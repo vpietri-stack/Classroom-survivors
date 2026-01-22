@@ -218,19 +218,23 @@ class MainScene extends Phaser.Scene {
         this.wasd = this.input.keyboard.addKeys({ w: 'W', a: 'A', s: 'S', d: 'D' });
 
         // Joystick
-        this.input.addPointer(1);
-        this.joystick = { active: false, x: 0, y: 0, originX: 0, originY: 0, angle: 0, force: 0 };
+        this.input.addPointer(2); // Ensure we have enough pointers (Mouse + Touch1 + Touch2 + Touch3)
+        this.joystick = { active: false, x: 0, y: 0, originX: 0, originY: 0, angle: 0, force: 0, pointerId: null };
+
         this.input.on('pointerdown', (pointer) => {
-            if (pointer.y > this.scale.height * 0.7) {
+            // Only activate if not already active
+            if (!this.joystick.active && pointer.y > this.scale.height * 0.5) { // Increased hit area to bottom 50%
                 this.joystick.active = true;
+                this.joystick.pointerId = pointer.id;
                 this.joystick.originX = pointer.x;
                 this.joystick.originY = pointer.y;
                 this.joystick.x = pointer.x;
                 this.joystick.y = pointer.y;
             }
         });
+
         this.input.on('pointermove', (pointer) => {
-            if (this.joystick.active) {
+            if (this.joystick.active && pointer.id === this.joystick.pointerId) {
                 const maxDist = 50;
                 const dx = pointer.x - this.joystick.originX;
                 const dy = pointer.y - this.joystick.originY;
@@ -243,9 +247,13 @@ class MainScene extends Phaser.Scene {
                 this.joystick.force = clampDist / maxDist;
             }
         });
-        this.input.on('pointerup', () => {
-            this.joystick.active = false;
-            this.joystick.force = 0;
+
+        this.input.on('pointerup', (pointer) => {
+            if (this.joystick.active && pointer.id === this.joystick.pointerId) {
+                this.joystick.active = false;
+                this.joystick.force = 0;
+                this.joystick.pointerId = null;
+            }
         });
         this.joyGraphics = this.add.graphics().setScrollFactor(0);
 

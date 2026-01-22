@@ -169,6 +169,9 @@ class MainScene extends Phaser.Scene {
         this.bg = this.add.tileSprite(0, 0, this.scale.width, this.scale.height, 'grass').setOrigin(0, 0);
         this.bg.setScrollFactor(0);
 
+        // Optimize mobile touch (remove 300ms double-tap delay)
+        this.game.canvas.style.touchAction = 'none';
+
         this.enemies = this.physics.add.group();
         this.bullets = this.physics.add.group();
         this.gems = this.physics.add.group();

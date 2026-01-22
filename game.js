@@ -172,6 +172,10 @@ class MainScene extends Phaser.Scene {
         this.enemies = this.physics.add.group();
         this.bullets = this.physics.add.group();
         this.gems = this.physics.add.group();
+        this.obstacles = this.physics.add.staticGroup();
+
+        // Spawn environmental obstacles
+        this.spawnObstacles();
 
         // Player
         this.player = this.add.text(0, 0, '🧙‍♂️', { fontSize: '50px', padding: { top: 10 } }).setOrigin(0.5);
@@ -240,6 +244,8 @@ class MainScene extends Phaser.Scene {
         });
         this.physics.add.collider(this.enemies, this.enemies);
         this.physics.add.collider(this.player, this.enemies, this.handlePlayerHit, null, this);
+        this.physics.add.collider(this.player, this.obstacles);
+        this.physics.add.collider(this.enemies, this.obstacles);
 
         this.applyReward({ id: 'wand', name: 'Spirit Wand', type: 'weapon' });
         updateDOMHUD(this.playerStats, 0, 0);
@@ -354,6 +360,51 @@ class MainScene extends Phaser.Scene {
         boss.isBoss = true;
         boss.stunTimer = 0;
         this.enemies.add(boss);
+    }
+
+    spawnObstacles() {
+        const obstacleTypes = [
+            { emoji: '🌲', size: 25 },
+            { emoji: '🌳', size: 30 },
+            { emoji: '🪨', size: 20 },
+            { emoji: '🛖', size: 35 }
+        ];
+
+        const worldMin = -3500;
+        const worldMax = 3500;
+        const safeZone = 300; // No obstacles near player start
+
+        for (let i = 0; i < 120; i++) {
+            let x, y;
+            do {
+                x = Phaser.Math.Between(worldMin, worldMax);
+                y = Phaser.Math.Between(worldMin, worldMax);
+            } while (Math.abs(x) < safeZone && Math.abs(y) < safeZone);
+
+            const type = Phaser.Math.RND.pick(obstacleTypes);
+            const obs = this.add.text(x, y, type.emoji, { fontSize: '40px', padding: { top: 10 } }).setOrigin(0.5);
+            this.obstacles.add(obs);
+            obs.body.setCircle(type.size);
+            obs.body.setOffset((obs.width - type.size * 2) / 2, (obs.height - type.size * 2) / 2);
+        }
+
+        // Add some ponds (graphics-based)
+        for (let i = 0; i < 15; i++) {
+            let x, y;
+            do {
+                x = Phaser.Math.Between(worldMin, worldMax);
+                y = Phaser.Math.Between(worldMin, worldMax);
+            } while (Math.abs(x) < safeZone && Math.abs(y) < safeZone);
+
+            const pond = this.add.graphics();
+            pond.fillStyle(0x4488cc, 0.7);
+            pond.fillEllipse(x, y, 80, 50);
+
+            // Create invisible collider for pond
+            const pondCollider = this.add.zone(x, y, 70, 40);
+            this.physics.add.existing(pondCollider, true);
+            this.obstacles.add(pondCollider);
+        }
     }
 
     updateWeapons() {

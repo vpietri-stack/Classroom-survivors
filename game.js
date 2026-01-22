@@ -304,8 +304,8 @@ class MainScene extends Phaser.Scene {
         }
 
         this.spawnTimer++;
-        // Spawn much faster: start at ~1 spawn/sec, scale to ~10 spawns/sec
-        if (this.spawnTimer > Math.max(5, 60 - (this.playerStats.level * 4))) {
+        // Spawn faster: base 40 frames delay, decreasing. Min 2 frames delay.
+        if (this.spawnTimer > Math.max(2, 40 - (this.playerStats.level * 2))) {
             this.spawnEnemy();
             this.spawnTimer = 0;
         }
@@ -329,7 +329,7 @@ class MainScene extends Phaser.Scene {
     }
 
     spawnEnemy(distance = null) {
-        if (this.killCount >= 100) {
+        if (this.killCount >= 300) { // Increased threshold for boss
             this.spawnBoss();
             this.killCount = 0;
             return;
@@ -349,9 +349,9 @@ class MainScene extends Phaser.Scene {
         const type = Math.floor(this.gameTime / 1800) % 3;
         let sprite = type === 1 ? '🦇' : (type === 2 ? '🧟' : '👾');
 
-        // Weaker start, scaling HP
-        const hp = 3 + (this.playerStats.level * 3);
-        const speed = (50 + (Math.random() * 30) + (this.playerStats.level * 3));
+        // Weaker HP, but higher spawn rate handled in update
+        const hp = 2 + (this.playerStats.level * 1);
+        const speed = (50 + (Math.random() * 30) + (this.playerStats.level * 2));
 
         const enemy = this.add.text(ex, ey, sprite, { fontSize: '25px', padding: { top: 5 } }).setOrigin(0.5);
         this.physics.add.existing(enemy);
@@ -372,6 +372,28 @@ class MainScene extends Phaser.Scene {
         this.enemies.add(boss);
     }
 
+    spawnEnemyCircle() {
+        // Encircle event: 40 enemies in a tight ring
+        const count = 40;
+        const radius = 600;
+        for (let i = 0; i < count; i++) {
+            const angle = (i / count) * Math.PI * 2;
+            const ex = this.player.x + Math.cos(angle) * radius;
+            const ey = this.player.y + Math.sin(angle) * radius;
+
+            const sprite = '🧟';
+            const hp = 2 + (this.playerStats.level * 1);
+            const speed = 80 + (this.playerStats.level * 1); // Slightly faster charge?
+
+            const enemy = this.add.text(ex, ey, sprite, { fontSize: '25px', padding: { top: 5 } }).setOrigin(0.5);
+            this.physics.add.existing(enemy);
+            enemy.body.setCircle(10);
+            enemy.hp = hp; enemy.maxHp = hp; enemy.speed = speed; enemy.isBoss = false;
+            enemy.stunTimer = 0;
+            this.enemies.add(enemy);
+        }
+    }
+
     spawnObstacles() {
         // Initial batch around player start
         for (let i = 0; i < 80; i++) {
@@ -381,10 +403,11 @@ class MainScene extends Phaser.Scene {
 
     spawnSingleObstacle(distance = null) {
         const obstacleTypes = [
-            { emoji: '🌲', size: 25 },
-            { emoji: '🌳', size: 30 },
-            { emoji: '🪨', size: 20 },
-            { emoji: '🛖', size: 35 }
+            { emoji: '🌲', fontSize: '200px', bodyRad: 20, isTree: true },
+            { emoji: '🌳', fontSize: '200px', bodyRad: 20, isTree: true },
+            { emoji: '🪨', fontSize: '100px', bodyRad: 40 },
+            { emoji: '🌿', fontSize: '100px', bodyRad: 40 },
+            { emoji: '🛖', fontSize: '300px', bodyRad: 130 }
         ];
 
         const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
@@ -392,7 +415,7 @@ class MainScene extends Phaser.Scene {
         let dist = distance;
         if (dist === null) {
             const cam = this.cameras.main;
-            dist = Math.sqrt(Math.pow(cam.width, 2) + Math.pow(cam.height, 2)) / 2 + 200;
+            dist = Math.sqrt(Math.pow(cam.width, 2) + Math.pow(cam.height, 2)) / 2 + 300;
         }
 
         const x = this.player.x + Math.cos(angle) * dist;
@@ -401,19 +424,26 @@ class MainScene extends Phaser.Scene {
         // 15% chance for pond, 85% for emoji obstacle
         if (Math.random() < 0.15) {
             const pond = this.add.graphics();
-            pond.fillStyle(0x4488cc, 0.7);
-            pond.fillEllipse(x, y, 80, 50);
+            pond.fillStyle(0x355e3b, 0.8); // Swampish Green
+            pond.fillEllipse(x, y, 160, 100);
 
-            const pondCollider = this.add.zone(x, y, 70, 40);
+            const pondCollider = this.add.zone(x, y, 140, 80);
             this.physics.add.existing(pondCollider, true);
             this.obstacles.add(pondCollider);
             pondCollider.linkedGraphics = pond;
         } else {
             const type = Phaser.Math.RND.pick(obstacleTypes);
-            const obs = this.add.text(x, y, type.emoji, { fontSize: '40px', padding: { top: 10 } }).setOrigin(0.5);
+            const obs = this.add.text(x, y, type.emoji, { fontSize: type.fontSize, padding: { top: 40 } }).setOrigin(0.5);
             this.obstacles.add(obs);
-            obs.body.setCircle(type.size);
-            obs.body.setOffset((obs.width - type.size * 2) / 2, (obs.height - type.size * 2) / 2);
+            obs.body.setCircle(type.bodyRad);
+
+            if (type.isTree) {
+                // Offset colliding circle to the bottom (trunk)
+                obs.body.setOffset((obs.width - type.bodyRad * 2) / 2, obs.height - type.bodyRad * 2 - 20);
+            } else {
+                // Center collision
+                obs.body.setOffset((obs.width - type.bodyRad * 2) / 2, (obs.height - type.bodyRad * 2) / 2);
+            }
         }
     }
 
@@ -485,7 +515,7 @@ class MainScene extends Phaser.Scene {
             this.physics.add.existing(b);
             const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, nearest.x, nearest.y);
             b.body.setVelocity(Math.cos(angle) * 300, Math.sin(angle) * 300);
-            b.dmg = 12 * this.playerStats.might; b.type = 'wand'; b.life = 60;
+            b.dmg = 12 * (1 + w.level * 0.2) * this.playerStats.might; b.type = 'wand'; b.life = 60;
         }
     }
 
@@ -508,18 +538,38 @@ class MainScene extends Phaser.Scene {
         const whip = this.add.graphics();
 
         directions.forEach(dir => {
-            // Visuals
-            // Glow
-            whip.fillStyle(0x5555ff, 0.3);
-            const glowRectX = dir === 1 ? this.player.x : this.player.x - range;
-            whip.fillRect(glowRectX, this.player.y - thickness / 2, range, thickness);
+            // Visuals: Magic Splash Effect
+            const px = this.player.x;
+            const py = this.player.y;
 
-            // Core
-            whip.lineStyle(4, 0xffffff);
-            whip.beginPath();
-            whip.moveTo(this.player.x, this.player.y);
-            whip.lineTo(this.player.x + (dir * range), this.player.y);
-            whip.strokePath();
+            // 3 Layers: Dark Glow -> Cyan -> White Core
+            [
+                { color: 0x0000cc, thick: 40, alpha: 0.4, scale: 1.1 }, // Outer dark blue
+                { color: 0x00ffff, thick: 15, alpha: 0.8, scale: 1.0 }, // Main cyan slash
+                { color: 0xffffff, thick: 5, alpha: 1.0, scale: 0.9 }   // Inner white core
+            ].forEach(l => {
+                whip.lineStyle(l.thick, l.color, l.alpha);
+
+                // Front whip (dir matches facing) goes UP (-Y). Back whip goes DOWN (+Y).
+                // flipY = 1 if Front, -1 if Back.
+                const flipY = dir * this.player.scaleX;
+
+                const path = new Phaser.Curves.Path(px, py + (10 * flipY));
+                path.cubicBezierTo(
+                    px + (dir * range * l.scale * 0.5), py + (10 * flipY),
+                    px + (dir * range * l.scale * 0.8), py - (10 * flipY),
+                    px + (dir * range * l.scale), py - (60 * flipY)
+                );
+                path.draw(whip);
+            });
+
+            // Particles
+            whip.fillStyle(0xaaddff, 0.8);
+            for (let i = 0; i < 8; i++) {
+                const pxr = px + (Math.random() * range * 0.8 * dir);
+                const pyr = py + (Math.random() - 0.5) * 50;
+                whip.fillCircle(pxr, pyr, Phaser.Math.Between(2, 4));
+            }
 
             // Hit Detection
             this.enemies.getChildren().forEach(e => {
@@ -563,14 +613,80 @@ class MainScene extends Phaser.Scene {
 
     fireKnife(w) {
         synthShoot('knife');
-        const knife = this.add.text(this.player.x, this.player.y, '🔪', { fontSize: '24px' }).setOrigin(0.5);
-        this.bullets.add(knife);
-        this.physics.add.existing(knife);
-        knife.body.setVelocity(this.player.scaleX * 500, 0);
-        knife.dmg = 8 * this.playerStats.might; knife.type = 'knife';
+        const count = w.level;
+        const spreadAngle = 10 * (Math.PI / 180); // 10 degrees spread
+
+        for (let i = 0; i < count; i++) {
+            const offset = (i - (count - 1) / 2) * spreadAngle;
+            const knife = this.add.text(this.player.x, this.player.y, '🔪', { fontSize: '24px' }).setOrigin(0.5);
+            this.bullets.add(knife);
+            this.physics.add.existing(knife);
+
+            const baseAngle = this.player.scaleX === 1 ? 0 : Math.PI;
+            const finalAngle = baseAngle + offset;
+
+            knife.rotation = finalAngle;
+            const speed = 500;
+            knife.body.setVelocity(Math.cos(finalAngle) * speed, Math.sin(finalAngle) * speed);
+            knife.dmg = 8 * this.playerStats.might; knife.type = 'knife';
+        }
     }
 
     fireSantaWater(w) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Phaser.Math.Between(100, 300);
+        const tx = this.player.x + Math.cos(angle) * dist;
+        const ty = this.player.y + Math.sin(angle) * dist;
+
+        const bottle = this.add.text(tx, ty - 500, '🧪', { fontSize: '30px' }).setOrigin(0.5);
+
+        this.tweens.add({
+            targets: bottle,
+            y: ty,
+            rotation: 10,
+            duration: 600,
+            ease: 'Quad.easeIn',
+            onComplete: () => {
+                bottle.destroy();
+                noise(0.1);
+
+                // Base 120 / 2 = 60. Increase 20% per level.
+                const size = 60 * (1 + w.level * 0.2);
+                // Damage / 3 * (1 + 20% per level)
+                const dmg = ((8 + w.level * 3) / 3) * (1 + w.level * 0.2) * this.playerStats.might;
+                const duration = 20000;
+
+                const puddle = this.add.graphics();
+                puddle.fillStyle(0x4488ff, 0.5);
+                puddle.fillCircle(0, 0, size / 2);
+                puddle.setPosition(tx, ty);
+
+                this.tweens.add({ targets: puddle, alpha: 0.2, scaleX: 1.1, scaleY: 1.1, yoyo: true, repeat: -1, duration: 600 });
+
+                const tick = this.time.addEvent({
+                    delay: 250,
+                    repeat: Math.floor(duration / 250),
+                    callback: () => {
+                        this.enemies.getChildren().forEach(e => {
+                            if (Phaser.Math.Distance.Between(tx, ty, e.x, e.y) < size / 2) {
+                                this.damageEnemy(e, dmg);
+                            }
+                        });
+                    }
+                });
+
+                this.time.delayedCall(duration, () => {
+                    tick.remove();
+                    this.tweens.add({
+                        targets: puddle, alpha: 0, duration: 500,
+                        onComplete: () => puddle.destroy()
+                    });
+                });
+            }
+        });
+    }
+
+    fireSantaWaterOld(w) {
         synthShoot('garlic'); // Reuse garlic sound
         const size = 60 + (w.level * 15);
         const dmg = (5 + w.level * 2) * this.playerStats.might;
@@ -635,7 +751,7 @@ class MainScene extends Phaser.Scene {
         this.knockbackVelocity.x = Math.cos(angle) * 800;
         this.knockbackVelocity.y = Math.sin(angle) * 800;
 
-        updateDOMHUD(this.playerStats, this.gameTime, this.killCount);
+        updateDOMHUD(this.playerStats, Math.floor(this.accumulatedTime / 1000), this.killCount);
         if (this.playerStats.hp <= 0) this.gameOver();
     }
 
@@ -707,7 +823,7 @@ class MainScene extends Phaser.Scene {
                         g.val = val; g.type = 'chest';
                         this.gems.add(g);
                     }
-                    updateDOMHUD(this.playerStats, this.gameTime, this.killCount);
+                    updateDOMHUD(this.playerStats, Math.floor(this.accumulatedTime / 1000), this.killCount);
                     enemy.destroy();
                 }
             });
@@ -735,8 +851,13 @@ class MainScene extends Phaser.Scene {
             this.playerStats.nextLevelXp = Math.floor(this.playerStats.nextLevelXp * 1.5);
             synthLevelUp();
             this.triggerLevelUp();
+
+            // Every 5 levels, spawn a horde circle
+            if (this.playerStats.level % 5 === 0) {
+                this.spawnEnemyCircle();
+            }
         }
-        updateDOMHUD(this.playerStats, this.gameTime, this.killCount);
+        updateDOMHUD(this.playerStats, Math.floor(this.accumulatedTime / 1000), this.killCount);
     }
 
     triggerLevelUp() {
@@ -771,17 +892,17 @@ class MainScene extends Phaser.Scene {
             } else {
                 if (reward.id === 'whip') p.weapons.push({ type: 'whip', level: 1, timer: 0, cooldown: 60 });
                 if (reward.id === 'wand') p.weapons.push({ type: 'wand', level: 1, timer: 0, cooldown: 60 });
-                if (reward.id === 'axe') p.weapons.push({ type: 'axe', level: 1, timer: 0, cooldown: 70 });
+                if (reward.id === 'axe') p.weapons.push({ type: 'axe', level: 1, timer: 0, cooldown: 140 });
                 if (reward.id === 'cross') p.weapons.push({ type: 'cross', level: 1, timer: 0, cooldown: 80 });
                 if (reward.id === 'orb') p.weapons.push({ type: 'orb', level: 1, angle: 0, range: 100, dmg: 5, timer: 0 });
-                if (reward.id === 'water') p.weapons.push({ type: 'water', level: 1, timer: 0, cooldown: 180 });
-                if (reward.id === 'knife') p.weapons.push({ type: 'knife', level: 1, timer: 0, cooldown: 20 });
+                if (reward.id === 'water') p.weapons.push({ type: 'water', level: 1, timer: 0, cooldown: 300 });
+                if (reward.id === 'knife') p.weapons.push({ type: 'knife', level: 1, timer: 0, cooldown: 60 });
             }
         } else if (reward.type === 'stat') {
             if (reward.id === 'might') p.might += 0.1;
             if (reward.id === 'speed') p.speed += 0.1;
         } else if (reward.type === 'heal') p.hp = Math.min(p.maxHp, p.hp + 30);
-        updateDOMHUD(p, this.gameTime, this.killCount);
+        updateDOMHUD(p, Math.floor(this.accumulatedTime / 1000), this.killCount);
     }
 }
 

@@ -171,6 +171,15 @@ class MainScene extends Phaser.Scene {
 
         // Optimize mobile touch (remove 300ms double-tap delay)
         this.game.canvas.style.touchAction = 'none';
+        // Mobile Optimization: Aggressive touch handling
+        document.body.style.touchAction = 'none';
+        document.body.style.overflow = 'hidden';
+
+        // Prevent default browser gestures (zoom, scroll) which cause 300ms delay
+        window.addEventListener('touchstart', (e) => { if (e.target === this.game.canvas) e.preventDefault(); }, { passive: false });
+        window.addEventListener('touchmove', (e) => { if (e.target === this.game.canvas) e.preventDefault(); }, { passive: false });
+
+        this.input.addPointer(2); // Support multitouch (joystick + tap)
 
         this.enemies = this.physics.add.group();
         this.bullets = this.physics.add.group();
@@ -376,8 +385,8 @@ class MainScene extends Phaser.Scene {
     }
 
     spawnEnemyCircle() {
-        // Encircle event: 40 enemies in a tight ring
-        const count = 40;
+        // Encircle event: 80 enemies in a tight ring (no gaps)
+        const count = 80;
         const radius = 600;
         for (let i = 0; i < count; i++) {
             const angle = (i / count) * Math.PI * 2;

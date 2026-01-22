@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Classroom Survivors: ESL Edition (Phaser)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="phaser.min.js"></script>
+</head>
+
+<body>
+
+    <!-- HUD -->
+    <div id="hud">
+        <div class="xp-bar-container">
+            <div class="xp-bar-fill" id="xpBar"></div>
+        </div>
+
+        <div id="inventory"></div>
+
+        <div id="status-panel">
+            <div class="hp-container">
+                <div class="hp-fill" id="hpBarFill"></div>
+                <div class="hp-text"><span id="hpText">100/100</span></div>
+            </div>
+        </div>
+
+        <div id="game-stats">
+            <div class="stat-badge">LVL <span id="levelDisplay">1</span></div>
+            <div class="stat-badge"><i class="fas fa-clock"></i> <span id="timerDisplay">00:00</span></div>
+            <div class="stat-badge"><i class="fas fa-skull"></i> <span id="killDisplay">0</span></div>
+        </div>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="startScreen" class="overlay">
+        <h1
+            class="text-6xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 floating">
+            Classroom Survivors</h1>
+
+        <!-- Content Selector -->
+        <div class="mb-6 flex flex-col items-center gap-2 bg-black/40 p-4 rounded-xl border border-white/20">
+            <label class="text-yellow-400 font-bold text-sm tracking-widest uppercase mb-1">Select Lesson
+                Content</label>
+            <div class="flex gap-3">
+                <select id="sel-book"
+                    class="bg-gray-800 text-white border border-gray-600 rounded px-3 py-2 font-bold focus:outline-none focus:border-yellow-400">
+                    <option value="PU1">PU1</option>
+                </select>
+                <select id="sel-unit"
+                    class="bg-gray-800 text-white border border-gray-600 rounded px-3 py-2 font-bold focus:outline-none focus:border-yellow-400">
+                    <!-- Populated by JS -->
+                </select>
+            </div>
+        </div>
+
+        <p class="mb-8 text-xl text-gray-300">Survive the horde. Learn English. Power Up.</p>
+        <button class="game-btn text-2xl" onclick="triggerStartGame()">START GAME</button>
+        <p class="mt-4 text-sm text-gray-400">Use WASD/Arrows or Touch to move.</p>
+    </div>
+
+    <!-- Level Up Menu -->
+    <div id="levelUpMenu" class="overlay hidden">
+        <h2 class="text-4xl font-bold mb-8 text-yellow-300 text-center">CHOOSE A POWER UP</h2>
+        <div class="powerup-grid" id="powerup-cards-container"></div>
+    </div>
+
+    <!-- ESL Minigames -->
+
+    <!-- Spelling Game -->
+    <div id="spellingGame" class="overlay hidden">
+        <div class="minigame-container text-center">
+            <h3 class="text-2xl font-bold mb-4 text-purple-700">Spelling Challenge!</h3>
+            <button onclick="playTTS()" class="w-16 h-16 rounded-full bg-blue-500 text-white text-2xl mb-6 shadow-lg"><i
+                    class="fas fa-volume-up"></i></button>
+            <div id="spelling-input-display"
+                class="bg-white rounded-lg p-4 mb-6 text-3xl font-bold min-h-[60px] tracking-widest text-gray-700 border-2 border-dashed border-gray-300">
+            </div>
+            <div id="spelling-keyboard" class="flex flex-wrap justify-center gap-3 mb-6"></div>
+
+            <div id="spelling-actions" class="flex justify-center gap-4">
+                <button onclick="checkSpelling()" class="game-btn bg-green-500">CHECK</button>
+                <button onclick="clearSpelling()" class="game-btn bg-gray-500">CLEAR</button>
+            </div>
+
+            <!-- Result Action (Dynamically Shown) -->
+            <div id="spelling-result-action" class="hidden mt-4">
+                <!-- Injected button -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Word Rec Game -->
+    <div id="wordRecGame" class="overlay hidden">
+        <div class="minigame-container text-center">
+            <h3 class="text-2xl font-bold mb-2 text-purple-700">Quick Listen!</h3>
+            <div class="w-full bg-gray-300 h-4 mb-6 rounded-full overflow-hidden">
+                <div id="rec-timer-bar" class="h-full bg-red-500 w-full transition-all duration-[100ms] linear"></div>
+            </div>
+            <button onclick="playTTS()" class="w-16 h-16 rounded-full bg-blue-500 text-white text-2xl mb-8 shadow-lg"><i
+                    class="fas fa-volume-up"></i></button>
+
+            <div class="flex flex-wrap justify-center gap-6" id="rec-options">
+                <!-- Buttons injected dynamically -->
+            </div>
+
+            <!-- Result Action (Dynamically Shown) -->
+            <div id="rec-result-action" class="hidden mt-4">
+                <!-- Injected button -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Grammar Game -->
+    <div id="grammarGame" class="overlay hidden">
+        <div class="minigame-container">
+            <h3 class="text-2xl font-bold mb-4 text-purple-700 text-center">Complete the Sentences!</h3>
+
+            <div id="sentence-container" class="mb-6 flex flex-col gap-4">
+                <!-- Sentences injected here -->
+            </div>
+
+            <div id="word-dock" class="bg-gray-100 p-6 rounded-xl flex flex-wrap gap-4 justify-center min-h-[100px]">
+                <!-- Options injected here -->
+            </div>
+
+            <div id="grammar-actions" class="mt-6 flex justify-center gap-4">
+                <button onclick="checkGrammar()" class="game-btn bg-green-500">CHECK</button>
+                <button onclick="clearGrammar()" class="game-btn bg-gray-500">CLEAR</button>
+            </div>
+
+            <!-- Result Action (Dynamically Shown) -->
+            <div id="grammar-result-action" class="hidden mt-4 text-center">
+                <!-- Injected button -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Feedback -->
+    <div id="feedbackOverlay" class="overlay hidden" style="background: rgba(0,0,0,0.6);">
+        <div id="feedbackCard"
+            class="bg-white p-8 rounded-2xl text-center transform scale-0 transition-transform duration-300">
+            <div id="feedbackIcon" class="text-8xl mb-4"></div>
+            <h2 id="feedbackTitle" class="text-3xl font-bold mb-2"></h2>
+            <p id="feedbackMsg" class="text-lg text-gray-600 mb-6"></p>
+            <button onclick="closeFeedback()" class="game-btn">CONTINUE</button>
+        </div>
+    </div>
+
+    <div id="gameOverScreen" class="overlay hidden">
+        <h1 class="text-6xl font-bold text-red-500 mb-4">GAME OVER</h1>
+        <p class="text-xl text-yellow-400 mb-2 font-bold tracking-wider" id="finalContentDisplay"></p>
+        <p class="text-2xl mb-8">You survived <span id="finalTime">00:00</span></p>
+        <button class="game-btn" onclick="location.reload()">TRY AGAIN</button>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>

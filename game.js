@@ -101,7 +101,7 @@ const POWER_UPS = [
     { id: 'orb', name: "Orbit", icon: "🔮", type: "weapon", desc: "Spins around you" },
     { id: 'axe', name: "Axe", icon: "🪓", type: "weapon", desc: "Add one more axe" },
     { id: 'cross', name: "Cross", icon: "✝️", type: "weapon", desc: "Boomerang effect" },
-    { id: 'garlic', name: "Garlic", icon: "🧄", type: "weapon", desc: "Damages nearby enemies" },
+    { id: 'water', name: "Santa Water", icon: "💧", type: "weapon", desc: "Drops damaging puddle" },
     { id: 'knife', name: "Knife", icon: "🔪", type: "weapon", desc: "Fires in facing direction" },
     { id: 'speed', name: "Swiftness", icon: "👟", type: "stat", desc: "+10% Move Speed" },
     { id: 'might', name: "Spinach", icon: "🥬", type: "stat", desc: "+10% Damage" },
@@ -174,9 +174,6 @@ class MainScene extends Phaser.Scene {
         this.gems = this.physics.add.group();
         this.obstacles = this.physics.add.staticGroup();
 
-        // Spawn environmental obstacles
-        this.spawnObstacles();
-
         // Player
         this.player = this.add.text(0, 0, '🧙‍♂️', { fontSize: '50px', padding: { top: 10 } }).setOrigin(0.5);
         this.physics.add.existing(this.player);
@@ -184,6 +181,9 @@ class MainScene extends Phaser.Scene {
         this.player.body.setCollideWorldBounds(false);
 
         this.cameras.main.startFollow(this.player);
+
+        // Spawn environmental obstacles (after player exists)
+        this.spawnObstacles();
 
         // Inputs
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -316,6 +316,16 @@ class MainScene extends Phaser.Scene {
         this.gameTime++;
         this.accumulatedTime += delta;
         updateDOMHUD(this.playerStats, Math.floor(this.accumulatedTime / 1000), this.killCount);
+
+        // Continuous obstacle spawning and cleanup
+        this.obstacleTimer = (this.obstacleTimer || 0) + 1;
+        if (this.obstacleTimer > 30 && this.obstacles.getChildren().length < 150) {
+            this.spawnSingleObstacle();
+            this.obstacleTimer = 0;
+        }
+        if (this.gameTime % 120 === 0) {
+            this.cleanupDistantObstacles();
+        }
     }
 
     spawnEnemy(distance = null) {
@@ -363,6 +373,13 @@ class MainScene extends Phaser.Scene {
     }
 
     spawnObstacles() {
+        // Initial batch around player start
+        for (let i = 0; i < 80; i++) {
+            this.spawnSingleObstacle(Phaser.Math.Between(400, 1500));
+        }
+    }
+
+    spawnSingleObstacle(distance = null) {
         const obstacleTypes = [
             { emoji: '🌲', size: 25 },
             { emoji: '🌳', size: 30 },
@@ -370,41 +387,44 @@ class MainScene extends Phaser.Scene {
             { emoji: '🛖', size: 35 }
         ];
 
-        const worldMin = -3500;
-        const worldMax = 3500;
-        const safeZone = 300; // No obstacles near player start
+        const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
 
-        for (let i = 0; i < 120; i++) {
-            let x, y;
-            do {
-                x = Phaser.Math.Between(worldMin, worldMax);
-                y = Phaser.Math.Between(worldMin, worldMax);
-            } while (Math.abs(x) < safeZone && Math.abs(y) < safeZone);
+        let dist = distance;
+        if (dist === null) {
+            const cam = this.cameras.main;
+            dist = Math.sqrt(Math.pow(cam.width, 2) + Math.pow(cam.height, 2)) / 2 + 200;
+        }
 
+        const x = this.player.x + Math.cos(angle) * dist;
+        const y = this.player.y + Math.sin(angle) * dist;
+
+        // 15% chance for pond, 85% for emoji obstacle
+        if (Math.random() < 0.15) {
+            const pond = this.add.graphics();
+            pond.fillStyle(0x4488cc, 0.7);
+            pond.fillEllipse(x, y, 80, 50);
+
+            const pondCollider = this.add.zone(x, y, 70, 40);
+            this.physics.add.existing(pondCollider, true);
+            this.obstacles.add(pondCollider);
+            pondCollider.linkedGraphics = pond;
+        } else {
             const type = Phaser.Math.RND.pick(obstacleTypes);
             const obs = this.add.text(x, y, type.emoji, { fontSize: '40px', padding: { top: 10 } }).setOrigin(0.5);
             this.obstacles.add(obs);
             obs.body.setCircle(type.size);
             obs.body.setOffset((obs.width - type.size * 2) / 2, (obs.height - type.size * 2) / 2);
         }
+    }
 
-        // Add some ponds (graphics-based)
-        for (let i = 0; i < 15; i++) {
-            let x, y;
-            do {
-                x = Phaser.Math.Between(worldMin, worldMax);
-                y = Phaser.Math.Between(worldMin, worldMax);
-            } while (Math.abs(x) < safeZone && Math.abs(y) < safeZone);
-
-            const pond = this.add.graphics();
-            pond.fillStyle(0x4488cc, 0.7);
-            pond.fillEllipse(x, y, 80, 50);
-
-            // Create invisible collider for pond
-            const pondCollider = this.add.zone(x, y, 70, 40);
-            this.physics.add.existing(pondCollider, true);
-            this.obstacles.add(pondCollider);
-        }
+    cleanupDistantObstacles() {
+        this.obstacles.getChildren().forEach(obs => {
+            const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, obs.x, obs.y);
+            if (dist > 2500) {
+                if (obs.linkedGraphics) obs.linkedGraphics.destroy();
+                obs.destroy();
+            }
+        });
     }
 
     updateWeapons() {
@@ -439,14 +459,7 @@ class MainScene extends Phaser.Scene {
                     });
                 });
             }
-            if (w.type === 'garlic' && this.gameTime % 20 === 0) {
-                const range = 60 + (w.level * 10);
-                this.enemies.getChildren().forEach(e => {
-                    if (Phaser.Math.Distance.Between(this.player.x, this.player.y, e.x, e.y) < range) {
-                        this.damageEnemy(e, w.dmg * this.playerStats.might, 'garlic');
-                    }
-                });
-            }
+
             if (w.timer >= w.cooldown / this.playerStats.cooldown) {
                 w.timer = 0;
                 if (w.type === 'wand') this.fireWand(w);
@@ -454,6 +467,7 @@ class MainScene extends Phaser.Scene {
                 if (w.type === 'axe') this.fireAxe(w);
                 if (w.type === 'cross') this.fireCross(w);
                 if (w.type === 'knife') this.fireKnife(w);
+                if (w.type === 'water') this.fireSantaWater(w);
             }
         });
     }
@@ -471,7 +485,7 @@ class MainScene extends Phaser.Scene {
             this.physics.add.existing(b);
             const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, nearest.x, nearest.y);
             b.body.setVelocity(Math.cos(angle) * 300, Math.sin(angle) * 300);
-            b.dmg = 6 * this.playerStats.might; b.type = 'wand'; b.life = 60;
+            b.dmg = 12 * this.playerStats.might; b.type = 'wand'; b.life = 60;
         }
     }
 
@@ -554,6 +568,45 @@ class MainScene extends Phaser.Scene {
         this.physics.add.existing(knife);
         knife.body.setVelocity(this.player.scaleX * 500, 0);
         knife.dmg = 8 * this.playerStats.might; knife.type = 'knife';
+    }
+
+    fireSantaWater(w) {
+        synthShoot('garlic'); // Reuse garlic sound
+        const size = 60 + (w.level * 15);
+        const dmg = (5 + w.level * 2) * this.playerStats.might;
+        const duration = 3000 + (w.level * 500);
+
+        // Create puddle at player position
+        const puddle = this.add.graphics();
+        puddle.fillStyle(0x5599ff, 0.6);
+        puddle.fillEllipse(this.player.x, this.player.y, size, size * 0.6);
+        puddle.x = this.player.x;
+        puddle.y = this.player.y;
+
+        // Damage enemies periodically while puddle exists
+        const damageEvent = this.time.addEvent({
+            delay: 200,
+            repeat: Math.floor(duration / 200),
+            callback: () => {
+                this.enemies.getChildren().forEach(e => {
+                    if (Phaser.Math.Distance.Between(puddle.x, puddle.y, e.x, e.y) < size / 2) {
+                        this.damageEnemy(e, dmg);
+                    }
+                });
+            }
+        });
+
+        // Fade out and destroy puddle
+        this.tweens.add({
+            targets: puddle,
+            alpha: 0,
+            delay: duration - 500,
+            duration: 500,
+            onComplete: () => {
+                damageEvent.remove();
+                puddle.destroy();
+            }
+        });
     }
 
     updateBullets() {
@@ -717,11 +770,11 @@ class MainScene extends Phaser.Scene {
                 if (reward.id === 'orb') existing.range += 20;
             } else {
                 if (reward.id === 'whip') p.weapons.push({ type: 'whip', level: 1, timer: 0, cooldown: 60 });
-                if (reward.id === 'wand') p.weapons.push({ type: 'wand', level: 1, timer: 0, cooldown: 30 });
+                if (reward.id === 'wand') p.weapons.push({ type: 'wand', level: 1, timer: 0, cooldown: 60 });
                 if (reward.id === 'axe') p.weapons.push({ type: 'axe', level: 1, timer: 0, cooldown: 70 });
                 if (reward.id === 'cross') p.weapons.push({ type: 'cross', level: 1, timer: 0, cooldown: 80 });
                 if (reward.id === 'orb') p.weapons.push({ type: 'orb', level: 1, angle: 0, range: 100, dmg: 5, timer: 0 });
-                if (reward.id === 'garlic') p.weapons.push({ type: 'garlic', level: 1, dmg: 2, timer: 0 });
+                if (reward.id === 'water') p.weapons.push({ type: 'water', level: 1, timer: 0, cooldown: 180 });
                 if (reward.id === 'knife') p.weapons.push({ type: 'knife', level: 1, timer: 0, cooldown: 20 });
             }
         } else if (reward.type === 'stat') {

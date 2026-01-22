@@ -126,6 +126,9 @@ const config = {
     scale: {
         mode: Phaser.Scale.RESIZE,
         autoCenter: Phaser.Scale.CENTER_BOTH
+    },
+    input: {
+        activePointers: 3
     }
 };
 
@@ -172,12 +175,25 @@ class MainScene extends Phaser.Scene {
         // Optimize mobile touch (remove 300ms double-tap delay)
         this.game.canvas.style.touchAction = 'none';
         // Mobile Optimization: Aggressive touch handling
+        this.game.canvas.style.touchAction = 'none';
         document.body.style.touchAction = 'none';
+        document.body.style.userSelect = 'none';
+        document.body.style.webkitUserSelect = 'none';
         document.body.style.overflow = 'hidden';
 
-        // Prevent default browser gestures (zoom, scroll) which cause 300ms delay
-        window.addEventListener('touchstart', (e) => { if (e.target === this.game.canvas) e.preventDefault(); }, { passive: false });
-        window.addEventListener('touchmove', (e) => { if (e.target === this.game.canvas) e.preventDefault(); }, { passive: false });
+        // Prevent default browser gestures (zoom, scroll)
+        const preventDefault = (e) => {
+            if (e.target === this.game.canvas) {
+                e.preventDefault();
+            }
+        };
+        window.addEventListener('touchstart', preventDefault, { passive: false });
+        window.addEventListener('touchmove', preventDefault, { passive: false });
+        window.addEventListener('touchend', preventDefault, { passive: false });
+        window.addEventListener('touchcancel', preventDefault, { passive: false });
+
+        this.scale.on('resize', this.handleResize, this);
+        this.handleResize(this.scale.gameSize);
 
         this.input.addPointer(2); // Support multitouch (joystick + tap)
 
@@ -915,6 +931,26 @@ class MainScene extends Phaser.Scene {
             if (reward.id === 'speed') p.speed += 0.1;
         } else if (reward.type === 'heal') p.hp = Math.min(p.maxHp, p.hp + 30);
         updateDOMHUD(p, Math.floor(this.accumulatedTime / 1000), this.killCount);
+    }
+
+    handleResize(gameSize) {
+        const width = gameSize.width;
+        // Adjust zoom to keep visible area roughly consistent (min 800px width visible)
+        // On mobile (e.g. 400px), zoom will be ~0.5. On desktop (1920px), zoom will be 1 (clamped).
+        let zoom = width / 800;
+        zoom = Phaser.Math.Clamp(zoom, 0.4, 1.0);
+        this.cameras.main.setZoom(zoom);
+        this.bg.setSize(width / zoom, this.scale.height / zoom); // Resize tileSprite to cover camera? 
+        // No, TileSprite is fixed to screen. 
+        // But if we zoom out, the camera sees MORE of the world. 
+        // The BG is attached to the camera scroll?
+        // Line 169: this.bg = this.add.tileSprite(0, 0, this.scale.width, this.scale.height, 'grass').setOrigin(0, 0);
+        // bg.setScrollFactor(0).
+        // If zoom is 0.5, we see 2x width. The BG is only this.scale.width wide.
+        // We need to resize the BG to cover the new viewport.
+        if (this.bg) {
+            this.bg.setSize(width / zoom + 100, this.scale.height / zoom + 100);
+        }
     }
 }
 

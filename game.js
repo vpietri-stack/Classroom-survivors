@@ -933,9 +933,8 @@ class MainScene extends Phaser.Scene {
         document.getElementById('finalScore').innerText = formatTime(scoreSec);
 
         // Show selected content
-        const book = document.getElementById('sel-book').value;
-        const unit = document.getElementById('sel-unit').value;
-        document.getElementById('finalContentDisplay').innerText = `${book} - Unit ${unit}`;
+        const displayText = selectedDay && selectedTime ? `${selectedDay} ${selectedTime}` : 'N/A';
+        document.getElementById('finalContentDisplay').innerText = displayText;
 
         document.getElementById('gameOverScreen').classList.remove('hidden');
     }
@@ -1011,67 +1010,130 @@ function updateDOMHUD(player, time, kills) {
     });
 }
 
+// --- WIZARD STATE ---
+let selectedDay = null;
+let selectedTime = null;
+let selectedStudent = null;
+
 function initMenus() {
-    const classSel = document.getElementById('sel-class');
-    const studentSel = document.getElementById('sel-student');
-
-    classSel.innerHTML = '';
-
-    if (typeof CLASS_CONFIG === 'undefined') {
-        console.error("CLASS_CONFIG is undefined. Make sure teaching_content.js is loaded correctly.");
+    if (typeof CLASS_CONFIG === 'undefined' || typeof CLASS_DAYS === 'undefined') {
+        console.error("CLASS_CONFIG or CLASS_DAYS is undefined. Make sure teaching_content.js is loaded correctly.");
         return;
     }
 
-    // Populate Classes
-    Object.keys(CLASS_CONFIG).forEach(className => {
-        const opt = document.createElement('option');
-        opt.value = className;
-        opt.innerText = className;
-        classSel.appendChild(opt);
+    // Populate Day buttons
+    const dayContainer = document.getElementById('day-buttons');
+    dayContainer.innerHTML = '';
+
+    CLASS_DAYS.forEach(day => {
+        const btn = document.createElement('button');
+        btn.className = 'wizard-btn bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200';
+        btn.innerText = day;
+        btn.onclick = () => selectDay(day);
+        dayContainer.appendChild(btn);
     });
+}
 
-    function updateStudents() {
-        const selectedClass = classSel.value;
-        const classData = CLASS_CONFIG[selectedClass];
+function selectDay(day) {
+    selectedDay = day;
 
-        studentSel.innerHTML = '';
+    // Hide step 1, show step 2
+    document.getElementById('step-day').classList.add('hidden');
+    document.getElementById('step-time').classList.remove('hidden');
 
-        if (classData && classData.students) {
-            classData.students.forEach(student => {
-                const opt = document.createElement('option');
-                opt.value = student;
-                opt.innerText = student;
-                studentSel.appendChild(opt);
-            });
-            // Show start buttons if students exist
-            const btns = document.getElementById('start-buttons');
-            if (btns) {
-                btns.classList.remove('hidden');
-                btns.classList.add('flex');
-            }
-        } else {
-            // Hide if no students
-            const btns = document.getElementById('start-buttons');
-            if (btns) {
-                btns.classList.add('hidden');
-                btns.classList.remove('flex');
-            }
-        }
+    // Populate time buttons for this day
+    const timeContainer = document.getElementById('time-buttons');
+    const noClassMsg = document.getElementById('no-class-msg');
+    timeContainer.innerHTML = '';
 
-        loadContent();
+    const dayData = CLASS_CONFIG[day];
+
+    if (dayData && Object.keys(dayData).length > 0) {
+        noClassMsg.classList.add('hidden');
+        Object.keys(dayData).forEach(time => {
+            const btn = document.createElement('button');
+            btn.className = 'wizard-btn bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200';
+            btn.innerText = time;
+            btn.onclick = () => selectTime(time);
+            timeContainer.appendChild(btn);
+        });
+    } else {
+        // No classes for this day
+        noClassMsg.classList.remove('hidden');
     }
+}
 
-    classSel.addEventListener('change', updateStudents);
+function selectTime(time) {
+    selectedTime = time;
 
-    // Initial population
-    if (Object.keys(CLASS_CONFIG).length > 0) {
-        classSel.value = Object.keys(CLASS_CONFIG)[0];
-        updateStudents();
+    // Hide step 2, show step 3
+    document.getElementById('step-time').classList.add('hidden');
+    document.getElementById('step-student').classList.remove('hidden');
+
+    // Populate student buttons
+    const studentContainer = document.getElementById('student-buttons');
+    studentContainer.innerHTML = '';
+
+    const classData = CLASS_CONFIG[selectedDay][time];
+
+    if (classData && classData.students) {
+        classData.students.forEach(student => {
+            const btn = document.createElement('button');
+            btn.className = 'wizard-btn bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200';
+            btn.innerText = student;
+            btn.onclick = () => selectStudent(student);
+            studentContainer.appendChild(btn);
+        });
     }
+}
+
+function selectStudent(student) {
+    selectedStudent = student;
+
+    // Hide step 3, show step 4 (greeting)
+    document.getElementById('step-student').classList.add('hidden');
+    document.getElementById('step-greeting').classList.remove('hidden');
+
+    // Update greeting text
+    document.getElementById('greeting-text').innerText = `Hello, ${student}!`;
+
+    // Load content for this class
+    loadContent();
+}
+
+// --- BACK NAVIGATION ---
+function goBackToDay() {
+    document.getElementById('step-time').classList.add('hidden');
+    document.getElementById('step-day').classList.remove('hidden');
+    selectedDay = null;
+}
+
+function goBackToTime() {
+    document.getElementById('step-student').classList.add('hidden');
+    document.getElementById('step-time').classList.remove('hidden');
+    selectedTime = null;
+}
+
+function goBackToStudent() {
+    document.getElementById('step-greeting').classList.add('hidden');
+    document.getElementById('step-student').classList.remove('hidden');
+    selectedStudent = null;
+}
+
+// --- GAME INTRO ---
+function showGameIntro() {
+    document.getElementById('startScreen').classList.add('hidden');
+    document.getElementById('gameIntroOverlay').classList.remove('hidden');
+}
+
+function startGameFromIntro() {
+    document.getElementById('gameIntroOverlay').classList.add('hidden');
+    triggerStartGame();
 }
 
 function triggerStartGame() {
     document.getElementById('startScreen').classList.add('hidden');
+    document.getElementById('gameIntroOverlay').classList.add('hidden');
     initAudio();
     if (!game) game = new Phaser.Game(config);
     else { game.scene.resume('MainScene'); /* or restart */ }
@@ -1219,14 +1281,12 @@ function claimReward(success) {
 
 // --- PLACEHOLDERS FOR LARGE CHUNKS ---
 function loadContent() {
-    const classSel = document.getElementById('sel-class');
-    if (!classSel || !CLASS_CONFIG) return;
+    if (!CLASS_CONFIG || !selectedDay || !selectedTime) return;
 
-    const selectedClass = classSel.value;
-    const classData = CLASS_CONFIG[selectedClass];
+    const classData = CLASS_CONFIG[selectedDay] && CLASS_CONFIG[selectedDay][selectedTime];
 
     if (!classData || !classData.content) {
-        console.warn("No content configured for class:", selectedClass);
+        console.warn("No content configured for:", selectedDay, selectedTime);
         return;
     }
 

@@ -1196,9 +1196,18 @@ const AVAILABLE_CONTENT = {
     }
 };
 
+// CLASS_CONFIG organized by day -> time -> class data
+const CLASS_DAYS = ["周一", "周四", "周五", "周六", "周日"];
+
 const CLASS_CONFIG = {
-    "周四 1810-1940": {
-        students: ["Aaron", "Daniel", "Domi", "Jojo", "Lucky", "Simon"],
-        content: { book: "PU1", unit: "3", page: "43" }
+    "周四": {
+        "1810-1940": {
+            students: ["Aaron", "Daniel", "Domi", "Jojo", "Lucky", "Simon"],
+            content: { book: "PU1", unit: "3", page: "43" }
+        }
     }
+    // Add more days/times as needed:
+    // "周六": {
+    //     "0900-1030": { students: [...], content: {...} }
+    // }
 };

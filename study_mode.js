@@ -578,7 +578,7 @@ function finishStudySession() {
     const ss = durationSec % 60;
     const timeStr = `${mm}m ${ss}s`;
 
-    const player = document.getElementById('sel-student').value || "Student";
+    const player = selectedStudent || "Student";
 
     const container = document.getElementById('study-game-area');
     container.innerHTML = `

@@ -3,7 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="A fun ESL learning game where you survive waves of enemies by spelling words, recognizing sounds, and forming sentences. Learn English while playing!">
     <title>Classroom Survivors: ESL Edition (Phaser)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -44,14 +46,14 @@
 
         <!-- Content Selector -->
         <div class="mb-6 flex flex-col items-center gap-2 bg-black/40 p-4 rounded-xl border border-white/20">
-            <label class="text-yellow-400 font-bold text-sm tracking-widest uppercase mb-1">Select Lesson
-                Content</label>
+            <label class="text-yellow-400 font-bold text-sm tracking-widest uppercase mb-1">Select Class &
+                Student</label>
             <div class="flex gap-3">
-                <select id="sel-book"
+                <select id="sel-class" aria-label="Select Class"
                     class="bg-gray-800 text-white border border-gray-600 rounded px-3 py-2 font-bold focus:outline-none focus:border-yellow-400">
-                    <option value="PU1">PU1</option>
+                    <!-- Populated by JS -->
                 </select>
-                <select id="sel-unit"
+                <select id="sel-student" aria-label="Select Student"
                     class="bg-gray-800 text-white border border-gray-600 rounded px-3 py-2 font-bold focus:outline-none focus:border-yellow-400">
                     <!-- Populated by JS -->
                 </select>
@@ -59,8 +61,29 @@
         </div>
 
         <p class="mb-8 text-xl text-gray-300">Survive the horde. Learn English. Power Up.</p>
-        <button class="game-btn text-2xl" onclick="triggerStartGame()">START GAME</button>
+        <div id="start-buttons" class="hidden flex-col gap-4">
+            <button class="game-btn text-2xl bg-blue-600 hover:bg-blue-500" onclick="initStudyMode()">我想打卡</button>
+            <button class="game-btn text-2xl bg-orange-600 hover:bg-orange-500"
+                onclick="triggerStartGame()">我想边学边玩</button>
+        </div>
+
         <p class="mt-4 text-sm text-gray-400">Use WASD/Arrows or Touch to move.</p>
+    </div>
+
+    <!-- Study Mode Overlay -->
+    <div id="studyModeOverlay"
+        class="overlay hidden bg-gradient-to-br from-slate-900 to-slate-800 z-50 flex flex-col items-center p-8">
+        <h2 id="study-title" class="text-4xl text-yellow-400 font-bold mb-2">Study Mode</h2>
+        <p id="study-instruction" class="text-xl text-gray-300 mb-8">Instruction</p>
+
+        <div id="study-game-area" class="w-full max-w-4xl flex-grow flex flex-col items-center">
+            <!-- Game content injected here -->
+        </div>
+
+        <button
+            onclick="document.getElementById('studyModeOverlay').classList.add('hidden'); document.getElementById('startScreen').classList.remove('hidden');"
+            aria-label="Close" class="absolute top-4 right-4 text-gray-500 hover:text-white text-2xl"><i
+                class="fas fa-times"></i></button>
     </div>
 
     <!-- Level Up Menu -->
@@ -74,8 +97,11 @@
     <!-- Spelling Game -->
     <div id="spellingGame" class="overlay hidden">
         <div class="minigame-container text-center">
+            <div class="text-yellow-400 font-bold text-2xl mb-4 animate-pulse">⏱️ Time Left: <span
+                    id="spelling-timer">00:00</span></div>
             <h3 class="text-2xl font-bold mb-4 text-purple-700">Spelling Challenge!</h3>
-            <button onclick="playTTS()" class="w-16 h-16 rounded-full bg-blue-500 text-white text-2xl mb-6 shadow-lg"><i
+            <button onclick="playTTS()" aria-label="Play Audio"
+                class="w-16 h-16 rounded-full bg-blue-500 text-white text-2xl mb-6 shadow-lg"><i
                     class="fas fa-volume-up"></i></button>
             <div id="spelling-input-display"
                 class="bg-white rounded-lg p-4 mb-6 text-3xl font-bold min-h-[60px] tracking-widest text-gray-700 border-2 border-dashed border-gray-300">
@@ -97,11 +123,14 @@
     <!-- Word Rec Game -->
     <div id="wordRecGame" class="overlay hidden">
         <div class="minigame-container text-center">
+            <div class="text-yellow-400 font-bold text-2xl mb-4 animate-pulse">⏱️ Time Left: <span
+                    id="rec-timer">00:00</span></div>
             <h3 class="text-2xl font-bold mb-2 text-purple-700">Quick Listen!</h3>
             <div class="w-full bg-gray-300 h-4 mb-6 rounded-full overflow-hidden">
                 <div id="rec-timer-bar" class="h-full bg-red-500 w-full transition-all duration-[100ms] linear"></div>
             </div>
-            <button onclick="playTTS()" class="w-16 h-16 rounded-full bg-blue-500 text-white text-2xl mb-8 shadow-lg"><i
+            <button onclick="playTTS()" aria-label="Play Audio"
+                class="w-16 h-16 rounded-full bg-blue-500 text-white text-2xl mb-8 shadow-lg"><i
                     class="fas fa-volume-up"></i></button>
 
             <div class="flex flex-wrap justify-center gap-6" id="rec-options">
@@ -118,6 +147,8 @@
     <!-- Grammar Game -->
     <div id="grammarGame" class="overlay hidden">
         <div class="minigame-container">
+            <div class="text-yellow-400 font-bold text-2xl mb-4 text-center animate-pulse">⏱️ Time Left: <span
+                    id="grammar-timer">00:00</span></div>
             <h3 class="text-2xl font-bold mb-4 text-purple-700 text-center">Complete the Sentences!</h3>
 
             <div id="sentence-container" class="mb-6 flex flex-col gap-4">
@@ -152,14 +183,28 @@
     </div>
 
     <div id="gameOverScreen" class="overlay hidden">
-        <h1 class="text-6xl font-bold text-red-500 mb-4">GAME OVER</h1>
-        <p class="text-xl text-yellow-400 mb-2 font-bold tracking-wider" id="finalContentDisplay"></p>
-        <p class="text-2xl mb-8">You survived <span id="finalTime">00:00</span></p>
+        <h2 class="text-6xl font-bold text-red-500 mb-6">GAME OVER</h2>
+        <div class="bg-black/40 p-8 rounded-2xl border-2 border-red-500/50 max-w-md mx-auto mb-8">
+            <p class="text-xl text-yellow-400 mb-4 font-bold tracking-wider" id="finalContentDisplay"></p>
+            <div class="text-white text-lg space-y-3">
+                <p class="flex justify-between"><span class="text-gray-400">最高等级:</span> <span
+                        class="font-bold text-green-400" id="finalLevel">1</span></p>
+                <p class="flex justify-between"><span class="text-gray-400">生存时间:</span> <span class="font-bold"
+                        id="finalSurvivalTime">00:00</span></p>
+                <p class="flex justify-between"><span class="text-gray-400">回答问题时间:</span> <span
+                        class="font-bold text-purple-400" id="finalMinigameTime">00:00</span></p>
+                <div class="border-t border-gray-600 pt-3 mt-3">
+                    <p class="flex justify-between text-2xl"><span class="text-yellow-400">得分:</span> <span
+                            class="font-bold text-yellow-400" id="finalScore">00:00</span></p>
+                </div>
+            </div>
+        </div>
         <button class="game-btn" onclick="location.reload()">TRY AGAIN</button>
     </div>
 
     <script src="teaching_content.js"></script>
     <script src="game.js"></script>
+    <script src="study_mode.js"></script>
 </body>
 
 </html>

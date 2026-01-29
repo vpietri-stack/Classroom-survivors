@@ -906,8 +906,38 @@ class MainScene extends Phaser.Scene {
 
     gameOver() {
         this.scene.pause();
+
+        // Stop any running minigame countdown
+        if (minigameCountdownInterval) {
+            clearInterval(minigameCountdownInterval);
+            minigameCountdownInterval = null;
+        }
+
+        // Calculate statistics
+        const totalPlayedTimeSec = Math.floor((this.accumulatedTime + totalMinigameTimeMs) / 1000);
+        const survivalTimeSec = Math.floor(this.accumulatedTime / 1000);
+        const minigameTimeSec = Math.floor(totalMinigameTimeMs / 1000);
+        const scoreSec = Math.max(0, survivalTimeSec); // Score is remaining survival time
+
+        // Format time strings
+        const formatTime = (seconds) => {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
+        };
+
+        // Update display
+        document.getElementById('finalLevel').innerText = this.playerStats.level;
+        document.getElementById('finalSurvivalTime').innerText = formatTime(totalPlayedTimeSec);
+        document.getElementById('finalMinigameTime').innerText = '-' + formatTime(minigameTimeSec);
+        document.getElementById('finalScore').innerText = formatTime(scoreSec);
+
+        // Show selected content
+        const book = document.getElementById('sel-book').value;
+        const unit = document.getElementById('sel-unit').value;
+        document.getElementById('finalContentDisplay').innerText = `${book} - Unit ${unit}`;
+
         document.getElementById('gameOverScreen').classList.remove('hidden');
-        document.getElementById('finalTime').innerText = document.getElementById('timerDisplay').innerText;
     }
 
     applyReward(reward) {
@@ -982,30 +1012,61 @@ function updateDOMHUD(player, time, kills) {
 }
 
 function initMenus() {
-    const bookSel = document.getElementById('sel-book');
-    const unitSel = document.getElementById('sel-unit');
-    bookSel.innerHTML = ''; unitSel.innerHTML = '';
-    Object.keys(AVAILABLE_CONTENT).forEach(book => {
+    const classSel = document.getElementById('sel-class');
+    const studentSel = document.getElementById('sel-student');
+
+    classSel.innerHTML = '';
+
+    if (typeof CLASS_CONFIG === 'undefined') {
+        console.error("CLASS_CONFIG is undefined. Make sure teaching_content.js is loaded correctly.");
+        return;
+    }
+
+    // Populate Classes
+    Object.keys(CLASS_CONFIG).forEach(className => {
         const opt = document.createElement('option');
-        opt.value = book; opt.innerText = book;
-        bookSel.appendChild(opt);
+        opt.value = className;
+        opt.innerText = className;
+        classSel.appendChild(opt);
     });
-    function updateUnits() {
-        const selectedBook = bookSel.value;
-        const units = AVAILABLE_CONTENT[selectedBook] || [];
-        unitSel.innerHTML = '';
-        units.forEach(unit => {
-            const opt = document.createElement('option');
-            opt.value = unit; opt.innerText = `Unit ${unit}`;
-            unitSel.appendChild(opt);
-        });
+
+    function updateStudents() {
+        const selectedClass = classSel.value;
+        const classData = CLASS_CONFIG[selectedClass];
+
+        studentSel.innerHTML = '';
+
+        if (classData && classData.students) {
+            classData.students.forEach(student => {
+                const opt = document.createElement('option');
+                opt.value = student;
+                opt.innerText = student;
+                studentSel.appendChild(opt);
+            });
+            // Show start buttons if students exist
+            const btns = document.getElementById('start-buttons');
+            if (btns) {
+                btns.classList.remove('hidden');
+                btns.classList.add('flex');
+            }
+        } else {
+            // Hide if no students
+            const btns = document.getElementById('start-buttons');
+            if (btns) {
+                btns.classList.add('hidden');
+                btns.classList.remove('flex');
+            }
+        }
+
         loadContent();
     }
-    bookSel.addEventListener('change', updateUnits);
-    unitSel.addEventListener('change', loadContent);
-    if (Object.keys(AVAILABLE_CONTENT).length > 0) {
-        bookSel.value = Object.keys(AVAILABLE_CONTENT)[0];
-        updateUnits();
+
+    classSel.addEventListener('change', updateStudents);
+
+    // Initial population
+    if (Object.keys(CLASS_CONFIG).length > 0) {
+        classSel.value = Object.keys(CLASS_CONFIG)[0];
+        updateStudents();
     }
 }
 
@@ -1019,6 +1080,11 @@ function triggerStartGame() {
 let pendingReward = null;
 let rewardContext = 'levelup';
 let isFirstAttempt = true;
+let minigameStartTime = 0; // Track when minigame started (in ms)
+let currentMinigameType = ''; // Track which type of minigame is active
+let minigameCountdownInterval = null; // Interval for countdown timer during minigames
+let totalMinigameTimeMs = 0; // Track total time spent in all minigames
+
 
 function showPowerUpSelection(context) {
     document.getElementById('levelUpMenu').classList.remove('hidden');
@@ -1031,10 +1097,15 @@ function showPowerUpSelection(context) {
     const existingWeapons = scene ? scene.playerStats.weapons : [];
 
     const shuffled = [...POWER_UPS].sort(() => 0.5 - Math.random()).slice(0, 3);
-    const gameTypes = ['spelling', 'wordrec', 'scramble'];
 
-    shuffled.forEach((reward, i) => {
-        const gameType = gameTypes[i];
+    // Create completely randomized pairings between power-ups and game types
+    const allGameTypes = ['spelling', 'wordrec', 'scramble'];
+    const pairings = shuffled.map(reward => {
+        const randomGameType = allGameTypes[Math.floor(Math.random() * allGameTypes.length)];
+        return { reward, gameType: randomGameType };
+    });
+
+    pairings.forEach(({ reward, gameType }) => {
         let description = reward.desc;
 
         // Dynamic description for Whip upgrades
@@ -1062,20 +1133,80 @@ function showPowerUpSelection(context) {
     });
 }
 
+function startMinigameCountdown(scene) {
+    // Clear any existing countdown
+    if (minigameCountdownInterval) {
+        clearInterval(minigameCountdownInterval);
+    }
+
+    // Update countdown every 100ms
+    minigameCountdownInterval = setInterval(() => {
+        const currentTime = Math.max(0, Math.floor(scene.accumulatedTime / 1000));
+        const m = Math.floor(currentTime / 60);
+        const s = currentTime % 60;
+        const timeString = `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
+
+        // Update all minigame timer displays
+        const spellingTimer = document.getElementById('spelling-timer');
+        const recTimer = document.getElementById('rec-timer');
+        const grammarTimer = document.getElementById('grammar-timer');
+
+        if (spellingTimer) spellingTimer.textContent = timeString;
+        if (recTimer) recTimer.textContent = timeString;
+        if (grammarTimer) grammarTimer.textContent = timeString;
+
+        // Deduct time from survival time
+        scene.accumulatedTime = Math.max(0, scene.accumulatedTime - 100);
+    }, 100);
+}
+
 function startMiniGame(type, context) {
     rewardContext = context;
     isFirstAttempt = true;
+    currentMinigameType = type;
+    minigameStartTime = Date.now(); // Record start time
+
+    // Start countdown timer display
+    const scene = game.scene.getScene('MainScene');
+    if (scene) {
+        startMinigameCountdown(scene);
+    }
+
     if (type === 'spelling') startSpellingGame();
     if (type === 'wordrec') startWordRecGame();
     if (type === 'scramble') startGrammarGame();
 }
 
 function claimReward(success) {
+    // Stop countdown timer
+    if (minigameCountdownInterval) {
+        clearInterval(minigameCountdownInterval);
+        minigameCountdownInterval = null;
+    }
+
     document.getElementById('spellingGame').classList.add('hidden');
     document.getElementById('wordRecGame').classList.add('hidden');
     document.getElementById('grammarGame').classList.add('hidden');
+
+    // Calculate time penalty
+    const timeSpentMs = Date.now() - minigameStartTime;
+    const timeSpentSec = Math.floor(timeSpentMs / 1000);
+
+    // Track cumulative minigame time
+    totalMinigameTimeMs += timeSpentMs;
+
+    const scene = game.scene.getScene('MainScene');
+
+    // Note: time was already deducted during countdown in startMinigameCountdown
+    // Just update the HUD
+    if (scene) {
+        updateDOMHUD(scene.playerStats, Math.floor(scene.accumulatedTime / 1000), scene.killCount);
+    }
+
+    // Apply reward based on game type and success
+    // Spelling and Grammar: always give reward if answered correctly
+    // Sight words: only give reward on first try
     if (success) {
-        const scene = game.scene.getScene('MainScene');
         if (rewardContext === 'chest') {
             const r = POWER_UPS[Math.floor(Math.random() * POWER_UPS.length)];
             scene.applyReward(r);
@@ -1088,25 +1219,41 @@ function claimReward(success) {
 
 // --- PLACEHOLDERS FOR LARGE CHUNKS ---
 function loadContent() {
-    const book = document.getElementById('sel-book').value;
-    const unit = document.getElementById('sel-unit').value;
+    const classSel = document.getElementById('sel-class');
+    if (!classSel || !CLASS_CONFIG) return;
+
+    const selectedClass = classSel.value;
+    const classData = CLASS_CONFIG[selectedClass];
+
+    if (!classData || !classData.content) {
+        console.warn("No content configured for class:", selectedClass);
+        return;
+    }
+
+    const { book, unit, page } = classData.content;
 
     // Default to empty/placeholders
     SPELLING_WORDS = [];
     SIGHT_WORDS = [];
     GRAMMAR_SENTENCES = [];
 
-    const content = TEACHING_CONTENT[book] && TEACHING_CONTENT[book][unit];
-    if (content) {
-        SPELLING_WORDS = content.spelling || [];
-        SIGHT_WORDS = content.sight || [];
-        GRAMMAR_SENTENCES = content.grammar || [];
+    // Access new structure: Book > Unit > Page
+    const pageContent = TEACHING_CONTENT[book] &&
+        TEACHING_CONTENT[book][unit] &&
+        TEACHING_CONTENT[book][unit][page];
+
+    if (pageContent) {
+        // Both spelling and word rec use vocab
+        SPELLING_WORDS = pageContent.vocab || [];
+        // Format vocab for sight words (keep array wrapping as legacy support)
+        SIGHT_WORDS = (pageContent.vocab || []).map(w => [w]);
+        GRAMMAR_SENTENCES = pageContent.sentences || [];
     } else {
-        // Placeholders for other units
-        const prefix = `${book} U${unit}`;
-        SPELLING_WORDS = [`${prefix} Word1`, `${prefix} Word2`, `${prefix} Word3`, `${prefix} Word4`];
-        SIGHT_WORDS = [[`${prefix} Sight1`, `Distractor`], [`${prefix} Sight2`, `Distractor`]];
-        GRAMMAR_SENTENCES = [`${prefix} Placeholder sentence 1.`, `${prefix} Placeholder sentence 2.`];
+        // Placeholders if content missing
+        const prefix = `${book} U${unit} P${page}`;
+        SPELLING_WORDS = [`${prefix} Word1`, `${prefix} Word2`];
+        SIGHT_WORDS = [[`${prefix} Word1`], [`${prefix} Word2`]];
+        GRAMMAR_SENTENCES = [`${prefix} Sentence 1.`, `${prefix} Sentence 2.`];
     }
 }
 
@@ -1119,7 +1266,8 @@ function startSpellingGame() {
     currentTTSWord = word;
 
     const totalChars = word.length;
-    let missingCount = Math.min(totalChars, 1 + Math.floor((level - 1) / 2)); // Adjusted difficulty
+    // Always use ALL letters - no level-based scaling
+    let missingCount = totalChars;
     const indices = Array.from({ length: totalChars }, (_, i) => i);
     indices.sort(() => 0.5 - Math.random());
     const missingIndices = indices.slice(0, missingCount);
@@ -1243,9 +1391,8 @@ function startWordRecGame() {
     const target = pair[0];
     const level = game.scene.getScene('MainScene').playerStats.level;
 
-    let choiceCount = 2;
-    if (level >= 5) choiceCount = 3;
-    if (level >= 10) choiceCount = 4;
+    // Always show 5 words - no level-based scaling
+    let choiceCount = 5;
 
     let choices = [target];
     const pool = SIGHT_WORDS.flat().filter(w => w !== target);
@@ -1307,7 +1454,23 @@ function checkWordRec(selected, target, btn) {
 
 function startGrammarGame() {
     if (GRAMMAR_SENTENCES.length === 0) { handleMinigameSuccess('grammar'); return; }
-    const sentenceStr = GRAMMAR_SENTENCES[Math.floor(Math.random() * GRAMMAR_SENTENCES.length)];
+
+    // Handle multiple valid variations
+    const rawEntry = GRAMMAR_SENTENCES[Math.floor(Math.random() * GRAMMAR_SENTENCES.length)];
+    let possibilities = [];
+    let primarySentence = "";
+
+    if (Array.isArray(rawEntry)) {
+        possibilities = rawEntry;
+        primarySentence = rawEntry[0];
+    } else {
+        possibilities = [rawEntry];
+        primarySentence = rawEntry;
+    }
+
+    // Store valid possibilities for validation
+    document.getElementById('grammarGame').dataset.validOptions = JSON.stringify(possibilities);
+
     const level = game.scene.getScene('MainScene').playerStats.level;
 
     const sentContainer = document.getElementById('sentence-container');
@@ -1317,16 +1480,18 @@ function startGrammarGame() {
     document.getElementById('grammar-result-action').classList.add('hidden');
     document.getElementById('grammar-actions').classList.remove('hidden');
 
-    const rawChunks = sentenceStr.split(' ');
+    const rawChunks = primarySentence.split(' ');
     const tokens = rawChunks.map(chunk => {
-        const match = chunk.match(/^(.+?)([,.]+)$/);
+        // Improved regex to include ? and !
+        const match = chunk.match(/^(.+?)([,.?!]+)$/);
         return match ? { word: match[1], punct: match[2] } : { word: chunk, punct: '' };
     });
 
     const candidateIndices = tokens.map((_, i) => i);
     candidateIndices.sort(() => 0.5 - Math.random());
 
-    let numBlanks = Math.min(tokens.length, Math.max(1, Math.floor(level / 2))); // Scale blanks with level
+    // Always use ALL words - no level-based scaling
+    let numBlanks = tokens.length;
 
     const blankIndices = candidateIndices.slice(0, numBlanks);
     const neededOptions = [];
@@ -1382,25 +1547,76 @@ function clearGrammar() {
 
 function checkGrammar() {
     const zones = document.querySelectorAll('.drop-zone');
-    let allCorrect = true;
+    const gameEl = document.getElementById('grammarGame');
+    const validOptions = JSON.parse(gameEl.dataset.validOptions || "[]");
+
+    // 1. Collect user's words
+    let userWords = [];
     let anyFilled = false;
+    let allFilled = true;
 
     zones.forEach(zone => {
         if (zone.children.length > 0) {
             anyFilled = true;
+            userWords.push(zone.children[0].innerText);
+        } else {
+            allFilled = false;
+            userWords.push(null); // Gap
+        }
+    });
+
+    // 2. Check complete match against ANY valid option
+    let exactMatchFound = false;
+
+    if (allFilled) {
+        for (let option of validOptions) {
+            // Tokenize option to get words only
+            const optChunks = option.split(' ');
+            const optWords = optChunks.map(chunk => {
+                const match = chunk.match(/^(.+?)([,.?!]+)$/);
+                return match ? match[1] : chunk;
+            });
+
+            // Compare arrays
+            if (optWords.length === userWords.length) {
+                const isMatch = optWords.every((w, i) => w === userWords[i]);
+                if (isMatch) {
+                    exactMatchFound = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    // 3. Update UI
+    let allCorrect = true;
+    zones.forEach((zone, i) => {
+        if (zone.children.length > 0) {
             const item = zone.children[0];
-            if (item.innerText === zone.dataset.expected) {
+            const word = item.innerText;
+
+            if (exactMatchFound) {
+                // If the whole sentence is a valid variation, everything is correct
                 item.classList.add('correct');
                 item.classList.remove('wrong');
             } else {
-                item.classList.add('wrong');
-                item.classList.remove('correct');
-                allCorrect = false;
+                // Fallback: Grade against the *primary* expected word (from the slot definition)
+                // This gives feedback based on the original structure if the user is off
+                if (word === zone.dataset.expected) {
+                    item.classList.add('correct');
+                    item.classList.remove('wrong');
+                } else {
+                    item.classList.add('wrong');
+                    item.classList.remove('correct');
+                    allCorrect = false;
+                }
             }
         } else {
             allCorrect = false;
         }
     });
+
+    if (exactMatchFound) allCorrect = true;
 
     if (anyFilled && !allCorrect) {
         synthError();
@@ -1412,6 +1628,8 @@ function checkGrammar() {
     }
 }
 
+
+
 function handleMinigameSuccess(gameType) {
     let actionsId, resultId;
     if (gameType === 'spelling') { actionsId = 'spelling-actions'; resultId = 'spelling-result-action'; }
@@ -1422,7 +1640,12 @@ function handleMinigameSuccess(gameType) {
     const resultDiv = document.getElementById(resultId);
     resultDiv.classList.remove('hidden');
 
-    if (isFirstAttempt) {
+    // New reward logic:
+    // - Spelling and Grammar: always give reward if answered correctly (even on subsequent tries)
+    // - Sight words (rec): only give reward on first try within time limit
+    const shouldGiveReward = (gameType === 'spelling' || gameType === 'grammar') || isFirstAttempt;
+
+    if (shouldGiveReward) {
         resultDiv.innerHTML = `<button onclick="claimReward(true)" class="game-btn bg-green-500 text-2xl py-4 px-8 animate-bounce">GET POWER UP!</button>`;
     } else {
         resultDiv.innerHTML = `<button onclick="claimReward(false)" class="game-btn bg-blue-500 text-2xl py-4 px-8">CONTINUE (NO REWARD)</button>`;
@@ -1455,3 +1678,6 @@ document.getElementById('sentence-container').addEventListener('click', (e) => {
         e.target.parentElement.classList.remove('filled');
     }
 });
+
+// Initialize menus on load
+window.addEventListener('DOMContentLoaded', initMenus);

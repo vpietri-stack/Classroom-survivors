@@ -146,12 +146,12 @@ function nextRoundBWord() {
 
     const container = document.getElementById('study-game-area');
     container.innerHTML = `
-        <div class="flex flex-col items-center gap-6">
-            <button onclick="playTTS()" aria-label="Play Audio" class="w-16 h-16 rounded-full bg-blue-500 text-white text-2xl shadow-lg"><i class="fas fa-volume-up"></i></button>
+        <div class="flex flex-col items-center gap-[var(--gap-md)] w-full">
+            <button onclick="playTTS()" aria-label="Play Audio" class="w-16 h-16 rounded-full bg-blue-500 text-white text-2xl shadow-lg transform active:scale-95 transition-transform"><i class="fas fa-volume-up"></i></button>
             
-            <div id="scramble-slots" class="flex gap-2 min-h-[60px]"></div>
+            <div id="scramble-slots" class="flex flex-wrap justify-center gap-[var(--gap-sm)] min-h-[60px] w-full px-4"></div>
             
-            <div id="scramble-bank" class="flex gap-2 flex-wrap justify-center"></div>
+            <div id="scramble-bank" class="flex flex-wrap justify-center gap-[var(--gap-sm)] w-full px-4"></div>
         </div>
     `;
 
@@ -159,7 +159,7 @@ function nextRoundBWord() {
     const slotsDiv = document.getElementById('scramble-slots');
     for (let i = 0; i < word.length; i++) {
         const slot = document.createElement('div');
-        slot.className = "w-12 h-12 border-2 border-white rounded flex items-center justify-center text-2xl font-bold bg-gray-800 text-white select-none";
+        slot.className = "study-slot";
 
         // Pre-fill space if character is a space
         if (word[i] === ' ') {
@@ -185,7 +185,7 @@ function nextRoundBWord() {
 
     letters.forEach((char) => {
         const btn = document.createElement('button');
-        btn.className = "w-14 h-14 bg-amber-400 hover:bg-amber-300 rounded-xl text-black font-bold text-2xl shadow-md transition-transform hover:scale-105";
+        btn.className = "study-letter-btn";
         btn.innerText = char;
         btn.onclick = (e) => addLetterToSlot(char, e.target, word);
         bankDiv.appendChild(btn);
@@ -312,16 +312,16 @@ function nextRoundCWord() {
 
     const container = document.getElementById('study-game-area');
     container.innerHTML = `
-        <div class="flex flex-col items-center gap-6">
-            <button onclick="playTTS()" aria-label="Play Audio" class="w-16 h-16 rounded-full bg-blue-500 text-white text-2xl shadow-lg"><i class="fas fa-volume-up"></i></button>
+        <div class="flex flex-col items-center gap-[var(--gap-md)] w-full">
+            <button onclick="playTTS()" aria-label="Play Audio" class="w-16 h-16 rounded-full bg-blue-500 text-white text-2xl shadow-lg transform active:scale-95 transition-transform"><i class="fas fa-volume-up"></i></button>
             
-            <div id="spelling-display" class="flex gap-2 min-h-[60px] text-3xl font-bold tracking-widest border-b-2 border-white pb-2 min-w-[200px] justify-center text-white"></div>
+            <div id="spelling-display" class="flex flex-wrap justify-center gap-[var(--gap-xs)] min-h-[60px] w-full px-4 text-white"></div>
             
-            <div id="virtual-keyboard" class="flex gap-2 flex-wrap justify-center max-w-lg"></div>
+            <div id="virtual-keyboard" class="flex flex-wrap justify-center gap-[var(--gap-sm)] max-w-lg px-4"></div>
             
-            <div class="flex gap-4">
-                <button onclick="checkRoundC('${word.replace(/'/g, "\\'")}')" class="game-btn bg-green-500">CHECK</button>
-                <button onclick="clearRoundC()" class="game-btn bg-gray-500">CLEAR</button>
+            <div class="flex gap-[var(--gap-md)]">
+                <button onclick="checkRoundC('${word.replace(/'/g, "\\'")}')" class="game-btn bg-green-500 py-3 px-6">CHECK</button>
+                <button onclick="clearRoundC()" class="game-btn bg-gray-500 py-3 px-6">CLEAR</button>
             </div>
         </div>
     `;
@@ -348,7 +348,7 @@ function nextRoundCWord() {
     const kbDiv = document.getElementById('virtual-keyboard');
     keys.forEach(char => {
         const btn = document.createElement('button');
-        btn.className = "w-12 h-14 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-bold text-xl shadow transition-colors";
+        btn.className = "study-key";
         btn.innerText = char;
         btn.onclick = () => typeRoundC(char);
         kbDiv.appendChild(btn);
@@ -383,7 +383,7 @@ function updateRoundCDisplay() {
 
         if (char === ' ') {
             // Fixed space
-            html += `<div class="w-8 h-10 flex items-center justify-center text-3xl mx-1" data-fixed="true"> </div>`;
+            html += `<div class="w-6 sm:w-8 h-10 flex items-center justify-center text-2xl sm:text-3xl mx-1" data-fixed="true"> </div>`;
             // If input has a space here? Actually input shouldn't have spaces if user types keys.
             // We need to skip this index in the input mapping?
             // Let's assume user input skips spaces.
@@ -399,15 +399,15 @@ function updateRoundCDisplay() {
             if (roundCInput[inputIndex] !== undefined) inputIndex++;
 
             // Visual slot
-            const borderClass = filledChar ? "border-b-2 border-white" : "border-b-2 border-gray-500";
-            const textClass = "text-white";
+            const borderClass = filledChar ? "border-white" : "border-gray-500";
+            const textClass = filledChar ? "text-white" : "text-transparent";
 
-            html += `<div class="w-8 h-10 flex items-center justify-center ${borderClass} ${textClass} mx-1">${filledChar}</div>`;
+            html += `<div class="study-slot border-b-4 ${borderClass} ${textClass} bg-transparent mx-[var(--gap-xs)]">${filledChar}</div>`;
         }
     }
 
     disp.innerHTML = html;
-    disp.className = "flex gap-1 justify-center min-h-[60px] flex-wrap"; // Update container style
+    disp.className = "flex gap-[var(--gap-xs)] justify-center min-h-[var(--slot-size)] flex-wrap w-full px-4"; // Update container style
 }
 
 // Logic check needs adjustment too: we compare input against target *without spaces*?
@@ -430,7 +430,7 @@ function checkRoundC(targetWord) {
     // Re-render with colors
     for (let i = 0; i < targetWord.length; i++) {
         if (targetWord[i] === ' ') {
-            html += `<div class="w-8 h-10 flex items-center justify-center text-3xl mx-1"> </div>`;
+            html += `<div class="w-6 sm:w-8 h-10 flex items-center justify-center text-2xl sm:text-3xl mx-1"> </div>`;
         } else {
             const char = input[inputIndex] || "";
             const targetChar = targetClean[inputIndex] || "";
@@ -449,7 +449,7 @@ function checkRoundC(targetWord) {
                 borderColor = "border-gray-500";
             }
 
-            html += `<div class="w-8 h-10 flex items-center justify-center border-b-2 ${borderColor} ${colorClass} mx-1">${char}</div>`;
+            html += `<div class="study-slot border-b-4 ${borderColor} ${colorClass} bg-transparent mx-[var(--gap-xs)]">${char}</div>`;
             inputIndex++;
         }
     }
@@ -498,17 +498,17 @@ function nextRoundDSentence() {
 
     const container = document.getElementById('study-game-area');
     container.innerHTML = `
-        <div class="flex flex-col gap-6 w-full max-w-2xl mx-auto">
-             <div id="sentence-drop-zone" class="bg-gray-800 p-6 rounded-xl min-h-[100px] flex flex-wrap gap-2 items-center justify-center border-2 border-dashed border-gray-600">
+        <div class="flex flex-col gap-[var(--gap-md)] w-full max-w-2xl mx-auto px-4">
+             <div id="sentence-drop-zone" class="bg-gray-800/50 p-6 rounded-xl min-h-[120px] flex flex-wrap gap-[var(--gap-sm)] items-center justify-center border-2 border-dashed border-gray-600">
                 <!-- Drop words here -->
              </div>
              
-             <div id="sentence-word-bank" class="bg-gray-700 p-4 rounded-xl flex flex-wrap gap-2 justify-center">
+             <div id="sentence-word-bank" class="bg-gray-700/50 p-4 rounded-xl flex flex-wrap gap-[var(--gap-sm)] justify-center min-h-[100px]">
                 <!-- Source words -->
              </div>
              
              <div class="flex justify-center gap-4">
-                <button onclick="checkRoundD('${sentence.replace(/'/g, "\\'")}')" class="game-btn bg-green-500">CHECK</button>
+                <button onclick="checkRoundD('${sentence.replace(/'/g, "\\'")}')" class="game-btn bg-green-500 py-3 px-8 text-xl">CHECK</button>
              </div>
         </div>
     `;
@@ -530,7 +530,7 @@ function nextRoundDSentence() {
 
 function createWordTile(word, id) {
     const btn = document.createElement('button');
-    btn.className = "game-btn bg-amber-400 hover:bg-amber-300 rounded-lg text-black font-bold text-xl px-4 py-2 shadow-md transition-transform hover:scale-105";
+    btn.className = "study-word-tile";
     btn.innerText = word;
     btn.dataset.word = word;
     btn.dataset.id = id;
@@ -582,13 +582,13 @@ function finishStudySession() {
 
     const container = document.getElementById('study-game-area');
     container.innerHTML = `
-        <div class="text-center">
-            <h2 class="text-4xl text-green-400 font-bold mb-4">Great job ${player}!</h2>
-            <p class="text-2xl text-white mb-8">You completed this session in ${timeStr}</p>
+        <div class="text-center px-4">
+            <h2 class="study-text-2xl text-green-400 font-bold mb-4">Great job ${player}!</h2>
+            <p class="study-text-xl text-white mb-8">You completed this session in ${timeStr}</p>
             
             <div class="flex flex-col gap-4 items-center">
-                <button onclick="initStudyMode()" class="game-btn bg-blue-600 text-2xl w-64">再学习一下</button>
-                <button onclick="exitStudyMode()" class="game-btn bg-orange-500 text-2xl w-64">边玩边学</button>
+                <button onclick="initStudyMode()" class="game-btn bg-blue-600 text-xl sm:text-2xl w-full max-w-[280px]">再学习一下</button>
+                <button onclick="exitStudyMode()" class="game-btn bg-orange-500 text-xl sm:text-2xl w-full max-w-[280px]">边玩边学</button>
             </div>
         </div>
     `;

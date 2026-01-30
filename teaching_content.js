@@ -2,14 +2,14 @@ const TEACHING_CONTENT = {
     "PU1": {
         "0": {
             "4": {
-                vocab: ['Hello', 'Hi', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink', 'grey', 'black', 'white', 'brown'],
+                vocab: ['hello', 'hi', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink', 'grey', 'black', 'white', 'brown'],
                 sentences: [
                     "Hello, I'm Jim.",
                     "Hi, I'm Jenny."
                 ]
             },
             "5": {
-                vocab: ["What's", 'your', 'name', "I'm", 'How', 'old', 'are', 'you'],
+                vocab: ["what's", 'your', 'name', "I'm", 'how', 'old', 'are', 'you'],
                 sentences: [
                     "What's your name? I'm Cameron.",
                     "What's your name? I'm Shelly.",
@@ -43,7 +43,7 @@ const TEACHING_CONTENT = {
                 ]
             },
             "8": {
-                vocab: ['school', 'classroom', 'rubber', 'pencil', 'teacher', 'bag', 'crayon', 'desk', 'chair', 'book', 'pen', 'pencil case', 'the', 'is', 'in', "Where's", 'on', 'under', 'next to', 'my', "it's", 'the', "they're"],
+                vocab: ['school', 'classroom', 'rubber', 'pencil', 'teacher', 'bag', 'crayon', 'desk', 'chair', 'book', 'pen', 'pencil case', 'the', 'is', 'in', "where's", 'on', 'under', 'next to', 'my', "it's", "they're"],
                 sentences: [
                     "Where's the bag? It's on the desk.",
                     "Where's the pencil? It's under the desk.",
@@ -59,7 +59,7 @@ const TEACHING_CONTENT = {
         },
         "1": {
             "9": {
-                vocab: ["Where's", 'on', 'under', 'next to', 'in', 'the', "It's", "it's", 'are', 'pencils', 'book', 'desk', 'rubber', 'chair', 'pen', 'bag', 'pencil', 'crayon', 'crayons', 'pencil case', 'pens', 'books', 'chairs'],
+                vocab: ["where's", 'on', 'under', 'next to', 'in', 'the', "it's", 'are', 'pencil', 'book', 'desk', 'rubber', 'chair', 'pen', 'bag', 'crayon', 'pencil case'],
                 sentences: [
                     "The pencils are under the book.",
                     "The book's on the desk.",
@@ -78,7 +78,7 @@ const TEACHING_CONTENT = {
                 ]
             },
             "10": {
-                vocab: ['door', 'wall', 'window', 'board', 'cupboard', 'bookcase', 'paper', 'ruler', 'playground', "Where's", 'on', 'under', 'next to', 'in', 'the', "It's", 'The', 'yes', 'no', 'is', "isn't"],
+                vocab: ['door', 'wall', 'window', 'board', 'cupboard', 'bookcase', 'paper', 'ruler', 'playground', "where's", 'on', 'under', 'next to', 'in', 'the', "it's", 'yes', 'no', 'is', "isn't"],
                 sentences: [
                     "Jim is in the classroom.",
                     "The book is on the bookcase.",
@@ -93,7 +93,7 @@ const TEACHING_CONTENT = {
                 ]
             },
             "11": {
-                vocab: ["What's", 'this', 'What', 'are', 'these', "It's", 'a', 'an', 'they', "they're", 'window', 'windows', 'playground', 'rubbers', 'rulers', 'bookcase', 'wall', 'doors', 'crayon', 'cupboard'],
+                vocab: ["what's", 'this', 'what', 'are', 'these', "it's", 'a', 'an', 'they', "they're", 'window', 'playground', 'rubber', 'ruler', 'bookcase', 'wall', 'door', 'crayon', 'cupboard'],
                 sentences: [
                     "What's this? It's a window.",
                     "What are these? They're windows.",
@@ -126,7 +126,7 @@ const TEACHING_CONTENT = {
                 ]
             },
             "14": {
-                vocab: ['Hello', 'Hi', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink', 'grey', 'black', 'white', 'brown', "What's", 'your', 'name', "I'm", 'How', 'old', 'are', 'you', 'school', 'classroom', 'rubber', 'pencil', 'teacher', 'bag', 'crayon', 'desk', 'chair', 'book', 'pen', 'pencil case', 'the', 'is', "Where's", 'on', 'under', 'next to', 'in', "it's", 'my', "It's", 'door', 'wall', 'window', 'board', 'cupboard', 'bookcase', 'paper', 'ruler', 'playground', 'yes', 'no', "isn't", 'this', 'What', 'these', 'a', 'an', 'they', "they're", 'ok', 'thank', 'here', 'help', 'listen', 'share', 'work together', 'we', "that's", 'rule'],
+                vocab: ['hello', 'hi', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink', 'grey', 'black', 'white', 'brown', "what's", 'your', 'name', "I'm", 'how', 'old', 'are', 'you', 'school', 'classroom', 'rubber', 'pencil', 'teacher', 'bag', 'crayon', 'desk', 'chair', 'book', 'pen', 'pencil case', 'the', 'is', "where's", 'on', 'under', 'next to', 'in', "it's", 'my', 'door', 'wall', 'window', 'board', 'cupboard', 'bookcase', 'paper', 'ruler', 'playground', 'yes', 'no', "isn't", 'this', 'what', 'these', 'a', 'an', 'they', "they're", 'ok', 'thank', 'here', 'help', 'listen', 'share', 'work together', 'we', "that's", 'rule'],
                 sentences: [
                     "Hello, I'm Jim.",
                     "Hi, I'm Jenny. What's your name? I'm Cameron.",
@@ -209,7 +209,7 @@ const TEACHING_CONTENT = {
                 ]
             },
             "15": {
-                vocab: ['Hello', 'Hi', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink', 'grey', 'black', 'white', 'brown', "What's", 'your', 'name', "I'm", 'How', 'old', 'are', 'you', 'school', 'classroom', 'rubber', 'pencil', 'teacher', 'bag', 'crayon', 'desk', 'chair', 'book', 'pen', 'pencil case', 'the', 'is', "Where's", 'on', 'under', 'next to', 'in', "it's", 'my', "It's", 'door', 'wall', 'window', 'board', 'cupboard', 'bookcase', 'paper', 'ruler', 'playground', 'yes', 'no', "isn't", 'this', 'What', 'these', 'a', 'an', 'they', "they're", 'ok', 'thank', 'here', 'help', 'listen', 'share', 'work together', 'we', "that's", 'rule'],
+                vocab: ['hello', 'hi', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink', 'grey', 'black', 'white', 'brown', "what's", 'your', 'name', "I'm", 'how', 'old', 'are', 'you', 'school', 'classroom', 'rubber', 'pencil', 'teacher', 'bag', 'crayon', 'desk', 'chair', 'book', 'pen', 'pencil case', 'the', 'is', "where's", 'on', 'under', 'next to', 'in', "it's", 'my', 'door', 'wall', 'window', 'board', 'cupboard', 'bookcase', 'paper', 'ruler', 'playground', 'yes', 'no', "isn't", 'this', 'what', 'these', 'a', 'an', 'they', "they're", 'ok', 'thank', 'here', 'help', 'listen', 'share', 'work together', 'we', "that's", 'rule'],
                 sentences: [
                     "Hello, I'm Jim.",
                     "Hi, I'm Jenny. What's your name? I'm Cameron.",
@@ -292,7 +292,7 @@ const TEACHING_CONTENT = {
                 ]
             },
             "16": {
-                vocab: ['Hello', 'Hi', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink', 'grey', 'black', 'white', 'brown', "What's", 'your', 'name', "I'm", 'How', 'old', 'are', 'you', 'school', 'classroom', 'rubber', 'pencil', 'teacher', 'bag', 'crayon', 'desk', 'chair', 'book', 'pen', 'pencil case', 'the', 'is', "Where's", 'on', 'under', 'next to', 'in', "it's", 'my', "It's", 'door', 'wall', 'window', 'board', 'cupboard', 'bookcase', 'paper', 'ruler', 'playground', 'yes', 'no', "isn't", 'this', 'What', 'these', 'a', 'an', 'they', "they're", 'ok', 'thank', 'here', 'help', 'listen', 'share', 'work together', 'we', "that's", 'rule'],
+                vocab: ['hello', 'hi', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink', 'grey', 'black', 'white', 'brown', "what's", 'your', 'name', "I'm", 'how', 'old', 'are', 'you', 'school', 'classroom', 'rubber', 'pencil', 'teacher', 'bag', 'crayon', 'desk', 'chair', 'book', 'pen', 'pencil case', 'the', 'is', "where's", 'on', 'under', 'next to', 'in', "it's", 'my', 'door', 'wall', 'window', 'board', 'cupboard', 'bookcase', 'paper', 'ruler', 'playground', 'yes', 'no', "isn't", 'this', 'what', 'these', 'a', 'an', 'they', "they're", 'ok', 'thank', 'here', 'help', 'listen', 'share', 'work together', 'we', "that's", 'rule'],
                 sentences: [
                     "Hello, I'm Jim.",
                     "Hi, I'm Jenny. What's your name? I'm Cameron.",
@@ -377,7 +377,7 @@ const TEACHING_CONTENT = {
         },
         "2": {
             "19": {
-                vocab: ['family', 'grandfather', 'grandpa', 'father', 'dad', 'mother', 'mum', 'grandmother', 'grandma', 'brother', 'sister', 'Mr.', 'is', 'Ms.', 'Grandpa', 'Grandma', "They're", 'the'],
+                vocab: ['family', 'grandfather', 'grandpa', 'father', 'dad', 'mother', 'mum', 'grandmother', 'grandma', 'brother', 'sister', 'is', 'Mr.', 'Ms.', 'Grandpa', 'Grandma', "they're", 'the'],
                 sentences: [
                     "Mr. Friendly is Jim's father.",
                     "Mr. Friendly is Jim's dad.",
@@ -397,7 +397,7 @@ const TEACHING_CONTENT = {
                 ]
             },
             "20": {
-                vocab: ['Mum', 'are', 'these', 'animals', 'my', 'family', 'No', 'They', "aren't", 'your', 'Is', 'sister', "isn't", 'friend', 'Look', 'at', 'he', 'brother', 'understand', "Who's", 'this', 'girl', 'boy', "They're"],
+                vocab: ['mum', 'are', 'these', 'animal', 'my', 'family', 'no', 'they', "aren't", 'your', 'is', 'sister', "isn't", 'friend', 'look', 'at', 'he', 'brother', 'understand', "who's", 'this', 'girl', 'boy', "they're"],
                 sentences: [
                     "Mum, are these animals my family?",
                     "They aren't your family.",
@@ -416,15 +416,12 @@ const TEACHING_CONTENT = {
                 ]
             },
             "21": {
-                vocab: ['Who', 'is', 'she', 'he', "She's", "He's", 'a', 'girl', 'boy', 'This', 'Dad', 'Mum', 'my', 'father', 'mother', 'brother', 'Grandpa', 'grandfather'],
+                vocab: ['who', 'is', 'she', 'he', "she's", "he's", 'a', 'girl', 'boy', 'this', 'Dad', 'Mum', 'my', 'father', 'mother', 'brother', 'Grandpa', 'grandfather'],
                 sentences: [
                     "Who is she? She's Jenny. She's a girl.",
                     "Who is he? He's Jim. He's a boy.",
-                    "This is Dad. He's my father.",
-                    "This is Mum. She's my mother.",
                     "This is Jim. He's my brother.",
                     "This is Jenny. She's my sister.",
-                    "This is Grandpa. He's my grandfather.",
                     "He's Ben. He's a boy.",
                     "She's Kim. She's a girl.",
                     "He's Tom. He's a boy.",
@@ -432,7 +429,7 @@ const TEACHING_CONTENT = {
                 ]
             },
             "22": {
-                vocab: ['head', 'ear', 'eyes', 'mouth', 'nose', 'hair', 'face', 'tail', 'hand', 'arm', 'leg', 'foot', 'feet', 'body', 'Move', 'your', 'and', 'put', 'arms', 'up', 'Touch', 'ears', 'Close', 'Open', 'clap', 'hands'],
+                vocab: ['head', 'ear', 'eyes', 'mouth', 'nose', 'hair', 'face', 'tail', 'hand', 'arm', 'leg', 'foot', 'feet', 'body', 'move', 'your', 'and', 'put', 'arms', 'up', 'touch', 'ears', 'close', 'open', 'clap', 'hands'],
                 sentences: [
                     "Move your body, Jenny.",
                     "Move your tail, Cameron.",
@@ -445,7 +442,7 @@ const TEACHING_CONTENT = {
                 ]
             },
             "23": {
-                vocab: ["'ve got", "haven't got", 'brown', 'hair', 'black', 'blue', 'eyes', 'green', 'Have', 'you', 'got', 'red', 'Yes', 'have', 'No', 'brother', 'sister', 'twins', 'family', 'grey', 'faces', 'ears', 'tails', 'pink', 'mouths', 'purple', 'heads', 'orange', 'bodies', 'feet', 'yellow', 'legs', 'robot', 'hands', 'nose'],
+                vocab: ["I've got", "haven't got", 'brown', 'hair', 'black', 'blue', 'eyes', 'green', 'have', 'you', 'got', 'red', 'yes', 'no', 'brother', 'sister', 'twin', 'family', 'grey', 'face', 'ears', 'tail', 'pink', 'mouth', 'purple', 'head', 'orange', 'body', 'feet', 'yellow', 'legs', 'robot', 'hands', 'nose'],
                 sentences: [
                     "I've got brown hair.",
                     "I haven't got black hair.",
@@ -487,7 +484,7 @@ const TEACHING_CONTENT = {
                 ]
             },
             "26": {
-                vocab: ['family', 'grandfather', 'grandpa', 'father', 'dad', 'mother', 'mum', 'grandmother', 'grandma', 'brother', 'sister', 'Mr.', 'is', 'Ms.', 'Grandpa', 'Grandma', "They're", 'the', 'are', 'these', 'animals', 'my', 'No', 'They', "aren't", 'your', 'Is', "isn't", 'friend', 'Look', 'at', 'he', 'understand', "Who's", 'this', 'girl', 'boy', 'Who', 'she', "She's", "He's", 'a', 'This', 'Dad', 'head', 'ear', 'eyes', 'mouth', 'nose', 'hair', 'face', 'tail', 'hand', 'arm', 'leg', 'foot', 'feet', 'body', 'Move', 'and', 'put', 'arms', 'up', 'Touch', 'ears', 'Close', 'Open', 'clap', 'hands', "'ve got", "haven't got", 'brown', 'black', 'blue', 'green', 'Have', 'you', 'got', 'red', 'Yes', 'have', 'twins', 'grey', 'faces', 'tails', 'pink', 'mouths', 'purple', 'heads', 'orange', 'bodies', 'yellow', 'legs', 'robot', 'see', 'hear', 'smell', 'taste', 'touch', 'two', 'one'],
+                vocab: ['family', 'grandfather', 'grandpa', 'father', 'dad', 'mother', 'mum', 'grandmother', 'grandma', 'brother', 'sister', 'Mr.', 'is', 'Ms.', 'Grandpa', 'Grandma', "they're", 'the', 'are', 'these', 'animal', 'my', 'no', 'they', "aren't", 'your', 'is', "isn't", 'friend', 'look', 'at', 'he', 'understand', "who's", 'this', 'girl', 'boy', 'who', 'she', "she's", "he's", 'a', 'this', 'Dad', 'head', 'ear', 'eyes', 'mouth', 'nose', 'hair', 'face', 'tail', 'hand', 'arm', 'leg', 'foot', 'feet', 'body', 'move', 'and', 'put', 'arms', 'up', 'touch', 'ears', 'close', 'open', 'clap', 'hands', "I've got", "haven't got", 'brown', 'black', 'blue', 'green', 'have', 'you', 'got', 'red', 'yes', 'have', 'twin', 'grey', 'yellow', 'legs', 'robot', 'see', 'hear', 'smell', 'taste', 'touch', 'two', 'one'],
                 sentences: [
                     "Mr. Friendly is Jim's father.",
                     "Mr. Friendly is Jim's dad.",
@@ -520,11 +517,8 @@ const TEACHING_CONTENT = {
                     ["They're my brother and sister.", "They're my sister and brother."],
                     "Who is she? She's Jenny. She's a girl.",
                     "Who is he? He's Jim. He's a boy.",
-                    "This is Dad. He's my father.",
-                    "This is Mum. She's my mother.",
                     "This is Jim. He's my brother.",
                     "This is Jenny. She's my sister.",
-                    "This is Grandpa. He's my grandfather.",
                     "He's Ben. He's a boy.",
                     "She's Kim. She's a girl.",
                     "He's Tom. He's a boy.",
@@ -582,7 +576,7 @@ const TEACHING_CONTENT = {
                 ]
             },
             "27": {
-                vocab: ['family', 'grandfather', 'grandpa', 'father', 'dad', 'mother', 'mum', 'grandmother', 'grandma', 'brother', 'sister', 'Mr.', 'is', 'Ms.', 'Grandpa', 'Grandma', "They're", 'the', 'are', 'these', 'animals', 'my', 'No', 'They', "aren't", 'your', 'Is', "isn't", 'friend', 'Look', 'at', 'he', 'understand', "Who's", 'this', 'girl', 'boy', 'Who', 'she', "She's", "He's", 'a', 'This', 'Dad', 'head', 'ear', 'eyes', 'mouth', 'nose', 'hair', 'face', 'tail', 'hand', 'arm', 'leg', 'foot', 'feet', 'body', 'Move', 'and', 'put', 'arms', 'up', 'Touch', 'ears', 'Close', 'Open', 'clap', 'hands', "'ve got", "haven't got", 'brown', 'black', 'blue', 'green', 'Have', 'you', 'got', 'red', 'Yes', 'have', 'twins', 'grey', 'faces', 'tails', 'pink', 'mouths', 'purple', 'heads', 'orange', 'bodies', 'yellow', 'legs', 'robot', 'see', 'hear', 'smell', 'taste', 'touch', 'two', 'one'],
+                vocab: ['family', 'grandfather', 'grandpa', 'father', 'dad', 'mother', 'mum', 'grandmother', 'grandma', 'brother', 'sister', 'Mr.', 'is', 'Ms.', 'Grandpa', 'Grandma', "they're", 'the', 'are', 'these', 'animal', 'my', 'no', 'they', "aren't", 'your', 'is', "isn't", 'friend', 'look', 'at', 'he', 'understand', "who's", 'this', 'girl', 'boy', 'who', 'she', "she's", "he's", 'a', 'this', 'Dad', 'head', 'ear', 'eyes', 'mouth', 'nose', 'hair', 'face', 'tail', 'hand', 'arm', 'leg', 'foot', 'feet', 'body', 'move', 'and', 'put', 'arms', 'up', 'touch', 'ears', 'close', 'open', 'clap', 'hands', "I've got", "haven't got", 'brown', 'black', 'blue', 'green', 'have', 'you', 'got', 'red', 'yes', 'have', 'twin', 'grey', 'yellow', 'legs', 'robot', 'see', 'hear', 'smell', 'taste', 'touch', 'two', 'one'],
                 sentences: [
                     "Mr. Friendly is Jim's father.",
                     "Mr. Friendly is Jim's dad.",
@@ -615,11 +609,8 @@ const TEACHING_CONTENT = {
                     ["They're my brother and sister.", "They're my sister and brother."],
                     "Who is she? She's Jenny. She's a girl.",
                     "Who is he? He's Jim. He's a boy.",
-                    "This is Dad. He's my father.",
-                    "This is Mum. She's my mother.",
                     "This is Jim. He's my brother.",
                     "This is Jenny. She's my sister.",
-                    "This is Grandpa. He's my grandfather.",
                     "He's Ben. He's a boy.",
                     "She's Kim. She's a girl.",
                     "He's Tom. He's a boy.",
@@ -677,7 +668,7 @@ const TEACHING_CONTENT = {
                 ]
             },
             "28": {
-                vocab: ['family', 'grandfather', 'grandpa', 'father', 'dad', 'mother', 'mum', 'grandmother', 'grandma', 'brother', 'sister', 'Mr.', 'is', 'Ms.', 'Grandpa', 'Grandma', "They're", 'the', 'are', 'these', 'animals', 'my', 'No', 'They', "aren't", 'your', 'Is', "isn't", 'friend', 'Look', 'at', 'he', 'understand', "Who's", 'this', 'girl', 'boy', 'Who', 'she', "She's", "He's", 'a', 'This', 'Dad', 'head', 'ear', 'eyes', 'mouth', 'nose', 'hair', 'face', 'tail', 'hand', 'arm', 'leg', 'foot', 'feet', 'body', 'Move', 'and', 'put', 'arms', 'up', 'Touch', 'ears', 'Close', 'Open', 'clap', 'hands', "'ve got", "haven't got", 'brown', 'black', 'blue', 'green', 'Have', 'you', 'got', 'red', 'Yes', 'have', 'twins', 'grey', 'faces', 'tails', 'pink', 'mouths', 'purple', 'heads', 'orange', 'bodies', 'yellow', 'legs', 'robot', 'see', 'hear', 'smell', 'taste', 'touch', 'two', 'one'],
+                vocab: ['family', 'grandfather', 'grandpa', 'father', 'dad', 'mother', 'mum', 'grandmother', 'grandma', 'brother', 'sister', 'Mr.', 'is', 'Ms.', 'Grandpa', 'Grandma', "they're", 'the', 'are', 'these', 'animal', 'my', 'no', 'they', "aren't", 'your', 'is', "isn't", 'friend', 'look', 'at', 'he', 'understand', "who's", 'this', 'girl', 'boy', 'who', 'she', "she's", "he's", 'a', 'this', 'Dad', 'head', 'ear', 'eyes', 'mouth', 'nose', 'hair', 'face', 'tail', 'hand', 'arm', 'leg', 'foot', 'feet', 'body', 'move', 'and', 'put', 'arms', 'up', 'touch', 'ears', 'close', 'open', 'clap', 'hands', "I've got", "haven't got", 'brown', 'black', 'blue', 'green', 'have', 'you', 'got', 'red', 'yes', 'have', 'twin', 'grey', 'yellow', 'legs', 'robot', 'see', 'hear', 'smell', 'taste', 'touch', 'two', 'one'],
                 sentences: [
                     "Mr. Friendly is Jim's father.",
                     "Mr. Friendly is Jim's dad.",
@@ -710,11 +701,8 @@ const TEACHING_CONTENT = {
                     ["They're my brother and sister.", "They're my sister and brother."],
                     "Who is she? She's Jenny. She's a girl.",
                     "Who is he? He's Jim. He's a boy.",
-                    "This is Dad. He's my father.",
-                    "This is Mum. She's my mother.",
                     "This is Jim. He's my brother.",
                     "This is Jenny. She's my sister.",
-                    "This is Grandpa. He's my grandfather.",
                     "He's Ben. He's a boy.",
                     "She's Kim. She's a girl.",
                     "He's Tom. He's a boy.",
@@ -774,7 +762,7 @@ const TEACHING_CONTENT = {
         },
         "3": {
             "31": {
-                vocab: ['cow', 'donkey', 'horse', 'spider', 'sheep', 'goat', 'cat', 'dog', 'chicken', 'duck', 'rooster', 'hen', 'chickens', 'cows', 'He', "isn't", 'a', 'She', "He's", "She's", 'and', 'are', 'They', "aren't", "They're"],
+                vocab: ['cow', 'donkey', 'horse', 'spider', 'sheep', 'goat', 'cat', 'dog', 'chicken', 'duck', 'rooster', 'hen', 'he', "isn't", 'a', 'she', "he's", "she's", 'and', 'are', 'they', "aren't", "they're"],
                 sentences: [
                     "Rocky's a rooster. He isn't a duck.",
                     "Rocky isn't a duck. He's a rooster.",
@@ -793,7 +781,7 @@ const TEACHING_CONTENT = {
                 ]
             },
             "32": {
-                vocab: ['big', 'small', 'long', 'short', 'old', 'young', 'nice', 'horse', 'spider', 'cat', 'brother', 'sister', 'friend', 'tail', 'new', 'horses', 'too', 'Now', 'Sorry', 'OK', 'not', 'are', 'is', "isn't", "aren't", "I'm", "you're", "he's", "she's", "they're", 'a', 'at', 'my'],
+                vocab: ['big', 'small', 'long', 'short', 'old', 'young', 'nice', 'horse', 'spider', 'cat', 'brother', 'sister', 'friend', 'tail', 'new', 'too', 'now', 'sorry', 'ok', 'not', 'are', 'is', "isn't", "aren't", "I'm", "you're", "he's", "she's", "they're", 'a', 'at', 'my'],
                 sentences: [
                     "He's a small spider.",
                     "Harry's big.",
@@ -816,7 +804,7 @@ const TEACHING_CONTENT = {
                 ]
             },
             "33": {
-                vocab: ['small', 'horse', 'is', 'black', 'long', 'pencil', 'blue', 'young', 'cat', 'orange', 'big', 'duck', 'yellow', 'new', 'book', 'green', 'short', 'ruler', 'purple', 'old', 'grey', 'The', 'sheep', 'have got', 'tails', "It's", 'a', 'spider', "They're", 'nice', 'ducks', 'cats', 'donkeys', 'ears', "I'm", 'and'],
+                vocab: ['small', 'horse', 'is', 'black', 'long', 'pencil', 'blue', 'young', 'cat', 'orange', 'big', 'duck', 'yellow', 'new', 'book', 'green', 'short', 'ruler', 'purple', 'old', 'grey', 'the', 'sheep', 'have got', 'tail', "it's", 'a', 'spider', "they're", 'nice', 'duck', 'cat', 'donkey', 'ears', "I'm", 'and'],
                 sentences: [
                     "The small horse is black.",
                     "The long pencil is blue.",
@@ -835,7 +823,7 @@ const TEACHING_CONTENT = {
                 ]
             },
             "34": {
-                vocab: ['funny', 'dog', 'brown', 'nose', 'long', 'tail', 'sad', 'black', 'happy', 'park', 'beautiful', 'ugly', 'pink', 'short', 'angry', 'cat', 'spider', 'nice', 'donkey', 'sheep', 'ducks', 'goat', 'family', 'grandfather', 'mother', 'brother', 'grandmother', 'father', 'sister', 'pet', "She's", "He's", "I've got", "We're", "It's", "They're", 'Have', 'got', 'with', 'in', 'the', 'an', 'and', 'This', 'is', 'My', 'dogs', 'cats', 'Yes', 'No'],
+                vocab: ['funny', 'dog', 'brown', 'nose', 'long', 'tail', 'sad', 'black', 'happy', 'park', 'beautiful', 'ugly', 'pink', 'short', 'angry', 'cat', 'spider', 'nice', 'donkey', 'sheep', 'duck', 'goat', 'family', 'grandfather', 'mother', 'brother', 'grandmother', 'father', 'sister', 'pet', "she's", "he's", "I've got", "we're", "it's", "they're", 'have', 'got', 'with', 'in', 'the', 'an', 'and', 'this', 'is', 'my', 'yes', 'no'],
                 sentences: [
                     ["She's a funny dog with a black nose and a long tail.", "She's a funny dog with a long tail and a black nose."],
                     ["He's a sad dog with a black nose and a black tail.", "He's a sad dog with a black tail and a black nose."],
@@ -865,9 +853,8 @@ const TEACHING_CONTENT = {
                 ]
             },
             "35": {
-                vocab: ['duck', "It's", 'got', 'long', 'ears', "hasn't", 'small', 'feet', 'Has', 'it', 'a', 'face', 'Yes', 'No', 'of', 'an', 'animal', 'for', 'your', 'to', 'My', 'has', 'big', 'body', 'short', 'tail', 'Play', 'guessing', 'game', 'with', 'animals', 'Is', 'beautiful', "isn't", 'donkey'],
+                vocab: ['duck', "it's", 'got', 'long', 'ears', "hasn't", 'small', 'feet', 'has', 'it', 'a', 'face', 'yes', 'no', 'of', 'an', 'animal', 'for', 'your', 'to', 'my', 'has', 'big', 'body', 'short', 'tail', 'play', 'guessing', 'game', 'with', 'animal', 'is', 'beautiful', "isn't", 'donkey'],
                 sentences: [
-                    "Which duck is he talking about?",
                     "It's got long ears.",
                     "It hasn't got small feet.",
                     "Has it got a long face? Yes, it has.",
@@ -881,7 +868,7 @@ const TEACHING_CONTENT = {
                 ]
             },
             "36": {
-                vocab: ['bees', 'chickens', 'cows', 'sheep', 'Milk', 'comes', 'from', 'Eggs', 'come', 'Honey', 'Wool'],
+                vocab: ['bee', 'chicken', 'cow', 'sheep', 'milk', 'comes', 'from', 'eggs', 'come', 'honey', 'wool'],
                 sentences: [
                     "Milk comes from cows.",
                     "Eggs come from chickens.",
@@ -890,7 +877,7 @@ const TEACHING_CONTENT = {
                 ]
             },
             "37": {
-                vocab: ['bees', 'chickens', 'cows', 'sheep', 'Milk', 'comes', 'from', 'Eggs', 'come', 'Honey', 'Wool'],
+                vocab: ['bee', 'chicken', 'cow', 'sheep', 'milk', 'comes', 'from', 'eggs', 'come', 'honey', 'wool'],
                 sentences: [
                     "Milk comes from cows.",
                     "Eggs come from chickens.",
@@ -899,7 +886,7 @@ const TEACHING_CONTENT = {
                 ]
             },
             "38": {
-                vocab: ['cow', 'donkey', 'horse', 'spider', 'sheep', 'goat', 'cat', 'dog', 'chicken', 'duck', 'rooster', 'hen', 'chickens', 'cows', 'He', "isn't", 'a', 'She', "He's", "She's", 'and', 'are', 'They', "aren't", "They're", 'big', 'small', 'long', 'short', 'old', 'young', 'nice', 'brother', 'sister', 'friend', 'tail', 'new', 'horses', 'too', 'Now', 'Sorry', 'OK', 'not', 'is', "I'm", "you're", "he's", "she's", "they're", 'at', 'my', 'black', 'pencil', 'blue', 'orange', 'yellow', 'book', 'green', 'ruler', 'purple', 'grey', 'The', 'have got', 'tails', "It's", 'ducks', 'cats', 'donkeys', 'ears', 'funny', 'brown', 'nose', 'sad', 'happy', 'park', 'beautiful', 'ugly', 'pink', 'angry', 'family', 'grandfather', 'mother', 'grandmother', 'father', 'pet', "I've got", "We're", 'Have', 'got', 'with', 'in', 'the', 'an', 'My', 'dogs', 'Yes', 'No', 'feet', 'Has', 'it', 'face', 'of', 'animal', 'for', 'your', 'to', 'has', 'body', 'comes', 'from', 'come', 'Honey', 'Wool', 'bees', 'Milk', 'Eggs'],
+                vocab: ['cow', 'donkey', 'horse', 'spider', 'sheep', 'goat', 'cat', 'dog', 'chicken', 'duck', 'rooster', 'hen', 'he', "isn't", 'a', 'she', "he's", "she's", 'and', 'are', 'they', "aren't", "they're", 'big', 'small', 'long', 'short', 'old', 'young', 'nice', 'brother', 'sister', 'friend', 'tail', 'new', 'too', 'now', 'sorry', 'ok', 'not', 'is', "I'm", "you're", 'at', 'my', 'black', 'pencil', 'blue', 'orange', 'yellow', 'book', 'green', 'ruler', 'purple', 'grey', 'the', 'have got', "it's", 'ears', 'funny', 'brown', 'nose', 'sad', 'happy', 'park', 'beautiful', 'ugly', 'pink', 'angry', 'family', 'grandfather', 'mother', 'grandmother', 'father', 'mum', 'pet', "I've got", "we're", 'have', 'got', 'with', 'in', 'an', 'my', 'yes', 'no', 'feet', 'has', 'it', 'face', 'of', 'animal', 'for', 'your', 'to', 'body', 'comes', 'from', 'come', 'honey', 'wool', 'bee', 'milk', 'eggs'],
                 sentences: [
                     "Rocky's a rooster. He isn't a duck.",
                     "Rocky isn't a duck. He's a rooster.",
@@ -972,7 +959,6 @@ const TEACHING_CONTENT = {
                     "The grandmother is beautiful.",
                     "The father is angry.",
                     "The sister is happy.",
-                    "Which duck is he talking about?",
                     "It's got long ears.",
                     "It hasn't got small feet.",
                     "Has it got a long face? Yes, it has.",
@@ -990,7 +976,7 @@ const TEACHING_CONTENT = {
                 ]
             },
             "39": {
-                vocab: ['cow', 'donkey', 'horse', 'spider', 'sheep', 'goat', 'cat', 'dog', 'chicken', 'duck', 'rooster', 'hen', 'chickens', 'cows', 'He', "isn't", 'a', 'She', "He's", "She's", 'and', 'are', 'They', "aren't", "They're", 'big', 'small', 'long', 'short', 'old', 'young', 'nice', 'brother', 'sister', 'friend', 'tail', 'new', 'horses', 'too', 'Now', 'Sorry', 'OK', 'not', 'is', "I'm", "you're", "he's", "she's", "they're", 'at', 'my', 'black', 'pencil', 'blue', 'orange', 'yellow', 'book', 'green', 'ruler', 'purple', 'grey', 'The', 'have got', 'tails', "It's", 'ducks', 'cats', 'donkeys', 'ears', 'funny', 'brown', 'nose', 'sad', 'happy', 'park', 'beautiful', 'ugly', 'pink', 'angry', 'family', 'grandfather', 'mother', 'grandmother', 'father', 'pet', "I've got", "We're", 'Have', 'got', 'with', 'in', 'the', 'an', 'My', 'dogs', 'Yes', 'No', 'feet', 'Has', 'it', 'face', 'of', 'animal', 'for', 'your', 'to', 'has', 'body', 'comes', 'from', 'come', 'Honey', 'Wool', 'bees', 'Milk', 'Eggs'],
+                vocab: ['cow', 'donkey', 'horse', 'spider', 'sheep', 'goat', 'cat', 'dog', 'chicken', 'duck', 'rooster', 'hen', 'he', "isn't", 'a', 'she', "he's", "she's", 'and', 'are', 'they', "aren't", "they're", 'big', 'small', 'long', 'short', 'old', 'young', 'nice', 'brother', 'sister', 'friend', 'tail', 'new', 'too', 'now', 'sorry', 'ok', 'not', 'is', "I'm", "you're", 'at', 'my', 'black', 'pencil', 'blue', 'orange', 'yellow', 'book', 'green', 'ruler', 'purple', 'grey', 'the', 'have got', "it's", 'ears', 'funny', 'brown', 'nose', 'sad', 'happy', 'park', 'beautiful', 'ugly', 'pink', 'angry', 'family', 'grandfather', 'mother', 'grandmother', 'father', 'mum', 'pet', "I've got", "we're", 'have', 'got', 'with', 'in', 'an', 'my', 'yes', 'no', 'feet', 'has', 'it', 'face', 'of', 'animal', 'for', 'your', 'to', 'body', 'comes', 'from', 'come', 'honey', 'wool', 'bee', 'milk', 'eggs'],
                 sentences: [
                     "Rocky's a rooster. He isn't a duck.",
                     "Rocky isn't a duck. He's a rooster.",
@@ -1063,7 +1049,6 @@ const TEACHING_CONTENT = {
                     "The grandmother is beautiful.",
                     "The father is angry.",
                     "The sister is happy.",
-                    "Which duck is he talking about?",
                     "It's got long ears.",
                     "It hasn't got small feet.",
                     "Has it got a long face? Yes, it has.",
@@ -1081,7 +1066,7 @@ const TEACHING_CONTENT = {
                 ]
             },
             "40": {
-                vocab: ['cow', 'donkey', 'horse', 'spider', 'sheep', 'goat', 'cat', 'dog', 'chicken', 'duck', 'rooster', 'hen', 'chickens', 'cows', 'He', "isn't", 'a', 'She', "He's", "She's", 'and', 'are', 'They', "aren't", "They're", 'big', 'small', 'long', 'short', 'old', 'young', 'nice', 'brother', 'sister', 'friend', 'tail', 'new', 'horses', 'too', 'Now', 'Sorry', 'OK', 'not', 'is', "I'm", "you're", "he's", "she's", "they're", 'at', 'my', 'black', 'pencil', 'blue', 'orange', 'yellow', 'book', 'green', 'ruler', 'purple', 'grey', 'The', 'have got', 'tails', "It's", 'ducks', 'cats', 'donkeys', 'ears', 'funny', 'brown', 'nose', 'sad', 'happy', 'park', 'beautiful', 'ugly', 'pink', 'angry', 'family', 'grandfather', 'mother', 'grandmother', 'father', 'pet', "I've got", "We're", 'Have', 'got', 'with', 'in', 'the', 'an', 'My', 'dogs', 'Yes', 'No', 'feet', 'Has', 'it', 'face', 'of', 'animal', 'for', 'your', 'to', 'has', 'body', 'comes', 'from', 'come', 'Honey', 'Wool', 'bees', 'Milk', 'Eggs'],
+                vocab: ['cow', 'donkey', 'horse', 'spider', 'sheep', 'goat', 'cat', 'dog', 'chicken', 'duck', 'rooster', 'hen', 'he', "isn't", 'a', 'she', "he's", "she's", 'and', 'are', 'they', "aren't", "they're", 'big', 'small', 'long', 'short', 'old', 'young', 'nice', 'brother', 'sister', 'friend', 'tail', 'new', 'too', 'now', 'sorry', 'ok', 'not', 'is', "I'm", "you're", 'at', 'my', 'black', 'pencil', 'blue', 'orange', 'yellow', 'book', 'green', 'ruler', 'purple', 'grey', 'the', 'have got', "it's", 'ears', 'funny', 'brown', 'nose', 'sad', 'happy', 'park', 'beautiful', 'ugly', 'pink', 'angry', 'family', 'grandfather', 'mother', 'grandmother', 'father', 'mum', 'pet', "I've got", "we're", 'have', 'got', 'with', 'in', 'an', 'my', 'yes', 'no', 'feet', 'has', 'it', 'face', 'of', 'animal', 'for', 'your', 'to', 'body', 'comes', 'from', 'come', 'honey', 'wool', 'bee', 'milk', 'eggs'],
                 sentences: [
                     "Rocky's a rooster. He isn't a duck.",
                     "Rocky isn't a duck. He's a rooster.",
@@ -1154,7 +1139,6 @@ const TEACHING_CONTENT = {
                     "The grandmother is beautiful.",
                     "The father is angry.",
                     "The sister is happy.",
-                    "Which duck is he talking about?",
                     "It's got long ears.",
                     "It hasn't got small feet.",
                     "Has it got a long face? Yes, it has.",
@@ -1172,15 +1156,15 @@ const TEACHING_CONTENT = {
                 ]
             },
             "42": {
-                vocab: ['Hello', 'Hi', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink', 'grey', 'black', 'white', 'brown', "What's", 'your', 'name', "I'm", 'How', 'old', 'are', 'you', 'school', 'classroom', 'rubber', 'pencil', 'teacher', 'bag', 'crayon', 'desk', 'chair', 'book', 'pen', 'pencil case', 'table', 'the', 'is', 'in', "Where's", 'on', 'under', 'next to', 'my', "it's", "they're", 'pencils', 'crayons', 'pens', 'books', 'chairs', 'door', 'wall', 'window', 'board', 'cupboard', 'bookcase', 'paper', 'ruler', 'playground', 'yes', 'no', "isn't", 'What', 'these', 'a', 'an', 'they', 'ok', 'thank', 'here', 'help', 'listen', 'share', 'work together', 'we', "that's", 'rule', 'family', 'grandfather', 'grandpa', 'father', 'dad', 'mother', 'mum', 'grandmother', 'grandma', 'brother', 'sister', 'Mr.', 'Ms.', 'Grandpa', 'Grandma', "They're", 'animals', 'No', 'They', "aren't", 'friend', 'Look', 'at', 'he', 'understand', "Who's", 'this', 'girl', 'boy', 'Who', 'she', "She's", "He's", 'This', 'Dad', 'Mum', 'head', 'ear', 'eyes', 'mouth', 'nose', 'hair', 'face', 'tail', 'hand', 'arm', 'leg', 'foot', 'feet', 'body', 'Move', 'and', 'put', 'arms', 'up', 'Touch', 'ears', 'Close', 'Open', 'clap', 'hands', "'ve got", "haven't got", 'got', 'Have', 'twins', 'faces', 'tails', 'mouths', 'heads', 'bodies', 'yellow', 'legs', 'robot', 'see', 'hear', 'smell', 'taste', 'touch', 'cow', 'donkey', 'horse', 'spider', 'sheep', 'goat', 'cat', 'dog', 'chicken', 'duck', 'rooster', 'hen', 'chickens', 'cows', 'big', 'small', 'long', 'short', 'nice', 'new', 'horses', 'too', 'Now', 'Sorry', 'OK', 'not', "you're", "he's", "she's", "they're", "It's", 'ducks', 'cats', 'donkeys', 'funny', 'brown', 'sad', 'happy', 'park', 'beautiful', 'ugly', 'angry', 'pet', "I've got", "We're", 'with', 'an', 'My', 'dogs', 'Yes', 'it', 'animal', 'of', 'for', 'to', 'has', 'comes', 'from', 'come', 'Honey', 'Wool', 'bees', 'Milk', 'Eggs'],
+                vocab: ['hello', 'hi', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink', 'grey', 'black', 'white', 'brown', "what's", 'your', 'name', "I'm", 'how', 'old', 'are', 'you', 'school', 'classroom', 'rubber', 'pencil', 'teacher', 'bag', 'crayon', 'desk', 'chair', 'book', 'pen', 'pencil case', 'table', 'the', 'is', 'in', "where's", 'on', 'under', 'next to', 'my', "it's", "they're", 'door', 'wall', 'window', 'board', 'cupboard', 'bookcase', 'paper', 'ruler', 'playground', 'yes', 'no', "isn't", 'what', 'these', 'a', 'an', 'they', 'ok', 'thank', 'here', 'help', 'listen', 'share', 'work together', 'we', "that's", 'rule', 'family', 'grandfather', 'grandpa', 'father', 'dad', 'mother', 'mum', 'grandmother', 'grandma', 'brother', 'sister', 'Mr.', 'Ms.', 'Grandpa', 'Grandma', "they're", 'animal', 'no', 'friend', 'look', 'at', 'he', 'understand', "who's", 'this', 'girl', 'boy', 'who', 'she', "she's", "he's", 'Dad', 'Mum', 'head', 'ear', 'eyes', 'mouth', 'nose', 'hair', 'face', 'tail', 'hand', 'arm', 'leg', 'foot', 'feet', 'body', 'move', 'and', 'put', 'arms', 'up', 'touch', 'ears', 'close', 'open', 'clap', 'hands', "'ve got", "haven't got", 'got', 'have', 'twin', 'yellow', 'legs', 'robot', 'see', 'hear', 'smell', 'taste', 'touch', 'cow', 'donkey', 'horse', 'spider', 'sheep', 'goat', 'cat', 'dog', 'chicken', 'duck', 'rooster', 'hen', 'big', 'small', 'long', 'short', 'nice', 'new', 'too', 'now', 'sorry', 'ok', 'not', "you're", "it's", 'funny', 'brown', 'sad', 'happy', 'park', 'beautiful', 'ugly', 'angry', 'pet', "I've got", "we're", 'with', 'an', 'my', 'yes', 'it', 'has', 'comes', 'from', 'come', 'honey', 'wool', 'bee', 'milk', 'eggs'],
                 sentences: [
-                    ["Hello, I'm Jim.", "Hi, I'm Jenny.", "What's your name? I'm Cameron.", "How old are you? I'm ten.", "The bag is red.", "The book is blue.", "Where's the bag? It's on the desk.", "The pencils are under the book.", "Jim is in the classroom.", "The book is on the bookcase.", "What's this? It's a window.", "What are these? They're windows.", "Are you OK? Yes, thank you.", "I help my classmates.", "We work together.", "Mr. Friendly is Jim's father.", "They're the Friendly family.", "Mum, are these animals my family?", "They aren't your family.", "Who is she? She's Jenny. She's a girl.", "This is Dad. He's my father.", "Move your body, Jenny.", "Touch your hair and your face.", "I've got brown hair.", "They've got blue eyes.", "Have you got red hair? Yes, I have.", "I've got two eyes to see.", "Rocky's a rooster. He isn't a duck.", "Harry's a horse. He's big.", "The small horse is black.", "She's a funny dog with a black nose.", "Milk comes from cows.", "Eggs come from chickens.", "Hello, I'm Jim.", "Hi, I'm Jenny.", "What's your name? I'm Cameron.", "How old are you? I'm ten.", "The bag is red.", "The book is blue.", "Where's the bag? It's on the desk.", "The pencils are under the book.", "Jim is in the classroom.", "The book is on the bookcase.", "What's this? It's a window.", "What are these? They're windows.", "Are you OK? Yes, thank you.", "I help my classmates.", "We work together.", "Mr. Friendly is Jim's father.", "They're the Friendly family.", "Mum, are these animals my family?", "They aren't your family.", "Who is she? She's Jenny. She's a girl.", "This is Dad. He's my father.", "Move your body, Jenny.", "Touch your face and your hair.", "I've got brown hair.", "They've got blue eyes.", "Have you got red hair? Yes, I have.", "I've got two eyes to see.", "Rocky's a rooster. He isn't a duck.", "Harry's a horse. He's big.", "The small horse is black.", "She's a funny dog with a black nose.", "Milk comes from cows.", "Eggs come from chickens."]
+                    ["Hello, I'm Jim.", "Hi, I'm Jenny.", "What's your name? I'm Cameron.", "How old are you? I'm ten.", "The bag is red.", "The book is blue.", "Where's the bag? It's on the desk.", "The pencils are under the book.", "Jim is in the classroom.", "The book is on the bookcase.", "What's this? It's a window.", "What are these? They're windows.", "Are you OK? Yes, thank you.", "I help my classmates.", "We work together.", "Mr. Friendly is Jim's father.", "They're the Friendly family.", "Mum, are these animals my family?", "They aren't your family.", "Who is she? She's Jenny. She's a girl.", "Move your body, Jenny.", "Touch your hair and your face.", "I've got brown hair.", "They've got blue eyes.", "Have you got red hair? Yes, I have.", "I've got two eyes to see.", "Rocky's a rooster. He isn't a duck.", "Harry's a horse. He's big.", "The small horse is black.", "She's a funny dog with a black nose.", "Milk comes from cows.", "Eggs come from chickens.", "Hello, I'm Jim.", "Hi, I'm Jenny.", "What's your name? I'm Cameron.", "How old are you? I'm ten.", "The bag is red.", "The book is blue.", "Where's the bag? It's on the desk.", "The pencils are under the book.", "Jim is in the classroom.", "The book is on the bookcase.", "What's this? It's a window.", "What are these? They're windows.", "Are you OK? Yes, thank you.", "I help my classmates.", "We work together.", "Mr. Friendly is Jim's father.", "They're the Friendly family.", "Mum, are these animals my family?", "They aren't your family.", "Who is she? She's Jenny. She's a girl.", "Move your body, Jenny.", "Touch your face and your hair.", "I've got brown hair.", "They've got blue eyes.", "Have you got red hair? Yes, I have.", "I've got two eyes to see.", "Rocky's a rooster. He isn't a duck.", "Harry's a horse. He's big.", "The small horse is black.", "She's a funny dog with a black nose.", "Milk comes from cows.", "Eggs come from chickens."]
                 ]
             },
             "43": {
-                vocab: ['Hello', 'Hi', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink', 'grey', 'black', 'white', 'brown', "What's", 'your', 'name', "I'm", 'How', 'old', 'are', 'you', 'school', 'classroom', 'rubber', 'pencil', 'teacher', 'bag', 'crayon', 'desk', 'chair', 'book', 'pen', 'pencil case', 'table', 'the', 'is', 'in', "Where's", 'on', 'under', 'next to', 'my', "it's", "they're", 'pencils', 'crayons', 'pens', 'books', 'chairs', 'door', 'wall', 'window', 'board', 'cupboard', 'bookcase', 'paper', 'ruler', 'playground', 'yes', 'no', "isn't", 'What', 'these', 'a', 'an', 'they', 'ok', 'thank', 'here', 'help', 'listen', 'share', 'work together', 'we', "that's", 'rule', 'family', 'grandfather', 'grandpa', 'father', 'dad', 'mother', 'mum', 'grandmother', 'grandma', 'brother', 'sister', 'Mr.', 'Ms.', 'Grandpa', 'Grandma', "They're", 'animals', 'No', 'They', "aren't", 'friend', 'Look', 'at', 'he', 'understand', "Who's", 'this', 'girl', 'boy', 'Who', 'she', "She's", "He's", 'This', 'Dad', 'Mum', 'head', 'ear', 'eyes', 'mouth', 'nose', 'hair', 'face', 'tail', 'hand', 'arm', 'leg', 'foot', 'feet', 'body', 'Move', 'and', 'put', 'arms', 'up', 'Touch', 'ears', 'Close', 'Open', 'clap', 'hands', "'ve got", "haven't got", 'got', 'Have', 'twins', 'faces', 'tails', 'mouths', 'heads', 'bodies', 'yellow', 'legs', 'robot', 'see', 'hear', 'smell', 'taste', 'touch', 'cow', 'donkey', 'horse', 'spider', 'sheep', 'goat', 'cat', 'dog', 'chicken', 'duck', 'rooster', 'hen', 'chickens', 'cows', 'big', 'small', 'long', 'short', 'nice', 'new', 'horses', 'too', 'Now', 'Sorry', 'OK', 'not', "you're", "he's", "she's", "they're", "It's", 'ducks', 'cats', 'donkeys', 'funny', 'brown', 'sad', 'happy', 'park', 'beautiful', 'ugly', 'angry', 'pet', "I've got", "We're", 'with', 'an', 'My', 'dogs', 'Yes', 'it', 'animal', 'of', 'for', 'to', 'has', 'comes', 'from', 'come', 'Honey', 'Wool', 'bees', 'Milk', 'Eggs'],
+                vocab: ['hello', 'hi', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink', 'grey', 'black', 'white', 'brown', "what's", 'your', 'name', "I'm", 'how', 'old', 'are', 'you', 'school', 'classroom', 'rubber', 'pencil', 'teacher', 'bag', 'crayon', 'desk', 'chair', 'book', 'pen', 'pencil case', 'table', 'the', 'is', 'in', "where's", 'on', 'under', 'next to', 'my', "it's", "they're", 'door', 'wall', 'window', 'board', 'cupboard', 'bookcase', 'paper', 'ruler', 'playground', 'yes', 'no', "isn't", 'what', 'these', 'a', 'an', 'they', 'ok', 'thank', 'here', 'help', 'listen', 'share', 'work together', 'we', "that's", 'rule', 'family', 'grandfather', 'grandpa', 'father', 'dad', 'mother', 'mum', 'grandmother', 'grandma', 'brother', 'sister', 'Mr.', 'Ms.', 'Grandpa', 'Grandma', "they're", 'animal', 'no', 'friend', 'look', 'at', 'he', 'understand', "who's", 'this', 'girl', 'boy', 'who', 'she', "she's", "he's", 'Dad', 'Mum', 'head', 'ear', 'eyes', 'mouth', 'nose', 'hair', 'face', 'tail', 'hand', 'arm', 'leg', 'foot', 'feet', 'body', 'move', 'and', 'put', 'arms', 'up', 'touch', 'ears', 'close', 'open', 'clap', 'hands', "'ve got", "haven't got", 'got', 'have', 'twin', 'yellow', 'legs', 'robot', 'see', 'hear', 'smell', 'taste', 'touch', 'cow', 'donkey', 'horse', 'spider', 'sheep', 'goat', 'cat', 'dog', 'chicken', 'duck', 'rooster', 'hen', 'big', 'small', 'long', 'short', 'nice', 'new', 'too', 'now', 'sorry', 'ok', 'not', "you're", "it's", 'funny', 'brown', 'sad', 'happy', 'park', 'beautiful', 'ugly', 'angry', 'pet', "I've got", "we're", 'with', 'an', 'my', 'yes', 'it', 'has', 'comes', 'from', 'come', 'honey', 'wool', 'bee', 'milk', 'eggs'],
                 sentences: [
-                    ["Hello, I'm Jim.", "Hi, I'm Jenny.", "What's your name? I'm Cameron.", "How old are you? I'm ten.", "The bag is red.", "The book is blue.", "Where's the bag? It's on the desk.", "The pencils are under the book.", "Jim is in the classroom.", "The book is on the bookcase.", "What's this? It's a window.", "What are these? They're windows.", "Are you OK? Yes, thank you.", "I help my classmates.", "We work together.", "Mr. Friendly is Jim's father.", "They're the Friendly family.", "Mum, are these animals my family?", "They aren't your family.", "Who is she? She's Jenny. She's a girl.", "This is Dad. He's my father.", "Move your body, Jenny.", "Touch your hair and your face.", "I've got brown hair.", "They've got blue eyes.", "Have you got red hair? Yes, I have.", "I've got two eyes to see.", "Rocky's a rooster. He isn't a duck.", "Harry's a horse. He's big.", "The small horse is black.", "She's a funny dog with a black nose.", "Milk comes from cows.", "Eggs come from chickens.", "Hello, I'm Jim.", "Hi, I'm Jenny.", "What's your name? I'm Cameron.", "How old are you? I'm ten.", "The bag is red.", "The book is blue.", "Where's the bag? It's on the desk.", "The pencils are under the book.", "Jim is in the classroom.", "The book is on the bookcase.", "What's this? It's a window.", "What are these? They're windows.", "Are you OK? Yes, thank you.", "I help my classmates.", "We work together.", "Mr. Friendly is Jim's father.", "They're the Friendly family.", "Mum, are these animals my family?", "They aren't your family.", "Who is she? She's Jenny. She's a girl.", "This is Dad. He's my father.", "Move your body, Jenny.", "Touch your face and your hair.", "I've got brown hair.", "They've got blue eyes.", "Have you got red hair? Yes, I have.", "I've got two eyes to see.", "Rocky's a rooster. He isn't a duck.", "Harry's a horse. He's big.", "The small horse is black.", "She's a funny dog with a black nose.", "Milk comes from cows.", "Eggs come from chickens."]
+                    ["Hello, I'm Jim.", "Hi, I'm Jenny.", "What's your name? I'm Cameron.", "How old are you? I'm ten.", "The bag is red.", "The book is blue.", "Where's the bag? It's on the desk.", "The pencils are under the book.", "Jim is in the classroom.", "The book is on the bookcase.", "What's this? It's a window.", "What are these? They're windows.", "Are you OK? Yes, thank you.", "I help my classmates.", "We work together.", "Mr. Friendly is Jim's father.", "They're the Friendly family.", "Mum, are these animals my family?", "They aren't your family.", "Who is she? She's Jenny. She's a girl.", "Move your body, Jenny.", "Touch your hair and your face.", "I've got brown hair.", "They've got blue eyes.", "Have you got red hair? Yes, I have.", "I've got two eyes to see.", "Rocky's a rooster. He isn't a duck.", "Harry's a horse. He's big.", "The small horse is black.", "She's a funny dog with a black nose.", "Milk comes from cows.", "Eggs come from chickens.", "Hello, I'm Jim.", "Hi, I'm Jenny.", "What's your name? I'm Cameron.", "How old are you? I'm ten.", "The bag is red.", "The book is blue.", "Where's the bag? It's on the desk.", "The pencils are under the book.", "Jim is in the classroom.", "The book is on the bookcase.", "What's this? It's a window.", "What are these? They're windows.", "Are you OK? Yes, thank you.", "I help my classmates.", "We work together.", "Mr. Friendly is Jim's father.", "They're the Friendly family.", "Mum, are these animals my family?", "They aren't your family.", "Who is she? She's Jenny. She's a girl.", "Move your body, Jenny.", "Touch your face and your hair.", "I've got brown hair.", "They've got blue eyes.", "Have you got red hair? Yes, I have.", "I've got two eyes to see.", "Rocky's a rooster. He isn't a duck.", "Harry's a horse. He's big.", "The small horse is black.", "She's a funny dog with a black nose.", "Milk comes from cows.", "Eggs come from chickens."]
                 ]
             }
         }

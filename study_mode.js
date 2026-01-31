@@ -584,7 +584,8 @@ function finishStudySession() {
     container.innerHTML = `
         <div class="text-center px-4">
             <h2 class="study-text-2xl text-green-400 font-bold mb-4">Great job ${player}!</h2>
-            <p class="study-text-xl text-white mb-8">You completed this session in ${timeStr}</p>
+            <p class="study-text-xl text-white mb-2">You completed this session in ${timeStr}</p>
+            <p class="study-text-xl text-yellow-400 mb-8 font-bold">记得发图片在群里给Val看看！!</p>
             
             <div class="flex flex-col gap-4 items-center">
                 <button onclick="initStudyMode()" class="game-btn bg-blue-600 text-xl sm:text-2xl w-full max-w-[280px]">再学习一下</button>

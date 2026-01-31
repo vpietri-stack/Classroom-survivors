@@ -82,6 +82,26 @@ const synthError = () => {
     o.connect(g); g.connect(audioCtx.destination);
     o.start(); o.stop(audioCtx.currentTime + 0.2);
 };
+
+const synthDeath = () => {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const playNote = (freq, start, dur) => {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = 'square';
+        o.frequency.setValueAtTime(freq, start);
+        g.gain.setValueAtTime(0.2, start);
+        g.gain.exponentialRampToValueAtTime(0.01, start + dur);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(start); o.stop(start + dur);
+    };
+    // dadadadum
+    playNote(220, now, 0.2);       // A3
+    playNote(220, now + 0.25, 0.2);  // A3
+    playNote(220, now + 0.5, 0.2);   // A3
+    playNote(164.8, now + 0.75, 0.6); // E3 (lower)
+};
 let currentTTSWord = "";
 const playTTS = () => {
     if (!currentTTSWord) return;
@@ -293,6 +313,10 @@ class MainScene extends Phaser.Scene {
     }
 
     update(time, delta) {
+        if (this.gameState === 'GAMEOVER') {
+            this.player.body.setVelocity(0, 0);
+            return;
+        }
         if (this.gameState !== 'PLAYING') return;
 
         // Player Move
@@ -890,7 +914,10 @@ class MainScene extends Phaser.Scene {
         // (Removed lines that set knockbackVelocity)
 
         updateDOMHUD(this.playerStats, Math.floor(this.accumulatedTime / 1000), this.killCount);
-        if (this.playerStats.hp <= 0) this.gameOver();
+        if (this.playerStats.hp <= 0 && this.gameState !== 'GAMEOVER') {
+            this.gameState = 'GAMEOVER';
+            this.gameOver();
+        }
     }
 
     damageEnemy(enemy, amount, knockback = 0) {
@@ -1086,38 +1113,76 @@ class MainScene extends Phaser.Scene {
     }
 
     gameOver() {
-        this.scene.pause();
+        // Character can't be controlled (handled in update check)
+        this.player.body.setVelocity(0, 0);
+        this.player.body.setImmovable(true);
 
-        // Stop any running minigame countdown
-        if (minigameCountdownInterval) {
-            clearInterval(minigameCountdownInterval);
-            minigameCountdownInterval = null;
-        }
+        // Disable enemy movement/spawn
+        this.enemies.getChildren().forEach(e => {
+            if (e.body) e.body.setVelocity(0, 0);
+        });
 
-        // Calculate statistics
-        const totalPlayedTimeSec = Math.floor((this.accumulatedTime + totalMinigameTimeMs) / 1000);
-        const survivalTimeSec = Math.floor(this.accumulatedTime / 1000);
-        const minigameTimeSec = Math.floor(totalMinigameTimeMs / 1000);
-        const scoreSec = Math.max(0, survivalTimeSec); // Score is remaining survival time
+        // Death Sequence
+        synthDeath();
 
-        // Format time strings
-        const formatTime = (seconds) => {
-            const m = Math.floor(seconds / 60);
-            const s = seconds % 60;
-            return `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
-        };
+        // Turn red and scale up slightly for drama
+        this.tweens.add({
+            targets: this.player,
+            scaleX: 1.5,
+            scaleY: 1.5,
+            duration: 1500,
+            ease: 'Power2'
+        });
 
-        // Update display
-        document.getElementById('finalLevel').innerText = this.playerStats.level;
-        document.getElementById('finalSurvivalTime').innerText = formatTime(totalPlayedTimeSec);
-        document.getElementById('finalMinigameTime').innerText = '-' + formatTime(minigameTimeSec);
-        document.getElementById('finalScore').innerText = formatTime(scoreSec);
+        this.tweens.addCounter({
+            from: 255,
+            to: 0,
+            duration: 2000,
+            onUpdate: (tween) => {
+                const value = Math.floor(tween.getValue());
+                // Gradual shift to full red (keeping red at 255, lowering G and B)
+                this.player.setTint(Phaser.Display.Color.GetColor(255, value, value));
+            },
+            onComplete: () => {
+                // Flash white screen then show result
+                this.cameras.main.flash(500, 255, 255, 255);
 
-        // Show selected content
-        const displayText = selectedDay && selectedTime ? `${selectedDay} ${selectedTime}` : 'N/A';
-        document.getElementById('finalContentDisplay').innerText = displayText;
+                this.time.delayedCall(500, () => {
+                    this.scene.pause();
 
-        document.getElementById('gameOverScreen').classList.remove('hidden');
+                    // Stop any running minigame countdown
+                    if (minigameCountdownInterval) {
+                        clearInterval(minigameCountdownInterval);
+                        minigameCountdownInterval = null;
+                    }
+
+                    // Calculate statistics
+                    const totalPlayedTimeSec = Math.floor((this.accumulatedTime + totalMinigameTimeMs) / 1000);
+                    const survivalTimeSec = Math.floor(this.accumulatedTime / 1000);
+                    const minigameTimeSec = Math.floor(totalMinigameTimeMs / 1000);
+                    const scoreSec = Math.max(0, survivalTimeSec);
+
+                    // Format time strings
+                    const formatTime = (seconds) => {
+                        const m = Math.floor(seconds / 60);
+                        const s = seconds % 60;
+                        return `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
+                    };
+
+                    // Update display
+                    document.getElementById('finalLevel').innerText = this.playerStats.level;
+                    document.getElementById('finalSurvivalTime').innerText = formatTime(totalPlayedTimeSec);
+                    document.getElementById('finalMinigameTime').innerText = '-' + formatTime(minigameTimeSec);
+                    document.getElementById('finalScore').innerText = formatTime(scoreSec);
+
+                    // Show selected content
+                    const displayText = selectedDay && selectedTime ? `${selectedDay} ${selectedTime}` : 'N/A';
+                    document.getElementById('finalContentDisplay').innerText = displayText;
+
+                    document.getElementById('gameOverScreen').classList.remove('hidden');
+                });
+            }
+        });
     }
 
     applyReward(reward) {

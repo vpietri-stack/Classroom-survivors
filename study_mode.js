@@ -618,3 +618,54 @@ function playHappySound() {
         synthLevelUp();
     }
 }
+
+// --- KEYBOARD SUPPORT ---
+window.addEventListener('keydown', (e) => {
+    if (!STUDY_STATE.active) return;
+
+    if (STUDY_STATE.round === 'B') {
+        handleRoundBKeyDown(e.key);
+    } else if (STUDY_STATE.round === 'C') {
+        handleRoundCKeyDown(e.key);
+    }
+});
+
+function handleRoundBKeyDown(key) {
+    if (key === 'Backspace') {
+        const slots = document.getElementById('scramble-slots').children;
+        // Find last filled slot
+        for (let i = slots.length - 1; i >= 0; i--) {
+            if (slots[i].innerText && slots[i].dataset.fixed !== "true") {
+                removeLetterFromSlot(i, currentTTSWord);
+                break;
+            }
+        }
+    } else if (key.length === 1 && key.match(/[a-z0-9]/i)) {
+        const bank = document.getElementById('scramble-bank').children;
+        for (let btn of bank) {
+            if (btn.innerText.toLowerCase() === key.toLowerCase() && btn.style.visibility !== 'hidden') {
+                addLetterToSlot(btn.innerText, btn, currentTTSWord);
+                break;
+            }
+        }
+    }
+}
+
+function handleRoundCKeyDown(key) {
+    if (key === 'Enter') {
+        const word = currentTTSWord;
+        checkRoundC(word);
+    } else if (key === 'Backspace') {
+        roundCInput = roundCInput.slice(0, -1);
+        updateRoundCDisplay();
+    } else if (key.length === 1 && key.match(/[a-z0-9]/i)) {
+        // Only allow typing if the key is in the visible virtual keyboard
+        const kb = document.getElementById('virtual-keyboard').children;
+        for (let btn of kb) {
+            if (btn.innerText.toLowerCase() === key.toLowerCase()) {
+                typeRoundC(btn.innerText);
+                break;
+            }
+        }
+    }
+}

@@ -102,6 +102,21 @@ const synthDeath = () => {
     playNote(220, now + 0.5, 0.2);   // A3
     playNote(164.8, now + 0.75, 0.6); // E3 (lower)
 };
+
+const synthLootbox = () => {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(440, now);
+    o.frequency.exponentialRampToValueAtTime(880, now + 0.1);
+    o.frequency.exponentialRampToValueAtTime(1320, now + 0.2);
+    g.gain.setValueAtTime(0.2, now);
+    g.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(now + 0.3);
+};
 let currentTTSWord = "";
 const playTTS = () => {
     if (!currentTTSWord) return;
@@ -407,7 +422,22 @@ class MainScene extends Phaser.Scene {
                 const r = t.a + t.b * t.theta;
                 t.x = t.spawnX + r * Math.cos(t.theta);
                 t.y = t.spawnY + r * Math.sin(t.theta);
-                t.rotation += 0.2;
+
+                if (t.fireballs) {
+                    t.fireballs.forEach(fb => {
+                        if (!fb.active) return;
+                        fb.orbitAngle += fb.orbitSpeed;
+                        fb.x = t.x + Math.cos(fb.orbitAngle) * fb.orbitRadius;
+                        fb.y = t.y + Math.sin(fb.orbitAngle) * fb.orbitRadius;
+                        fb.rotation += 0.1;
+
+                        // Fire trail
+                        if (this.gameTime % 2 === 0) {
+                            const trail = this.add.text(fb.x, fb.y, '🔥', { fontSize: '20px' }).setOrigin(0.5).setAlpha(0.5);
+                            this.time.delayedCall(250, () => trail.destroy());
+                        }
+                    });
+                }
             });
         }
     }
@@ -976,21 +1006,23 @@ class MainScene extends Phaser.Scene {
                 y: '-=10', // Float up slightly
                 duration: 500,
                 onComplete: () => {
-                    const val = enemy.isBoss ? 50 : 5;
-                    const type = enemy.isBoss ? 'chest' : 'xp';
-                    if (type === 'xp') {
+                    if (enemy.isBoss) {
+                        for (let i = 0; i < 5; i++) {
+                            const offsetX = (Math.random() - 0.5) * 40;
+                            const offsetY = (Math.random() - 0.5) * 40;
+                            const g = this.add.circle(enemy.x + offsetX, enemy.y + offsetY, 6, 0x00ff88);
+                            this.physics.add.existing(g);
+                            g.val = 10; g.type = 'xp';
+                            this.gems.add(g);
+                        }
+                    } else {
                         const g = this.add.circle(enemy.x, enemy.y, 6, 0x00ff88);
                         this.physics.add.existing(g);
-                        g.val = val; g.type = 'xp';
-                        this.gems.add(g);
-                        this.killCount++;
-                    } else {
-                        const g = this.add.text(enemy.x, enemy.y, '🎁', { fontSize: '30px' }).setOrigin(0.5);
-                        this.physics.add.existing(g);
-                        g.val = val; g.type = 'chest';
+                        g.val = 5; g.type = 'xp';
                         this.gems.add(g);
                     }
-                    if (type === 'xp' && Math.random() < 0.01) {
+                    this.killCount++;
+                    if (!enemy.isBoss && Math.random() < 0.01) {
                         this.spawnLootbox(enemy.x, enemy.y);
                     }
                     updateDOMHUD(this.playerStats, Math.floor(this.accumulatedTime / 1000), this.killCount);
@@ -1016,7 +1048,8 @@ class MainScene extends Phaser.Scene {
         container.add([bg, icon]);
 
         this.physics.add.existing(container);
-        container.body.setCircle(25);
+        container.body.setSize(50, 50);
+        container.body.setOffset(-25, -25);
         container.reward = choice;
         this.lootboxes.add(container);
 
@@ -1031,29 +1064,66 @@ class MainScene extends Phaser.Scene {
     }
 
     handleLootboxPickup(player, box) {
+        if (box.collected) return;
+        box.collected = true;
+
         const reward = box.reward;
-        if (reward.type === 'weapon') {
-            this.applyReward(reward);
-        } else {
-            if (reward.id === 'heart') {
-                this.playerStats.hp = Math.min(this.playerStats.maxHp, this.playerStats.hp + 30);
-            } else if (reward.id === 'vortex') {
-                this.gems.getChildren().forEach(gem => {
-                    if (gem.type === 'xp') gem.vortexed = true;
-                });
-            } else if (reward.id === 'tornado') {
-                this.spawnTornado();
-            }
-        }
+        const iconStr = reward.icon || reward.emoji;
+
+        synthLootbox();
+
+        // Visual orbit animation before activation
+        const flyingIcon = this.add.text(box.x, box.y, iconStr, { fontSize: '30px' }).setOrigin(0.5);
         box.destroy();
-        synthGem();
-        updateDOMHUD(this.playerStats, Math.floor(this.accumulatedTime / 1000), this.killCount);
+
+        let orbitAngle = 0;
+        this.tweens.addCounter({
+            from: 0,
+            to: 1,
+            duration: 800,
+            onUpdate: (tween) => {
+                const t = tween.getValue();
+                orbitAngle += 0.25;
+                const radius = 60 * (1 - t * 0.4);
+
+                flyingIcon.x = this.player.x + Math.cos(orbitAngle) * radius;
+                flyingIcon.y = this.player.y + Math.sin(orbitAngle) * radius;
+                flyingIcon.rotation += 0.15;
+
+                if (t > 0.6) {
+                    const snapT = (t - 0.6) / 0.4;
+                    flyingIcon.x = Phaser.Math.Linear(flyingIcon.x, this.player.x, snapT);
+                    flyingIcon.y = Phaser.Math.Linear(flyingIcon.y, this.player.y, snapT);
+                    flyingIcon.scale = 1.2 * (1 - snapT);
+                }
+            },
+            onComplete: () => {
+                flyingIcon.destroy();
+
+                // Bonus triggers EXACTLY when icon flies into player
+                if (reward.type === 'weapon') {
+                    this.applyReward(reward);
+                } else {
+                    if (reward.id === 'heart') {
+                        this.playerStats.hp = Math.min(this.playerStats.maxHp, this.playerStats.hp + 30);
+                    } else if (reward.id === 'vortex') {
+                        this.gems.getChildren().forEach(gem => {
+                            if (gem.type === 'xp') gem.vortexed = true;
+                        });
+                    } else if (reward.id === 'tornado') {
+                        this.spawnTornado();
+                    }
+                }
+                updateDOMHUD(this.playerStats, Math.floor(this.accumulatedTime / 1000), this.killCount);
+                synthGem(); // Secondary snap sound
+            }
+        });
     }
 
     spawnTornado() {
-        const tornado = this.add.text(this.player.x, this.player.y, '🌪️', { fontSize: '150px' }).setOrigin(0.5);
+        // Invisible center for the spiral movement
+        const tornado = this.add.circle(this.player.x, this.player.y, 5, 0xffffff, 0);
         this.physics.add.existing(tornado);
-        tornado.body.setCircle(60);
         this.tornados.add(tornado);
 
         tornado.theta = 0;
@@ -1061,11 +1131,26 @@ class MainScene extends Phaser.Scene {
         tornado.spawnY = this.player.y;
         tornado.a = 50;  // Initial offset
         tornado.b = 8;   // Spiral expansion rate
+        tornado.fireballs = [];
+
+        // Create a swirling mass of fireballs
+        for (let i = 0; i < 12; i++) {
+            const fb = this.add.text(this.player.x, this.player.y, '🔥', { fontSize: '40px' }).setOrigin(0.5);
+            this.physics.add.existing(fb);
+            fb.body.setCircle(15);
+            this.tornados.add(fb);
+
+            fb.orbitRadius = Phaser.Math.Between(20, 70);
+            fb.orbitSpeed = Phaser.Math.FloatBetween(0.1, 0.2);
+            fb.orbitAngle = (i / 12) * Math.PI * 2;
+            tornado.fireballs.push(fb);
+        }
 
         if (!this.activeTornados) this.activeTornados = [];
         this.activeTornados.push(tornado);
 
         this.time.delayedCall(5000, () => {
+            if (tornado.fireballs) tornado.fireballs.forEach(f => { if (f.active) f.destroy(); });
             tornado.destroy();
         });
     }
@@ -1593,10 +1678,15 @@ function startSpellingGame() {
 
     const totalChars = word.length;
     // Always use ALL letters - no level-based scaling
-    let missingCount = totalChars;
-    const indices = Array.from({ length: totalChars }, (_, i) => i);
-    indices.sort(() => 0.5 - Math.random());
-    const missingIndices = indices.slice(0, missingCount);
+    // But spaces should be pre-filled
+    const indices = [];
+    for (let i = 0; i < totalChars; i++) {
+        if (word[i] !== ' ') {
+            indices.push(i);
+        }
+    }
+    const missingIndices = [...indices]; // All non-space characters are missing
+    let missingCount = missingIndices.length;
 
     let template = [];
     let missingChars = [];
@@ -1672,7 +1762,8 @@ function updateSpellingDisplay() {
                 displayHtml += "_";
             }
         } else {
-            displayHtml += char;
+            // Show literal characters like spaces
+            displayHtml += char === ' ' ? '&nbsp;' : char;
         }
     });
     document.getElementById('spelling-input-display').innerHTML = displayHtml;
@@ -2009,3 +2100,31 @@ document.getElementById('sentence-container').addEventListener('click', (e) => {
 
 // Initialize menus on load
 window.addEventListener('DOMContentLoaded', initMenus);
+
+// --- KEYBOARD SUPPORT FOR MINIGAMES ---
+window.addEventListener('keydown', (e) => {
+    // Check if Study Mode is active - if so, let it handle the keyboard
+    if (typeof STUDY_STATE !== 'undefined' && STUDY_STATE.active) return;
+
+    // Check if Spelling Minigame is active
+    const spellingGameEl = document.getElementById('spellingGame');
+    if (spellingGameEl && !spellingGameEl.classList.contains('hidden')) {
+        handleGameSpellingKeyDown(e.key);
+    }
+});
+
+function handleGameSpellingKeyDown(key) {
+    if (key === 'Enter') {
+        checkSpelling();
+    } else if (key === 'Backspace') {
+        clearSpelling();
+    } else if (key.length === 1 && key.match(/[a-z0-9]/i)) {
+        const bubbles = document.querySelectorAll('.letter-bubble');
+        for (let bubble of bubbles) {
+            if (bubble.innerText.toLowerCase() === key.toLowerCase() && bubble.style.visibility !== 'hidden') {
+                handleSpellingInput(bubble.innerText, bubble);
+                break;
+            }
+        }
+    }
+}

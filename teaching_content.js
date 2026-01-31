@@ -1180,5 +1180,187 @@ const AVAILABLE_CONTENT = {
     }
 };
 
+/**
+ * Spaced Repetition Logic Helpers
+ */
 
+/**
+ * Returns a sorted array of all pages in a book: [{unit, page}, ...]
+ * Based on the order in AVAILABLE_CONTENT.
+ */
+function getSortedPagesForBook(book) {
+    if (!AVAILABLE_CONTENT[book]) return [];
+    const sorted = [];
+    const units = Object.keys(AVAILABLE_CONTENT[book]).sort((a, b) => parseInt(a) - parseInt(b));
+    let absIndex = 0;
+    units.forEach(unit => {
+        const pages = AVAILABLE_CONTENT[book][unit].sort((a, b) => parseInt(a) - parseInt(b));
+        pages.forEach(page => {
+            sorted.push({ unit, page: page.toString(), absIndex: absIndex++ });
+        });
+    });
+    return sorted;
+}
 
+/**
+ * Weighted random selection from an array of indices.
+ * weights: array of numbers corresponding to items.
+ */
+function getWeightedRandomIndex(weights) {
+    const totalWeight = weights.reduce((a, b) => a + b, 0);
+    let random = Math.random() * totalWeight;
+    for (let i = 0; i < weights.length; i++) {
+        if (random < weights[i]) return i;
+        random -= weights[i];
+    }
+    return weights.length - 1;
+}
+
+/**
+ * Picks N unique items from a pool of pages.
+ * if useWeights is true, it uses linear weighting based on proximity to activePageIndex.
+ * pages: array of {unit, page, absIndex} objects
+ */
+function pickUniqueItems(book, pages, count, type, activePageIndex, useWeights = false) {
+    const allItems = [];
+    pages.forEach((p) => {
+        const content = TEACHING_CONTENT[book] && TEACHING_CONTENT[book][p.unit] && TEACHING_CONTENT[book][p.unit][p.page];
+        if (content && content[type]) {
+            const items = content[type];
+            items.forEach(item => {
+                allItems.push({ item, pageIndex: p.absIndex });
+            });
+        }
+    });
+
+    if (allItems.length === 0) return [];
+
+    const selected = [];
+    const pool = [...allItems];
+
+    for (let i = 0; i < count && pool.length > 0; i++) {
+        let index;
+        if (useWeights) {
+            // Weights based on distance to activePageIndex
+            // Weight = 1 / (distance + 1)
+            // or even steeper: 1 / Math.pow(distance + 1, 2)
+            const weights = pool.map(entry => {
+                const distance = Math.abs(entry.pageIndex - activePageIndex);
+                return 1 / Math.pow(distance + 1, 2);
+            });
+            index = getWeightedRandomIndex(weights);
+        } else {
+            index = Math.floor(Math.random() * pool.length);
+        }
+        selected.push(pool[index].item);
+        pool.splice(index, 1);
+    }
+
+    return selected;
+}
+
+/**
+ * Main function to get content based on Spaced Repetition logic.
+ */
+function getSpacedRepetitionContent(book, unit, page, type, isStudyMode) {
+    const sortedPages = getSortedPagesForBook(book);
+    const activePageIndex = sortedPages.findIndex(p => p.unit === unit && p.page === page.toString());
+
+    if (activePageIndex === -1) {
+        // Fallback to current page only if not found
+        const content = TEACHING_CONTENT[book] && TEACHING_CONTENT[book][unit] && TEACHING_CONTENT[book][unit][page];
+        return content ? (content[type] || []) : [];
+    }
+
+    if (isStudyMode) {
+        // Study Mode: 3 from Recent, 2 from Review
+        // Recent Pool: current page (activePageIndex) and the page immediately preceding it.
+        const recentPageIndices = [activePageIndex];
+        if (activePageIndex > 0) recentPageIndices.push(activePageIndex - 1);
+
+        const recentPages = recentPageIndices.map(idx => sortedPages[idx]);
+        let recentItems = pickUniqueItems(book, recentPages, 3, type, activePageIndex, false);
+
+        // Review Pool: all other previous pages
+        const reviewPageIndices = [];
+        for (let i = 0; i < activePageIndex - 1; i++) {
+            reviewPageIndices.push(i);
+        }
+
+        if (reviewPageIndices.length === 0) {
+            // Edge case: no review pages, pull more from recent if possible
+            if (recentItems.length < 5) {
+                const moreRecent = pickUniqueItems(book, recentPages, 5 - recentItems.length, type, activePageIndex, false);
+                // Filter duplicates
+                moreRecent.forEach(item => {
+                    if (!recentItems.includes(item)) recentItems.push(item);
+                });
+            }
+            return recentItems.slice(0, 5);
+        }
+
+        const reviewPages = reviewPageIndices.map(idx => sortedPages[idx]);
+        // Weight review pages based on index (closer to current = higher weight)
+        const reviewItems = pickUniqueItems(book, reviewPages, 2, type, activePageIndex, true);
+
+        // Combine and ensure no duplicates
+        const finalSet = [...recentItems];
+        reviewItems.forEach(item => {
+            if (finalSet.length < 5 && !finalSet.includes(item)) {
+                finalSet.push(item);
+            }
+        });
+
+        // If still not enough, fill from recent again (avoiding dupes)
+        if (finalSet.length < 5) {
+            const allRecent = pickUniqueItems(book, recentPages, 10, type, activePageIndex, false);
+            allRecent.forEach(item => {
+                if (finalSet.length < 5 && !finalSet.includes(item)) finalSet.push(item);
+            });
+        }
+
+        return finalSet;
+    } else {
+        // Game Mode: Weighted selection starting at current page
+        const gamePageIndices = [];
+        for (let i = activePageIndex; i < sortedPages.length; i++) {
+            gamePageIndices.push(i);
+        }
+        const gamePages = gamePageIndices.map(idx => sortedPages[idx]);
+        // We return ALL items but we need to pass weights or handle probability during pick.
+        // For game mode, the requirement says "Use the same weighted probability system... for all items used during game mode".
+        // This means when the game needs A word, it should pick one weighted.
+        // However, game.js currently works with a flattened array.
+        // Let's provide a function that returns a pool, or just let game.js pick items one by one.
+        // Actually, let's keep it simple: return a larger pool (e.g. 50 items) that is pre-weighted by frequency?
+        // NO, better to modify game.js to call a "getRandomWeightedItem" function.
+
+        // Strategy: loadContent in game.js will store the sortedPages and activePageIndex,
+        // and then startXXGame will call a helper to pick ONE item.
+        return gamePages; // Return the metadata so game.js can handle it
+    }
+}
+
+/**
+ * Picks a single item for Game Mode based on weighted probability.
+ */
+function getWeightedItemForGame(book, unit, page, type) {
+    const sortedPages = getSortedPagesForBook(book);
+    const activePageIndex = sortedPages.findIndex(p => p.unit === unit && p.page === page.toString());
+
+    if (activePageIndex === -1) {
+        const content = TEACHING_CONTENT[book] && TEACHING_CONTENT[book][unit] && TEACHING_CONTENT[book][unit][page];
+        const items = content ? (content[type] || []) : [];
+        return items[Math.floor(Math.random() * items.length)];
+    }
+
+    const gamePageIndices = [];
+    for (let i = activePageIndex; i < sortedPages.length; i++) {
+        gamePageIndices.push(i);
+    }
+    const gamePages = gamePageIndices.map(idx => sortedPages[idx]);
+
+    // Use pickUniqueItems with count=1 and useWeights=true
+    const items = pickUniqueItems(book, gamePages, 1, type, activePageIndex, true);
+    return items[0];
+}

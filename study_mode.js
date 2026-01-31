@@ -13,27 +13,31 @@ const STUDY_STATE = {
 
 // Entry point
 function initStudyMode() {
-    if (SPELLING_WORDS.length < 5 || GRAMMAR_SENTENCES.length < 5) {
-        alert("Not enough content for Study Mode! Need at least 5 words and 5 sentences.");
-        return;
+    // Determine book/unit/page from current selection
+    let book = "PU1", unit = "0", page = "4";
+    if (typeof selectedDay !== 'undefined' && typeof selectedTime !== 'undefined' && CLASS_CONFIG[selectedDay] && CLASS_CONFIG[selectedDay][selectedTime]) {
+        const config = CLASS_CONFIG[selectedDay][selectedTime].content;
+        book = config.book;
+        unit = config.unit;
+        page = config.page;
+    }
+
+    // Get Spaced Repetition Content
+    const SR_WORDS = getSpacedRepetitionContent(book, unit, page, 'vocab', true);
+    const SR_SENTENCES = getSpacedRepetitionContent(book, unit, page, 'sentences', true);
+
+    if (SR_WORDS.length < 5 || SR_SENTENCES.length < 5) {
+        alert("Not enough content for Study Mode! Need at least 5 words and 5 sentences from current and previous pages.");
+        if (SR_WORDS.length === 0 || SR_SENTENCES.length === 0) return;
     }
 
     STUDY_STATE.active = true;
     STUDY_STATE.startTime = Date.now();
     STUDY_STATE.round = 'A';
 
-    // Pick 5 random unique words
-    const shuffledWords = [...SPELLING_WORDS].sort(() => 0.5 - Math.random());
-    STUDY_STATE.words = [...new Set(shuffledWords)].slice(0, 5); // Ensure uniqueness if possible, though SPELLING_WORDS might have dupes?
-    // If set reduces size < 5, we might need more logic, but assuming enough content.
-    if (STUDY_STATE.words.length < 5) {
-        // Fallback if duplicates reduced count
-        STUDY_STATE.words = shuffledWords.slice(0, 5);
-    }
-
-    // Pick 5 random unique sentences
-    const shuffledSentences = [...GRAMMAR_SENTENCES].sort(() => 0.5 - Math.random());
-    STUDY_STATE.sentences = shuffledSentences.slice(0, 5);
+    // Pick exactly 5 (SR logic already tries to do this, but let's be sure)
+    STUDY_STATE.words = SR_WORDS.slice(0, 5);
+    STUDY_STATE.sentences = SR_SENTENCES.slice(0, 5);
 
     // Hide Start Screen
     document.getElementById('startScreen').classList.add('hidden');

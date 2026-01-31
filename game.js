@@ -1292,28 +1292,45 @@ function loadContent() {
 
     const { book, unit, page } = classData.content;
 
-    // Default to empty/placeholders
+    // Default to empty
     SPELLING_WORDS = [];
     SIGHT_WORDS = [];
     GRAMMAR_SENTENCES = [];
 
-    // Access new structure: Book > Unit > Page
-    const pageContent = TEACHING_CONTENT[book] &&
-        TEACHING_CONTENT[book][unit] &&
-        TEACHING_CONTENT[book][unit][page];
+    // Use Spaced Repetition logic to get all available items up to current page
+    const sortedPages = getSortedPagesForBook(book);
+    const activePageIndex = sortedPages.findIndex(p => p.unit === unit && p.page === page.toString());
 
-    if (pageContent) {
-        // Both spelling and word rec use vocab
-        SPELLING_WORDS = pageContent.vocab || [];
-        // Format vocab for sight words (keep array wrapping as legacy support)
-        SIGHT_WORDS = (pageContent.vocab || []).map(w => [w]);
-        GRAMMAR_SENTENCES = pageContent.sentences || [];
-    } else {
-        // Placeholders if content missing
+    // We populate the global arrays with ALL eligible items (current + future)
+    // The specific weighted selection will happen during minigame start
+    const unitsToLoad = sortedPages.slice(activePageIndex);
+
+    unitsToLoad.forEach(p => {
+        const content = TEACHING_CONTENT[book] && TEACHING_CONTENT[book][p.unit] && TEACHING_CONTENT[book][p.unit][p.page];
+        if (content) {
+            if (content.vocab) {
+                content.vocab.forEach(w => {
+                    if (!SPELLING_WORDS.includes(w)) SPELLING_WORDS.push(w);
+                });
+            }
+            if (content.sentences) {
+                content.sentences.forEach(s => {
+                    // Avoid dupes if necessary, though sentences might be unique across pages usually
+                    GRAMMAR_SENTENCES.push(s);
+                });
+            }
+        }
+    });
+
+    // Format SIGHT_WORDS (legacy legacy...)
+    SIGHT_WORDS = SPELLING_WORDS.map(w => [w]);
+
+    if (SPELLING_WORDS.length === 0) {
+        // Final fallback if absolutely nothing found
         const prefix = `${book} U${unit} P${page}`;
-        SPELLING_WORDS = [`${prefix} Word1`, `${prefix} Word2`];
-        SIGHT_WORDS = [[`${prefix} Word1`], [`${prefix} Word2`]];
-        GRAMMAR_SENTENCES = [`${prefix} Sentence 1.`, `${prefix} Sentence 2.`];
+        SPELLING_WORDS = [`${prefix} Word1`];
+        SIGHT_WORDS = [[`${prefix} Word1`]];
+        GRAMMAR_SENTENCES = [`${prefix} Sentence 1.`];
     }
 }
 
@@ -1322,7 +1339,10 @@ function loadContent() {
 function startSpellingGame() {
     const level = game.scene.getScene('MainScene').playerStats.level;
     if (SPELLING_WORDS.length === 0) { handleMinigameSuccess('spelling'); return; }
-    const word = SPELLING_WORDS[Math.floor(Math.random() * SPELLING_WORDS.length)];
+
+    // Weighted selection
+    const { book, unit, page } = CLASS_CONFIG[selectedDay][selectedTime].content;
+    const word = getWeightedItemForGame(book, unit, page, 'vocab');
     currentTTSWord = word;
 
     const totalChars = word.length;
@@ -1446,9 +1466,11 @@ let recTimeLeft;
 
 function startWordRecGame() {
     if (SIGHT_WORDS.length === 0) { handleMinigameSuccess('rec'); return; }
-    const pair = SIGHT_WORDS[Math.floor(Math.random() * SIGHT_WORDS.length)];
-    currentTTSWord = pair[0];
-    const target = pair[0];
+
+    const { book, unit, page } = CLASS_CONFIG[selectedDay][selectedTime].content;
+    const target = getWeightedItemForGame(book, unit, page, 'vocab');
+
+    currentTTSWord = target;
     const level = game.scene.getScene('MainScene').playerStats.level;
 
     // Always show 5 words - no level-based scaling
@@ -1515,8 +1537,8 @@ function checkWordRec(selected, target, btn) {
 function startGrammarGame() {
     if (GRAMMAR_SENTENCES.length === 0) { handleMinigameSuccess('grammar'); return; }
 
-    // Handle multiple valid variations
-    const rawEntry = GRAMMAR_SENTENCES[Math.floor(Math.random() * GRAMMAR_SENTENCES.length)];
+    const { book, unit, page } = CLASS_CONFIG[selectedDay][selectedTime].content;
+    const rawEntry = getWeightedItemForGame(book, unit, page, 'sentences');
     let possibilities = [];
     let primarySentence = "";
 

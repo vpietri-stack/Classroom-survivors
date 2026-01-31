@@ -100,8 +100,7 @@ const POWER_UPS = [
     { id: 'water', name: "Santa Water", icon: "💧", type: "weapon", desc: "Drops damaging puddle" },
     { id: 'knife', name: "Knife", icon: "🔪", type: "weapon", desc: "Fires in facing direction" },
     { id: 'speed', name: "Swiftness", icon: "👟", type: "stat", desc: "+10% Move Speed" },
-    { id: 'might', name: "Spinach", icon: "🥬", type: "stat", desc: "+10% Damage" },
-    { id: 'recover', name: "Heart", icon: "❤️", type: "heal", desc: "Heal 30 HP" }
+    { id: 'might', name: "Spinach", icon: "🥬", type: "stat", desc: "+10% Damage" }
 ];
 
 // --- PHASER CONFIG ---
@@ -197,6 +196,8 @@ class MainScene extends Phaser.Scene {
         this.enemies = this.physics.add.group();
         this.bullets = this.physics.add.group();
         this.gems = this.physics.add.group();
+        this.lootboxes = this.physics.add.group();
+        this.tornados = this.physics.add.group();
         this.obstacles = this.physics.add.staticGroup();
 
         // Player
@@ -279,6 +280,8 @@ class MainScene extends Phaser.Scene {
         this.physics.add.overlap(this.player, this.enemies, this.handlePlayerHit, null, this);
         this.physics.add.collider(this.player, this.obstacles);
         this.physics.add.collider(this.enemies, this.obstacles, null, (e, o) => !e.isBat, this);
+        this.physics.add.overlap(this.player, this.lootboxes, this.handleLootboxPickup, null, this);
+        this.physics.add.overlap(this.tornados, this.enemies, (t, e) => this.damageEnemy(e, 999), null, this);
 
         this.applyReward({ id: 'wand', name: 'Spirit Wand', type: 'weapon' });
         updateDOMHUD(this.playerStats, 0, 0);
@@ -370,6 +373,18 @@ class MainScene extends Phaser.Scene {
         if (this.nextSwarmTime <= 0) {
             this.spawnBatSwarm();
             this.nextSwarmTime = Phaser.Math.Between(3000, 4200); // ~1 minute roughly
+        }
+
+        // Move Tornados
+        if (this.activeTornados) {
+            this.activeTornados = this.activeTornados.filter(t => t.active);
+            this.activeTornados.forEach(t => {
+                t.theta += 0.08;
+                const r = t.a + t.b * t.theta;
+                t.x = t.spawnX + r * Math.cos(t.theta);
+                t.y = t.spawnY + r * Math.sin(t.theta);
+                t.rotation += 0.2;
+            });
         }
     }
 
@@ -948,6 +963,9 @@ class MainScene extends Phaser.Scene {
                         g.val = val; g.type = 'chest';
                         this.gems.add(g);
                     }
+                    if (type === 'xp' && Math.random() < 0.01) {
+                        this.spawnLootbox(enemy.x, enemy.y);
+                    }
                     updateDOMHUD(this.playerStats, Math.floor(this.accumulatedTime / 1000), this.killCount);
                     enemy.destroy();
                 }
@@ -955,10 +973,80 @@ class MainScene extends Phaser.Scene {
         }
     }
 
+    spawnLootbox(x, y) {
+        const weapons = POWER_UPS.filter(p => p.type === 'weapon');
+        const specials = [
+            { id: 'heart', icon: '❤️', type: 'special' },
+            { id: 'vortex', icon: '🌀', type: 'special' },
+            { id: 'tornado', icon: '🌪️', type: 'special' }
+        ];
+        const choices = [...weapons, ...specials];
+        const choice = Phaser.Math.RND.pick(choices);
+
+        const container = this.add.container(x, y);
+        const bg = this.add.rectangle(0, 0, 50, 50, 0xffd700).setAlpha(0.8);
+        const icon = this.add.text(0, 0, choice.icon || choice.emoji, { fontSize: '30px' }).setOrigin(0.5);
+        container.add([bg, icon]);
+
+        this.physics.add.existing(container);
+        container.body.setCircle(25);
+        container.reward = choice;
+        this.lootboxes.add(container);
+
+        // Flashing gold square
+        this.tweens.add({
+            targets: bg,
+            alpha: 0.3,
+            duration: 300,
+            yoyo: true,
+            repeat: -1
+        });
+    }
+
+    handleLootboxPickup(player, box) {
+        const reward = box.reward;
+        if (reward.type === 'weapon') {
+            this.applyReward(reward);
+        } else {
+            if (reward.id === 'heart') {
+                this.playerStats.hp = Math.min(this.playerStats.maxHp, this.playerStats.hp + 30);
+            } else if (reward.id === 'vortex') {
+                this.gems.getChildren().forEach(gem => {
+                    if (gem.type === 'xp') gem.vortexed = true;
+                });
+            } else if (reward.id === 'tornado') {
+                this.spawnTornado();
+            }
+        }
+        box.destroy();
+        synthGem();
+        updateDOMHUD(this.playerStats, Math.floor(this.accumulatedTime / 1000), this.killCount);
+    }
+
+    spawnTornado() {
+        const tornado = this.add.text(this.player.x, this.player.y, '🌪️', { fontSize: '150px' }).setOrigin(0.5);
+        this.physics.add.existing(tornado);
+        tornado.body.setCircle(60);
+        this.tornados.add(tornado);
+
+        tornado.theta = 0;
+        tornado.spawnX = this.player.x;
+        tornado.spawnY = this.player.y;
+        tornado.a = 50;  // Initial offset
+        tornado.b = 8;   // Spiral expansion rate
+
+        if (!this.activeTornados) this.activeTornados = [];
+        this.activeTornados.push(tornado);
+
+        this.time.delayedCall(5000, () => {
+            tornado.destroy();
+        });
+    }
+
     updateGems() {
         this.gems.getChildren().forEach(g => {
             const d = Phaser.Math.Distance.Between(this.player.x, this.player.y, g.x, g.y);
-            if (d < 150) this.physics.moveToObject(g, this.player, 400);
+            if (d < 150 || g.vortexed) this.physics.moveToObject(g, this.player, 600);
             if (d < 30) {
                 synthGem();
                 if (g.type === 'chest') this.triggerTreasureEvent();

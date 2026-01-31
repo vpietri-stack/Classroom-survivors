@@ -143,6 +143,7 @@ class MainScene extends Phaser.Scene {
         this.accumulatedTime = 0;
         this.spawnTimer = 0;
         this.killCount = 0;
+        this.nextSwarmTime = Phaser.Math.Between(30 * 60, 90 * 60); // ~1 minute average
 
         this.playerStats = {
             hp: 100, maxHp: 100,
@@ -274,10 +275,10 @@ class MainScene extends Phaser.Scene {
             }
             g.destroy();
         });
-        this.physics.add.collider(this.enemies, this.enemies);
-        this.physics.add.collider(this.player, this.enemies, this.handlePlayerHit, null, this);
+        this.physics.add.collider(this.enemies, this.enemies, null, (e1, e2) => !e1.isBat && !e2.isBat, this);
+        this.physics.add.overlap(this.player, this.enemies, this.handlePlayerHit, null, this);
         this.physics.add.collider(this.player, this.obstacles);
-        this.physics.add.collider(this.enemies, this.obstacles);
+        this.physics.add.collider(this.enemies, this.obstacles, null, (e, o) => !e.isBat, this);
 
         this.applyReward({ id: 'wand', name: 'Spirit Wand', type: 'weapon' });
         updateDOMHUD(this.playerStats, 0, 0);
@@ -293,7 +294,7 @@ class MainScene extends Phaser.Scene {
 
         // Player Move
         let dx = 0, dy = 0;
-        const speed = 200 * this.playerStats.speed;
+        const speed = 80 * this.playerStats.speed;
         if (this.cursors.left.isDown || this.wasd.a.isDown) dx = -1;
         else if (this.cursors.right.isDown || this.wasd.d.isDown) dx = 1;
         if (this.cursors.up.isDown || this.wasd.w.isDown) dy = -1;
@@ -317,9 +318,12 @@ class MainScene extends Phaser.Scene {
 
         if (this.invulnTimer > 0) {
             this.invulnTimer--;
-            this.player.alpha = this.invulnTimer % 10 < 5 ? 0.5 : 1;
+            const isFlashing = this.invulnTimer % 10 < 5;
+            this.player.alpha = isFlashing ? 0.6 : 1;
+            this.player.setTint(isFlashing ? 0xff0000 : 0xffffff);
         } else {
             this.player.alpha = 1;
+            this.player.clearTint();
         }
         if (dx < 0) this.player.setScale(-1, 1);
         if (dx > 0) this.player.setScale(1, 1);
@@ -336,8 +340,10 @@ class MainScene extends Phaser.Scene {
         }
 
         this.spawnTimer++;
-        // Spawn faster: base 40 frames delay, decreasing. Min 2 frames delay.
-        if (this.spawnTimer > Math.max(2, 40 - (this.playerStats.level * 2))) {
+        const playSeconds = (this.accumulatedTime + totalMinigameTimeMs) / 1000;
+        // Start way higher (12 frames) and scale linearly. No aggressive jump for spawn rate.
+        const spawnDelay = Math.max(2, 12 - (playSeconds / 45));
+        if (this.spawnTimer > spawnDelay) {
             this.spawnEnemy();
             this.spawnTimer = 0;
         }
@@ -357,6 +363,13 @@ class MainScene extends Phaser.Scene {
         }
         if (this.gameTime % 120 === 0) {
             this.cleanupDistantObstacles();
+        }
+
+        // Random Bat Swarms
+        this.nextSwarmTime--;
+        if (this.nextSwarmTime <= 0) {
+            this.spawnBatSwarm();
+            this.nextSwarmTime = Phaser.Math.Between(3000, 4200); // ~1 minute roughly
         }
     }
 
@@ -379,16 +392,19 @@ class MainScene extends Phaser.Scene {
         const ey = this.player.y + Math.sin(angle) * dist;
 
         const type = Math.floor(this.gameTime / 1800) % 3;
-        let sprite = type === 1 ? '🦇' : (type === 2 ? '🧟' : '👾');
+        const isBat = type === 1;
+        let sprite = isBat ? '🦇' : (type === 2 ? '🧟' : '👾');
 
+        const difficulty = this.getDifficulty();
         // Weaker HP, but higher spawn rate handled in update
-        const hp = 2 + (this.playerStats.level * 1);
-        const speed = (50 + (Math.random() * 30) + (this.playerStats.level * 2));
+        const hp = 2 + (difficulty * 1);
+        const speed = (17 + (Math.random() * 10) + (difficulty * 0.7));
 
         const enemy = this.add.text(ex, ey, sprite, { fontSize: '25px', padding: { top: 5 } }).setOrigin(0.5);
         this.physics.add.existing(enemy);
         enemy.body.setCircle(10); // Smaller collider
         enemy.hp = hp; enemy.maxHp = hp; enemy.speed = speed; enemy.isBoss = false;
+        enemy.isBat = isBat;
         enemy.stunTimer = 0;
         this.enemies.add(enemy);
     }
@@ -397,8 +413,9 @@ class MainScene extends Phaser.Scene {
         const boss = this.add.text(this.player.x, this.player.y - 600, '👹', { fontSize: '80px', padding: { top: 20 } }).setOrigin(0.5);
         this.physics.add.existing(boss);
         boss.body.setCircle(35);
-        boss.hp = 300 + (this.playerStats.level * 50);
-        boss.speed = 100;
+        const difficulty = this.getDifficulty();
+        boss.hp = 300 + (difficulty * 50);
+        boss.speed = 33 + (difficulty * 0.5);
         boss.isBoss = true;
         boss.stunTimer = 0;
         this.enemies.add(boss);
@@ -413,9 +430,10 @@ class MainScene extends Phaser.Scene {
             const ex = this.player.x + Math.cos(angle) * radius;
             const ey = this.player.y + Math.sin(angle) * radius;
 
+            const difficulty = this.getDifficulty();
             const sprite = '🧟';
-            const hp = 2 + (this.playerStats.level * 1);
-            const speed = 80 + (this.playerStats.level * 1); // Slightly faster charge?
+            const hp = 2 + (difficulty * 1);
+            const speed = 27 + (difficulty * 0.3); // Slightly faster charge?
 
             const enemy = this.add.text(ex, ey, sprite, { fontSize: '25px', padding: { top: 5 } }).setOrigin(0.5);
             this.physics.add.existing(enemy);
@@ -427,19 +445,19 @@ class MainScene extends Phaser.Scene {
     }
 
     spawnObstacles() {
-        // Initial batch around player start
-        for (let i = 0; i < 80; i++) {
+        // Initial batch around player start (reduced from 80)
+        for (let i = 0; i < 30; i++) {
             this.spawnSingleObstacle(Phaser.Math.Between(400, 1500));
         }
     }
 
     spawnSingleObstacle(distance = null) {
         const obstacleTypes = [
-            { emoji: '🌲', fontSize: '200px', bodyRad: 20, isTree: true },
-            { emoji: '🌳', fontSize: '200px', bodyRad: 20, isTree: true },
-            { emoji: '🪨', fontSize: '100px', bodyRad: 40 },
-            { emoji: '🌿', fontSize: '100px', bodyRad: 40 },
-            { emoji: '🛖', fontSize: '300px', bodyRad: 130 }
+            { emoji: '🌲', fontSize: '100px', bodyRad: 10, isTree: true },
+            { emoji: '🌳', fontSize: '100px', bodyRad: 10, isTree: true },
+            { emoji: '🪨', fontSize: '50px', bodyRad: 20 },
+            { emoji: '🌿', fontSize: '50px', bodyRad: 20 },
+            { emoji: '🛖', fontSize: '150px', bodyRad: 65 }
         ];
 
         const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
@@ -457,9 +475,9 @@ class MainScene extends Phaser.Scene {
         if (Math.random() < 0.15) {
             const pond = this.add.graphics();
             pond.fillStyle(0x355e3b, 0.8); // Swampish Green
-            pond.fillEllipse(x, y, 160, 100);
+            pond.fillEllipse(x, y, 80, 50);
 
-            const pondCollider = this.add.zone(x, y, 140, 80);
+            const pondCollider = this.add.zone(x, y, 70, 40);
             this.physics.add.existing(pondCollider, true);
             this.obstacles.add(pondCollider);
             pondCollider.linkedGraphics = pond;
@@ -471,11 +489,68 @@ class MainScene extends Phaser.Scene {
 
             if (type.isTree) {
                 // Offset colliding circle to the bottom (trunk)
-                obs.body.setOffset((obs.width - type.bodyRad * 2) / 2, obs.height - type.bodyRad * 2 - 20);
+                obs.body.setOffset((obs.width - type.bodyRad * 2) / 2, obs.height - type.bodyRad * 2 - 10);
             } else {
                 // Center collision
                 obs.body.setOffset((obs.width - type.bodyRad * 2) / 2, (obs.height - type.bodyRad * 2) / 2);
             }
+        }
+    }
+
+    spawnBatSwarm() {
+        const side = Phaser.Math.Between(0, 3); // 0:L, 1:R, 2:T, 3:B
+        const count = 30 + Math.floor(this.getDifficulty() * 2);
+        const playerSpeed = 80 * this.playerStats.speed;
+        const swarmSpeed = playerSpeed * 4.5;
+        const difficulty = this.getDifficulty();
+        const hp = (2 + (difficulty * 1)) * 0.5;
+
+        for (let i = 0; i < count; i++) {
+            this.time.delayedCall(i * 40, () => {
+                const cam = this.cameras.main;
+                const margin = 40; // Spawns just outside the visible edge
+                let startX, startY;
+
+                // Freshly calculate camera bounds for each bat so they follow player movement
+                if (side === 0) { // From Left
+                    startX = cam.worldView.left - margin;
+                    startY = cam.worldView.top + Math.random() * cam.worldView.height;
+                } else if (side === 1) { // From Right
+                    startX = cam.worldView.right + margin;
+                    startY = cam.worldView.top + Math.random() * cam.worldView.height;
+                } else if (side === 2) { // From Top
+                    startX = cam.worldView.left + Math.random() * cam.worldView.width;
+                    startY = cam.worldView.top - margin;
+                } else { // From Bottom
+                    startX = cam.worldView.left + Math.random() * cam.worldView.width;
+                    startY = cam.worldView.bottom + margin;
+                }
+
+                const ox = (Math.random() - 0.5) * 60;
+                const oy = (Math.random() - 0.5) * 60;
+                const bat = this.add.text(startX + ox, startY + oy, '🦇', { fontSize: '20px' }).setOrigin(0.5);
+                this.physics.add.existing(bat);
+                bat.body.setCircle(8);
+                bat.hp = hp; bat.maxHp = hp; bat.speed = swarmSpeed;
+                bat.isSwarm = true;
+                bat.isBat = true;
+                this.enemies.add(bat);
+
+                // Target the player's current position to guarantee they sweep through
+                const angle = Phaser.Math.Angle.Between(bat.x, bat.y, this.player.x, this.player.y);
+                const finalAngle = angle + (Math.random() - 0.5) * 0.15; // Tight spread
+
+                bat.body.setVelocity(
+                    Math.cos(finalAngle) * swarmSpeed,
+                    Math.sin(finalAngle) * swarmSpeed
+                );
+
+                // Self-destruct when far away (increased to ensure screen crossing)
+                this.time.addEvent({
+                    delay: 5000,
+                    callback: () => { if (bat.active) bat.destroy(); }
+                });
+            });
         }
     }
 
@@ -489,11 +564,29 @@ class MainScene extends Phaser.Scene {
         });
     }
 
+    getDifficulty() {
+        // playTimeMs is the "play time" (Survival time excluding minigame deductions)
+        // totalMinigameTimeMs is global in game.js
+        const playTimeMs = this.accumulatedTime + totalMinigameTimeMs;
+        const seconds = playTimeMs / 1000;
+
+        // Base scaling: 1 "level" worth of difficulty per 30 seconds
+        let difficulty = seconds / 30;
+
+        if (seconds > 300) {
+            // Aggressive scaling after 5 minutes
+            difficulty += Math.pow((seconds - 300) / 10, 1.2);
+        }
+
+        // Start at minimum difficulty 1
+        return Math.max(1, difficulty);
+    }
+
     updateWeapons() {
         this.enemies.getChildren().forEach(e => {
             if (e.stunTimer > 0) {
                 e.stunTimer--;
-            } else {
+            } else if (!e.isSwarm) {
                 this.physics.moveToObject(e, this.player, e.speed);
             }
         });
@@ -778,10 +871,8 @@ class MainScene extends Phaser.Scene {
         this.playerStats.hp -= 10;
         this.invulnTimer = 60;
 
-        // Knockback Player
-        const angle = Phaser.Math.Angle.Between(enemy.x, enemy.y, player.x, player.y);
-        this.knockbackVelocity.x = Math.cos(angle) * 800;
-        this.knockbackVelocity.y = Math.sin(angle) * 800;
+        // Remove Player Knockback
+        // (Removed lines that set knockbackVelocity)
 
         updateDOMHUD(this.playerStats, Math.floor(this.accumulatedTime / 1000), this.killCount);
         if (this.playerStats.hp <= 0) this.gameOver();
@@ -812,7 +903,9 @@ class MainScene extends Phaser.Scene {
         this.tweens.add({ targets: txt, y: enemy.y - 50, alpha: 0, duration: 500, onComplete: () => txt.destroy() });
 
         if (enemy.hp <= 0) {
-            enemy.body.enable = false; // Disable physics
+            enemy.body.checkCollision.none = true; // No more hitting things
+            enemy.body.setVelocity(enemy.body.velocity.x * 1.5, enemy.body.velocity.y * 1.5); // Boost death slide
+            enemy.body.setDrag(1000); // Slow down gradually
             synthHit();
 
             // Dust Effect (Thanos Snap style)

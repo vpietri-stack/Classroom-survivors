@@ -2093,7 +2093,7 @@ const TEACHING_CONTENT = {
                     { a: "Honey comes ...?", b: "from bees." },
                     { a: "Wool comes ...?", b: "from sheep." },
                     { a: "Do you like chocolate?", b: "Yes, I do. I like chocolate." },
-                    { a: "Do you like poopoo cak?", b: "No, I don't." },
+                    { a: "Do you like poopoo cake?", b: "No, I don't." },
                     { a: "Does your sister like lemonade?", b: "Yes, she does. She likes lemonade." },
                     { a: "Does your sister like peepee lemonade?", b: "No, she doesn't." },
                     { a: "Does your brother like chocolate?", b: "Yes, He does. He likes chocolate." },
@@ -2106,7 +2106,7 @@ const TEACHING_CONTENT = {
                     { a: "What's your favourite drink?", b: "My favourite drink is lemonade." },
                     { a: "What's your favourite colour?", b: "My favourite colour is blue." },
                     { a: "What do you want for your birthday?", b: "I want a new bike." },
-                    { a: "What does she for her birthday?", b: "She wants a big kite." },
+                    { a: "What does she want for her birthday?", b: "She wants a big kite." },
                     { a: "What does he want for his birthday?", b: "He wants a small radio." },
                     { a: "Does she want some poopoo?", b: "No, she doesn't." },
                     { a: "Does she want a big kite?", b: "Yes, she does." },
@@ -2368,6 +2368,559 @@ const TEACHING_CONTENT = {
                     ]
                 }
             }
+        },
+        "4": {
+            "54": {
+                vocab: [
+                    'aunt', 'uncle', 'cousin', 'daughter', 'son', 'granddaughter', 'grandson', 'grandparents', 'parents',
+                    'balcony', 'basement', 'downstairs', 'upstairs', 'lift', 'roof', 'stairs', 'first floor', 'second floor', 'third floor', 'garage', 'garden',
+                    'mine', 'yours', 'his', 'hers', 'ours', 'theirs', 'than',
+                    'older', 'younger', 'bigger', 'smaller', 'taller', 'shorter', 'better', 'worse'
+                ],
+                sentences: [
+                    "My cousin is older than me.",
+                    "The balcony is smaller than the garden.",
+                    "Your house is bigger than mine.",
+                    "His car is faster than hers.",
+                    "Our garden is more beautiful than theirs.",
+                    "This book is mine.",
+                    "Is that bag yours?",
+                    "The red bike is his.",
+                    "The blue dress is hers.",
+                    "The big house is ours.",
+                    "The small car is theirs.",
+                    "My grades are better than last year.",
+                    "The weather is worse today than yesterday.",
+                    "She is taller than her brother.",
+                    "He is younger than his sister."
+                ],
+                sentencePairs: [
+                    { a: "Is that book yours?", b: "Yes, it's mine." },
+                    { a: "Whose car is this?", b: "It's ours." },
+                    { a: "Is your house bigger than mine?", b: "Yes, our house is bigger than yours." },
+                    { a: "Who is older, you or your cousin?", b: "My cousin is older than me." },
+                    { a: "Is the balcony bigger than the garden?", b: "No, the balcony is smaller than the garden." },
+                    { a: "Which is better, chocolate or vanilla?", b: "Chocolate is better than vanilla." }
+                ]
+            }
+        },
+        "5": {
+            "66": {
+                vocab: [
+                    'bat', 'bear', 'dolphin', 'kangaroo', 'lion', 'panda', 'parrot', 'penguin', 'rabbit', 'whale', 'shark',
+                    'climb', 'fall', 'fly', 'hide', 'hop', 'jump', 'run', 'swim', 'walk',
+                    'cage', 'above', 'below', 'near', 'opposite',
+                    'the best', 'the worst', 'most', 'least', 'biggest', 'smallest', 'tallest', 'shortest', 'fastest', 'slowest'
+                ],
+                sentences: [
+                    "The blue whale is the biggest animal.",
+                    "The cheetah is the fastest animal.",
+                    "The giraffe is the tallest animal.",
+                    "The ant is the smallest animal.",
+                    "The bat is above the tree.",
+                    "The shark is below the boat.",
+                    "The rabbit is near the hole.",
+                    "The zoo is opposite the park.",
+                    "The lion is in the cage.",
+                    "Who is the tallest in the class?",
+                    "Which animal is the most dangerous?",
+                    "This is the best day ever.",
+                    "That was the worst movie.",
+                    "Dolphins can swim and jump.",
+                    "Kangaroos can jump very high.",
+                    "Parrots can fly and talk.",
+                    "Penguins can swim but they can't fly."
+                ],
+                sentencePairs: [
+                    { a: "Which animal is the biggest?", b: "The blue whale is the biggest animal." },
+                    { a: "Who is the tallest?", b: "The giraffe is the tallest." },
+                    { a: "Where is the bat?", b: "The bat is above the tree." },
+                    { a: "Where is the bus stop?", b: "The bus stop is opposite the zoo." },
+                    { a: "Can penguins fly?", b: "No, penguins can't fly, but they can swim." },
+                    { a: "Which is the best animal?", b: "I think the dolphin is the best animal." }
+                ]
+            }
+        },
+        "6": {
+            "78": {
+                vocab: [
+                    'cloud', 'cloudy', 'rainbow', 'rain', 'rainy', 'snow', 'snowy', 'sun', 'sunny', 'wind', 'windy', 'fog', 'foggy', 'hot', 'cold',
+                    'boots', 'coat', 'scarf', 'sweater', 'gloves', 'hat', 'raincoat', 'umbrella',
+                    'was', 'were', "wasn't", "weren't", 'yesterday', 'last night', 'last week'
+                ],
+                sentences: [
+                    "It was sunny yesterday.",
+                    "It was rainy last night.",
+                    "It was cold and snowy.",
+                    "There was a rainbow.",
+                    "There was a scarf on the chair.",
+                    "There were some boots on the floor.",
+                    "I was at home yesterday.",
+                    "We were at the park last week.",
+                    "She was cold.",
+                    "They were happy.",
+                    "He wasn't at school.",
+                    "We weren't hungry.",
+                    "Were you at the cinema? No, I wasn't.",
+                    "Was it windy? Yes, it was.",
+                    "Were they tired? Yes, they were."
+                ],
+                sentencePairs: [
+                    { a: "Was it sunny yesterday?", b: "Yes, it was." },
+                    { a: "Were you at school yesterday?", b: "No, I wasn't." },
+                    { a: "Was she at the school?", b: "Yes, she was." },
+                    { a: "Were they home?", b: "Yes, they were." },
+                    { a: "Were there any clouds?", b: "Yes, there were." },
+                    { a: "Was there a rainbow?", b: "No, there wasn't." },
+                    { a: "Was he in the bin?", b: "Yes, he was." },
+                    { a: "What was the weather like?", b: "It was cloudy and windy." }
+                ]
+            },
+            "81": {
+                vocab: [
+                    'aunt', 'uncle', 'cousin', 'daughter', 'son', 'granddaughter', 'grandson', 'grandparents', 'parents',
+                    'balcony', 'basement', 'downstairs', 'upstairs', 'lift', 'roof', 'stairs', 'first floor', 'second floor', 'third floor', 'garage', 'garden',
+                    'mine', 'yours', 'his', 'hers', 'ours', 'theirs', 'than',
+                    'older', 'younger', 'bigger', 'smaller', 'taller', 'shorter', 'better', 'worse',
+                    'bat', 'bear', 'dolphin', 'kangaroo', 'lion', 'panda', 'parrot', 'penguin', 'rabbit', 'whale', 'shark',
+                    'climb', 'fall', 'fly', 'hide', 'hop', 'jump', 'run', 'swim', 'walk',
+                    'cage', 'above', 'below', 'near', 'opposite',
+                    'the best', 'the worst', 'most', 'least', 'biggest', 'smallest', 'tallest', 'shortest', 'fastest', 'slowest',
+                    'cloud', 'cloudy', 'rainbow', 'rain', 'rainy', 'snow', 'snowy', 'sun', 'sunny', 'wind', 'windy', 'fog', 'foggy', 'hot', 'cold',
+                    'boots', 'coat', 'scarf', 'sweater', 'gloves', 'hat', 'raincoat', 'umbrella',
+                    'was', 'were', "wasn't", "weren't", 'yesterday', 'last night', 'last week'
+                ],
+                sentences: [
+                    "My cousin is older than me.",
+                    "The balcony is smaller than the garden.",
+                    "Your house is bigger than mine.",
+                    "His car is faster than hers.",
+                    "Our garden is more beautiful than theirs.",
+                    "This book is mine.",
+                    "The blue whale is the biggest animal.",
+                    "The cheetah is the fastest animal.",
+                    "The bat is above the tree.",
+                    "The shark is below the boat.",
+                    "Who is the tallest in the class?",
+                    "This is the best day ever.",
+                    "It was sunny yesterday.",
+                    "It was rainy last night.",
+                    "There was a rainbow.",
+                    "I was at home yesterday.",
+                    "We were at the park last week.",
+                    "He wasn't at school.",
+                    "Were you at the cinema? No, I wasn't."
+                ],
+                sentencePairs: [
+                    { a: "Is that book yours?", b: "Yes, it's mine." },
+                    { a: "Who is older, you or your cousin?", b: "My cousin is older than me." },
+                    { a: "Which animal is the biggest?", b: "The blue whale is the biggest animal." },
+                    { a: "Who is the tallest?", b: "The giraffe is the tallest." },
+                    { a: "Where is the bat?", b: "The bat is above the tree." },
+                    { a: "Was it sunny yesterday?", b: "Yes, it was." },
+                    { a: "Were you at school yesterday?", b: "No, I wasn't." },
+                    { a: "Was she at the school?", b: "Yes, she was." },
+                    { a: "Were they home?", b: "Yes, they were." },
+                    { a: "Were there any clouds?", b: "Yes, there were." },
+                    { a: "Was there a rainbow?", b: "No, there wasn't." },
+                    { a: "Was he in the bin?", b: "Yes, he was." },
+                    { a: "What was the weather like?", b: "It was cloudy and windy." }
+                ]
+            }
+        },
+        "7": {
+            "91": {
+                vocab: [
+                    'cheese', 'pasta', 'soup', 'sandwich', 'salad', 'vegetables', 'plate', 'bottle', 'glass', 'bowl', 'cup',
+                    'boil boiled', 'cook cooked', 'cut', 'fry fried', 'carry carried', 'drop dropped', 'wash washed', 'cry cried',
+                    'dance danced', 'help helped', 'like liked', 'look looked', 'play played', 'start started', 'stop stopped', 'smile smiled',
+                    'go went', 'do did'
+                ],
+                sentences: [
+                    "I cooked lunch yesterday.",
+                    "We went to the market.",
+                    "She washed the vegetables.",
+                    "He fried the eggs.",
+                    "They chopped the carrots.",
+                    "I didn't buy the carrots.",
+                    "We didn't eat the soup.",
+                    "She didn't like the pasta.",
+                    "He didn't wash his hands.",
+                    "Did you cook dinner? Yes, I did.",
+                    "Did he go to school? No, he didn't.",
+                    "We danced at the party.",
+                    "I played football last week.",
+                    "The movie started at 7 o'clock.",
+                    "I helped my mum in the kitchen."
+                ],
+                sentencePairs: [
+                    { a: "What did you cook?", b: "I cooked chicken and rice." },
+                    { a: "Did you wash the fruit?", b: "Yes, I washed the fruit." },
+                    { a: "Where did you go?", b: "We went to the market." },
+                    { a: "Did she like the soup?", b: "No, she didn't it." },
+                    { a: "What did he do yesterday?", b: "He played football." },
+                    { a: "Did they make a cake?", b: "Yes, they did." }
+                ]
+            }
+        },
+        "8": {
+            "104": {
+                vocab: [
+                    'bus station', 'café', 'cinema', 'hospital', 'library', 'market', 'shopping centre', 'sports centre', 'supermarket', 'swimming pool', 'zoo',
+                    'car park', 'litter bin', 'pavement', 'square', 'traffic lights', 'ticket',
+                    'buy bought', 'catch caught', 'come came', 'draw drew', 'drink drank', 'eat ate',
+                    'find found', 'give gave', 'have had', 'lose lost', 'make made', 'see saw', 'take took', 'wear wore',
+                    'have to', 'have had'
+                ],
+                sentences: [
+                    "I bought a ticket at the bus station.",
+                    "She caught the bus.",
+                    "He came to my house.",
+                    "We drew a picture in art class.",
+                    "I drank some water.",
+                    "They ate pizza at the café.",
+                    "We found a dog in the park.",
+                    "She gave me a present.",
+                    "I had a lot of fun.",
+                    "He lost his keys.",
+                    "We made a cake.",
+                    "I saw a lion at the zoo.",
+                    "She took a photo of the square.",
+                    "He wore a new coat.",
+                    "I have to see the doctor.",
+                    "Do you have to wear a uniform?",
+                    "We have to be quiet in the library."
+                ],
+                sentencePairs: [
+                    { a: "Where did you go?", b: "I went to the shopping centre." },
+                    { a: "What did you buy?", b: "I bought a new shirt." },
+                    { a: "Did you see the film?", b: "Yes, I saw it at the cinema." },
+                    { a: "What did he eat?", b: "He ate a sandwich." },
+                    { a: "Do we have to go now?", b: "Yes, we have to catch the bus." },
+                    { a: "Where did you find the money?", b: "I found it on the pavement." }
+                ]
+            }
+        },
+        "9": {
+            "116": {
+                vocab: [
+                    'afraid', 'angry', 'boring', 'busy', 'dangerous', 'difficult', 'easy', 'exciting', 'frightened', 'hungry', 'interesting', 'surprised', 'thirsty', 'tired', 'beautiful', 'famous',
+                    'more', 'most', 'one of the'
+                ],
+                sentences: [
+                    "The circus is more exciting than the farm.",
+                    "The book is more interesting than the movie.",
+                    "Math is more difficult than English.",
+                    "This is the most beautiful city.",
+                    "That was the most boring film.",
+                    "He is the most famous singer.",
+                    "It's one of the most dangerous animals.",
+                    "She is one of the most famous actors.",
+                    "I was frightened by the storm.",
+                    "He was angry because he lost the game.",
+                    "Are you thirsty? Yes, I want some water.",
+                    "I am tired after running.",
+                    "The shark is more dangerous than the dolphin.",
+                    "The city is busier than the village.",
+                    "This test was easy."
+                ],
+                sentencePairs: [
+                    { a: "Which is more exciting?", b: "The circus is more exciting than the farm." },
+                    { a: "Who is the most famous?", b: "He is the most famous singer." },
+                    { a: "Is the shark dangerous?", b: "Yes, it is one of the most dangerous animals." },
+                    { a: "How do you feel?", b: "I am tired and thirsty." },
+                    { a: "Was the film good?", b: "No, it was the most boring film." },
+                    { a: "Which subject is more difficult?", b: "Math is more difficult than English." }
+                ]
+            },
+            "119": {
+                vocab: [
+                    'beans', 'cheese', 'chicken', 'eggs', 'flour', 'fruit', 'meat', 'pasta', 'peas', 'pepper', 'potatoes', 'rice', 'salt', 'soup', 'sugar', 'vegetables',
+                    'boil', 'chop', 'cook', 'cut', 'fry', 'mix', 'wash', 'add',
+                    'bus station', 'café', 'cinema', 'hospital', 'library', 'market', 'shopping centre', 'sports centre', 'supermarket', 'swimming pool', 'zoo',
+                    'car park', 'litter bin', 'pavement', 'square', 'traffic lights', 'ticket',
+                    'afraid', 'angry', 'boring', 'busy', 'dangerous', 'difficult', 'easy', 'exciting', 'frightened', 'hungry', 'interesting', 'surprised', 'thirsty', 'tired', 'beautiful', 'famous',
+                    'cooked', 'danced', 'fried', 'helped', 'liked', 'looked', 'played', 'started', 'stopped', 'washed',
+                    'went', 'did', 'bought', 'caught', 'came', 'drew', 'drank', 'ate', 'found', 'gave', 'had', 'lost', 'made', 'saw', 'took', 'wore',
+                    'have to', 'more', 'most', 'one of the'
+                ],
+                sentences: [
+                    "I cooked lunch yesterday.",
+                    "We went to the market.",
+                    "I bought a ticket at the bus station.",
+                    "She caught the bus.",
+                    "I saw a lion at the zoo.",
+                    "The circus is more exciting than the farm.",
+                    "This is the most beautiful city.",
+                    "It's one of the most dangerous animals.",
+                    "I have to see the doctor.",
+                    "I didn't buy the carrots.",
+                    "Did you cook dinner? Yes, I did.",
+                    "We made a cake.",
+                    "He lost his keys.",
+                    "I was frightened by the storm."
+                ],
+                sentencePairs: [
+                    { a: "Where did you go?", b: "We went to the market." },
+                    { a: "What did you buy?", b: "I bought a new shirt." },
+                    { a: "Did you see the film?", b: "Yes, I saw it at the cinema." },
+                    { a: "Which is more exciting?", b: "The circus is more exciting than the farm." },
+                    { a: "How do you feel?", b: "I am tired and thirsty." }
+                ]
+            }
+        }
+    },
+    "PU3": {
+        "0": {
+            "5": {
+                vocab: [
+                    'countryside', 'field', 'forest', 'grass', 'ground', 'lake', 'leaf', 'leaves', 'mountain', 'river', 'rock', 'tractor',
+                    'wake up', 'get dressed', 'get up', 'have a shower', 'have breakfast', 'toothbrush', 'toothpaste', 'towel',
+                    'going', 'getting', 'swimming', 'having', 'eating', 'kicking', 'playing', 'riding',
+                    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'weekend',
+                    'do homework', 'go shopping', 'go skating', 'listen to music', 'read a comic', 'watch a film', 'write an email',
+                    'always', 'often', 'sometimes', 'never',
+                    'morning', 'afternoon', 'evening',
+                    'before', 'after',
+                    'once', 'twice',
+                    'everyday', 'every',
+                    'day', 'week', 'month', 'year',
+                    'wear', 'helmet', 'gloves', 'goggles', 'knee pads', 'must', "mustn't",
+                    'clown', 'cook', 'dentist', 'doctor', 'farmer', 'film star', 'nurse', 'pirate', 'pop star', 'vet',
+                    'beard', 'blonde', 'curly', 'fair', 'fat', 'moustache', 'short', 'straight', 'tall', 'thin',
+                    'treasure', 'costume', 'party', 'surprise', 'present',
+                    'why', 'because',
+                    'aunt', 'uncle', 'cousin', 'daughter', 'son', 'granddaughter', 'grandson', 'grandparents', 'parents',
+                    'balcony', 'basement', 'downstairs', 'upstairs', 'lift', 'roof', 'stairs', 'first floor', 'second floor', 'third floor', 'garage', 'garden',
+                    'mine', 'yours', 'his', 'hers', 'ours', 'theirs', 'than',
+                    'older', 'younger', 'bigger', 'smaller', 'taller', 'shorter', 'better', 'worse',
+                    'bat', 'bear', 'dolphin', 'kangaroo', 'lion', 'panda', 'parrot', 'penguin', 'rabbit', 'whale', 'shark',
+                    'climb', 'fall', 'fly', 'hide', 'hop', 'jump', 'run', 'swim', 'walk',
+                    'cage', 'above', 'below', 'near', 'opposite',
+                    'the best', 'the worst', 'most', 'least', 'biggest', 'smallest', 'tallest', 'shortest', 'fastest', 'slowest',
+                    'cloud', 'cloudy', 'rainbow', 'rain', 'rainy', 'snow', 'snowy', 'sun', 'sunny', 'wind', 'windy', 'fog', 'foggy', 'hot', 'cold',
+                    'boots', 'coat', 'scarf', 'sweater', 'gloves', 'hat', 'raincoat', 'umbrella',
+                    'was', 'were', "wasn't", "weren't", 'yesterday', 'last night', 'last week',
+                    'beans', 'cheese', 'chicken', 'eggs', 'flour', 'fruit', 'meat', 'pasta', 'peas', 'pepper', 'potatoes', 'rice', 'salt', 'soup', 'sugar', 'vegetables',
+                    'boil', 'chop', 'cook', 'cut', 'fry', 'mix', 'wash', 'add',
+                    'cooked', 'danced', 'fried', 'helped', 'liked', 'looked', 'played', 'started', 'stopped', 'washed',
+                    'went', 'did',
+                    'bus station', 'café', 'cinema', 'hospital', 'library', 'market', 'shopping centre', 'sports centre', 'supermarket', 'swimming pool', 'zoo',
+                    'car park', 'litter bin', 'pavement', 'square', 'traffic lights', 'ticket',
+                    'bought', 'caught', 'came', 'drew', 'drank', 'ate', 'found', 'gave', 'had', 'lost', 'made', 'saw', 'took', 'wore',
+                    'have to',
+                    'afraid', 'angry', 'boring', 'busy', 'dangerous', 'difficult', 'easy', 'exciting', 'frightened', 'hungry', 'interesting', 'surprised', 'thirsty', 'tired', 'beautiful', 'famous',
+                    'more', 'one of the'
+                ],
+                sentences: [
+                    "What are you doing? I'm going to the forest.",
+                    "What is he doing? He's swimming in the lake.",
+                    "What is she doing? She's riding a horse.",
+                    "What are we doing? We're playing in the grass.",
+                    "What are they doing? They're eating breakfast.",
+                    "Are you having a shower? Yes, I am.",
+                    "Is he getting dressed? No, he isn't.",
+                    "Are they kicking a football? Yes, they are.",
+                    "Is she going to the mountain? Yes, she is.",
+                    "Are we playing in the field? No, we aren't.",
+                    "What time do you wake up? I wake up at six o'clock.",
+                    "What time do you get up? I get up at seven o'clock.",
+                    "What time do you have a shower? I have a shower at seven o'clock.",
+                    "What time do you have breakfast? I have breakfast at eight o'clock.",
+                    "What time do you get dressed? I get dressed at eight o'clock.",
+                    "I always do my homework after school.",
+                    "He often goes shopping on Saturdays.",
+                    "She sometimes listens to music before bed.",
+                    "They never go skating at the weekend.",
+                    "We watch a film every Friday evening.",
+                    "I write an email once a week.",
+                    "She reads a comic twice a month.",
+                    "They go shopping everyday.",
+                    "You must wear a helmet.",
+                    "I must wear goggles when I swim.",
+                    "He must wear gloves in the winter.",
+                    "You mustn't kick the teacher.",
+                    "You mustn't eat poopoo.",
+                    "We mustn't drink peepee.",
+                    "How often do you listen to music? I always listen to music in the car.",
+                    "How often does she go shopping? She goes shopping once a week.",
+                    "How often do they watch a film? They watch a film every weekend.",
+                    "What does a doctor do? A doctor helps people.",
+                    "What is the doctor doing? She's helping a child.",
+                    "What does a farmer do? A farmer grows food.",
+                    "What is the farmer doing? He's driving a tractor.",
+                    "What do dentists do? They help people with their teeth.",
+                    "What are the dentists doing? They're working in the clinic.",
+                    "What does she do? She's a pop star.",
+                    "What is the pop star doing? She's singing a song.",
+                    "What do you do? I'm a cook.",
+                    "What are you doing now? I'm cooking dinner.",
+                    "Why are you wearing a costume? Because it's a party.",
+                    "I'm happy because I found the treasure.",
+                    "He's got a moustache and curly hair.",
+                    "She's tall and thin.",
+                    "They've got blonde hair and fair skin.",
+                    "He's got a beard and straight black hair.",
+                    "She's short and has got curly blonde hair.",
+                    "My cousin is older than me.",
+                    "The balcony is smaller than the garden.",
+                    "Your house is bigger than mine.",
+                    "His car is faster than hers.",
+                    "Our garden is more beautiful than theirs.",
+                    "This book is mine.",
+                    "Is that bag yours?",
+                    "The red bike is his.",
+                    "The blue dress is hers.",
+                    "The big house is ours.",
+                    "The small car is theirs.",
+                    "My grades are better than last year.",
+                    "The weather is worse today than yesterday.",
+                    "She is taller than her brother.",
+                    "He is younger than his sister.",
+                    "The blue whale is the biggest animal.",
+                    "The cheetah is the fastest animal.",
+                    "The giraffe is the tallest animal.",
+                    "The ant is the smallest animal.",
+                    "The bat is above the tree.",
+                    "The shark is below the boat.",
+                    "The rabbit is near the hole.",
+                    "The zoo is opposite the park.",
+                    "The lion is in the cage.",
+                    "Who is the tallest in the class?",
+                    "Which animal is the most dangerous?",
+                    "This is the best day ever.",
+                    "That was the worst movie.",
+                    "Dolphins can swim and jump.",
+                    "Kangaroos can jump very high.",
+                    "Parrots can fly and talk.",
+                    "Penguins can swim but they can't fly.",
+                    "It was sunny yesterday.",
+                    "It was rainy last night.",
+                    "It was cold and snowy.",
+                    "There was a rainbow.",
+                    "There was a scarf on the chair.",
+                    "There were some boots on the floor.",
+                    "I was at home yesterday.",
+                    "We were at the park last week.",
+                    "She was cold.",
+                    "They were happy.",
+                    "He wasn't at school.",
+                    "We weren't hungry.",
+                    "Were you at the cinema? No, I wasn't.",
+                    "Was it windy? Yes, it was.",
+                    "Were they tired? Yes, they were.",
+                    "I cooked lunch yesterday.",
+                    "We went to the market.",
+                    "She washed the vegetables.",
+                    "He fried the eggs.",
+                    "They chopped the carrots.",
+                    "I didn't buy the carrots.",
+                    "We didn't eat the soup.",
+                    "She didn't like the pasta.",
+                    "He didn't wash his hands.",
+                    "Did you cook dinner? Yes, I did.",
+                    "Did he go to school? No, he didn't.",
+                    "We danced at the party.",
+                    "I played football last week.",
+                    "The movie started at 7 o'clock.",
+                    "I helped my mum in the kitchen.",
+                    "I bought a ticket at the bus station.",
+                    "She caught the bus.",
+                    "He came to my house.",
+                    "We drew a picture in art class.",
+                    "I drank some water.",
+                    "They ate pizza at the café.",
+                    "We found a dog in the park.",
+                    "She gave me a present.",
+                    "I had a lot of fun.",
+                    "He lost his keys.",
+                    "We made a cake.",
+                    "I saw a lion at the zoo.",
+                    "She took a photo of the square.",
+                    "He wore a new coat.",
+                    "I have to see the doctor.",
+                    "Do you have to wear a uniform?",
+                    "We have to be quiet in the library.",
+                    "The circus is more exciting than the farm.",
+                    "The book is more interesting than the movie.",
+                    "Math is more difficult than English.",
+                    "This is the most beautiful city.",
+                    "That was the most boring film.",
+                    "He is the most famous singer.",
+                    "It's one of the most dangerous animals.",
+                    "She is one of the most famous film star.",
+                    "I was frightened by the storm.",
+                    "He was angry because he lost the game.",
+                    "Are you thirsty? Yes, I want some water.",
+                    "I am tired after running.",
+                    "The shark is more dangerous than the dolphin.",
+                    "The city is busier than the village.",
+                    "This test was easy."
+                ],
+                sentencePairs: [
+                    { a: "What are you doing?", b: "I'm going to the forest." },
+                    { a: "What is he doing?", b: "He's swimming in the lake." },
+                    { a: "What is she doing?", b: "She's riding a horse." },
+                    { a: "What are they doing?", b: "They're eating breakfast." },
+                    { a: "Are you having a shower?", b: "Yes, I am." },
+                    { a: "Is he getting dressed?", b: "No, he isn't." },
+                    { a: "Are they kicking a football?", b: "Yes, they are." },
+                    { a: "What time do you wake up?", b: "I wake up at six o'clock." },
+                    { a: "What time do you get up?", b: "I get up at seven o'clock." },
+                    { a: "What time do you have a shower?", b: "I have a shower at seven o'clock." },
+                    { a: "What time do you have breakfast?", b: "I have breakfast at eight o'clock." },
+                    { a: "What time do you get dressed?", b: "I get dressed at eight o'clock." },
+                    { a: "How often do you do homework?", b: "I always do homework after school." },
+                    { a: "How often does she go shopping?", b: "She goes shopping once a week." },
+                    { a: "How often do they watch a film?", b: "They often watch a film at the weekend." },
+                    { a: "What must you wear when you go skating?", b: "I must wear a helmet and knee pads." },
+                    { a: "How often do you write an email?", b: "I write an email twice a month." },
+                    { a: "How often do you go skating?", b: "I go skating twice a year." },
+                    { a: "What does a doctor do?", b: "A doctor helps people." },
+                    { a: "What is the doctor doing?", b: "She's helping the girl." },
+                    { a: "What does he do?", b: "He's firefighter." },
+                    { a: "What is the firefighter doing?", b: "He's saving the cat." },
+                    { a: "Why are you happy?", b: "Because It's my birthday." },
+                    { a: "What does she look like?", b: "She's tall and thin with long curly hair." },
+                    { a: "What does he look like?", b: "He's short, fat, and bald with a big moustache." },
+                    { a: "Is that book yours?", b: "Yes, it's mine." },
+                    { a: "Whose car is this?", b: "It's ours." },
+                    { a: "Is your house bigger than mine?", b: "Yes, our house is bigger than yours." },
+                    { a: "Who is older, you or your cousin?", b: "My cousin is older than me." },
+                    { a: "Is the balcony bigger than the garden?", b: "No, the balcony is smaller than the garden." },
+                    { a: "Which is better, chocolate or vanilla?", b: "Chocolate is better than vanilla." },
+                    { a: "Which animal is the biggest?", b: "The blue whale is the biggest animal." },
+                    { a: "Who is the tallest?", b: "The giraffe is the tallest." },
+                    { a: "Where is the bat?", b: "The bat is above the tree." },
+                    { a: "Where is the bus stop?", b: "The bus stop is opposite the zoo." },
+                    { a: "Can penguins fly?", b: "No, penguins can't fly, but they can swim." },
+                    { a: "Which is the best animal?", b: "I think the dolphin is the best animal." },
+                    { a: "Was it sunny yesterday?", b: "Yes, it was sunny yesterday." },
+                    { a: "Were you at school yesterday?", b: "No, I wasn't at school." },
+                    { a: "What was the weather like?", b: "It was cloudy and windy." },
+                    { a: "Was she happy?", b: "No, she wasn't happy." },
+                    { a: "Were there any cookies?", b: "Yes, there were some cookies." },
+                    { a: "Where were you last night?", b: "I was at home." },
+                    { a: "What did you cook?", b: "I cooked chicken and rice." },
+                    { a: "Did you wash the fruit?", b: "Yes, I washed the fruit." },
+                    { a: "Where did you go?", b: "We went to the market." },
+                    { a: "Did she like the soup?", b: "No, she didn't like the soup." },
+                    { a: "What did he do yesterday?", b: "He played football." },
+                    { a: "Did they make a cake?", b: "Yes, they mixed the flour and sugar." },
+                    { a: "Where did you go?", b: "I went to the shopping centre." },
+                    { a: "What did you buy?", b: "I bought a new shirt." },
+                    { a: "Did you see the film?", b: "Yes, I saw it at the cinema." },
+                    { a: "What did he eat?", b: "He ate a sandwich." },
+                    { a: "Do we have to go now?", b: "Yes, we have to catch the bus." },
+                    { a: "Where did you find the money?", b: "I found it on the pavement." },
+                    { a: "Which is more exciting?", b: "The circus is more exciting than the farm." },
+                    { a: "Who is the most famous?", b: "He is the most famous singer." },
+                    { a: "Is the shark dangerous?", b: "Yes, it is one of the most dangerous animals." },
+                    { a: "How do you feel?", b: "I am tired and thirsty." },
+                    { a: "Was the film good?", b: "No, it was the most boring film." },
+                    { a: "Which subject is more difficult?", b: "Math is more difficult than English." }
+                ]
+            }
         }
     }
 };
@@ -2383,7 +2936,16 @@ const AVAILABLE_CONTENT = {
         "0": [5],
         "1": [16],
         "2": [28],
-        "3": [40, 43]
+        "3": [40, 43],
+        "4": [54],
+        "5": [66],
+        "6": [78, 81],
+        "7": [91],
+        "8": [104],
+        "9": [116, 119]
+    },
+    "PU3": {
+        "0": [5]
     }
 };
 
@@ -2469,7 +3031,7 @@ function pickUniqueItems(book, pages, count, type, activePageIndex, useWeights =
 /**
  * Main function to get content based on Spaced Repetition logic.
  */
-function getSpacedRepetitionContent(book, unit, page, type, isStudyMode) {
+function getSpacedRepetitionContent(book, unit, page, type, isStudyMode, count = 5) {
     const sortedPages = getSortedPagesForBook(book);
     const activePageIndex = sortedPages.findIndex(p => p.unit === unit && p.page === page.toString());
 
@@ -2480,13 +3042,16 @@ function getSpacedRepetitionContent(book, unit, page, type, isStudyMode) {
     }
 
     if (isStudyMode) {
-        // Study Mode: 3 from Recent, 2 from Review
+        // Study Mode: ~60% from Recent, ~40% from Review
+        const countRecent = Math.ceil(count * 0.6);
+        const countReview = count - countRecent;
+
         // Recent Pool: current page (activePageIndex) and the page immediately preceding it.
         const recentPageIndices = [activePageIndex];
         if (activePageIndex > 0) recentPageIndices.push(activePageIndex - 1);
 
         const recentPages = recentPageIndices.map(idx => sortedPages[idx]);
-        let recentItems = pickUniqueItems(book, recentPages, 3, type, activePageIndex, false);
+        let recentItems = pickUniqueItems(book, recentPages, countRecent, type, activePageIndex, false);
 
         // Review Pool: all other previous pages
         const reviewPageIndices = [];
@@ -2496,33 +3061,33 @@ function getSpacedRepetitionContent(book, unit, page, type, isStudyMode) {
 
         if (reviewPageIndices.length === 0) {
             // Edge case: no review pages, pull more from recent if possible
-            if (recentItems.length < 5) {
-                const moreRecent = pickUniqueItems(book, recentPages, 5 - recentItems.length, type, activePageIndex, false);
+            if (recentItems.length < count) {
+                const moreRecent = pickUniqueItems(book, recentPages, count - recentItems.length, type, activePageIndex, false);
                 // Filter duplicates
                 moreRecent.forEach(item => {
                     if (!recentItems.includes(item)) recentItems.push(item);
                 });
             }
-            return recentItems.slice(0, 5);
+            return recentItems.slice(0, count);
         }
 
         const reviewPages = reviewPageIndices.map(idx => sortedPages[idx]);
         // Weight review pages based on index (closer to current = higher weight)
-        const reviewItems = pickUniqueItems(book, reviewPages, 2, type, activePageIndex, true);
+        const reviewItems = pickUniqueItems(book, reviewPages, countReview, type, activePageIndex, true);
 
         // Combine and ensure no duplicates
         const finalSet = [...recentItems];
         reviewItems.forEach(item => {
-            if (finalSet.length < 5 && !finalSet.includes(item)) {
+            if (finalSet.length < count && !finalSet.includes(item)) {
                 finalSet.push(item);
             }
         });
 
         // If still not enough, fill from recent again (avoiding dupes)
-        if (finalSet.length < 5) {
-            const allRecent = pickUniqueItems(book, recentPages, 10, type, activePageIndex, false);
+        if (finalSet.length < count) {
+            const allRecent = pickUniqueItems(book, recentPages, count * 2, type, activePageIndex, false);
             allRecent.forEach(item => {
-                if (finalSet.length < 5 && !finalSet.includes(item)) finalSet.push(item);
+                if (finalSet.length < count && !finalSet.includes(item)) finalSet.push(item);
             });
         }
 

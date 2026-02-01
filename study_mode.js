@@ -578,13 +578,13 @@ function checkRoundD(targetSentence) {
 // --- ROUND E: Sentence Matching ---
 function startRoundE() {
     STUDY_STATE.round = 'E';
-    updateStudyUI("Round E: Sentence Matching", "Match each question with its answer.");
+    STUDY_STATE.subRound = 1; // Initialize sub-round counter
 
     // Get sentence pairs using Spaced Repetition logic
     const { book, unit, page } = CLASS_CONFIG[selectedDay][selectedTime].content;
 
-    // Request 5 pairs (3 recent + 2 review handled by getSpacedRepetitionContent)
-    let pairs = getSpacedRepetitionContent(book, unit, page, 'sentencePairs', true);
+    // Request 9 pairs for 3 rounds of 3 (E1, E2, E3)
+    let pairs = getSpacedRepetitionContent(book, unit, page, 'sentencePairs', true, 9);
 
     // Fallback if data is totally missing (shouldn't happen with our content population)
     if (!pairs || pairs.length === 0) {
@@ -597,10 +597,34 @@ function startRoundE() {
         ];
     }
 
-    // Shuffle and take up to 5 pairs
-    const shuffledPairs = pairs.sort(() => 0.5 - Math.random()).slice(0, 5);
-    STUDY_STATE.sentencePairs = shuffledPairs;
+    // Ensure we have at least 9 pairs by recycling if necessary
+    if (pairs.length < 9) {
+        const originalLength = pairs.length;
+        const extraNeeded = 9 - originalLength;
+        for (let i = 0; i < extraNeeded; i++) {
+            pairs.push(pairs[i % originalLength]);
+        }
+    }
 
+    // Shuffle and store all pairs for the upcoming sub-rounds
+    STUDY_STATE.allEPairs = pairs.sort(() => 0.5 - Math.random());
+
+    nextRoundESubRound();
+}
+
+function nextRoundESubRound() {
+    if (STUDY_STATE.subRound > 3) {
+        finishStudySession();
+        return;
+    }
+
+    updateStudyUI(`Round E${STUDY_STATE.subRound}: Sentence Matching`, "Match each question with its answer.");
+
+    // Slice 3 pairs for this round: [0-3), [3-6), [6-9)
+    const startIdx = (STUDY_STATE.subRound - 1) * 3;
+    const roundPairs = STUDY_STATE.allEPairs.slice(startIdx, startIdx + 3);
+
+    STUDY_STATE.sentencePairs = roundPairs;
     renderRoundE();
 }
 
@@ -723,7 +747,8 @@ function checkRoundE() {
     if (allCorrect) {
         playHappySound();
         setTimeout(() => {
-            finishStudySession();
+            STUDY_STATE.subRound++;
+            nextRoundESubRound();
         }, 1500);
     } else {
         synthError();

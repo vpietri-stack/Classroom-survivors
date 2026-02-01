@@ -2091,8 +2091,8 @@ function startSentenceMatchGame() {
         ];
     }
 
-    // Shuffle and ensure we have up to 5 pairs
-    const shuffledPairs = pairs.sort(() => 0.5 - Math.random()).slice(0, 5);
+    // Shuffle and ensure we have up to 3 pairs
+    const shuffledPairs = pairs.sort(() => 0.5 - Math.random()).slice(0, 3);
 
     // Store in game element for later reference
     const gameEl = document.getElementById('sentenceMatchGame');

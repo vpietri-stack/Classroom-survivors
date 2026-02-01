@@ -490,7 +490,7 @@ function startRoundD() {
 
 function nextRoundDSentence() {
     if (STUDY_STATE.currentSentenceIndex >= STUDY_STATE.sentences.length) {
-        finishStudySession();
+        startRoundE();
         return;
     }
 
@@ -572,6 +572,182 @@ function checkRoundD(targetSentence) {
         dropZone.classList.add('border-red-500');
         setTimeout(() => dropZone.classList.remove('border-red-500'), 500);
     }
+}
+
+
+// --- ROUND E: Sentence Matching ---
+function startRoundE() {
+    STUDY_STATE.round = 'E';
+    updateStudyUI("Round E: Sentence Matching", "Match each question with its answer.");
+
+    // Get sentence pairs using Spaced Repetition logic
+    const { book, unit, page } = CLASS_CONFIG[selectedDay][selectedTime].content;
+
+    // Request 5 pairs (3 recent + 2 review handled by getSpacedRepetitionContent)
+    let pairs = getSpacedRepetitionContent(book, unit, page, 'sentencePairs', true);
+
+    // Fallback if data is totally missing (shouldn't happen with our content population)
+    if (!pairs || pairs.length === 0) {
+        pairs = [
+            { a: "What's your name?", b: "My name is Sarah." },
+            { a: "How old are you?", b: "I'm seven years old." },
+            { a: "What colour is the apple?", b: "The apple is red." },
+            { a: "Where's the book?", b: "The book is on the desk." },
+            { a: "Is it a cat?", b: "No, it isn't a cat." }
+        ];
+    }
+
+    // Shuffle and take up to 5 pairs
+    const shuffledPairs = pairs.sort(() => 0.5 - Math.random()).slice(0, 5);
+    STUDY_STATE.sentencePairs = shuffledPairs;
+
+    renderRoundE();
+}
+
+function renderRoundE() {
+    const pairs = STUDY_STATE.sentencePairs;
+
+    // Create shuffled array of B sentences for the dock
+    const bSentences = pairs.map((p, i) => ({ text: p.b, correctIndex: i }));
+    bSentences.sort(() => 0.5 - Math.random());
+
+    const container = document.getElementById('study-game-area');
+    container.innerHTML = `
+        <div class="flex flex-col gap-4 w-full max-w-3xl mx-auto px-4">
+            <div id="match-pairs-container" class="flex flex-col gap-3">
+                ${pairs.map((pair, index) => `
+                    <div class="match-pair-row flex flex-col sm:flex-row gap-2 items-stretch">
+                        <div class="sentence-a flex-1 bg-indigo-900/60 p-3 rounded-lg text-white font-medium text-sm sm:text-base" data-index="${index}">
+                            ${pair.a}
+                        </div>
+                        <div class="sentence-b-slot flex-1 bg-gray-700/50 p-3 rounded-lg min-h-[50px] border-2 border-dashed border-gray-500 flex items-center justify-center cursor-pointer" 
+                             data-target-index="${index}" 
+                             onclick="handleSlotClick(${index})">
+                            <span class="text-gray-400 text-sm">Click to place answer</span>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div id="sentence-b-dock" class="bg-gray-800/50 p-4 rounded-xl flex flex-wrap gap-2 justify-center min-h-[80px] mt-4">
+                ${bSentences.map(item => `
+                    <button class="sentence-b-tile bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer"
+                            data-correct-index="${item.correctIndex}"
+                            onclick="selectBTile(this)">
+                        ${item.text}
+                    </button>
+                `).join('')}
+            </div>
+            
+            <div class="flex justify-center gap-4 mt-4">
+                <button onclick="checkRoundE()" class="game-btn bg-green-500 py-3 px-8 text-xl">CHECK</button>
+            </div>
+        </div>
+    `;
+}
+
+let selectedBTile = null;
+
+function selectBTile(tile) {
+    // Clear previous selection
+    document.querySelectorAll('.sentence-b-tile').forEach(t => t.classList.remove('ring-4', 'ring-yellow-400'));
+
+    // Select this tile
+    selectedBTile = tile;
+    tile.classList.add('ring-4', 'ring-yellow-400');
+}
+
+function handleSlotClick(slotIndex) {
+    const slot = document.querySelector(`.sentence-b-slot[data-target-index="${slotIndex}"]`);
+
+    // If clicking a slot that already has a tile, return it to dock
+    const existingTile = slot.querySelector('.sentence-b-tile');
+    if (existingTile) {
+        returnTileToDock(existingTile);
+        slot.innerHTML = '<span class="text-gray-400 text-sm">Click to place answer</span>';
+        return;
+    }
+
+    // If a tile is selected, place it in this slot
+    if (selectedBTile) {
+        slot.innerHTML = '';
+        slot.appendChild(selectedBTile);
+        selectedBTile.classList.remove('ring-4', 'ring-yellow-400');
+        selectedBTile = null;
+    }
+}
+
+function returnTileToDock(tile) {
+    const dock = document.getElementById('sentence-b-dock');
+    tile.classList.remove('ring-4', 'ring-yellow-400', 'correct-match', 'wrong-match');
+    tile.style.backgroundColor = '';
+    dock.appendChild(tile);
+}
+
+function checkRoundE() {
+    const pairs = STUDY_STATE.sentencePairs;
+    const slots = document.querySelectorAll('.sentence-b-slot');
+    let allCorrect = true;
+    let anyPlaced = false;
+
+    slots.forEach((slot, index) => {
+        const tile = slot.querySelector('.sentence-b-tile');
+
+        if (tile) {
+            anyPlaced = true;
+            const correctIndex = parseInt(tile.dataset.correctIndex);
+            const targetIndex = parseInt(slot.dataset.targetIndex);
+
+            if (correctIndex === targetIndex) {
+                // Correct match
+                tile.classList.remove('wrong-match');
+                tile.classList.add('correct-match');
+                tile.style.backgroundColor = '#10b981'; // green
+            } else {
+                // Incorrect match
+                tile.classList.remove('correct-match');
+                tile.classList.add('wrong-match');
+                tile.style.backgroundColor = '#ef4444'; // red
+                allCorrect = false;
+            }
+        } else {
+            allCorrect = false;
+        }
+    });
+
+    if (!anyPlaced) {
+        // No tiles placed, do nothing
+        return;
+    }
+
+    if (allCorrect) {
+        playHappySound();
+        setTimeout(() => {
+            finishStudySession();
+        }, 1500);
+    } else {
+        synthError();
+        // Reset after 2 seconds
+        setTimeout(() => {
+            resetRoundE();
+        }, 2000);
+    }
+}
+
+function resetRoundE() {
+    // Return all tiles to dock
+    const tiles = document.querySelectorAll('.sentence-b-tile');
+    tiles.forEach(tile => {
+        returnTileToDock(tile);
+    });
+
+    // Reset all slots
+    const slots = document.querySelectorAll('.sentence-b-slot');
+    slots.forEach(slot => {
+        slot.innerHTML = '<span class="text-gray-400 text-sm">Click to place answer</span>';
+    });
+
+    selectedBTile = null;
 }
 
 

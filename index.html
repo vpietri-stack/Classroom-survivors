@@ -228,6 +228,34 @@
         </div>
     </div>
 
+    <!-- Sentence Match Game -->
+    <div id="sentenceMatchGame" class="overlay hidden p-4">
+        <div class="minigame-container max-h-[90vh] overflow-y-auto">
+            <div class="text-yellow-400 font-bold text-xl sm:text-2xl mb-4 text-center animate-pulse">⏱️ Time Left:
+                <span id="sentencematch-timer">00:00</span>
+            </div>
+            <h3 class="text-xl sm:text-2xl font-bold mb-4 text-purple-700 text-center">Match the Sentences!</h3>
+
+            <div id="sentencematch-pairs" class="mb-4 flex flex-col gap-3">
+                <!-- Pairs injected here -->
+            </div>
+
+            <div id="sentencematch-dock"
+                class="bg-gray-100 p-4 rounded-xl flex flex-wrap gap-2 justify-center min-h-[80px]">
+                <!-- B sentences injected here -->
+            </div>
+
+            <div id="sentencematch-actions" class="mt-6 flex justify-center gap-4">
+                <button onclick="checkSentenceMatch()" class="game-btn bg-green-500 py-2 px-6">CHECK</button>
+            </div>
+
+            <!-- Result Action (Dynamically Shown) -->
+            <div id="sentencematch-result-action" class="hidden mt-4 text-center">
+                <!-- Injected button -->
+            </div>
+        </div>
+    </div>
+
     <!-- Result Feedback -->
     <div id="feedbackOverlay" class="overlay hidden bg-black/60">
         <div id="feedbackCard"

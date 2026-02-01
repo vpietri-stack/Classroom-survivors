@@ -1192,7 +1192,7 @@ class MainScene extends Phaser.Scene {
 
     triggerTreasureEvent() {
         this.scene.pause();
-        const types = ['spelling', 'wordrec', 'scramble'];
+        const types = ['spelling', 'wordrec', 'scramble', 'sentencematch'];
         const type = types[Math.floor(Math.random() * types.length)];
         startMiniGame(type, 'chest');
     }
@@ -1492,7 +1492,7 @@ function showPowerUpSelection(context) {
     const shuffled = [...POWER_UPS].sort(() => 0.5 - Math.random()).slice(0, 3);
 
     // Create completely randomized pairings between power-ups and game types
-    const allGameTypes = ['spelling', 'wordrec', 'scramble'];
+    const allGameTypes = ['spelling', 'wordrec', 'scramble', 'sentencematch'];
     const pairings = shuffled.map(reward => {
         const randomGameType = allGameTypes[Math.floor(Math.random() * allGameTypes.length)];
         return { reward, gameType: randomGameType };
@@ -1547,6 +1547,8 @@ function startMinigameCountdown(scene) {
         if (spellingTimer) spellingTimer.textContent = timeString;
         if (recTimer) recTimer.textContent = timeString;
         if (grammarTimer) grammarTimer.textContent = timeString;
+        const sentencematchTimer = document.getElementById('sentencematch-timer');
+        if (sentencematchTimer) sentencematchTimer.textContent = timeString;
 
         // Deduct time from survival time
         scene.accumulatedTime = Math.max(0, scene.accumulatedTime - 100);
@@ -1568,6 +1570,7 @@ function startMiniGame(type, context) {
     if (type === 'spelling') startSpellingGame();
     if (type === 'wordrec') startWordRecGame();
     if (type === 'scramble') startGrammarGame();
+    if (type === 'sentencematch') startSentenceMatchGame();
 }
 
 function claimReward(success) {
@@ -1580,6 +1583,7 @@ function claimReward(success) {
     document.getElementById('spellingGame').classList.add('hidden');
     document.getElementById('wordRecGame').classList.add('hidden');
     document.getElementById('grammarGame').classList.add('hidden');
+    document.getElementById('sentenceMatchGame').classList.add('hidden');
 
     // Calculate time penalty
     const timeSpentMs = Date.now() - minigameStartTime;
@@ -2048,11 +2052,167 @@ function checkGrammar() {
 }
 
 
+// --- SENTENCE MATCH MINIGAME ---
+let gameModeSelectedBTile = null;
+
+function startSentenceMatchGame() {
+    const { book, unit, page } = CLASS_CONFIG[selectedDay][selectedTime].content;
+    // Get sentence pairs using weighted selection (similar to other minigames but for 5 items)
+    const sortedPages = getSortedPagesForBook(book);
+    const activePageIndex = sortedPages.findIndex(p => p.unit === unit && p.page === page.toString());
+
+    // Game Mode logic: content from current page onwards (or falling back to current if at end)
+    let gamePages = [];
+    if (activePageIndex !== -1) {
+        const gamePageIndices = [];
+        for (let i = activePageIndex; i < sortedPages.length; i++) {
+            gamePageIndices.push(i);
+        }
+        gamePages = gamePageIndices.map(idx => sortedPages[idx]);
+    } else {
+        // Fallback if page not found in sorted list
+        gamePages = [{ unit, page: page.toString(), absIndex: 0 }];
+    }
+
+    // Pick 5 pairs using the weighted logic
+    let pairs = pickUniqueItems(book, gamePages, 5, 'sentencePairs', activePageIndex, true);
+
+    // Fallback if selection returns nothing
+    if (pairs.length === 0) {
+        pairs = [
+            { a: "What's your name?", b: "My name is Sarah." },
+            { a: "How old are you?", b: "I'm seven years old." },
+            { a: "What colour is the apple?", b: "The apple is red." },
+            { a: "Where's the book?", b: "The book is on the desk." },
+            { a: "Is it a cat?", b: "No, it isn't a cat." }
+        ];
+    }
+
+    // Shuffle and ensure we have up to 5 pairs
+    const shuffledPairs = pairs.sort(() => 0.5 - Math.random()).slice(0, 5);
+
+    // Store in game element for later reference
+    const gameEl = document.getElementById('sentenceMatchGame');
+    gameEl.dataset.pairs = JSON.stringify(shuffledPairs);
+
+    // Create shuffled B sentences
+    const bSentences = shuffledPairs.map((p, i) => ({ text: p.b, correctIndex: i }));
+    bSentences.sort(() => 0.5 - Math.random());
+
+    // Build pairs UI
+    const pairsContainer = document.getElementById('sentencematch-pairs');
+    pairsContainer.innerHTML = shuffledPairs.map((pair, index) => `
+        <div class="match-pair-row flex flex-col sm:flex-row gap-2 items-stretch">
+            <div class="sentence-a flex-1 bg-indigo-600 p-3 rounded-lg text-white font-medium text-sm" data-index="${index}">
+                ${pair.a}
+            </div>
+            <div class="gm-sentence-b-slot flex-1 bg-gray-200 p-3 rounded-lg min-h-[45px] border-2 border-dashed border-gray-400 flex items-center justify-center cursor-pointer text-gray-700" 
+                 data-target-index="${index}" 
+                 onclick="handleGameModeSlotClick(${index})">
+                <span class="text-gray-400 text-sm">Click to place</span>
+            </div>
+        </div>
+    `).join('');
+
+    // Build dock UI
+    const dock = document.getElementById('sentencematch-dock');
+    dock.innerHTML = bSentences.map(item => `
+        <button class="gm-sentence-b-tile bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer"
+                data-correct-index="${item.correctIndex}"
+                onclick="selectGameModeBTile(this)">
+            ${item.text}
+        </button>
+    `).join('');
+
+    gameModeSelectedBTile = null;
+
+    document.getElementById('sentencematch-actions').classList.remove('hidden');
+    document.getElementById('sentencematch-result-action').classList.add('hidden');
+    document.getElementById('sentenceMatchGame').classList.remove('hidden');
+}
+
+function selectGameModeBTile(tile) {
+    document.querySelectorAll('.gm-sentence-b-tile').forEach(t => t.classList.remove('ring-4', 'ring-yellow-400'));
+    gameModeSelectedBTile = tile;
+    tile.classList.add('ring-4', 'ring-yellow-400');
+}
+
+function handleGameModeSlotClick(slotIndex) {
+    const slot = document.querySelector(`.gm-sentence-b-slot[data-target-index="${slotIndex}"]`);
+
+    const existingTile = slot.querySelector('.gm-sentence-b-tile');
+    if (existingTile) {
+        returnGameModeTileToDock(existingTile);
+        slot.innerHTML = '<span class="text-gray-400 text-sm">Click to place</span>';
+        return;
+    }
+
+    if (gameModeSelectedBTile) {
+        slot.innerHTML = '';
+        slot.appendChild(gameModeSelectedBTile);
+        gameModeSelectedBTile.classList.remove('ring-4', 'ring-yellow-400');
+        gameModeSelectedBTile = null;
+    }
+}
+
+function returnGameModeTileToDock(tile) {
+    const dock = document.getElementById('sentencematch-dock');
+    tile.classList.remove('ring-4', 'ring-yellow-400');
+    tile.style.backgroundColor = '';
+    dock.appendChild(tile);
+}
+
+function checkSentenceMatch() {
+    const slots = document.querySelectorAll('.gm-sentence-b-slot');
+    let allCorrect = true;
+    let anyPlaced = false;
+
+    slots.forEach((slot) => {
+        const tile = slot.querySelector('.gm-sentence-b-tile');
+
+        if (tile) {
+            anyPlaced = true;
+            const correctIndex = parseInt(tile.dataset.correctIndex);
+            const targetIndex = parseInt(slot.dataset.targetIndex);
+
+            if (correctIndex === targetIndex) {
+                tile.style.backgroundColor = '#10b981'; // green
+            } else {
+                tile.style.backgroundColor = '#ef4444'; // red
+                allCorrect = false;
+            }
+        } else {
+            allCorrect = false;
+        }
+    });
+
+    if (!anyPlaced) return;
+
+    if (allCorrect) {
+        handleMinigameSuccess('sentencematch');
+    } else {
+        synthError();
+        isFirstAttempt = false;
+        // Reset after 2 seconds
+        setTimeout(() => {
+            const tiles = document.querySelectorAll('.gm-sentence-b-tile');
+            tiles.forEach(tile => {
+                returnGameModeTileToDock(tile);
+            });
+            const slots = document.querySelectorAll('.gm-sentence-b-slot');
+            slots.forEach(slot => {
+                slot.innerHTML = '<span class="text-gray-400 text-sm">Click to place</span>';
+            });
+        }, 2000);
+    }
+}
+
 
 function handleMinigameSuccess(gameType) {
     let actionsId, resultId;
     if (gameType === 'spelling') { actionsId = 'spelling-actions'; resultId = 'spelling-result-action'; }
     else if (gameType === 'rec') { actionsId = 'rec-options'; resultId = 'rec-result-action'; }
+    else if (gameType === 'sentencematch') { actionsId = 'sentencematch-actions'; resultId = 'sentencematch-result-action'; }
     else { actionsId = 'grammar-actions'; resultId = 'grammar-result-action'; }
 
     if (actionsId) document.getElementById(actionsId).classList.add('hidden');
@@ -2062,7 +2222,7 @@ function handleMinigameSuccess(gameType) {
     // New reward logic:
     // - Spelling and Grammar: always give reward if answered correctly (even on subsequent tries)
     // - Sight words (rec): only give reward on first try within time limit
-    const shouldGiveReward = (gameType === 'spelling' || gameType === 'grammar') || isFirstAttempt;
+    const shouldGiveReward = (gameType === 'spelling' || gameType === 'grammar' || gameType === 'sentencematch') || isFirstAttempt;
 
     if (shouldGiveReward) {
         resultDiv.innerHTML = `<button onclick="claimReward(true)" class="game-btn bg-green-500 text-2xl py-4 px-8 animate-bounce">GET POWER UP!</button>`;

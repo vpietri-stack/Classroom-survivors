@@ -937,7 +937,10 @@ class MainScene extends Phaser.Scene {
         if (this.invulnTimer > 0) return;
 
         synthHurt();
-        this.playerStats.hp -= 10;
+        // Calculate damage: 1 base + 1 per minute of play time (restoring the time deducted by minigames)
+        const playTimeMs = this.accumulatedTime + totalMinigameTimeMs;
+        const damage = 1 + Math.floor(playTimeMs / 60000);
+        this.playerStats.hp -= damage;
         this.invulnTimer = 60;
 
         // Remove Player Knockback

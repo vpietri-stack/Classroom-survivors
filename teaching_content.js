@@ -2532,9 +2532,9 @@ const TEACHING_CONTENT = {
             "91": {
                 vocab: [
                     'cheese', 'pasta', 'soup', 'sandwich', 'salad', 'vegetables', 'plate', 'bottle', 'glass', 'bowl', 'cup',
-                    'boil, boiled', 'cook, cooked', 'cut', 'fry, fried', 'carry, carried', 'drop, dropped', 'wash, washed', 'cry, cried',
-                    'dance, danced', 'help, helped', 'like, liked', 'look, looked', 'play, played', 'start, started', 'stop, stopped', 'smile, smiled',
-                    'go, went', 'do, did'
+                    'boil boiled', 'cook cooked', 'cut', 'fry fried', 'carry carried', 'drop dropped', 'wash washed', 'cry cried',
+                    'dance danced', 'help helped', 'like liked', 'look looked', 'play played', 'start started', 'stop stopped', 'smile smiled',
+                    'go went', 'do did'
                 ],
                 sentences: [
                     "I cooked lunch yesterday.",
@@ -2568,8 +2568,8 @@ const TEACHING_CONTENT = {
                 vocab: [
                     'bus station', 'café', 'cinema', 'hospital', 'library', 'market', 'shopping centre', 'sports centre', 'supermarket', 'swimming pool', 'zoo',
                     'car park', 'litter bin', 'pavement', 'square', 'traffic lights', 'ticket',
-                    'buy, bought', 'catch, caught', 'come, came', 'draw, drew', 'drink, drank', 'eat, ate',
-                    'find, found', 'give, gave', 'have, had', 'lose, lost', 'make, made', 'see, saw', 'take, took', 'wear, wore',
+                    'buy bought', 'catch caught', 'come came', 'draw drew', 'drink drank', 'eat ate',
+                    'find found', 'give gave', 'have had', 'lose lost', 'make made', 'see saw', 'take took', 'wear wore',
                     'have to', 'have had'
                 ],
                 sentences: [
@@ -2641,10 +2641,10 @@ const TEACHING_CONTENT = {
                     'car park', 'litter bin', 'pavement', 'square', 'traffic lights', 'ticket',
                     'afraid', 'angry', 'boring', 'busy', 'dangerous', 'difficult', 'easy', 'exciting', 'frightened', 'hungry', 'interesting',
                     'surprised', 'thirsty', 'tired', 'beautiful', 'famous',
-                    'boil, boiled', 'cook, cooked', 'cut', 'fry, fried', 'carry, carried', 'drop, dropped', 'wash, washed', 'cry, cried',
-                    'dance, danced', 'help, helped', 'like, liked', 'look, looked', 'play, played', 'start, started', 'stop, stopped', 'smile, smiled',
-                    'go, went', 'do, did', 'buy, bought', 'catch, caught', 'come, came', 'draw, drew', 'drink, drank', 'eat, ate',
-                    'find, found', 'give, gave', 'have, had', 'lose, lost', 'make, made', 'see, saw', 'take, took', 'wear, wore',
+                    'boil boiled', 'cook cooked', 'cut', 'fry fried', 'carry carried', 'drop dropped', 'wash washed', 'cry cried',
+                    'dance danced', 'help helped', 'like liked', 'look looked', 'play played', 'start started', 'stop stopped', 'smile smiled',
+                    'go went', 'do did', 'buy bought', 'catch caught', 'come came', 'draw drew', 'drink drank', 'eat ate',
+                    'find found', 'give gave', 'have had', 'lose lost', 'make made', 'see saw', 'take took', 'wear wore',
                     'have to', 'more', 'most', 'one of the'
                 ],
                 sentences: [

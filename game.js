@@ -136,7 +136,6 @@ const playTTS = () => {
     };
 
     const playBaidu = () => {
-        // Use lan=uk as per Phonics reference
         const url = `https://fanyi.baidu.com/gettts?lan=uk&text=${encodeURIComponent(text)}&spd=3&source=web`;
         const audio = new Audio(url);
         audio.play().catch(e => {

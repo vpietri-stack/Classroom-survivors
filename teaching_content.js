@@ -1841,6 +1841,194 @@ const TEACHING_CONTENT = {
                     { a: "Wool comes ...?", b: "from sheep." },
                 ]
             }
+        },
+        "4": {
+            "54": {
+                vocab: [
+                    "chocolate", "cake", "chicken", "burger", "bread", "lemonade", "water",
+                    "banana", "bananas", "mango", "mangoes", "salad", "fruit", "grapes", "apple",
+                    "juice", "orange", "meat", "sausages", "meatballs", "beans", "rice",
+                    "pasta", "carrots", "tomato", "onion", "potato", "cheese", "egg",
+                    "please", "thank you", "sorry", "Here you are",
+                    "I like", "you like", "we like", "they like", "he likes", "she likes",
+                    "Yes he does", "No he doesn't", "Yes she does", "No she doesn't",
+                    "he doesn't like", "she doesn't like",
+                    "Yes I do", "Yes you do", "Yes we do", "Yes they do",
+                    "No I don't", "No you don't", "No we don't", "No they don't",
+                    "I don't like", "you don't like", "we don't like", "they don't like"
+                ],
+                sentences: [
+                    "I like chocolate.",
+                    "Harry likes mangoes.",
+                    "I don't like books.",
+                    "Harry doesn't like chocolate.",
+                    "Do you like chocolate? Yes, I do.",
+                    "Do you like poopoo cake? No, I don't.",
+                    "Does he like apples? Yes, he does.",
+                    "Does he like peepee lemonade? No, he doesn't.",
+                    "I like apples and bananas.",
+                    "I don't like beans or carrots.",
+                    "I like meatballs, but I don't like beans.",
+                    "Would you like some ice cream? Yes, please.",
+                    "Would you like some ice cream? No, thank you.",
+                    "Can I have some chocolate, please? Here you are.",
+                    "It's a banana.",
+                    "It's an onion.",
+                    "I'd like some chocolate.",
+                    "I'd like some apples."
+                ],
+                sentencePairs: [
+                    { a: "Do you like chocolate?", b: "Yes, I do." },
+                    { a: "Does he like poopoo cake?", b: "No, he doesn't." },
+                    { a: "Does she like fruit?", b: "Yes, she does." },
+                    { a: "Would you like some ice cream?", b: "Yes, please." },
+                    { a: "Can I have some chocolate, please?", b: "Here you are." },
+                    { a: "Do you like peepee lemonade?", b: "No, I don't." },
+                    { a: "I like apples ...", b: "but I don't like beans." }
+                ]
+            },
+            "5": {
+                "66": {
+                    vocab: [
+                        "ball", "kite", "plane", "doll", "car", "robot", "bike", "computer", "mouse",
+                        "keyboard", "toy box", "balloon", "balloons", "radio", "helicopter", "teddy",
+                        "teddy bear", "board game", "ship", "monster", "alien", "present",
+                        "Shapes", "circle", "square", "triangle", "rectangle",
+                        "big", "small", "old", "new", "cool", "grey", "happy", "angry",
+                        "birthday", "party", "card", "share", "twins", "house", "hat", "horse"
+                    ],
+                    sentences: [
+                        "Whose car is that?",
+                        "Whose bike is this?",
+                        "It's Jim's bike.",
+                        "It's Jenny's car.",
+                        "It's Grandma and Grandpa's farm.",
+                        "His bike's orange.",
+                        "It's his favourite toy.",
+                        "Her car's red.",
+                        "Her radio's new.",
+                        "Their house is yellow.",
+                        "It's their farm.",
+                        "Our board game's new.",
+                        "Does he want a teddy?",
+                        "What does he want?",
+                        "He wants a helicopter.",
+                        "No, he doesn't want that one.",
+                        "Yes, he does.",
+                        "No, he doesn't.",
+                        "Can I have your red car, please?",
+                        "Would you like my robot?",
+                        "Here you are."
+                    ],
+                    sentencePairs: [
+                        { a: "Whose car is that?", b: "It's Jenny's car." },
+                        { a: "Does he want a teddy?", b: "Yes, he does." },
+                        { a: "Is it his favourite toy?", b: "Yes, it is." },
+                        { a: "Whose bike is this?", b: "It's Jim's bike." },
+                        { a: "What does he want?", b: "He wants a helicopter." },
+                        { a: "Can I have your red car?", b: "Here you are." }
+                    ]
+                }
+            }
+        },
+        "6": {
+            "78": {
+                vocab: [
+                    "bus", "car", "lorry", "truck", "motorbike", "train",
+                    "park", "shop", "shops", "bookshop", "garden", "street", "bus stop", "zoo",
+                    "bear", "polar bear", "snake", "crocodile", "monkey", "tiger", "elephant",
+                    "lizard", "giraffe", "hippo", "zebra", "penguin", "flamingo", "lion",
+                    "panda", "rhino", "whale", "jellyfish", "chameleon", "frog", "spider",
+                    "tree", "flower", "jungle", "grassland", "ice", "ocean", "water", "leaf", "land", "neck",
+                    "old", "new", "young", "tall", "thin", "long", "scary", "big", "small"
+                ],
+                sentences: [
+                    "There's a car.",
+                    "There's a big lorry.",
+                    "There are two lorries.",
+                    "There are some cars.",
+                    "There isn't a train.",
+                    "There isn't a zoo in my town.",
+                    "There aren't any shops.",
+                    "There aren't any new animals.",
+                    "Is there a zoo in your town?",
+                    "Are there any animals?",
+                    "Yes, there are.",
+                    "No, there aren't.",
+                    "Yes, there is.",
+                    "No, there isn't.",
+                    "Let's play a game.",
+                    "Let's colour the elephants grey.",
+                    "Let's look at the zebras.",
+                    "That's a good idea.",
+                    "OK."
+                ],
+                sentencePairs: [
+                    { a: "Is there a bus?", b: "Yes, there is, but there isn't a train." },
+                    { a: "Are there any animals?", b: "Yes, there are, but there aren't any shops." },
+                    { a: "Let's play a game.", b: "OK, let's play on the computer" },
+                    { a: "Let's look at the zebras.", b: "Good idea, they're my favourite animals." },
+                    { a: "Is there a train?", b: "No, there isn't, but there is a bus." },
+                    { a: "Are there any shops?", b: "No, there aren't, but there are some animals." }
+                ]
+            }
+        },
+        "7": {
+            "92": {
+                vocab: [
+                    "play", "playing", "football", "basketball", "tennis", "hockey", "badminton", "baseball", "music",
+                    "guitar", "piano",
+                    "ride a bike", "riding a bike",
+                    "swim", "swimming",
+                    "watch TV", "watching TV",
+                    "skateboard", "skateboarding",
+                    "run", "running",
+                    "jump", "jumping",
+                    "eat", "eating",
+                    "smile", "smiling",
+                    "listen to music", "listening to music",
+                    "he is", "he isn't", "she is", "she isn't", "it is", "it isn't",
+                    "I am", "I'm", "I'm not",
+                    "you are", "you aren't", "we are", "we aren't", "they are", "they aren't",
+                    "let's", "can", "can't"
+                ],
+                sentences: [
+                    "What are you doing?",
+                    "What are we doing?",
+                    "What are they doing?",
+                    "What is he doing?",
+                    "What is she doing?",
+                    "Are you playing football?",
+                    "Is she running?",
+                    "Are they eating?",
+                    "Yes, I am.", "No, I'm not.",
+                    "Yes, we are.", "No, we aren't.",
+                    "Yes, they are.", "No, they aren't.",
+                    "Yes, he is.", "No, he isn't.",
+                    "Yes, she is.", "No, she isn't.",
+                    "I'm playing tennis.",
+                    "I'm not watching TV.",
+                    "He's riding a bike.",
+                    "She isn't swimming.",
+                    "They're listening to music.",
+                    "We aren't playing baseball.",
+                    "Can I play with you?",
+                    "Can we go on the swings?",
+                    "Can I watch television?",
+                    "Yes, you can.",
+                    "No, you can't.",
+                    "Let's play basketball.",
+                    "Let's ride our bikes."
+                ],
+                sentencePairs: [
+                    { a: "What are you doing?", b: "I'm watching TV." },
+                    { a: "Are you playing football?", b: "Yes, I am." },
+                    { a: "Is he riding a bike?", b: "No, he isn't." },
+                    { a: "Can I play with you?", b: "Yes, of course." },
+                    { a: "What is she doing?", b: "She's swimming." },
+                    { a: "Can we go on the swings?", b: "No, you can't." }
+                ]
+            }
         }
     },
     "PU2": {
@@ -2092,12 +2280,12 @@ const TEACHING_CONTENT = {
                     { a: "Eggs come ...?", b: "from chickens." },
                     { a: "Honey comes ...?", b: "from bees." },
                     { a: "Wool comes ...?", b: "from sheep." },
-                    { a: "Do you like chocolate?", b: "Yes, I do. I like chocolate." },
+                    { a: "Do you like chocolate?", b: "Yes, I do." },
                     { a: "Do you like poopoo cake?", b: "No, I don't." },
-                    { a: "Does your sister like lemonade?", b: "Yes, she does. She likes lemonade." },
+                    { a: "Does your sister like lemonade?", b: "Yes, she does." },
                     { a: "Does your sister like peepee lemonade?", b: "No, she doesn't." },
-                    { a: "Does your brother like chocolate?", b: "Yes, He does. He likes chocolate." },
-                    { a: "Does your brother like poopoo cake?", b: "No, He doesn't." },
+                    { a: "Does your brother like chocolate?", b: "Yes, he does." },
+                    { a: "Does your brother like poopoo cake?", b: "No, he doesn't." },
                     { a: "What do you like?", b: "I like chocolate." },
                     { a: "What does your sister like?", b: "She likes lemonade." },
                     { a: "What does your brother like?", b: "He likes chocolate." },
@@ -3212,7 +3400,11 @@ const AVAILABLE_CONTENT = {
         "0": [4, 5, 7, 8],
         "1": [9, 10, 11, 12, 13, 14, 15, 16],
         "2": [19, 20, 21, 22, 23, 24, 25, 26, 27, 28],
-        "3": [31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 43]
+        "3": [31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 43],
+        "4": [54],
+        "5": [66],
+        "6": [78],
+        "7": [92]
     },
     "PU2": {
         "0": [5],

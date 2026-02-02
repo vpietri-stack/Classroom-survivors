@@ -583,13 +583,13 @@ const TEACHING_CONTENT = {
                     'they are', "they're", 'they are not', "they aren't",
 
                     // 'Have Got' (Positive & Negative)
-                    'I have got', "I've got", 'I have not got', "I haven't got",
-                    'you have got', "you've got", 'you have not got', "you haven't got",
-                    'we have got', "we've got", 'we have not got', "we haven't got",
-                    'they have got', "they've got", 'they have not got', "they haven't got",
-                    'he has got', "he's got", 'he has not got', "he hasn't got",
-                    'she has got', "she's got", 'she has not got', "she hasn't got",
-                    'it has got', "it's got", 'it has not got', "it hasn't got",
+                    "I've got", "I haven't got",
+                    "you've got", "you haven't got",
+                    "we've got", "we haven't got",
+                    "they've got", "they haven't got",
+                    "he's got", "he hasn't got",
+                    "she's got", "she hasn't got",
+                    "it's got", "it hasn't got",
 
                     // Family & People Nouns
                     'family', 'mother', 'mum', 'father', 'dad', 'brother', 'sister',
@@ -697,12 +697,12 @@ const TEACHING_CONTENT = {
                     'they are', "they're", 'they are not', "they aren't",
 
                     // 'Have Got' (Positive & Negative)
-                    'I have got', "I've got", 'I have not got', "I haven't got",
-                    'you have got', "you've got", 'you have not got', "you haven't got",
-                    'we have got', "we've got", 'we have not got', "we haven't got",
-                    'they have got', "they've got", 'they have not got', "they haven't got",
-                    'he has got', "he's got", 'he has not got', "he hasn't got",
-                    'she has got', "she's got", 'she has not got', "she hasn't got",
+                    "I've got", "I haven't got",
+                    "you've got", "you haven't got",
+                    "we've got", "we haven't got",
+                    "they've got", "they haven't got",
+                    "he's got", "he hasn't got",
+                    "she's got", "she hasn't got",
                     'it has got', "it's got", 'it has not got', "it hasn't got",
 
                     // Family & People Nouns
@@ -809,12 +809,12 @@ const TEACHING_CONTENT = {
                     'they are', "they're", 'they are not', "they aren't",
 
                     // 'Have Got' (Positive & Negative)
-                    'I have got', "I've got", 'I have not got', "I haven't got",
-                    'you have got', "you've got", 'you have not got', "you haven't got",
-                    'we have got', "we've got", 'we have not got', "we haven't got",
-                    'they have got', "they've got", 'they have not got', "they haven't got",
-                    'he has got', "he's got", 'he has not got', "he hasn't got",
-                    'she has got', "she's got", 'she has not got', "she hasn't got",
+                    "I've got", "I haven't got",
+                    "you've got", "you haven't got",
+                    "we've got", "we haven't got",
+                    "they've got", "they haven't got",
+                    "he's got", "he hasn't got",
+                    "she's got", "she hasn't got",
                     'it has got', "it's got", 'it has not got', "it hasn't got",
 
                     // Family & People Nouns
@@ -1401,12 +1401,12 @@ const TEACHING_CONTENT = {
                     'they are', "they're", "they aren't",
 
                     // --- VERBS & PRONOUN CONTRACTIONS (HAVE GOT) ---
-                    'I have got', "I've got", "I haven't got",
-                    'you have got', "you've got", "you haven't got",
-                    'we have got', "we've got", "we haven't got",
-                    'they have got', "they've got", "they haven't got",
-                    'he has got', "he's got", "he hasn't got",
-                    'she has got', "she's got", "she hasn't got",
+                    "I've got", "I haven't got",
+                    "you've got", "you haven't got",
+                    "we've got", "we haven't got",
+                    "they've got", "they haven't got",
+                    "he's got", "he hasn't got",
+                    "she's got", "she hasn't got",
                     'it has got', "it's got", "it hasn't got",
 
                     // --- SENSORY & ACTION VERBS ---
@@ -1627,12 +1627,12 @@ const TEACHING_CONTENT = {
                     'they are', "they're", "they aren't",
 
                     // --- VERBS & PRONOUN CONTRACTIONS (HAVE GOT) ---
-                    'I have got', "I've got", "I haven't got",
-                    'you have got', "you've got", "you haven't got",
-                    'we have got', "we've got", "we haven't got",
-                    'they have got', "they've got", "they haven't got",
-                    'he has got', "he's got", "he hasn't got",
-                    'she has got', "she's got", "she hasn't got",
+                    "I've got", "I haven't got",
+                    "you've got", "you haven't got",
+                    "we've got", "we haven't got",
+                    "they've got", "they haven't got",
+                    "he's got", "he hasn't got",
+                    "she's got", "she hasn't got",
                     'it has got', "it's got", "it hasn't got",
 
                     // --- SENSORY & ACTION VERBS ---
@@ -1855,12 +1855,12 @@ const TEACHING_CONTENT = {
                     'you are', "you're", "you aren't",
                     'we are', "we're", "we aren't",
                     'they are', "they're", "they aren't",
-                    'I have got', "I've got", "I haven't got",
-                    'you have got', "you've got", "you haven't got",
-                    'we have got', "we've got", "we haven't got",
-                    'they have got', "they've got", "they haven't got",
-                    'he has got', "he's got", "he hasn't got",
-                    'she has got', "she's got", "she hasn't got",
+                    "I've got", "I haven't got",
+                    "you've got", "you haven't got",
+                    "we've got", "we haven't got",
+                    "they've got", "they haven't got",
+                    "he's got", "he hasn't got",
+                    "she's got", "she hasn't got",
                     'it has got', "it's got", "it hasn't got",
                     'I can', "I can't", 'he can', "he can't", 'she can', "she can't", 'it can', "it can't",
                     'I do', "I don't", 'you do', "you don't", 'they do', "they don't",
@@ -2955,8 +2955,8 @@ const TEACHING_CONTENT = {
                     "Show me your book.",
                     "Open your books.",
                     "Don't talk.",
-                    "I have got a bike.",
-                    "She has got a pet.",
+                    "I've got a bike.",
+                    "She's got a pet.",
                     "He hasn't got a camera.",
                     "Have you got a phone?",
                     "Can I ask a question?",
@@ -2969,7 +2969,7 @@ const TEACHING_CONTENT = {
                     { a: "How old are you?", b: "I am twelve years old." },
                     { a: "Where is the pen?", b: "It is on the desk." },
                     { a: "Is this your book?", b: "Yes, it is mine." },
-                    { a: "Have you got a pet?", b: "Yes, I have got a dog." },
+                    { a: "Have you got a pet?", b: "Yes, I've got a dog." },
                     { a: "Can I ask a question?", b: "Yes, you can." },
                     { a: "Open your books.", b: "Okay, teacher." },
                     { a: "What time is it?", b: "It is half past ten." }
@@ -3055,7 +3055,7 @@ const TEACHING_CONTENT = {
                 vocab: [
                     'apple', 'banana', 'biscuit', 'bread', 'burger', 'cake', 'carrot', 'cheese', 'chicken', 'chips', 'chocolate', 'egg', 'fish', 'fruit', 'ice cream', 'lemon', 'meat', 'milk', 'nut', 'onion', 'orange', 'pasta', 'potato', 'rice', 'salad', 'sandwich', 'soup', 'steak', 'sugar', 'tomato', 'vegetable', 'water', 'yoghurt',
                     'delicious', 'fresh', 'horrible', 'spicy', 'sweet', 'tasty', 'yucky',
-                    'have got a problem', 'have got a headache', 'have got time', 'have got something to do',
+                    "I've got a problem", "I've got a headache", "I've got time",
                     'a lot of', 'lots of', 'a little', 'a few', 'too much', 'too many', 'not enough'
                 ],
                 sentences: [

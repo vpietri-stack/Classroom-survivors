@@ -714,72 +714,121 @@ class MainScene extends Phaser.Scene {
     }
 
     fireWhip(w) {
-        synthShoot('whip');
+        // Sequential Strike Sequence: Forward, Up, Back, Down
+        // L1-2: [F]
+        // L3: [F, B]
+        // L4: [F, U, B]
+        // L5+: [F, U, B, D]
+
+        const sequence = ['front'];
+        if (w.level >= 4) sequence.push('up');
+        if (w.level >= 3) sequence.push('back');
+        if (w.level >= 5) sequence.push('down');
 
         // Stats Calculation
-        // Level 4, 6, 8... increase range. (Level - 2) / 2 floored gives 1 at L4, 2 at L6.
-        const rangeBonus = Math.max(0, Math.floor((w.level - 2) / 2)) * 40;
+        // Level 2, 4, 6, 8... increase range? (Current logic was a bit messy)
+        // New logic: 
+        // L2: +5 Dmg
+        // L6+: Alternates Range (+40) and Damage (+5)
+        let dmgBonus = 0;
+        let rangeBonus = 0;
+
+        if (w.level >= 2) dmgBonus += 5; // Level 2 bonus
+
+        if (w.level >= 6) {
+            const post5 = w.level - 5;
+            // Odd post5 (6, 8, 10): Range
+            // Even post5 (7, 9, 11): Damage
+            rangeBonus += Math.ceil(post5 / 2) * 40;
+            dmgBonus += Math.floor(post5 / 2) * 5;
+        }
+
         const range = 220 + rangeBonus;
-
-        // Level 3, 5, 7... increase damage. (Level - 1) / 2 floored gives 1 at L3, 2 at L5.
-        const dmgBonus = Math.max(0, Math.floor((w.level - 1) / 2)) * 5;
         const damage = (15 + dmgBonus) * this.playerStats.might;
+        const strikeDuration = 150;
 
-        const thickness = 75;
-        // Level 2+ adds back attack
-        const directions = w.level >= 2 ? [this.player.scaleX, -this.player.scaleX] : [this.player.scaleX];
-
-        const whip = this.add.graphics();
-
-        directions.forEach(dir => {
-            // Visuals: Magic Splash Effect
-            const px = this.player.x;
-            const py = this.player.y;
-
-            // 3 Layers: Dark Glow -> Cyan -> White Core
-            [
-                { color: 0x0000cc, thick: 40, alpha: 0.4, scale: 1.1 }, // Outer dark blue
-                { color: 0x00ffff, thick: 15, alpha: 0.8, scale: 1.0 }, // Main cyan slash
-                { color: 0xffffff, thick: 5, alpha: 1.0, scale: 0.9 }   // Inner white core
-            ].forEach(l => {
-                whip.lineStyle(l.thick, l.color, l.alpha);
-
-                // Front whip (dir matches facing) goes UP (-Y). Back whip goes DOWN (+Y).
-                // flipY = 1 if Front, -1 if Back.
-                const flipY = dir * this.player.scaleX;
-
-                const path = new Phaser.Curves.Path(px, py + (10 * flipY));
-                path.cubicBezierTo(
-                    px + (dir * range * l.scale * 0.5), py + (10 * flipY),
-                    px + (dir * range * l.scale * 0.8), py - (10 * flipY),
-                    px + (dir * range * l.scale), py - (60 * flipY)
-                );
-                path.draw(whip);
-            });
-
-            // Particles
-            whip.fillStyle(0xaaddff, 0.8);
-            for (let i = 0; i < 8; i++) {
-                const pxr = px + (Math.random() * range * 0.8 * dir);
-                const pyr = py + (Math.random() - 0.5) * 50;
-                whip.fillCircle(pxr, pyr, Phaser.Math.Between(2, 4));
-            }
-
-            // Hit Detection
-            this.enemies.getChildren().forEach(e => {
-                const dx = (e.x - this.player.x) * dir;
-                const dy = Math.abs(e.y - this.player.y);
-
-                // Check specifically for this direction to allow hitting enemies on both sides independently
-                if (dx > 0 && dx <= range && dy <= thickness / 2) {
-                    // Prevent double damage in same frame if enemy is somehow overlapping center? 
-                    // No, distinct directions shouldn't overlap except at x=0, which dx>0 handles.
-                    this.damageEnemy(e, damage, 300);
-                }
+        sequence.forEach((dir, index) => {
+            this.time.delayedCall(index * strikeDuration, () => {
+                this.performWhipStrike(dir, damage, range, strikeDuration);
             });
         });
+    }
 
-        this.tweens.add({ targets: whip, alpha: 0, duration: 150, onComplete: () => whip.destroy() });
+    performWhipStrike(direction, damage, range, duration) {
+        synthShoot('whip');
+        const whip = this.add.graphics();
+        const px = this.player.x;
+        const py = this.player.y;
+        const thickness = 75;
+
+        // Direction mapping: 
+        // front: facing (scaleX), back: -facing, up: rotate -90, down: rotate 90
+        let angleOffset = 0;
+        if (direction === 'back') angleOffset = Math.PI;
+        if (direction === 'up') angleOffset = -Math.PI / 2;
+        if (direction === 'down') angleOffset = Math.PI / 2;
+
+        const facing = this.player.scaleX; // 1 (right) or -1 (left)
+        const baseAngle = facing === 1 ? 0 : Math.PI;
+        const finalAngle = baseAngle + angleOffset;
+
+        // Visuals
+        [
+            { color: 0x0000cc, thick: 40, alpha: 0.4, scale: 1.1 },
+            { color: 0x00ffff, thick: 15, alpha: 0.8, scale: 1.0 },
+            { color: 0xffffff, thick: 5, alpha: 1.0, scale: 0.9 }
+        ].forEach(l => {
+            whip.lineStyle(l.thick, l.color, l.alpha);
+
+            // We use a simplified path for all directions by rotating the coordinate system conceptually
+            // or just calculating points based on finalAngle.
+            // Old logic used cubicBezierTo which was hardcoded for horizontal. 
+            // Let's adapt it to any angle.
+
+            const path = new Phaser.Curves.Path(px, py);
+
+            // Calculate control points based on angle
+            const cp1x = px + Math.cos(finalAngle) * range * l.scale * 0.5;
+            const cp1y = py + Math.sin(finalAngle) * range * l.scale * 0.5;
+
+            const cp2x = px + Math.cos(finalAngle + 0.2 * facing) * range * l.scale * 0.8;
+            const cp2y = py + Math.sin(finalAngle + 0.2 * facing) * range * l.scale * 0.8;
+
+            const endX = px + Math.cos(finalAngle - 0.1 * facing) * range * l.scale;
+            const endY = py + Math.sin(finalAngle - 0.1 * facing) * range * l.scale;
+
+            path.moveTo(px, py);
+            path.cubicBezierTo(cp1x, cp1y, cp2x, cp2y, endX, endY);
+            path.draw(whip);
+        });
+
+        // Particles
+        whip.fillStyle(0xaaddff, 0.8);
+        for (let i = 0; i < 8; i++) {
+            const dist = Math.random() * range * 0.8;
+            const pAngle = finalAngle + (Math.random() - 0.5) * 0.3;
+            const pxr = px + Math.cos(pAngle) * dist;
+            const pyr = py + Math.sin(pAngle) * dist;
+            whip.fillCircle(pxr, pyr, Phaser.Math.Between(2, 4));
+        }
+
+        // Hit Detection
+        this.enemies.getChildren().forEach(e => {
+            const dx = e.x - px;
+            const dy = e.y - py;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist <= range) {
+                const angleToEnemy = Math.atan2(dy, dx);
+                // Difference between finalAngle and angleToEnemy
+                let diff = Math.abs(Phaser.Math.Angle.Normalize(angleToEnemy - finalAngle));
+                if (diff < 0.6) { // ~35 degrees cone
+                    this.damageEnemy(e, damage, 300);
+                }
+            }
+        });
+
+        this.tweens.add({ targets: whip, alpha: 0, duration: duration, onComplete: () => whip.destroy() });
     }
 
     fireAxe(w) {
@@ -1285,7 +1334,7 @@ class MainScene extends Phaser.Scene {
                 if (reward.id === 'knife') existing.cooldown = Math.max(5, existing.cooldown - 2);
                 if (reward.id === 'orb') existing.range += 20;
             } else {
-                if (reward.id === 'whip') p.weapons.push({ type: 'whip', level: 1, timer: 0, cooldown: 60 });
+                if (reward.id === 'whip') p.weapons.push({ type: 'whip', level: 1, timer: 0, cooldown: 120 });
                 if (reward.id === 'wand') p.weapons.push({ type: 'wand', level: 1, timer: 0, cooldown: 60 });
                 if (reward.id === 'axe') p.weapons.push({ type: 'axe', level: 1, timer: 0, cooldown: 140 });
                 if (reward.id === 'cross') p.weapons.push({ type: 'cross', level: 1, timer: 0, cooldown: 80 });
@@ -1509,9 +1558,14 @@ function showPowerUpSelection(context) {
             const weapon = existingWeapons.find(w => w.type === 'whip');
             if (weapon) {
                 const nextLevel = weapon.level + 1;
-                if (nextLevel === 2) description = "Back Attack";
-                else if (nextLevel % 2 !== 0) description = "Increased Damage";
-                else description = "Increased Range";
+                if (nextLevel === 2) description = "Increased Damage";
+                else if (nextLevel === 3) description = "Back Attack";
+                else if (nextLevel === 4) description = "Up Attack";
+                else if (nextLevel === 5) description = "Down Attack";
+                else {
+                    const post5 = nextLevel - 5;
+                    description = post5 % 2 !== 0 ? "Increased Range" : "Increased Damage";
+                }
             }
         }
 

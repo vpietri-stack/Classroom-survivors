@@ -57,7 +57,7 @@ const CLASS_CONFIG = {
     "周六": {
         "0900-1030": {
             students: ["Angel", "Eddy", "Dylan", "Mia", "YaoYao"],
-            content: { book: "", unit: "2", page: "28" }
+            content: { book: "PU1", unit: "2", page: "28" }
         },
         "1040-1210": {
             students: ["Amy", "Annie", "Doris", "Harvey", "May", "Milk"],

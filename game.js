@@ -120,9 +120,49 @@ const synthLootbox = () => {
 let currentTTSWord = "";
 const playTTS = () => {
     if (!currentTTSWord) return;
-    const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(currentTTSWord)}&type=1`;
-    const audio = new Audio(url);
-    audio.play().catch(e => console.log("TTS play failed", e));
+    const text = currentTTSWord;
+
+    const playYoudao = () => {
+        const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=1`;
+        const audio = new Audio(url);
+        audio.play().catch(e => {
+            console.warn("Youdao TTS failed, trying Baidu", e);
+            playBaidu();
+        });
+        audio.onerror = () => {
+            console.warn("Youdao TTS error, trying Baidu");
+            playBaidu();
+        };
+    };
+
+    const playBaidu = () => {
+        // Use lan=uk as per Phonics reference
+        const url = `https://fanyi.baidu.com/gettts?lan=uk&text=${encodeURIComponent(text)}&spd=3&source=web`;
+        const audio = new Audio(url);
+        audio.play().catch(e => {
+            console.warn("Baidu TTS failed, trying Browser", e);
+            playBrowserSpeech();
+        });
+        audio.onerror = () => {
+            console.warn("Baidu TTS error, trying Browser");
+            playBrowserSpeech();
+        };
+    };
+
+    const playBrowserSpeech = () => {
+        console.log("Falling back to Browser Speech");
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.rate = 0.9;
+            const voices = window.speechSynthesis.getVoices();
+            const v = voices.find(val => val.lang.includes('GB') || val.lang.includes('UK') || val.lang.includes('en'));
+            if (v) u.voice = v;
+            window.speechSynthesis.speak(u);
+        }
+    };
+
+    playYoudao();
 };
 
 // --- GAME DATA ---

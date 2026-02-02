@@ -925,7 +925,7 @@ class MainScene extends Phaser.Scene {
             if (b.type === 'axe') b.rotation += 0.1;
             if (b.type === 'cross') {
                 b.rotation -= 0.2; b.returnTimer--;
-                if (b.returnTimer <= 0 && !b.reversed) {
+                if (b.returnTimer <= 0 && !b.reversed && b.body) {
                     b.body.velocity.x *= -1; b.body.velocity.y *= -1; b.reversed = true;
                 }
             }
@@ -1637,7 +1637,7 @@ function loadContent() {
 
     // Use Spaced Repetition logic to get all available items up to current page
     const sortedPages = getSortedPagesForBook(book);
-    const activePageIndex = sortedPages.findIndex(p => p.unit === unit && p.page === page.toString());
+    const activePageIndex = sortedPages.findIndex(p => p.book === book && p.unit === unit && p.page === page.toString());
 
     // We populate the global arrays with ALL eligible items (current + future)
     // The specific weighted selection will happen during minigame start
@@ -2062,7 +2062,7 @@ function startSentenceMatchGame() {
     const { book, unit, page } = CLASS_CONFIG[selectedDay][selectedTime].content;
     // Get sentence pairs using weighted selection (similar to other minigames but for 5 items)
     const sortedPages = getSortedPagesForBook(book);
-    const activePageIndex = sortedPages.findIndex(p => p.unit === unit && p.page === page.toString());
+    const activePageIndex = sortedPages.findIndex(p => p.book === book && p.unit === unit && p.page === page.toString());
 
     // Game Mode logic: content from current page onwards (or falling back to current if at end)
     let gamePages = [];
@@ -2074,11 +2074,11 @@ function startSentenceMatchGame() {
         gamePages = gamePageIndices.map(idx => sortedPages[idx]);
     } else {
         // Fallback if page not found in sorted list
-        gamePages = [{ unit, page: page.toString(), absIndex: 0 }];
+        gamePages = [{ book, unit, page: page.toString(), absIndex: 0 }];
     }
 
     // Pick 5 pairs using the weighted logic
-    let pairs = pickUniqueItems(book, gamePages, 5, 'sentencePairs', activePageIndex, true);
+    let pairs = pickUniqueItems(gamePages, 5, 'sentencePairs', activePageIndex, true);
 
     // Fallback if selection returns nothing
     if (pairs.length === 0) {

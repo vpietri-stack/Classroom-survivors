@@ -2262,7 +2262,7 @@ const TEACHING_CONTENT = {
                     sentencePairs: [
                         { a: "What does a doctor do?", b: "A doctor helps people." },
                         { a: "What is the doctor doing?", b: "She's helping the girl." },
-                        { a: "What does he do?", b: "He's firefighter." },
+                        { a: "What does he do?", b: "He's a firefighter." },
                         { a: "What is the firefighter doing?", b: "He's saving the cat." },
                         { a: "Why are you happy?", b: "Because It's my birthday." },
                         { a: "What does she look like?", b: "She's tall and thin with long curly hair." },
@@ -2360,7 +2360,7 @@ const TEACHING_CONTENT = {
                         { a: "How often do you go skating?", b: "I go skating twice a year." },
                         { a: "What does a doctor do?", b: "A doctor helps people." },
                         { a: "What is the doctor doing?", b: "She's helping the girl." },
-                        { a: "What does he do?", b: "He's firefighter." },
+                        { a: "What does he do?", b: "He's a firefighter." },
                         { a: "What is the firefighter doing?", b: "He's saving the cat." },
                         { a: "Why are you happy?", b: "Because It's my birthday." },
                         { a: "What does she look like?", b: "She's tall and thin with long curly hair." },
@@ -2639,9 +2639,12 @@ const TEACHING_CONTENT = {
                     'boil', 'chop', 'cook', 'cut', 'fry', 'mix', 'wash', 'add',
                     'bus station', 'café', 'cinema', 'hospital', 'library', 'market', 'shopping centre', 'sports centre', 'supermarket', 'swimming pool', 'zoo',
                     'car park', 'litter bin', 'pavement', 'square', 'traffic lights', 'ticket',
-                    'afraid', 'angry', 'boring', 'busy', 'dangerous', 'difficult', 'easy', 'exciting', 'frightened', 'hungry', 'interesting', 'surprised', 'thirsty', 'tired', 'beautiful', 'famous',
-                    'cooked', 'danced', 'fried', 'helped', 'liked', 'looked', 'played', 'started', 'stopped', 'washed',
-                    'went', 'did', 'bought', 'caught', 'came', 'drew', 'drank', 'ate', 'found', 'gave', 'had', 'lost', 'made', 'saw', 'took', 'wore',
+                    'afraid', 'angry', 'boring', 'busy', 'dangerous', 'difficult', 'easy', 'exciting', 'frightened', 'hungry', 'interesting',
+                    'surprised', 'thirsty', 'tired', 'beautiful', 'famous',
+                    'boil boiled', 'cook cooked', 'cut', 'fry fried', 'carry carried', 'drop dropped', 'wash washed', 'cry cried',
+                    'dance danced', 'help helped', 'like liked', 'look looked', 'play played', 'start started', 'stop stopped', 'smile smiled',
+                    'go went', 'do did', 'buy bought', 'catch caught', 'come came', 'draw drew', 'drink drank', 'eat ate',
+                    'find found', 'give gave', 'have had', 'lose lost', 'make made', 'see saw', 'take took', 'wear wore',
                     'have to', 'more', 'most', 'one of the'
                 ],
                 sentences: [
@@ -2702,12 +2705,12 @@ const TEACHING_CONTENT = {
                     'boots', 'coat', 'scarf', 'sweater', 'gloves', 'hat', 'raincoat', 'umbrella',
                     'was', 'were', "wasn't", "weren't", 'yesterday', 'last night', 'last week',
                     'beans', 'cheese', 'chicken', 'eggs', 'flour', 'fruit', 'meat', 'pasta', 'peas', 'pepper', 'potatoes', 'rice', 'salt', 'soup', 'sugar', 'vegetables',
-                    'boil', 'chop', 'cook', 'cut', 'fry', 'mix', 'wash', 'add',
-                    'cooked', 'danced', 'fried', 'helped', 'liked', 'looked', 'played', 'started', 'stopped', 'washed',
-                    'went', 'did',
+                    'boil boiled', 'cook cooked', 'cut', 'fry fried', 'carry carried', 'drop dropped', 'wash washed', 'cry cried',
+                    'dance danced', 'help helped', 'like liked', 'look looked', 'play played', 'start started', 'stop stopped', 'smile smiled',
+                    'go went', 'do did', 'buy bought', 'catch caught', 'come came', 'draw drew', 'drink drank', 'eat ate',
+                    'find found', 'give gave', 'have had', 'lose lost', 'make made', 'see saw', 'take took', 'wear wore',
                     'bus station', 'café', 'cinema', 'hospital', 'library', 'market', 'shopping centre', 'sports centre', 'supermarket', 'swimming pool', 'zoo',
                     'car park', 'litter bin', 'pavement', 'square', 'traffic lights', 'ticket',
-                    'bought', 'caught', 'came', 'drew', 'drank', 'ate', 'found', 'gave', 'had', 'lost', 'made', 'saw', 'took', 'wore',
                     'have to',
                     'afraid', 'angry', 'boring', 'busy', 'dangerous', 'difficult', 'easy', 'exciting', 'frightened', 'hungry', 'interesting', 'surprised', 'thirsty', 'tired', 'beautiful', 'famous',
                     'more', 'one of the'
@@ -2878,7 +2881,7 @@ const TEACHING_CONTENT = {
                     { a: "How often do you go skating?", b: "I go skating twice a year." },
                     { a: "What does a doctor do?", b: "A doctor helps people." },
                     { a: "What is the doctor doing?", b: "She's helping the girl." },
-                    { a: "What does he do?", b: "He's firefighter." },
+                    { a: "What does he do?", b: "He's a firefighter." },
                     { a: "What is the firefighter doing?", b: "He's saving the cat." },
                     { a: "Why are you happy?", b: "Because It's my birthday." },
                     { a: "What does she look like?", b: "She's tall and thin with long curly hair." },
@@ -3132,7 +3135,9 @@ const TEACHING_CONTENT = {
                     'armchair', 'bath', 'bed', 'carpet', 'cooker', 'cupboard', 'curtain', 'desk', 'lamp', 'mirror', 'poster', 'shelf', 'shelves', 'sofa', 'table', 'wardrobe',
                     'look after', 'look at', 'look for', 'look into', 'look up',
                     'bored', 'boring', 'excited', 'exciting', 'interested', 'interesting', 'tired', 'tiring', 'amazed', 'amazing', 'relaxed', 'relaxing', 'annoyed', 'annoying',
-                    'arrived', 'asked', 'cooked', 'decided', 'hated', 'helped', 'liked', 'lived', 'looked', 'loved', 'moved', 'phoned', 'played', 'started', 'stayed', 'studied', 'tidied', 'visited', 'wanted', 'watched', 'worked',
+                    'arrive arrived', 'ask asked', 'cook cooked', 'decide decided', 'hate hated', 'help helped', 'like liked', 'live lived', 'look looked',
+                    'love loved', 'move moved', 'phone phoned', 'play played', 'start started', 'stay stayed', 'study studied', 'tidy tidied', 'visit visited',
+                    'want wanted', 'watch watched', 'work worked',
                     'very', 'really', 'quite'
                 ],
                 sentences: [
@@ -3167,7 +3172,9 @@ const TEACHING_CONTENT = {
                 vocab: [
                     'calm', 'cheerful', 'friendly', 'funny', 'helpful', 'intelligent', 'kind', 'nice', 'quiet',
                     'yesterday', 'last night', 'last week', 'last month', 'last year', 'ago',
-                    'became', 'bought', 'came', 'did', 'drank', 'ate', 'felt', 'found', 'flew', 'got', 'gave', 'went', 'had', 'knew', 'left', 'lost', 'made', 'met', 'put', 'read', 'ran', 'said', 'saw', 'sent', 'sat', 'spoke', 'took', 'told', 'thought', 'won', 'wrote',
+                    'become became', 'buy bought', 'come came', 'do did', 'drink drank', 'eat ate', 'feel felt', 'find found', 'fly flew', 'get got', 'give gave',
+                    'go went', 'have had', 'know knew', 'leave left', 'lose lost', 'make made', 'meet met', 'put', 'read', 'run ran', 'say said', 'see saw',
+                    'send sent', 'sit sat', 'speak spoke', 'take took', 'tell told', 'think thought', 'win won', 'write wrote',
                     'mine', 'yours', 'hers'
                 ],
                 sentences: [

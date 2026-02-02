@@ -3,25 +3,35 @@ const CLASS_DAYS = ["周一", "周四", "周五", "周六", "周日"];
 
 /**
  *    Available content PU1:
-        0: [4, 5, 7, 8],
-        1: [9, 10, 11, 12, 13, 14, 15, 16],
-        2: [19, 20, 21, 22, 23, 24, 25, 26, 27, 28],
-        3: [31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 43]
-    
-    PU2 
-       0: [5],
-        1: [16],
-        2: [28],
-        3: [40, 43],
-        4: [54],
-        5: [66],
-        6: [78, 81],
-        7: [91],
-        8: [104],
-        9: [116, 119]
-
-    PU3: 
-        0: [5]
+    "PU1": {
+        "0": [4, 5, 7, 8],
+        "1": [9, 10, 11, 12, 13, 14, 15, 16],
+        "2": [19, 20, 21, 22, 23, 24, 25, 26, 27, 28],
+        "3": [31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 43]
+    },
+    "PU2": {
+        "0": [5],
+        "1": [16],
+        "2": [28],
+        "3": [40, 43],
+        "4": [54],
+        "5": [66],
+        "6": [78, 81],
+        "7": [91],
+        "8": [104],
+        "9": [116, 119]
+    },
+    "PU3": {
+        "0": [5]
+    },
+    "Think1": {
+        "0": [11],
+        "1": [19],
+        "2": [27],
+        "3": [37],
+        "4": [46],
+        "5": [55],
+        "6": [64]
  */
 
 // CLASS_CONFIG organized by day -> time -> class data
@@ -47,7 +57,7 @@ const CLASS_CONFIG = {
     "周六": {
         "0900-1030": {
             students: ["Angel", "Eddy", "Dylan", "Mia", "YaoYao"],
-            content: { book: "PU1", unit: "2", page: "28" }
+            content: { book: "", unit: "2", page: "28" }
         },
         "1040-1210": {
             students: ["Amy", "Annie", "Doris", "Harvey", "May", "Milk"],
@@ -55,7 +65,7 @@ const CLASS_CONFIG = {
         },
         "1310-1440": {
             students: ["Apple", "Lily", "Ryan", "Terry", "Toby"],
-            content: { book: "PU2", unit: "0", page: "5" }
+            content: { book: "Think1", unit: "6", page: "64" }
         },
         "1630-1800": {
             students: ["Coco", "Grayson", "Laura", "Leo"],
@@ -73,7 +83,7 @@ const CLASS_CONFIG = {
         },
         "1040-1210": {
             students: ["Amber", "Cindy", "Gaby", "Louis", "Kelly", "Susie"],
-            content: { book: "PU1", unit: "0", page: "5" }
+            content: { book: "Think1", unit: "5", page: "55" }
         },
         "1310-1440": {
             students: ["Grace", "Frank", "William", "Joe"],

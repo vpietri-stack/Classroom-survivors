@@ -171,13 +171,13 @@ const TEACHING_CONTENT = {
             "14": {
                 vocab: [
                     // Verbs & Pronoun Contractions
-                    'I am', "I'm", 'I am not', "I'm not",
-                    'he is', "he's", 'he is not', "he isn't",
-                    'she is', "she's", 'she is not', "she isn't",
-                    'it is', "it's", 'it is not', "it isn't",
-                    'you are', "you're", 'you are not', "you aren't",
-                    'we are', "we're", 'we are not', "we aren't",
-                    'they are', "they're", 'they are not', "they aren't",
+                    'I am', "I'm", "I'm not",
+                    'he is', "he's", "he isn't",
+                    'she is', "she's", "she isn't",
+                    'it is', "it's", "it isn't",
+                    'you are', "you're", "you aren't",
+                    'we are', "we're", "we aren't",
+                    'they are', "they're", "they aren't",
 
                     // School Nouns
                     'bag', 'book', 'pen', 'pencil', 'rubber', 'ruler', 'desk', 'chair', 'pencil case', 'board', 'table', 'teacher',
@@ -280,12 +280,12 @@ const TEACHING_CONTENT = {
                 vocab: [
                     // Verbs & Pronoun Contractions
                     'I am', "I'm", 'I am not', "I'm not",
-                    'he is', "he's", 'he is not', "he isn't",
-                    'she is', "she's", 'she is not', "she isn't",
-                    'it is', "it's", 'it is not', "it isn't",
-                    'you are', "you're", 'you are not', "you aren't",
-                    'we are', "we're", 'we are not', "we aren't",
-                    'they are', "they're", 'they are not', "they aren't",
+                    'he is', "he's", "he isn't",
+                    'she is', "she's", "she isn't",
+                    'it is', "it's", "it isn't",
+                    'you are', "you're", "you aren't",
+                    'we are', "we're", "we aren't",
+                    'they are', "they're", "they aren't",
 
                     // School Nouns
                     'bag', 'book', 'pen', 'pencil', 'rubber', 'ruler', 'desk', 'chair', 'pencil case', 'board', 'table', 'teacher',
@@ -355,13 +355,13 @@ const TEACHING_CONTENT = {
             "16": {
                 vocab: [
                     // Verbs & Pronoun Contractions
-                    'I am', "I'm", 'I am not', "I'm not",
-                    'he is', "he's", 'he is not', "he isn't",
-                    'she is', "she's", 'she is not', "she isn't",
-                    'it is', "it's", 'it is not', "it isn't",
-                    'you are', "you're", 'you are not', "you aren't",
-                    'we are', "we're", 'we are not', "we aren't",
-                    'they are', "they're", 'they are not', "they aren't",
+                    'I am', "I'm", "I'm not",
+                    'he is', "he's", "he isn't",
+                    'she is', "she's", "she isn't",
+                    'it is', "it's", "it isn't",
+                    'you are', "you're", "you aren't",
+                    'we are', "we're", "we aren't",
+                    'they are', "they're", "they aren't",
 
                     // School Nouns
                     'bag', 'book', 'pen', 'pencil', 'rubber', 'ruler', 'desk', 'chair', 'pencil case', 'board', 'table', 'teacher',
@@ -1392,13 +1392,13 @@ const TEACHING_CONTENT = {
             "42": {
                 vocab: [
                     // --- VERBS & PRONOUN CONTRACTIONS (TO BE) ---
-                    'I am', "I'm", 'I am not', "I'm not",
-                    'you are', "you're", 'you are not', "you aren't",
-                    'he is', "he's", 'he is not', "he isn't",
-                    'she is', "she's", 'she is not', "she isn't",
-                    'it is', "it's", 'it is not', "it isn't",
-                    'we are', "we're", 'we are not', "we aren't",
-                    'they are', "they're", 'they are not', "they aren't",
+                    'I am', "I'm", "I'm not",
+                    'you are', "you're", "you aren't",
+                    'he is', "he's", "he isn't",
+                    'she is', "she's", "she isn't",
+                    'it is', "it's", "it isn't",
+                    'we are', "we're", "we aren't",
+                    'they are', "they're", "they aren't",
 
                     // --- VERBS & PRONOUN CONTRACTIONS (HAVE GOT) ---
                     'I have got', "I've got", "I haven't got",
@@ -1618,13 +1618,13 @@ const TEACHING_CONTENT = {
             "43": {
                 vocab: [
                     // --- VERBS & PRONOUN CONTRACTIONS (TO BE) ---
-                    'I am', "I'm", 'I am not', "I'm not",
-                    'you are', "you're", 'you are not', "you aren't",
-                    'he is', "he's", 'he is not', "he isn't",
-                    'she is', "she's", 'she is not', "she isn't",
-                    'it is', "it's", 'it is not', "it isn't",
-                    'we are', "we're", 'we are not', "we aren't",
-                    'they are', "they're", 'they are not', "they aren't",
+                    'I am', "I'm", "I'm not",
+                    'you are', "you're", "you aren't",
+                    'he is', "he's", "he isn't",
+                    'she is', "she's", "she isn't",
+                    'it is', "it's", "it isn't",
+                    'we are', "we're", "we aren't",
+                    'they are', "they're", "they aren't",
 
                     // --- VERBS & PRONOUN CONTRACTIONS (HAVE GOT) ---
                     'I have got', "I've got", "I haven't got",
@@ -1848,13 +1848,13 @@ const TEACHING_CONTENT = {
             "5": {
                 vocab: [
                     // Verbs, Pronouns & Contractions
-                    'I am', "I'm", 'I am not', "I'm not",
-                    'he is', "he's", 'he is not', "he isn't",
-                    'she is', "she's", 'she is not', "she isn't",
-                    'it is', "it's", 'it is not', "it isn't",
-                    'you are', "you're", 'you are not', "you aren't",
-                    'we are', "we're", 'we are not', "we aren't",
-                    'they are', "they're", 'they are not', "they aren't",
+                    'I am', "I'm", "I'm not",
+                    'he is', "he's", "he isn't",
+                    'she is', "she's", "she isn't",
+                    'it is', "it's", "it isn't",
+                    'you are', "you're", "you aren't",
+                    'we are', "we're", "we aren't",
+                    'they are', "they're", "they aren't",
                     'I have got', "I've got", "I haven't got",
                     'you have got', "you've got", "you haven't got",
                     'we have got', "we've got", "we haven't got",
@@ -1862,9 +1862,9 @@ const TEACHING_CONTENT = {
                     'he has got', "he's got", "he hasn't got",
                     'she has got', "she's got", "she hasn't got",
                     'it has got', "it's got", "it hasn't got",
-                    'I can', 'I cannot', "I can't", 'he can', "he can't", 'she can', "she can't", 'it can', "it can't",
-                    'I do', 'I do not', "I don't", 'you do', "you don't", 'they do', "they don't",
-                    'he does', 'he does not', "he doesn't", 'she does', "she doesn't",
+                    'I can', "I can't", 'he can', "he can't", 'she can', "she can't", 'it can', "it can't",
+                    'I do', "I don't", 'you do', "you don't", 'they do', "they don't",
+                    'he does', "he doesn't", 'she does', "she doesn't",
 
                     // People & Family
                     'family', 'grandfather', 'grandpa', 'grandmother', 'grandma', 'father', 'dad', 'mother', 'mum',

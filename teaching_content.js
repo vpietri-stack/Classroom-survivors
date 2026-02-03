@@ -3530,7 +3530,8 @@ function getSpacedRepetitionContent(book, unit, page, type, isStudyMode, count =
     const activePageIndex = sortedPages.findIndex(p => p.book === book && p.unit === unit && p.page === page.toString());
 
     if (activePageIndex === -1) {
-        // Fallback to current page only if not found
+        // Game Mode logic: content from beginning up to current page
+        // (Ensure we don't show future content)
         const content = TEACHING_CONTENT[book] && TEACHING_CONTENT[book][unit] && TEACHING_CONTENT[book][unit][page];
         return content ? (content[type] || []) : [];
     }
@@ -3587,9 +3588,9 @@ function getSpacedRepetitionContent(book, unit, page, type, isStudyMode, count =
 
         return finalSet;
     } else {
-        // Game Mode: Weighted selection starting at current page
+        // Game Mode: Weighted selection up to current page
         const gamePageIndices = [];
-        for (let i = activePageIndex; i < sortedPages.length; i++) {
+        for (let i = 0; i <= activePageIndex; i++) {
             gamePageIndices.push(i);
         }
         const gamePages = gamePageIndices.map(idx => sortedPages[idx]);
@@ -3621,7 +3622,7 @@ function getWeightedItemForGame(book, unit, page, type) {
     }
 
     const gamePageIndices = [];
-    for (let i = activePageIndex; i < sortedPages.length; i++) {
+    for (let i = 0; i <= activePageIndex; i++) {
         gamePageIndices.push(i);
     }
     const gamePages = gamePageIndices.map(idx => sortedPages[idx]);

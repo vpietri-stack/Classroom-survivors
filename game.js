@@ -1732,9 +1732,9 @@ function loadContent() {
     const sortedPages = getSortedPagesForBook(book);
     const activePageIndex = sortedPages.findIndex(p => p.book === book && p.unit === unit && p.page === page.toString());
 
-    // We populate the global arrays with ALL eligible items (current + future)
+    // We populate the global arrays with ALL eligible items (up to current)
     // The specific weighted selection will happen during minigame start
-    const unitsToLoad = sortedPages.slice(activePageIndex);
+    const unitsToLoad = sortedPages.slice(0, activePageIndex + 1);
 
     unitsToLoad.forEach(p => {
         const content = TEACHING_CONTENT[book] && TEACHING_CONTENT[book][p.unit] && TEACHING_CONTENT[book][p.unit][p.page];
@@ -2157,11 +2157,12 @@ function startSentenceMatchGame() {
     const sortedPages = getSortedPagesForBook(book);
     const activePageIndex = sortedPages.findIndex(p => p.book === book && p.unit === unit && p.page === page.toString());
 
-    // Game Mode logic: content from current page onwards (or falling back to current if at end)
+    // Game Mode logic: content from beginning up to current page
+    // (Ensure we don't show future content)
     let gamePages = [];
     if (activePageIndex !== -1) {
         const gamePageIndices = [];
-        for (let i = activePageIndex; i < sortedPages.length; i++) {
+        for (let i = 0; i <= activePageIndex; i++) {
             gamePageIndices.push(i);
         }
         gamePages = gamePageIndices.map(idx => sortedPages[idx]);

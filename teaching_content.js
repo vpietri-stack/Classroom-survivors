@@ -1853,9 +1853,9 @@ const TEACHING_CONTENT = {
                     "I like", "you like", "we like", "they like", "he likes", "she likes",
                     "Yes he does", "No he doesn't", "Yes she does", "No she doesn't",
                     "he doesn't like", "she doesn't like",
-                    "Yes I do", "Yes you do", "Yes we do", "Yes they do",
-                    "No I don't", "No you don't", "No we don't", "No they don't",
-                    "I don't like", "you don't like", "we don't like", "they don't like"
+                    "Yes I do",
+                    "No I don't",
+                    "I don't like",
                 ],
                 sentences: [
                     "I like chocolate.",

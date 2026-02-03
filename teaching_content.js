@@ -279,7 +279,7 @@ const TEACHING_CONTENT = {
             "15": {
                 vocab: [
                     // Verbs & Pronoun Contractions
-                    'I am', "I'm", 'I am not', "I'm not",
+                    'I am', "I'm", "I'm not",
                     'he is', "he's", "he isn't",
                     'she is', "she's", "she isn't",
                     'it is', "it's", "it isn't",
@@ -576,11 +576,11 @@ const TEACHING_CONTENT = {
             },
             "26": {
                 vocab: [ // Verbs & Pronoun Contractions
-                    'I am', "I'm", 'I am not', "I'm not",
-                    'he is', "he's", 'he is not', "he isn't",
-                    'she is', "she's", 'she is not', "she isn't",
-                    'it is', "it's", 'it is not', "it isn't",
-                    'they are', "they're", 'they are not', "they aren't",
+                    'I am', "I'm", "I'm not",
+                    'he is', "he's", "he isn't",
+                    'she is', "she's", "she isn't",
+                    'it is', "it's", "it isn't",
+                    'they are', "they're", "they aren't",
 
                     // 'Have Got' (Positive & Negative)
                     "I've got", "I haven't got",
@@ -690,11 +690,11 @@ const TEACHING_CONTENT = {
             },
             "27": {
                 vocab: [ // Verbs & Pronoun Contractions
-                    'I am', "I'm", 'I am not', "I'm not",
-                    'he is', "he's", 'he is not', "he isn't",
-                    'she is', "she's", 'she is not', "she isn't",
-                    'it is', "it's", 'it is not', "it isn't",
-                    'they are', "they're", 'they are not', "they aren't",
+                    'I am', "I'm", "I'm not",
+                    'he is', "he's", "he isn't",
+                    'she is', "she's", "she isn't",
+                    'it is', "it's", "it isn't",
+                    'they are', "they're", "they aren't",
 
                     // 'Have Got' (Positive & Negative)
                     "I've got", "I haven't got",
@@ -703,7 +703,7 @@ const TEACHING_CONTENT = {
                     "they've got", "they haven't got",
                     "he's got", "he hasn't got",
                     "she's got", "she hasn't got",
-                    'it has got', "it's got", 'it has not got', "it hasn't got",
+                    "it's got", "it hasn't got",
 
                     // Family & People Nouns
                     'family', 'mother', 'mum', 'father', 'dad', 'brother', 'sister',
@@ -802,11 +802,11 @@ const TEACHING_CONTENT = {
             },
             "28": {
                 vocab: [ // Verbs & Pronoun Contractions
-                    'I am', "I'm", 'I am not', "I'm not",
-                    'he is', "he's", 'he is not', "he isn't",
-                    'she is', "she's", 'she is not', "she isn't",
-                    'it is', "it's", 'it is not', "it isn't",
-                    'they are', "they're", 'they are not', "they aren't",
+                    'I am', "I'm", "I'm not",
+                    'he is', "he's", "he isn't",
+                    'she is', "she's", "she isn't",
+                    'it is', "it's", "it isn't",
+                    'they are', "they're", "they aren't",
 
                     // 'Have Got' (Positive & Negative)
                     "I've got", "I haven't got",
@@ -815,7 +815,7 @@ const TEACHING_CONTENT = {
                     "they've got", "they haven't got",
                     "he's got", "he hasn't got",
                     "she's got", "she hasn't got",
-                    'it has got', "it's got", 'it has not got', "it hasn't got",
+                    "it's got", "it hasn't got",
 
                     // Family & People Nouns
                     'family', 'mother', 'mum', 'father', 'dad', 'brother', 'sister',
@@ -1085,13 +1085,13 @@ const TEACHING_CONTENT = {
             },
             "38": {
                 vocab: [        // --- VERBS & PRONOUN CONTRACTIONS (TO BE - REVIEW) ---
-                    'it is', "it's", 'it is not', "it isn't",
-                    'they are', "they're", 'they are not', "they aren't",
+                    'it is', "it's", "it isn't",
+                    'they are', "they're", "they aren't",
 
                     // --- VERBS & PRONOUN CONTRACTIONS (HAS GOT) ---
-                    'he has got', "he's got", "he hasn't got",
-                    'she has got', "she's got", "she hasn't got",
-                    'it has got', "it's got", "it hasn't got", 'has', "hasn't",
+                    "he's got", "he hasn't got",
+                    "she's got", "she hasn't got",
+                    "it's got", "it hasn't got", 'has', "hasn't",
 
                     // --- FARM ANIMALS ---
                     'animal', 'bee', 'cat', 'chicken', 'cow', 'dog', 'donkey', 'duck',
@@ -1187,13 +1187,13 @@ const TEACHING_CONTENT = {
             },
             "39": {
                 vocab: [        // --- VERBS & PRONOUN CONTRACTIONS (TO BE - REVIEW) ---
-                    'it is', "it's", 'it is not', "it isn't",
-                    'they are', "they're", 'they are not', "they aren't",
+                    'it is', "it's", "it isn't",
+                    'they are', "they're", "they aren't",
 
                     // --- VERBS & PRONOUN CONTRACTIONS (HAS GOT) ---
-                    'he has got', "he's got", "he hasn't got",
-                    'she has got', "she's got", "she hasn't got",
-                    'it has got', "it's got", "it hasn't got", 'has', "hasn't",
+                    "he's got", "he hasn't got",
+                    "she's got", "she hasn't got",
+                    "it's got", "it hasn't got", 'has', "hasn't",
 
                     // --- FARM ANIMALS ---
                     'animal', 'bee', 'cat', 'chicken', 'cow', 'dog', 'donkey', 'duck',
@@ -1289,13 +1289,13 @@ const TEACHING_CONTENT = {
             },
             "40": {
                 vocab: [        // --- VERBS & PRONOUN CONTRACTIONS (TO BE - REVIEW) ---
-                    'it is', "it's", 'it is not', "it isn't",
-                    'they are', "they're", 'they are not', "they aren't",
+                    'it is', "it's", "it isn't",
+                    'they are', "they're", "they aren't",
 
                     // --- VERBS & PRONOUN CONTRACTIONS (HAS GOT) ---
-                    'he has got', "he's got", "he hasn't got",
-                    'she has got', "she's got", "she hasn't got",
-                    'it has got', "it's got", "it hasn't got", 'has', "hasn't",
+                    "he's got", "he hasn't got",
+                    "she's got", "she hasn't got",
+                    "it's got", "it hasn't got", 'has', "hasn't",
 
                     // --- FARM ANIMALS ---
                     'animal', 'bee', 'cat', 'chicken', 'cow', 'dog', 'donkey', 'duck',
@@ -1407,7 +1407,7 @@ const TEACHING_CONTENT = {
                     "they've got", "they haven't got",
                     "he's got", "he hasn't got",
                     "she's got", "she hasn't got",
-                    'it has got', "it's got", "it hasn't got",
+                    "it's got", "it hasn't got",
 
                     // --- SENSORY & ACTION VERBS ---
                     'look', 'listen', 'open', 'close', 'stand up', 'sit down',
@@ -1633,7 +1633,7 @@ const TEACHING_CONTENT = {
                     "they've got", "they haven't got",
                     "he's got", "he hasn't got",
                     "she's got", "she hasn't got",
-                    'it has got', "it's got", "it hasn't got",
+                    "it's got", "it hasn't got",
 
                     // --- SENSORY & ACTION VERBS ---
                     'look', 'listen', 'open', 'close', 'stand up', 'sit down',
@@ -2049,7 +2049,7 @@ const TEACHING_CONTENT = {
                     "they've got", "they haven't got",
                     "he's got", "he hasn't got",
                     "she's got", "she hasn't got",
-                    'it has got', "it's got", "it hasn't got",
+                    "it's got", "it hasn't got",
                     'I can', "I can't", 'he can', "he can't", 'she can', "she can't", 'it can', "it can't",
                     'I do', "I don't", 'you do', "you don't", 'they do', "they don't",
                     'he does', "he doesn't", 'she does', "she doesn't",
@@ -2377,184 +2377,184 @@ const TEACHING_CONTENT = {
                     { a: "What time do you have breakfast?", b: "I have breakfast at eight o'clock." },
                     { a: "What time do you get dressed?", b: "I get dressed at eight o'clock." }
                 ]
+            }
+        },
+        "2": {
+            "28": {
+                vocab: [
+                    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'weekend',
+                    'do homework', 'go shopping', 'go skating', 'listen to music', 'read a comic', 'watch a film', 'write an email',
+                    'always', 'often', 'sometimes', 'never',
+                    'morning', 'afternoon', 'evening',
+                    'before', 'after',
+                    'once', 'twice',
+                    'everyday', 'every',
+                    'day', 'week', 'month', 'year',
+                    'wear', 'helmet', 'gloves', 'goggles', 'knee pads', 'must', "mustn't",
+                ],
+                sentences: [
+                    "I always do my homework after school.",
+                    "He often goes shopping on Saturdays.",
+                    "She sometimes listens to music before bed.",
+                    "They never go skating at the weekend.",
+                    "We watch a film every Friday evening.",
+                    "I write an email once a week.",
+                    "She reads a comic twice a month.",
+                    "They go shopping everyday.",
+                    "You must wear a helmet.",
+                    "I must wear goggles when I swim.",
+                    "He must wear gloves in the winter.",
+                    "You mustn't kick the teacher.",
+                    "You mustn't eat poopoo.",
+                    "We mustn't drink peepee.",
+                    "How often do you listen to music? I always listen to music in the car.",
+                    "How often does she go shopping? She goes shopping once a week.",
+                    "How often do they watch a film? They watch a film every weekend."
+                ],
+                sentencePairs: [
+                    { a: "How often do you do homework?", b: "I always do homework after school." },
+                    { a: "How often does she go shopping?", b: "She goes shopping once a week." },
+                    { a: "How often do they watch a film?", b: "They often watch a film at the weekend." },
+                    { a: "What must you wear when you go skating?", b: "I must wear a helmet and knee pads." },
+                    { a: "How often do you write an email?", b: "I write an email twice a month." },
+                    { a: "How often do you go skating?", b: "I go skating twice a year." }
+                ]
+            }
+        },
+        "3": {
+            "40": {
+                vocab: [
+                    'clown', 'cook', 'dentist', 'doctor', 'farmer', 'film star', 'nurse', 'pirate', 'pop star', 'vet',
+                    'beard', 'blonde', 'curly', 'fair', 'fat', 'moustache', 'short', 'straight', 'tall', 'thin',
+                    'treasure', 'costume', 'party', 'surprise', 'present',
+                    'why', 'because'
+                ],
+                sentences: [
+                    "What does a doctor do? A doctor helps people.",
+                    "What is the doctor doing? She's helping a child.",
+                    "What does a farmer do? A farmer grows food.",
+                    "What is the farmer doing? He's driving a tractor.",
+                    "What do dentists do? They help people with their teeth.",
+                    "What are the dentists doing? They're working in the clinic.",
+                    "What does she do? She's a pop star.",
+                    "What is the pop star doing? She's singing a song.",
+                    "What do you do? I'm a cook.",
+                    "What are you doing now? I'm cooking dinner.",
+                    "Why are you wearing a costume? Because it's a party.",
+                    "I'm happy because I found the treasure.",
+                    "He's got a moustache and curly hair.",
+                    "She's tall and thin.",
+                    "They've got blonde hair and fair skin.",
+                    "He's got a beard and straight black hair.",
+                    "She's short and has got curly blonde hair."
+                ],
+                sentencePairs: [
+                    { a: "What does a doctor do?", b: "A doctor helps people." },
+                    { a: "What is the doctor doing?", b: "She's helping the girl." },
+                    { a: "What does he do?", b: "He's a firefighter." },
+                    { a: "What is the firefighter doing?", b: "He's saving the cat." },
+                    { a: "Why are you happy?", b: "Because It's my birthday." },
+                    { a: "What does she look like?", b: "She's tall and thin with long curly hair." },
+                    { a: "What does he look like?", b: "He's short, fat, and bald with a big moustache." }
+                ]
             },
-            "2": {
-                "28": {
-                    vocab: [
-                        'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'weekend',
-                        'do homework', 'go shopping', 'go skating', 'listen to music', 'read a comic', 'watch a film', 'write an email',
-                        'always', 'often', 'sometimes', 'never',
-                        'morning', 'afternoon', 'evening',
-                        'before', 'after',
-                        'once', 'twice',
-                        'everyday', 'every',
-                        'day', 'week', 'month', 'year',
-                        'wear', 'helmet', 'gloves', 'goggles', 'knee pads', 'must', "mustn't",
-                    ],
-                    sentences: [
-                        "I always do my homework after school.",
-                        "He often goes shopping on Saturdays.",
-                        "She sometimes listens to music before bed.",
-                        "They never go skating at the weekend.",
-                        "We watch a film every Friday evening.",
-                        "I write an email once a week.",
-                        "She reads a comic twice a month.",
-                        "They go shopping everyday.",
-                        "You must wear a helmet.",
-                        "I must wear goggles when I swim.",
-                        "He must wear gloves in the winter.",
-                        "You mustn't kick the teacher.",
-                        "You mustn't eat poopoo.",
-                        "We mustn't drink peepee.",
-                        "How often do you listen to music? I always listen to music in the car.",
-                        "How often does she go shopping? She goes shopping once a week.",
-                        "How often do they watch a film? They watch a film every weekend."
-                    ],
-                    sentencePairs: [
-                        { a: "How often do you do homework?", b: "I always do homework after school." },
-                        { a: "How often does she go shopping?", b: "She goes shopping once a week." },
-                        { a: "How often do they watch a film?", b: "They often watch a film at the weekend." },
-                        { a: "What must you wear when you go skating?", b: "I must wear a helmet and knee pads." },
-                        { a: "How often do you write an email?", b: "I write an email twice a month." },
-                        { a: "How often do you go skating?", b: "I go skating twice a year." }
-                    ]
-                }
-            },
-            "3": {
-                "40": {
-                    vocab: [
-                        'clown', 'cook', 'dentist', 'doctor', 'farmer', 'film star', 'nurse', 'pirate', 'pop star', 'vet',
-                        'beard', 'blonde', 'curly', 'fair', 'fat', 'moustache', 'short', 'straight', 'tall', 'thin',
-                        'treasure', 'costume', 'party', 'surprise', 'present',
-                        'why', 'because'
-                    ],
-                    sentences: [
-                        "What does a doctor do? A doctor helps people.",
-                        "What is the doctor doing? She's helping a child.",
-                        "What does a farmer do? A farmer grows food.",
-                        "What is the farmer doing? He's driving a tractor.",
-                        "What do dentists do? They help people with their teeth.",
-                        "What are the dentists doing? They're working in the clinic.",
-                        "What does she do? She's a pop star.",
-                        "What is the pop star doing? She's singing a song.",
-                        "What do you do? I'm a cook.",
-                        "What are you doing now? I'm cooking dinner.",
-                        "Why are you wearing a costume? Because it's a party.",
-                        "I'm happy because I found the treasure.",
-                        "He's got a moustache and curly hair.",
-                        "She's tall and thin.",
-                        "They've got blonde hair and fair skin.",
-                        "He's got a beard and straight black hair.",
-                        "She's short and has got curly blonde hair."
-                    ],
-                    sentencePairs: [
-                        { a: "What does a doctor do?", b: "A doctor helps people." },
-                        { a: "What is the doctor doing?", b: "She's helping the girl." },
-                        { a: "What does he do?", b: "He's a firefighter." },
-                        { a: "What is the firefighter doing?", b: "He's saving the cat." },
-                        { a: "Why are you happy?", b: "Because It's my birthday." },
-                        { a: "What does she look like?", b: "She's tall and thin with long curly hair." },
-                        { a: "What does he look like?", b: "He's short, fat, and bald with a big moustache." }
-                    ]
-                },
-                "43": {
-                    vocab: [
-                        'countryside', 'field', 'forest', 'grass', 'ground', 'lake', 'leaf', 'leaves', 'mountain', 'river', 'rock', 'tractor',
-                        'wake up', 'get dressed', 'get up', 'have a shower', 'have breakfast', 'toothbrush', 'toothpaste', 'towel',
-                        'going', 'getting', 'swimming', 'having', 'eating', 'kicking', 'playing', 'riding',
-                        'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'weekend',
-                        'do homework', 'go shopping', 'go skating', 'listen to music', 'read a comic', 'watch a film', 'write an email',
-                        'always', 'often', 'sometimes', 'never',
-                        'morning', 'afternoon', 'evening',
-                        'before', 'after',
-                        'once', 'twice',
-                        'everyday', 'every',
-                        'day', 'week', 'month', 'year',
-                        'wear', 'helmet', 'gloves', 'goggles', 'knee pads', 'must', "mustn't",
-                        'clown', 'cook', 'dentist', 'doctor', 'farmer', 'film star', 'nurse', 'pirate', 'pop star', 'vet',
-                        'beard', 'blonde', 'curly', 'fair', 'fat', 'moustache', 'short', 'straight', 'tall', 'thin',
-                        'treasure', 'costume', 'party', 'surprise', 'present',
-                        'why', 'because'
-                    ],
-                    sentences: [
-                        "What are you doing? I'm going to the forest.",
-                        "What is he doing? He's swimming in the lake.",
-                        "What is she doing? She's riding a horse.",
-                        "What are we doing? We're playing in the grass.",
-                        "What are they doing? They're eating breakfast.",
-                        "Are you having a shower? Yes, I am.",
-                        "Is he getting dressed? No, he isn't.",
-                        "Are they kicking a football? Yes, they are.",
-                        "Is she going to the mountain? Yes, she is.",
-                        "Are we playing in the field? No, we aren't.",
-                        "What time do you wake up? I wake up at six o'clock.",
-                        "What time do you get up? I get up at seven o'clock.",
-                        "What time do you have a shower? I have a shower at seven o'clock.",
-                        "What time do you have breakfast? I have breakfast at eight o'clock.",
-                        "What time do you get dressed? I get dressed at eight o'clock.",
-                        "I always do my homework after school.",
-                        "He often goes shopping on Saturdays.",
-                        "She sometimes listens to music before bed.",
-                        "They never go skating at the weekend.",
-                        "We watch a film every Friday evening.",
-                        "I write an email once a week.",
-                        "She reads a comic twice a month.",
-                        "They go shopping everyday.",
-                        "You must wear a helmet.",
-                        "I must wear goggles when I swim.",
-                        "He must wear gloves in the winter.",
-                        "You mustn't kick the teacher.",
-                        "You mustn't eat poopoo.",
-                        "We mustn't drink peepee.",
-                        "How often do you listen to music? I always listen to music in the car.",
-                        "How often does she go shopping? She goes shopping once a week.",
-                        "How often do they watch a film? They watch a film every weekend.",
-                        "What does a doctor do? A doctor helps people.",
-                        "What is the doctor doing? She's helping a child.",
-                        "What does a farmer do? A farmer grows food.",
-                        "What is the farmer doing? He's driving a tractor.",
-                        "What do dentists do? They help people with their teeth.",
-                        "What are the dentists doing? They're working in the clinic.",
-                        "What does she do? She's a pop star.",
-                        "What is the pop star doing? She's singing a song.",
-                        "What do you do? I'm a cook.",
-                        "What are you doing now? I'm cooking dinner.",
-                        "Why are you wearing a costume? Because it's a party.",
-                        "I'm happy because I found the treasure.",
-                        "He's got a moustache and curly hair.",
-                        "She's tall and thin.",
-                        "They've got blonde hair and fair skin.",
-                        "He's got a beard and straight black hair.",
-                        "She's short and has got curly blonde hair."
-                    ],
-                    sentencePairs: [
-                        { a: "What are you doing?", b: "I'm going to the forest." },
-                        { a: "What is he doing?", b: "He's swimming in the lake." },
-                        { a: "What is she doing?", b: "She's riding a horse." },
-                        { a: "What are they doing?", b: "They're eating breakfast." },
-                        { a: "Are you having a shower?", b: "Yes, I am." },
-                        { a: "Is he getting dressed?", b: "No, he isn't." },
-                        { a: "Are they kicking a football?", b: "Yes, they are." },
-                        { a: "What time do you wake up?", b: "I wake up at six o'clock." },
-                        { a: "What time do you get up?", b: "I get up at seven o'clock." },
-                        { a: "What time do you have a shower?", b: "I have a shower at seven o'clock." },
-                        { a: "What time do you have breakfast?", b: "I have breakfast at eight o'clock." },
-                        { a: "What time do you get dressed?", b: "I get dressed at eight o'clock." },
-                        { a: "How often do you do homework?", b: "I always do homework after school." },
-                        { a: "How often does she go shopping?", b: "She goes shopping once a week." },
-                        { a: "How often do they watch a film?", b: "They often watch a film at the weekend." },
-                        { a: "What must you wear when you go skating?", b: "I must wear a helmet and knee pads." },
-                        { a: "How often do you write an email?", b: "I write an email twice a month." },
-                        { a: "How often do you go skating?", b: "I go skating twice a year." },
-                        { a: "What does a doctor do?", b: "A doctor helps people." },
-                        { a: "What is the doctor doing?", b: "She's helping the girl." },
-                        { a: "What does he do?", b: "He's a firefighter." },
-                        { a: "What is the firefighter doing?", b: "He's saving the cat." },
-                        { a: "Why are you happy?", b: "Because It's my birthday." },
-                        { a: "What does she look like?", b: "She's tall and thin with long curly hair." },
-                        { a: "What does he look like?", b: "He's short, fat, and bald with a big moustache." }
-                    ]
-                }
+            "43": {
+                vocab: [
+                    'countryside', 'field', 'forest', 'grass', 'ground', 'lake', 'leaf', 'leaves', 'mountain', 'river', 'rock', 'tractor',
+                    'wake up', 'get dressed', 'get up', 'have a shower', 'have breakfast', 'toothbrush', 'toothpaste', 'towel',
+                    'going', 'getting', 'swimming', 'having', 'eating', 'kicking', 'playing', 'riding',
+                    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'weekend',
+                    'do homework', 'go shopping', 'go skating', 'listen to music', 'read a comic', 'watch a film', 'write an email',
+                    'always', 'often', 'sometimes', 'never',
+                    'morning', 'afternoon', 'evening',
+                    'before', 'after',
+                    'once', 'twice',
+                    'everyday', 'every',
+                    'day', 'week', 'month', 'year',
+                    'wear', 'helmet', 'gloves', 'goggles', 'knee pads', 'must', "mustn't",
+                    'clown', 'cook', 'dentist', 'doctor', 'farmer', 'film star', 'nurse', 'pirate', 'pop star', 'vet',
+                    'beard', 'blonde', 'curly', 'fair', 'fat', 'moustache', 'short', 'straight', 'tall', 'thin',
+                    'treasure', 'costume', 'party', 'surprise', 'present',
+                    'why', 'because'
+                ],
+                sentences: [
+                    "What are you doing? I'm going to the forest.",
+                    "What is he doing? He's swimming in the lake.",
+                    "What is she doing? She's riding a horse.",
+                    "What are we doing? We're playing in the grass.",
+                    "What are they doing? They're eating breakfast.",
+                    "Are you having a shower? Yes, I am.",
+                    "Is he getting dressed? No, he isn't.",
+                    "Are they kicking a football? Yes, they are.",
+                    "Is she going to the mountain? Yes, she is.",
+                    "Are we playing in the field? No, we aren't.",
+                    "What time do you wake up? I wake up at six o'clock.",
+                    "What time do you get up? I get up at seven o'clock.",
+                    "What time do you have a shower? I have a shower at seven o'clock.",
+                    "What time do you have breakfast? I have breakfast at eight o'clock.",
+                    "What time do you get dressed? I get dressed at eight o'clock.",
+                    "I always do my homework after school.",
+                    "He often goes shopping on Saturdays.",
+                    "She sometimes listens to music before bed.",
+                    "They never go skating at the weekend.",
+                    "We watch a film every Friday evening.",
+                    "I write an email once a week.",
+                    "She reads a comic twice a month.",
+                    "They go shopping everyday.",
+                    "You must wear a helmet.",
+                    "I must wear goggles when I swim.",
+                    "He must wear gloves in the winter.",
+                    "You mustn't kick the teacher.",
+                    "You mustn't eat poopoo.",
+                    "We mustn't drink peepee.",
+                    "How often do you listen to music? I always listen to music in the car.",
+                    "How often does she go shopping? She goes shopping once a week.",
+                    "How often do they watch a film? They watch a film every weekend.",
+                    "What does a doctor do? A doctor helps people.",
+                    "What is the doctor doing? She's helping a child.",
+                    "What does a farmer do? A farmer grows food.",
+                    "What is the farmer doing? He's driving a tractor.",
+                    "What do dentists do? They help people with their teeth.",
+                    "What are the dentists doing? They're working in the clinic.",
+                    "What does she do? She's a pop star.",
+                    "What is the pop star doing? She's singing a song.",
+                    "What do you do? I'm a cook.",
+                    "What are you doing now? I'm cooking dinner.",
+                    "Why are you wearing a costume? Because it's a party.",
+                    "I'm happy because I found the treasure.",
+                    "He's got a moustache and curly hair.",
+                    "She's tall and thin.",
+                    "They've got blonde hair and fair skin.",
+                    "He's got a beard and straight black hair.",
+                    "She's short and has got curly blonde hair."
+                ],
+                sentencePairs: [
+                    { a: "What are you doing?", b: "I'm going to the forest." },
+                    { a: "What is he doing?", b: "He's swimming in the lake." },
+                    { a: "What is she doing?", b: "She's riding a horse." },
+                    { a: "What are they doing?", b: "They're eating breakfast." },
+                    { a: "Are you having a shower?", b: "Yes, I am." },
+                    { a: "Is he getting dressed?", b: "No, he isn't." },
+                    { a: "Are they kicking a football?", b: "Yes, they are." },
+                    { a: "What time do you wake up?", b: "I wake up at six o'clock." },
+                    { a: "What time do you get up?", b: "I get up at seven o'clock." },
+                    { a: "What time do you have a shower?", b: "I have a shower at seven o'clock." },
+                    { a: "What time do you have breakfast?", b: "I have breakfast at eight o'clock." },
+                    { a: "What time do you get dressed?", b: "I get dressed at eight o'clock." },
+                    { a: "How often do you do homework?", b: "I always do homework after school." },
+                    { a: "How often does she go shopping?", b: "She goes shopping once a week." },
+                    { a: "How often do they watch a film?", b: "They often watch a film at the weekend." },
+                    { a: "What must you wear when you go skating?", b: "I must wear a helmet and knee pads." },
+                    { a: "How often do you write an email?", b: "I write an email twice a month." },
+                    { a: "How often do you go skating?", b: "I go skating twice a year." },
+                    { a: "What does a doctor do?", b: "A doctor helps people." },
+                    { a: "What is the doctor doing?", b: "She's helping the girl." },
+                    { a: "What does he do?", b: "He's a firefighter." },
+                    { a: "What is the firefighter doing?", b: "He's saving the cat." },
+                    { a: "Why are you happy?", b: "Because It's my birthday." },
+                    { a: "What does she look like?", b: "She's tall and thin with long curly hair." },
+                    { a: "What does he look like?", b: "He's short, fat, and bald with a big moustache." }
+                ]
             }
         },
         "4": {
@@ -2893,10 +2893,10 @@ const TEACHING_CONTENT = {
                     'boots', 'coat', 'scarf', 'sweater', 'gloves', 'hat', 'raincoat', 'umbrella',
                     'was', 'were', "wasn't", "weren't", 'yesterday', 'last night', 'last week',
                     'beans', 'cheese', 'chicken', 'eggs', 'flour', 'fruit', 'meat', 'pasta', 'peas', 'pepper', 'potatoes', 'rice', 'salt', 'soup', 'sugar', 'vegetables',
-                    'boil, boiled', 'cook, cooked', 'cut', 'fry, fried', 'carry, carried', 'drop, dropped', 'wash, washed', 'cry, cried',
-                    'dance, danced', 'help, helped', 'like, liked', 'look, looked', 'play, played', 'start, started', 'stop, stopped', 'smile, smiled',
-                    'go, went', 'do, did', 'buy, bought', 'catch, caught', 'come, came', 'draw, drew', 'drink, drank', 'eat, ate',
-                    'find, found', 'give, gave', 'have, had', 'lose, lost', 'make, made', 'see, saw', 'take, took', 'wear, wore',
+                    'boil boiled', 'cook cooked', 'cut', 'fry fried', 'carry carried', 'drop dropped', 'wash washed', 'cry cried',
+                    'dance danced', 'help helped', 'like liked', 'look looked', 'play played', 'start started', 'stop stopped', 'smile smiled',
+                    'go went', 'do did', 'buy bought', 'catch caught', 'come came', 'draw drew', 'drink drank', 'eat ate',
+                    'find found', 'give gave', 'have had', 'lose lost', 'make made', 'see saw', 'take took', 'wear wore',
                     'bus station', 'café', 'cinema', 'hospital', 'library', 'market', 'shopping centre', 'sports centre', 'supermarket', 'swimming pool', 'zoo',
                     'car park', 'litter bin', 'pavement', 'square', 'traffic lights', 'ticket',
                     'have to',

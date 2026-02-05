@@ -584,12 +584,12 @@ const TEACHING_CONTENT = {
 
                     // 'Have Got' (Positive & Negative)
                     "I've got", "I haven't got",
-                    "you've got", "you haven't got",
-                    "we've got", "we haven't got",
-                    "they've got", "they haven't got",
-                    "he's got", "he hasn't got",
-                    "she's got", "she hasn't got",
-                    "it's got", "it hasn't got",
+                    "you've got", " haven't got",
+                    "we've got", " haven't got",
+                    "they've got", " haven't got",
+                    "he's got", "hasn't got",
+            "hasn't got",
+                    "it's got", "hasn't got",
 
                     // Family & People Nouns
                     'family', 'mother', 'mum', 'father', 'dad', 'brother', 'sister',
@@ -698,12 +698,12 @@ const TEACHING_CONTENT = {
 
                     // 'Have Got' (Positive & Negative)
                     "I've got", "I haven't got",
-                    "you've got", "you haven't got",
-                    "we've got", "we haven't got",
-                    "they've got", "they haven't got",
-                    "he's got", "he hasn't got",
-                    "she's got", "she hasn't got",
-                    "it's got", "it hasn't got",
+                    "you've got", "haven't got",
+                    "we've got", "haven't got",
+                    "they've got", "haven't got",
+                    "he's got", "hasn't got",
+                    "hasn't got",
+                    "it's got", "hasn't got",
 
                     // Family & People Nouns
                     'family', 'mother', 'mum', 'father', 'dad', 'brother', 'sister',
@@ -810,12 +810,12 @@ const TEACHING_CONTENT = {
 
                     // 'Have Got' (Positive & Negative)
                     "I've got", "I haven't got",
-                    "you've got", "you haven't got",
-                    "we've got", "we haven't got",
-                    "they've got", "they haven't got",
+                    "you've got", "haven't got",
+                    "we've got", "haven't got",
+                    "they've got", "haven't got",
                     "he's got", "he hasn't got",
-                    "she's got", "she hasn't got",
-                    "it's got", "it hasn't got",
+                    "hasn't got",
+                    "it's got", "hasn't got",
 
                     // Family & People Nouns
                     'family', 'mother', 'mum', 'father', 'dad', 'brother', 'sister',

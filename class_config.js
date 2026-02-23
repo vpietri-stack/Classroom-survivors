@@ -44,7 +44,7 @@ const CLASS_CONFIG = {
     "周一": {
         "1810-1940": {
             students: ["Amy", "David", "Gavin", "Nick", "Sean", "Sophie"],
-            content: { book: "PU1", unit: "7", page: "92" }
+            content: { book: "PU2", unit: "0", page: "5" }
         }
     },
     "周四": {
@@ -62,7 +62,7 @@ const CLASS_CONFIG = {
     "周六": {
         "0900-1030": {
             students: ["Angel", "Eddy", "Dylan", "Mia", "YaoYao"],
-            content: { book: "PU1", unit: "6", page: "78" }
+            content: { book: "PU1", unit: "7", page: "92" }
         },
         "1040-1210": {
             students: ["Amy", "Annie", "Doris", "Harvey", "May", "Milk"],

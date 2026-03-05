@@ -26,7 +26,12 @@ const CLASS_DAYS = ["周一", "周四", "周五", "周六", "周日"];
         "9": [116, 119]
     },
     "PU3": {
-        "0": [5]
+        "0": [5],
+        "1": [16],
+        "2": [28],
+        "3": [40],
+        "4": [54],
+    "5": [66]
     },
     "Think1": {
         "0": [11],
@@ -74,17 +79,17 @@ const CLASS_CONFIG = {
         },
         "1630-1800": {
             students: ["Coco", "Grayson", "Laura", "Leo"],
-            content: { book: "PU3", unit: "0", page: "5" }
+            content: { book: "PU3", unit: "3", page: "40" }
         },
         "1810-1940": {
             students: ["Annie", "Clarence", "Coco", "Gabriel"],
-            content: { book: "PU3", unit: "0", page: "5" }
+            content: { book: "PU3", unit: "5", page: "66" }
         }
     },
     "周日": {
         "0900-1030": {
             students: ["Candy", "Joying", "Lucas", "Nina", "Rex", "Yoyo"],
-            content: { book: "PU3", unit: "0", page: "5" }
+            content: { book: "PU3", unit: "4", page: "54" }
         },
         "1040-1210": {
             students: ["Amber", "Cindy", "Gaby", "Louis", "Kelly", "Susie"],

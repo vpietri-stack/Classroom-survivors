@@ -525,6 +525,46 @@ TEACHING_CONTENT["PU2"] = {
         }
     },
     "4": {
+        "45": {
+            vocab: [
+                'aunt', 'cousin', 'daughter', 'granddaughter', 'grandparents', 'grandson', 'parents', 'son', 'uncle',
+                'mother', 'brother', 'mum'
+            ],
+            sentences: [
+                "Zoe is Jim and Jenny's cousin.",
+                "Jim is his parents' son.",
+                "Jenny is her parents' daughter.",
+                "Jim is his grandparents' grandson.",
+                "Jenny is her grandparents' granddaughter.",
+            ],
+            sentencePairs: [
+                { a: "Who is Zoe?", b: "She's Jim and Jenny's cousin." },
+                { a: "Who are Mr and Mrs Friendly?", b: "They are Jim and Jenny's parents." },
+                { a: "Where are the children in the photo?", b: "The children are at the front." },
+                { a: "Where are the grown-ups in the photo?", b: "The grown-ups are behind." }
+            ]
+        },
+        "46": {
+            vocab: [
+                'big', 'bigger', 'clean', 'cleaner', 'fat', 'fatter', 'funny', 'funnier', 'long', 'longer', 'nice', 'nicer', 'old', 'older', 'pretty', 'prettier', 'short', 'shorter', 'small', 'smaller', 'tall', 'taller', 'thin', 'thinner', 'young', 'younger', 'good', 'better', 'bad', 'worse'
+            ],
+            sentences: [
+                "Jim and Jenny's uncle is shorter than their dad.",
+                "Rocky's younger than Henrietta.",
+                "My ears are longer than your ears!",
+                "Jim and Jenny's cousin is younger than them.",
+                "It's better than the old one.",
+                "Shelly's singing is worse than Gracie's."
+            ],
+            sentencePairs: [
+                { a: "Is their uncle taller than their dad?", b: "No, he isn't. Their dad's taller." },
+                { a: "Who is younger?", b: "Rocky's younger than Henrietta." },
+                { a: "Are your ears longer than mine?", b: "Yes, they are!" },
+                { a: "Is their cousin older than them?", b: "No, he isn't. He's younger." },
+                { a: "Is the new one better?", b: "Yes, it's better than the old one." },
+                { a: "Whose singing is worse?", b: "Shelly's singing is worse than Gracie's." }
+            ]
+        },
         "54": {
             vocab: [
                 'aunt', 'uncle', 'cousin', 'daughter', 'son', 'granddaughter', 'grandson', 'grandparents', 'parents',
@@ -712,13 +752,66 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "What did you cook?", b: "I cooked chicken and rice." },
                 { a: "Did you wash the fruit?", b: "Yes, I washed the fruit." },
                 { a: "Where did you go?", b: "We went to the market." },
-                { a: "Did she like the soup?", b: "No, she didn't it." },
+                { a: "Did she like the soup?", b: "No, she didn't like it." },
                 { a: "What did he do yesterday?", b: "He played football." },
                 { a: "Did they make a cake?", b: "Yes, they did." }
             ]
         }
     },
     "8": {
+        "95": {
+            vocab: [
+                'car park', 'city centre', 'funfair', 'map', 'ride', 'road', 'ticket', 'train station'
+            ],
+            sentences: [
+                "The city centre is where the shops are.",
+                "We can go on fantastic rides at the funfair.",
+                "We can use a map to find places.",
+                "We must buy a ticket to catch a bus or train.",
+                "The car park is the place for your car near the shops."
+            ],
+            sentencePairs: [
+                { a: "Where is the city centre?", b: "The middle of the city, where the shops are." },
+                { a: "Why do we go to the funfair?", b: "We go there to go on fantastic rides." },
+                { a: "What can we use a map for?", b: "We can use it to find places." },
+                { a: "What must you buy to catch a bus or train?", b: "We must buy a ticket." },
+                { a: "Where can I park the car?", b: "In the car park." }
+            ]
+        },
+        "96": {
+            vocab: [
+                'buy bought', 'bring brought', 'choose chose', 'drive drove', 'find found', 'give gave', 'hide hid', 'lose lost', 'ride rode', 'sit sat', 'sleep slept', 'stand stood', 'tell told', 'take took', 'wear wore'
+            ],
+            sentences: [
+                "He bought it last year.",
+                "Farmer Friendly brought you home.",
+                "He chose it because green's his favourite colour.",
+                "The family drove to the beach.",
+                "I found my old hat this morning.",
+                "He gave me his favourite green hat.",
+                "She hid behind a tree.",
+                "I lost my cousin in the forest.",
+                "We rode in Farmer Friendly's lorry.",
+                "I sat in the back and slept.",
+                "I stood and watched the beautiful countryside.",
+                "You told us a different story!",
+                "You took it from the garden!",
+                "He wore it on holiday.",
+                "The family drove to the beach. We were there for a week.",
+                "He didn't give you the hat.",
+                "You didn't lose her!",
+                "Did they go shopping?"
+            ],
+            sentencePairs: [
+                { a: "When did he buy it?", b: "He bought it last year." },
+                { a: "Who brought you home?", b: "Farmer Friendly brought me home." },
+                { a: "Why did he choose the green one?", b: "He chose it because green's his favourite colour." },
+                { a: "Where did the family drive?", b: "They drove to the beach." },
+                { a: "When did you find your hat?", b: "I found it this morning." },
+                { a: "Did he give you the hat?", b: "No, he didn't." },
+                { a: "Did you lose her?", b: "No, I didn't!" },
+            ]
+        },
         "104": {
             vocab: [
                 'bus station', 'café', 'cinema', 'hospital', 'library', 'market', 'shopping centre', 'sports centre', 'supermarket', 'swimming pool', 'zoo',
@@ -834,10 +927,10 @@ AVAILABLE_CONTENT["PU2"] = {
     "1": [16],
     "2": [28],
     "3": [40, 43],
-    "4": [54],
+    "4": [45, 46, 54],
     "5": [66],
     "6": [78, 81],
     "7": [91],
-    "8": [104],
+    "8": [95, 96, 104],
     "9": [116, 119]
 };

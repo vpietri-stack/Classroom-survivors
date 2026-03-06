@@ -11,18 +11,19 @@ const CLASS_DAYS = ["周一", "周四", "周五", "周六", "周日"];
         "4": [54],
         "5": [66],
         "6": [78],
-        "7": [92]
+        "7": [83, 84, 92],
+        "9": [107, 108]
     },
     "PU2": {
         "0": [5],
         "1": [16],
         "2": [28],
         "3": [40, 43],
-        "4": [54],
+        "4": [45, 46, 54],
         "5": [66],
         "6": [78, 81],
         "7": [91],
-        "8": [104],
+        "8": [95, 96, 104],
         "9": [116, 119]
     },
     "PU3": {
@@ -60,14 +61,14 @@ const CLASS_CONFIG = {
     },
     "周五": {
         "1900-2030": {
-            students: ["Amy", "Colin", "Ethan", "Hollis", "Selena", "Sophia"],
-            content: { book: "PU1", unit: "6", page: "78" }
+            students: ["Colin", "Ethan", "Hollis", "Selena", "Sophia"],
+            content: { book: "PU1", unit: "7", page: "84" }
         }
     },
     "周六": {
         "0900-1030": {
             students: ["Angel", "Eddy", "Dylan", "Mia", "YaoYao"],
-            content: { book: "PU1", unit: "7", page: "92" }
+            content: { book: "PU1", unit: "9", page: "108" }
         },
         "1040-1210": {
             students: ["Amy", "Annie", "Doris", "Harvey", "May", "Milk"],
@@ -101,11 +102,11 @@ const CLASS_CONFIG = {
         },
         "1450-1620": {
             students: ["Dave", "Irene", "Lele", "Mia", "Sylvia"],
-            content: { book: "PU2", unit: "3", page: "43" }
+            content: { book: "PU2", unit: "4", page: "46" }
         },
         "1630-1800": {
             students: ["James", "Jenny", "Koey", "Minnie", "Mia", "Pudding"],
-            content: { book: "PU2", unit: "7", page: "91" }
+            content: { book: "PU2", unit: "8", page: "96" }
         }
     }
 };

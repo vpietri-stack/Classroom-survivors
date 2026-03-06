@@ -396,8 +396,8 @@ TEACHING_CONTENT["PU3"] = {
                 "He's got a temperature.",
                 "She's got a headache.",
                 "I've got a cough and a sore throat.",
-                "He's got toothache.",
-                "She's got stomach-ache.",
+                "He's got a toothache.",
+                "She's got a stomach-ache.",
                 "I've got a cold.",
                 "You need a bandage on your knee.",
                 "My ankle hurts.",
@@ -411,16 +411,16 @@ TEACHING_CONTENT["PU3"] = {
                 "This book is as interesting as that one."
             ],
             sentencePairs: [
-                { a: "Who is the strongest?", b: "Ivan is the strongest man here." },
-                { a: "Is Jenny taller than you?", b: "Yes, Jenny is taller than me." },
-                { a: "Are you as strong as him?", b: "No, I'm not as strong as him." },
+                { a: "Who is the strongest in Diversicus?", b: "Ivan is." },
+                { a: "Is Jenny taller than you?", b: "Yes, she is." },
+                { a: "Are you as strong as him?", b: "No, I'm not." },
                 { a: "What do you want to do?", b: "I want to go to the party, but I need to get some sleep." },
                 { a: "What's the matter?", b: "I've got a headache." },
                 { a: "What's wrong with him?", b: "He's got a temperature." },
-                { a: "Who is the tallest in the class?", b: "He's the tallest boy in the class." },
-                { a: "Is the mouse bigger than the elephant?", b: "No, the mouse is smaller than the elephant." },
-                { a: "Do you need a bandage?", b: "Yes, I need a bandage on my knee." },
-                { a: "Is she as fast as her sister?", b: "No, she's not as fast as her sister." }
+                { a: "Who is the tallest in the class?", b: "That boy is." },
+                { a: "Are mice bigger than elephants?", b: "No, they aren't." },
+                { a: "Do you need a bandage?", b: "Yes, please. I hurt my knee." },
+                { a: "Is she as fast as her sister?", b: "No, she isn't." }
             ]
         }
     },

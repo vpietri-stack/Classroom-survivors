@@ -719,10 +719,13 @@ function checkRoundE() {
 
         if (tile) {
             anyPlaced = true;
-            const correctIndex = parseInt(tile.dataset.correctIndex);
             const targetIndex = parseInt(slot.dataset.targetIndex);
 
-            if (correctIndex === targetIndex) {
+            // Allow matching if the text matches the expected answer for this question
+            const placedText = tile.innerText.trim();
+            const expectedText = pairs[targetIndex].b.trim();
+
+            if (placedText === expectedText) {
                 // Correct match
                 tile.classList.remove('wrong-match');
                 tile.classList.add('correct-match');

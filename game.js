@@ -2171,7 +2171,7 @@ function startSentenceMatchGame() {
         gamePages = [{ book, unit, page: page.toString(), absIndex: 0 }];
     }
 
-    // Pick 5 pairs using the weighted logic
+    // Pick 5 pairs using the weighted logic (pickUniqueItems now deduplicates by text)
     let pairs = pickUniqueItems(gamePages, 5, 'sentencePairs', activePageIndex, true);
 
     // Fallback if selection returns nothing
@@ -2185,7 +2185,7 @@ function startSentenceMatchGame() {
         ];
     }
 
-    // Shuffle and ensure we have up to 3 pairs
+    // Shuffle and ensure we have up to 3 pairs for the current round
     const shuffledPairs = pairs.sort(() => 0.5 - Math.random()).slice(0, 3);
 
     // Store in game element for later reference
@@ -2261,6 +2261,9 @@ function returnGameModeTileToDock(tile) {
 
 function checkSentenceMatch() {
     const slots = document.querySelectorAll('.gm-sentence-b-slot');
+    const gameEl = document.getElementById('sentenceMatchGame');
+    const pairsData = JSON.parse(gameEl.dataset.pairs);
+
     let allCorrect = true;
     let anyPlaced = false;
 
@@ -2269,10 +2272,13 @@ function checkSentenceMatch() {
 
         if (tile) {
             anyPlaced = true;
-            const correctIndex = parseInt(tile.dataset.correctIndex);
             const targetIndex = parseInt(slot.dataset.targetIndex);
 
-            if (correctIndex === targetIndex) {
+            // Allow matching if the text matches the expected answer for this question
+            const placedText = tile.innerText.trim();
+            const expectedText = pairsData[targetIndex].b.trim();
+
+            if (placedText === expectedText) {
                 tile.style.backgroundColor = '#10b981'; // green
             } else {
                 tile.style.backgroundColor = '#ef4444'; // red

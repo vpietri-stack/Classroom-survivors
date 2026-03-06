@@ -56,12 +56,29 @@ function getWeightedRandomIndex(weights) {
  */
 function pickUniqueItems(pages, count, type, activePageIndex, useWeights = false) {
     const allItems = [];
+    const seenIdentifier = new Set(); // Track unique items by content to avoid showing the same question twice
+
     pages.forEach((p) => {
         const content = TEACHING_CONTENT[p.book] && TEACHING_CONTENT[p.book][p.unit] && TEACHING_CONTENT[p.book][p.unit][p.page];
         if (content && content[type]) {
             const items = content[type];
             items.forEach(item => {
-                allItems.push({ item, pageIndex: p.absIndex });
+                // Generate identifier based on item content
+                let identifier = "";
+                if (typeof item === 'string') {
+                    // Normalize vocab/sentence text
+                    identifier = item.trim().toLowerCase();
+                } else if (item && item.a && item.b) {
+                    // For sentence pairs, deduplicate based on question (a)
+                    identifier = "pair:" + item.a.trim().toLowerCase();
+                } else {
+                    identifier = JSON.stringify(item);
+                }
+
+                if (!seenIdentifier.has(identifier)) {
+                    seenIdentifier.add(identifier);
+                    allItems.push({ item, pageIndex: p.absIndex });
+                }
             });
         }
     });
@@ -75,8 +92,6 @@ function pickUniqueItems(pages, count, type, activePageIndex, useWeights = false
         let index;
         if (useWeights) {
             // Weights based on distance to activePageIndex
-            // Weight = 1 / (distance + 1)
-            // or even steeper: 1 / Math.pow(distance + 1, 2)
             const weights = pool.map(entry => {
                 const distance = Math.abs(entry.pageIndex - activePageIndex);
                 return 1 / Math.pow(distance + 1, 2);
@@ -100,8 +115,7 @@ function getSpacedRepetitionContent(book, unit, page, type, isStudyMode, count =
     const activePageIndex = sortedPages.findIndex(p => p.book === book && p.unit === unit && p.page === page.toString());
 
     if (activePageIndex === -1) {
-        // Game Mode logic: content from beginning up to current page
-        // (Ensure we don't show future content)
+        // Fallback logic
         const content = TEACHING_CONTENT[book] && TEACHING_CONTENT[book][unit] && TEACHING_CONTENT[book][unit][page];
         return content ? (content[type] || []) : [];
     }
@@ -158,23 +172,12 @@ function getSpacedRepetitionContent(book, unit, page, type, isStudyMode, count =
 
         return finalSet;
     } else {
-        // Game Mode: Weighted selection up to current page
+        // Game Mode: Return metadata so game.js can handle it
         const gamePageIndices = [];
         for (let i = 0; i <= activePageIndex; i++) {
             gamePageIndices.push(i);
         }
-        const gamePages = gamePageIndices.map(idx => sortedPages[idx]);
-        // We return ALL items but we need to pass weights or handle probability during pick.
-        // For game mode, the requirement says "Use the same weighted probability system... for all items used during game mode".
-        // This means when the game needs A word, it should pick one weighted.
-        // However, game.js currently works with a flattened array.
-        // Let's provide a function that returns a pool, or just let game.js pick items one by one.
-        // Actually, let's keep it simple: return a larger pool (e.g. 50 items) that is pre-weighted by frequency?
-        // NO, better to modify game.js to call a "getRandomWeightedItem" function.
-
-        // Strategy: loadContent in game.js will store the sortedPages and activePageIndex,
-        // and then startXXGame will call a helper to pick ONE item.
-        return gamePages; // Return the metadata so game.js can handle it
+        return gamePageIndices.map(idx => sortedPages[idx]);
     }
 }
 

@@ -784,7 +784,7 @@ TEACHING_CONTENT["PU2"] = {
             ],
             sentences: [
                 "He bought it last year.",
-                "Farmer Friendly brought you home.",
+                "Grandpa brought you home.",
                 "He chose it because green's his favourite colour.",
                 "The family drove to the beach.",
                 "I found my old hat this morning.",
@@ -796,10 +796,9 @@ TEACHING_CONTENT["PU2"] = {
                 "I stood and watched the beautiful countryside.",
                 "You told us a different story!",
                 "You took it from the garden!",
-                "He wore it on holiday.",
-                "The family drove to the beach. We were there for a week.",
-                "He didn't give you the hat.",
-                "You didn't lose her!",
+                "He wore the hat on holiday.",
+                "We were there for a week.",
+                "He didn't give you the hat, you took it from the garden!",
                 "Did they go shopping?"
             ],
             sentencePairs: [

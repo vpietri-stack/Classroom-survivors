@@ -37,6 +37,7 @@ function triggerGomoku(mode = gomokuMode) {
 
     if (!gomokuCanvas.onmousedown) {
         gomokuCanvas.onmousedown = handleGomokuClick;
+        gomokuCanvas.ontouchstart = handleGomokuClick;
     }
 
     gomokuGameActive = true;
@@ -186,9 +187,27 @@ function handleGomokuClick(e) {
     if (gomokuMode === 'regular' && gomokuTurn !== 'player') return;
     if (gomokuMode === 'speed' && gomokuTurn === 'minigame') return;
 
+    // Prevent scrolling when tapping the canvas
+    if (e.type === 'touchstart') e.preventDefault();
+
     const rect = gomokuCanvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+
+    // Support both mouse and touch events
+    const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
+    const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
+
+    if (clientX === undefined || clientY === undefined) return;
+
+    // Calculate position relative to canvas CSS size
+    const cssX = clientX - rect.left;
+    const cssY = clientY - rect.top;
+
+    // Scale CSS coordinates to internal canvas dimensions
+    const scaleX = gomokuCanvas.width / rect.width;
+    const scaleY = gomokuCanvas.height / rect.height;
+
+    const x = cssX * scaleX;
+    const y = cssY * scaleY;
 
     const padding = 30;
     const cellSize = (gomokuCanvas.width - padding * 2) / (BOARD_SIZE - 1);
@@ -206,8 +225,6 @@ function handleGomokuClick(e) {
             drawGomokuBoard();
             osc('sine', 400, 0.1, 0.1);
 
-            // Still check win immediately? 
-            // If they win, we end it.
             if (checkWin(r, c, 1)) {
                 endGomokuGame('win');
                 return;

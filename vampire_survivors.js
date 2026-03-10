@@ -987,7 +987,9 @@ class MainScene extends Phaser.Scene {
                     document.getElementById('finalMinigameTime').innerText = '-' + formatTime(minigameTimeSec);
                     document.getElementById('finalScore').innerText = formatTime(scoreSec);
 
-                    const displayText = selectedDay && selectedTime ? `${selectedDay} ${selectedTime}` : 'N/A';
+                    const studentName = typeof selectedStudent !== 'undefined' && selectedStudent ? selectedStudent : '';
+                    const classInfo = selectedDay && selectedTime ? `${selectedDay} ${selectedTime}` : 'N/A';
+                    const displayText = studentName ? `${studentName} (${classInfo})` : classInfo;
                     document.getElementById('finalContentDisplay').innerText = displayText;
 
                     document.getElementById('gameOverScreen').classList.remove('hidden');

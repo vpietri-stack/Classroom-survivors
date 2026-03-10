@@ -439,15 +439,17 @@ function endGomokuGame(result) {
     const title = document.getElementById('gomokuResultTitle');
     const msg = document.getElementById('gomokuResultMsg');
 
+    const studentName = typeof selectedStudent !== 'undefined' && selectedStudent ? selectedStudent : 'Player';
+
     if (result === 'win') {
         title.innerText = "You Won!";
         title.className = "text-4xl font-bold mb-4 text-green-400";
-        msg.innerText = "Congratulations! You are a 5 in a row Master.";
+        msg.innerText = `Congratulations, ${studentName}! You are a 5 in a row Master.`;
         synthLevelUp();
     } else {
         title.innerText = "Game Over";
         title.className = "text-4xl font-bold mb-4 text-red-500";
-        msg.innerText = "Better luck next time! The computer won this round.";
+        msg.innerText = `Better luck next time, ${studentName}! The computer won this round.`;
         synthDeath();
     }
 

@@ -334,9 +334,26 @@
                 <div class="text-xl">五子棋 (5 in a row)</div>
                 <div id="gomoku-timer" class="text-red-800">Game: 00:00</div>
             </div>
-            <canvas id="gomokuCanvas" width="600" height="600" class="shadow-inner cursor-pointer max-w-full h-auto"
+            <canvas id="gomokuCanvas" width="600" height="600" class="shadow-inner max-w-full h-auto"
                 style="border: 2px solid #5d2b06;"></canvas>
-            <div id="gomoku-status" class="mt-4 text-center text-black text-lg font-bold h-8">Your turn!</div>
+
+            <div id="gomoku-drag-area" class="mt-6 flex flex-col items-center gap-3">
+                <div id="gomoku-status" class="text-center text-black text-lg font-bold h-8">Your turn!</div>
+
+                <div id="gomoku-stash-container"
+                    class="bg-black/10 p-3 rounded-2xl border-2 border-[#8b4513]/30 flex items-center gap-4">
+                    <div class="text-xs font-bold text-[#5d2b06] border-r border-[#5d2b06]/30 pr-4">DRAG PIECE<br>TO
+                        BOARD</div>
+                    <div id="gomoku-piece-stash"
+                        class="w-14 h-14 bg-black rounded-full shadow-xl border-2 border-white/20 cursor-grab active:cursor-grabbing hover:scale-105 transition-transform">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ghost piece for dragging -->
+            <div id="gomoku-ghost-piece"
+                class="fixed pointer-events-none hidden w-10 h-10 bg-black rounded-full shadow-2xl border-2 border-white/40 z-[100] opacity-80">
+            </div>
         </div>
     </div>
 

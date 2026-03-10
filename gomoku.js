@@ -12,6 +12,10 @@ let gomokuSpeedInterval = null;
 const SPEED_AI_INTERVAL = 10000;
 let gomokuNextAiTime = 0;
 
+let isGomokuDragging = false;
+let gomokuDragCell = null;
+let dragInitialized = false;
+
 // --- GOMOKU INITIALIZATION ---
 function showGomokuModeSelection() {
     document.getElementById('gameSelectionOverlay').classList.add('hidden');
@@ -35,9 +39,9 @@ function triggerGomoku(mode = gomokuMode) {
     gomokuCanvas = document.getElementById('gomokuCanvas');
     gomokuCtx = gomokuCanvas.getContext('2d');
 
-    if (!gomokuCanvas.onmousedown) {
-        gomokuCanvas.onmousedown = handleGomokuClick;
-        gomokuCanvas.ontouchstart = handleGomokuClick;
+    if (!dragInitialized) {
+        initDragAndDrop();
+        dragInitialized = true;
     }
 
     gomokuGameActive = true;
@@ -143,8 +147,14 @@ function drawGomokuBoard() {
         }
     }
 
+    // Drag Preview
+    if (gomokuDragCell) {
+        drawPiece(gomokuDragCell.r, gomokuDragCell.c, 'preview');
+    }
+
     // Last move indicator
     if (lastGomokuMove) {
+        const cellSize = (size - padding * 2) / (BOARD_SIZE - 1);
         gomokuCtx.strokeStyle = 'red';
         gomokuCtx.lineWidth = 2;
         gomokuCtx.beginPath();
@@ -167,6 +177,10 @@ function drawPiece(r, c, color) {
     if (color === 'black') {
         grad.addColorStop(0, '#666');
         grad.addColorStop(1, '#000');
+    } else if (color === 'preview') {
+        gomokuCtx.globalAlpha = 0.4;
+        grad.addColorStop(0, '#888');
+        grad.addColorStop(1, '#222');
     } else {
         grad.addColorStop(0, '#fff');
         grad.addColorStop(1, '#ccc');
@@ -179,47 +193,117 @@ function drawPiece(r, c, color) {
 
     gomokuCtx.shadowBlur = 0;
     gomokuCtx.shadowOffsetY = 0;
+    gomokuCtx.globalAlpha = 1.0;
 }
 
 // --- GAME LOGIC ---
+function initDragAndDrop() {
+    const stash = document.getElementById('gomoku-piece-stash');
+    const ghost = document.getElementById('gomoku-ghost-piece');
+
+    const startDrag = (e) => {
+        if (!gomokuGameActive || (gomokuMode === 'regular' && gomokuTurn !== 'player')) return;
+        if (gomokuTurn === 'minigame') return;
+
+        isGomokuDragging = true;
+        ghost.classList.remove('hidden');
+        moveGhost(e);
+
+        if (e.type === 'touchstart') e.preventDefault();
+    };
+
+    const moveGhost = (e) => {
+        if (!isGomokuDragging) return;
+
+        const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
+
+        if (clientX === undefined || clientY === undefined) return;
+
+        ghost.style.left = (clientX - 20) + 'px';
+        ghost.style.top = (clientY - 60) + 'px';
+
+        const rect = gomokuCanvas.getBoundingClientRect();
+        if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
+            const scaleX = gomokuCanvas.width / rect.width;
+            const scaleY = gomokuCanvas.height / rect.height;
+            const x = (clientX - rect.left) * scaleX;
+            const y = (clientY - rect.top) * scaleY;
+
+            const padding = 30;
+            const cellSize = (gomokuCanvas.width - padding * 2) / (BOARD_SIZE - 1);
+            const c = Math.round((x - padding) / cellSize);
+            const r = Math.round((y - padding) / cellSize);
+
+            if (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE && gomokuBoard[r][c] === 0) {
+                if (!gomokuDragCell || gomokuDragCell.r !== r || gomokuDragCell.c !== c) {
+                    gomokuDragCell = { r, c };
+                    drawGomokuBoard();
+                }
+            } else if (gomokuDragCell) {
+                gomokuDragCell = null;
+                drawGomokuBoard();
+            }
+        } else if (gomokuDragCell) {
+            gomokuDragCell = null;
+            drawGomokuBoard();
+        }
+
+        if (e.type === 'touchmove') e.preventDefault();
+    };
+
+    const endDrag = (e) => {
+        if (!isGomokuDragging) return;
+        isGomokuDragging = false;
+        ghost.classList.add('hidden');
+
+        if (gomokuDragCell) {
+            const { r, c } = gomokuDragCell;
+            handleMoveSelection(r, c);
+            gomokuDragCell = null;
+        }
+        drawGomokuBoard();
+    };
+
+    stash.addEventListener('mousedown', startDrag);
+    stash.addEventListener('touchstart', startDrag, { passive: false });
+    window.addEventListener('mousemove', moveGhost);
+    window.addEventListener('touchmove', moveGhost, { passive: false });
+    window.addEventListener('mouseup', endDrag);
+    window.addEventListener('touchend', endDrag);
+}
+
 function handleGomokuClick(e) {
     if (!gomokuGameActive) return;
     if (gomokuMode === 'regular' && gomokuTurn !== 'player') return;
     if (gomokuMode === 'speed' && gomokuTurn === 'minigame') return;
 
-    // Prevent scrolling when tapping the canvas
     if (e.type === 'touchstart') e.preventDefault();
 
     const rect = gomokuCanvas.getBoundingClientRect();
-
-    // Support both mouse and touch events
     const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
     const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
 
     if (clientX === undefined || clientY === undefined) return;
 
-    // Calculate position relative to canvas CSS size
-    const cssX = clientX - rect.left;
-    const cssY = clientY - rect.top;
-
-    // Scale CSS coordinates to internal canvas dimensions
     const scaleX = gomokuCanvas.width / rect.width;
     const scaleY = gomokuCanvas.height / rect.height;
-
-    const x = cssX * scaleX;
-    const y = cssY * scaleY;
+    const x = (clientX - rect.left) * scaleX;
+    const y = (clientY - rect.top) * scaleY;
 
     const padding = 30;
     const cellSize = (gomokuCanvas.width - padding * 2) / (BOARD_SIZE - 1);
-
     const c = Math.round((x - padding) / cellSize);
     const r = Math.round((y - padding) / cellSize);
 
+    handleMoveSelection(r, c);
+}
+
+function handleMoveSelection(r, c) {
     if (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE && gomokuBoard[r][c] === 0) {
         pendingGomokuMove = { r, c };
 
         if (gomokuMode === 'speed') {
-            // Place piece immediately in speed mode
             gomokuBoard[r][c] = 1;
             lastGomokuMove = { r, c };
             drawGomokuBoard();
@@ -230,7 +314,6 @@ function handleGomokuClick(e) {
                 return;
             }
         }
-
         showGomokuMiniGame();
     }
 }

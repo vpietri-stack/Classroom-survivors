@@ -1010,7 +1010,6 @@ TEACHING_CONTENT["PU1"] = {
             vocab: ['funny', 'dog', 'brown', 'nose', 'long', 'tail', 'sad', 'black', 'happy', 'park', 'beautiful', 'ugly', 'pink', 'short', 'angry', 'cat', 'spider', 'nice', 'donkey', 'sheep', 'duck', 'goat', 'family', 'grandfather', 'mother', 'brother', 'grandmother', 'father', 'sister', 'pet', "she's", "he's", "I've got", "we're", "it's", "they're", 'have', 'got', 'with', 'in', 'the', 'an', 'and', 'this', 'is', 'my', 'yes', 'no'],
             sentences: [
                 "I've got a happy dog.",
-                "My happy dog's in the park.",
                 "She's a beautiful dog.",
                 "We're in the park!",
                 "He's an ugly dog.",
@@ -1850,10 +1849,10 @@ TEACHING_CONTENT["PU1"] = {
                 "pasta", "carrots", "tomato", "onion", "potato", "cheese", "egg",
                 "please", "thank you", "sorry", "Here you are",
                 "I like", "you like", "we like", "they like", "he likes", "she likes",
-                "Yes he does", "No he doesn't", "Yes she does", "No she doesn't",
+                "Yes, he does", "No, he doesn't", "Yes, she does", "No, she doesn't",
                 "he doesn't like", "she doesn't like",
-                "Yes I do",
-                "No I don't",
+                "Yes, I do",
+                "No, I don't",
                 "I don't like",
             ],
             sentences: [

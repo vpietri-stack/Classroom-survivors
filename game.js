@@ -122,28 +122,28 @@ const playTTS = () => {
     if (!currentTTSWord) return;
     const text = currentTTSWord;
 
-    const playYoudao = () => {
-        const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=1`;
-        const audio = new Audio(url);
-        audio.play().catch(e => {
-            console.warn("Youdao TTS failed, trying Local MP3", e);
-            playLocalMP3();
-        });
-        audio.onerror = () => {
-            console.warn("Youdao TTS error, trying Local MP3");
-            playLocalMP3();
-        };
-    };
-
     const playLocalMP3 = () => {
         const url = `audio_mp3/${encodeURIComponent(text)}.mp3`;
         const audio = new Audio(url);
         audio.play().catch(e => {
-            console.warn("Local MP3 failed, trying Browser", e);
+            console.warn("Local MP3 failed, trying Youdao", e);
+            playYoudao();
+        });
+        audio.onerror = () => {
+            console.warn("Local MP3 error, trying Youdao");
+            playYoudao();
+        };
+    };
+
+    const playYoudao = () => {
+        const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=1`;
+        const audio = new Audio(url);
+        audio.play().catch(e => {
+            console.warn("Youdao TTS failed, trying Browser", e);
             playBrowserSpeech();
         });
         audio.onerror = () => {
-            console.warn("Local MP3 error, trying Browser");
+            console.warn("Youdao TTS error, trying Browser");
             playBrowserSpeech();
         };
     };
@@ -161,7 +161,7 @@ const playTTS = () => {
         }
     };
 
-    playYoudao();
+    playLocalMP3();
 };
 
 // --- GAME DATA ---

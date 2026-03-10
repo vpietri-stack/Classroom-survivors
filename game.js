@@ -146,12 +146,12 @@ const playTTS = () => {
 
     const playYoudao = () => {
         const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=1`;
-        tryAudioWithTimeout(url, "Youdao TTS", playLocalMP3, 2000);
+        tryAudioWithTimeout(url, "Youdao TTS", playLocalMP3, 1000);
     };
 
     const playLocalMP3 = () => {
         const url = `audio_mp3/${encodeURIComponent(text)}.mp3`;
-        tryAudioWithTimeout(url, "Local MP3", playBaidu, 4000);
+        tryAudioWithTimeout(url, "Local MP3", playBaidu, 10000);
     };
 
     const playBaidu = () => {

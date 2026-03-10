@@ -93,7 +93,7 @@
                     <button class="game-btn text-2xl bg-blue-600 hover:bg-blue-500 w-full"
                         onclick="initStudyMode()">我想打卡</button>
                     <button class="game-btn text-2xl bg-orange-600 hover:bg-orange-500 w-full"
-                        onclick="showGameIntro()">我想边学边玩</button>
+                        onclick="showGameSelection()">我想边学边玩</button>
                 </div>
             </div>
 
@@ -142,7 +142,7 @@
     </div>
 
     <!-- Level Up Menu -->
-    <div id="levelUpMenu" class="overlay hidden p-4">
+    <div id="levelUpMenu" class="overlay hidden p-4" style="z-index: 50;">
         <h2 class="text-2xl sm:text-4xl font-bold mb-8 text-yellow-300 text-center uppercase tracking-widest">Choose a
             Power Up</h2>
         <div class="powerup-grid" id="powerup-cards-container"></div>
@@ -151,9 +151,9 @@
     <!-- ESL Minigames -->
 
     <!-- Spelling Game -->
-    <div id="spellingGame" class="overlay hidden p-4">
+    <div id="spellingGame" class="overlay hidden p-4" style="z-index: 50;">
         <div class="minigame-container text-center">
-            <div class="text-yellow-400 font-bold text-xl sm:text-2xl mb-4 animate-pulse">⏱️ Time Left: <span
+            <div class="text-yellow-400 font-bold text-xl sm:text-2xl mb-4 animate-pulse"><span
                     id="spelling-timer">00:00</span></div>
             <h3 class="text-xl sm:text-2xl font-bold mb-4 text-purple-700">Spelling Challenge!</h3>
             <button onclick="playTTS()" aria-label="Play Audio"
@@ -177,9 +177,9 @@
     </div>
 
     <!-- Word Rec Game -->
-    <div id="wordRecGame" class="overlay hidden p-4">
+    <div id="wordRecGame" class="overlay hidden p-4" style="z-index: 50;">
         <div class="minigame-container text-center">
-            <div class="text-yellow-400 font-bold text-xl sm:text-2xl mb-4 animate-pulse">⏱️ Time Left: <span
+            <div class="text-yellow-400 font-bold text-xl sm:text-2xl mb-4 animate-pulse"><span
                     id="rec-timer">00:00</span></div>
             <h3 class="text-xl sm:text-2xl font-bold mb-2 text-purple-700">Quick Listen!</h3>
             <div class="w-full bg-gray-300 h-3 sm:h-4 mb-6 rounded-full overflow-hidden">
@@ -201,9 +201,9 @@
     </div>
 
     <!-- Grammar Game -->
-    <div id="grammarGame" class="overlay hidden p-4">
+    <div id="grammarGame" class="overlay hidden p-4" style="z-index: 50;">
         <div class="minigame-container max-h-[90vh] overflow-y-auto">
-            <div class="text-yellow-400 font-bold text-xl sm:text-2xl mb-4 text-center animate-pulse">⏱️ Time Left:
+            <div class="text-yellow-400 font-bold text-xl sm:text-2xl mb-4 text-center animate-pulse">
                 <span id="grammar-timer">00:00</span>
             </div>
             <h3 class="text-xl sm:text-2xl font-bold mb-4 text-purple-700 text-center">Complete the Sentences!</h3>
@@ -230,9 +230,9 @@
     </div>
 
     <!-- Sentence Match Game -->
-    <div id="sentenceMatchGame" class="overlay hidden p-4">
+    <div id="sentenceMatchGame" class="overlay hidden p-4" style="z-index: 50;">
         <div class="minigame-container max-h-[90vh] overflow-y-auto">
-            <div class="text-yellow-400 font-bold text-xl sm:text-2xl mb-4 text-center animate-pulse">⏱️ Time Left:
+            <div class="text-yellow-400 font-bold text-xl sm:text-2xl mb-4 text-center animate-pulse">
                 <span id="sentencematch-timer">00:00</span>
             </div>
             <h3 class="text-xl sm:text-2xl font-bold mb-4 text-purple-700 text-center">Match the Sentences!</h3>
@@ -258,7 +258,7 @@
     </div>
 
     <!-- Result Feedback -->
-    <div id="feedbackOverlay" class="overlay hidden bg-black/60">
+    <div id="feedbackOverlay" class="overlay hidden bg-black/60" style="z-index: 60;">
         <div id="feedbackCard"
             class="bg-white p-8 rounded-2xl text-center transform scale-0 transition-transform duration-300">
             <div id="feedbackIcon" class="text-8xl mb-4"></div>
@@ -290,12 +290,91 @@
         <button class="game-btn py-3 px-10 text-xl" onclick="location.reload()">TRY AGAIN</button>
     </div>
 
+    <!-- Game Selection Overlay -->
+    <div id="gameSelectionOverlay" class="overlay hidden p-4">
+        <div
+            class="bg-black/60 p-8 rounded-2xl border-2 border-blue-500/50 w-full max-w-md mx-auto backdrop-blur-sm text-center">
+            <h2
+                class="text-3xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
+                你想玩什么？
+            </h2>
+            <div class="flex flex-col gap-6">
+                <button
+                    class="game-btn text-2xl bg-orange-600 hover:bg-orange-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all"
+                    onclick="showGameIntro()">Vampire Survivors</button>
+                <button
+                    class="game-btn text-2xl bg-indigo-600 hover:bg-indigo-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all"
+                    onclick="showGomokuModeSelection()">五子棋 (5 in a row)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gomoku Mode Selection -->
+    <div id="gomokuModeSelectionOverlay" class="overlay hidden p-4">
+        <div
+            class="bg-white/10 p-8 rounded-2xl border-2 border-indigo-500/50 w-full max-w-md mx-auto backdrop-blur-sm shadow-2xl">
+            <h2 class="text-3xl sm:text-4xl font-bold mb-8 text-center text-white tracking-wider">
+                选择模式
+            </h2>
+            <div class="flex flex-col gap-6">
+                <button
+                    class="game-btn text-2xl bg-indigo-600 hover:bg-indigo-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all"
+                    onclick="triggerGomoku('regular')">常规五子棋</button>
+                <button
+                    class="game-btn text-2xl bg-red-600 hover:bg-red-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all"
+                    onclick="triggerGomoku('speed')">竞速五子棋</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gomoku Screen -->
+    <div id="gomokuScreen" class="overlay hidden p-4 flex flex-col items-center justify-center">
+        <div class="bg-[#dcb35c] p-4 sm:p-8 rounded-2xl border-8 border-[#8b4513] shadow-2xl relative">
+            <div class="flex justify-between items-center mb-4 text-black font-bold">
+                <div class="text-xl">五子棋 (5 in a row)</div>
+                <div id="gomoku-timer" class="text-red-800">Game: 00:00</div>
+            </div>
+            <canvas id="gomokuCanvas" width="600" height="600" class="shadow-inner cursor-pointer max-w-full h-auto"
+                style="border: 2px solid #5d2b06;"></canvas>
+            <div id="gomoku-status" class="mt-4 text-center text-black text-lg font-bold h-8">Your turn!</div>
+        </div>
+    </div>
+
+    <!-- Gomoku Game Over -->
+    <div id="gomokuGameOverScreen" class="overlay hidden p-4 text-center">
+        <div class="bg-black/60 p-8 rounded-2xl border-2 border-indigo-500/50 w-full max-w-md mx-auto backdrop-blur-sm">
+            <h2 id="gomokuResultTitle" class="text-4xl font-bold mb-4">You Won!</h2>
+            <p id="gomokuResultMsg" class="text-xl text-gray-200 mb-8"></p>
+
+            <div class="bg-white/10 p-6 rounded-xl space-y-3 mb-8 text-left text-lg">
+                <p class="flex justify-between font-medium"><span class="text-gray-400">Game time:</span> <span
+                        id="gomokuGameTime" class="text-white">00:00</span></p>
+                <p class="flex justify-between font-medium"><span class="text-gray-400">Questions time:</span> <span
+                        id="gomokuQuestTime" class="text-purple-400">00:00</span></p>
+                <hr class="border-white/20">
+                <p class="flex justify-between text-xl font-bold"><span class="text-yellow-400">Total time:</span> <span
+                        id="gomokuTotalTime" class="text-yellow-400">00:00</span></p>
+            </div>
+
+            <div class="flex flex-col gap-4">
+                <button class="game-btn bg-green-600 hover:bg-green-500 text-xl py-3 rounded-lg"
+                    onclick="triggerGomoku()">再玩一次</button>
+                <button class="game-btn bg-blue-600 hover:bg-blue-500 text-xl py-3 rounded-lg"
+                    onclick="showGameSelection()">我想玩别的</button>
+                <button class="game-btn bg-orange-600 hover:bg-orange-500 text-xl py-3 rounded-lg"
+                    onclick="initStudyMode()">学习模式</button>
+            </div>
+        </div>
+    </div>
+
     <script src="teaching_content.js"></script>
     <script src="content_pu1.js"></script>
     <script src="content_pu2.js"></script>
     <script src="content_pu3.js"></script>
     <script src="content_think1.js"></script>
     <script src="class_config.js"></script>
+    <script src="vampire_survivors.js"></script>
+    <script src="gomoku.js"></script>
     <script src="game.js"></script>
     <script src="study_mode.js"></script>
 </body>

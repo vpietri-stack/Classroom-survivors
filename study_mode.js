@@ -797,7 +797,7 @@ function finishStudySession() {
             
             <div class="flex flex-col gap-4 items-center">
                 <button onclick="initStudyMode()" class="game-btn bg-blue-600 text-xl sm:text-2xl w-full max-w-[280px]">再学习一下</button>
-                <button onclick="exitStudyMode()" class="game-btn bg-orange-500 text-xl sm:text-2xl w-full max-w-[280px]">边玩边学</button>
+                <button onclick="showGameSelection()" class="game-btn bg-orange-500 text-xl sm:text-2xl w-full max-w-[280px]">边玩边学</button>
             </div>
         </div>
     `;

@@ -122,43 +122,41 @@ const playTTS = () => {
     if (!currentTTSWord) return;
     const text = currentTTSWord;
 
-    const playYoudao = () => {
-        const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=1`;
-        const audio = new Audio(url);
-        audio.play().catch(e => {
-            console.warn("Youdao TTS failed, trying Baidu Fanyi", e);
-            playBaidu();
-        });
-        audio.onerror = () => {
-            console.warn("Youdao TTS error, trying Baidu Fanyi");
-            playBaidu();
+    // Helper: try playing an Audio URL with a timeout.
+    // If audio doesn't start playing within timeoutMs, fall through to onFail.
+    // The settled flag prevents double-triggering from both timeout and error.
+    const tryAudioWithTimeout = (url, label, onFail, timeoutMs = 2000) => {
+        let settled = false;
+        const fail = (reason) => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timer);
+            console.warn(`${label} ${reason}`);
+            onFail();
         };
+        const audio = new Audio(url);
+        audio.addEventListener('playing', () => {
+            settled = true;
+            clearTimeout(timer);
+        });
+        audio.onerror = () => fail("error");
+        audio.play().catch(e => fail("play failed: " + e));
+        const timer = setTimeout(() => fail("timeout"), timeoutMs);
     };
 
-    const playBaidu = () => {
-        const url = `https://fanyi.baidu.com/gettts?lan=uk&text=${encodeURIComponent(text)}&spd=3&source=web`;
-        const audio = new Audio(url);
-        audio.play().catch(e => {
-            console.warn("Baidu Fanyi TTS failed, trying Local MP3", e);
-            playLocalMP3();
-        });
-        audio.onerror = () => {
-            console.warn("Baidu Fanyi TTS error, trying Local MP3");
-            playLocalMP3();
-        };
+    const playYoudao = () => {
+        const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=1`;
+        tryAudioWithTimeout(url, "Youdao TTS", playLocalMP3, 2000);
     };
 
     const playLocalMP3 = () => {
         const url = `audio_mp3/${encodeURIComponent(text)}.mp3`;
-        const audio = new Audio(url);
-        audio.play().catch(e => {
-            console.warn("Local MP3 failed, trying Browser", e);
-            playBrowserSpeech();
-        });
-        audio.onerror = () => {
-            console.warn("Local MP3 error, trying Browser");
-            playBrowserSpeech();
-        };
+        tryAudioWithTimeout(url, "Local MP3", playBaidu, 1000);
+    };
+
+    const playBaidu = () => {
+        const url = `https://fanyi.baidu.com/gettts?lan=uk&text=${encodeURIComponent(text)}&spd=3&source=web`;
+        tryAudioWithTimeout(url, "Baidu Fanyi TTS", playBrowserSpeech, 2000);
     };
 
     const playBrowserSpeech = () => {

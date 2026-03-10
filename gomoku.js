@@ -16,6 +16,8 @@ let isGomokuDragging = false;
 let gomokuDragCell = null;
 let dragInitialized = false;
 
+let gomokuViewport = { minR: 3, maxR: 11, minC: 3, maxC: 11 };
+
 // --- GOMOKU INITIALIZATION ---
 function showGomokuModeSelection() {
     document.getElementById('gameSelectionOverlay').classList.add('hidden');
@@ -67,6 +69,17 @@ function triggerGomoku(mode = gomokuMode) {
 function initGomokuBoard() {
     gomokuBoard = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(0));
     lastGomokuMove = null;
+    gomokuViewport = { minR: 3, maxR: 11, minC: 3, maxC: 11 };
+}
+
+function expandGomokuViewport(r, c) {
+    let changed = false;
+    // Zoom out if piece is on the edge of current view
+    if (r <= gomokuViewport.minR && gomokuViewport.minR > 0) { gomokuViewport.minR--; changed = true; }
+    if (r >= gomokuViewport.maxR && gomokuViewport.maxR < BOARD_SIZE - 1) { gomokuViewport.maxR++; changed = true; }
+    if (c <= gomokuViewport.minC && gomokuViewport.minC > 0) { gomokuViewport.minC--; changed = true; }
+    if (c >= gomokuViewport.maxC && gomokuViewport.maxC < BOARD_SIZE - 1) { gomokuViewport.maxC++; changed = true; }
+    if (changed) drawGomokuBoard();
 }
 
 function updateGomokuTimer() {
@@ -106,24 +119,30 @@ function updateGomokuStatus(msg) {
 function drawGomokuBoard() {
     const size = gomokuCanvas.width;
     const padding = 30;
-    const cellSize = (size - padding * 2) / (BOARD_SIZE - 1);
+
+    const viewWidth = gomokuViewport.maxC - gomokuViewport.minC + 1;
+    const viewHeight = gomokuViewport.maxR - gomokuViewport.minR + 1;
+    const visibleCount = Math.max(viewWidth, viewHeight);
+    const cellSize = (size - padding * 2) / (visibleCount - 1);
 
     gomokuCtx.clearRect(0, 0, size, size);
 
     // Grid
     gomokuCtx.strokeStyle = '#5d2b06';
     gomokuCtx.lineWidth = 1;
-    for (let i = 0; i < BOARD_SIZE; i++) {
-        // Horizontal
-        gomokuCtx.beginPath();
-        gomokuCtx.moveTo(padding, padding + i * cellSize);
-        gomokuCtx.lineTo(size - padding, padding + i * cellSize);
-        gomokuCtx.stroke();
 
-        // Vertical
+    for (let r = gomokuViewport.minR; r <= gomokuViewport.maxR; r++) {
+        const y = padding + (r - gomokuViewport.minR) * cellSize;
         gomokuCtx.beginPath();
-        gomokuCtx.moveTo(padding + i * cellSize, padding);
-        gomokuCtx.lineTo(padding + i * cellSize, size - padding);
+        gomokuCtx.moveTo(padding, y);
+        gomokuCtx.lineTo(size - padding, y);
+        gomokuCtx.stroke();
+    }
+    for (let c = gomokuViewport.minC; c <= gomokuViewport.maxC; c++) {
+        const x = padding + (c - gomokuViewport.minC) * cellSize;
+        gomokuCtx.beginPath();
+        gomokuCtx.moveTo(x, padding);
+        gomokuCtx.lineTo(x, size - padding);
         gomokuCtx.stroke();
     }
 
@@ -131,16 +150,20 @@ function drawGomokuBoard() {
     const stars = [3, 7, 11];
     gomokuCtx.fillStyle = '#5d2b06';
     stars.forEach(r => {
+        if (r < gomokuViewport.minR || r > gomokuViewport.maxR) return;
         stars.forEach(c => {
+            if (c < gomokuViewport.minC || c > gomokuViewport.maxC) return;
+            const x = padding + (c - gomokuViewport.minC) * cellSize;
+            const y = padding + (r - gomokuViewport.minR) * cellSize;
             gomokuCtx.beginPath();
-            gomokuCtx.arc(padding + c * cellSize, padding + r * cellSize, 4, 0, Math.PI * 2);
+            gomokuCtx.arc(x, y, 4, 0, Math.PI * 2);
             gomokuCtx.fill();
         });
     });
 
     // Pieces
-    for (let r = 0; r < BOARD_SIZE; r++) {
-        for (let c = 0; c < BOARD_SIZE; c++) {
+    for (let r = gomokuViewport.minR; r <= gomokuViewport.maxR; r++) {
+        for (let c = gomokuViewport.minC; c <= gomokuViewport.maxC; c++) {
             if (gomokuBoard[r][c] !== 0) {
                 drawPiece(r, c, gomokuBoard[r][c] === 1 ? 'black' : 'white');
             }
@@ -154,20 +177,29 @@ function drawGomokuBoard() {
 
     // Last move indicator
     if (lastGomokuMove) {
-        const cellSize = (size - padding * 2) / (BOARD_SIZE - 1);
-        gomokuCtx.strokeStyle = 'red';
-        gomokuCtx.lineWidth = 2;
-        gomokuCtx.beginPath();
-        gomokuCtx.arc(padding + lastGomokuMove.c * cellSize, padding + lastGomokuMove.r * cellSize, cellSize * 0.4, 0, Math.PI * 2);
-        gomokuCtx.stroke();
+        if (lastGomokuMove.r >= gomokuViewport.minR && lastGomokuMove.r <= gomokuViewport.maxR &&
+            lastGomokuMove.c >= gomokuViewport.minC && lastGomokuMove.c <= gomokuViewport.maxC) {
+            const x = padding + (lastGomokuMove.c - gomokuViewport.minC) * cellSize;
+            const y = padding + (lastGomokuMove.r - gomokuViewport.minR) * cellSize;
+            gomokuCtx.strokeStyle = 'red';
+            gomokuCtx.lineWidth = 2;
+            gomokuCtx.beginPath();
+            gomokuCtx.arc(x, y, cellSize * 0.4, 0, Math.PI * 2);
+            gomokuCtx.stroke();
+        }
     }
 }
 
 function drawPiece(r, c, color) {
+    const size = gomokuCanvas.width;
     const padding = 30;
-    const cellSize = (gomokuCanvas.width - padding * 2) / (BOARD_SIZE - 1);
-    const x = padding + c * cellSize;
-    const y = padding + r * cellSize;
+    const viewWidth = gomokuViewport.maxC - gomokuViewport.minC + 1;
+    const viewHeight = gomokuViewport.maxR - gomokuViewport.minR + 1;
+    const visibleCount = Math.max(viewWidth, viewHeight);
+    const cellSize = (size - padding * 2) / (visibleCount - 1);
+
+    const x = padding + (c - gomokuViewport.minC) * cellSize;
+    const y = padding + (r - gomokuViewport.minR) * cellSize;
 
     gomokuCtx.shadowBlur = 4;
     gomokuCtx.shadowColor = 'rgba(0,0,0,0.5)';
@@ -178,9 +210,15 @@ function drawPiece(r, c, color) {
         grad.addColorStop(0, '#666');
         grad.addColorStop(1, '#000');
     } else if (color === 'preview') {
-        gomokuCtx.globalAlpha = 0.4;
-        grad.addColorStop(0, '#888');
-        grad.addColorStop(1, '#222');
+        gomokuCtx.globalAlpha = 0.6;
+        grad.addColorStop(0, '#999');
+        grad.addColorStop(1, '#333');
+        // Add a highlight ring for preview
+        gomokuCtx.strokeStyle = '#fff';
+        gomokuCtx.lineWidth = 2;
+        gomokuCtx.beginPath();
+        gomokuCtx.arc(x, y, cellSize * 0.45, 0, Math.PI * 2);
+        gomokuCtx.stroke();
     } else {
         grad.addColorStop(0, '#fff');
         grad.addColorStop(1, '#ccc');
@@ -231,9 +269,13 @@ function initDragAndDrop() {
             const y = (clientY - rect.top) * scaleY;
 
             const padding = 30;
-            const cellSize = (gomokuCanvas.width - padding * 2) / (BOARD_SIZE - 1);
-            const c = Math.round((x - padding) / cellSize);
-            const r = Math.round((y - padding) / cellSize);
+            const viewWidth = gomokuViewport.maxC - gomokuViewport.minC + 1;
+            const viewHeight = gomokuViewport.maxR - gomokuViewport.minR + 1;
+            const visibleCount = Math.max(viewWidth, viewHeight);
+            const cellSize = (gomokuCanvas.width - padding * 2) / (visibleCount - 1);
+
+            const c = Math.round((x - padding) / cellSize) + gomokuViewport.minC;
+            const r = Math.round((y - padding) / cellSize) + gomokuViewport.minR;
 
             if (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE && gomokuBoard[r][c] === 0) {
                 if (!gomokuDragCell || gomokuDragCell.r !== r || gomokuDragCell.c !== c) {
@@ -292,9 +334,12 @@ function handleGomokuClick(e) {
     const y = (clientY - rect.top) * scaleY;
 
     const padding = 30;
-    const cellSize = (gomokuCanvas.width - padding * 2) / (BOARD_SIZE - 1);
-    const c = Math.round((x - padding) / cellSize);
-    const r = Math.round((y - padding) / cellSize);
+    const viewWidth = gomokuViewport.maxC - gomokuViewport.minC + 1;
+    const viewHeight = gomokuViewport.maxR - gomokuViewport.minR + 1;
+    const visibleCount = Math.max(viewWidth, viewHeight);
+    const cellSize = (gomokuCanvas.width - padding * 2) / (visibleCount - 1);
+    const c = Math.round((x - padding) / cellSize) + gomokuViewport.minC;
+    const r = Math.round((y - padding) / cellSize) + gomokuViewport.minR;
 
     handleMoveSelection(r, c);
 }
@@ -302,6 +347,7 @@ function handleGomokuClick(e) {
 function handleMoveSelection(r, c) {
     if (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE && gomokuBoard[r][c] === 0) {
         pendingGomokuMove = { r, c };
+        expandGomokuViewport(r, c);
 
         if (gomokuMode === 'speed') {
             gomokuBoard[r][c] = 1;
@@ -373,6 +419,7 @@ function speedAiTurn() {
     if (move) {
         gomokuBoard[move.r][move.c] = 2; // AI is White
         lastGomokuMove = move;
+        expandGomokuViewport(move.r, move.c);
         drawGomokuBoard();
         osc('sine', 300, 0.1, 0.1);
 
@@ -389,6 +436,7 @@ function aiTurn() {
     if (move) {
         gomokuBoard[move.r][move.c] = 2; // AI is White
         lastGomokuMove = move;
+        expandGomokuViewport(move.r, move.c);
         drawGomokuBoard();
         osc('sine', 300, 0.1, 0.1);
 

@@ -126,11 +126,24 @@ const playTTS = () => {
         const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=1`;
         const audio = new Audio(url);
         audio.play().catch(e => {
-            console.warn("Youdao TTS failed, trying Local MP3", e);
+            console.warn("Youdao TTS failed, trying Baidu Fanyi", e);
+            playBaidu();
+        });
+        audio.onerror = () => {
+            console.warn("Youdao TTS error, trying Baidu Fanyi");
+            playBaidu();
+        };
+    };
+
+    const playBaidu = () => {
+        const url = `https://fanyi.baidu.com/gettts?lan=uk&text=${encodeURIComponent(text)}&spd=3&source=web`;
+        const audio = new Audio(url);
+        audio.play().catch(e => {
+            console.warn("Baidu Fanyi TTS failed, trying Local MP3", e);
             playLocalMP3();
         });
         audio.onerror = () => {
-            console.warn("Youdao TTS error, trying Local MP3");
+            console.warn("Baidu Fanyi TTS error, trying Local MP3");
             playLocalMP3();
         };
     };

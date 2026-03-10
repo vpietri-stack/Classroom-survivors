@@ -151,7 +151,7 @@ const playTTS = () => {
 
     const playLocalMP3 = () => {
         const url = `audio_mp3/${encodeURIComponent(text)}.mp3`;
-        tryAudioWithTimeout(url, "Local MP3", playBaidu, 1000);
+        tryAudioWithTimeout(url, "Local MP3", playBaidu, 4000);
     };
 
     const playBaidu = () => {

@@ -97,7 +97,7 @@ class MainScene extends Phaser.Scene {
         this.enemies = this.physics.add.group();
         this.bullets = this.physics.add.group();
         this.gems = this.physics.add.group();
-        this.lootboxes = this.physics.add.group();
+        this.powerUps = this.physics.add.group();
         this.tornados = this.physics.add.group();
         this.obstacles = this.physics.add.staticGroup();
 
@@ -173,7 +173,7 @@ class MainScene extends Phaser.Scene {
         this.physics.add.overlap(this.player, this.enemies, this.handlePlayerHit, null, this);
         this.physics.add.collider(this.player, this.obstacles);
         this.physics.add.collider(this.enemies, this.obstacles, null, (e, o) => !e.isBat, this);
-        this.physics.add.overlap(this.player, this.lootboxes, this.handleLootboxPickup, null, this);
+        this.physics.add.overlap(this.player, this.powerUps, this.handlePowerUpPickup, null, this);
         this.physics.add.overlap(this.tornados, this.enemies, (t, e) => this.damageEnemy(e, 999), null, this);
 
         this.applyReward({ id: 'wand', name: 'Spirit Wand', type: 'weapon' });
@@ -396,45 +396,16 @@ class MainScene extends Phaser.Scene {
             this.obstacles.add(pondCollider);
             pondCollider.linkedGraphics = pond;
         } else {
-            const isCrate = Math.random() < 0.2;
-            const type = isCrate ? { emoji: '📦', fontSize: '40px', bodyRad: 20, isCrate: true } : Phaser.Math.RND.pick(obstacleTypes);
+            const type = Phaser.Math.RND.pick(obstacleTypes);
             const obs = this.add.text(x, y, type.emoji, { fontSize: type.fontSize, padding: { top: 40 } }).setOrigin(0.5);
 
-            if (isCrate) {
-                this.physics.add.existing(obs, false);
-                obs.body.setImmovable(true);
-                obs.hp = 10;
-                obs.isCrate = true;
-                this.physics.add.collider(this.bullets, obs, (b, crate) => {
-                    this.damageCrate(crate, b.dmg || 10);
-                    if (b.type !== 'axe' && b.type !== 'cross') b.destroy();
-                });
-            } else {
-                this.obstacles.add(obs);
-            }
-
+            this.obstacles.add(obs);
             obs.body.setCircle(type.bodyRad);
             if (type.isTree) {
                 obs.body.setOffset((obs.width - type.bodyRad * 2) / 2, obs.height - type.bodyRad * 2 - 10);
             } else {
                 obs.body.setOffset((obs.width - type.bodyRad * 2) / 2, (obs.height - type.bodyRad * 2) / 2);
             }
-        }
-    }
-
-    damageCrate(crate, dmg) {
-        crate.hp -= dmg;
-        crate.setTint(0xcccccc);
-        this.time.delayedCall(100, () => { if (crate.active) crate.clearTint(); });
-        synthHit();
-        if (crate.hp <= 0) {
-            if (Math.random() < 0.3) this.spawnLootbox(crate.x, crate.y);
-            else if (Math.random() < 0.6) {
-                const g = this.add.circle(crate.x, crate.y, 6, 0x00ff88);
-                this.physics.add.existing(g);
-                g.val = 5; g.type = 'xp'; this.gems.add(g);
-            }
-            crate.destroy();
         }
     }
 
@@ -847,7 +818,7 @@ class MainScene extends Phaser.Scene {
                 duration: 500,
                 onComplete: () => {
                     if (enemy.isBoss) {
-                        this.spawnLootbox(enemy.x, enemy.y);
+                        if (Math.random() < 0.3) this.spawnPowerUp(enemy.x, enemy.y);
                         for (let i = 0; i < 5; i++) {
                             const g = this.add.circle(enemy.x + (Math.random() - 0.5) * 40, enemy.y + (Math.random() - 0.5) * 40, 6, 0x00ff88);
                             this.physics.add.existing(g);
@@ -858,9 +829,8 @@ class MainScene extends Phaser.Scene {
                         this.physics.add.existing(g);
                         g.val = 5; g.type = 'xp'; this.gems.add(g);
 
-                        // 1% chance for Lootbox from regular enemies
                         if (Math.random() < 0.01) {
-                            this.spawnLootbox(enemy.x, enemy.y);
+                            this.spawnPowerUp(enemy.x, enemy.y);
                         }
                     }
                     this.killCount++;
@@ -871,7 +841,7 @@ class MainScene extends Phaser.Scene {
         }
     }
 
-    spawnLootbox(x, y) {
+    spawnPowerUp(x, y) {
         const weapons = POWER_UPS.filter(p => p.type === 'weapon');
         const specials = [
             { id: 'heart', icon: '❤️', type: 'special' },
@@ -881,39 +851,38 @@ class MainScene extends Phaser.Scene {
         const choices = [...weapons, ...specials];
         const choice = Phaser.Math.RND.pick(choices);
 
-        const container = this.add.container(x, y);
-        const bg = this.add.rectangle(0, 0, 50, 50, 0xffd700).setAlpha(0.8);
-        const icon = this.add.text(0, 0, choice.icon || choice.emoji, { fontSize: '30px' }).setOrigin(0.5);
-        container.add([bg, icon]);
+        const icon = this.add.text(x, y, choice.icon || choice.emoji, { fontSize: '40px' }).setOrigin(0.5);
 
-        this.physics.add.existing(container);
-        container.body.setSize(50, 50);
-        container.body.setOffset(-25, -25);
-        container.reward = choice;
-        this.lootboxes.add(container);
+        this.physics.add.existing(icon);
+        icon.body.setSize(40, 40);
+        icon.body.setOffset(-20, -20);
+        icon.reward = choice;
+        this.powerUps.add(icon);
 
-        // Flashing gold square
+        // Flashing animation
         this.tweens.add({
-            targets: bg,
-            alpha: 0.3,
-            duration: 300,
+            targets: icon,
+            alpha: 0.5,
+            scaleX: 1.2,
+            scaleY: 1.2,
+            duration: 400,
             yoyo: true,
             repeat: -1
         });
     }
 
-    handleLootboxPickup(player, box) {
-        if (box.collected) return;
-        box.collected = true;
+    handlePowerUpPickup(player, powerup) {
+        if (powerup.collected) return;
+        powerup.collected = true;
 
-        const reward = box.reward;
+        const reward = powerup.reward;
         const iconStr = reward.icon || reward.emoji;
 
-        synthLootbox();
+        synthGem(); // Powerup pickup sound
 
         // Visual orbit animation before activation
-        const flyingIcon = this.add.text(box.x, box.y, iconStr, { fontSize: '30px' }).setOrigin(0.5);
-        box.destroy();
+        const flyingIcon = this.add.text(powerup.x, powerup.y, iconStr, { fontSize: '40px' }).setOrigin(0.5);
+        powerup.destroy();
 
         let orbitAngle = 0;
         this.tweens.addCounter({
@@ -976,75 +945,6 @@ class MainScene extends Phaser.Scene {
             duration: 600,
             ease: 'Back.easeOut',
             onComplete: () => txt.destroy()
-        });
-    }
-
-    spawnLootbox(x, y) {
-        const box = this.add.text(x, y, '🎁', { fontSize: '35px' }).setOrigin(0.5);
-        this.physics.add.existing(box);
-        this.lootboxes.add(box);
-        const rewards = [
-            { id: 'heart', name: 'Health', icon: '❤️', type: 'heal' },
-            { id: 'vortex', name: 'Vacuum', icon: '🧲', type: 'bonus' },
-            { id: 'tornado', name: 'Fire Storm', icon: '🔥', type: 'bonus' }
-        ];
-        const weaponPool = POWER_UPS.filter(p => p.type === 'weapon');
-        rewards.push(weaponPool[Math.floor(Math.random() * weaponPool.length)]);
-        box.reward = rewards[Math.floor(Math.random() * rewards.length)];
-    }
-
-    handleLootboxPickup(player, box) {
-        if (box.collected) return;
-        box.collected = true;
-
-        const reward = box.reward;
-        const iconStr = reward.icon || reward.emoji;
-
-        synthLootbox();
-
-        const flyingIcon = this.add.text(box.x, box.y, iconStr, { fontSize: '30px' }).setOrigin(0.5);
-        box.destroy();
-
-        let orbitAngle = 0;
-        this.tweens.addCounter({
-            from: 0,
-            to: 1,
-            duration: 800,
-            onUpdate: (tween) => {
-                const t = tween.getValue();
-                orbitAngle += 0.25;
-                const radius = 60 * (1 - t * 0.4);
-
-                flyingIcon.x = this.player.x + Math.cos(orbitAngle) * radius;
-                flyingIcon.y = this.player.y + Math.sin(orbitAngle) * radius;
-                flyingIcon.rotation += 0.15;
-
-                if (t > 0.6) {
-                    const snapT = (t - 0.6) / 0.4;
-                    flyingIcon.x = Phaser.Math.Linear(flyingIcon.x, this.player.x, snapT);
-                    flyingIcon.y = Phaser.Math.Linear(flyingIcon.y, this.player.y, snapT);
-                    flyingIcon.scale = 1.2 * (1 - snapT);
-                }
-            },
-            onComplete: () => {
-                flyingIcon.destroy();
-
-                if (reward.type === 'weapon') {
-                    this.applyReward(reward);
-                } else {
-                    if (reward.id === 'heart') {
-                        this.playerStats.hp = Math.min(this.playerStats.maxHp, this.playerStats.hp + 30);
-                    } else if (reward.id === 'vortex') {
-                        this.gems.getChildren().forEach(gem => {
-                            if (gem.type === 'xp') gem.vortexed = true;
-                        });
-                    } else if (reward.id === 'tornado') {
-                        this.spawnTornado();
-                    }
-                }
-                updateDOMHUD(this.playerStats, Math.floor(this.accumulatedTime / 1000), this.killCount);
-                synthGem();
-            }
         });
     }
 

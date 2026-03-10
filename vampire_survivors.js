@@ -430,7 +430,7 @@ class MainScene extends Phaser.Scene {
         if (crate.hp <= 0) {
             if (Math.random() < 0.3) this.spawnLootbox(crate.x, crate.y);
             else if (Math.random() < 0.6) {
-                const g = this.add.text(crate.x, crate.y, '🟢', { fontSize: '15px' }).setOrigin(0.5);
+                const g = this.add.circle(crate.x, crate.y, 6, 0x00ff88);
                 this.physics.add.existing(g);
                 g.val = 5; g.type = 'xp'; this.gems.add(g);
             }
@@ -793,58 +793,169 @@ class MainScene extends Phaser.Scene {
     damageEnemy(enemy, amount, knockback = 0) {
         if (!enemy.active) return;
         enemy.hp -= amount;
-        synthHit();
+
+        // Hit Juice: Scale Pop & Alpha Tween
+        this.tweens.add({
+            targets: enemy,
+            alpha: 0.3,
+            scaleX: 1.2,
+            scaleY: 1.2,
+            duration: 50,
+            yoyo: true,
+            onComplete: () => { if (enemy.active) enemy.setScale(1); }
+        });
+
+        if (knockback > 0 && enemy.body) {
+            const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, enemy.x, enemy.y);
+            enemy.body.setVelocity(Math.cos(angle) * knockback, Math.sin(angle) * knockback);
+            enemy.stunTimer = 15;
+        }
 
         // Damage Text (Juice)
         this.spawnDamagePop(enemy.x, enemy.y, Math.round(amount));
 
-        enemy.setTint(0xff0000);
-        enemy.alpha = 0.8;
-        this.time.delayedCall(100, () => {
-            if (enemy.active) {
-                enemy.clearTint();
-                enemy.alpha = 1.0;
-            }
-        });
-
-        if (knockback > 0 && enemy.body) {
-            const kbVal = knockback * 1.5; // Buffed knockback push
-            const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, enemy.x, enemy.y);
-            enemy.body.setVelocity(Math.cos(angle) * kbVal, Math.sin(angle) * kbVal);
-            enemy.stunTimer = 25; // Buffed stun time
-        }
-
         if (enemy.hp <= 0) {
             enemy.active = false;
-            if (enemy.body) enemy.body.enable = false;
+            enemy.body.checkCollision.none = true;
+            enemy.body.setVelocity(enemy.body.velocity.x * 1.5, enemy.body.velocity.y * 1.5);
+            enemy.body.setDrag(1000);
+            synthHit();
 
-            if (enemy.isBoss) {
-                this.spawnLootbox(enemy.x, enemy.y);
-                this.killCount += 10;
-            } else {
-                if (Math.random() < 0.05) {
-                    const g = this.add.text(enemy.x, enemy.y, '💎', { fontSize: '20px' }).setOrigin(0.5);
-                    this.physics.add.existing(g);
-                    g.val = 15; g.type = 'xp'; this.gems.add(g);
-                } else {
-                    const g = this.add.text(enemy.x, enemy.y, '🟢', { fontSize: '15px' }).setOrigin(0.5);
-                    this.physics.add.existing(g);
-                    g.val = 5; g.type = 'xp'; this.gems.add(g);
-                }
-                this.killCount++;
+            // Dust Effect (Thanos Snap)
+            const particles = this.add.graphics();
+            particles.fillStyle(0xcccccc, 0.8);
+            for (let i = 0; i < 8; i++) {
+                const px = enemy.x + (Math.random() - 0.5) * 40;
+                const py = enemy.y + (Math.random() - 0.5) * 40;
+                particles.fillCircle(px, py, 4);
             }
+            this.tweens.add({
+                targets: particles,
+                alpha: 0,
+                y: '-=30',
+                duration: 600,
+                onComplete: () => particles.destroy()
+            });
 
             // Death animation: fade out and float up
             this.tweens.add({
                 targets: enemy,
                 alpha: 0,
-                y: enemy.y - 40,
-                scale: 0.5,
-                duration: 400,
-                ease: 'Cubic.easeOut',
-                onComplete: () => enemy.destroy()
+                y: enemy.y - 15,
+                scaleX: 0.8,
+                scaleY: 0.8,
+                duration: 500,
+                onComplete: () => {
+                    if (enemy.isBoss) {
+                        this.spawnLootbox(enemy.x, enemy.y);
+                        for (let i = 0; i < 5; i++) {
+                            const g = this.add.circle(enemy.x + (Math.random() - 0.5) * 40, enemy.y + (Math.random() - 0.5) * 40, 6, 0x00ff88);
+                            this.physics.add.existing(g);
+                            g.val = 15; g.type = 'xp'; this.gems.add(g);
+                        }
+                    } else {
+                        const g = this.add.circle(enemy.x, enemy.y, 6, 0x00ff88);
+                        this.physics.add.existing(g);
+                        g.val = 5; g.type = 'xp'; this.gems.add(g);
+
+                        // 1% chance for Lootbox from regular enemies
+                        if (Math.random() < 0.01) {
+                            this.spawnLootbox(enemy.x, enemy.y);
+                        }
+                    }
+                    this.killCount++;
+                    updateDOMHUD(this.playerStats, Math.floor(this.accumulatedTime / 1000), this.killCount);
+                    enemy.destroy();
+                }
             });
         }
+    }
+
+    spawnLootbox(x, y) {
+        const weapons = POWER_UPS.filter(p => p.type === 'weapon');
+        const specials = [
+            { id: 'heart', icon: '❤️', type: 'special' },
+            { id: 'vortex', icon: '🌀', type: 'special' },
+            { id: 'tornado', icon: '🌪️', type: 'special' }
+        ];
+        const choices = [...weapons, ...specials];
+        const choice = Phaser.Math.RND.pick(choices);
+
+        const container = this.add.container(x, y);
+        const bg = this.add.rectangle(0, 0, 50, 50, 0xffd700).setAlpha(0.8);
+        const icon = this.add.text(0, 0, choice.icon || choice.emoji, { fontSize: '30px' }).setOrigin(0.5);
+        container.add([bg, icon]);
+
+        this.physics.add.existing(container);
+        container.body.setSize(50, 50);
+        container.body.setOffset(-25, -25);
+        container.reward = choice;
+        this.lootboxes.add(container);
+
+        // Flashing gold square
+        this.tweens.add({
+            targets: bg,
+            alpha: 0.3,
+            duration: 300,
+            yoyo: true,
+            repeat: -1
+        });
+    }
+
+    handleLootboxPickup(player, box) {
+        if (box.collected) return;
+        box.collected = true;
+
+        const reward = box.reward;
+        const iconStr = reward.icon || reward.emoji;
+
+        synthLootbox();
+
+        // Visual orbit animation before activation
+        const flyingIcon = this.add.text(box.x, box.y, iconStr, { fontSize: '30px' }).setOrigin(0.5);
+        box.destroy();
+
+        let orbitAngle = 0;
+        this.tweens.addCounter({
+            from: 0,
+            to: 1,
+            duration: 800,
+            onUpdate: (tween) => {
+                const t = tween.getValue();
+                orbitAngle += 0.25;
+                const radius = 60 * (1 - t * 0.4);
+
+                flyingIcon.x = this.player.x + Math.cos(orbitAngle) * radius;
+                flyingIcon.y = this.player.y + Math.sin(orbitAngle) * radius;
+                flyingIcon.rotation += 0.15;
+
+                if (t > 0.6) {
+                    const snapT = (t - 0.6) / 0.4;
+                    flyingIcon.x = Phaser.Math.Linear(flyingIcon.x, this.player.x, snapT);
+                    flyingIcon.y = Phaser.Math.Linear(flyingIcon.y, this.player.y, snapT);
+                    flyingIcon.scale = 1.2 * (1 - snapT);
+                }
+            },
+            onComplete: () => {
+                flyingIcon.destroy();
+
+                if (reward.type === 'weapon') {
+                    this.applyReward(reward);
+                } else {
+                    if (reward.id === 'heart') {
+                        this.playerStats.hp = Math.min(this.playerStats.maxHp, this.playerStats.hp + 30);
+                    } else if (reward.id === 'vortex') {
+                        this.gems.getChildren().forEach(gem => {
+                            if (gem.type === 'xp') gem.vortexed = true;
+                        });
+                    } else if (reward.id === 'tornado') {
+                        this.spawnTornado();
+                    }
+                }
+                updateDOMHUD(this.playerStats, Math.floor(this.accumulatedTime / 1000), this.killCount);
+                synthGem();
+            }
+        });
     }
 
     spawnDamagePop(x, y, amount) {

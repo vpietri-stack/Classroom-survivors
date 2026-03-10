@@ -396,16 +396,45 @@ class MainScene extends Phaser.Scene {
             this.obstacles.add(pondCollider);
             pondCollider.linkedGraphics = pond;
         } else {
-            const type = Phaser.Math.RND.pick(obstacleTypes);
+            const isCrate = Math.random() < 0.2;
+            const type = isCrate ? { emoji: '📦', fontSize: '40px', bodyRad: 20, isCrate: true } : Phaser.Math.RND.pick(obstacleTypes);
             const obs = this.add.text(x, y, type.emoji, { fontSize: type.fontSize, padding: { top: 40 } }).setOrigin(0.5);
-            this.obstacles.add(obs);
-            obs.body.setCircle(type.bodyRad);
 
+            if (isCrate) {
+                this.physics.add.existing(obs, false);
+                obs.body.setImmovable(true);
+                obs.hp = 10;
+                obs.isCrate = true;
+                this.physics.add.collider(this.bullets, obs, (b, crate) => {
+                    this.damageCrate(crate, b.dmg || 10);
+                    if (b.type !== 'axe' && b.type !== 'cross') b.destroy();
+                });
+            } else {
+                this.obstacles.add(obs);
+            }
+
+            obs.body.setCircle(type.bodyRad);
             if (type.isTree) {
                 obs.body.setOffset((obs.width - type.bodyRad * 2) / 2, obs.height - type.bodyRad * 2 - 10);
             } else {
                 obs.body.setOffset((obs.width - type.bodyRad * 2) / 2, (obs.height - type.bodyRad * 2) / 2);
             }
+        }
+    }
+
+    damageCrate(crate, dmg) {
+        crate.hp -= dmg;
+        crate.setTint(0xcccccc);
+        this.time.delayedCall(100, () => { if (crate.active) crate.clearTint(); });
+        synthHit();
+        if (crate.hp <= 0) {
+            if (Math.random() < 0.3) this.spawnLootbox(crate.x, crate.y);
+            else if (Math.random() < 0.6) {
+                const g = this.add.text(crate.x, crate.y, '🟢', { fontSize: '15px' }).setOrigin(0.5);
+                this.physics.add.existing(g);
+                g.val = 5; g.type = 'xp'; this.gems.add(g);
+            }
+            crate.destroy();
         }
     }
 
@@ -762,16 +791,33 @@ class MainScene extends Phaser.Scene {
     }
 
     damageEnemy(enemy, amount, knockback = 0) {
+        if (!enemy.active) return;
         enemy.hp -= amount;
         synthHit();
+
+        // Damage Text (Juice)
+        this.spawnDamagePop(enemy.x, enemy.y, Math.round(amount));
+
         enemy.setTint(0xff0000);
-        this.time.delayedCall(100, () => { if (enemy.active) enemy.clearTint(); });
+        enemy.alpha = 0.8;
+        this.time.delayedCall(100, () => {
+            if (enemy.active) {
+                enemy.clearTint();
+                enemy.alpha = 1.0;
+            }
+        });
+
         if (knockback > 0 && enemy.body) {
+            const kbVal = knockback * 1.5; // Buffed knockback push
             const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, enemy.x, enemy.y);
-            enemy.body.setVelocity(Math.cos(angle) * knockback, Math.sin(angle) * knockback);
-            enemy.stunTimer = 15;
+            enemy.body.setVelocity(Math.cos(angle) * kbVal, Math.sin(angle) * kbVal);
+            enemy.stunTimer = 25; // Buffed stun time
         }
+
         if (enemy.hp <= 0) {
+            enemy.active = false;
+            if (enemy.body) enemy.body.enable = false;
+
             if (enemy.isBoss) {
                 this.spawnLootbox(enemy.x, enemy.y);
                 this.killCount += 10;
@@ -787,8 +833,39 @@ class MainScene extends Phaser.Scene {
                 }
                 this.killCount++;
             }
-            enemy.destroy();
+
+            // Death animation: fade out and float up
+            this.tweens.add({
+                targets: enemy,
+                alpha: 0,
+                y: enemy.y - 40,
+                scale: 0.5,
+                duration: 400,
+                ease: 'Cubic.easeOut',
+                onComplete: () => enemy.destroy()
+            });
         }
+    }
+
+    spawnDamagePop(x, y, amount) {
+        const txt = this.add.text(x, y + (Math.random() - 0.5) * 20, amount, {
+            fontSize: '18px',
+            fontFamily: 'Fredoka',
+            color: '#ffffff',
+            stroke: '#000000',
+            strokeThickness: 3,
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+
+        this.tweens.add({
+            targets: txt,
+            y: y - 50,
+            alpha: 0,
+            scale: 1.5,
+            duration: 600,
+            ease: 'Back.easeOut',
+            onComplete: () => txt.destroy()
+        });
     }
 
     spawnLootbox(x, y) {

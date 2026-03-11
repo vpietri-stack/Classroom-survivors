@@ -501,3 +501,28 @@ body {
 .text-green-500 {
     color: #22c55e;
 }
+
+/* Translation Hints */
+.translation-hint {
+    font-size: clamp(1rem, 3.5vw, 1.4rem);
+    color: #a78bfa;
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    border-radius: 8px;
+    padding: 6px 16px;
+    margin: 4px auto 8px;
+    text-align: center;
+    max-width: 90%;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.minigame-container .translation-hint {
+    color: #7c3aed;
+    background: rgba(139, 92, 246, 0.12);
+    border-color: rgba(139, 92, 246, 0.3);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}

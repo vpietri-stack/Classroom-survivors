@@ -176,9 +176,10 @@
             <div class="w-full bg-gray-300 h-3 sm:h-4 mb-6 rounded-full overflow-hidden">
                 <div id="rec-timer-bar" class="h-full bg-red-500 w-full transition-all duration-[100ms] linear"></div>
             </div>
-            <button onclick="playTTS()" aria-label="Play Audio" class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-500 text-white text-2xl mb-8 shadow-lg transform active:scale-95 transition-transform">
+            <button onclick="playTTS()" aria-label="Play Audio" class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-500 text-white text-2xl mb-2 shadow-lg transform active:scale-95 transition-transform">
                 <i class="fas fa-volume-up"></i>
             </button>
+            <div id="rec-translation" class="translation-hint hidden"></div>
 
             <div class="flex flex-wrap justify-center gap-3 sm:gap-6" id="rec-options">
                 <!-- Buttons injected dynamically -->
@@ -197,7 +198,8 @@
             <div class="text-yellow-400 font-bold text-xl sm:text-2xl mb-4 text-center animate-pulse">
                 <span id="grammar-timer">00:00</span>
             </div>
-            <h3 class="text-xl sm:text-2xl font-bold mb-4 text-purple-700 text-center">Complete the Sentences!</h3>
+            <h3 class="text-xl sm:text-2xl font-bold mb-1 text-purple-700 text-center">Complete the Sentences!</h3>
+            <div id="grammar-translation" class="translation-hint hidden"></div>
 
             <div id="sentence-container" class="mb-6 flex flex-col gap-3 sm:gap-4">
                 <!-- Sentences injected here -->

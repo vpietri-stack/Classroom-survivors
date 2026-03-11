@@ -6,6 +6,39 @@ let GRAMMAR_SENTENCES = [];
 // --- GLOBAL STATE ---
 let activeGameMode = null; // 'VampireSurvivors' or 'Gomoku'
 
+// --- TRANSLATION SYSTEM (LOCAL) ---
+function getLocalTranslation(text) {
+    if (!text) return '';
+    const key = text.trim();
+    // Search all books/units/pages in TEACHING_CONTENT for a translations object
+    if (typeof TEACHING_CONTENT !== 'undefined') {
+        for (const book in TEACHING_CONTENT) {
+            for (const unit in TEACHING_CONTENT[book]) {
+                for (const page in TEACHING_CONTENT[book][unit]) {
+                    const entry = TEACHING_CONTENT[book][unit][page];
+                    if (entry.translations && entry.translations[key]) {
+                        return entry.translations[key];
+                    }
+                }
+            }
+        }
+    }
+    return '';
+}
+
+function showTranslation(elementId, text) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+
+    el.textContent = "";
+    el.classList.add('hidden');
+
+    const cn = getLocalTranslation(text);
+    if (cn) {
+        el.textContent = cn;
+        el.classList.remove('hidden');
+    }
+}
 
 // --- AUDIO SYSTEM ---
 let audioCtx;
@@ -640,6 +673,7 @@ function startWordRecGame() {
     const target = getWeightedItemForGame(book, unit, page, 'vocab');
 
     currentTTSWord = target;
+    showTranslation('rec-translation', target);
 
     // Always show 5 words - no level-based scaling
     let choiceCount = 5;
@@ -720,6 +754,7 @@ function startGrammarGame() {
 
     // Store valid possibilities for validation
     document.getElementById('grammarGame').dataset.validOptions = JSON.stringify(possibilities);
+    showTranslation('grammar-translation', primarySentence);
 
 
     const sentContainer = document.getElementById('sentence-container');

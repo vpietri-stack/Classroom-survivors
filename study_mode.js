@@ -58,6 +58,7 @@ function startRoundA() {
 
     const container = document.getElementById('study-game-area');
     container.innerHTML = `
+        <div id="roundA-translation" class="translation-hint hidden"></div>
         <div id="roundA-container" class="flex flex-wrap justify-center gap-6 mt-8 p-4">
             <!-- Words injected here -->
         </div>
@@ -100,6 +101,7 @@ function playRoundAPrompt() {
     // "sound of one of the word is played" -> Pick random from remaining
     const target = STUDY_STATE.remainingWordsRoundA[Math.floor(Math.random() * STUDY_STATE.remainingWordsRoundA.length)];
     currentTTSWord = target; // Global from game.js for playTTS()
+    showTranslation('roundA-translation', target);
     setTimeout(playTTS, 500); // Small delay
 }
 
@@ -152,12 +154,14 @@ function nextRoundBWord() {
     container.innerHTML = `
         <div class="flex flex-col items-center gap-[var(--gap-md)] w-full">
             <button onclick="playTTS()" aria-label="Play Audio" class="w-16 h-16 rounded-full bg-blue-500 text-white text-2xl shadow-lg transform active:scale-95 transition-transform"><i class="fas fa-volume-up"></i></button>
+            <div id="roundB-translation" class="translation-hint hidden"></div>
             
             <div id="scramble-slots" class="flex flex-wrap justify-center gap-[var(--gap-sm)] min-h-[60px] w-full px-4"></div>
             
             <div id="scramble-bank" class="flex flex-wrap justify-center gap-[var(--gap-sm)] w-full px-4"></div>
         </div>
     `;
+    showTranslation('roundB-translation', word);
 
     // Setup Slots
     const slotsDiv = document.getElementById('scramble-slots');
@@ -318,6 +322,7 @@ function nextRoundCWord() {
     container.innerHTML = `
         <div class="flex flex-col items-center gap-[var(--gap-md)] w-full">
             <button onclick="playTTS()" aria-label="Play Audio" class="w-16 h-16 rounded-full bg-blue-500 text-white text-2xl shadow-lg transform active:scale-95 transition-transform"><i class="fas fa-volume-up"></i></button>
+            <div id="roundC-translation" class="translation-hint hidden"></div>
             
             <div id="spelling-display" class="flex flex-wrap justify-center gap-[var(--gap-xs)] min-h-[60px] w-full px-4 text-white"></div>
             
@@ -329,6 +334,7 @@ function nextRoundCWord() {
             </div>
         </div>
     `;
+    showTranslation('roundC-translation', word);
 
     // Virtual Keyboard: Actual letters + random
     // Count exact unique letters needed
@@ -503,6 +509,7 @@ function nextRoundDSentence() {
     const container = document.getElementById('study-game-area');
     container.innerHTML = `
         <div class="flex flex-col gap-[var(--gap-md)] w-full max-w-2xl mx-auto px-4">
+             <div id="roundD-translation" class="translation-hint hidden"></div>
              <div id="sentence-drop-zone" class="bg-gray-800/50 p-6 rounded-xl min-h-[120px] flex flex-wrap gap-[var(--gap-sm)] items-center justify-center border-2 border-dashed border-gray-600">
                 <!-- Drop words here -->
              </div>
@@ -516,6 +523,7 @@ function nextRoundDSentence() {
              </div>
         </div>
     `;
+    showTranslation('roundD-translation', sentence);
 
     // Tokenize
     // Simple space split, retain punctuation attached? 

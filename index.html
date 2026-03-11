@@ -47,8 +47,7 @@
         <div id="selection-wizard" class="w-full max-w-md mx-auto">
 
             <!-- Step 1: Select Day -->
-            <div id="step-day"
-                class="step-container mb-6 flex flex-col items-center gap-3 bg-black/40 p-6 rounded-xl border border-white/20">
+            <div id="step-day" class="step-container mb-6 flex flex-col items-center gap-3 bg-black/40 p-6 rounded-xl border border-white/20">
                 <label class="text-yellow-400 font-bold text-lg tracking-widest uppercase mb-2">你周几跟Val上课</label>
                 <div id="day-buttons" class="flex flex-wrap justify-center gap-3">
                     <!-- Day buttons populated by JS -->
@@ -56,8 +55,7 @@
             </div>
 
             <!-- Step 2: Select Time (hidden initially) -->
-            <div id="step-time"
-                class="step-container hidden mb-6 flex flex-col items-center gap-3 bg-black/40 p-6 rounded-xl border border-white/20">
+            <div id="step-time" class="step-container hidden mb-6 flex flex-col items-center gap-3 bg-black/40 p-6 rounded-xl border border-white/20">
                 <button onclick="goBackToDay()" class="self-start text-gray-400 hover:text-white text-sm mb-2">
                     <i class="fas fa-arrow-left mr-1"></i>返回
                 </button>
@@ -69,8 +67,7 @@
             </div>
 
             <!-- Step 3: Select Student (hidden initially) -->
-            <div id="step-student"
-                class="step-container hidden mb-6 flex flex-col items-center gap-3 bg-black/40 p-6 rounded-xl border border-white/20">
+            <div id="step-student" class="step-container hidden mb-6 flex flex-col items-center gap-3 bg-black/40 p-6 rounded-xl border border-white/20">
                 <button onclick="goBackToTime()" class="self-start text-gray-400 hover:text-white text-sm mb-2">
                     <i class="fas fa-arrow-left mr-1"></i>返回
                 </button>
@@ -81,13 +78,11 @@
             </div>
 
             <!-- Step 4: Greeting & Actions (hidden initially) -->
-            <div id="step-greeting"
-                class="step-container hidden mb-6 flex flex-col items-center gap-4 bg-black/40 p-6 rounded-xl border border-white/20">
+            <div id="step-greeting" class="step-container hidden mb-6 flex flex-col items-center gap-4 bg-black/40 p-6 rounded-xl border border-white/20">
                 <button onclick="goBackToStudent()" class="self-start text-gray-400 hover:text-white text-sm mb-2">
                     <i class="fas fa-arrow-left mr-1"></i>返回
                 </button>
-                <h2 id="greeting-text"
-                    class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-400">
+                <h2 id="greeting-text" class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-400">
                     Hello, Student!
                 </h2>
                 <div class="flex flex-col gap-4 w-full mt-4">
@@ -104,10 +99,8 @@
 
     <!-- Game Intro Overlay -->
     <div id="gameIntroOverlay" class="overlay hidden p-4">
-        <div
-            class="bg-black/60 p-6 sm:p-8 rounded-2xl border-2 border-yellow-500/50 w-full max-w-md sm:max-w-lg mx-auto backdrop-blur-sm">
-            <h1
-                class="text-3xl sm:text-5xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 text-center floating">
+        <div class="bg-black/60 p-6 sm:p-8 rounded-2xl border-2 border-yellow-500/50 w-full max-w-md sm:max-w-lg mx-auto backdrop-blur-sm">
+            <h1 class="text-3xl sm:text-5xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 text-center floating">
                 Classroom Survivors
             </h1>
 
@@ -118,17 +111,14 @@
                 <p>⏱️ <strong class="text-yellow-400">计时模式：</strong>答题时间会从生存时间中扣除，答得越快分数越高！</p>
             </div>
 
-            <button
-                class="game-btn text-xl sm:text-2xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 w-full py-3 sm:py-4 shadow-lg"
-                onclick="startGameFromIntro()">
+            <button class="game-btn text-xl sm:text-2xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 w-full py-3 sm:py-4 shadow-lg" onclick="startGameFromIntro()">
                 <i class="fas fa-play mr-2"></i>开始游戏
             </button>
         </div>
     </div>
 
     <!-- Study Mode Overlay -->
-    <div id="studyModeOverlay"
-        class="overlay hidden bg-gradient-to-br from-slate-900 to-slate-800 z-50 flex flex-col items-center p-4 sm:p-8 overflow-y-auto">
+    <div id="studyModeOverlay" class="overlay hidden bg-gradient-to-br from-slate-900 to-slate-800 z-50 flex flex-col items-center p-4 sm:p-8 overflow-y-auto">
         <h2 id="study-title" class="text-2xl sm:text-4xl text-yellow-400 font-bold mb-2">Study Mode</h2>
         <p id="study-instruction" class="text-lg sm:text-xl text-gray-300 mb-8 text-center">Instruction</p>
 
@@ -157,9 +147,9 @@
             <div class="text-yellow-400 font-bold text-xl sm:text-2xl mb-4 animate-pulse"><span
                     id="spelling-timer">00:00</span></div>
             <h3 class="text-xl sm:text-2xl font-bold mb-4 text-purple-700">Spelling Challenge!</h3>
-            <button onclick="playTTS()" aria-label="Play Audio"
-                class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-500 text-white text-2xl mb-6 shadow-lg transform active:scale-95 transition-transform"><i
-                    class="fas fa-volume-up"></i></button>
+            <button onclick="playTTS()" aria-label="Play Audio" class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-500 text-white text-2xl mb-6 shadow-lg transform active:scale-95 transition-transform">
+                <i class="fas fa-volume-up"></i>
+            </button>
             <div id="spelling-input-display"
                 class="bg-white rounded-lg p-3 sm:p-4 mb-6 study-text-xl font-bold min-h-[50px] sm:min-h-[60px] tracking-widest text-gray-700 border-2 border-dashed border-gray-300 flex flex-wrap justify-center items-center">
             </div>
@@ -186,9 +176,9 @@
             <div class="w-full bg-gray-300 h-3 sm:h-4 mb-6 rounded-full overflow-hidden">
                 <div id="rec-timer-bar" class="h-full bg-red-500 w-full transition-all duration-[100ms] linear"></div>
             </div>
-            <button onclick="playTTS()" aria-label="Play Audio"
-                class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-500 text-white text-2xl mb-8 shadow-lg transform active:scale-95 transition-transform"><i
-                    class="fas fa-volume-up"></i></button>
+            <button onclick="playTTS()" aria-label="Play Audio" class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-500 text-white text-2xl mb-8 shadow-lg transform active:scale-95 transition-transform">
+                <i class="fas fa-volume-up"></i>
+            </button>
 
             <div class="flex flex-wrap justify-center gap-3 sm:gap-6" id="rec-options">
                 <!-- Buttons injected dynamically -->
@@ -260,8 +250,7 @@
 
     <!-- Result Feedback -->
     <div id="feedbackOverlay" class="overlay hidden bg-black/60" style="z-index: 60;">
-        <div id="feedbackCard"
-            class="bg-white p-8 rounded-2xl text-center transform scale-0 transition-transform duration-300">
+        <div id="feedbackCard" class="bg-white p-8 rounded-2xl text-center transform scale-0 transition-transform duration-300">
             <div id="feedbackIcon" class="text-8xl mb-4"></div>
             <h2 id="feedbackTitle" class="text-3xl font-bold mb-2"></h2>
             <p id="feedbackMsg" class="text-lg text-gray-600 mb-6"></p>
@@ -273,18 +262,13 @@
         <h2 class="text-4xl sm:text-6xl font-bold text-red-500 mb-6 text-center">GAME OVER</h2>
         <div
             class="bg-black/60 p-6 sm:p-8 rounded-2xl border-2 border-red-500/50 w-full max-w-md mx-auto mb-8 backdrop-blur-sm">
-            <p class="text-lg sm:text-xl text-yellow-400 mb-4 font-bold tracking-wider text-center"
-                id="finalContentDisplay"></p>
+            <p class="text-lg sm:text-xl text-yellow-400 mb-4 font-bold tracking-wider text-center" id="finalContentDisplay"></p>
             <div class="text-white text-base sm:text-lg space-y-3">
-                <p class="flex justify-between"><span class="text-gray-400">最高等级:</span> <span
-                        class="font-bold text-green-400" id="finalLevel">1</span></p>
-                <p class="flex justify-between"><span class="text-gray-400">生存时间:</span> <span class="font-bold"
-                        id="finalSurvivalTime">00:00</span></p>
-                <p class="flex justify-between"><span class="text-gray-400">回答问题时间:</span> <span
-                        class="font-bold text-purple-400" id="finalMinigameTime">00:00</span></p>
+                <p class="flex justify-between"><span class="text-gray-400">最高等级:</span> <span class="font-bold text-green-400" id="finalLevel">1</span></p>
+                <p class="flex justify-between"><span class="text-gray-400">生存时间:</span> <span class="font-bold" id="finalSurvivalTime">00:00</span></p>
+                <p class="flex justify-between"><span class="text-gray-400">回答问题时间:</span> <span class="font-bold text-purple-400" id="finalMinigameTime">00:00</span></p>
                 <div class="border-t border-gray-600 pt-3 mt-3">
-                    <p class="flex justify-between text-xl sm:text-2xl"><span class="text-yellow-400">得分:</span> <span
-                            class="font-bold text-yellow-400" id="finalScore">00:00</span></p>
+                    <p class="flex justify-between text-xl sm:text-2xl"><span class="text-yellow-400">得分:</span> <span class="font-bold text-yellow-400" id="finalScore">00:00</span></p>
                 </div>
             </div>
         </div>
@@ -300,12 +284,8 @@
                 你想玩什么？
             </h2>
             <div class="flex flex-col gap-6">
-                <button
-                    class="game-btn text-2xl bg-orange-600 hover:bg-orange-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all"
-                    onclick="showGameIntro()">Vampire Survivors</button>
-                <button
-                    class="game-btn text-2xl bg-indigo-600 hover:bg-indigo-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all"
-                    onclick="showGomokuModeSelection()">五子棋 (5 in a row)</button>
+                <button class="game-btn text-2xl bg-orange-600 hover:bg-orange-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all" onclick="showGameIntro()">Vampire Survivors</button>
+                <button class="game-btn text-2xl bg-indigo-600 hover:bg-indigo-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all" onclick="showGomokuModeSelection()">五子棋 (5 in a row)</button>
             </div>
         </div>
     </div>
@@ -318,12 +298,8 @@
                 选择模式
             </h2>
             <div class="flex flex-col gap-6">
-                <button
-                    class="game-btn text-2xl bg-indigo-600 hover:bg-indigo-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all"
-                    onclick="triggerGomoku('regular')">常规五子棋</button>
-                <button
-                    class="game-btn text-2xl bg-red-600 hover:bg-red-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all"
-                    onclick="triggerGomoku('speed')">竞速五子棋</button>
+                <button class="game-btn text-2xl bg-indigo-600 hover:bg-indigo-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all" onclick="triggerGomoku('regular')">常规五子棋</button>
+                <button class="game-btn text-2xl bg-red-600 hover:bg-red-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all" onclick="triggerGomoku('speed')">竞速五子棋</button>
             </div>
         </div>
     </div>
@@ -335,26 +311,20 @@
                 <div class="text-xl">五子棋 (5 in a row)</div>
                 <div id="gomoku-timer" class="text-red-800">Game: 00:00</div>
             </div>
-            <canvas id="gomokuCanvas" width="600" height="600" class="shadow-inner max-w-full h-auto"
-                style="border: 2px solid #5d2b06;"></canvas>
+            <canvas id="gomokuCanvas" width="600" height="600" class="shadow-inner max-w-full h-auto" style="border: 2px solid #5d2b06;"></canvas>
 
             <div id="gomoku-drag-area" class="mt-6 flex flex-col items-center gap-3">
                 <div id="gomoku-status" class="text-center text-black text-lg font-bold h-8">Your turn!</div>
 
-                <div id="gomoku-stash-container"
-                    class="bg-black/10 p-3 rounded-2xl border-2 border-[#8b4513]/30 flex items-center gap-4">
+                <div id="gomoku-stash-container" class="bg-black/10 p-3 rounded-2xl border-2 border-[#8b4513]/30 flex items-center gap-4">
                     <div class="text-xs font-bold text-[#5d2b06] border-r border-[#5d2b06]/30 pr-4">DRAG PIECE<br>TO
                         BOARD</div>
-                    <div id="gomoku-piece-stash"
-                        class="w-14 h-14 bg-black rounded-full shadow-xl border-2 border-white/20 cursor-grab active:cursor-grabbing hover:scale-105 transition-transform">
-                    </div>
+                    <div id="gomoku-piece-stash" class="w-14 h-14 bg-black rounded-full shadow-xl border-2 border-white/20 cursor-grab active:cursor-grabbing hover:scale-105 transition-transform"></div>
                 </div>
             </div>
 
             <!-- Ghost piece for dragging -->
-            <div id="gomoku-ghost-piece"
-                class="fixed pointer-events-none hidden w-10 h-10 bg-black rounded-full shadow-2xl border-2 border-white/40 z-[100] opacity-80">
-            </div>
+            <div id="gomoku-ghost-piece" class="fixed pointer-events-none hidden w-10 h-10 bg-black rounded-full shadow-2xl border-2 border-white/40 z-[100] opacity-80"></div>
         </div>
     </div>
 
@@ -365,22 +335,16 @@
             <p id="gomokuResultMsg" class="text-xl text-gray-200 mb-8"></p>
 
             <div class="bg-white/10 p-6 rounded-xl space-y-3 mb-8 text-left text-lg">
-                <p class="flex justify-between font-medium"><span class="text-gray-400">Game time:</span> <span
-                        id="gomokuGameTime" class="text-white">00:00</span></p>
-                <p class="flex justify-between font-medium"><span class="text-gray-400">Questions time:</span> <span
-                        id="gomokuQuestTime" class="text-purple-400">00:00</span></p>
+                <p class="flex justify-between font-medium"><span class="text-gray-400">Game time:</span> <span id="gomokuGameTime" class="text-white">00:00</span></p>
+                <p class="flex justify-between font-medium"><span class="text-gray-400">Questions time:</span> <span id="gomokuQuestTime" class="text-purple-400">00:00</span></p>
                 <hr class="border-white/20">
-                <p class="flex justify-between text-xl font-bold"><span class="text-yellow-400">Total time:</span> <span
-                        id="gomokuTotalTime" class="text-yellow-400">00:00</span></p>
+                <p class="flex justify-between text-xl font-bold"><span class="text-yellow-400">Total time:</span> <span id="gomokuTotalTime" class="text-yellow-400">00:00</span></p>
             </div>
 
             <div class="flex flex-col gap-4">
-                <button class="game-btn bg-green-600 hover:bg-green-500 text-xl py-3 rounded-lg"
-                    onclick="triggerGomoku()">再玩一次</button>
-                <button class="game-btn bg-blue-600 hover:bg-blue-500 text-xl py-3 rounded-lg"
-                    onclick="showGameSelection()">我想玩别的</button>
-                <button class="game-btn bg-orange-600 hover:bg-orange-500 text-xl py-3 rounded-lg"
-                    onclick="initStudyMode()">学习模式</button>
+                <button class="game-btn bg-green-600 hover:bg-green-500 text-xl py-3 rounded-lg" onclick="triggerGomoku()">再玩一次</button>
+                <button class="game-btn bg-blue-600 hover:bg-blue-500 text-xl py-3 rounded-lg" onclick="showGameSelection()">我想玩别的</button>
+                <button class="game-btn bg-orange-600 hover:bg-orange-500 text-xl py-3 rounded-lg" onclick="initStudyMode()">学习模式</button>
             </div>
         </div>
     </div>

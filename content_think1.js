@@ -240,6 +240,32 @@ TEACHING_CONTENT["Think1"] = {
         }
     },
     "6": {
+        "58": {
+            vocab: [
+                'yesterday', 'last night', 'last week', 'last month', 'last year', 'ago',
+                'become became', 'buy bought', 'come came', 'do did', 'drink drank', 'eat ate', 'feel felt', 'find found', 'fly flew', 'get got', 'give gave',
+                'go went', 'have had', 'know knew', 'leave left', 'lose lost', 'make made', 'meet met', 'put', 'read', 'run ran', 'say said', 'see saw',
+                'send sent', 'sit sat', 'speak spoke', 'take took', 'tell told', 'think thought', 'win won', 'write wrote'
+            ],
+            sentences: [
+                "I went to the cinema yesterday.",
+                "She bought a new phone last week.",
+                "We ate pizza for dinner.",
+                "He drank some water.",
+                "They flew to Spain last year.",
+                "I didn't go to school yesterday.",
+                "She didn't buy the dress.",
+                "We didn't eat the cake.",
+                "Did you go to the party? Yes, I did.",
+                "Did she see the film? No, she didn't."
+            ],
+            sentencePairs: [
+                { a: "Where did you go on holiday?", b: "We went to Italy." },
+                { a: "What did you eat?", b: "I ate pasta." },
+                { a: "Did you see Tom?", b: "Yes, I saw him at the park." },
+                { a: "When did you arrive?", b: "I arrived two days ago." }
+            ]
+        },
         "64": {
             vocab: [
                 'calm', 'cheerful', 'friendly', 'funny', 'helpful', 'intelligent', 'kind', 'nice', 'quiet',
@@ -285,5 +311,5 @@ AVAILABLE_CONTENT["Think1"] = {
     "3": [37],
     "4": [46],
     "5": [55],
-    "6": [64]
+    "6": [58, 64]
 };

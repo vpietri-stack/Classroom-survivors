@@ -535,6 +535,44 @@ TEACHING_CONTENT["PU3"] = {
                 { a: "What are the wings made of?", b: "They're made of paper." }
             ]
         }
+    },
+    "6": {
+        "69": {
+            vocab: [
+                'geography', 'history', 'sports', 'PE', 'maths', 'language', 'music', 'science', 'IT', 'art',
+                'timetable', 'break', 'lunch', 'morning', 'afternoon',
+                'at', 'before', 'after'
+            ],
+            sentences: [
+                "What have we got at nine o'clock on Monday?",
+                "We've got geography at nine o'clock.",
+                "What have we got at ten o'clock on Tuesday?",
+                "We've got history at ten o'clock.",
+                "What have we got at eleven o'clock on Wednesday?",
+                "We've got science at eleven o'clock.",
+                "What have we got at half past one on Thursday?",
+                "We've got maths at half past one.",
+                "What have we got at two o'clock on Friday?",
+                "We've got IT at two o'clock.",
+                "What time is the break? It's at half past ten.",
+                "What time is lunch? It's at one o'clock.",
+                "Frank has two sports classes after lunch.",
+                "His first class is music.",
+                "We've got language before the break.",
+                "We've got art in the morning.",
+                "We've got PE in the afternoon.",
+                "We've got a new timetable."
+            ],
+            sentencePairs: [
+                { a: "What has she got at nine o'clock on Monday?", b: "She's got geography." },
+                { a: "What have you got at ten o'clock on Tuesday?", b: "I've got history." },
+                { a: "What time is lunch?", b: "It's at one o'clock." },
+                { a: "When is his first class?", b: "His first class is at half past eight." },
+                { a: "What has Frank got after lunch?", b: "He's got two sports classes." },
+                { a: "What have we got before the break?", b: "We've got language." },
+                { a: "What have they got on Wednesday morning?", b: "They've got science." }
+            ]
+        }
     }
 };
 
@@ -544,5 +582,6 @@ AVAILABLE_CONTENT["PU3"] = {
     "2": [28],
     "3": [40],
     "4": [54],
-    "5": [66]
+    "5": [66],
+    "6": [69]
 };

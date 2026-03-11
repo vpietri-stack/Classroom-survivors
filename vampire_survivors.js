@@ -94,6 +94,45 @@ class MainScene extends Phaser.Scene {
 
         this.input.addPointer(2);
 
+        // Pre-generate emoji textures to prevent massive FPS drops
+        const makeEmoji = (key, char, size, padTop = 0) => {
+            if (!this.textures.exists(key)) {
+                const t = this.add.text(0, 0, char, { fontSize: size + 'px', padding: { top: padTop } });
+                const wh = Math.max(t.width, t.height, 1);
+                const rt = this.make.renderTexture({ width: wh, height: wh, add: false });
+                rt.draw(t, 0, 0);
+                rt.saveTexture(key);
+                t.destroy();
+                rt.destroy();
+            }
+        };
+
+        makeEmoji('player', '🧙‍♂️', 50, 10);
+        makeEmoji('boss', '👹', 80, 20);
+        makeEmoji('bat', '🦇', 25, 5);
+        makeEmoji('bat_swarm', '🦇', 20, 0);
+        makeEmoji('zombie', '🧟', 25, 5);
+        makeEmoji('alien', '👾', 25, 5);
+        makeEmoji('orb', '🔮', 20, 0);
+        makeEmoji('axe', '🪓', 24, 0);
+        makeEmoji('cross', '✝️', 24, 0);
+        makeEmoji('knife', '🔪', 24, 0);
+        makeEmoji('bottle', '🧪', 30, 0);
+        makeEmoji('fire_large', '🔥', 40, 0);
+        makeEmoji('fire_small', '🔥', 20, 0);
+        makeEmoji('obs_🌲', '🌲', 100, 40);
+        makeEmoji('obs_🌳', '🌳', 100, 40);
+        makeEmoji('obs_🪨', '🪨', 50, 40);
+        makeEmoji('obs_🌿', '🌿', 50, 40);
+        makeEmoji('obs_🛖', '🛖', 150, 40);
+
+        const allPowerUps = [...POWER_UPS,
+        { id: 'heart', icon: '❤️' },
+        { id: 'vortex', icon: '🌀' },
+        { id: 'tornado', icon: '🌪️' }
+        ];
+        allPowerUps.forEach(p => makeEmoji('pu_' + p.id, p.icon || p.emoji, 40, 0));
+
         this.enemies = this.physics.add.group();
         this.bullets = this.physics.add.group();
         this.gems = this.physics.add.group();
@@ -101,7 +140,7 @@ class MainScene extends Phaser.Scene {
         this.tornados = this.physics.add.group();
         this.obstacles = this.physics.add.staticGroup();
 
-        this.player = this.add.text(0, 0, '🧙‍♂️', { fontSize: '50px', padding: { top: 10 } }).setOrigin(0.5);
+        this.player = this.add.image(0, 0, 'player').setOrigin(0.5);
         this.physics.add.existing(this.player);
         this.player.body.setCircle(20);
         this.player.body.setCollideWorldBounds(false);
@@ -283,7 +322,7 @@ class MainScene extends Phaser.Scene {
                         fb.rotation += 0.1;
 
                         if (this.gameTime % 2 === 0) {
-                            const trail = this.add.text(fb.x, fb.y, '🔥', { fontSize: '20px' }).setOrigin(0.5).setAlpha(0.5);
+                            const trail = this.add.image(fb.x, fb.y, 'fire_small').setOrigin(0.5).setAlpha(0.5);
                             this.time.delayedCall(250, () => trail.destroy());
                         }
                     });
@@ -311,13 +350,13 @@ class MainScene extends Phaser.Scene {
 
         const type = Math.floor(this.gameTime / 1800) % 3;
         const isBat = type === 1;
-        let sprite = isBat ? '🦇' : (type === 2 ? '🧟' : '👾');
+        const textureKey = isBat ? 'bat' : (type === 2 ? 'zombie' : 'alien');
 
         const difficulty = this.getDifficulty();
         const hp = 2 + (difficulty * 1);
         const speed = (17 + (Math.random() * 10) + (difficulty * 0.7));
 
-        const enemy = this.add.text(ex, ey, sprite, { fontSize: '25px', padding: { top: 5 } }).setOrigin(0.5);
+        const enemy = this.add.image(ex, ey, textureKey).setOrigin(0.5);
         this.physics.add.existing(enemy);
         enemy.body.setCircle(10);
         enemy.hp = hp; enemy.maxHp = hp; enemy.speed = speed; enemy.isBoss = false;
@@ -327,7 +366,7 @@ class MainScene extends Phaser.Scene {
     }
 
     spawnBoss() {
-        const boss = this.add.text(this.player.x, this.player.y - 600, '👹', { fontSize: '80px', padding: { top: 20 } }).setOrigin(0.5);
+        const boss = this.add.image(this.player.x, this.player.y - 600, 'boss').setOrigin(0.5);
         this.physics.add.existing(boss);
         boss.body.setCircle(35);
         const difficulty = this.getDifficulty();
@@ -347,11 +386,10 @@ class MainScene extends Phaser.Scene {
             const ey = this.player.y + Math.sin(angle) * radius;
 
             const difficulty = this.getDifficulty();
-            const sprite = '🧟';
             const hp = 2 + (difficulty * 1);
             const speed = 27 + (difficulty * 0.3);
 
-            const enemy = this.add.text(ex, ey, sprite, { fontSize: '25px', padding: { top: 5 } }).setOrigin(0.5);
+            const enemy = this.add.image(ex, ey, 'zombie').setOrigin(0.5);
             this.physics.add.existing(enemy);
             enemy.body.setCircle(10);
             enemy.hp = hp; enemy.maxHp = hp; enemy.speed = speed; enemy.isBoss = false;
@@ -397,7 +435,7 @@ class MainScene extends Phaser.Scene {
             pondCollider.linkedGraphics = pond;
         } else {
             const type = Phaser.Math.RND.pick(obstacleTypes);
-            const obs = this.add.text(x, y, type.emoji, { fontSize: type.fontSize, padding: { top: 40 } }).setOrigin(0.5);
+            const obs = this.add.image(x, y, 'obs_' + type.emoji).setOrigin(0.5);
 
             this.obstacles.add(obs);
             obs.body.setCircle(type.bodyRad);
@@ -439,7 +477,7 @@ class MainScene extends Phaser.Scene {
 
                 const ox = (Math.random() - 0.5) * 60;
                 const oy = (Math.random() - 0.5) * 60;
-                const bat = this.add.text(startX + ox, startY + oy, '🦇', { fontSize: '20px' }).setOrigin(0.5);
+                const bat = this.add.image(startX + ox, startY + oy, 'bat_swarm').setOrigin(0.5);
                 this.physics.add.existing(bat);
                 bat.body.setCircle(8);
                 bat.hp = hp; bat.maxHp = hp; bat.speed = swarmSpeed;
@@ -501,7 +539,7 @@ class MainScene extends Phaser.Scene {
                 if (w.sprites.length !== w.level) {
                     w.sprites.forEach(s => s.destroy()); w.sprites = [];
                     for (let i = 0; i < w.level; i++) {
-                        const orb = this.add.text(0, 0, '🔮', { fontSize: '20px' }).setOrigin(0.5);
+                        const orb = this.add.image(0, 0, 'orb').setOrigin(0.5);
                         this.physics.add.existing(orb); w.sprites.push(orb);
                     }
                 }
@@ -644,7 +682,7 @@ class MainScene extends Phaser.Scene {
         const count = w.level;
         for (let i = 0; i < count; i++) {
             const spread = (i - (count - 1) / 2) * 50;
-            const axe = this.add.text(this.player.x, this.player.y, '🪓', { fontSize: '24px' }).setOrigin(0.5);
+            const axe = this.add.image(this.player.x, this.player.y, 'axe').setOrigin(0.5);
             this.bullets.add(axe);
             this.physics.add.existing(axe);
             axe.body.setVelocity(this.player.scaleX * 150 + spread, -400);
@@ -655,7 +693,7 @@ class MainScene extends Phaser.Scene {
 
     fireCross(w) {
         synthShoot('cross');
-        const cross = this.add.text(this.player.x, this.player.y, '✝️', { fontSize: '24px' }).setOrigin(0.5);
+        const cross = this.add.image(this.player.x, this.player.y, 'cross').setOrigin(0.5);
         this.bullets.add(cross);
         this.physics.add.existing(cross);
         cross.body.setVelocity(this.player.scaleX * 300, 0);
@@ -669,7 +707,7 @@ class MainScene extends Phaser.Scene {
 
         for (let i = 0; i < count; i++) {
             const offset = (i - (count - 1) / 2) * spreadAngle;
-            const knife = this.add.text(this.player.x, this.player.y, '🔪', { fontSize: '24px' }).setOrigin(0.5);
+            const knife = this.add.image(this.player.x, this.player.y, 'knife').setOrigin(0.5);
             this.bullets.add(knife);
             this.physics.add.existing(knife);
 
@@ -689,7 +727,7 @@ class MainScene extends Phaser.Scene {
         const tx = this.player.x + Math.cos(angle) * dist;
         const ty = this.player.y + Math.sin(angle) * dist;
 
-        const bottle = this.add.text(tx, ty - 500, '🧪', { fontSize: '30px' }).setOrigin(0.5);
+        const bottle = this.add.image(tx, ty - 500, 'bottle').setOrigin(0.5);
 
         this.tweens.add({
             targets: bottle,
@@ -851,7 +889,7 @@ class MainScene extends Phaser.Scene {
         const choices = [...weapons, ...specials];
         const choice = Phaser.Math.RND.pick(choices);
 
-        const icon = this.add.text(x, y, choice.icon || choice.emoji, { fontSize: '40px' }).setOrigin(0.5);
+        const icon = this.add.image(x, y, 'pu_' + choice.id).setOrigin(0.5);
 
         this.physics.add.existing(icon);
         icon.body.setSize(40, 40);
@@ -881,7 +919,7 @@ class MainScene extends Phaser.Scene {
         synthGem(); // Powerup pickup sound
 
         // Visual orbit animation before activation
-        const flyingIcon = this.add.text(powerup.x, powerup.y, iconStr, { fontSize: '40px' }).setOrigin(0.5);
+        const flyingIcon = this.add.image(powerup.x, powerup.y, 'pu_' + reward.id).setOrigin(0.5);
         powerup.destroy();
 
         let orbitAngle = 0;
@@ -961,7 +999,7 @@ class MainScene extends Phaser.Scene {
         tornado.fireballs = [];
 
         for (let i = 0; i < 12; i++) {
-            const fb = this.add.text(this.player.x, this.player.y, '🔥', { fontSize: '40px' }).setOrigin(0.5);
+            const fb = this.add.image(this.player.x, this.player.y, 'fire_large').setOrigin(0.5);
             this.physics.add.existing(fb);
             fb.body.setCircle(15);
             this.tornados.add(fb);

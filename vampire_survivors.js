@@ -98,9 +98,9 @@ class MainScene extends Phaser.Scene {
         const makeEmoji = (key, char, size, padTop = 0) => {
             if (!this.textures.exists(key)) {
                 const t = this.add.text(0, 0, char, { fontSize: size + 'px', padding: { top: padTop } });
-                const wh = Math.max(t.width, t.height, 1);
+                const wh = Math.max(t.width, t.height, 1) * 1.2; // Add 20% margin
                 const rt = this.make.renderTexture({ width: wh, height: wh, add: false });
-                rt.draw(t, 0, 0);
+                rt.draw(t, wh * 0.1, wh * 0.1); // Center slightly
                 rt.saveTexture(key);
                 t.destroy();
                 rt.destroy();
@@ -113,7 +113,7 @@ class MainScene extends Phaser.Scene {
         makeEmoji('bat_swarm', '🦇', 20, 0);
         makeEmoji('zombie', '🧟', 25, 5);
         makeEmoji('alien', '👾', 25, 5);
-        makeEmoji('orb', '🔮', 20, 0);
+        makeEmoji('orb', '🔮', 24, 0); // Match cross size (24px)
         makeEmoji('axe', '🪓', 24, 0);
         makeEmoji('cross', '✝️', 24, 0);
         makeEmoji('knife', '🔪', 24, 0);
@@ -141,8 +141,9 @@ class MainScene extends Phaser.Scene {
         this.obstacles = this.physics.add.staticGroup();
 
         this.player = this.add.image(0, 0, 'player').setOrigin(0.5);
+        this.player.setScale(1.5);
         this.physics.add.existing(this.player);
-        this.player.body.setCircle(20);
+        this.player.body.setCircle(20 * 1.5);
         this.player.body.setCollideWorldBounds(false);
 
         this.cameras.main.startFollow(this.player);
@@ -231,7 +232,7 @@ class MainScene extends Phaser.Scene {
         if (this.gameState !== 'PLAYING') return;
 
         let dx = 0, dy = 0;
-        const speed = 80 * this.playerStats.speed;
+        const speed = 160 * this.playerStats.speed; // Doubled base speed (from 80 to 160)
         if (this.cursors.left.isDown || this.wasd.a.isDown) dx = -1;
         else if (this.cursors.right.isDown || this.wasd.d.isDown) dx = 1;
         if (this.cursors.up.isDown || this.wasd.w.isDown) dy = -1;
@@ -261,8 +262,8 @@ class MainScene extends Phaser.Scene {
             this.player.alpha = 1;
             this.player.clearTint();
         }
-        if (dx < 0) this.player.setScale(-1, 1);
-        if (dx > 0) this.player.setScale(1, 1);
+        if (dx < 0) this.player.setScale(-1.5, 1.5);
+        if (dx > 0) this.player.setScale(1.5, 1.5);
 
         this.bg.tilePositionX = this.cameras.main.scrollX;
         this.bg.tilePositionY = this.cameras.main.scrollY;
@@ -276,8 +277,9 @@ class MainScene extends Phaser.Scene {
         }
 
         this.spawnTimer++;
-        const playSeconds = (this.accumulatedTime + totalMinigameTimeMs) / 1000;
-        const spawnDelay = Math.max(2, 12 - (playSeconds / 45));
+        const difficulty = this.getDifficulty();
+        // Spawn delay decreases over time (more enemies)
+        const spawnDelay = Math.max(0.4, 15 / difficulty);
         if (this.spawnTimer > spawnDelay) {
             this.spawnEnemy();
             this.spawnTimer = 0;
@@ -512,12 +514,14 @@ class MainScene extends Phaser.Scene {
     }
 
     getDifficulty() {
-        const playTimeMs = this.accumulatedTime + totalMinigameTimeMs;
-        const seconds = playTimeMs / 1000;
-        let difficulty = seconds / 30;
+        const seconds = this.accumulatedTime / 1000;
+        // First 5 minutes: Linear growth from 1.0 to 4.0
+        let difficulty = 1 + (seconds / 100);
 
         if (seconds > 300) {
-            difficulty += Math.pow((seconds - 300) / 10, 1.2);
+            // After 5 minutes: Exponential growth. 
+            // Difficulty doubles every 90 seconds.
+            difficulty *= Math.pow(2, (seconds - 300) / 90);
         }
 
         return Math.max(1, difficulty);
@@ -539,7 +543,7 @@ class MainScene extends Phaser.Scene {
                 if (w.sprites.length !== w.level) {
                     w.sprites.forEach(s => s.destroy()); w.sprites = [];
                     for (let i = 0; i < w.level; i++) {
-                        const orb = this.add.image(0, 0, 'orb').setOrigin(0.5);
+                        const orb = this.add.image(0, 0, 'orb').setOrigin(0.5).setScale(1.5); // Match cross scale (1.5x)
                         this.physics.add.existing(orb); w.sprites.push(orb);
                     }
                 }
@@ -549,7 +553,7 @@ class MainScene extends Phaser.Scene {
                     s.x = this.player.x + Math.cos(theta) * w.range;
                     s.y = this.player.y + Math.sin(theta) * w.range;
                     this.enemies.getChildren().forEach(e => {
-                        if (Phaser.Math.Distance.Between(s.x, s.y, e.x, e.y) < 30 && this.gameTime % 20 === 0) {
+                        if (Phaser.Math.Distance.Between(s.x, s.y, e.x, e.y) < 30 && this.gameTime % 20 === 0) { // Match cross hitbox (30px)
                             this.damageEnemy(e, w.dmg * this.playerStats.might);
                         }
                     });
@@ -576,33 +580,34 @@ class MainScene extends Phaser.Scene {
         });
         if (nearest) {
             synthShoot('wand');
-            const b = this.add.circle(this.player.x, this.player.y, 7, 0x00ffff);
+            const b = this.add.circle(this.player.x, this.player.y, 10.5, 0x00ffff); // 7 * 1.5
             this.bullets.add(b);
             this.physics.add.existing(b);
             const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, nearest.x, nearest.y);
             b.body.setVelocity(Math.cos(angle) * 300, Math.sin(angle) * 300);
             b.dmg = 12 * (1 + w.level * 0.2) * this.playerStats.might; b.type = 'wand'; b.life = 60;
+            b.setScale(1.5);
         }
     }
 
     fireWhip(w) {
         const sequence = ['front'];
-        if (w.level >= 4) sequence.push('up');
-        if (w.level >= 3) sequence.push('back');
-        if (w.level >= 5) sequence.push('down');
+        if (w.level >= 2) sequence.push('back');
+        if (w.level >= 3) sequence.push('up');
+        if (w.level >= 4) sequence.push('down');
 
         let dmgBonus = 0;
         let rangeBonus = 0;
 
-        if (w.level >= 2) dmgBonus += 5;
-
-        if (w.level >= 6) {
-            const post5 = w.level - 5;
-            rangeBonus += Math.ceil(post5 / 2) * 40;
-            dmgBonus += Math.floor(post5 / 2) * 5;
+        if (w.level >= 5) {
+            const post4 = w.level - 4;
+            // Odd levels (5, 7, ...) increase range
+            rangeBonus += Math.ceil(post4 / 2) * 50;
+            // Even levels (6, 8, ...) increase damage
+            dmgBonus += Math.floor(post4 / 2) * 10;
         }
 
-        const range = 220 + rangeBonus;
+        const range = 330 + rangeBonus; // 220 * 1.5 = 330
         const damage = (15 + dmgBonus) * this.playerStats.might;
         const strikeDuration = 150;
 
@@ -624,14 +629,14 @@ class MainScene extends Phaser.Scene {
         if (direction === 'up') angleOffset = -Math.PI / 2;
         if (direction === 'down') angleOffset = Math.PI / 2;
 
-        const facing = this.player.scaleX;
+        const facing = this.player.scaleX > 0 ? 1 : -1;
         const baseAngle = facing === 1 ? 0 : Math.PI;
         const finalAngle = baseAngle + angleOffset;
 
         [
-            { color: 0x0000cc, thick: 40, alpha: 0.4, scale: 1.1 },
-            { color: 0x00ffff, thick: 15, alpha: 0.8, scale: 1.0 },
-            { color: 0xffffff, thick: 5, alpha: 1.0, scale: 0.9 }
+            { color: 0x0000cc, thick: 60, alpha: 0.4, scale: 1.1 }, // thick * 1.5
+            { color: 0x00ffff, thick: 22.5, alpha: 0.8, scale: 1.0 },
+            { color: 0xffffff, thick: 7.5, alpha: 1.0, scale: 0.9 }
         ].forEach(l => {
             whip.lineStyle(l.thick, l.color, l.alpha);
 
@@ -682,9 +687,10 @@ class MainScene extends Phaser.Scene {
         const count = w.level;
         for (let i = 0; i < count; i++) {
             const spread = (i - (count - 1) / 2) * 50;
-            const axe = this.add.image(this.player.x, this.player.y, 'axe').setOrigin(0.5);
+            const axe = this.add.image(this.player.x, this.player.y, 'axe').setOrigin(0.5).setScale(1.5);
             this.bullets.add(axe);
             this.physics.add.existing(axe);
+            axe.body.setCircle(15);
             axe.body.setVelocity(this.player.scaleX * 150 + spread, -400);
             axe.body.gravity.y = 800;
             axe.dmg = 12 * this.playerStats.might; axe.type = 'axe';
@@ -693,9 +699,10 @@ class MainScene extends Phaser.Scene {
 
     fireCross(w) {
         synthShoot('cross');
-        const cross = this.add.image(this.player.x, this.player.y, 'cross').setOrigin(0.5);
+        const cross = this.add.image(this.player.x, this.player.y, 'cross').setOrigin(0.5).setScale(1.5);
         this.bullets.add(cross);
         this.physics.add.existing(cross);
+        cross.body.setCircle(15);
         cross.body.setVelocity(this.player.scaleX * 300, 0);
         cross.dmg = 6 * this.playerStats.might; cross.type = 'cross'; cross.returnTimer = 40;
     }
@@ -707,11 +714,12 @@ class MainScene extends Phaser.Scene {
 
         for (let i = 0; i < count; i++) {
             const offset = (i - (count - 1) / 2) * spreadAngle;
-            const knife = this.add.image(this.player.x, this.player.y, 'knife').setOrigin(0.5);
+            const knife = this.add.image(this.player.x, this.player.y, 'knife').setOrigin(0.5).setScale(1.5);
             this.bullets.add(knife);
             this.physics.add.existing(knife);
+            knife.body.setCircle(12);
 
-            const baseAngle = this.player.scaleX === 1 ? 0 : Math.PI;
+            const baseAngle = this.player.scaleX > 0 ? 0 : Math.PI;
             const finalAngle = baseAngle + offset;
 
             knife.rotation = finalAngle;
@@ -739,7 +747,7 @@ class MainScene extends Phaser.Scene {
                 bottle.destroy();
                 noise(0.1);
 
-                const size = 60 * (1 + w.level * 0.2);
+                const size = 90 * (1 + w.level * 0.2); // 60 * 1.5
                 const dmg = ((8 + w.level * 3) / 3) * (1 + w.level * 0.2) * this.playerStats.might;
                 const duration = 20000;
 
@@ -788,13 +796,14 @@ class MainScene extends Phaser.Scene {
 
     handlePlayerHit(player, enemy) {
         if (this.invulnTimer > 0) return;
-        const dmg = enemy.isBoss ? 20 : 10;
+
+        const seconds = this.accumulatedTime / 1000;
+        // 1 damage in the first minute, then +1 per minute, cap at 10
+        const dmg = Math.min(10, 1 + Math.floor(seconds / 60));
+
         this.playerStats.hp -= dmg;
         synthHurt();
         this.invulnTimer = 60;
-        const angle = Phaser.Math.Angle.Between(enemy.x, enemy.y, player.x, player.y);
-        this.knockbackVelocity.x = Math.cos(angle) * 300;
-        this.knockbackVelocity.y = Math.sin(angle) * 300;
         if (this.playerStats.hp <= 0) this.gameOver();
         updateDOMHUD(this.playerStats, Math.floor(this.accumulatedTime / 1000), this.killCount);
     }

@@ -42,6 +42,7 @@ class MainScene extends Phaser.Scene {
     }
 
     create() {
+        this.startTime = Date.now();
         this.frameTime = 0;
         this.gameState = 'PLAYING';
         this.gameTime = 0;
@@ -144,6 +145,10 @@ class MainScene extends Phaser.Scene {
         this.player.setScale(1.5);
         this.physics.add.existing(this.player);
         this.player.body.setCircle(20 * 1.5);
+        this.player.body.setOffset(
+            (this.player.width - 20 * 1.5 * 2) / 2,
+            (this.player.height - 20 * 1.5 * 2) / 2
+        );
         this.player.body.setCollideWorldBounds(false);
 
         this.cameras.main.startFollow(this.player);
@@ -278,8 +283,8 @@ class MainScene extends Phaser.Scene {
 
         this.spawnTimer++;
         const difficulty = this.getDifficulty();
-        // Spawn delay decreases over time (more enemies)
-        const spawnDelay = Math.max(0.4, 15 / difficulty);
+        // Spawn delay: starts at 15 frames, decreases with difficulty, floor at 2 frames
+        const spawnDelay = Math.max(2, 15 / difficulty);
         if (this.spawnTimer > spawnDelay) {
             this.spawnEnemy();
             this.spawnTimer = 0;
@@ -355,12 +360,19 @@ class MainScene extends Phaser.Scene {
         const textureKey = isBat ? 'bat' : (type === 2 ? 'zombie' : 'alien');
 
         const difficulty = this.getDifficulty();
-        const hp = 2 + (difficulty * 1);
-        const speed = (17 + (Math.random() * 10) + (difficulty * 0.7));
+        // HP: starts at 12 (one spirit wand hit). 
+        // Growth is slowed so that at 10 mins (diff ~11.3) HP is ~12 * (1 + 10.3 * 0.13) = ~28 (two wand hits)
+        const hp = 12 * (1 + (difficulty - 1) * 0.13);
+        // Speed: starts at 16 (0.1x player base speed of 160), scales with difficulty
+        const speed = 16 * difficulty + (Math.random() * 5);
 
         const enemy = this.add.image(ex, ey, textureKey).setOrigin(0.5);
         this.physics.add.existing(enemy);
         enemy.body.setCircle(10);
+        enemy.body.setOffset(
+            (enemy.width - 10 * 2) / 2,
+            (enemy.height - 10 * 2) / 2
+        );
         enemy.hp = hp; enemy.maxHp = hp; enemy.speed = speed; enemy.isBoss = false;
         enemy.isBat = isBat;
         enemy.stunTimer = 0;
@@ -371,9 +383,14 @@ class MainScene extends Phaser.Scene {
         const boss = this.add.image(this.player.x, this.player.y - 600, 'boss').setOrigin(0.5);
         this.physics.add.existing(boss);
         boss.body.setCircle(35);
+        boss.body.setOffset(
+            (boss.width - 35 * 2) / 2,
+            (boss.height - 35 * 2) / 2
+        );
         const difficulty = this.getDifficulty();
-        boss.hp = 300 + (difficulty * 50);
-        boss.speed = 33 + (difficulty * 0.5);
+        // Boss: 25x regular enemy HP
+        boss.hp = 12 * 25 * (1 + (difficulty - 1) * 0.13);
+        boss.speed = 20 * difficulty;
         boss.isBoss = true;
         boss.stunTimer = 0;
         this.enemies.add(boss);
@@ -388,8 +405,8 @@ class MainScene extends Phaser.Scene {
             const ey = this.player.y + Math.sin(angle) * radius;
 
             const difficulty = this.getDifficulty();
-            const hp = 2 + (difficulty * 1);
-            const speed = 27 + (difficulty * 0.3);
+            const hp = 12 * (1 + (difficulty - 1) * 0.13);
+            const speed = 16 * difficulty;
 
             const enemy = this.add.image(ex, ey, 'zombie').setOrigin(0.5);
             this.physics.add.existing(enemy);
@@ -451,11 +468,12 @@ class MainScene extends Phaser.Scene {
 
     spawnBatSwarm() {
         const side = Phaser.Math.Between(0, 3);
-        const count = 30 + Math.floor(this.getDifficulty() * 2);
-        const playerSpeed = 80 * this.playerStats.speed;
-        const swarmSpeed = playerSpeed * 4.5;
         const difficulty = this.getDifficulty();
-        const hp = (2 + (difficulty * 1)) * 0.5;
+        const count = 20 + Math.floor(difficulty * 5);
+        const playerSpeed = 160 * this.playerStats.speed;
+        const swarmSpeed = playerSpeed * 3;
+        // Bat swarm HP: half of regular enemy HP
+        const hp = 6 * (1 + (difficulty - 1) * 0.13);
 
         for (let i = 0; i < count; i++) {
             this.time.delayedCall(i * 40, () => {
@@ -482,6 +500,10 @@ class MainScene extends Phaser.Scene {
                 const bat = this.add.image(startX + ox, startY + oy, 'bat_swarm').setOrigin(0.5);
                 this.physics.add.existing(bat);
                 bat.body.setCircle(8);
+                bat.body.setOffset(
+                    (bat.width - 8 * 2) / 2,
+                    (bat.height - 8 * 2) / 2
+                );
                 bat.hp = hp; bat.maxHp = hp; bat.speed = swarmSpeed;
                 bat.isSwarm = true;
                 bat.isBat = true;
@@ -514,17 +536,15 @@ class MainScene extends Phaser.Scene {
     }
 
     getDifficulty() {
-        const seconds = this.accumulatedTime / 1000;
-        // First 5 minutes: Linear growth from 1.0 to 4.0
-        let difficulty = 1 + (seconds / 100);
+        const secondsSinceStart = (Date.now() - this.startTime) / 1000;
 
-        if (seconds > 300) {
-            // After 5 minutes: Exponential growth. 
-            // Difficulty doubles every 90 seconds.
-            difficulty *= Math.pow(2, (seconds - 300) / 90);
+        if (secondsSinceStart <= 300) {
+            // First 5 minutes: gentle linear growth from 1.0 to 2.0
+            return 1 + (secondsSinceStart / 300);
         }
-
-        return Math.max(1, difficulty);
+        // After 5 minutes: exponential growth starting from 2.0
+        // Doubles every 120 seconds — allows stats like damage and spawn rate to scale up fast
+        return 2 * Math.pow(2, (secondsSinceStart - 300) / 120);
     }
 
     updateWeapons() {
@@ -540,6 +560,7 @@ class MainScene extends Phaser.Scene {
             w.timer++;
             if (w.type === 'orb') {
                 if (!w.sprites) w.sprites = [];
+                if (!w.hitCooldowns) w.hitCooldowns = new Map();
                 if (w.sprites.length !== w.level) {
                     w.sprites.forEach(s => s.destroy()); w.sprites = [];
                     for (let i = 0; i < w.level; i++) {
@@ -548,13 +569,19 @@ class MainScene extends Phaser.Scene {
                     }
                 }
                 w.angle = (w.angle || 0) + 0.05;
+                // Decrement all cooldowns and clean up destroyed enemies
+                w.hitCooldowns.forEach((val, key) => {
+                    if (!key.active) { w.hitCooldowns.delete(key); return; }
+                    if (val > 0) w.hitCooldowns.set(key, val - 1);
+                });
                 w.sprites.forEach((s, i) => {
                     const theta = w.angle + (i * (Math.PI * 2 / w.level));
                     s.x = this.player.x + Math.cos(theta) * w.range;
                     s.y = this.player.y + Math.sin(theta) * w.range;
                     this.enemies.getChildren().forEach(e => {
-                        if (Phaser.Math.Distance.Between(s.x, s.y, e.x, e.y) < 30 && this.gameTime % 20 === 0) { // Match cross hitbox (30px)
-                            this.damageEnemy(e, w.dmg * this.playerStats.might);
+                        if (Phaser.Math.Distance.Between(s.x, s.y, e.x, e.y) < 30 && (!w.hitCooldowns.has(e) || w.hitCooldowns.get(e) <= 0)) {
+                            this.damageEnemy(e, w.dmg * this.playerStats.might, 200);
+                            w.hitCooldowns.set(e, 20); // 20-frame cooldown per enemy
                         }
                     });
                 });
@@ -797,9 +824,9 @@ class MainScene extends Phaser.Scene {
     handlePlayerHit(player, enemy) {
         if (this.invulnTimer > 0) return;
 
-        const seconds = this.accumulatedTime / 1000;
-        // 1 damage in the first minute, then +1 per minute, cap at 10
-        const dmg = Math.min(10, 1 + Math.floor(seconds / 60));
+        const difficulty = this.getDifficulty();
+        // Damage scales with difficulty: 1 at start, grows with difficulty, cap at 25
+        const dmg = Math.min(25, Math.ceil(difficulty));
 
         this.playerStats.hp -= dmg;
         synthHurt();

@@ -15,6 +15,7 @@ let gomokuNextAiTime = 0;
 let isGomokuDragging = false;
 let gomokuDragCell = null;
 let dragInitialized = false;
+const TOUCH_Y_OFFSET = 40; // pixels above the finger for touch placement
 
 let gomokuViewport = { minR: 3, maxR: 11, minC: 3, maxC: 11 };
 
@@ -253,13 +254,17 @@ function initDragAndDrop() {
     const moveGhost = (e) => {
         if (!isGomokuDragging) return;
 
+        const isTouch = e.type === 'touchmove' || e.type === 'touchstart';
         const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
-        const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
+        const rawClientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
 
-        if (clientX === undefined || clientY === undefined) return;
+        if (clientX === undefined || rawClientY === undefined) return;
+
+        // Apply offset for touch so the piece appears above the finger
+        const clientY = isTouch ? rawClientY - TOUCH_Y_OFFSET : rawClientY;
 
         ghost.style.left = (clientX - 20) + 'px';
-        ghost.style.top = (clientY - 60) + 'px';
+        ghost.style.top = (clientY - 20) + 'px';
 
         const rect = gomokuCanvas.getBoundingClientRect();
         if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
@@ -320,13 +325,17 @@ function handleGomokuClick(e) {
     if (gomokuMode === 'regular' && gomokuTurn !== 'player') return;
     if (gomokuMode === 'speed' && gomokuTurn === 'minigame') return;
 
-    if (e.type === 'touchstart') e.preventDefault();
+    const isTouch = e.type === 'touchstart' || e.type === 'touchend';
+    if (isTouch) e.preventDefault();
 
     const rect = gomokuCanvas.getBoundingClientRect();
     const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
-    const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
+    const rawClientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
 
-    if (clientX === undefined || clientY === undefined) return;
+    if (clientX === undefined || rawClientY === undefined) return;
+
+    // Apply offset for touch so placement is above the finger
+    const clientY = isTouch ? rawClientY - TOUCH_Y_OFFSET : rawClientY;
 
     const scaleX = gomokuCanvas.width / rect.width;
     const scaleY = gomokuCanvas.height / rect.height;

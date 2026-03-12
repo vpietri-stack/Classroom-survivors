@@ -8,22 +8,9 @@ let activeGameMode = null; // 'VampireSurvivors' or 'Gomoku'
 
 // --- TRANSLATION SYSTEM (LOCAL) ---
 function getLocalTranslation(text) {
-    if (!text) return '';
+    if (!text || typeof LOCAL_TRANSLATIONS === 'undefined') return '';
     const key = text.trim();
-    // Search all books/units/pages in TEACHING_CONTENT for a translations object
-    if (typeof TEACHING_CONTENT !== 'undefined') {
-        for (const book in TEACHING_CONTENT) {
-            for (const unit in TEACHING_CONTENT[book]) {
-                for (const page in TEACHING_CONTENT[book][unit]) {
-                    const entry = TEACHING_CONTENT[book][unit][page];
-                    if (entry.translations && entry.translations[key]) {
-                        return entry.translations[key];
-                    }
-                }
-            }
-        }
-    }
-    return '';
+    return LOCAL_TRANSLATIONS[key] || '';
 }
 
 function showTranslation(elementId, text) {

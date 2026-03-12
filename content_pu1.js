@@ -2023,7 +2023,7 @@ TEACHING_CONTENT["PU1"] = {
                 "No, I'm not."
             ],
             sentencePairs: [
-                { a: "What are you doing?", b: "I'm watching Tom." },
+                { a: "What are you doing?", b: "I'm watching TV." },
                 { a: "What's she eating?", b: "She's eating an apple." },
                 { a: "Is she cleaning her feet?", b: "No, she isn't." },
                 { a: "Are you playing tennis?", b: "No, I'm not." },

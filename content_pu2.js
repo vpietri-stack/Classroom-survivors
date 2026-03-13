@@ -565,6 +565,28 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "Whose singing is worse?", b: "Shelly's singing is worse than Gracie's." }
             ]
         },
+        "47": {
+            vocab: [
+                'long', 'longer', 'short', 'shorter', 'straight', 'straighter', 'tall', 'taller', 'young', 'younger',
+                'angry', 'angrier', 'curly', 'curlier', 'happy', 'happier', 'naughty', 'naughtier', 'ugly', 'uglier',
+                'big', 'bigger', 'fat', 'fatter', 'sad', 'sadder', 'thin', 'thinner',
+                'good', 'better', 'bad', 'worse', 'than'
+            ],
+            sentences: [
+                "My mum's hair's curlier than my aunt's.",
+                "The cat's tail's longer than the dog's.",
+                "My dad's beard's shorter than my uncle's.",
+                "The kittens are thinner than the puppies.",
+                "Our new house is better than our old one."
+            ],
+            sentencePairs: [
+                { a: "Good", b: "Better." },
+                { a: "Bad", b: "Worse" },
+                { a: "Happy", b: "Happier" },
+                { a: "Fat", b: "Fatter" },
+                { a: "Big", b: "Bigger" }
+            ]
+        },
         "54": {
             vocab: [
                 'aunt', 'uncle', 'cousin', 'daughter', 'son', 'granddaughter', 'grandson', 'grandparents', 'parents',
@@ -809,6 +831,33 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "When did you find your hat?", b: "I found it this morning." },
                 { a: "Did he give you the hat?", b: "No, he didn't." },
                 { a: "Did you lose her?", b: "No, I didn't!" },
+            ]
+        },
+        "97": {
+            vocab: [
+                'buy bought', 'choose chose', 'draw drew', 'drive drove', 'feed fed', 'find found', 'give gave', 'go went', 'hide hid', 'lose lost', 'sleep slept', 'take took', 'wear wore',
+                'photos', 'skates', 'sweater', 'picture', 'scarf', 'tickets', 'boots', 'chocolate',
+                'garden', 'bus', 'park', 'school', 'bookcase', 'funfair', 'ride',
+                'rabbit', 'fish'
+            ],
+            sentences: [
+                "How many photos did Jane take?",
+                "Which ice cream did Mary choose?",
+                "What did your grandparents give you?",
+                "What time did Jim feed the fish?",
+                "Where did the rabbit sleep?",
+                "They gave me some skates.",
+                "He fed them at eight o'clock.",
+                "It slept in the garden.",
+                "Peter drew a picture for his mother.",
+                "Lily found a scarf on the bus.",
+                "Fred's dad bought five tickets.",
+                "We went on the biggest ride at the funfair."
+            ],
+            sentencePairs: [
+                { a: "What did your grandparents give you?", b: "They gave me some skates." },
+                { a: "What time did Jim feed the fish?", b: "He fed them at eight o'clock." },
+                { a: "Where did the rabbit sleep?", b: "It slept in the garden." }
             ]
         },
         "104": {

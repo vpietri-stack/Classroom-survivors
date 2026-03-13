@@ -2135,6 +2135,50 @@ TEACHING_CONTENT["PU1"] = {
                 { a: "Clean your shoes, please.", b: "No problem, I'll clean them." },
                 { a: "Come here, please.", b: "Coming!" }
             ]
+        },
+        "110": {
+            vocab: ['shell', 'sea', 'beach', 'sand', 'boat', 'sun', 'camera', 'sunglasses', 'fish', 'take a photo', 'jellyfish', 'fishing'],
+            sentences: [
+                "At the beach, we can play on the sand.",
+                "At the beach, we can swim in the sea.",
+                "At the beach, we can pick up shells.",
+                "At the beach, we can see boats and fish.",
+                "At the beach, we can go fishing",
+                "Grandpa is taking photos in the sun."
+
+            ],
+            sentencePairs: [
+                { a: "At the beach, we can swim", b: "in the sea." },
+                { a: "At the beach, we can play", b: "on the sand." },
+                { a: "At the beach, we can pick", b: "up shells." },
+                { a: "At the beach, we can see", b: "boats and fish." },
+                { a: "At the beach, we can go", b: "fishing." },
+                { a: "I can take photos", b: "with my camera." },
+                { a: "Where's the orange boat?", b: "It's on the blue sea." },
+                { a: "Who's in the boat?", b: "There's a man, he's fishing." }
+            ]
+        },
+        "111": {
+            vocab: ['flying', 'kite', 'taking', 'photos', 'swimming', 'playing', 'sand', 'collecting', 'shells', 'like', 'enjoy', 'so', 'do', 'I', 'me', 'too'],
+            sentences: [
+                "I like flying my kite.",
+                "I enjoy taking photos.",
+                "I like swimming.",
+                "I enjoy playing on the sand.",
+                "I like collecting shells.",
+                "I like flying my kite. So do I.",
+                "I enjoy taking photos. Me too.",
+                "I like swimming. So do I.",
+                "I enjoy playing on the sand. Me too.",
+                "I like collecting shells. So do I."
+            ],
+            sentencePairs: [
+                { a: "I like flying my kite. So...", b: "...do I." },
+                { a: "I enjoy taking photos. Me...", b: "...too." },
+                { a: "I like swimming. So...", b: "...do I." },
+                { a: "I enjoy playing on the sand. Me...", b: "...too." },
+                { a: "I like collecting shells. So...", b: "...do I." }
+            ]
         }
     }
 };
@@ -2148,5 +2192,5 @@ AVAILABLE_CONTENT["PU1"] = {
     "5": [66],
     "6": [78],
     "7": [83, 84, 92],
-    "9": [107, 108]
+    "9": [107, 108, 110, 111]
 };

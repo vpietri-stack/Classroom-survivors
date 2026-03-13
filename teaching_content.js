@@ -10,6 +10,7 @@ const BOOK_SERIES = {
     "PU1": ["PU1"],
     "PU2": ["PU2"],
     "PU3": ["PU3"],
+    "Think0": ["Think0"],
     "Think1": ["Think1"]
 };
 

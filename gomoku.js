@@ -9,7 +9,7 @@ let gomokuAccumulatedTime = 0;
 let lastGomokuMove = null;
 let gomokuMode = 'regular';
 let gomokuSpeedInterval = null;
-const SPEED_AI_INTERVAL = 10000;
+let currentGomokuSpeedIntervalTime = 10000;
 let gomokuNextAiTime = 0;
 
 let isGomokuDragging = false;
@@ -94,9 +94,11 @@ function triggerGomoku(mode = gomokuMode) {
     gomokuStartTime = Date.now();
 
     if (gomokuMode === 'speed') {
-        updateGomokuStatus("Speed Mode! AI plays every 10s");
-        gomokuNextAiTime = Date.now() + SPEED_AI_INTERVAL;
-        gomokuSpeedInterval = setInterval(speedAiTurn, SPEED_AI_INTERVAL);
+        currentGomokuSpeedIntervalTime = getGomokuSpeedInterval();
+        const seconds = currentGomokuSpeedIntervalTime / 1000;
+        updateGomokuStatus(`Speed Mode! AI plays every ${seconds}s`);
+        gomokuNextAiTime = Date.now() + currentGomokuSpeedIntervalTime;
+        gomokuSpeedInterval = setInterval(speedAiTurn, currentGomokuSpeedIntervalTime);
     } else {
         updateGomokuStatus("Your turn!");
     }
@@ -462,7 +464,7 @@ function speedAiTurn() {
     if (!gomokuGameActive) return;
 
     // Reset timer for next move
-    gomokuNextAiTime = Date.now() + SPEED_AI_INTERVAL;
+    gomokuNextAiTime = Date.now() + currentGomokuSpeedIntervalTime;
 
     const move = findBestMove(true);
     if (move) {
@@ -568,8 +570,29 @@ function findBestMove(perfect = false) {
         else if (rand < 0.6) return allMoves[Math.floor(Math.random() * Math.min(3, allMoves.length))];
         else return allMoves[Math.floor(Math.random() * Math.min(10, allMoves.length))];
     }
-    
+
     return allMoves[0];
+}
+
+function getGomokuSpeedInterval() {
+    let book = 'PU3'; // Default
+    if (typeof selectedDay !== 'undefined' && typeof selectedTime !== 'undefined' && typeof CLASS_CONFIG !== 'undefined') {
+        if (CLASS_CONFIG[selectedDay] && CLASS_CONFIG[selectedDay][selectedTime]) {
+            const classData = CLASS_CONFIG[selectedDay][selectedTime];
+            if (classData && classData.content) {
+                book = classData.content.book;
+            }
+        }
+    }
+
+    switch (book) {
+        case 'PU1': return 20000;
+        case 'PU2': return 15000;
+        case 'PU3':
+        case 'Think0': return 10000;
+        case 'Think1': return 5000;
+        default: return 10000;
+    }
 }
 
 function hasNeighbor(r, c) {

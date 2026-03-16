@@ -541,12 +541,6 @@ function findBestMove(perfect = false) {
         if (rand < 0.3) return allMoves[0];
         else if (rand < 0.6) return allMoves[Math.floor(Math.random() * Math.min(3, allMoves.length))];
         else return allMoves[Math.floor(Math.random() * Math.min(10, allMoves.length))];
-    } else if (difficultyToUse === 'easiest') {
-        // Really dumb
-        if (hasCriticalMove && rand < 0.3) return allMoves[0]; // 70% chance to miss a critical move
-        if (rand < 0.1) return allMoves[0];
-        else if (rand < 0.4) return allMoves[Math.floor(Math.random() * Math.min(5, allMoves.length))];
-        else return allMoves[Math.floor(Math.random() * Math.min(20, allMoves.length))];
     }
     
     return allMoves[0];

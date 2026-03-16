@@ -335,17 +335,25 @@
 
     <!-- Gomoku Difficulty Selection -->
     <div id="gomokuDifficultySelectionOverlay" class="overlay hidden p-4">
-        <div class="bg-white/10 p-8 rounded-2xl border-2 border-indigo-500/50 w-full max-w-md mx-auto backdrop-blur-sm shadow-2xl">
+        <div
+            class="bg-white/10 p-8 rounded-2xl border-2 border-indigo-500/50 w-full max-w-md mx-auto backdrop-blur-sm shadow-2xl">
             <h2 class="text-3xl sm:text-4xl font-bold mb-8 text-center text-white tracking-wider">
                 选择难度 (Difficulty)
             </h2>
             <div class="flex flex-col gap-4">
-                <button class="game-btn text-xl bg-green-600 hover:bg-green-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all" onclick="startGameWithDifficulty('easiest')">Easiest (Very easy)</button>
-                <button class="game-btn text-xl bg-blue-600 hover:bg-blue-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all" onclick="startGameWithDifficulty('easy')">Easy (Good for kids)</button>
-                <button class="game-btn text-xl bg-orange-600 hover:bg-orange-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all" onclick="startGameWithDifficulty('hard')">Hard (Standard)</button>
-                <button class="game-btn text-xl bg-red-600 hover:bg-red-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all" onclick="startGameWithDifficulty('hardest')">Hardest (Challenging)</button>
+                <button
+                    class="game-btn text-xl bg-blue-600 hover:bg-blue-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all"
+                    onclick="startGameWithDifficulty('easy')">Easy (Good for kids)</button>
+                <button
+                    class="game-btn text-xl bg-orange-600 hover:bg-orange-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all"
+                    onclick="startGameWithDifficulty('hard')">Hard</button>
+                <button
+                    class="game-btn text-xl bg-red-600 hover:bg-red-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all"
+                    onclick="startGameWithDifficulty('hardest')">Hardest (Challenging)</button>
             </div>
-            <button onclick="document.getElementById('gomokuDifficultySelectionOverlay').classList.add('hidden'); document.getElementById('gomokuModeSelectionOverlay').classList.remove('hidden');" class="mt-6 text-gray-300 hover:text-white text-sm w-full text-center">
+            <button
+                onclick="document.getElementById('gomokuDifficultySelectionOverlay').classList.add('hidden'); document.getElementById('gomokuModeSelectionOverlay').classList.remove('hidden');"
+                class="mt-6 text-gray-300 hover:text-white text-sm w-full text-center">
                 <i class="fas fa-arrow-left mr-1"></i>返回 (Back)
             </button>
         </div>

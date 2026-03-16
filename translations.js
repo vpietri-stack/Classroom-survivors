@@ -1946,39 +1946,39 @@ const LOCAL_TRANSLATIONS = {
     "restaurant": "餐厅",
     "taxi": "出租车",
     "wi-fi": "无线（Wi-Fi）",
-    
+
     "morning": "上午/早晨",
     "afternoon": "下午",
     "evening": "晚上",
     "night": "夜晚",
-    
+
     "projector": "投影仪",
-    
+
     "men": "男人(复数)",
     "women": "女人(复数)",
     "people": "人们",
     "children": "孩子们",
-    
+
     "bye": "再见",
     "English": "英语",
     "work": "工作",
     "partner": "搭档/伙伴",
     "mean": "意思",
-    
+
     "number": "号码",
     "email": "电子邮件",
-    
+
     "See you later!": "待会儿见！",
     "Have a good day!": "祝你度过美好的一天！",
-    
+
     "My name's Tom.": "我的名字叫汤姆。",
     "My name's Anna.": "我的名字叫安娜。",
-    
+
     "This is Maria.": "这是玛丽亚。",
     "This is David.": "这是大卫。",
-    
+
     "How are you? I'm fine, thanks.": "你好吗？我很好，谢谢。",
-    
+
     "It's a red bus.": "这是一辆红色的公共汽车。",
     "It's a blue pen.": "这是一支蓝色的钢笔。",
     "It's a green book.": "这是一本绿色的书。",
@@ -1991,12 +1991,12 @@ const LOCAL_TRANSLATIONS = {
     "It's an Italian car.": "这是一辆意大利汽车。",
     "It's an airport.": "这是一个机场。",
     "It's an English book.": "这是一本英语书。",
-    
+
     "What's this in English? It's a pen.": "这个用英语怎么说？它是一支钢笔。",
     "What's this in English? It's a desk.": "这个用英语怎么说？它是一张课桌。",
     "What's this in English? It's a computer.": "这个用英语怎么说？它是一台电脑。",
     "What's this in English? It's a projector.": "这个用英语怎么说？它是一台投影仪。",
-    
+
     "Close your books.": "合上你的书。",
     "Listen!": "听！",
     "Look at the picture.": "看图片。",
@@ -2004,12 +2004,12 @@ const LOCAL_TRANSLATIONS = {
     "Work with a partner.": "和搭档一起练习。",
     "What does this mean?": "这是什么意思？",
     "Sorry, I don't understand.": "对不起，我不明白。",
-    
+
     "The men are in the restaurant.": "男人们在餐厅里。",
     "The women are at the café.": "女人们在咖啡馆里。",
     "The people are at the airport.": "人们在机场。",
     "The children are at school.": "孩子们在学校里。",
-    
+
     "What's your phone number?": "你的电话号码是多少？",
     "My phone number is 12345.": "我的电话号码是12345。",
     "What's your house number?": "你的门牌号是多少？",
@@ -2018,7 +2018,7 @@ const LOCAL_TRANSLATIONS = {
     "My email address is tom@email.com.": "我的电子邮箱是tom@email.com。",
     "What's your street address?": "你的街道地址是什么？",
     "My address is 10 High Street.": "我的地址是高街10号。",
-    
+
     "Hello! How are you?": "你好！你好吗？",
     "I'm fine, thanks.": "我很好，谢谢。",
     "Is it a red bus?": "这是一辆红色的公共汽车吗？",
@@ -2031,9 +2031,78 @@ const LOCAL_TRANSLATIONS = {
     "An Italian car.": "An Italian car.",
     "A or an? ___ hotel": "用A还是an? ___ hotel",
     "A hotel.": "A hotel.",
-    
+
     "Bye!": "再见！",
     "It's 185 158 789 0.": "它是 185 158 789 0。",
     "It's 42 High Street.": "它是高街42号。",
-    "It's Monkeyteacher@pig.com": "它是 Monkeyteacher@pig.com。"
+    "It's Monkeyteacher@pig.com": "它是 Monkeyteacher@pig.com。",
+
+    // --- PU2 Unit 1 Page 7 ---
+    "countryside": "乡下",
+    "field": "田野",
+    "forest": "森林",
+    "grass": "草/草地",
+    "ground": "地面",
+    "lake": "湖泊",
+    "leaf": "树叶(单数)",
+    "leaves": "树叶(复数)",
+    "mountain": "山",
+    "river": "河",
+    "rock": "岩石",
+    "tractor": "拖拉机",
+    "outside": "在外面",
+    "pretty": "漂亮的",
+    "problem": "问题",
+    "many": "许多",
+    "digging": "挖",
+    "barn": "谷仓",
+
+    "Grandpa's farm is in the countryside.": "爷爷的农场在乡下。",
+    "I like walking in the countryside.": "我喜欢在乡下散步。",
+    "We can see our farm from here.": "我们从这里能看到我们的农场。",
+    "Those purple flowers on the grass are beautiful.": "草地上的那些紫色的花很漂亮。",
+    "Grandpa's got a new blue tractor.": "爷爷有一台新的蓝色拖拉机。",
+    "There's a big grey rock in the field.": "田野里有一块灰色的大石头。",
+    "There are many trees in the forest.": "森林里有许多树。",
+    "There aren't many leaves on the trees.": "树上没有多少叶子。",
+    "There are a lot of brown leaves on the ground.": "地上有许多棕色的叶子。",
+    "I love playing with leaves.": "我喜欢玩树叶。",
+    "Can you see that lake and the river?": "你能看到那个湖和那条河吗？",
+    "Let's go for a walk in the forest.": "我们去森林里散步吧。",
+    "They are sitting next to the lake.": "他们正坐在湖边。",
+    "Jane is fishing in the river with her grandma.": "简正在和她奶奶在河里钓鱼。",
+    "Look at those cows in that field.": "看那田野里的牛。",
+    "Lily and her dog are playing on the grass.": "莉莉和她的狗在草地上玩耍。",
+    "My dog is digging in the ground.": "我的狗在地上挖洞。",
+    "There's a big mountain behind Fred's house.": "弗雷德家后面有一座大山。",
+    "Lucy is sitting next to the window.": "露西正坐在窗户旁边。",
+    "There are many leaves under the tree.": "树下有许多树叶。",
+    "The tractor is big.": "拖拉机很大。",
+    "The lake is blue.": "湖是蓝色的。",
+    "The rock is grey.": "岩石是灰色的。",
+    "The grass is green.": "草是绿色的。",
+
+    "Where's Grandpas's farm": "爷爷的农场在哪里？",
+    "It's in the countryside.": "在乡下。",
+    "Are the flowers beautiful?": "那些花漂亮吗？",
+    "Yes, they are.": "是的，它们很漂亮。",
+    "What has Grandpa got?": "爷爷有什么？",
+    "He's got a new blue tractor.": "他有一台新的蓝色拖拉机。",
+    "What is in the field?": "田里有什么？",
+    "Are there many leaves on the trees?": "树上有很多叶子吗？",
+    "No, there aren't. The leaves are on the ground.": "不，没有。叶子在地上。",
+    "What colour are the leaves?": "树叶是什么颜色的？",
+    "They're red, yellow and brown.": "它们是红色、黄色和棕色的。",
+    "Can we go for a swim?": "我们可以去游泳吗？",
+    "No, we can't. The water's too cold.": "不，我们不能。水太冷了。",
+    "What is the dog doing?": "小狗在做什么？",
+    "It's looking for its bone in the ground.": "它正在地上找骨头。",
+    "Is the tractor green?": "拖拉机是绿色的吗？",
+    "No, it isn't. It's blue.": "不，它不是。它是蓝色的。",
+    "What can you see on the lake?": "在湖上你能看到什么？",
+    "I can see a boat.": "我能看到一艘小船。",
+    "What is Jane doing on the boat?": "简在船上做什么？",
+    "She's fishing.": "她正在钓鱼。",
+    "Are there mountains behind the lake?": "湖的后面有山吗？",
+    "No, there aren't, but there's a forest.": "不，没有，但是有一片森林。"
 };

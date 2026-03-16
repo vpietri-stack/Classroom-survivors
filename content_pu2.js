@@ -307,6 +307,52 @@ TEACHING_CONTENT["PU2"] = {
         }
     },
     "1": {
+        "7": {
+            vocab: [
+                'countryside', 'field', 'forest', 'grass', 'ground', 'lake', 'leaf', 'leaves', 'mountain', 'river', 'rock', 'tractor',
+                'outside', 'beautiful', 'garden', 'pretty', 'problem', 'many', 'digging', 'fishing', 'barn', 'boat'
+            ],
+            sentences: [
+                "Grandpa's farm is in the countryside.",
+                "I like walking in the countryside.",
+                "We can see our farm from here.",
+                "Those purple flowers on the grass are beautiful.",
+                "Grandpa's got a new blue tractor.",
+                "There's a big grey rock in the field.",
+                "There are many trees in the forest.",
+                "There aren't many leaves on the trees.",
+                "There are a lot of brown leaves on the ground.",
+                "I love playing with leaves.",
+                "Can you see that lake and the river?",
+                "Let's go for a walk in the forest.",
+                "They are sitting next to the lake.",
+                "Jane is fishing in the river with her grandma.",
+                "Look at those cows in that field.",
+                "Lily and her dog are playing on the grass.",
+                "My dog is digging in the ground.",
+                "There's a big mountain behind Fred's house.",
+                "Lucy is sitting next to the window.",
+                "There are many leaves under the tree.",
+                "The tractor is big.",
+                "The lake is blue.",
+                "The rock is grey.",
+                "The grass is green."
+            ],
+            sentencePairs: [
+                { a: "Where's Grandpas's farm", b: "It's in the countryside." },
+                { a: "Are the flowers beautiful?", b: "Yes, they are." },
+                { a: "What has Grandpa got?", b: "He's got a new blue tractor." },
+                { a: "What is in the field?", b: "There's a big grey rock in the field." },
+                { a: "Are there many leaves on the trees?", b: "No, there aren't. The leaves are on the ground." },
+                { a: "What colour are the leaves?", b: "They're red, yellow and brown." },
+                { a: "Can we go for a swim?", b: "No, we can't. The water's too cold." },
+                { a: "What is the dog doing?", b: "It's looking for its bone in the ground." },
+                { a: "Is the tractor green?", b: "No, it isn't. It's blue." },
+                { a: "What can you see on the lake?", b: "I can see a boat." },
+                { a: "What is Jane doing on the boat?", b: "She's fishing." },
+                { a: "Are there mountains behind the lake?", b: "No, there aren't, but there's a forest." }
+            ]
+        },
         "16": {
             vocab: [
                 'countryside', 'field', 'forest', 'grass', 'ground', 'lake', 'leaf', 'leaves', 'mountain', 'river', 'rock', 'tractor',
@@ -972,7 +1018,7 @@ TEACHING_CONTENT["PU2"] = {
 
 AVAILABLE_CONTENT["PU2"] = {
     "0": [5],
-    "1": [16],
+    "1": [7, 16],
     "2": [28],
     "3": [40, 43],
     "4": [45, 46, 54],

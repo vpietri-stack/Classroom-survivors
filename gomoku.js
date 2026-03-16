@@ -20,6 +20,18 @@ const TOUCH_Y_OFFSET = 40; // pixels above the finger for touch placement
 let gomokuViewport = { minR: 3, maxR: 11, minC: 3, maxC: 11 };
 
 // --- GOMOKU INITIALIZATION ---
+let gomokuDifficulty = 'hard';
+
+function showGomokuDifficultySelection() {
+    document.getElementById('gomokuModeSelectionOverlay').classList.add('hidden');
+    document.getElementById('gomokuDifficultySelectionOverlay').classList.remove('hidden');
+}
+
+function startGameWithDifficulty(diff) {
+    gomokuDifficulty = diff;
+    triggerGomoku('regular');
+}
+
 function showGomokuModeSelection() {
     document.getElementById('gameSelectionOverlay').classList.add('hidden');
     document.getElementById('gomokuModeSelectionOverlay').classList.remove('hidden');
@@ -31,6 +43,8 @@ function triggerGomoku(mode = gomokuMode) {
     document.getElementById('startScreen').classList.add('hidden');
     document.getElementById('gameSelectionOverlay').classList.add('hidden');
     document.getElementById('gomokuModeSelectionOverlay').classList.add('hidden');
+    const diffOverlay = document.getElementById('gomokuDifficultySelectionOverlay');
+    if (diffOverlay) diffOverlay.classList.add('hidden');
     document.getElementById('gomokuGameOverScreen').classList.add('hidden');
     document.getElementById('gomokuScreen').classList.remove('hidden');
 
@@ -503,27 +517,39 @@ function findBestMove(perfect = false) {
     // Sort moves from highest score to lowest
     allMoves.sort((a, b) => b.score - a.score);
 
-    // If there is an immediate critical move (winning, or blocking a 4-in-a-row)
-    // ALWAYS take it. A score >= 2000 represents at least a blocked/taken 4-in-a-row.
-    if (perfect || allMoves[0].score >= 2000) {
+    if (perfect) {
         return allMoves[0];
     }
 
-    // AI Difficulty adjustment for students:
-    // Sorts all moves and probabilistically picks one so it's not a chess-level computer
+    let difficultyToUse = (gomokuMode === 'speed') ? 'hard' : gomokuDifficulty;
+    const hasCriticalMove = allMoves[0].score >= 2000;
     const rand = Math.random();
-    if (rand < 0.5) {
-        // 50% chance: play the absolute best move
-        return allMoves[0];
-    } else if (rand < 0.8) {
-        // 30% chance: pick from the top 3 best moves (might miss a critical block!)
-        const idx = Math.floor(Math.random() * Math.min(3, allMoves.length));
-        return allMoves[idx];
-    } else {
-        // 20% chance: Bigger blunder! Pick a random move from the top 8 (gives students big openings)
-        const idx = Math.floor(Math.random() * Math.min(8, allMoves.length));
-        return allMoves[idx];
+
+    if (difficultyToUse === 'hardest') {
+        if (hasCriticalMove) return allMoves[0];
+        if (rand < 0.9) return allMoves[0];
+        return allMoves[Math.floor(Math.random() * Math.min(3, allMoves.length))];
+    } else if (difficultyToUse === 'hard') {
+        // Current level
+        if (hasCriticalMove) return allMoves[0];
+        if (rand < 0.5) return allMoves[0];
+        else if (rand < 0.8) return allMoves[Math.floor(Math.random() * Math.min(3, allMoves.length))];
+        else return allMoves[Math.floor(Math.random() * Math.min(8, allMoves.length))];
+    } else if (difficultyToUse === 'easy') {
+        // Slightly dumber
+        if (hasCriticalMove && rand < 0.6) return allMoves[0]; // 40% chance to miss a critical move
+        if (rand < 0.3) return allMoves[0];
+        else if (rand < 0.6) return allMoves[Math.floor(Math.random() * Math.min(3, allMoves.length))];
+        else return allMoves[Math.floor(Math.random() * Math.min(10, allMoves.length))];
+    } else if (difficultyToUse === 'easiest') {
+        // Really dumb
+        if (hasCriticalMove && rand < 0.3) return allMoves[0]; // 70% chance to miss a critical move
+        if (rand < 0.1) return allMoves[0];
+        else if (rand < 0.4) return allMoves[Math.floor(Math.random() * Math.min(5, allMoves.length))];
+        else return allMoves[Math.floor(Math.random() * Math.min(20, allMoves.length))];
     }
+    
+    return allMoves[0];
 }
 
 function hasNeighbor(r, c) {

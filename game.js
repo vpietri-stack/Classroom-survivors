@@ -527,6 +527,7 @@ function startSpellingGame() {
     const { book, unit, page } = CLASS_CONFIG[selectedDay][selectedTime].content;
     const word = getWeightedItemForGame(book, unit, page, 'vocab');
     currentTTSWord = word;
+    showTranslation('spelling-translation', word);
 
     const totalChars = word.length;
     // Always use ALL letters - no level-based scaling

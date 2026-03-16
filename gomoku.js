@@ -590,7 +590,7 @@ function getGomokuSpeedInterval() {
         case 'PU2': return 15000;
         case 'PU3':
         case 'Think0': return 10000;
-        case 'Think1': return 5000;
+        case 'Think1': return 10000;
         default: return 10000;
     }
 }

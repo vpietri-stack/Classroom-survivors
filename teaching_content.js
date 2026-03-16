@@ -126,16 +126,15 @@ function getSpacedRepetitionContent(book, unit, page, type, isStudyMode, count =
         const countRecent = Math.ceil(count * 0.6);
         const countReview = count - countRecent;
 
-        // Recent Pool: current page (activePageIndex) and the page immediately preceding it.
+        // Recent Pool: current page (activePageIndex) only.
         const recentPageIndices = [activePageIndex];
-        if (activePageIndex > 0) recentPageIndices.push(activePageIndex - 1);
 
         const recentPages = recentPageIndices.map(idx => sortedPages[idx]);
         let recentItems = pickUniqueItems(recentPages, countRecent, type, activePageIndex, false);
 
-        // Review Pool: all other previous pages
+        // Review Pool: all previous pages
         const reviewPageIndices = [];
-        for (let i = 0; i < activePageIndex - 1; i++) {
+        for (let i = 0; i < activePageIndex; i++) {
             reviewPageIndices.push(i);
         }
 

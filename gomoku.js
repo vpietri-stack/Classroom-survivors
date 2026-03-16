@@ -25,6 +25,32 @@ let gomokuDifficulty = 'hard';
 function showGomokuDifficultySelection() {
     document.getElementById('gomokuModeSelectionOverlay').classList.add('hidden');
     document.getElementById('gomokuDifficultySelectionOverlay').classList.remove('hidden');
+
+    const easyBtn = document.getElementById('gomokuEasyBtn');
+    if (easyBtn) {
+        let isPu1OrPu2 = false;
+        if (typeof selectedDay !== 'undefined' && typeof selectedTime !== 'undefined' && typeof CLASS_CONFIG !== 'undefined') {
+            if (CLASS_CONFIG[selectedDay] && CLASS_CONFIG[selectedDay][selectedTime]) {
+                const classData = CLASS_CONFIG[selectedDay][selectedTime];
+                if (classData && classData.content) {
+                    const book = classData.content.book;
+                    if (book === 'PU1' || book === 'PU2') {
+                        isPu1OrPu2 = true;
+                    }
+                }
+            }
+        }
+
+        if (isPu1OrPu2 || typeof selectedDay === 'undefined' || selectedDay === null) {
+            easyBtn.disabled = false;
+            easyBtn.className = "game-btn text-xl bg-blue-600 hover:bg-blue-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all";
+            easyBtn.innerText = "Easy (Good for kids)";
+        } else {
+            easyBtn.disabled = true;
+            easyBtn.className = "game-btn text-xl bg-gray-500 w-full py-4 rounded-xl shadow-lg transform cursor-not-allowed opacity-50";
+            easyBtn.innerText = "Easy (PU1 & PU2 only)";
+        }
+    }
 }
 
 function startGameWithDifficulty(diff) {

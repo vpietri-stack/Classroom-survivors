@@ -792,6 +792,33 @@ TEACHING_CONTENT["PU2"] = {
         }
     },
     "7": {
+        "83": {
+            vocab: [
+                'vegetables', 'cheese', 'pasta', 'sandwich', 'salad', 'soup', 'bread', 'potatoes', 'carrots', 'onions', 'beans', 'tomatoes',
+                'lemonade', 'hot chocolate',
+                'plate', 'bowl', 'cup', 'bottle', 'glass',
+                'hot', 'cold', 'fantastic', 'nice', 'lovely'
+            ],
+            sentences: [
+                "I've got a fantastic cheese sandwich.",
+                "There were some potatoes, carrots and onions.",
+                "Would you like a glass of lemonade?",
+                "There is some pasta in the red bowl.",
+                "There's some lemonade in the yellow bottle.",
+                "There's some salad in the purple bowl."
+            ],
+            sentencePairs: [
+                { a: "What kind of sandwich is this?", b: "It's a cheese sandwich." },
+                { a: "There were some potatoes, carrots and onions,", b: "So I made some vegetable soup!" },
+                { a: "What's in that yellow bottle?", b: "It's lemonade." },
+                { a: "It's cold today.", b: "So here are some cups of hot chocolate." },
+                { a: "Would you like a glass of cold lemonade?", b: "Yes, please. Thank you!" },
+                { a: "What have you got in the purple bowl?", b: "We've got a salad in this one." },
+                { a: "Where's the salad?", b: "It's in the purple bowl." },
+                { a: "There was some bread and some cheese,", b: "So I made a fantastic cheese sandwich." },
+                { a: "Where are the vegetables?", b: "They're in the soup." }
+            ]
+        },
         "91": {
             vocab: [
                 'cheese', 'pasta', 'soup', 'sandwich', 'salad', 'vegetables', 'plate', 'bottle', 'glass', 'bowl', 'cup',
@@ -818,9 +845,9 @@ TEACHING_CONTENT["PU2"] = {
             ],
             sentencePairs: [
                 { a: "What did you cook?", b: "I cooked chicken and rice." },
-                { a: "Did you wash the fruit?", b: "Yes, I washed the fruit." },
+                { a: "Did you wash the fruit?", b: "No, I didn't, but I washed the vegetables." },
                 { a: "Where did you go?", b: "We went to the market." },
-                { a: "Did she like the soup?", b: "No, she didn't like it." },
+                { a: "Did she like the soup?", b: "No, she didn't." },
                 { a: "What did he do yesterday?", b: "He played football." },
                 { a: "Did they make a cake?", b: "Yes, they did." }
             ]
@@ -1024,7 +1051,7 @@ AVAILABLE_CONTENT["PU2"] = {
     "4": [45, 46, 54],
     "5": [66],
     "6": [78, 81],
-    "7": [91],
+    "7": [83, 91],
     "8": [95, 96, 104],
     "9": [116, 119]
 };

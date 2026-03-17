@@ -572,6 +572,29 @@ TEACHING_CONTENT["PU3"] = {
                 { a: "What have we got before the break?", b: "We've got language." },
                 { a: "What have they got on Wednesday morning?", b: "They've got science." }
             ]
+        },
+        "71": {
+            vocab: [
+                'Turkey', 'market', 'stone', 'sea',
+                'project', 'research', 'information', 'geography', 'history', 'art', 'exam', 'study', 'topic', 'homework',
+                'fishing', 'sailing', 'windsurfing',
+                'should', "shouldn't", 'listen', 'help', 'finish', 'stay', 'lunch', 'break', 'problem', 'question'
+            ],
+            sentences: [
+                "You should always listen carefully to your teacher.",
+                "Should we do our project on geography or art?",
+                "You shouldn't go to bed late the night before an exam.",
+                "You should drink a lot of water to help you study.",
+                "We should all stay for lunch because it's beautiful here."
+            ],
+            sentencePairs: [
+                { a: "Should you help your friend if she's got a problem?", b: "Yes, you should." },
+                { a: "Should we do our project on geography, history or art?", b: "We should do all three." },
+                { a: "It's beautiful here.", b: "We should all stay for lunch." },
+                { a: "You should put your hand up...", b: "...to ask a question." },
+                { a: "Should you copy in exams?", b: "No, you shouldn't." },
+                { a: "You shouldn't talk...", b: "...when your teacher is speaking." }
+            ]
         }
     }
 };
@@ -583,5 +606,5 @@ AVAILABLE_CONTENT["PU3"] = {
     "3": [40],
     "4": [54],
     "5": [66],
-    "6": [69]
+    "6": [69, 71]
 };

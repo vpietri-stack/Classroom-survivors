@@ -301,6 +301,38 @@ TEACHING_CONTENT["Think1"] = {
                 { a: "What is she like?", b: "She's kind and cheerful." }
             ]
         }
+    },
+    "7": {
+        "66": {
+            vocab: [
+                'e-reader', 'digital camera', 'flat screen TV', 'tablet', 'laptop', 'computer', 'mobile phone',
+                'inventor', 'invents', 'idea', 'shocking', 'research', 'problem', 'internet', 'infection', 'blind', 'gel', 'fact'
+            ],
+            sentences: [
+                "I think the laptop looks really new.",
+                "An inventor creates something completely new.",
+                "I researched the information on the internet.",
+                "A tablet is a small portable computer.",
+                "I use my digital camera to take photos.",
+                "A flat screen TV is in the living room.",
+                "You can read books on an e-reader.",
+                "I have got a desktop computer on my desk.",
+                "A shocking fact makes you feel very surprised.",
+                "He wrote the formula on his mobile phone."
+            ],
+            sentencePairs: [
+                { a: "What do you use to read digital books?", b: "You use an e-reader." },
+                { a: "Which gadget has a touchscreen and is portable?", b: "It is a tablet." },
+                { a: "What do you call a person who creates things?", b: "An inventor." },
+                { a: "Where can you find information for a project?", b: "You can research it on the internet." },
+                { a: "What is a digital camera for?", b: "It is for taking photos." },
+                { a: "What do you use to watch films at home?", b: "I watch them on my flat screen TV." },
+                { a: "What is a shocking fact?", b: "Something that makes you feel surprised and upset." },
+                { a: "What does a laptop look like?", b: "I think it looks really cool and new." },
+                { a: "What happens if you have a huge problem?", b: "You have to find an idea to solve it." },
+                { a: "Where do you find a desktop computer?", b: "It is usually on a desk in an office." }
+            ]
+        }
     }
 };
 
@@ -311,5 +343,6 @@ AVAILABLE_CONTENT["Think1"] = {
     "3": [37],
     "4": [46],
     "5": [55],
-    "6": [58, 64]
+    "6": [58, 64],
+    "7": [66]
 };

@@ -55,15 +55,16 @@ function getWeightedRandomIndex(weights) {
  * if useWeights is true, it uses linear weighting based on proximity to activePageIndex.
  * pages: array of {unit, page, absIndex} objects
  */
-function pickUniqueItems(pages, count, type, activePageIndex, useWeights = false) {
+function pickUniqueItems(pages, count, type, activePageIndex, useWeights = false, samePageOnly = false) {
     const allItems = [];
     const seenIdentifier = new Set(); // Track unique items by content to avoid showing the same question twice
+    const pagesWithItems = [];
 
     pages.forEach((p) => {
         const content = TEACHING_CONTENT[p.book] && TEACHING_CONTENT[p.book][p.unit] && TEACHING_CONTENT[p.book][p.unit][p.page];
-        if (content && content[type]) {
-            const items = content[type];
-            items.forEach(item => {
+        if (content && content[type] && content[type].length > 0) {
+            const pageItems = [];
+            content[type].forEach(item => {
                 // Generate identifier based on item content
                 let identifier = "";
                 if (typeof item === 'string') {
@@ -78,13 +79,44 @@ function pickUniqueItems(pages, count, type, activePageIndex, useWeights = false
 
                 if (!seenIdentifier.has(identifier)) {
                     seenIdentifier.add(identifier);
-                    allItems.push({ item, pageIndex: p.absIndex });
+                    const itemEntry = { item, pageIndex: p.absIndex };
+                    pageItems.push(itemEntry);
+                    allItems.push(itemEntry);
                 }
             });
+            if (pageItems.length > 0) {
+                pagesWithItems.push({ pageIndex: p.absIndex, items: pageItems });
+            }
         }
     });
 
     if (allItems.length === 0) return [];
+
+    if (samePageOnly && pagesWithItems.length > 0) {
+        // Pick ONE page first
+        let selectedPage;
+        if (useWeights) {
+            // Weights based on distance to activePageIndex
+            const weights = pagesWithItems.map(p => {
+                const distance = Math.abs(p.pageIndex - activePageIndex);
+                return 1 / Math.pow(distance + 1, 2);
+            });
+            const pageIdx = getWeightedRandomIndex(weights);
+            selectedPage = pagesWithItems[pageIdx];
+        } else {
+            selectedPage = pagesWithItems[Math.floor(Math.random() * pagesWithItems.length)];
+        }
+
+        // Pick 'count' unique items from the selected page
+        const pool = [...selectedPage.items];
+        const selected = [];
+        for (let i = 0; i < count && pool.length > 0; i++) {
+            const idx = Math.floor(Math.random() * pool.length);
+            selected.push(pool[idx].item);
+            pool.splice(idx, 1);
+        }
+        return selected;
+    }
 
     const selected = [];
     const pool = [...allItems];
@@ -172,12 +204,12 @@ function getSpacedRepetitionContent(book, unit, page, type, isStudyMode, count =
 
         return finalSet;
     } else {
-        // Game Mode: Return metadata so game.js can handle it
-        const gamePageIndices = [];
+        // Game Mode: Return all eligible pages
+        const gamePages = [];
         for (let i = 0; i <= activePageIndex; i++) {
-            gamePageIndices.push(i);
+            gamePages.push(sortedPages[i]);
         }
-        return gamePageIndices.map(idx => sortedPages[idx]);
+        return gamePages;
     }
 }
 

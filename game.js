@@ -924,22 +924,19 @@ function startSentenceMatchGame() {
         gamePages = [{ book, unit, page: page.toString(), absIndex: 0 }];
     }
 
-    // Pick 5 pairs using the weighted logic (pickUniqueItems now deduplicates by text)
-    let pairs = pickUniqueItems(gamePages, 5, 'sentencePairs', activePageIndex, true);
+    // Pick 3 pairs from the same page using the weighted logic
+    let pairs = pickUniqueItems(gamePages, 3, 'sentencePairs', activePageIndex, true, true);
 
     // Fallback if selection returns nothing
     if (pairs.length === 0) {
         pairs = [
             { a: "What's your name?", b: "My name is Sarah." },
             { a: "How old are you?", b: "I'm seven years old." },
-            { a: "What colour is the apple?", b: "The apple is red." },
-            { a: "Where's the book?", b: "The book is on the desk." },
-            { a: "Is it a cat?", b: "No, it isn't a cat." }
+            { a: "What colour is the apple?", b: "The apple is red." }
         ];
     }
 
-    // Shuffle and ensure we have up to 3 pairs for the current round
-    const shuffledPairs = pairs.sort(() => 0.5 - Math.random()).slice(0, 3);
+    const shuffledPairs = pairs; // Already picked and unique from one page
 
     // Store in game element for later reference
     const gameEl = document.getElementById('sentenceMatchGame');

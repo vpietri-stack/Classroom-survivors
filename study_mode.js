@@ -587,36 +587,6 @@ function checkRoundD(targetSentence) {
 function startRoundE() {
     STUDY_STATE.round = 'E';
     STUDY_STATE.subRound = 1; // Initialize sub-round counter
-
-    // Get sentence pairs using Spaced Repetition logic
-    const { book, unit, page } = CLASS_CONFIG[selectedDay][selectedTime].content;
-
-    // Request 9 pairs for 3 rounds of 3 (E1, E2, E3)
-    let pairs = getSpacedRepetitionContent(book, unit, page, 'sentencePairs', true, 9);
-
-    // Fallback if data is totally missing (shouldn't happen with our content population)
-    if (!pairs || pairs.length === 0) {
-        pairs = [
-            { a: "What's your name?", b: "My name is Sarah." },
-            { a: "How old are you?", b: "I'm seven years old." },
-            { a: "What colour is the apple?", b: "The apple is red." },
-            { a: "Where's the book?", b: "The book is on the desk." },
-            { a: "Is it a cat?", b: "No, it isn't a cat." }
-        ];
-    }
-
-    // Ensure we have at least 9 pairs by recycling if necessary
-    if (pairs.length < 9) {
-        const originalLength = pairs.length;
-        const extraNeeded = 9 - originalLength;
-        for (let i = 0; i < extraNeeded; i++) {
-            pairs.push(pairs[i % originalLength]);
-        }
-    }
-
-    // Shuffle and store all pairs for the upcoming sub-rounds
-    STUDY_STATE.allEPairs = pairs.sort(() => 0.5 - Math.random());
-
     nextRoundESubRound();
 }
 
@@ -628,11 +598,42 @@ function nextRoundESubRound() {
 
     updateStudyUI(`Round E${STUDY_STATE.subRound}: Sentence Matching`, "Match each question with its answer.");
 
-    // Slice 3 pairs for this round: [0-3), [3-6), [6-9)
-    const startIdx = (STUDY_STATE.subRound - 1) * 3;
-    const roundPairs = STUDY_STATE.allEPairs.slice(startIdx, startIdx + 3);
+    // Get sentence pairs using Spaced Repetition logic
+    const { book, unit, page } = CLASS_CONFIG[selectedDay][selectedTime].content;
+    const sortedPages = getSortedPagesForBook(book);
+    const activePageIndex = sortedPages.findIndex(p => p.book === book && p.unit === unit && p.page === page.toString());
 
-    STUDY_STATE.sentencePairs = roundPairs;
+    let pairs = [];
+
+    if (STUDY_STATE.subRound === 1) {
+        // E1: 3 pairs from the CURRENT page
+        const currentPage = sortedPages[activePageIndex] ? [sortedPages[activePageIndex]] : [];
+        pairs = pickUniqueItems(currentPage, 3, 'sentencePairs', activePageIndex, false, true);
+    } else {
+        // E2, E3: 3 pairs from a PREVIOUS page (weighted)
+        const previousPages = sortedPages.slice(0, activePageIndex);
+        if (previousPages.length > 0) {
+            pairs = pickUniqueItems(previousPages, 3, 'sentencePairs', activePageIndex, true, true);
+        }
+    }
+
+    // Fallback if no pairs found (or no previous pages)
+    if (!pairs || pairs.length === 0) {
+        // If we can't find previous content for E2/E3, try current page again
+        const currentPage = sortedPages[activePageIndex] ? [sortedPages[activePageIndex]] : [];
+        pairs = pickUniqueItems(currentPage, 3, 'sentencePairs', activePageIndex, false, true);
+    }
+
+    // Final fallback for empty content
+    if (!pairs || pairs.length === 0) {
+        pairs = [
+            { a: "What's your name?", b: "My name is Sarah." },
+            { a: "How old are you?", b: "I'm seven years old." },
+            { a: "What colour is the apple?", b: "The apple is red." }
+        ];
+    }
+
+    STUDY_STATE.sentencePairs = pairs;
     renderRoundE();
 }
 

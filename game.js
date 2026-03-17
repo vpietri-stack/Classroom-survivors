@@ -562,11 +562,12 @@ function startSpellingGame() {
     // My missingChars above is in index order? No, loop 0..total. Yes index order.
 
     gameEl.dataset.currentInput = "";
+    gameEl.dataset.feedbackMode = "false";
 
     updateSpellingDisplay();
 
     const display = document.getElementById('spelling-input-display');
-    display.classList.remove('text-red-500', 'shake');
+    display.classList.remove('shake');
     document.getElementById('spelling-result-action').classList.add('hidden');
     document.getElementById('spelling-actions').classList.remove('hidden');
     document.getElementById('spellingGame').classList.remove('hidden');
@@ -587,6 +588,8 @@ function startSpellingGame() {
 }
 
 function handleSpellingInput(char, bubble) {
+    if (!document.getElementById('spelling-result-action').classList.contains('hidden')) return;
+
     const gameEl = document.getElementById('spellingGame');
     const missingChars = JSON.parse(gameEl.dataset.missingChars);
     let currentInput = gameEl.dataset.currentInput;
@@ -603,13 +606,23 @@ function updateSpellingDisplay() {
     const gameEl = document.getElementById('spellingGame');
     const template = JSON.parse(gameEl.dataset.template);
     const currentInput = gameEl.dataset.currentInput;
+    const targetWord = gameEl.dataset.targetWord;
+    const isFeedback = gameEl.dataset.feedbackMode === "true";
+    const isSuccess = !document.getElementById('spelling-result-action').classList.contains('hidden');
+
     let displayHtml = "";
     let inputIdx = 0;
 
-    template.forEach(char => {
+    template.forEach((char, fullIdx) => {
         if (char === null) {
             if (inputIdx < currentInput.length) {
-                displayHtml += `<span class="text-blue-600 underline">${currentInput[inputIdx]}</span>`;
+                let colorClass = "text-blue-600";
+                if (isSuccess) {
+                    colorClass = "text-green-500";
+                } else if (isFeedback) {
+                    colorClass = (currentInput[inputIdx] === targetWord[fullIdx]) ? "text-green-500" : "text-red-500";
+                }
+                displayHtml += `<span class="${colorClass} underline">${currentInput[inputIdx]}</span>`;
                 inputIdx++;
             } else {
                 displayHtml += "_";
@@ -623,15 +636,20 @@ function updateSpellingDisplay() {
 }
 
 function clearSpelling() {
+    if (!document.getElementById('spelling-result-action').classList.contains('hidden')) return;
+
     const gameEl = document.getElementById('spellingGame');
     gameEl.dataset.currentInput = "";
+    gameEl.dataset.feedbackMode = "false";
     updateSpellingDisplay();
     const display = document.getElementById('spelling-input-display');
-    display.classList.remove('text-red-500', 'shake');
+    display.classList.remove('shake');
     document.querySelectorAll('.letter-bubble').forEach(b => b.style.visibility = 'visible');
 }
 
 function checkSpelling() {
+    if (!document.getElementById('spelling-result-action').classList.contains('hidden')) return;
+
     const gameEl = document.getElementById('spellingGame');
     const currentInput = gameEl.dataset.currentInput;
     const missingChars = JSON.parse(gameEl.dataset.missingChars);
@@ -641,9 +659,12 @@ function checkSpelling() {
 
     if (currentInput === missingChars.join('')) {
         handleMinigameSuccess('spelling');
+        updateSpellingDisplay(); // Refresh to show green
     } else {
+        gameEl.dataset.feedbackMode = "true";
+        updateSpellingDisplay();
         const display = document.getElementById('spelling-input-display');
-        display.classList.add('text-red-500', 'shake');
+        display.classList.add('shake');
         synthError();
         setTimeout(() => display.classList.remove('shake'), 500);
         isFirstAttempt = false;
@@ -1076,9 +1097,11 @@ function handleMinigameSuccess(gameType) {
     // - Spelling and Grammar: always give reward if answered correctly (even on subsequent tries)
     // - Sight words (rec): only give reward on first try within time limit
     const shouldGiveReward = (gameType === 'spelling' || gameType === 'grammar' || gameType === 'sentencematch') || isFirstAttempt;
+    const isGomoku = (activeGameMode === 'Gomoku' || rewardContext === 'gomoku');
 
     if (shouldGiveReward) {
-        resultDiv.innerHTML = `<button onclick="claimReward(true)" class="game-btn bg-green-500 text-2xl py-4 px-8 animate-bounce">GET POWER UP!</button>`;
+        const btnText = isGomoku ? "CONTINUE!" : "GET POWER UP!";
+        resultDiv.innerHTML = `<button onclick="claimReward(true)" class="game-btn bg-green-500 text-2xl py-4 px-8 animate-bounce">${btnText}</button>`;
     } else {
         resultDiv.innerHTML = `<button onclick="claimReward(false)" class="game-btn bg-blue-500 text-2xl py-4 px-8">CONTINUE (NO REWARD)</button>`;
     }
@@ -1122,6 +1145,11 @@ window.addEventListener('keydown', (e) => {
     // Check if Spelling Minigame is active
     const spellingGameEl = document.getElementById('spellingGame');
     if (spellingGameEl && !spellingGameEl.classList.contains('hidden')) {
+        // Prevent default browser behavior for Enter/Backspace only when spelling game is active
+        // This stops focused buttons (like CLEAR) from being triggered again by the Enter key
+        if (e.key === 'Enter' || e.key === 'Backspace') {
+            e.preventDefault();
+        }
         handleGameSpellingKeyDown(e.key);
     }
 });

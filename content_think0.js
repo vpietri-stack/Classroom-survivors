@@ -98,7 +98,7 @@ TEACHING_CONTENT["Think0"] = {
 
                 // Identifying Objects
                 { a: "Is it a red bus?", b: "Yes, it is." },
-                { a: "Is it an orange phone?", b: "No, it isn't." },
+                { a: "Is it an orange phone?", b: "No, it isn't. It's a black phone." },
 
                 // Articles a/an
                 { a: "A or an? ___ bus", b: "A bus." },
@@ -176,7 +176,7 @@ TEACHING_CONTENT["Think0"] = {
                 { a: "Who is she?", b: "She's a singer." },
                 { a: "Where is he from?", b: "He is from Spain." },
                 { a: "How are they?", b: "They are awesome!" },
-                { a: "Why are we here?", b: "Because we are a group." },
+                { a: "Why are we here?", b: "Because we want to study English." },
                 { a: "Is Messi a famous athlete?", b: "Yes, he is." },
                 { a: "Is Messi a famous singer?", b: "No, he isn't." },
                 { a: "Are they from Mexico?", b: "No, they aren't. They are Indonesian." }

@@ -78,7 +78,7 @@ const CLASS_CONFIG = {
         },
         "1310-1440": {
             students: ["Apple", "Lily", "Ryan", "Terry", "Toby", "Grace"],
-            content: { book: "Think1", unit: "6", page: "66" }
+            content: { book: "Think1", unit: "7", page: "66" }
         },
         "1630-1800": {
             students: ["Coco", "Grayson", "Laura", "Leo", "Frank", "William"],

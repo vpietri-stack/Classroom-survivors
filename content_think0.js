@@ -118,9 +118,74 @@ TEACHING_CONTENT["Think0"] = {
                 { a: "What's your email address?", b: "It's Monkeyteacher@pig.com" }
             ]
         }
+    },
+    "1": {
+        "15": {
+            vocab: [
+                // Countries
+                "Brazil", "Ecuador", "Indonesia", "Japan", "Mexico", "Russia", "South Africa", "Spain", "Sudan", "Turkey", "the UK", "the US", "China", "South Korea",
+
+                // Nationalities
+                "American", "Brazilian", "British", "Ecuadorian", "Indonesian", "Japanese", "Mexican", "Russian", "South African", "Spanish", "Sudanese", "Turkish", "Chinese", "Korean",
+
+                // Question Words
+                "How", "What", "Where", "Who", "Why",
+
+                // Roles & Professions
+                "actor", "athlete", "musician", "pianist", "singer",
+
+                // Adjectives
+                "awesome", "beautiful", "cool", "famous", "great",
+
+                // General Nouns
+                "city", "dish", "flag", "group", "music", "world"
+            ],
+            sentences: [
+                "I'm from Brazil. I'm Brazilian.",
+                "She's from Ecuador. She's Ecuadorian.",
+                "LiJun is from Indonesia. He is Indonesian.",
+                "We're from Japan. We're Japanese.",
+                "Yalitza is from Mexico. She's Mexican.",
+                "They're from Russia. They're Russian.",
+                "We are from South Africa. We are South African.",
+                "Rafael is from Spain. He is Spanish.",
+                "She is from Sudan. She is Sudanese.",
+                "Cenc is from Turkey. He is Turkish.",
+                "Jess is from the UK. She is British.",
+                "My parents are from the US. They're American.",
+                "Yuja is from China. She is Chinese.",
+                "They are from South Korea. They are Korean.",
+                "Paella is a Spanish dish.",
+                "Who is your favourite musician?",
+                "I am from a big city.",
+                "She is from a small town.",
+                "It's the Brazilian flag.",
+                "Why is she your favourite actor?"
+            ],
+            sentencePairs: [
+                { a: "Who is your favourite teacher?", b: "Val." },
+                { a: "Where are you from?", b: "I am from Turkey." },
+                { a: "How old are you?", b: "I am 12." },
+                { a: "Why is she your favourite?", b: "Because she's cool!" },
+                { a: "Is it the Brazilian flag?", b: "Yes, it is." },
+                { a: "Are you from the USA?", b: "No, I'm not. I'm from the UK." },
+                { a: "Is paella a Spanish dish?", b: "Yes, it is." },
+                { a: "Are they wrong?", b: "No, they aren't." },
+
+                // Additional examples for each pattern
+                { a: "Who is she?", b: "She's a singer." },
+                { a: "Where is he from?", b: "He is from Spain." },
+                { a: "How are they?", b: "They are awesome!" },
+                { a: "Why are we here?", b: "Because we are a group." },
+                { a: "Is Messi a famous athlete?", b: "Yes, he is." },
+                { a: "Is Messi a famous singer?", b: "No, he isn't." },
+                { a: "Are they from Mexico?", b: "No, they aren't. They are Indonesian." }
+            ]
+        }
     }
 };
 
 AVAILABLE_CONTENT["Think0"] = {
-    "0": [11]
+    "0": [11],
+    "1": [15]
 };

@@ -82,7 +82,7 @@ const CLASS_CONFIG = {
         },
         "1630-1800": {
             students: ["Coco", "Grayson", "Laura", "Leo", "Frank", "William"],
-            content: { book: "Think0", unit: "0", page: "11" }
+            content: { book: "Think0", unit: "1", page: "15" }
         },
         "1810-1940": {
             students: ["Annie", "Clarence", "Coco", "Gabriel"],

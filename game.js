@@ -4,7 +4,7 @@ let SIGHT_WORDS = [];
 let GRAMMAR_SENTENCES = [];
 
 // --- GLOBAL STATE ---
-let activeGameMode = null; // 'VampireSurvivors' or 'Gomoku'
+let activeGameMode = null; // 'VampireSurvivors' or 'Gomoku' or 'Uno'
 
 // --- TRANSLATION SYSTEM (LOCAL) ---
 function getLocalTranslation(text) {
@@ -230,7 +230,7 @@ function updateDOMHUD(stats, time, kills) {
 
 function showGameSelection() {
     // Reset all screens
-    const screens = ['startScreen', 'gomokuScreen', 'gomokuGameOverScreen', 'gameOverScreen', 'gameIntroOverlay', 'studentManagerOverlay', 'studyModeOverlay'];
+    const screens = ['startScreen', 'gomokuScreen', 'gomokuGameOverScreen', 'gameOverScreen', 'gameIntroOverlay', 'studentManagerOverlay', 'studyModeOverlay', 'unoScreen', 'unoGameOverScreen'];
     screens.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
@@ -440,6 +440,11 @@ function claimReward(success) {
 
     if (rewardContext === 'gomoku' || activeGameMode === 'Gomoku') {
         completeGomokuMove(success);
+        return;
+    }
+
+    if (rewardContext === 'uno' || activeGameMode === 'Uno') {
+        completeUnoESLQuestion(success);
         return;
     }
 
@@ -738,8 +743,10 @@ function checkWordRec(selected, target, btn) {
     } else {
         synthError();
         btn.classList.add('bg-red-500', 'shake');
-        setTimeout(() => btn.classList.remove('shake'), 500);
-        isFirstAttempt = false;
+        setTimeout(() => {
+            btn.classList.remove('bg-red-500', 'shake');
+            startWordRecGame();
+        }, 500);
     }
 }
 
@@ -1093,18 +1100,10 @@ function handleMinigameSuccess(gameType) {
     const resultDiv = document.getElementById(resultId);
     resultDiv.classList.remove('hidden');
 
-    // New reward logic:
-    // - Spelling and Grammar: always give reward if answered correctly (even on subsequent tries)
-    // - Sight words (rec): only give reward on first try within time limit
-    const shouldGiveReward = (gameType === 'spelling' || gameType === 'grammar' || gameType === 'sentencematch') || isFirstAttempt;
-    const isGomoku = (activeGameMode === 'Gomoku' || rewardContext === 'gomoku');
-
-    if (shouldGiveReward) {
-        const btnText = isGomoku ? "CONTINUE!" : "GET POWER UP!";
-        resultDiv.innerHTML = `<button onclick="claimReward(true)" class="game-btn bg-green-500 text-2xl py-4 px-8 animate-bounce">${btnText}</button>`;
-    } else {
-        resultDiv.innerHTML = `<button onclick="claimReward(false)" class="game-btn bg-blue-500 text-2xl py-4 px-8">CONTINUE (NO REWARD)</button>`;
-    }
+    // Always give reward on eventual success.
+    const isGomokuOrUno = (activeGameMode === 'Gomoku' || rewardContext === 'gomoku' || activeGameMode === 'Uno' || rewardContext === 'uno');
+    const btnText = isGomokuOrUno ? "CONTINUE!" : "GET POWER UP!";
+    resultDiv.innerHTML = `<button onclick="claimReward(true)" class="game-btn bg-green-500 text-2xl py-4 px-8 animate-bounce">${btnText}</button>`;
 }
 
 

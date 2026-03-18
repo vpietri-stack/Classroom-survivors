@@ -483,6 +483,31 @@ TEACHING_CONTENT["PU3"] = {
         }
     },
     "5": {
+        "57": {
+            vocab: [
+                'gold', 'silver', 'light', 'dark', 'bright', 'striped', 'spotted', 'stripes', 'spots', 'plain',
+                'wings', 'trousers', 'scarf', 'hat', 'socks', 'shirt', 'jacket', 'belt', 'crown', 'helmet',
+                'show', 'clouds', 'sun', 'star', 'present', 'bird'
+            ],
+            sentences: [
+                "Lily is wearing silver striped trousers",
+                "She's got silver wings on her back.",
+                "Marc is wearing bright orange trousers.",
+                "He's got a gold jacket.",
+                "Ivan is wearing dark blue trousers.",
+                "He's got a light blue shirt with white spots",
+                "My mum wanted a scarf with light pink spots",
+                "I would like some socks with yellow stripes."
+            ],
+            sentencePairs: [
+                { a: "Who is the person with the silver wings?", b: "That's Lily" },
+                { a: "What color is Marc's jacket?", b: "It's gold" },
+                { a: "Ivan is the sky in the new show.", b: "The white spots on his shirt are clouds" },
+                { a: "Which hat did Helen buy?", b: "She chose the light brown one with dark-blue stripes" },
+                { a: "Which bird is Emma's favorite?", b: "The one with the striped body and the red tail" },
+                { a: "I need a box for Sophia's present.", b: "Let's get the big one with yellow spots" }
+            ]
+        },
         "66": {
             vocab: [
                 // Describing clothes
@@ -605,6 +630,6 @@ AVAILABLE_CONTENT["PU3"] = {
     "2": [28],
     "3": [40],
     "4": [54],
-    "5": [66],
+    "5": [57, 66],
     "6": [69, 71]
 };

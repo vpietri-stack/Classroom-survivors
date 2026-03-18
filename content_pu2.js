@@ -660,10 +660,11 @@ TEACHING_CONTENT["PU2"] = {
             sentencePairs: [
                 { a: "Is that book yours?", b: "Yes, it's mine." },
                 { a: "Whose car is this?", b: "It's ours." },
-                { a: "Is your house bigger than mine?", b: "Yes, our house is bigger than yours." },
-                { a: "Who is older, you or your cousin?", b: "My cousin is older than me." },
-                { a: "Is the balcony bigger than the garden?", b: "No, the balcony is smaller than the garden." },
-                { a: "Which is better, chocolate or vanilla?", b: "Chocolate is better than vanilla." }
+                { a: "Is your dog bigger than mine?", b: "No, it isn't. Yours is bigger." },
+                { a: "Who is older, you or your grandpa?", b: "My grandpa is." },
+                { a: "Who is younger, you or your grandpa?", b: "I am." },
+                { a: "Is the balcony in the basement?", b: "No, it isn't." },
+                { a: "Which flavour is better, chocolate or vanilla?", b: "I think vanilla's better." }
             ]
         }
     },

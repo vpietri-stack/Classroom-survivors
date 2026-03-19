@@ -27,6 +27,50 @@ function showTranslation(elementId, text) {
     }
 }
 
+function showVocabImage(elementId, word) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+
+    el.classList.add('hidden');
+    if (!word) return;
+
+    const filename = word.trim().toLowerCase().replace(/ /g, '-');
+    const imagePath = `images/vocab/${filename}.png`;
+    
+    // Use an off-DOM image to preload and check existence
+    const img = new Image();
+    img.onload = () => {
+        el.src = imagePath;
+        el.classList.remove('hidden');
+    };
+    img.onerror = () => {
+        el.classList.add('hidden');
+    };
+    img.src = imagePath;
+}
+
+function showVocabImage(elementId, word) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+
+    el.classList.add('hidden');
+    if (!word) return;
+
+    const filename = word.trim().toLowerCase().replace(/ /g, '-');
+    const imagePath = `images/vocab/${filename}.png`;
+    
+    // Use an off-DOM image to preload and check existence
+    const img = new Image();
+    img.onload = () => {
+        el.src = imagePath;
+        el.classList.remove('hidden');
+    };
+    img.onerror = () => {
+        el.classList.add('hidden');
+    };
+    img.src = imagePath;
+}
+
 // --- AUDIO SYSTEM ---
 let audioCtx;
 function initAudio() {
@@ -533,6 +577,7 @@ function startSpellingGame() {
     const word = getWeightedItemForGame(book, unit, page, 'vocab');
     currentTTSWord = word;
     showTranslation('spelling-translation', word);
+    showVocabImage('spelling-image', word);
 
     const totalChars = word.length;
     // Always use ALL letters - no level-based scaling
@@ -688,6 +733,7 @@ function startWordRecGame() {
 
     currentTTSWord = target;
     showTranslation('rec-translation', target);
+    showVocabImage('rec-image', target);
 
     // Always show 5 words - no level-based scaling
     let choiceCount = 5;

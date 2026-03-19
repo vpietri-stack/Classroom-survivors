@@ -59,6 +59,7 @@ function startRoundA() {
     const container = document.getElementById('study-game-area');
     container.innerHTML = `
         <div id="roundA-translation" class="translation-hint hidden"></div>
+        <img id="roundA-image" class="w-32 h-32 object-contain mx-auto my-2 hidden border-2 border-slate-300 rounded-xl bg-white/10" alt="Vocabulary Image">
         <div id="roundA-container" class="flex flex-wrap justify-center gap-6 mt-8 p-4">
             <!-- Words injected here -->
         </div>
@@ -86,7 +87,7 @@ function renderRoundAWords() {
 
     STUDY_STATE.remainingWordsRoundA.sort(() => 0.5 - Math.random()).forEach(word => {
         const btn = document.createElement('button');
-        btn.className = "game-btn bg-indigo-500 hover:bg-indigo-400 text-2xl px-8 py-5 rounded-2xl shadow-lg transform transition-all hover:scale-105"; // Warmer styling
+        btn.className = "game-btn bg-indigo-500 hover:bg-indigo-400 text-2xl px-8 py-5 rounded-2xl shadow-lg transform transition-all hover:scale-105";
         btn.innerText = word;
         btn.onclick = () => checkRoundA(word, btn);
         container.appendChild(btn);
@@ -102,6 +103,7 @@ function playRoundAPrompt() {
     const target = STUDY_STATE.remainingWordsRoundA[Math.floor(Math.random() * STUDY_STATE.remainingWordsRoundA.length)];
     currentTTSWord = target; // Global from game.js for playTTS()
     showTranslation('roundA-translation', target);
+    showVocabImage('roundA-image', target);
     setTimeout(playTTS, 500); // Small delay
 }
 
@@ -155,6 +157,7 @@ function nextRoundBWord() {
         <div class="flex flex-col items-center gap-[var(--gap-md)] w-full">
             <button onclick="playTTS()" aria-label="Play Audio" class="w-16 h-16 rounded-full bg-blue-500 text-white text-2xl shadow-lg transform active:scale-95 transition-transform"><i class="fas fa-volume-up"></i></button>
             <div id="roundB-translation" class="translation-hint hidden"></div>
+            <img id="roundB-image" class="w-32 h-32 object-contain mx-auto my-2 hidden border-2 border-slate-300 rounded-xl bg-white/10" alt="Vocabulary Image">
             
             <div id="scramble-slots" class="flex flex-wrap justify-center gap-[var(--gap-sm)] min-h-[60px] w-full px-4"></div>
             
@@ -162,6 +165,7 @@ function nextRoundBWord() {
         </div>
     `;
     showTranslation('roundB-translation', word);
+    showVocabImage('roundB-image', word);
 
     // Setup Slots
     const slotsDiv = document.getElementById('scramble-slots');
@@ -323,6 +327,7 @@ function nextRoundCWord() {
         <div class="flex flex-col items-center gap-[var(--gap-md)] w-full">
             <button onclick="playTTS()" aria-label="Play Audio" class="w-16 h-16 rounded-full bg-blue-500 text-white text-2xl shadow-lg transform active:scale-95 transition-transform"><i class="fas fa-volume-up"></i></button>
             <div id="roundC-translation" class="translation-hint hidden"></div>
+            <img id="roundC-image" class="w-32 h-32 object-contain mx-auto my-2 hidden border-2 border-slate-300 rounded-xl bg-white/10" alt="Vocabulary Image">
             
             <div id="spelling-display" class="flex flex-wrap justify-center gap-[var(--gap-xs)] min-h-[60px] w-full px-4 text-white"></div>
             
@@ -335,6 +340,7 @@ function nextRoundCWord() {
         </div>
     `;
     showTranslation('roundC-translation', word);
+    showVocabImage('roundC-image', word);
 
     // Virtual Keyboard: Actual letters + random
     // Count exact unique letters needed

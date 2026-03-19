@@ -92,14 +92,14 @@ const CLASS_CONFIG = {
     "周日": {
         "0900-1030": {
             students: ["Candy", "Joying", "Lucas", "Nina", "Rex", "Yoyo"],
-            content: { book: "PU3", unit: "4", page: "54" }
+            content: { book: "PU3", unit: "5", page: "57" }
         },
         "1040-1210": {
             students: ["Amber", "Cindy", "Gaby", "Louis", "Kelly", "Susie"],
             content: { book: "Think1", unit: "6", page: "64" }
         },
         "1450-1620": {
-            students: ["Dave", "Irene", "Lele", "Mia", "Sylvia"],
+            students: ["Dave", "Irene", "Lele", "Mia", "Sylvia", "Leon"],
             content: { book: "PU2", unit: "4", page: "54" }
         },
         "1630-1800": {

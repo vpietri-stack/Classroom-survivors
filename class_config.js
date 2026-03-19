@@ -64,7 +64,7 @@ const CLASS_CONFIG = {
     "周五": {
         "1900-2030": {
             students: ["Colin", "Ethan", "Hollis", "Selena", "Sophia"],
-            content: { book: "PU1", unit: "7", page: "84" }
+            content: { book: "PU1", unit: "7", page: "92" }
         }
     },
     "周六": {
@@ -96,11 +96,7 @@ const CLASS_CONFIG = {
         },
         "1040-1210": {
             students: ["Amber", "Cindy", "Gaby", "Louis", "Kelly", "Susie"],
-            content: { book: "Think1", unit: "6", page: "58" }
-        },
-        "1310-1440": {
-            students: ["Grace", "Frank", "William", "Joe"],
-            content: { book: "PU2", unit: "9", page: "116" }
+            content: { book: "Think1", unit: "6", page: "64" }
         },
         "1450-1620": {
             students: ["Dave", "Irene", "Lele", "Mia", "Sylvia"],

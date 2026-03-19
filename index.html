@@ -83,7 +83,7 @@
             <!-- Step 4: Greeting & Actions (hidden initially) -->
             <div id="step-greeting"
                 class="step-container hidden mb-6 flex flex-col items-center gap-4 bg-black/40 p-6 rounded-xl border border-white/20">
-                <button onclick="goBackToStudent()" class="self-start text-gray-400 hover:text-white text-sm mb-2">
+                <button onclick="goBackToStudentOrUnit()" class="self-start text-gray-400 hover:text-white text-sm mb-2">
                     <i class="fas fa-arrow-left mr-1"></i>返回
                 </button>
                 <h2 id="greeting-text"
@@ -97,6 +97,31 @@
                         onclick="showGameSelection()">我想边学边玩</button>
                 </div>
             </div>
+
+            <!-- Step: Select Book (for non-Val students) -->
+            <div id="step-book"
+                class="step-container hidden mb-6 flex flex-col items-center gap-3 bg-black/40 p-6 rounded-xl border border-white/20">
+                <button onclick="goBackToDay()" class="self-start text-gray-400 hover:text-white text-sm mb-2">
+                    <i class="fas fa-arrow-left mr-1"></i>返回
+                </button>
+                <label class="text-yellow-400 font-bold text-lg tracking-widest uppercase mb-2">选择教材 (Select Book)</label>
+                <div id="book-buttons" class="flex flex-wrap justify-center gap-3">
+                    <!-- Book buttons populated by JS -->
+                </div>
+            </div>
+
+            <!-- Step: Select Unit (for non-Val students) -->
+            <div id="step-unit"
+                class="step-container hidden mb-6 flex flex-col items-center gap-3 bg-black/40 p-6 rounded-xl border border-white/20">
+                <button onclick="goBackToBook()" class="self-start text-gray-400 hover:text-white text-sm mb-2">
+                    <i class="fas fa-arrow-left mr-1"></i>返回
+                </button>
+                <label class="text-yellow-400 font-bold text-lg tracking-widest uppercase mb-2">选择单元 (Select Unit)</label>
+                <div id="unit-buttons" class="flex flex-wrap justify-center gap-3">
+                    <!-- Unit buttons populated by JS -->
+                </div>
+            </div>
+
 
         </div>
 

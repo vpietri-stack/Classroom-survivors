@@ -2,6 +2,8 @@
 // Contains simplified Chinese translations for vocabulary and sentences
 
 const LOCAL_TRANSLATIONS = {
+    "Other Students": "其他老师的学生",
+
 
     // --- School Supplies ---
     "bag": "书包",

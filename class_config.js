@@ -1,5 +1,5 @@
 // CLASS_DAYS defines the order of days shown in the selection wizard
-const CLASS_DAYS = ["周一", "周四", "周五", "周六", "周日"];
+const CLASS_DAYS = ["周一", "周四", "周五", "周六", "周日", "其他老师的学生"];
 
 /**
  *    Available content PU1:
@@ -69,7 +69,7 @@ const CLASS_CONFIG = {
     },
     "周六": {
         "0900-1030": {
-            students: ["Angel", "Eddy", "Dylan", "Mia", "YaoYao", "Julia"],
+            students: ["Angel", "Loki", "Dylan", "Mia", "YaoYao", "Julia"],
             content: { book: "PU1", unit: "9", page: "111" }
         },
         "1040-1210": {

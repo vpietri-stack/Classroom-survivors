@@ -287,6 +287,9 @@ function showGameSelection() {
 let selectedDay = null;
 let selectedTime = null;
 let selectedStudent = null;
+let selectedBook = null;
+let selectedUnit = null;
+let selectedClassContent = null;
 
 function initMenus() {
     if (typeof CLASS_CONFIG === 'undefined' || typeof CLASS_DAYS === 'undefined') {
@@ -309,6 +312,23 @@ function initMenus() {
 
 function selectDay(day) {
     selectedDay = day;
+
+    if (day === "其他老师的学生") {
+        document.getElementById('step-day').classList.add('hidden');
+        document.getElementById('step-book').classList.remove('hidden');
+
+        // Populate book buttons
+        const bookContainer = document.getElementById('book-buttons');
+        bookContainer.innerHTML = '';
+        Object.keys(TEACHING_CONTENT).forEach(book => {
+            const btn = document.createElement('button');
+            btn.className = 'wizard-btn bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200';
+            btn.innerText = book;
+            btn.onclick = () => selectBook(book);
+            bookContainer.appendChild(btn);
+        });
+        return;
+    }
 
     // Hide step 1, show step 2
     document.getElementById('step-day').classList.add('hidden');
@@ -339,6 +359,7 @@ function selectDay(day) {
 function selectTime(time) {
     selectedTime = time;
 
+    const classData = CLASS_CONFIG[selectedDay][time];
     // Hide step 2, show step 3
     document.getElementById('step-time').classList.add('hidden');
     document.getElementById('step-student').classList.remove('hidden');
@@ -346,8 +367,6 @@ function selectTime(time) {
     // Populate student buttons
     const studentContainer = document.getElementById('student-buttons');
     studentContainer.innerHTML = '';
-
-    const classData = CLASS_CONFIG[selectedDay][time];
 
     if (classData && classData.students) {
         classData.students.forEach(student => {
@@ -358,6 +377,36 @@ function selectTime(time) {
             studentContainer.appendChild(btn);
         });
     }
+}
+
+function selectBook(book) {
+    selectedBook = book;
+    document.getElementById('step-book').classList.add('hidden');
+    document.getElementById('step-unit').classList.remove('hidden');
+
+    const unitContainer = document.getElementById('unit-buttons');
+    unitContainer.innerHTML = '';
+    const bookData = TEACHING_CONTENT[book];
+    if (bookData) {
+        Object.keys(bookData).forEach(unit => {
+            const btn = document.createElement('button');
+            btn.className = 'wizard-btn bg-gradient-to-r from-yellow-600 to-amber-600 hover:from-yellow-500 hover:to-amber-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200';
+            btn.innerText = `Unit ${unit}`;
+            btn.onclick = () => selectUnit(unit);
+            unitContainer.appendChild(btn);
+        });
+    }
+}
+
+function selectUnit(unit) {
+    selectedUnit = unit;
+    selectedStudent = "Other Student"; // Tag as other teacher student
+
+    document.getElementById('step-unit').classList.add('hidden');
+    document.getElementById('step-greeting').classList.remove('hidden');
+
+    document.getElementById('greeting-text').innerText = `Welcome!`;
+    loadContent();
 }
 
 function selectStudent(student) {
@@ -377,8 +426,10 @@ function selectStudent(student) {
 // --- BACK NAVIGATION ---
 function goBackToDay() {
     document.getElementById('step-time').classList.add('hidden');
+    document.getElementById('step-book').classList.add('hidden'); // Also hide if we came from book
     document.getElementById('step-day').classList.remove('hidden');
     selectedDay = null;
+    selectedBook = null;
 }
 
 function goBackToTime() {
@@ -387,10 +438,28 @@ function goBackToTime() {
     selectedTime = null;
 }
 
-function goBackToStudent() {
+function goBackToStudentOrUnit() {
     document.getElementById('step-greeting').classList.add('hidden');
-    document.getElementById('step-student').classList.remove('hidden');
+    if (selectedBook) {
+        document.getElementById('step-unit').classList.remove('hidden');
+    } else {
+        document.getElementById('step-student').classList.remove('hidden');
+    }
     selectedStudent = null;
+    selectedUnit = null;
+}
+
+function goBackToBook() {
+    document.getElementById('step-unit').classList.add('hidden');
+    document.getElementById('step-book').classList.remove('hidden');
+    selectedBook = null;
+    selectedUnit = null;
+}
+
+function goBackToTimeFromBook() {
+    document.getElementById('step-book').classList.add('hidden');
+    document.getElementById('step-time').classList.remove('hidden');
+    selectedBook = null;
 }
 
 // --- GAME INTRO ---
@@ -514,16 +583,27 @@ function claimReward(success) {
 
 // --- PLACEHOLDERS FOR LARGE CHUNKS ---
 function loadContent() {
-    if (!CLASS_CONFIG || !selectedDay || !selectedTime) return;
+    let book, unit, page;
 
-    const classData = CLASS_CONFIG[selectedDay] && CLASS_CONFIG[selectedDay][selectedTime];
-
-    if (!classData || !classData.content) {
-        console.warn("No content configured for:", selectedDay, selectedTime);
-        return;
+    if (selectedBook && selectedUnit) {
+        book = selectedBook;
+        unit = selectedUnit;
+        // Assign the LAST page of that unit
+        const bookData = TEACHING_CONTENT[book];
+        const unitData = bookData[unit];
+        const pages = Object.keys(unitData).sort((a, b) => parseInt(a) - parseInt(b));
+        page = pages[pages.length - 1]; // Last page
+        selectedClassContent = { book, unit, page };
+    } else {
+        if (!CLASS_CONFIG || !selectedDay || !selectedTime) return;
+        const classData = CLASS_CONFIG[selectedDay] && CLASS_CONFIG[selectedDay][selectedTime];
+        if (!classData || !classData.content) {
+            console.warn("No content configured for:", selectedDay, selectedTime);
+            return;
+        }
+        ({ book, unit, page } = classData.content);
+        selectedClassContent = { book, unit, page };
     }
-
-    const { book, unit, page } = classData.content;
 
     // Default to empty
     SPELLING_WORDS = [];
@@ -573,7 +653,7 @@ function startSpellingGame() {
     if (SPELLING_WORDS.length === 0) { handleMinigameSuccess('spelling'); return; }
 
     // Weighted selection
-    const { book, unit, page } = CLASS_CONFIG[selectedDay][selectedTime].content;
+    const { book, unit, page } = selectedClassContent;
     const word = getWeightedItemForGame(book, unit, page, 'vocab');
     currentTTSWord = word;
     showTranslation('spelling-translation', word);
@@ -728,7 +808,8 @@ let recTimeLeft;
 function startWordRecGame() {
     if (SIGHT_WORDS.length === 0) { handleMinigameSuccess('rec'); return; }
 
-    const { book, unit, page } = CLASS_CONFIG[selectedDay][selectedTime].content;
+    // Weighted selection
+    const { book, unit, page } = selectedClassContent;
     const target = getWeightedItemForGame(book, unit, page, 'vocab');
 
     currentTTSWord = target;
@@ -801,7 +882,7 @@ function checkWordRec(selected, target, btn) {
 function startGrammarGame() {
     if (GRAMMAR_SENTENCES.length === 0) { handleMinigameSuccess('grammar'); return; }
 
-    const { book, unit, page } = CLASS_CONFIG[selectedDay][selectedTime].content;
+    const { book, unit, page } = selectedClassContent;
     const rawEntry = getWeightedItemForGame(book, unit, page, 'sentences');
     let possibilities = [];
     let primarySentence = "";
@@ -979,7 +1060,7 @@ function checkGrammar() {
 let gameModeSelectedBTile = null;
 
 function startSentenceMatchGame() {
-    const { book, unit, page } = CLASS_CONFIG[selectedDay][selectedTime].content;
+    const { book, unit, page } = selectedClassContent;
     // Get sentence pairs using weighted selection (similar to other minigames but for 5 items)
     const sortedPages = getSortedPagesForBook(book);
     const activePageIndex = sortedPages.findIndex(p => p.book === book && p.unit === unit && p.page === page.toString());

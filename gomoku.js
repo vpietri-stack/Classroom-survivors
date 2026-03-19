@@ -29,15 +29,10 @@ function showGomokuDifficultySelection() {
     const easyBtn = document.getElementById('gomokuEasyBtn');
     if (easyBtn) {
         let isPu1OrPu2 = false;
-        if (typeof selectedDay !== 'undefined' && typeof selectedTime !== 'undefined' && typeof CLASS_CONFIG !== 'undefined') {
-            if (CLASS_CONFIG[selectedDay] && CLASS_CONFIG[selectedDay][selectedTime]) {
-                const classData = CLASS_CONFIG[selectedDay][selectedTime];
-                if (classData && classData.content) {
-                    const book = classData.content.book;
-                    if (book === 'PU1' || book === 'PU2') {
-                        isPu1OrPu2 = true;
-                    }
-                }
+        if (typeof selectedClassContent !== 'undefined' && selectedClassContent) {
+            const book = selectedClassContent.book;
+            if (book === 'PU1' || book === 'PU2') {
+                isPu1OrPu2 = true;
             }
         }
 
@@ -576,13 +571,8 @@ function findBestMove(perfect = false) {
 
 function getGomokuSpeedInterval() {
     let book = 'PU3'; // Default
-    if (typeof selectedDay !== 'undefined' && typeof selectedTime !== 'undefined' && typeof CLASS_CONFIG !== 'undefined') {
-        if (CLASS_CONFIG[selectedDay] && CLASS_CONFIG[selectedDay][selectedTime]) {
-            const classData = CLASS_CONFIG[selectedDay][selectedTime];
-            if (classData && classData.content) {
-                book = classData.content.book;
-            }
-        }
+    if (typeof selectedClassContent !== 'undefined' && selectedClassContent) {
+        book = selectedClassContent.book;
     }
 
     switch (book) {

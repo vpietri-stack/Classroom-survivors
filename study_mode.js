@@ -15,11 +15,10 @@ const STUDY_STATE = {
 function initStudyMode() {
     // Determine book/unit/page from current selection
     let book = "PU1", unit = "0", page = "4";
-    if (typeof selectedDay !== 'undefined' && typeof selectedTime !== 'undefined' && CLASS_CONFIG[selectedDay] && CLASS_CONFIG[selectedDay][selectedTime]) {
-        const config = CLASS_CONFIG[selectedDay][selectedTime].content;
-        book = config.book;
-        unit = config.unit;
-        page = config.page;
+    if (typeof selectedClassContent !== 'undefined' && selectedClassContent) {
+        book = selectedClassContent.book;
+        unit = selectedClassContent.unit;
+        page = selectedClassContent.page;
     }
 
     // Get Spaced Repetition Content
@@ -605,7 +604,7 @@ function nextRoundESubRound() {
     updateStudyUI(`Round E${STUDY_STATE.subRound}: Sentence Matching`, "Match each question with its answer.");
 
     // Get sentence pairs using Spaced Repetition logic
-    const { book, unit, page } = CLASS_CONFIG[selectedDay][selectedTime].content;
+    const { book, unit, page } = selectedClassContent;
     const sortedPages = getSortedPagesForBook(book);
     const activePageIndex = sortedPages.findIndex(p => p.book === book && p.unit === unit && p.page === page.toString());
 

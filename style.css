@@ -523,8 +523,15 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-5px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ========== UNO STYLES ========== */
@@ -538,10 +545,11 @@ body {
     justify-content: center;
     position: relative;
     font-weight: bold;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    border: 2px solid rgba(255,255,255,0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.3);
     cursor: default;
     transition: transform 0.15s, box-shadow 0.15s;
+    -webkit-user-select: none;
     user-select: none;
     flex-shrink: 0;
 }
@@ -555,7 +563,7 @@ body {
 
 .uno-card .uno-mid {
     font-size: 22px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .uno-card .uno-br {
@@ -573,9 +581,21 @@ body {
     border-width: 3px;
 }
 
-.uno-card-big .uno-tl { font-size: 14px; top: 5px; left: 7px; }
-.uno-card-big .uno-mid { font-size: 32px; }
-.uno-card-big .uno-br { font-size: 14px; bottom: 5px; right: 7px; }
+.uno-card-big .uno-tl {
+    font-size: 14px;
+    top: 5px;
+    left: 7px;
+}
+
+.uno-card-big .uno-mid {
+    font-size: 32px;
+}
+
+.uno-card-big .uno-br {
+    font-size: 14px;
+    bottom: 5px;
+    right: 7px;
+}
 
 .uno-glow {
     cursor: pointer;
@@ -602,20 +622,34 @@ body {
 }
 
 @keyframes unoPulse {
-    0%, 100% { box-shadow: 0 0 8px 2px rgba(250, 204, 21, 0.5); }
-    50% { box-shadow: 0 0 16px 6px rgba(250, 204, 21, 0.8); }
+
+    0%,
+    100% {
+        box-shadow: 0 0 8px 2px rgba(250, 204, 21, 0.5);
+    }
+
+    50% {
+        box-shadow: 0 0 16px 6px rgba(250, 204, 21, 0.8);
+    }
 }
 
 @keyframes unoSnapPulse {
-    0%, 100% { box-shadow: 0 0 8px 2px rgba(168, 85, 247, 0.5); }
-    50% { box-shadow: 0 0 16px 6px rgba(168, 85, 247, 0.9); }
+
+    0%,
+    100% {
+        box-shadow: 0 0 8px 2px rgba(168, 85, 247, 0.5);
+    }
+
+    50% {
+        box-shadow: 0 0 16px 6px rgba(168, 85, 247, 0.9);
+    }
 }
 
 .uno-card-back {
     width: 18px;
     height: 26px;
     background: linear-gradient(135deg, #1e1b4b, #312e81);
-    border: 1px solid rgba(255,255,255,0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 3px;
     display: inline-block;
 }
@@ -624,14 +658,14 @@ body {
     width: 80px;
     height: 115px;
     background: linear-gradient(135deg, #1e1b4b, #312e81);
-    border: 3px solid rgba(255,255,255,0.25);
+    border: 3px solid rgba(255, 255, 255, 0.25);
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .uno-ai-box {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     transition: all 0.3s;
 }
 
@@ -642,8 +676,8 @@ body {
 }
 
 #uno-player-area {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.3s;
 }
 
@@ -667,5 +701,11 @@ body {
     align-self: center;
 }
 
-.uno-draw-btn:hover { background: #6d28d9; }
-.uno-draw-btn:active { transform: translateY(2px); border-bottom-width: 1px; }
+.uno-draw-btn:hover {
+    background: #6d28d9;
+}
+
+.uno-draw-btn:active {
+    transform: translateY(2px);
+    border-bottom-width: 1px;
+}

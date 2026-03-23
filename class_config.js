@@ -16,7 +16,7 @@ const CLASS_DAYS = ["周一", "周四", "周五", "周六", "周日", "其他老
     },
     "PU2": {
       "0": [5],
-    "1": [7, 16],
+    "1": [7, 9, 16],
     "2": [28],
     "3": [40, 43],
     "4": [45, 46, 54],
@@ -58,7 +58,7 @@ const CLASS_CONFIG = {
     "周一": {
         "1810-1940": {
             students: ["Selena", "David", "Gavin", "Nick", "Sean", "Sophie"],
-            content: { book: "PU2", unit: "1", page: "7" }
+            content: { book: "PU2", unit: "1", page: "9" }
         }
     },
     "周四": {

@@ -353,6 +353,36 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "Are there mountains behind the lake?", b: "No, there aren't, but there's a forest." }
             ]
         },
+        "9": {
+            vocab: [
+                'kittens', 'puppies', 'kitten', 'puppy',
+                'wash washing', 'play playing', 'look looking', 'eat eating', 'drink drinking', 'sleep sleeping', 'clean cleaning', 'take taking', 'walk walking', 'put on putting on', 'take off taking off', 'drive driving', 'read reading', 'do doing', 'talk talking', 'sing singing',
+                'face', 'legs', 'tail', 'ball', 'sock', 'ice cream', 'photo', 'shoes', 'sausages', 'hands', 'car', 'book', 'homework', 'boy', 'girl', 'man', 'woman', 'children',
+                'pretty', 'young', 'awake', 'happy', 'fat', 'short', 'red'
+            ],
+            sentences: [
+                "Fred's eating an ice cream.",
+                "Vicky's mum's taking a photo.",
+                "Daisy's washing her face.",
+                "They're cleaning their shoes.",
+                "I'm doing my homework.",
+                "They're taking off their boots.",
+                "The puppy is playing with a ball.",
+                "It's eating a red sock."
+            ],
+            sentencePairs: [
+                { a: "Is the kitten playing?", b: "No, it isn't." },
+                { a: "Is the boy washing his hands?", b: "Yes, he is." },
+                { a: "Are you reading a book?", b: "No I'm not. I'm doing my homework." },
+                { a: "Are they putting on their boots?", b: "No they aren't. They're taking off their boots." },
+                { a: "Is she playing tennis?", b: "Yes, she is." },
+                { a: "Are the children walking?", b: "Yes, they are." },
+                { a: "What's the fat puppy doing?", b: "It's eating Grandpa's old red sock." },
+                { a: "Is Grandpa driving a car?", b: "No, he isn't. He's riding a bike." },
+                { a: "What's the girl doing?", b: "She's singing." },
+                { a: "What's the boy doing?", b: "He's reading a book." }
+            ]
+        },
         "16": {
             vocab: [
                 'countryside', 'field', 'forest', 'grass', 'ground', 'lake', 'leaf', 'leaves', 'mountain', 'river', 'rock', 'tractor',
@@ -1046,7 +1076,7 @@ TEACHING_CONTENT["PU2"] = {
 
 AVAILABLE_CONTENT["PU2"] = {
     "0": [5],
-    "1": [7, 16],
+    "1": [7, 9, 16],
     "2": [28],
     "3": [40, 43],
     "4": [45, 46, 54],

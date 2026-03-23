@@ -451,7 +451,7 @@ function completeGomokuMove(success) {
     } else {
         gomokuTurn = 'ai';
         updateGomokuStatus("Computer thinking...");
-        setTimeout(aiTurn, 600);
+        setTimeout(gomokuAiTurn, 600);
     }
 }
 
@@ -475,7 +475,7 @@ function speedAiTurn() {
     }
 }
 
-function aiTurn() {
+function gomokuAiTurn() {
     if (!gomokuGameActive) return;
 
     const move = findBestMove();

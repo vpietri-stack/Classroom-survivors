@@ -378,7 +378,7 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "Is she playing tennis?", b: "Yes, she is." },
                 { a: "Are the children walking?", b: "Yes, they are." },
                 { a: "What's the fat puppy doing?", b: "It's eating Grandpa's old red sock." },
-                { a: "Is Grandpa driving a car?", b: "No, he isn't. He's riding a bike." },
+                { a: "Is Grandpa driving a car?", b: "No, he isn't. He's driving his tractor." },
                 { a: "What's the girl doing?", b: "She's singing." },
                 { a: "What's the boy doing?", b: "He's reading a book." }
             ]

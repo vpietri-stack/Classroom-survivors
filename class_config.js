@@ -50,6 +50,22 @@ const CLASS_DAYS = ["周一", "周四", "周五", "周六", "周日", "其他老
     "5": [55],
     "6": [58, 64],
     "7": [66]
+    },
+
+    "Think2": {
+    "0": [11],
+    "1": [19],
+    "2": [29],
+    "3": [37],
+    "4": [47],
+    "5": [55],
+    "6": [65],
+    "7": [73],
+    "8": [83],
+    "9": [91],
+    "10": [101],
+    "11": [109],
+    "12": [119]
     }
  */
 
@@ -85,6 +101,10 @@ const CLASS_CONFIG = {
         "1310-1440": {
             students: ["Apple", "Lily", "Ryan", "Terry", "Toby", "Grace"],
             content: { book: "Think1", unit: "7", page: "66" }
+        },
+        "1450-1620": {
+            students: ["Gregory", "Max", "Sibyl"],
+            content: { book: "Think2", unit: "7", page: "73" }
         },
         "1630-1800": {
             students: ["Coco", "Grayson", "Laura", "Leo", "Frank", "William"],

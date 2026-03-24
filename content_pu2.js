@@ -850,6 +850,42 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "Where are the vegetables?", b: "They're in the soup." }
             ]
         },
+        "85": {
+            vocab: [
+                'bring brought', 'do did', 'drink drank', 'eat ate', 'get got', 'go went', 'have had', 'make made', 'put put', 'see saw',
+                'cake', 'juice', 'meatballs', 'orange', 'strawberries', 'water',
+                'breakfast', 'children', 'dinner', 'kitchen', 'last Saturday', 'lunch', 'parents', 'school', 'shop', 'shops', 'yesterday'
+            ],
+            sentences: [
+                "Fred went to the shop.",
+                "The children had lunch at school.",
+                "Jane drank orange juice with her breakfast.",
+                "Last Saturday Daisy made carrot soup.",
+                "She put strawberries on top.",
+                "Did they bring the food home?",
+                "I ate a bowl of hot tomato soup.",
+                "They got vegetables for us.",
+                "I saw them in the car with their dad.",
+                "What did you put in the soup?"
+            ],
+            sentencePairs: [
+                { a: "Did you eat a bowl of hot tomato soup?", b: "Yes, I did." },
+                { a: "Did you have the same drink as me?", b: "No, I didn't. I drank orange juice." },
+                { a: "Did Fred go to the shop?", b: "Yes, he did." },
+                { a: "Did Peter make pasta for lunch?", b: "No, he didn't. He made it for dinner." },
+                { a: "Did Daisy make carrot soup?", b: "Yes, she did." },
+                { a: "Did Jane drink water with her breakfast?", b: "No, she didn't. She drank orange juice." },
+                { a: "Did the soup have red socks in it?", b: "Yes, it did." },
+                { a: "Did the soup have poopoo in it?", b: "No, it didn't. It had red socks in it." },
+                { a: "Did you bring the food home?", b: "No, we didn't. We ate it at school." },
+                { a: "Did the children have a cooking class?", b: "Yes, they did." },
+                { a: "Did the animals see the food?", b: "No, they didn't. Rocky only saw the children." },
+                { a: "What did you put in the soup, Gracie?", b: "I put some old red socks in it." },
+                { a: "Where did Fred go yesterday?", b: "He went to the shop to buy vegetables." },
+                { a: "Who went to Jim and Jenny's classroom?", b: "Mr Friendly went to the classroom." },
+                { a: "When did Daisy make carrot soup?", b: "She made it last Saturday." }
+            ]
+        },
         "91": {
             vocab: [
                 'cheese', 'pasta', 'soup', 'sandwich', 'salad', 'vegetables', 'plate', 'bottle', 'glass', 'bowl', 'cup',
@@ -1082,7 +1118,7 @@ AVAILABLE_CONTENT["PU2"] = {
     "4": [45, 46, 54],
     "5": [66],
     "6": [78, 81],
-    "7": [83, 91],
+    "7": [83, 85, 91],
     "8": [95, 96, 104],
     "9": [116, 119]
 };

@@ -508,6 +508,37 @@ TEACHING_CONTENT["PU3"] = {
                 { a: "I need a box for Sophia's present.", b: "Let's get the big one with yellow spots" }
             ]
         },
+        "59": {
+            vocab: [
+                'rubber', 'made of', 'recycle', 'eraser', 'painted', 'cut', 'watch', 'diary', 'bowl', 'boots'
+            ],
+            sentences: [
+                "What is new tree made of?",
+                "It is made of brown rubber.",
+                "The practice wings are made of paper.",
+                "We always recycle old things to make costumes.",
+                "The wings for the show are painted gold.",
+                "The acrobat is wearing a gold helmet.",
+                "Those boots are made of dark blue rubber.",
+                "My new shoes are made of rubber.",
+                "What are the wings made of?",
+                "They are made of old T-shirts.",
+                "Books are usually made of paper.",
+                "Her watch is made of gold."
+            ],
+            sentencePairs: [
+                { a: "What is your eraser made of?", b: "It is made of rubber." },
+                { a: "Are the practice wings strong?", b: "No, they aren't. They're made of paper." },
+                { a: "Why is the tree made of rubber?", b: "Because it is safe for acrobats." },
+                { a: "What are the wings for the show made of?", b: "They are made of old T-shirts." },
+                { a: "What did they do to the old T-shirts?", b: "They painted them gold and cut them up." },
+                { a: "What did David get for his birthday?", b: "He got some blue rubber boots." },
+                { a: "What is the watch made of?", b: "It is made of gold." },
+                { a: "What is the diary made of?", b: "It is made of paper." },
+                { a: "What are the bowls made of?", b: "They're made of silver." },
+                { a: "Can I put the wings on?", b: "OK, but please be very careful, they aren't very strong." }
+            ]
+        },
         "66": {
             vocab: [
                 // Describing clothes
@@ -661,6 +692,6 @@ AVAILABLE_CONTENT["PU3"] = {
     "2": [28],
     "3": [40],
     "4": [54],
-    "5": [57, 66],
+    "5": [57, 59, 66],
     "6": [69, 71, 73]
 };

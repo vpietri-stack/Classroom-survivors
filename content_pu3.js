@@ -620,6 +620,37 @@ TEACHING_CONTENT["PU3"] = {
                 { a: "Should you copy in exams?", b: "No, you shouldn't." },
                 { a: "You shouldn't talk...", b: "...when your teacher is speaking." }
             ]
+        },
+        "73": {
+            vocab: [
+                'laptop', 'app', 'E-book', 'Internet', 'website', 'Wifi', 'World Wide Web', 'screen', 'online', 'dictionary', 'rucksack', 'bin', 'scissors', 'glue', 'copy', 'cut', 'paste'
+            ],
+            sentences: [
+                "I am quite good at using the Internet.",
+                "She is not very good at drawing pictures.",
+                "You should use an online dictionary to study.",
+                "There is a bin on the laptop screen.",
+                "My rucksack has got a laptop inside.",
+                "Are you really good at playing the guitar?",
+                "To cut, copy, and paste on a computer, we don't need scissors or glue.",
+                "David is good at maths and science.",
+                "You can find safe websites on the web.",
+                "Katy is very good at writing poems.",
+                "I want to read on my e-book."
+            ],
+            sentencePairs: [
+                { a: "What are you good at?", b: "I'm quite good at taking photos." },
+                { a: "I don't understand this word.", b: "You should use an online dictionary." },
+                { a: "Are you good at music?", b: "No, I'm not, but I'm good at taking photos." },
+                { a: "Where is the bin?", b: "It is there on the laptop screen." },
+                { a: "What do we need for the project?", b: "We should get some scissors and glue." },
+                { a: "What is your favorite app?", b: "XiaoHongShu." },
+                { a: "Where's your laptop?", b: "It's in my rucksack." },
+                { a: "Should I use the Internet?", b: "Yes, but you should use safe websites." },
+                { a: "I love my laptop.", b: "I use it to do my homework." },
+                { a: "Are you good at sport?", b: "Yes, I'm really good at swimming." },
+                { a: "I want to use the internet.", b: "Is there Wifi here?" }
+            ]
         }
     }
 };
@@ -631,5 +662,5 @@ AVAILABLE_CONTENT["PU3"] = {
     "3": [40],
     "4": [54],
     "5": [57, 66],
-    "6": [69, 71]
+    "6": [69, 71, 73]
 };

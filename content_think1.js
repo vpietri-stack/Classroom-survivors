@@ -328,7 +328,7 @@ TEACHING_CONTENT["Think1"] = {
                 { a: "What is a digital camera for?", b: "It is for taking photos." },
                 { a: "What do you use to watch films at home?", b: "I watch them on my flat screen TV." },
                 { a: "What is a shocking fact?", b: "Something that makes you feel surprised and upset." },
-                { a: "What does a laptop look like?", b: "I think it looks really cool and new." },
+                { a: "What does the laptop look like?", b: "I think it looks really cool and new." },
                 { a: "What happens if you have a huge problem?", b: "You have to find an idea to solve it." },
                 { a: "Where do you find a desktop computer?", b: "It is usually on a desk in an office." }
             ]

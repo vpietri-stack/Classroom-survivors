@@ -683,7 +683,7 @@ TEACHING_CONTENT["PU2"] = {
                 "The big house is ours.",
                 "The small car is theirs.",
                 "My grades are better than last year.",
-                "The weather is worse today than yesterday.",
+                "Today's weather is worse than yesterday's.",
                 "She is taller than her brother.",
                 "He is younger than his sister."
             ],

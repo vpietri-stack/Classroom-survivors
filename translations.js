@@ -1976,7 +1976,7 @@ const LOCAL_TRANSLATIONS = {
     "The teacher is next to the window.": "老师在窗户旁边。",
     "The teacher's next to the window.": "老师在窗户旁边。",
     "The tractor is big.": "拖拉机很大。",
-    "The weather is worse today than yesterday.": "今天的天气比昨天差。",
+    "Today's weather is worse than yesterday's.": "今天的天气比昨天差。",
     "The white spots on his shirt are clouds": "他衬衫上的白色斑点是云朵。",
     "The women are at the café.": "女人们在咖啡馆里。",
     "The young cat is orange.": "那只小猫是橙色的。",

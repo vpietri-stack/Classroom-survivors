@@ -332,6 +332,36 @@ TEACHING_CONTENT["Think1"] = {
                 { a: "What happens if you have a huge problem?", b: "You have to find an idea to solve it." },
                 { a: "Where do you find a desktop computer?", b: "It is usually on a desk in an office." }
             ]
+        },
+        "68": {
+            vocab: [
+                'should', "shouldn't", 'must', "mustn't", 'have to', 'has to', "don't have to", "doesn't have to"
+            ],
+            sentences: [
+                "To stop infections, people have to wash their faces with clean water.",
+                "My dad has to go to a meeting tomorrow.",
+                "You don't have to take a bath every day if you use this gel.",
+                "She isn't late, so she doesn't have to hurry.",
+                "Do I have to go to the dentist?",
+                "I've got a headache. You should take some medicine.",
+                "She should start with an idea to help other people.",
+                "You shouldn't eat any more cake, it isn't healthy.",
+                "He shouldn't play video games all night.",
+                "Should I ask the teacher?",
+                "You must be careful, it's very dangerous.",
+                "You mustn't use the machine every night.",
+                "I mustn't be late, I have a meeting."
+            ],
+            sentencePairs: [
+                { a: "You look very tired. I think you ________ go to bed early tonight.", b: "should" },
+                { a: "It's Saturday! We ________ go to school today.", b: "don't have to" },
+                { a: "Mum said my brother ________ tidy his room before he goes out.", b: "has to" },
+                { a: "You ________ use your mobile phone during the test!", b: "mustn't" },
+                { a: "To take good photos, you ________ hold the digital camera still.", b: "have to" },
+                { a: "I think you ________ play video games all night because it is not healthy.", b: "shouldn't" },
+                { a: "She has a new laptop, so she ________ use the old desktop computer anymore.", b: "doesn't have to" },
+                { a: "This machine is very expensive. You ________ be careful with it!", b: "must" }
+            ]
         }
     }
 };
@@ -344,5 +374,5 @@ AVAILABLE_CONTENT["Think1"] = {
     "4": [46],
     "5": [55],
     "6": [58, 64],
-    "7": [66]
+    "7": [66, 68]
 };

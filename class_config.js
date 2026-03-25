@@ -38,7 +38,7 @@ const CLASS_DAYS = ["周一", "周四", "周五", "周六", "周日", "其他老
 
     "Think0": {
         "0": [11],
-        "1": [15]
+        "1": [15, 17]
     },  
 
     "Think1": {
@@ -108,7 +108,7 @@ const CLASS_CONFIG = {
         },
         "1630-1800": {
             students: ["Coco", "Grayson", "Laura", "Leo", "Frank", "William"],
-            content: { book: "Think0", unit: "1", page: "15" }
+            content: { book: "Think0", unit: "1", page: "17" }
         },
         "1810-1940": {
             students: ["Annie", "Clarence", "Coco", "Gabriel"],
@@ -125,7 +125,7 @@ const CLASS_CONFIG = {
             content: { book: "Think1", unit: "6", page: "64" }
         },
         "1450-1620": {
-            students: ["Dave", "Irene", "Lele", "Mia", "Sylvia", "Leon", "Neal"],
+            students: ["Dave", "Irene", "Mia", "Sylvia", "Leon", "Neal"],
             content: { book: "PU2", unit: "4", page: "54" }
         },
         "1630-1800": {

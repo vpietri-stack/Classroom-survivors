@@ -181,11 +181,72 @@ TEACHING_CONTENT["Think0"] = {
                 { a: "Is Messi a famous singer?", b: "No, he isn't." },
                 { a: "Are they from Mexico?", b: "No, they aren't. They are Indonesian." }
             ]
+        },
+        "17": {
+            vocab: [
+                'new', 'old', 'clean', 'dirty', 'cheap', 'expensive', 'fast', 'slow', 'big', 'small', 'hard', 'soft', 'high', 'low', 'tall', 'short', 'long'
+            ],
+            sentences: [
+                "My car is new.",
+                "It's a new car.",
+                "Her phone is old.",
+                "It's an old phone.",
+                "Our bus is clean.",
+                "It's a clean bus.",
+                "Their T-shirt is dirty.",
+                "It's a dirty T-shirt.",
+                "My tablet is cheap.",
+                "It's a cheap tablet.",
+                "His car is expensive.",
+                "It's an expensive car.",
+                "Your bike is fast.",
+                "It's a fast bike.",
+                "Her train is slow.",
+                "It's a slow train.",
+                "Our city is big.",
+                "It's a big city.",
+                "My bedroom is small.",
+                "It's a small bedroom.",
+                "His chair is hard.",
+                "It's a hard chair.",
+                "Her bed is soft.",
+                "It's a soft bed.",
+                "Their window is high.",
+                "It's a high window.",
+                "Our desk is low.",
+                "It's a low desk.",
+                "His house is tall.",
+                "It's a tall house.",
+                "My hair is short.",
+                "It's a short pen.",
+                "Your pen is long.",
+                "It's a long pen."
+            ],
+            sentencePairs: [
+                { a: "Is that computer new?", b: "Yes, it is. It isn't old." },
+                { a: "Are those books old?", b: "No, they aren't. They're new." },
+                { a: "Is her T-shirt clean?", b: "No, it isn't. It's dirty." },
+                { a: "Are the desks dirty?", b: "Yes, they are. They aren't clean." },
+                { a: "Is this sandwich cheap?", b: "Yes, it's only 2 RMB." },
+                { a: "Are the tablets expensive?", b: "Yes, they are. They're 10000 RMB." },
+                { a: "Is that taxi fast?", b: "Yes, it is. It goes 120KM/H" },
+                { a: "Are the red buses slow?", b: "No, they aren't. They're fast." },
+                { a: "Is Kunming big?", b: "Yes, it's a big city." },
+                { a: "Are the windows small?", b: "No, they aren't. They're big." },
+                { a: "Is his chair hard?", b: "No it isn't. It's soft" },
+                { a: "Are the sandwiches soft?", b: "Yes, they are. They aren't hard." },
+                { a: "Is the projector high?", b: "Yes, it is. It isn't low." },
+                { a: "Are the tables low?", b: "No they aren't. They're high." },
+                { a: "Is Yao Ming tall?", b: "Yes he is. He isn't short." },
+                { a: "Are the children short?", b: "Yes, they are. They aren't tall." },
+                { a: "Is that pen long?", b: "No, it isn't. It's short." },
+                { a: "Are Elephants noses long?", b: "Yes, they are." }
+            ]
         }
     }
 };
 
 AVAILABLE_CONTENT["Think0"] = {
     "0": [11],
-    "1": [15]
+    "1": [15, 17]
 };

@@ -383,6 +383,37 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "What's the boy doing?", b: "He's reading a book." }
             ]
         },
+        "10": {
+            vocab: [
+                'wake up', 'get up', 'have a shower', 'get dry', 'get dressed', 'have breakfast', 'have lunch', 'clean', 'put', 'wash',
+                'toothbrush', 'toothpaste', 'teeth', 'shower', 'towel', 'breakfast', 'lunch', 'milk', 'juice', 'bread', 'rice', 'chicken', 'banana', 'chocolate', 'shoes',
+                'morning', 'evening', 'night', 'now'
+            ],
+            sentences: [
+                "My dad has a shower in the evening.",
+                "I put toothpaste on my toothbrush.",
+                "I get dressed in the morning.",
+                "I have breakfast in the morning.",
+                "My mum wakes up at seven o'clock.",
+                "My sister washes her hands at lunch.",
+                "Sit down for breakfast, please.",
+                "I clean my teeth in the morning and in the evening."
+            ],
+            sentencePairs: [
+                { a: "What time does he get up?", b: "He gets up at eight o'clock." },
+                { a: "Is Peter getting up now?", b: "No, he isn't. He's getting his towel." },
+                { a: "Does Peter get up at eight o'clock?", b: "Yes, he does." },
+                { a: "When does she have a shower?", b: "She has a shower in the evening." },
+                { a: "Is she having a shower now?", b: "Yes, she is." },
+                { a: "Does she have a shower in the morning?", b: "No, she doesn't. She has a shower in the evening." },
+                { a: "When do you get dressed?", b: "I get dressed in the morning." },
+                { a: "Are you getting dressed now?", b: "No, I'm not. I'm having breakfast." },
+                { a: "Do you have rice for breakfast?", b: "No, I don't. I have bread and milk." },
+                { a: "When do they clean their teeth?", b: "In the morning, and in the evening." },
+                { a: "Are they cleaning their teeth now?", b: "Yes, they are." },
+                { a: "Do they clean their teeth in the morning?", b: "Yes, they do, and also in the evening." }
+            ]
+        },
         "16": {
             vocab: [
                 'countryside', 'field', 'forest', 'grass', 'ground', 'lake', 'leaf', 'leaves', 'mountain', 'river', 'rock', 'tractor',
@@ -1112,7 +1143,7 @@ TEACHING_CONTENT["PU2"] = {
 
 AVAILABLE_CONTENT["PU2"] = {
     "0": [5],
-    "1": [7, 9, 16],
+    "1": [7, 9, 10, 16],
     "2": [28],
     "3": [40, 43],
     "4": [45, 46, 54],

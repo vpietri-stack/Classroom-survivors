@@ -917,7 +917,7 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "When did Daisy make carrot soup?", b: "She made it last Saturday." }
             ]
         },
-        "91": {
+        "87": {
             vocab: [
                 'cheese', 'pasta', 'soup', 'sandwich', 'salad', 'vegetables', 'plate', 'bottle', 'glass', 'bowl', 'cup',
                 'boil boiled', 'cook cooked', 'cut', 'fry fried', 'carry carried', 'drop dropped', 'wash washed', 'cry cried',
@@ -948,6 +948,59 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "Did she like the soup?", b: "No, she didn't." },
                 { a: "What did he do yesterday?", b: "He played football." },
                 { a: "Did they make a cake?", b: "Yes, they did." }
+            ]
+        },
+        "93": {
+            vocab: [
+                'bring brought', 'do did', 'drink drank', 'eat ate', 'get got', 'go went', 'have had', 'make made', 'put put', 'see saw',
+                'boil boiled', 'carry carried', 'clap clapped', 'cook cooked', 'cry cried', 'cut cut', 'drop dropped', 'fry fried', 'help helped', 'invite invited', 'laugh laughed', 'like liked', 'smile smiled', 'start started', 'stop stopped', 'wash washed',
+                'beans', 'bread', 'cake', 'carrots', 'cheese', 'fruit', 'meatballs', 'onions', 'orange', 'pasta', 'potatoes', 'salad', 'sandwich', 'soup', 'strawberries', 'vegetables',
+                'chocolate', 'juice', 'lemonade', 'milk', 'tea', 'water',
+                'bottle', 'bowl', 'cup', 'glass', 'plate',
+                'breakfast', 'lunch', 'dinner', 'chef', 'café', 'kitchen', 'restaurant', 'school', 'parents', 'class',
+                'yesterday', 'last Saturday', 'last weekend'
+            ],
+            sentences: [
+                "Fred went to the shop.",
+                "The children had lunch at school.",
+                "Jane drank orange juice with her breakfast.",
+                "Last Saturday Daisy made carrot soup.",
+                "She put strawberries on top of the cake.",
+                "Did they bring the food home?",
+                "I ate a bowl of hot tomato soup.",
+                "They got vegetables for us.",
+                "I saw them in the car with their dad.",
+                "I did my homework yesterday.",
+                "He boiled the pasta in the kitchen.",
+                "Dad fried the onions.",
+                "You started asking me questions.",
+                "I stopped because I was tired.",
+                "I liked cooking them!",
+                "I invited my friends to my party.",
+                "Sally smiled at the camera.",
+                "We all laughed a lot.",
+                "I carried the bags.",
+                "He dropped her favourite plate.",
+                "I cried at the end.",
+                "The children washed their hands."
+            ],
+            sentencePairs: [
+                { a: "Did you eat a bowl of hot tomato soup?", b: "Yes, I did." },
+                { a: "Did you have the same drink as me?", b: "No, I didn't. I drank orange juice." },
+                { a: "Did Fred go to the shop?", b: "Yes, he did." },
+                { a: "Did Peter make pasta for lunch?", b: "No, he didn't. He made it for dinner." },
+                { a: "Did Daisy make carrot soup?", b: "Yes, she did." },
+                { a: "Did Jane drink water with her breakfast?", b: "No, she didn't. She drank orange juice." },
+                { a: "Did the soup have red socks in it?", b: "Yes, it did." },
+                { a: "Did the lorry have vegetables for the animals?", b: "No, it didn't. It had a family in it." },
+                { a: "Did you and Jim make a pasta salad?", b: "Yes, we did." },
+                { a: "Did you bring the food home?", b: "No, we didn't. We ate it at school." },
+                { a: "Did the children have a cooking class?", b: "Yes, they did." },
+                { a: "Did the animals see the food?", b: "No, they didn't. Rocky only saw the children." },
+                { a: "What did you put in the soup, Gracie?", b: "I put some old red socks in it." },
+                { a: "Where did Fred go yesterday?", b: "He went to the shop to buy vegetables." },
+                { a: "Who went to Jim and Jenny’s classroom?", b: "Mr Friendly went to the classroom." },
+                { a: "When did Daisy make carrot soup?", b: "She made it last Saturday." }
             ]
         }
     },
@@ -1149,7 +1202,7 @@ AVAILABLE_CONTENT["PU2"] = {
     "4": [45, 46, 54],
     "5": [66],
     "6": [78, 81],
-    "7": [83, 85, 91],
+    "7": [83, 85, 87, 93],
     "8": [95, 96, 104],
     "9": [116, 119]
 };

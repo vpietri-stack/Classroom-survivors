@@ -362,6 +362,67 @@ TEACHING_CONTENT["Think1"] = {
                 { a: "She has a new laptop, so she ________ use the old desktop computer anymore.", b: "doesn't have to" },
                 { a: "This machine is very expensive. You ________ be careful with it!", b: "must" }
             ]
+        },
+        "69": {
+            vocab: [
+                'laptop', 'desktop computer', 'tablet', 'keyboard', 'mouse', 'screen', 'printer', 'calculator', 'flat screen TV', 'games console', 'digital camera', 'e-reader', 'MP3 player', 'headphones', 'docking station', 'remote control', 'Bluetooth speakers', 'VR headset', 'drone', 'coffee machine', 'hair dryer', 'torch', 'electric toothbrush', 'mobile phone', 'smartphone', 'smartwatch', 'power bank'
+            ],
+            sentences: [
+                "Val's got a desktop computer at home, and a laptop at work.",
+                "My tablet's screen is larger than my mobile's.",
+                "I can type on a keyboard faster than I write with a pen.",
+                "Click on that photo with the mouse, please.",
+                "My computer screen is very big.",
+                "I need a printer for my homework.",
+                "You can use a calculator for the Maths test.",
+                "Most TVs nowadays have got a flat screen.",
+                "I play video games on my games console.",
+                "I can take photos with my digital camera, but I prefer using my phone.",
+                "I've got more than 1000 books on my e-reader!",
+                "Nowadays, nobody uses MP3 players anymore, everyone listens to music on their mobiles.",
+                "You should use headphones to listen to music on the bus, you mustn't be loud!",
+                "Use the remote control for the TV.",
+                "These Bluetooth speakers sound really great.",
+                "Wear the headset to play VR games.",
+                "He flies a drone in the park.",
+                "Mom uses the coffee machine every morning.",
+                "I use a hair dryer after a shower.",
+                "It is dark so you should use a torch.",
+                "Her teeth are really clean, she probably uses an electric toothbrush.",
+                "He wrote the formula on his mobile phone.",
+                "My smartwatch tells me the time, and I can also call my friends with it.",
+                "My phone's battery is dead so I need a power bank.",
+                "Nowadays, everybody uses the GPS on their mobile."
+            ],
+            sentencePairs: [
+                { a: "It is a portable computer that you can close.", b: "A laptop" },
+                { a: "This big computer usually stays in one place on a desk in an office.", b: "A desktop computer" },
+                { a: "It is a small portable computer that looks like a very large phone.", b: "A tablet" },
+                { a: "You use this to type letters and numbers into a computer.", b: "A keyboard" },
+                { a: "You move this with your hand to control the arrow on a computer screen.", b: "A mouse" },
+                { a: "This is what you look at on a computer, a phone, a TV, or a tablet.", b: "A screen" },
+                { a: "This machine puts your homework from the computer onto paper.", b: "A printer." },
+                { a: "This small gadget helps you with difficult numbers in school.", b: "A calculator." },
+                { a: "You can watch films in the living room on this.", b: "A flat screen TV." },
+                { a: "You connect this machine to the TV to play video games.", b: "A game console" },
+                { a: "You use this gadget to take photos.", b: "A digital camera" },
+                { a: "It's like a tablet but only for reading books.", b: "An e-reader" },
+                { a: "People use to listen to music on this before smartphones.", b: "A MP3 player." },
+                { a: "You wear these on your ears to listen to music quietly.", b: "Headphones" },
+                { a: "You put your phone into this machine to play music through its speakers.", b: "A docking station" },
+                { a: "You use this to control the TV from far away.", b: "A remote" },
+                { a: "These play music from your phone without using any wires or cables.", b: "Bluetooth speakers" },
+                { a: "You wear this over your eyes to see a digital world or 3D games.", b: "A VR/AR headset" },
+                { a: "This small machine flies in the air and often has a camera.", b: "A drone" },
+                { a: "This machine in the kitchen makes a hot drink for breakfast.", b: "A coffee machine" },
+                { a: "You use this machine after a shower.", b: "A hair dryer" },
+                { a: "This small light is in your hand and uses a battery.", b: "A torch" },
+                { a: "This machine uses a battery to help you clean your teeth.", b: "An electric toothbrush" },
+                { a: "You use this to call people, send messages, and go on the internet, listen to music, etc.", b: "A smartphone" },
+                { a: "You use this to see the time, but also call your friends.", b: "A smartwatch" },
+                { a: "This portable battery gives power to your phone when you are outside.", b: "A power bank" },
+                { a: "You use this to find your way to a new place.", b: "A GPS" }
+            ]
         }
     }
 };
@@ -374,5 +435,5 @@ AVAILABLE_CONTENT["Think1"] = {
     "4": [46],
     "5": [55],
     "6": [58, 64],
-    "7": [66, 68]
+    "7": [66, 68, 69]
 };

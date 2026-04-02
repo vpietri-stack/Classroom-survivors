@@ -242,11 +242,134 @@ TEACHING_CONTENT["Think0"] = {
                 { a: "Is that pen long?", b: "No, it isn't. It's short." },
                 { a: "Are Elephants noses long?", b: "Yes, they are." }
             ]
+        },
+        "18": {
+            vocab: [
+                // Countries
+                "Brazil", "Ecuador", "Indonesia", "Japan", "Mexico", "Russia", "South Africa", "Spain", "Sudan", "Turkey", "the UK", "the US", "China", "South Korea",
+                // Nationalities
+                "American", "Brazilian", "British", "Ecuadorian", "Indonesian", "Japanese", "Mexican", "Russian", "South African", "Spanish", "Sudanese", "Turkish", "Chinese", "Korean",
+                // Question Words
+                "How", "What", "Where", "Who", "Why",
+                // Roles & Professions
+                "actor", "athlete", "musician", "pianist", "singer",
+                // Adjectives
+                "awesome", "beautiful", "cool", "famous", "great",
+                'new', 'old', 'clean', 'dirty', 'cheap', 'expensive', 'fast', 'slow', 'big', 'small', 'hard', 'soft', 'high', 'low', 'tall', 'short', 'long',
+                // General Nouns
+                "city", "dish", "flag", "group", "music", "world",
+                // Verbs
+                "know"
+            ],
+            sentences: [
+                // From 15
+                "I'm from Brazil. I'm Brazilian.",
+                "She's from Ecuador. She's Ecuadorian.",
+                "LiJun is from Indonesia. He is Indonesian.",
+                "We're from Japan. We're Japanese.",
+                "Yalitza is from Mexico. She's Mexican.",
+                "They're from Russia. They're Russian.",
+                "We are from South Africa. We are South African.",
+                "Rafael is from Spain. He is Spanish.",
+                "She is from Sudan. She is Sudanese.",
+                "Cenc is from Turkey. He is Turkish.",
+                "Jess is from the UK. She is British.",
+                "My parents are from the US. They're American.",
+                "Yuja is from China. She is Chinese.",
+                "They are from South Korea. They are Korean.",
+                "Paella is a Spanish dish.",
+                "Who is your favourite musician?",
+                "I am from a big city.",
+                "She is from a small town.",
+                "It's the Brazilian flag.",
+                "Why is she your favourite actor?",
+                // From 17
+                "My car is new.",
+                "It's a new car.",
+                "Her phone is old.",
+                "It's an old phone.",
+                "Our bus is clean.",
+                "It's a clean bus.",
+                "Their T-shirt is dirty.",
+                "It's a dirty T-shirt.",
+                "My tablet is cheap.",
+                "It's a cheap tablet.",
+                "His car is expensive.",
+                "It's an expensive car.",
+                "Your bike is fast.",
+                "It's a fast bike.",
+                "Her train is slow.",
+                "It's a slow train.",
+                "Our city is big.",
+                "It's a big city.",
+                "My bedroom is small.",
+                "It's a small bedroom.",
+                "His chair is hard.",
+                "It's a hard chair.",
+                "Her bed is soft.",
+                "It's a soft bed.",
+                "Their window is high.",
+                "It's a high window.",
+                "Our desk is low.",
+                "It's a low desk.",
+                "His house is tall.",
+                "It's a tall house.",
+                "My hair is short.",
+                "It's a short pen.",
+                "Your pen is long.",
+                "It's a long pen.",
+                // New sentences
+                "That's so awesome!",
+                "See you later.",
+                "How's it going?"
+            ],
+            sentencePairs: [
+                // From 15
+                { a: "Who is your favourite teacher?", b: "Val." },
+                { a: "Where are you from?", b: "I am from Turkey." },
+                { a: "How old are you?", b: "I am 12." },
+                { a: "Why is she your favourite?", b: "Because she's cool!" },
+                { a: "Is it the Brazilian flag?", b: "Yes, it is." },
+                { a: "Are you from the USA?", b: "No, I'm not. I'm from the UK." },
+                { a: "Is paella a Spanish dish?", b: "Yes, it is." },
+                { a: "Are they wrong?", b: "No, they aren't." },
+                { a: "Who is she?", b: "She's a singer." },
+                { a: "Where is he from?", b: "He is from Spain." },
+                { a: "How are they?", b: "They are awesome!" },
+                { a: "Why are we here?", b: "Because we want to study English." },
+                { a: "Is Messi a famous athlete?", b: "Yes, he is." },
+                { a: "Is Messi a famous singer?", b: "No, he isn't." },
+                { a: "Are they from Mexico?", b: "No, they aren't. They are Indonesian." },
+                // From 17
+                { a: "Is that computer new?", b: "Yes, it is. It isn't old." },
+                { a: "Are those books old?", b: "No, they aren't. They're new." },
+                { a: "Is her T-shirt clean?", b: "No, it isn't. It's dirty." },
+                { a: "Are the desks dirty?", b: "Yes, they are. They aren't clean." },
+                { a: "Is this sandwich cheap?", b: "Yes, it's only 2 RMB." },
+                { a: "Are the tablets expensive?", b: "Yes, they are. They're 10000 RMB." },
+                { a: "Is that taxi fast?", b: "Yes, it is. It goes 120KM/H" },
+                { a: "Are the red buses slow?", b: "No, they aren't. They're fast." },
+                { a: "Is Kunming big?", b: "Yes, it's a big city." },
+                { a: "Are the windows small?", b: "No, they aren't. They're big." },
+                { a: "Is his chair hard?", b: "No it isn't. It's soft" },
+                { a: "Are the sandwiches soft?", b: "Yes, they are. They aren't hard." },
+                { a: "Is the projector high?", b: "Yes, it is. It isn't low." },
+                { a: "Are the tables low?", b: "No they aren't. They're high." },
+                { a: "Is Yao Ming tall?", b: "Yes he is. He isn't short." },
+                { a: "Are the children short?", b: "Yes, they are. They aren't tall." },
+                { a: "Is that pen long?", b: "No, it isn't. It's short." },
+                { a: "Are Elephants noses long?", b: "Yes, they are." },
+                // New pairs
+                { a: "Yao Ming is very tall!", b: "I know!" },
+                { a: "Hello Ben!", b: "How's it going?" },
+                { a: "Goodbye, Mike", b: "See you later, Annie." },
+                { a: "Look at my new Iphone!", b: "That's awesome!" }
+            ]
         }
     }
 };
 
 AVAILABLE_CONTENT["Think0"] = {
     "0": [11],
-    "1": [15, 17]
+    "1": [15, 17, 18]
 };

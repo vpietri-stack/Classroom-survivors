@@ -38,7 +38,7 @@ const CLASS_DAYS = ["周一", "周四", "周五", "周六", "周日", "其他老
 
     "Think0": {
         "0": [11],
-        "1": [15, 17]
+        "1": [15, 17, 18]
     },  
 
     "Think1": {
@@ -108,7 +108,7 @@ const CLASS_CONFIG = {
         },
         "1630-1800": {
             students: ["Coco", "Grayson", "Laura", "Leo", "Frank", "William"],
-            content: { book: "Think0", unit: "1", page: "17" }
+            content: { book: "Think0", unit: "1", page: "18" }
         },
         "1810-1940": {
             students: ["Annie", "Clarence", "Coco", "Gabriel", "Cody", "Ellie"],

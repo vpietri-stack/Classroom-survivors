@@ -610,6 +610,7 @@ const LOCAL_TRANSLATIONS = {
     "it isn't": "它不是",
     "jump": "跳",
     "jumping": "跳",
+    "know": "知道",
     "know knew": "知道",
     "leave left": "离开",
     "like liked": "喜欢",
@@ -3901,5 +3902,17 @@ const LOCAL_TRANSLATIONS = {
     "This portable battery gives power to your phone when you are outside.": "这种便携式电池在你外出时为手机提供电力。",
     "A power bank": "充电宝",
     "You use this to find your way to a new place.": "你用这个找到去新地方的路。",
-    "A GPS": "GPS/导航仪"
+    "A GPS": "GPS/导航仪",
+
+    // --- New Sentences ---
+    "That's so awesome!": "那太棒了！",
+    "How's it going?": "最近好吗？",
+    "See you later.": "待会儿见。",
+    "Yao Ming is very tall!": "姚明很高！",
+    "I know!": "我知道！",
+    "Hello Ben!": "你好，本！",
+    "Goodbye, Mike": "再见，迈克。",
+    "See you later, Annie.": "待会儿见，安妮。",
+    "Look at my new Iphone!": "看我的新iPhone！",
+    "That's awesome!": "那太棒了！"
 };

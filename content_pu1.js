@@ -1841,6 +1841,39 @@ TEACHING_CONTENT["PU1"] = {
         }
     },
     "4": {
+        "45": {
+            vocab: [
+                "banana", "bread", "burger", "cake", "chicken", "chocolate", "mango", "salad",
+                "lemonade", "water",
+                "afternoon", "garden", "lunch"
+            ],
+            sentences: [
+                "The Friendly family are having lunch.",
+                "The bread is on the table.",
+                "The lemonade is next to the water.",
+                "Jenny has got the bananas.",
+                "Mrs Friendly has got three burgers.",
+                "Gracie has got the chocolate.",
+                "The bread is next to the lemonade.",
+                "The mango is on the floor.",
+                "They are having lunch in the garden."
+            ],
+            sentencePairs: [
+                { a: "Where are the Friendly family?", b: "They are in the garden." },
+                { a: "How many burgers has Mrs Friendly got?", b: "She's got three." },
+                { a: "Where is the bread?", b: "It's on the table." },
+                { a: "Who has got the bananas?", b: "Jenny's got them." },
+                { a: "Who has got the chocolate?", b: "Gracie' got it, her mouth is brown!" },
+                { a: "What is Jim eating?", b: "He's eating a burger." },
+                { a: "Is the mango on the table?", b: "No, it isn't. It's on the floor" },
+                { a: "Are the bananas in Jenny's hands?", b: "Yes, they are." },
+                { a: "Has Jim got a burger?", b: "Yes, he has." },
+                { a: "Is Jim eating a burger?", b: "Yes, he is." },
+                { a: "Is Jim eating poopoo?", b: "No, he isn't. he's eating a burger." },
+                { a: "Has Jenny got mangoes?", b: "No, she hasn't. She's got bananas." },
+                { a: "Is Jenny eating the bananas?", b: "No, she isn't." }
+            ]
+        },
         "54": {
             vocab: [
                 "chocolate", "cake", "chicken", "burger", "bread", "lemonade", "water",
@@ -2188,7 +2221,7 @@ AVAILABLE_CONTENT["PU1"] = {
     "1": [9, 10, 11, 12, 13, 14, 15, 16],
     "2": [19, 20, 21, 22, 23, 24, 25, 26, 27, 28],
     "3": [31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 43],
-    "4": [54],
+    "4": [45, 54],
     "5": [66],
     "6": [78],
     "7": [83, 84, 92],

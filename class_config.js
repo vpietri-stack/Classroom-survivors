@@ -80,7 +80,7 @@ const CLASS_CONFIG = {
     "周四": {
         "1810-1940": {
             students: ["Aaron", "Daniel", "Domi", "Jojo", "Lucky", "Simon"],
-            content: { book: "PU1", unit: "3", page: "43" }
+            content: { book: "PU1", unit: "4", page: "45" }
         }
     },
     "周五": {

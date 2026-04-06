@@ -2066,6 +2066,7 @@ TEACHING_CONTENT["PU1"] = {
         "92": {
             vocab: [
                 "play", "playing", "football", "basketball", "tennis", "hockey", "badminton", "baseball", "music",
+                "tennis racket", "baseball bat", "hockey stick", "badminton racket",
                 "guitar", "piano",
                 "ride a bike", "riding a bike",
                 "swim", "swimming",
@@ -2111,11 +2112,20 @@ TEACHING_CONTENT["PU1"] = {
             ],
             sentencePairs: [
                 { a: "What are you doing?", b: "I'm watching TV." },
-                { a: "Are you playing football?", b: "Yes, I am." },
-                { a: "Is he riding a bike?", b: "No, he isn't." },
+                { a: "Are you playing football?", b: "Yes, we are." },
+                { a: "Are you playing basketball?", b: "No, we aren't. We're playing football." },
+                { a: "Is he riding a bike?", b: "No, he isn't. He's riding a horse" },
+                { a: "Is he riding a horse?", b: "Yes, he is." },
+                { a: "What is he doing?", b: "He's riding a horse." },
                 { a: "Can I play with you?", b: "Yes, of course." },
                 { a: "What is she doing?", b: "She's swimming." },
-                { a: "Can we go on the swings?", b: "No, you can't." }
+                { a: "Is she dancing?", b: "No, she isn't. She's swimming." },
+                { a: "Is she swimming?", b: "Yes, she is." },
+                { a: "What are they doing?", b: "They're playing tennis." },
+                { a: "Are they hitting the ball?", b: "Yes, they are." },
+                { a: "Are they kicking the ball?", b: "No, they aren't. They're playing tennis." },
+                { a: "Can we hit the ball?", b: "No, you can't. We're playing football." },
+                { a: "Can we kick the ball?", b: "Yes, you can." }
             ]
         }
     },

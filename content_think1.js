@@ -423,6 +423,31 @@ TEACHING_CONTENT["Think1"] = {
                 { a: "This portable battery gives power to your phone when you are outside.", b: "A power bank" },
                 { a: "You use this to find your way to a new place.", b: "A GPS" }
             ]
+        },
+        "70": {
+            vocab: [
+                'like me', 'like you', 'like her', 'like him', 'like them', 'like us', 'sounds like', 'looks like', 'tastes like', 'smells like', 'like what?'
+            ],
+            sentences: [
+                "He loves playing video games, just like me.",
+                "My sister is very cheerful and helpful, just like our mother.",
+                "Who's talking on the phone? It sounds like Jim.",
+                "My new tablet is so big, it looks like a laptop.",
+                "This drink tastes like strawberries.",
+                "The kitchen smells like fresh bread.",
+                "Like what? A poster perhaps?",
+                "That sounds like a great idea."
+            ],
+            sentencePairs: [
+                { a: "He loves playing video games.", b: "He is just like me." },
+                { a: "My sister is very cheerful and helpful.", b: "She is just like our mother." },
+                { a: "This cold drink is very sweet.", b: "It tastes like strawberries." },
+                { a: "The kitchen smells like fresh bread.", b: "Is Dad doing the cooking?" },
+                { a: "Let's buy her a present for her birthday.", b: "Like what? A poster perhaps?" },
+                { a: "I am very busy with my housework.", b: "Like what? Doing the washing up?" },
+                { a: "Why don't we go to the park?", b: "That sounds like a great idea." },
+                { a: "It is raining, so let's go for a walk.", b: "That sounds like a bad idea." }
+            ]
         }
     }
 };
@@ -435,5 +460,5 @@ AVAILABLE_CONTENT["Think1"] = {
     "4": [46],
     "5": [55],
     "6": [58, 64],
-    "7": [66, 68, 69]
+    "7": [66, 68, 69, 70]
 };

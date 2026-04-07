@@ -49,7 +49,7 @@ const CLASS_DAYS = ["周一", "周四", "周五", "周六", "周日", "其他老
     "4": [46],
     "5": [55],
     "6": [58, 64],
-    "7": [66, 68, 69]
+    "7": [66, 68, 69, 70]
     },
 
     "Think2": {
@@ -100,7 +100,7 @@ const CLASS_CONFIG = {
         },
         "1310-1440": {
             students: ["Apple", "Lily", "Ryan", "Terry", "Toby", "Grace"],
-            content: { book: "Think1", unit: "7", page: "69" }
+            content: { book: "Think1", unit: "7", page: "70" }
         },
         "1450-1620": {
             students: ["Gregory", "Max", "Sibyl"],

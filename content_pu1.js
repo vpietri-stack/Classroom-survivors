@@ -1081,538 +1081,6 @@ TEACHING_CONTENT["PU1"] = {
                 { a: "Wool comes ...?", b: "from sheep." },
             ]
         },
-        "38": {
-            vocab: [        // --- VERBS & PRONOUN CONTRACTIONS (TO BE - REVIEW) ---
-                'it is', "it's", "it isn't",
-                'they are', "they're", "they aren't",
-
-                // --- VERBS & PRONOUN CONTRACTIONS (HAS GOT) ---
-                "he's got", "he hasn't got",
-                "she's got", "she hasn't got",
-                "it's got", "it hasn't got", 'has', "hasn't",
-
-                // --- FARM ANIMALS ---
-                'animal', 'bee', 'cat', 'chicken', 'cow', 'dog', 'donkey', 'duck',
-                'goat', 'horse', 'sheep', 'spider',
-
-                // --- ANIMAL PRODUCTS & NATURE ---
-                'egg', 'food', 'honey', 'meat', 'milk', 'tail', 'wool',
-
-                // --- ADJECTIVES (DESCRIPTION) ---
-                'angry', 'beautiful', 'big', 'clean', 'dirty', 'funny', 'happy',
-                'long', 'short', 'small', 'ugly', 'young', 'old'
-            ],
-
-            sentences: [
-                // --- ANIMAL IDENTIFICATION (TO BE) - POSITIVE & NEGATIVE ---
-                "Harry's a horse. He isn't a donkey.", "It isn't a horse.",
-                "Gracie's a goat. She isn't a sheep.", "Shelly's a sheep. She isn't a goat.",
-                "Cameron's a cat. He isn't a dog.", "Henrietta's a chicken. She isn't a duck.",
-                "Rocky's a chicken. He isn't a cow.",
-
-
-                "It's a sheep.", "It isn't a goat.",
-                "They're chickens.", "They aren't ducks.",
-                "They're mice.", "They aren't lizards.",
-
-                // --- ANIMAL DESCRIPTION (ADJECTIVES) - POSITIVE & NEGATIVE ---
-                "The horse is beautiful.", "The horse isn't ugly.",
-                "Cameron's a nice cat.",
-                "Horses are big. They aren't small.",
-                "A spider's small. It isn't big",
-                "They're happy.", "They aren't sad.",
-
-                // --- ANIMAL ATTRIBUTES (HAS GOT) - POSITIVE & NEGATIVE ---
-                "Cameron's got a long tail.", "He hasn't got a short tail.",
-                "The spider has got eight legs.", "The spider hasn't got arms.",
-                "Elephants have got a long nose.",
-
-
-                // --- YES/NO QUESTIONS (IDENTITY & DESCRIPTION) ---
-                "Is it a donkey? Yes, it is.", "Is it a cow? No, it isn't.",
-                "Are they bees? Yes, they are.", "Are they spiders? No, they aren't.",
-                "Is Harry big? Yes, he is.", "Is the spider small? No, it isn't.",
-                "Are they chickens? Yes, they are.", "Are they ducks? No, they aren't.",
-
-                // --- YES/NO QUESTIONS (HAS GOT - ATTRIBUTES) ---
-                "Has it got a big mouth? Yes, it has.", "Has it got a small mouth? No, it hasn't.",
-                "Has the goat got a tail? Yes, it has.", "Has the goat got hands? No, it hasn't.",
-                "Has she got a cat? Yes, she has.", "Has she got a dog? No, she hasn't."
-            ],
-            sentencePairs: [
-                { a: "Is Shelly a sheep?", b: "Yes, she is." },
-                { a: "Is Shelly a goat?", b: "No, she isn't." },
-                { a: "Is Gracie a goat?", b: "Yes, she is." },
-                { a: "Is Gracie a sheep?", b: "No, she isn't." },
-                { a: "Is Harry a horse?", b: "Yes, he is." },
-                { a: "Is Harry a donkey?", b: "No, he isn't." },
-                { a: "Is Henrietta a chicken?", b: "Yes, she is." },
-                { a: "Is Henrietta a duck?", b: "No, she isn't." },
-                { a: "Is Cameron a cat?", b: "Yes, he is." },
-                { a: "Is Cameron a dog?", b: "No, he isn't." },
-                { a: "Is Henrietta a chicken?", b: "Yes, she is." },
-                { a: "Is Rocky a chicken?", b: "Yes, he is." },
-                { a: "Is Rocky a cow?", b: "No, he isn't." },
-                { a: "Are horses big?", b: "Yes, they are." },
-                { a: "Are horses small?", b: "No, they aren't." },
-                { a: "Are spiders big?", b: "No, they aren't." },
-                { a: "Are spiders small?", b: "Yes, they are." },
-                { a: "Is Harry big?", b: "Yes, he is." },
-                { a: "Is the spider small?", b: "Yes, it is.." },
-                { a: "Is Harry small?", b: "No, he isn't." },
-                { a: "Is the spider big?", b: "No, it isn't." },
-                { a: "Are donkeys big?", b: "Yes, they are." },
-                { a: "Are donkeys small?", b: "No, they aren't." },
-                { a: "Are cats big?", b: "No, they aren't." },
-                { a: "Are cats small?", b: "Yes, they are." },
-                { a: "Have donkeys got long ears?", b: "Yes, they have." },
-                { a: "Have donkeys got short ears?", b: "No, they haven't." },
-                { a: "Have cats got long tails?", b: "Yes, they have." },
-                { a: "Have sheep got long tails?", b: "No, they haven't." },
-                { a: "Is the spider ugly?", b: "Yes, it is." },
-                { a: "Is the spider beautiful?", b: "No, it isn't." },
-                { a: "Is the spider big?", b: "No, it isn't." },
-                { a: "Is the spider small?", b: "Yes, it is." },
-                { a: "Has a donkey got long ears?", b: "Yes, it has." },
-                { a: "Has a donkey got short ears?", b: "No, it hasn't." },
-                { a: "Has a cat got a long tail?", b: "Yes, it has." },
-                { a: "Has a cat got a short tail?", b: "No, it hasn't." },
-                { a: "Milk comes ...?", b: "from cows." },
-                { a: "Eggs come ...?", b: "from chickens." },
-                { a: "Honey comes ...?", b: "from bees." },
-                { a: "Wool comes ...?", b: "from sheep." },
-            ]
-        },
-        "39": {
-            vocab: [        // --- VERBS & PRONOUN CONTRACTIONS (TO BE - REVIEW) ---
-                'it is', "it's", "it isn't",
-                'they are', "they're", "they aren't",
-
-                // --- VERBS & PRONOUN CONTRACTIONS (HAS GOT) ---
-                "he's got", "he hasn't got",
-                "she's got", "she hasn't got",
-                "it's got", "it hasn't got", 'has', "hasn't",
-
-                // --- FARM ANIMALS ---
-                'animal', 'bee', 'cat', 'chicken', 'cow', 'dog', 'donkey', 'duck',
-                'goat', 'horse', 'sheep', 'spider',
-
-                // --- ANIMAL PRODUCTS & NATURE ---
-                'egg', 'food', 'honey', 'meat', 'milk', 'tail', 'wool',
-
-                // --- ADJECTIVES (DESCRIPTION) ---
-                'angry', 'beautiful', 'big', 'clean', 'dirty', 'funny', 'happy',
-                'long', 'short', 'small', 'ugly', 'young', 'old'
-            ],
-
-            sentences: [
-                // --- ANIMAL IDENTIFICATION (TO BE) - POSITIVE & NEGATIVE ---
-                "Harry's a horse. He isn't a donkey.", "It isn't a horse.",
-                "Gracie's a goat. She isn't a sheep.", "Shelly's a sheep. She isn't a goat.",
-                "Cameron's a cat. He isn't a dog.", "Henrietta's a chicken. She isn't a duck.",
-                "Rocky's a chicken. He isn't a cow.",
-
-
-                "It's a sheep.", "It isn't a goat.",
-                "They're chickens.", "They aren't ducks.",
-                "They're mice.", "They aren't lizards.",
-
-                // --- ANIMAL DESCRIPTION (ADJECTIVES) - POSITIVE & NEGATIVE ---
-                "The horse is beautiful.", "The horse isn't ugly.",
-                "Cameron's a nice cat.",
-                "Horses are big. They aren't small.",
-                "A spider's small. It isn't big",
-                "They're happy.", "They aren't sad.",
-
-                // --- ANIMAL ATTRIBUTES (HAS GOT) - POSITIVE & NEGATIVE ---
-                "Cameron's got a long tail.", "He hasn't got a short tail.",
-                "The spider has got eight legs.", "The spider hasn't got arms.",
-                "Elephants have got a long nose.",
-
-
-                // --- YES/NO QUESTIONS (IDENTITY & DESCRIPTION) ---
-                "Is it a donkey? Yes, it is.", "Is it a cow? No, it isn't.",
-                "Are they bees? Yes, they are.", "Are they spiders? No, they aren't.",
-                "Is Harry big? Yes, he is.", "Is the spider small? No, it isn't.",
-                "Are they chickens? Yes, they are.", "Are they ducks? No, they aren't.",
-
-                // --- YES/NO QUESTIONS (HAS GOT - ATTRIBUTES) ---
-                "Has it got a big mouth? Yes, it has.", "Has it got a small mouth? No, it hasn't.",
-                "Has the goat got a tail? Yes, it has.", "Has the goat got hands? No, it hasn't.",
-                "Has she got a cat? Yes, she has.", "Has she got a dog? No, she hasn't."
-            ],
-            sentencePairs: [
-                { a: "Is Shelly a sheep?", b: "Yes, she is." },
-                { a: "Is Shelly a goat?", b: "No, she isn't." },
-                { a: "Is Gracie a goat?", b: "Yes, she is." },
-                { a: "Is Gracie a sheep?", b: "No, she isn't." },
-                { a: "Is Harry a horse?", b: "Yes, he is." },
-                { a: "Is Harry a donkey?", b: "No, he isn't." },
-                { a: "Is Henrietta a chicken?", b: "Yes, she is." },
-                { a: "Is Henrietta a duck?", b: "No, she isn't." },
-                { a: "Is Cameron a cat?", b: "Yes, he is." },
-                { a: "Is Cameron a dog?", b: "No, he isn't." },
-                { a: "Is Henrietta a chicken?", b: "Yes, she is." },
-                { a: "Is Rocky a chicken?", b: "Yes, he is." },
-                { a: "Is Rocky a cow?", b: "No, he isn't." },
-                { a: "Are horses big?", b: "Yes, they are." },
-                { a: "Are horses small?", b: "No, they aren't." },
-                { a: "Are spiders big?", b: "No, they aren't." },
-                { a: "Are spiders small?", b: "Yes, they are." },
-                { a: "Is Harry big?", b: "Yes, he is." },
-                { a: "Is the spider small?", b: "Yes, it is.." },
-                { a: "Is Harry small?", b: "No, he isn't." },
-                { a: "Is the spider big?", b: "No, it isn't." },
-                { a: "Are donkeys big?", b: "Yes, they are." },
-                { a: "Are donkeys small?", b: "No, they aren't." },
-                { a: "Are cats big?", b: "No, they aren't." },
-                { a: "Are cats small?", b: "Yes, they are." },
-                { a: "Have donkeys got long ears?", b: "Yes, they have." },
-                { a: "Have donkeys got short ears?", b: "No, they haven't." },
-                { a: "Have cats got long tails?", b: "Yes, they have." },
-                { a: "Have sheep got long tails?", b: "No, they haven't." },
-                { a: "Is the spider ugly?", b: "Yes, it is." },
-                { a: "Is the spider beautiful?", b: "No, it isn't." },
-                { a: "Is the spider big?", b: "No, it isn't." },
-                { a: "Is the spider small?", b: "Yes, it is." },
-                { a: "Has a donkey got long ears?", b: "Yes, it has." },
-                { a: "Has a donkey got short ears?", b: "No, it hasn't." },
-                { a: "Has a cat got a long tail?", b: "Yes, it has." },
-                { a: "Has a cat got a short tail?", b: "No, it hasn't." },
-                { a: "Milk comes ...?", b: "from cows." },
-                { a: "Eggs come ...?", b: "from chickens." },
-                { a: "Honey comes ...?", b: "from bees." },
-                { a: "Wool comes ...?", b: "from sheep." },
-            ]
-        },
-        "40": {
-            vocab: [        // --- VERBS & PRONOUN CONTRACTIONS (TO BE - REVIEW) ---
-                'it is', "it's", "it isn't",
-                'they are', "they're", "they aren't",
-
-                // --- VERBS & PRONOUN CONTRACTIONS (HAS GOT) ---
-                "he's got", "he hasn't got",
-                "she's got", "she hasn't got",
-                "it's got", "it hasn't got", 'has', "hasn't",
-
-                // --- FARM ANIMALS ---
-                'animal', 'bee', 'cat', 'chicken', 'cow', 'dog', 'donkey', 'duck',
-                'goat', 'horse', 'sheep', 'spider',
-
-                // --- ANIMAL PRODUCTS & NATURE ---
-                'egg', 'food', 'honey', 'meat', 'milk', 'tail', 'wool',
-
-                // --- ADJECTIVES (DESCRIPTION) ---
-                'angry', 'beautiful', 'big', 'clean', 'dirty', 'funny', 'happy',
-                'long', 'short', 'small', 'ugly', 'young', 'old'
-            ],
-
-            sentences: [
-                // --- ANIMAL IDENTIFICATION (TO BE) - POSITIVE & NEGATIVE ---
-                "Harry's a horse. He isn't a donkey.", "It isn't a horse.",
-                "Gracie's a goat. She isn't a sheep.", "Shelly's a sheep. She isn't a goat.",
-                "Cameron's a cat. He isn't a dog.", "Henrietta's a chicken. She isn't a duck.",
-                "Rocky's a chicken. He isn't a cow.",
-
-
-                "It's a sheep.", "It isn't a goat.",
-                "They're chickens.", "They aren't ducks.",
-                "They're mice.", "They aren't lizards.",
-
-                // --- ANIMAL DESCRIPTION (ADJECTIVES) - POSITIVE & NEGATIVE ---
-                "The horse is beautiful.", "The horse isn't ugly.",
-                "Cameron's a nice cat.",
-                "Horses are big. They aren't small.",
-                "A spider's small. It isn't big",
-                "They're happy.", "They aren't sad.",
-
-                // --- ANIMAL ATTRIBUTES (HAS GOT) - POSITIVE & NEGATIVE ---
-                "Cameron's got a long tail.", "He hasn't got a short tail.",
-                "The spider has got eight legs.", "The spider hasn't got arms.",
-                "Elephants have got a long nose.",
-
-
-                // --- YES/NO QUESTIONS (IDENTITY & DESCRIPTION) ---
-                "Is it a donkey? Yes, it is.", "Is it a cow? No, it isn't.",
-                "Are they bees? Yes, they are.", "Are they spiders? No, they aren't.",
-                "Is Harry big? Yes, he is.", "Is the spider small? No, it isn't.",
-                "Are they chickens? Yes, they are.", "Are they ducks? No, they aren't.",
-
-                // --- YES/NO QUESTIONS (HAS GOT - ATTRIBUTES) ---
-                "Has it got a big mouth? Yes, it has.", "Has it got a small mouth? No, it hasn't.",
-                "Has the goat got a tail? Yes, it has.", "Has the goat got hands? No, it hasn't.",
-                "Has she got a cat? Yes, she has.", "Has she got a dog? No, she hasn't."
-            ],
-            sentencePairs: [
-                { a: "Is Shelly a sheep?", b: "Yes, she is." },
-                { a: "Is Shelly a goat?", b: "No, she isn't." },
-                { a: "Is Gracie a goat?", b: "Yes, she is." },
-                { a: "Is Gracie a sheep?", b: "No, she isn't." },
-                { a: "Is Harry a horse?", b: "Yes, he is." },
-                { a: "Is Harry a donkey?", b: "No, he isn't." },
-                { a: "Is Henrietta a chicken?", b: "Yes, she is." },
-                { a: "Is Henrietta a duck?", b: "No, she isn't." },
-                { a: "Is Cameron a cat?", b: "Yes, he is." },
-                { a: "Is Cameron a dog?", b: "No, he isn't." },
-                { a: "Is Henrietta a chicken?", b: "Yes, she is." },
-                { a: "Is Rocky a chicken?", b: "Yes, he is." },
-                { a: "Is Rocky a cow?", b: "No, he isn't." },
-                { a: "Are horses big?", b: "Yes, they are." },
-                { a: "Are horses small?", b: "No, they aren't." },
-                { a: "Are spiders big?", b: "No, they aren't." },
-                { a: "Are spiders small?", b: "Yes, they are." },
-                { a: "Is Harry big?", b: "Yes, he is." },
-                { a: "Is the spider small?", b: "Yes, it is.." },
-                { a: "Is Harry small?", b: "No, he isn't." },
-                { a: "Is the spider big?", b: "No, it isn't." },
-                { a: "Are donkeys big?", b: "Yes, they are." },
-                { a: "Are donkeys small?", b: "No, they aren't." },
-                { a: "Are cats big?", b: "No, they aren't." },
-                { a: "Are cats small?", b: "Yes, they are." },
-                { a: "Have donkeys got long ears?", b: "Yes, they have." },
-                { a: "Have donkeys got short ears?", b: "No, they haven't." },
-                { a: "Have cats got long tails?", b: "Yes, they have." },
-                { a: "Have sheep got long tails?", b: "No, they haven't." },
-                { a: "Is the spider ugly?", b: "Yes, it is." },
-                { a: "Is the spider beautiful?", b: "No, it isn't." },
-                { a: "Is the spider big?", b: "No, it isn't." },
-                { a: "Is the spider small?", b: "Yes, it is." },
-                { a: "Has a donkey got long ears?", b: "Yes, it has." },
-                { a: "Has a donkey got short ears?", b: "No, it hasn't." },
-                { a: "Has a cat got a long tail?", b: "Yes, it has." },
-                { a: "Has a cat got a short tail?", b: "No, it hasn't." },
-                { a: "Milk comes ...?", b: "from cows." },
-                { a: "Eggs come ...?", b: "from chickens." },
-                { a: "Honey comes ...?", b: "from bees." },
-                { a: "Wool comes ...?", b: "from sheep." },
-            ]
-        },
-        "42": {
-            vocab: [
-                // --- VERBS & PRONOUN CONTRACTIONS (TO BE) ---
-                'I am', "I'm", "I'm not",
-                'you are', "you're", "you aren't",
-                'he is', "he's", "he isn't",
-                'she is', "she's", "she isn't",
-                'it is', "it's", "it isn't",
-                'we are', "we're", "we aren't",
-                'they are', "they're", "they aren't",
-
-                // --- VERBS & PRONOUN CONTRACTIONS (HAVE GOT) ---
-                "I've got", "I haven't got",
-                "you've got", "you haven't got",
-                "we've got", "we haven't got",
-                "they've got", "they haven't got",
-                "he's got", "he hasn't got",
-                "she's got", "she hasn't got",
-                "it's got", "it hasn't got",
-
-                // --- SENSORY & ACTION VERBS ---
-                'look', 'listen', 'open', 'close', 'stand up', 'sit down',
-                'count', 'touch', 'smell', 'taste', 'hear', 'see',
-
-                // --- NOUNS: CLASSROOM & SCHOOL (UNIT 1) ---
-                'bag', 'board', 'book', 'chair', 'classroom', 'crayon', 'desk',
-                'door', 'pen', 'pencil', 'pencil case', 'rubber', 'ruler',
-                'teacher', 'window', 'wall', 'cupboard', 'table', 'pencil case',
-                'bookcase',
-
-                // --- NOUNS: FAMILY & PEOPLE (UNIT 2) ---
-                'boy', 'brother', 'cousin', 'dad', 'father', 'family', 'friend',
-                'girl', 'grandma', 'grandmother', 'grandpa', 'grandfather', 'mum', 'mother', 'sister',
-
-                // --- NOUNS: BODY & FACE (UNIT 2) ---
-                'arm', 'arms', 'body', 'ear', 'ears', 'eye', 'eyes', 'face', 'foot', 'feet',
-                'hair', 'hand', 'hands', 'head', 'leg', 'legs', 'mouth', 'nose',
-
-                // --- NOUNS: FARM ANIMALS & NATURE (UNIT 3) ---
-                'animal', 'bee', 'cat', 'chicken', 'cow', 'dog', 'donkey', 'duck',
-                'goat', 'horse', 'sheep', 'spider', 'tail',
-
-                // --- NOUNS: FOOD & PRODUCTS (UNIT 3) ---
-                'egg', 'eggs', 'food', 'honey', 'meat', 'milk', 'wool',
-
-                // --- ADJECTIVES ---
-                'angry', 'beautiful', 'big', 'small', 'funny', 'happy',
-                'long', 'new', 'nice', 'old', 'sad', 'short', 'small', 'ugly', 'young',
-
-                // --- COLORS (STARTER) ---
-                'black', 'blue', 'brown', 'green', 'grey', 'orange', 'pink', 'purple', 'red', 'white', 'yellow',
-
-                // --- PREPOSITIONS ---
-                'in', 'next to', 'on', 'under',
-
-                // --- DETERMINERS & PRONOUNS ---
-                'this', 'that', 'these', 'those', 'my', 'your',
-
-                // --- Question words ---
-                'what', "what's", 'where', "where's", 'who', "who's",
-            ],
-
-            sentences: [
-                // --- IDENTIFICATION (TO BE) - POSITIVE & NEGATIVE ---
-                "It's a pencil case.", "It isn't a ruler.",
-                "They're crayons.", "They aren't pens.",
-                "He's my brother.", "She isn't my sister.",
-                "These are my books.", "Those aren't my bags.",
-                "He's a teacher.", "He isn't a student.",
-                "She's my friend.", "She isn't my cousin.",
-
-                // --- DESCRIPTION (ADJECTIVES) - POSITIVE & NEGATIVE ---
-                "The dog is happy.", "The cat isn't sad.",
-                "It's beautiful.", "It isn't ugly.",
-                "They're dirty.", "They aren't clean.",
-                "She's young.", "She isn't old.",
-                "The monster is big.", "The monster isn't small.",
-
-                // --- LOCATION (PREPOSITIONS) - POSITIVE & NEGATIVE ---
-                "The rubber is in the pencil case.", "The rubber isn't on the desk.",
-                "The books are under the chair.", "The books aren't next to the door.",
-                "My bag is next to the window.", "My bag isn't under the table.",
-                "Jenny's in the classroom.", "Jim isn't in the bin.",
-
-                // --- POSSESSION (HAVE GOT - I/YOU/WE/THEY) - POSITIVE & NEGATIVE ---
-                "I've got a red pen.", "I haven't got a blue pen.",
-                "We've got two hands.", "We haven't got eight ears.",
-                "You've got a nice face.", "You haven't got an ugly face.",
-                "They've got long legs.", "They haven't got short legs.",
-
-                // --- POSSESSION (HAS GOT - HE/SHE/IT) - POSITIVE & NEGATIVE ---
-                "He's got brown hair.", "He hasn't got black hair.",
-                "She's got big eyes.", "She hasn't got small eyes.",
-                "It's got a long tail.", "It hasn't got a short tail.",
-                "The horse has got four legs.", "The horse hasn't got arms.",
-
-                // --- YES/NO QUESTIONS & ANSWERS (TO BE - IDENTITY/ADJECTIVES) ---
-                "Is it a rubber? Yes, it is.", "Is it a ruler? No, it isn't.",
-                "Are they ducks? Yes, they are.", "Are they chickens? No, they aren't.",
-                "Is she your sister? Yes, she is.", "Is she your mum? No, she isn't.",
-                "Are the spiders ugly? Yes, they are.", "Are the sheep ugly? No, they aren't.",
-
-                // --- YES/NO QUESTIONS & ANSWERS (LOCATION) ---
-                "Is the bag under the desk? Yes, it is.", "Is the bag on the chair? No, it isn't.",
-                "Are the pencils in the box? Yes, they are.", "Are the pencils under the book? No, they aren't.",
-
-                // --- YES/NO QUESTIONS & ANSWERS (HAVE/HAS GOT) ---
-                "Have you got a sister? Yes, I have.", "Have you got a brother? No, I haven't.",
-                "Have they got big feet? Yes, they have.", "Have they got small hands? No, they haven't.",
-                "Has he got a new cat? Yes, he has.", "Has he got an old donkey? No, he hasn't.",
-                "Has the cow got a tail? Yes, it has.", "Has the cow got arms? No, it hasn't.",
-
-                // --- WH- QUESTIONS ---
-                "What's this? It's a goat.",
-                "What are these? They're donkeys.",
-                "Who's she? She's my grandma.",
-                "Where's the cat? It's under the tree.",
-                "Where are the books? They're on the desk."
-            ],
-            sentencePairs: [
-                { a: "Is it a chair?", b: "No, it isn't a chair." },
-                { a: "What are these?", b: "They're rubbers." },
-                { a: "Where's the bag?", b: "The bag is under the chair." },
-                { a: "Where are the pencil cases?", b: "The pencil cases are under the table." },
-                { a: "What's your name?", b: "I'm Jenny." },
-                { a: "How old are you?", b: "I'm seven years old." },
-                { a: "What's the cat's name?", b: "The cat's name is Cameron." },
-                { a: "What's the horse's name?", b: "The horse's name is Harry." },
-                { a: "What's the boy's name?", b: "The boy's name is Jim." },
-                { a: "What's the girl's name?", b: "The girl's name is Jenny." },
-                { a: "What's the hen's name?", b: "The hen's name is Henrietta." },
-                { a: "What's the rooster's name?", b: "The rooster's name is Rocky." },
-                { a: "What's the sheep's name?", b: "The sheep's name is Shelly." },
-                { a: "What's the goat's name?", b: "The goat's name is Gracie." },
-                { a: "What colour is the bag?", b: "The bag is red." },
-                { a: "What colour is the pen?", b: "The pen is purple." },
-                { a: "What colour is the book?", b: "The book is blue." },
-                { a: "What colour is the pencil?", b: "The pencil is brown." },
-                { a: "Where's the bag?", b: "The bag is on the desk." },
-                { a: "Where's the pen?", b: "The pen is in the pencil case." },
-                { a: "Where's the book?", b: "The book is in the bag." },
-                { a: "Where is Jim?", b: "Jim is in the classroom." },
-                { a: "Where is the paper?", b: "The paper is in the cupboard." },
-                { a: "Where is Jenny?", b: "Jenny is in the playground." },
-                { a: "Where is the teacher?", b: "The teacher is next to the window." },
-                { a: "What's this?", b: "It's a window." },
-                { a: "What are these", b: "They're rubbers." },
-                { a: "Where are the books?", b: "They're on the bookcase." },
-                { a: "Where's the pencil?", b: "It's in the pencil case." },
-                { a: "Are you OK?", b: "Yes, thank you." },
-                { a: "Here you are!", b: "Thank you very much." },
-                { a: "Can I help you?", b: "Yes, thank you." },
-                { a: "What do you share?", b: "I share my book." },
-                { a: "Who do you listen to?", b: "I listen to the teacher." },
-                { a: "Who do you help?", b: "I help my classmates." },
-                { a: "How do we do our work?", b: "We work together." },
-                { a: "Is Mr. Friendly Jim's father?", b: "Yes, he is." },
-                { a: "Is Ms. Friendly Jenny's mother?", b: "Yes, she is." },
-                { a: "Is Grandpa Friendly Jim's grandfather?", b: "Yes, he is." },
-                { a: "Is Grandma Friendly Jim's grandmother?", b: "Yes, she is." },
-                { a: "Is Jim Jenny's brother?", b: "Yes, he is." },
-                { a: "Is Jenny Jim's sister?", b: "Yes, she is." },
-                { a: "Are they the Friendly family?", b: "Yes, they are." },
-                { a: "Is Shelly Rocky's sister?", b: "No, she isn't." },
-                { a: "Is Harry Rocky's brother?", b: "No, he isn't." },
-                { a: "Is Henrietta Rocky's mother?", b: "Yes, she is." },
-                { a: "Is Henrietta Rocky's father?", b: "No, she isn't." },
-                { a: "Who's she?", b: "She's Jenny." },
-                { a: "Who's he?", b: "He's Jim." },
-                { a: "Is Jenny a girl?", b: "Yes, she is." },
-                { a: "Is Jim a boy?", b: "Yes, he is." },
-                { a: "Is Jenny a boy?", b: "No, she isn't." },
-                { a: "Is Jim a girl?", b: "No, he isn't." },
-                { a: "Close ...", b: "your eyes." },
-                { a: "Put ...", b: "your arms up." },
-                { a: "Move ...", b: "your tail Cameron." },
-                { a: "Have you got pink eyes?", b: "No, I haven't." },
-                { a: "Have you got 2 arms?", b: "Yes, I have." },
-                { a: "Have you got 2 legs?", b: "Yes, I have." },
-                { a: "Have you got 5 eyes?", b: "No, I haven't." },
-                { a: "Have you got 2 ears?", b: "Yes, I have." },
-                { a: "Have you got 2 noses?", b: "No, I haven't." },
-                { a: "Have you got 2 mouths?", b: "No, I haven't." },
-                { a: "Is Shelly a sheep?", b: "Yes, she is." },
-                { a: "Is Shelly a goat?", b: "No, she isn't." },
-                { a: "Is Gracie a goat?", b: "Yes, she is." },
-                { a: "Is Gracie a sheep?", b: "No, she isn't." },
-                { a: "Is Harry a horse?", b: "Yes, he is." },
-                { a: "Is Harry a donkey?", b: "No, he isn't." },
-                { a: "Is Henrietta a chicken?", b: "Yes, she is." },
-                { a: "Is Henrietta a duck?", b: "No, she isn't." },
-                { a: "Is Cameron a cat?", b: "Yes, he is." },
-                { a: "Is Cameron a dog?", b: "No, he isn't." },
-                { a: "Is Henrietta a chicken?", b: "Yes, she is." },
-                { a: "Is Rocky a chicken?", b: "Yes, he is." },
-                { a: "Is Rocky a cow?", b: "No, he isn't." },
-                { a: "Are horses big?", b: "Yes, they are." },
-                { a: "Are horses small?", b: "No, they aren't." },
-                { a: "Are spiders big?", b: "No, they aren't." },
-                { a: "Are spiders small?", b: "Yes, they are." },
-                { a: "Is Harry big?", b: "Yes, he is." },
-                { a: "Is the spider small?", b: "Yes, it is.." },
-                { a: "Is Harry small?", b: "No, he isn't." },
-                { a: "Is the spider big?", b: "No, it isn't." },
-                { a: "Are donkeys big?", b: "Yes, they are." },
-                { a: "Are donkeys small?", b: "No, they aren't." },
-                { a: "Are cats big?", b: "No, they aren't." },
-                { a: "Are cats small?", b: "Yes, they are." },
-                { a: "Have donkeys got long ears?", b: "Yes, they have." },
-                { a: "Have donkeys got short ears?", b: "No, they haven't." },
-                { a: "Have cats got long tails?", b: "Yes, they have." },
-                { a: "Have sheep got long tails?", b: "No, they haven't." },
-                { a: "Is the spider ugly?", b: "Yes, it is." },
-                { a: "Is the spider beautiful?", b: "No, it isn't." },
-                { a: "Is the spider big?", b: "No, it isn't." },
-                { a: "Is the spider small?", b: "Yes, it is." },
-                { a: "Has a donkey got long ears?", b: "Yes, it has." },
-                { a: "Has a donkey got short ears?", b: "No, it hasn't." },
-                { a: "Has a cat got a long tail?", b: "Yes, it has." },
-                { a: "Has a cat got a short tail?", b: "No, it hasn't." },
-                { a: "Milk comes ...?", b: "from cows." },
-                { a: "Eggs come ...?", b: "from chickens." },
-                { a: "Honey comes ...?", b: "from bees." },
-                { a: "Wool comes ...?", b: "from sheep." },
-            ]
-        },
         "43": {
             vocab: [
                 // --- VERBS & PRONOUN CONTRACTIONS (TO BE) ---
@@ -1640,12 +1108,12 @@ TEACHING_CONTENT["PU1"] = {
                 // --- NOUNS: CLASSROOM & SCHOOL (UNIT 1) ---
                 'bag', 'board', 'book', 'chair', 'classroom', 'crayon', 'desk',
                 'door', 'pen', 'pencil', 'pencil case', 'rubber', 'ruler',
-                'teacher', 'window', 'wall', 'cupboard', 'table', 'pencil case',
-                'bookcase',
+                'teacher', 'window', 'wall', 'cupboard', 'table', 'paper',
+                'bookcase', 'playground', 'barn', 'rule', 'share', 'help', 'listen', 'work together',
 
                 // --- NOUNS: FAMILY & PEOPLE (UNIT 2) ---
                 'boy', 'brother', 'cousin', 'dad', 'father', 'family', 'friend',
-                'girl', 'grandma', 'grandmother', 'grandpa', 'grandfather', 'mum', 'mother', 'sister',
+                'girl', 'grandma', 'grandmother', 'grandpa', 'grandfather', 'mum', 'mother', 'sister', 'twins',
 
                 // --- NOUNS: BODY & FACE (UNIT 2) ---
                 'arm', 'arms', 'body', 'ear', 'ears', 'eye', 'eyes', 'face', 'foot', 'feet',
@@ -1653,14 +1121,14 @@ TEACHING_CONTENT["PU1"] = {
 
                 // --- NOUNS: FARM ANIMALS & NATURE (UNIT 3) ---
                 'animal', 'bee', 'cat', 'chicken', 'cow', 'dog', 'donkey', 'duck',
-                'goat', 'horse', 'sheep', 'spider', 'tail',
+                'goat', 'horse', 'sheep', 'spider', 'tail', 'frog',
 
                 // --- NOUNS: FOOD & PRODUCTS (UNIT 3) ---
                 'egg', 'eggs', 'food', 'honey', 'meat', 'milk', 'wool',
 
                 // --- ADJECTIVES ---
                 'angry', 'beautiful', 'big', 'small', 'funny', 'happy',
-                'long', 'new', 'nice', 'old', 'sad', 'short', 'small', 'ugly', 'young',
+                'long', 'new', 'nice', 'old', 'sad', 'short', 'small', 'ugly', 'young', 'blind',
 
                 // --- COLORS (STARTER) ---
                 'black', 'blue', 'brown', 'green', 'grey', 'orange', 'pink', 'purple', 'red', 'white', 'yellow',
@@ -1690,6 +1158,13 @@ TEACHING_CONTENT["PU1"] = {
                 "They're dirty.", "They aren't clean.",
                 "She's young.", "She isn't old.",
                 "The monster is big.", "The monster isn't small.",
+
+                // --- DESCRIPTION (Pronouns + Adjective + Noun:) - POSITIVE & NEGATIVE ---
+                "It's a happy dog.", "It's an angry cat.", "It isn't a nice cat.",
+                "It's a beautiful sheep.", "It's an ugly spider.", "It isn't a beautiful spider.",
+                "They're dirty cows.", "They aren't clean ducks.",
+                "They're big horses.", "They aren't small horses.",
+                "It's an old donkey.", "It isn't a young chicken.",
 
                 // --- LOCATION (PREPOSITIONS) - POSITIVE & NEGATIVE ---
                 "The rubber is in the pencil case.", "The rubber isn't on the desk.",
@@ -1776,63 +1251,61 @@ TEACHING_CONTENT["PU1"] = {
                 { a: "Is Jim Jenny's brother?", b: "Yes, he is." },
                 { a: "Is Jenny Jim's sister?", b: "Yes, she is." },
                 { a: "Are they the Friendly family?", b: "Yes, they are." },
-                { a: "Is Shelly Rocky's sister?", b: "No, she isn't." },
-                { a: "Is Harry Rocky's brother?", b: "No, he isn't." },
+                { a: "Is Shelly Rocky's sister?", b: "No, she isn't. She's Rocky's friend." },
+                { a: "Is Harry Rocky's brother?", b: "No, he isn't. He's Rocky's friend." },
                 { a: "Is Henrietta Rocky's mother?", b: "Yes, she is." },
-                { a: "Is Henrietta Rocky's father?", b: "No, she isn't." },
+                { a: "Is Henrietta Rocky's father?", b: "No, she isn't. She's Rocky's mother." },
                 { a: "Who's she?", b: "She's Jenny." },
                 { a: "Who's he?", b: "He's Jim." },
                 { a: "Is Jenny a girl?", b: "Yes, she is." },
                 { a: "Is Jim a boy?", b: "Yes, he is." },
-                { a: "Is Jenny a boy?", b: "No, she isn't." },
-                { a: "Is Jim a girl?", b: "No, he isn't." },
+                { a: "Is Jenny a boy?", b: "No, she isn't. She's a girl." },
+                { a: "Is Jim a girl?", b: "No, he isn't. He's a boy." },
                 { a: "Close ...", b: "your eyes." },
                 { a: "Put ...", b: "your arms up." },
                 { a: "Move ...", b: "your tail Cameron." },
                 { a: "Have you got pink eyes?", b: "No, I haven't." },
                 { a: "Have you got 2 arms?", b: "Yes, I have." },
                 { a: "Have you got 2 legs?", b: "Yes, I have." },
-                { a: "Have you got 5 eyes?", b: "No, I haven't." },
+                { a: "Have you got 5 eyes?", b: "No, I haven't. I've got 2 eyes." },
                 { a: "Have you got 2 ears?", b: "Yes, I have." },
-                { a: "Have you got 2 noses?", b: "No, I haven't." },
-                { a: "Have you got 2 mouths?", b: "No, I haven't." },
+                { a: "Have you got 2 noses?", b: "No, I haven't. I've got 1 nose." },
+                { a: "Have you got 2 mouths?", b: "No, I haven't. I've got 1 mouth." },
                 { a: "Is Shelly a sheep?", b: "Yes, she is." },
-                { a: "Is Shelly a goat?", b: "No, she isn't." },
+                { a: "Is Shelly a goat?", b: "No, she isn't. She's a sheep." },
                 { a: "Is Gracie a goat?", b: "Yes, she is." },
-                { a: "Is Gracie a sheep?", b: "No, she isn't." },
+                { a: "Is Gracie a sheep?", b: "No, she isn't. She's a goat." },
                 { a: "Is Harry a horse?", b: "Yes, he is." },
-                { a: "Is Harry a donkey?", b: "No, he isn't." },
+                { a: "Is Harry a donkey?", b: "No, he isn't. He's a horse." },
                 { a: "Is Henrietta a chicken?", b: "Yes, she is." },
-                { a: "Is Henrietta a duck?", b: "No, she isn't." },
+                { a: "Is Henrietta a duck?", b: "No, she isn't. She's a chicken." },
                 { a: "Is Cameron a cat?", b: "Yes, he is." },
-                { a: "Is Cameron a dog?", b: "No, he isn't." },
+                { a: "Is Cameron a dog?", b: "No, he isn't. He's a cat." },
                 { a: "Is Henrietta a chicken?", b: "Yes, she is." },
                 { a: "Is Rocky a chicken?", b: "Yes, he is." },
-                { a: "Is Rocky a cow?", b: "No, he isn't." },
+                { a: "Is Rocky a cow?", b: "No, he isn't. He's a chicken." },
                 { a: "Are horses big?", b: "Yes, they are." },
-                { a: "Are horses small?", b: "No, they aren't." },
-                { a: "Are spiders big?", b: "No, they aren't." },
+                { a: "Are horses small?", b: "No, they aren't. They're big." },
+                { a: "Are spiders big?", b: "No, they aren't. They're small." },
                 { a: "Are spiders small?", b: "Yes, they are." },
                 { a: "Is Harry big?", b: "Yes, he is." },
-                { a: "Is the spider small?", b: "Yes, it is.." },
-                { a: "Is Harry small?", b: "No, he isn't." },
-                { a: "Is the spider big?", b: "No, it isn't." },
+                { a: "Is the spider small?", b: "Yes, it is." },
+                { a: "Is Harry small?", b: "No, he isn't. He's big." },
                 { a: "Are donkeys big?", b: "Yes, they are." },
-                { a: "Are donkeys small?", b: "No, they aren't." },
-                { a: "Are cats big?", b: "No, they aren't." },
+                { a: "Are donkeys small?", b: "No, they aren't. They're big." },
+                { a: "Are cats big?", b: "No, they aren't. They're small." },
                 { a: "Are cats small?", b: "Yes, they are." },
                 { a: "Have donkeys got long ears?", b: "Yes, they have." },
-                { a: "Have donkeys got short ears?", b: "No, they haven't." },
+                { a: "Have donkeys got short ears?", b: "No, they haven't. They've got long ears." },
                 { a: "Have cats got long tails?", b: "Yes, they have." },
-                { a: "Have sheep got long tails?", b: "No, they haven't." },
+                { a: "Have sheep got long tails?", b: "No, they haven't. They've got short tails." },
                 { a: "Is the spider ugly?", b: "Yes, it is." },
                 { a: "Is the spider beautiful?", b: "No, it isn't." },
                 { a: "Is the spider big?", b: "No, it isn't." },
-                { a: "Is the spider small?", b: "Yes, it is." },
                 { a: "Has a donkey got long ears?", b: "Yes, it has." },
-                { a: "Has a donkey got short ears?", b: "No, it hasn't." },
+                { a: "Has a donkey got short ears?", b: "No, it hasn't. It's got long ears." },
                 { a: "Has a cat got a long tail?", b: "Yes, it has." },
-                { a: "Has a cat got a short tail?", b: "No, it hasn't." },
+                { a: "Has a cat got a short tail?", b: "No, it hasn't. It's got a long tail." },
                 { a: "Milk comes ...?", b: "from cows." },
                 { a: "Eggs come ...?", b: "from chickens." },
                 { a: "Honey comes ...?", b: "from bees." },
@@ -2230,7 +1703,7 @@ AVAILABLE_CONTENT["PU1"] = {
     "0": [4, 5, 7, 8],
     "1": [9, 10, 11, 12, 13, 14, 15, 16],
     "2": [19, 20, 21, 22, 23, 24, 25, 26, 27, 28],
-    "3": [31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 43],
+    "3": [31, 32, 33, 34, 35, 36, 37, 43],
     "4": [45, 54],
     "5": [66],
     "6": [78],

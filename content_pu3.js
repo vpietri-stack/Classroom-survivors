@@ -584,7 +584,7 @@ TEACHING_CONTENT["PU3"] = {
                 { a: "What are the erasers made of?", b: "They're made of rubber." },
                 { a: "What is the ring made of?", b: "It's made of gold." },
                 { a: "What could we use?", b: "We could use blue paper." },
-                { a: "Is the dress striped or spotted?", b: "It's striped." },
+                { a: "Is the dress striped or spotted?", b: "It's plain." },
                 { a: "What colour is it?", b: "It's dark green." },
                 { a: "Are the wings made of silver", b: "No, they aren't. They're painted silver." },
                 { a: "Shall we paint it?", b: "Yes, let's paint it dark blue." },

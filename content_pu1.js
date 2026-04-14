@@ -1652,6 +1652,59 @@ TEACHING_CONTENT["PU1"] = {
             ]
         }
     },
+    "8": {
+        "95": {
+            vocab: [
+                'room', 'bathroom', 'bedroom', 'dining room', 'kitchen', 'living room', 'hall',
+                'bath', 'bed', 'mirror', 'radio'
+            ],
+            sentences: [
+                "Jim is in the living room.",
+                "Jim is playing the piano in the living room.",
+                "They are sitting on the bed.",
+                "They are listening to the radio in the bedroom.",
+                "She's sleeping in the bedroom.",
+                "Grandpa is in the dining room.",
+                "Grandpa is eating in the dining room.",
+                "Mr Friendly is in the bathroom.",
+                "He's looking at his face in the mirror.",
+                "The bed is in the bedroom.",
+                "The bath is in the bathroom.",
+                "The piano is in the living room.",
+                "The TV is in the living room.",
+                "Grandma is in the kitchen.",
+                "Grandma is cooking in the kitchen."
+            ],
+            sentencePairs: [
+                { a: "Where is Grandma cooking?", b: "In the kitchen." },
+                { a: "What is Grandma doing in the kitchen?", b: "She's cooking." },
+                { a: "Is Grandma sleeping in the kitchen?", b: "No, she isn't. She's cooking." },
+                { a: "Is Grandma cooking in the kitchen?", b: "Yes, she is." },
+                { a: "Where is Dad washing his face?", b: "In the bathroom." },
+                { a: "What is Dad doing in the bathroom?", b: "He's washing his face." },
+                { a: "Is Dad eating in the bathroom?", b: "No, he isn't. He's washing his face." },
+                { a: "Is Dad washing his face in the bathroom?", b: "Yes, he is." },
+                { a: "Where is Jenny sleeping?", b: "In the bedroom." },
+                { a: "What is Jenny doing in the bedroom?", b: "She's sleeping." },
+                { a: "Is Jenny cooking in the bedroom?", b: "No, she isn't. She's sleeping." },
+                { a: "Is Jenny sleeping in the bedroom?", b: "Yes, she is." },
+                { a: "Where is Jim playing the piano?", b: "In the living room." },
+                { a: "What is Jim doing in the living room?", b: "He's playing the piano." },
+                { a: "Is Jim playing football in the living room?", b: "No, he isn't. He's playing the piano." },
+                { a: "Is Jim playing the piano in the living room?", b: "Yes, he is." },
+                { a: "Where are they eating dinner?", b: "In the dining room." },
+                { a: "What are they doing in the dining room?", b: "They're eating dinner." },
+                { a: "Are they cooking in the dining room?", b: "No, they aren't. They're eating dinner." },
+                { a: "Are they eating dinner in the dining room?", b: "Yes, they are." },
+                { a: "Where's the bed?", b: "In the bedroom." },
+                { a: "Is the bed in the bathroom?", b: "No, it isn't. It's in the bedroom." },
+                { a: "Is the bed in the bedroom?", b: "Yes, it is." },
+                { a: "Where's the bath?", b: "In the bathroom." },
+                { a: "Is the bath in the bedroom?", b: "No, it isn't. It's in the bathroom." },
+                { a: "Is the bath in the bathroom?", b: "Yes, it is." }
+            ]
+        }
+    },
     "9": {
         "107": {
             vocab: [
@@ -1758,5 +1811,6 @@ AVAILABLE_CONTENT["PU1"] = {
     "5": [66],
     "6": [78],
     "7": [83, 84, 92],
+    "8": [95],
     "9": [107, 108, 110, 111]
 };

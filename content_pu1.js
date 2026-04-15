@@ -76,24 +76,26 @@ TEACHING_CONTENT["PU1"] = {
     },
     "1": {
         "9": {
-            vocab: ["where's", 'on', 'under', 'next to', 'in', 'the', "it's", 'are', 'pencil', 'book', 'desk', 'rubber', 'chair', 'pen', 'bag', 'crayon', 'pencil case'],
+            vocab: ["where's", "yes, it is", "yes, they are", "no, they aren't", "no, it isn't", 'on', 'is', "isn't", 'are', "aren't", 'under', 'next to', 'in', 'the', "it's", 'are', 'pencil', 'book', 'desk', 'rubber', 'chair', 'pen', 'bag', 'crayon', 'pencil case'],
             sentences: [
                 "The pencils are under the book.",
-                "The book's on the desk.",
-                "The rubber's under the chair.",
-                "The pen's in the bag.",
-                "The crayon's under the desk.",
-                "The bag's on the chair.",
+                "The book is on the desk.",
+                "The rubber is under the chair.",
+                "The pen is in the bag.",
+                "The crayon is under the desk.",
+                "The bag is on the chair.",
                 "The crayons are in the pencil case.",
                 "The pens are on the desk.",
                 "The books are in the bag.",
                 "The chairs are under the desk."
             ],
             sentencePairs: [
-                { a: "Where are the pencils?", b: "The pencils are under the book." },
-                { a: "Where is the rubber?", b: "The rubber is under the chair." },
-                { a: "Where are the crayons?", b: "The crayons are in the pencil case." },
-                { a: "Where is the bag?", b: "The bag is on the chair." }
+                { a: "Where are the pencils?", b: "They're under the book." },
+                { a: "Where is the rubber?", b: "It's under the chair." },
+                { a: "Are the crayons in the pencil case?", b: "Yes, they are." },
+                { a: "Are the crayons in the bin?", b: "No, they aren't. They're in the pencil case." },
+                { a: "Is the bag on the chair?", b: "Yes, it is." },
+                { a: "Is the bag on the teacher's head?", b: "No, it isn't. It's on the chair." }
             ]
         },
         "10": {
@@ -111,10 +113,10 @@ TEACHING_CONTENT["PU1"] = {
                 "No it isn't."
             ],
             sentencePairs: [
-                { a: "Where is Jim?", b: "Jim is in the classroom." },
-                { a: "Where is the paper?", b: "The paper is in the cupboard." },
-                { a: "Where is Jenny?", b: "Jenny is in the playground." },
-                { a: "Where is the teacher?", b: "The teacher is next to the window." }
+                { a: "Where is Jim?", b: "He's in the classroom." },
+                { a: "Where is the paper?", b: "It's in the cupboard." },
+                { a: "Where is Jenny?", b: "She's in the playground." },
+                { a: "Where are the books?", b: "They're in the bookcase. " }
             ]
         },
         "11": {

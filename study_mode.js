@@ -559,6 +559,8 @@ function moveWordTile(btn) {
     const dropZone = document.getElementById('sentence-drop-zone');
     const bank = document.getElementById('sentence-word-bank');
 
+    btn.classList.remove('!bg-green-500', '!bg-red-500');
+
     if (btn.parentElement === bank) {
         dropZone.appendChild(btn);
     } else {
@@ -569,12 +571,25 @@ function moveWordTile(btn) {
 function checkRoundD(targetSentence) {
     const dropZone = document.getElementById('sentence-drop-zone');
     const currentWords = Array.from(dropZone.children).map(b => b.dataset.word);
-    const formedSentence = currentWords.join(' ');
+    const targetWords = targetSentence.split(' ');
+    let allCorrect = true;
 
-    // Normalize logic? (Trim spaces, etc)
-    // Target might have different whitespace, but split(' ') join(' ') usually matches if tokenization matched.
+    Array.from(dropZone.children).forEach((btn, index) => {
+        btn.classList.remove('!bg-green-500', '!bg-red-500');
+        
+        if (btn.dataset.word === targetWords[index]) {
+            btn.classList.add('!bg-green-500');
+        } else {
+            btn.classList.add('!bg-red-500');
+            allCorrect = false;
+        }
+    });
 
-    if (formedSentence === targetSentence) {
+    if (currentWords.length !== targetWords.length) {
+        allCorrect = false;
+    }
+
+    if (allCorrect) {
         playHappySound();
         setTimeout(() => {
             STUDY_STATE.currentSentenceIndex++;

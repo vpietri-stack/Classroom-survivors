@@ -36,7 +36,7 @@ function showVocabImage(elementId, word) {
 
     const filename = word.trim().toLowerCase().replace(/ /g, '-');
     const imagePath = `images/vocab/${filename}.png`;
-    
+
     // Use an off-DOM image to preload and check existence
     const img = new Image();
     img.onload = () => {
@@ -58,7 +58,7 @@ function showVocabImage(elementId, word) {
 
     const filename = word.trim().toLowerCase().replace(/ /g, '-');
     const imagePath = `images/vocab/${filename}.png`;
-    
+
     // Use an off-DOM image to preload and check existence
     const img = new Image();
     img.onload = () => {
@@ -909,9 +909,7 @@ function startGrammarGame() {
 
     const rawChunks = primarySentence.split(' ');
     const tokens = rawChunks.map(chunk => {
-        // Improved regex to include ? and !
-        const match = chunk.match(/^(.+?)([,.?!]+)$/);
-        return match ? { word: match[1], punct: match[2] } : { word: chunk, punct: '' };
+        return { word: chunk, punct: '' };
     });
 
     const candidateIndices = tokens.map((_, i) => i);
@@ -999,10 +997,7 @@ function checkGrammar() {
         for (let option of validOptions) {
             // Tokenize option to get words only
             const optChunks = option.split(' ');
-            const optWords = optChunks.map(chunk => {
-                const match = chunk.match(/^(.+?)([,.?!]+)$/);
-                return match ? match[1] : chunk;
-            });
+            const optWords = optChunks;
 
             // Compare arrays
             if (optWords.length === userWords.length) {

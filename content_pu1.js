@@ -1399,6 +1399,46 @@ TEACHING_CONTENT["PU1"] = {
                 { a: "What do they like?", b: "They like chicken." }
             ]
         },
+        "48": {
+            vocab: [
+                'apple', 'beans', 'fruit', 'grapes', 'meat', 'meatballs', 'orange', 'sausages',
+                'juice',
+                'breakfast', 'lunch', 'dinner'
+            ],
+            sentences: [
+                "I don't like juice.",
+                "Do you like fruit? Yes, I do.",
+                "Do you like juice? No, I don't.",
+                "Does she like meat? No, she doesn't.",
+                "Does he like beans? Yes, he does.",
+                "I don't like meat.",
+                "I like beans.",
+                "Do they like salad? Yes, they do.",
+                "I like sausages.",
+                "I don't like meatballs.",
+                "I eat bread, and fruit for breakfast.",
+                "I drink milk for breakfast.",
+                "I eat chicken salad for lunch.",
+                "I eat burgers for dinner.",
+                "What fruit do you like?"
+            ],
+            sentencePairs: [
+                { a: "Do you like fruit?", b: "Yes, I do." },
+                { a: "Do you like juice?", b: "No, I don't, but I like fruit." },
+                { a: "Does she like beans?", b: "Yes, she does." },
+                { a: "Does she like meat?", b: "No, she doesn't, but she like beans." },
+                { a: "Does he like burgers, sausages and meatballs?", b: "No, he doesn't. He doesn't like meat." },
+                { a: "Does he like salad?", b: "Yes, he does." },
+                { a: "What fruit do you like?", b: "I like apples and grapes." },
+                { a: "What meat do you like?", b: "I like chicken and sausages." },
+                { a: "What do you eat for breakfast?", b: "I like eating eggs and sausages in the morning." },
+                { a: "What do you drink for breakfast?", b: "In the morning, I usually drink milk." },
+                { a: "What do you eat for lunch?", b: "I like eating chicken salad for lunch." },
+                { a: "What do you drink for lunch?", b: "I usually drink water for lunch." },
+                { a: "What do you eat for dinner?", b: "In the evening, I like having a burger." },
+                { a: "What do you drink for dinner?", b: "I usually drink lemonade in the evening." }
+            ]
+        },
         "54": {
             vocab: [
                 "chocolate", "cake", "chicken", "burger", "bread", "lemonade", "water",
@@ -1653,7 +1693,7 @@ TEACHING_CONTENT["PU1"] = {
         },
         "84": {
             vocab: [
-                'riding', 'swimming', 'watching', 'cleaning', 'playing', 'painting', 'doing', 'eating', 'feet', 'Tom',
+                'riding', 'swimming', 'watching', 'cleaning', 'playing', 'painting', 'doing', 'eat eating', 'feet', 'Tom',
                 'what', 'doing', 'is', 'she', 'are', 'you', "I'm", "they're", "isn't", "not"
             ],
             sentences: [
@@ -1686,7 +1726,7 @@ TEACHING_CONTENT["PU1"] = {
                 "skateboard", "skateboarding",
                 "run", "running",
                 "jump", "jumping",
-                "eat", "eating",
+                "eat", "eat eating",
                 "smile", "smiling",
                 "listen to music", "listening to music",
                 "he is", "he isn't", "she is", "she isn't", "it is", "it isn't",
@@ -1896,7 +1936,7 @@ AVAILABLE_CONTENT["PU1"] = {
     "1": [9, 10, 11, 12, 13, 14, 15, 16],
     "2": [19, 20, 21, 22, 23, 24, 25, 26, 27, 28],
     "3": [31, 32, 33, 34, 35, 36, 37, 43],
-    "4": [45, 47, 54],
+    "4": [45, 47, 48, 54],
     "5": [66],
     "6": [78, 81],
     "7": [83, 84, 92],

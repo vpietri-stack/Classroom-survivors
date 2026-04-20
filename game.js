@@ -1114,7 +1114,7 @@ function startSentenceMatchGame() {
     // Build dock UI
     const dock = document.getElementById('sentencematch-dock');
     dock.innerHTML = bSentences.map(item => `
-        <button class="gm-sentence-b-tile bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer"
+        <button class="gm-sentence-b-tile bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer"
                 data-correct-index="${item.correctIndex}"
                 onclick="selectGameModeBTile(this)">
             ${item.text}

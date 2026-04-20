@@ -684,7 +684,7 @@ function renderRoundE() {
             
             <div id="sentence-b-dock" class="bg-gray-800/50 p-4 rounded-xl flex flex-wrap gap-2 justify-center min-h-[80px] mt-4">
                 ${bSentences.map(item => `
-                    <button class="sentence-b-tile bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer"
+                    <button class="sentence-b-tile bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer"
                             data-correct-index="${item.correctIndex}"
                             onclick="selectBTile(this)">
                         ${item.text}

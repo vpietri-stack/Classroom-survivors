@@ -366,10 +366,52 @@ TEACHING_CONTENT["Think0"] = {
                 { a: "Look at my new Iphone!", b: "That's awesome!" }
             ]
         }
+    },
+    "2": {
+        "23": {
+            vocab: [
+                'angry', 'bored', 'cold', 'excited', 'hot', 'hungry', 'sad', 'thirsty', 'tired', 'worried',
+                "he isn't", 'Yes, he is', "No, he isn't",
+                "She isn't", 'Yes, she is', "No, she isn't",
+                "I'm not", 'Yes, I am.', "No, I'm not",
+                "They aren't", 'Yes, they are', "No, they aren't",
+                "We aren't", 'Yes, we are', "No, we aren't"
+            ],
+            sentences: [
+                "My friends aren't at the party.",
+                "My dad's angry because the sales assistant isn't there.",
+                "We're at the cinema and we aren't bored, we're excited!",
+                "Mum and Dad are a bit worried because the train is late.",
+                "I'm not bored because I'm on holiday.",
+                "It is the first day at my new school.",
+                "I'm not sad because my friends are there."
+            ],
+            sentencePairs: [
+                { a: "Are you thirsty?", b: "Yes, I am. Can I have some water, please?" },
+                { a: "Is Liam tired?", b: "No, he isn't. He’s just bored." },
+                { a: "Is Jud at the airport?", b: "No, he isn't. He’s at the station." },
+                { a: "Are Jud's mum and dad worried?", b: "Yes, they are, because their train is late." },
+                { a: "Are Eve and Olivia hungry?", b: "No, they aren't. They've got food." },
+                { a: "Why is Nathan sad?", b: "Because he hasn't got friends at his new school." },
+                { a: "Why are you sad?", b: "Because my friends aren't at the party." },
+                { a: "Is the food at the party great?", b: "Yes, it is." },
+                { a: "Is there a problem?", b: "No there isn't, don't worry!" },
+                { a: "Are you cold?", b: "Yes, I am. Can I have a jacket, please?" },
+                { a: "Are you hungry?", b: "Yes, I am. Can I have a sandwich, please?" },
+                { a: "Are you bored?", b: "Yes, I am. Can we play a game, please?" },
+                { a: "Are you tired?", b: "Yes, I am. Can we take a rest, please?" },
+                { a: "Are you angry?", b: "Yes, I am. Do you want to fight?!" },
+                { a: "Are you hot?", b: "Yes, I am. Can we open the windows, please?" },
+                { a: "Are you worried?", b: "Yes, I am. I can't find my dog..." },
+                { a: "Are you excited?", b: "Yes, I am! This game is so much fun!" },
+                { a: "Are you sad?", b: "No, I'm not. I'm feeling great!" }
+            ]
+        }
     }
 };
 
 AVAILABLE_CONTENT["Think0"] = {
     "0": [11],
-    "1": [15, 17, 18]
+    "1": [15, 17, 18],
+    "2": [23]
 };

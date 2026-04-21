@@ -1832,6 +1832,38 @@ TEACHING_CONTENT["PU1"] = {
                 { a: "Is the bath in the bedroom?", b: "No, it isn't. It's in the bathroom." },
                 { a: "Is the bath in the bathroom?", b: "Yes, it is." }
             ]
+        },
+        "97": {
+            vocab: [
+                'I can', "I can't", 'you can', "you can't", 'he can', "he can't", 'she can', "she can't", 'we can', "we can't", 'they can', "they can't"
+            ],
+            sentences: [
+                "Can you ride a horse? No, I can't, but I can ride a bike.",
+                "Can Rocky fly? No, he can't.",
+                "Can he sing? No, he can't, but he can play the guitar.",
+                "I can't dance.",
+                "Can she play the guitar? Yes, she can, but she can't play the piano.",
+                "Gracie can eat books.",
+                "Dogs can't fly, but they can swim.",
+                "I can swim, but I can't fly.",
+                "Elephants can't jump.",
+                "Most animals can swim."
+            ],
+            sentencePairs: [
+                { a: "Can Rocky's brother and sister swim?", b: "Yes, they can." },
+                { a: "Can Cameron swim?", b: "No, he can't." },
+                { a: "What can Rocky do?", b: "He can dance and ride a horse." },
+                { a: "Can Shelly ride a horse?", b: "No, she can't." },
+                { a: "Can you play baseball?", b: "No, I can't, but I can play basketball." },
+                { a: "Can you play the piano?", b: "Yes, I can, but I can't play the guitar." },
+                { a: "Can dogs fly?", b: "No, they can't, but they can swim." },
+                { a: "Can ducks fly?", b: "Yes, they can, and they can swim." },
+                { a: "I can play the piano,", b: "but I can't play the guitar." },
+                { a: "I can play football,", b: "but I can't baseball." },
+                { a: "Dogs can swim,", b: "but they can't fly." },
+                { a: "Ducks can swim,", b: "and they can fly." },
+                { a: "He can't ride a horse,", b: "but he can ride a bike." }
+            ]
         }
     },
     "9": {
@@ -1940,6 +1972,6 @@ AVAILABLE_CONTENT["PU1"] = {
     "5": [66],
     "6": [78, 81],
     "7": [83, 84, 92],
-    "8": [95],
+    "8": [95, 97],
     "9": [107, 108, 110, 111]
 };

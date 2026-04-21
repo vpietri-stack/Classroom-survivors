@@ -12,11 +12,11 @@ const CLASS_DAYS = ["周一", "周四", "周五", "周六", "周日", "其他老
     "5": [66],
     "6": [78, 81],
     "7": [83, 84, 92],
-    "8": [95],
+    "8": [95, 97],
     "9": [107, 108, 110, 111]
     },
     "PU2": {
-      "0": [5],
+    "0": [5],
     "1": [7, 9, 10, 16],
     "2": [28],
     "3": [40, 43],
@@ -87,13 +87,13 @@ const CLASS_CONFIG = {
     "周五": {
         "1900-2030": {
             students: ["Colin", "Ethan", "Hollis", "Selena", "Sophia"],
-            content: { book: "PU1", unit: "8", page: "95" }
+            content: { book: "PU1", unit: "8", page: "97" }
         }
     },
     "周六": {
         "0900-1030": {
             students: ["Angel", "Loky", "Dylan", "Mia", "YaoYao", "Julia"],
-            content: { book: "PU1", unit: "6", page: "81" }
+            content: { book: "PU2", unit: "0", page: "5" }
         },
         "1040-1210": {
             students: ["Amy", "Annie", "Doris", "Harvey", "May", "Milk"],

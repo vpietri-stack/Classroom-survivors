@@ -4073,5 +4073,29 @@ const LOCAL_TRANSLATIONS = {
     "I drink milk for breakfast.": "我早餐喝牛奶。",
     "I eat chicken salad for lunch.": "我午餐吃鸡肉沙拉。",
     "I eat burgers for dinner.": "我晚餐吃汉堡。",
-    "What fruit do you like?": "你喜欢什么水果？"
+    "What fruit do you like?": "你喜欢什么水果？",
+
+    // --- PU1 Unit 8 Page 97 ---
+    "I can": "我会 / 我能",
+    "I can't": "我不会 / 我不能",
+    "you can": "你会 / 你能",
+    "you can't": "你不会 / 你不能",
+    "he can": "他会 / 他能",
+    "he can't": "他不会 / 他不能",
+    "she can": "她会 / 她能",
+    "she can't": "她不会 / 她不能",
+    "we can": "我们会 / 我们能",
+    "we can't": "我们不会 / 我们不能",
+    "they can": "他们会 / 他们能",
+    "they can't": "他们不会 / 他们不能",
+    "Can you ride a horse? No, I can't, but I can ride a bike.": "你会骑马吗？不，我不会，但我会骑自行车。",
+    "Can Rocky fly? No, he can't.": "Rocky会飞吗？不，他不会。",
+    "Can he sing? No, he can't, but he can play the guitar.": "他会唱歌吗？不，他不会，但他会弹吉他。",
+    "I can't dance.": "我不会跳舞。",
+    "Can she play the guitar? Yes, she can, but she can't play the piano.": "她会弹吉他吗？是的，她会，但她不会弹钢琴。",
+    "Gracie can eat books.": "Gracie会吃书。",
+    "Dogs can't fly, but they can swim.": "狗不会飞，但它们会游泳。",
+    "I can swim, but I can't fly.": "我会游泳，但我不会飞。",
+    "Elephants can't jump.": "大象不会跳。",
+    "Most animals can swim.": "大多数动物都会游泳。"
 };

@@ -169,190 +169,6 @@ TEACHING_CONTENT["PU1"] = {
                 { a: "How do we do our work?", b: "We work together." }
             ]
         },
-        "14": {
-            vocab: [
-                // Verbs & Pronoun Contractions
-                'I am', "I'm", "I'm not",
-                'he is', "he's", "he isn't",
-                'she is', "she's", "she isn't",
-                'it is', "it's", "it isn't",
-                'you are', "you're", "you aren't",
-                'we are', "we're", "we aren't",
-                'they are', "they're", "they aren't",
-
-                // School Nouns
-                'bag', 'book', 'pen', 'pencil', 'rubber', 'ruler', 'desk', 'chair', 'pencil case', 'board', 'table', 'teacher',
-
-                // Colors
-                'red', 'blue', 'green', 'yellow', 'orange', 'pink', 'purple', 'black', 'white', 'brown',
-
-                // Numbers & Articles
-                'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'a', 'an', 'the',
-
-                // Question Words & Possessives
-                "what's", "where's", 'your', 'my',
-
-                // Positions & Demonstratives
-                'in', 'on', 'under', 'next to', 'this', 'these', 'is', "isn't", 'are', "aren't"
-            ],
-            sentences: [
-                // Identification Statements (Positive & Negative)
-                "It's a red pen.",
-                "It isn't a blue pen.",
-                "This is my bag.",
-                "This isn't your bag.",
-                "They're green pencils.",
-                "They aren't yellow pencils.",
-                "These are rubbers.",
-                "These aren't rulers.",
-
-                // Yes/No Questions & Answers (Positive & Negative)
-                "Is it a desk? Yes, it is.",
-                "Is it a chair? No, it isn't.",
-                "Are they books? Yes, they are.",
-                "Are they pencil cases? No, they aren't.",
-                "Is it a black board? Yes, it is.",
-                "Is it a purple board? No, it isn't.",
-
-                // Wh- Questions & Answers (Standard)
-                "What's this? It's a ruler.",
-                "What's this? It isn't a rubber.",
-                "What colour is it? It's orange.",
-                "What colour is it? It isn't pink.",
-
-                // "What are these?" (2 pairs)
-                "What are these? They're books.",
-                "What are these? They aren't pencils.",
-
-                // Position Statements (Positive & Negative)
-                "The pen is on the desk.",
-                "The ruler isn't under the chair.",
-
-                // Position Question/Answers (one Where's? one Where are?)
-                "Where's the rubber? It's in the pencil case.",
-                "Where are the pens? They're in the bag.",
-                "Where's the book? It's on the table.",
-                "Where are the rubbers? They're on the desk.",
-                "Where's the bag? It's under the chair.",
-                "Where are the pencil cases? They're under the table.",
-                "Where's the ruler? It's next to the book.",
-                "Where are the books? They're next to the table."
-            ],
-            sentencePairs: [
-                { a: "Is it a chair?", b: "No, it isn't a chair." },
-                { a: "What are these?", b: "They're rubbers." },
-                { a: "Where's the bag?", b: "The bag is under the chair." },
-                { a: "Where are the pencil cases?", b: "The pencil cases are under the table." },
-                { a: "What's your name?", b: "I'm Jenny." },
-                { a: "How old are you?", b: "I'm seven years old." },
-                { a: "What's the cat's name?", b: "The cat's name is Cameron." },
-                { a: "What's the horse's name?", b: "The horse's name is Harry." },
-                { a: "What's the boy's name?", b: "The boy's name is Jim." },
-                { a: "What's the girl's name?", b: "The girl's name is Jenny." },
-                { a: "What's the hen's name?", b: "The hen's name is Henrietta." },
-                { a: "What's the rooster's name?", b: "The rooster's name is Rocky." },
-                { a: "What's the sheep's name?", b: "The sheep's name is Shelly." },
-                { a: "What's the goat's name?", b: "The goat's name is Gracie." },
-                { a: "What colour is the bag?", b: "The bag is red." },
-                { a: "What colour is the pen?", b: "The pen is purple." },
-                { a: "What colour is the book?", b: "The book is blue." },
-                { a: "What colour is the pencil?", b: "The pencil is brown." },
-                { a: "Where's the bag?", b: "The bag is on the desk." },
-                { a: "Where's the pen?", b: "The pen is in the pencil case." },
-                { a: "Where's the book?", b: "The book is in the bag." },
-                { a: "Where is Jim?", b: "Jim is in the classroom." },
-                { a: "Where is the paper?", b: "The paper is in the cupboard." },
-                { a: "Where is Jenny?", b: "Jenny is in the playground." },
-                { a: "Where is the teacher?", b: "The teacher is next to the window." },
-                { a: "What's this?", b: "It's a window." },
-                { a: "What are these", b: "They're rubbers." },
-                { a: "Where are the books?", b: "They're on the bookcase." },
-                { a: "Where's the pencil?", b: "It's in the pencil case." },
-                { a: "Are you OK?", b: "Yes, thank you." },
-                { a: "Here you are!", b: "Thank you very much." },
-                { a: "Can I help you?", b: "Yes, thank you." },
-                { a: "What do you share?", b: "I share my book." },
-                { a: "Who do you listen to?", b: "I listen to the teacher." },
-                { a: "Who do you help?", b: "I help my classmates." },
-                { a: "How do we do our work?", b: "We work together." }
-            ]
-        },
-        "15": {
-            vocab: [
-                // Verbs & Pronoun Contractions
-                'I am', "I'm", "I'm not",
-                'he is', "he's", "he isn't",
-                'she is', "she's", "she isn't",
-                'it is', "it's", "it isn't",
-                'you are', "you're", "you aren't",
-                'we are', "we're", "we aren't",
-                'they are', "they're", "they aren't",
-
-                // School Nouns
-                'bag', 'book', 'pen', 'pencil', 'rubber', 'ruler', 'desk', 'chair', 'pencil case', 'board', 'table', 'teacher',
-
-                // Colors
-                'red', 'blue', 'green', 'yellow', 'orange', 'pink', 'purple', 'black', 'white', 'brown',
-
-                // Numbers & Articles
-                'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'a', 'an', 'the',
-
-                // Question Words & Possessives
-                "what's", "where's", 'your', 'my',
-
-                // Positions & Demonstratives
-                'in', 'on', 'under', 'next to', 'this', 'these', 'is', "isn't", 'are', "aren't"
-            ],
-            sentences: [
-                // Identification Statements (Positive & Negative)
-                "It's a red pen.",
-                "It isn't a blue pen.",
-                "This is my bag.",
-                "This isn't your bag.",
-                "They're green pencils.",
-                "They aren't yellow pencils.",
-                "These are rubbers.",
-                "These aren't rulers.",
-
-                // Yes/No Questions & Answers (Positive & Negative)
-                "Is it a desk? Yes, it is.",
-                "Is it a chair? No, it isn't.",
-                "Are they books? Yes, they are.",
-                "Are they pencil cases? No, they aren't.",
-                "Is it a black board? Yes, it is.",
-                "Is it a purple board? No, it isn't.",
-
-                // Wh- Questions & Answers (Standard)
-                "What's this? It's a ruler.",
-                "What's this? It isn't a rubber.",
-                "What colour is it? It's orange.",
-                "What colour is it? It isn't pink.",
-
-                // "What are these?" (2 pairs)
-                "What are these? They're books.",
-                "What are these? They aren't pencils.",
-
-                // Position Statements (Positive & Negative)
-                "The pen is on the desk.",
-                "The ruler isn't under the chair.",
-
-                // Position Question/Answers (one Where's? one Where are?)
-                "Where's the rubber? It's in the pencil case.",
-                "Where are the pens? They're in the bag.",
-                "Where's the book? It's on the table.",
-                "Where are the rubbers? They're on the desk.",
-                "Where's the bag? It's under the chair.",
-                "Where are the pencil cases? They're under the table.",
-                "Where's the ruler? It's next to the book.",
-                "Where are the books? They're next to the table."
-            ],
-            sentencePairs: [
-                { a: "Is it a chair?", b: "No, it isn't a chair." },
-                { a: "What are these?", b: "They're rubbers." },
-                { a: "Where's the bag?", b: "The bag is under the chair." },
-                { a: "Where are the pencil cases?", b: "The pencil cases are under the table." }
-            ]
-        },
         "16": {
             vocab: [
                 // Verbs & Pronoun Contractions
@@ -423,12 +239,37 @@ TEACHING_CONTENT["PU1"] = {
                 "Where are the books? They're next to the table."
             ],
             sentencePairs: [
-                { a: "Is it a chair?", b: "No, it isn't a chair." },
+                { a: "Is it a chair?", b: "No, it isn't. It's a desk." },
                 { a: "What are these?", b: "They're rubbers." },
-                { a: "Where's the bag?", b: "The bag is under the chair." },
-                { a: "Where are the pencil cases?", b: "The pencil cases are under the table." }
+                { a: "What's your name?", b: "I'm Jenny." },
+                { a: "How old are you?", b: "I'm seven years old." },
+                { a: "What's the cat's name?", b: "He's Cameron." },
+                { a: "What's the horse's name?", b: "He's Harry." },
+                { a: "What's the boy's name?", b: "He's Jim." },
+                { a: "What's the girl's name?", b: "She's Jenny." },
+                { a: "What's the hen's name?", b: "She's Henrietta." },
+                { a: "What's the rooster's name?", b: "He's Rocky." },
+                { a: "What's the sheep's name?", b: "She's Shelly." },
+                { a: "What's the goat's name?", b: "She's Gracie." },
+                { a: "What colour is the bag?", b: "It's red." },
+                { a: "What colour are the crayons?", b: "They're purple." },
+                { a: "Where's the bag?", b: "It's on the desk." },
+                { a: "Where are the pencils?", b: "They're in the pencil case." },
+                { a: "Where is Jim?", b: "He's in the classroom." },
+                { a: "Where is Jenny?", b: "She's in the playground." },
+                { a: "What's this?", b: "It's a window." },
+                { a: "What are these", b: "They're rubbers." },
+                { a: "Where are the books?", b: "They're on the bookcase." },
+                { a: "Are you OK?", b: "Yes, thank you." },
+                { a: "Here you are!", b: "Thank you very much." },
+                { a: "Can I help you?", b: "Yes, thank you." },
+                { a: "What do you share?", b: "I share my book." },
+                { a: "Who do you listen to?", b: "I listen to the teacher." },
+                { a: "Who do you help?", b: "I help my classmates." },
+                { a: "How do we do our work?", b: "We work together." }
             ]
         },
+
     },
     "2": {
         "19": {
@@ -1965,7 +1806,7 @@ TEACHING_CONTENT["PU1"] = {
 
 AVAILABLE_CONTENT["PU1"] = {
     "0": [4, 5, 7, 8],
-    "1": [9, 10, 11, 12, 13, 14, 15, 16],
+    "1": [9, 10, 11, 12, 13, 16],
     "2": [19, 20, 21, 22, 23, 24, 25, 26, 27, 28],
     "3": [31, 32, 33, 34, 35, 36, 37, 43],
     "4": [45, 47, 48, 54],

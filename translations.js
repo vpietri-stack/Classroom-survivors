@@ -4131,5 +4131,24 @@ const LOCAL_TRANSLATIONS = {
     "Mum and Dad are a bit worried because the train is late.": "妈妈和爸爸有点担心，因为火车晚点了。",
     "I'm not bored because I'm on holiday.": "我不无聊，因为我在度假。",
     "It is the first day at my new school.": "这是我新学校的第一天。",
-    "I'm not sad because my friends are there.": "我不难过，因为我的朋友们在那里。"
+    "I'm not sad because my friends are there.": "我不难过，因为我的朋友们在那里。",
+
+    // --- PU2 Unit 9 Page 107 ---
+    "afraid": "害怕的",
+    "frightened": "受惊的/害怕的",
+    "surprised": "惊讶的",
+    "boring": "无聊的",
+    "dangerous": "危险的",
+    "difficult": "困难的",
+    "easy": "简单的",
+    "exciting": "令人兴奋的",
+
+    "I'm afraid of the dark.": "我怕黑。",
+    "The exam was really easy.": "考试真的很容易。",
+    "The film was so boring.": "这部电影太无聊了。",
+    "I'm frightened of spiders.": "我害怕蜘蛛。",
+    "It is difficult to see in the dark.": "在黑暗中很难看清。",
+    "You must wear a helmet, because skateboarding is dangerous.": "你必须戴头盔，因为滑板很危险。",
+    "Jim slept on the train, because he was tired.": "吉姆在火车上睡着了，因为他累了。",
+    "Jane was surprised when she saw a giraffe in the classroom.": "当简在教室里看到长颈鹿时，她很惊讶。"
 };

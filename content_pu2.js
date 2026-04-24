@@ -1112,6 +1112,35 @@ TEACHING_CONTENT["PU2"] = {
         }
     },
     "9": {
+        "107": {
+            vocab: [
+                'afraid', 'frightened', 'hungry', 'surprised', 'thirsty', 'tired',
+                'boring', 'dangerous', 'difficult', 'easy', 'exciting'
+            ],
+            sentences: [
+                "I'm afraid of the dark.",
+                "The exam was really easy.",
+                "The film was so boring.",
+                "I'm frightened of spiders.",
+                "It is difficult to see in the dark.",
+                "You must wear a helmet, because skateboarding is dangerous.",
+                "Jim slept on the train, because he was tired.",
+                "Jane was surprised when she saw a giraffe in the classroom."
+            ],
+            sentencePairs: [
+                { a: "Why are you drinking a glass of water?", b: "Because I am very thirsty." },
+                { a: "Why did Mary eat three bananas?", b: "Because she was very hungry." },
+                { a: "Why do you have to wear a helmet?", b: "Because skateboarding is dangerous." },
+                { a: "Why did Jim sleep on the train?", b: "Because he was very tired." },
+                { a: "Why are you afraid?", b: "Because I don't like the dark." },
+                { a: "Why is she so surprised?", b: "Because her daughter gave her a secret party." },
+                { a: "Do you like the funfair?", b: "Yes, I do, because the rides are so exciting!" },
+                { a: "Why were the students sleeping?", b: "Because the teacher was so boring." },
+                { a: "How was your exam?", b: "It was easy and I got everything right." },
+                { a: "Can you catch this running dog?", b: "No, it's too difficult, it's too fast for me!" },
+                { a: "Do you like scary films?", b: "No, I don't, I'm frightened of them!" }
+            ]
+        },
         "116": {
             vocab: [
                 'afraid', 'angry', 'boring', 'busy', 'dangerous', 'difficult', 'easy', 'exciting', 'frightened', 'hungry', 'interesting', 'surprised', 'thirsty', 'tired', 'beautiful', 'famous',
@@ -1194,5 +1223,5 @@ AVAILABLE_CONTENT["PU2"] = {
     "6": [78, 81],
     "7": [83, 85, 87, 93],
     "8": [95, 96, 104],
-    "9": [116, 119]
+    "9": [107, 116, 119]
 };

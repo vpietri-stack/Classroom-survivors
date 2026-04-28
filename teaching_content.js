@@ -69,6 +69,8 @@ function pickUniqueItems(pages, count, type, activePageIndex, useWeights = false
         const content = TEACHING_CONTENT[p.book] && TEACHING_CONTENT[p.book][p.unit] && TEACHING_CONTENT[p.book][p.unit][p.page];
         if (content && content[type] && content[type].length > 0) {
             const pageItems = [];
+            const pageSeen = new Set(); // Internal deduplication for this page
+
             content[type].forEach(item => {
                 // Generate identifier based on item content
                 let identifier = "";
@@ -82,12 +84,18 @@ function pickUniqueItems(pages, count, type, activePageIndex, useWeights = false
                     identifier = JSON.stringify(item);
                 }
 
-                if (!seenIdentifier.has(identifier)) {
-                    seenIdentifier.add(identifier);
-                    const itemEntry = { item, pageIndex: p.absIndex };
-                    pageItems.push(itemEntry);
-                    allItems.push(itemEntry);
-                }
+                // 1. Internal page deduplication (always ensure page items are unique within the page)
+                if (pageSeen.has(identifier)) return;
+                pageSeen.add(identifier);
+
+                // 2. Global deduplication (only if building a mixed pool)
+                // If samePageOnly is true, we want the page to have its full content.
+                if (!samePageOnly && seenIdentifier.has(identifier)) return;
+                if (!samePageOnly) seenIdentifier.add(identifier);
+
+                const itemEntry = { item, pageIndex: p.absIndex };
+                pageItems.push(itemEntry);
+                allItems.push(itemEntry);
             });
             if (pageItems.length > 0) {
                 pagesWithItems.push({ pageIndex: p.absIndex, items: pageItems });

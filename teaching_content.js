@@ -60,7 +60,12 @@ function pickUniqueItems(pages, count, type, activePageIndex, useWeights = false
     const seenIdentifier = new Set(); // Track unique items by content to avoid showing the same question twice
     const pagesWithItems = [];
 
-    pages.forEach((p) => {
+    // Process pages in reverse order (from current to oldest)
+    // This ensures that the current page "claims" its items first in the seenIdentifier set.
+    // Otherwise, common review items might be "stolen" by older pages, leaving the current page with a very small pool.
+    const reversedPages = [...pages].reverse();
+
+    reversedPages.forEach((p) => {
         const content = TEACHING_CONTENT[p.book] && TEACHING_CONTENT[p.book][p.unit] && TEACHING_CONTENT[p.book][p.unit][p.page];
         if (content && content[type] && content[type].length > 0) {
             const pageItems = [];

@@ -126,7 +126,8 @@ async function handleLoginSubmit() {
             id: data.id,
             name: data.fullName,
             avatar: data.avatar,
-            role: data.role
+            role: data.role,
+            classTime: data.classTime
         };
         
         if (data.needsPasswordChange) {
@@ -223,6 +224,74 @@ function saveUserToLocalAndStart(user) {
 
 function finishLogin() {
     hideAllAuthScreens();
-    // Drop them into the game's start screen
+
+    // Auto-resolve the student's class content from their classTime
+    if (authActiveUser && authActiveUser.classTime) {
+        resolveContentFromClassTime(authActiveUser.classTime, authActiveUser.name);
+    }
+
+    // Show the start screen but skip directly to the greeting step
     document.getElementById('startScreen').classList.remove('hidden');
+
+    // Hide all wizard steps
+    ['step-day', 'step-time', 'step-student', 'step-book', 'step-unit'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+    });
+
+    // Show greeting directly
+    document.getElementById('step-greeting').classList.remove('hidden');
+    document.getElementById('greeting-text').innerText = `Hello, ${authActiveUser.name}!`;
+}
+
+/**
+ * Maps a classTime string like "Sat 14:50" to the correct CLASS_CONFIG entry
+ * and calls loadContent() so the games have the right vocab/sentences.
+ */
+function resolveContentFromClassTime(classTime, studentName) {
+    const dayMap = {
+        'Mon': '周一', 'Tue': '周二', 'Wed': '周三',
+        'Thu': '周四', 'Fri': '周五', 'Sat': '周六', 'Sun': '周日'
+    };
+
+    // classTime format: "Sat 14:50" or "Mon/Thu 19:50"
+    const parts = classTime.split(' ');
+    if (parts.length < 2) return;
+
+    const timeStr = parts[1]; // e.g. "14:50"
+    const dayKeys = parts[0].split('/'); // e.g. ["Mon", "Thu"] or ["Sat"]
+
+    // Try each day abbreviation until we find a matching config entry
+    for (const dayAbbr of dayKeys) {
+        const dayZh = dayMap[dayAbbr];
+        if (!dayZh || !CLASS_CONFIG[dayZh]) continue;
+
+        const daySlots = CLASS_CONFIG[dayZh];
+        // Find the slot whose start time matches (e.g. "1450" matches "14:50")
+        for (const slotKey of Object.keys(daySlots)) {
+            const slotStart = slotKey.substring(0, 4); // e.g. "1450"
+            const csvTime = timeStr.replace(':', '');   // e.g. "1450"
+            if (slotStart === csvTime) {
+                // Found the matching slot — set the wizard state variables
+                selectedDay = dayZh;
+                selectedTime = slotKey;
+                selectedStudent = studentName;
+                loadContent();
+                return;
+            }
+        }
+    }
+    console.warn('Could not auto-resolve classTime:', classTime);
+}
+
+function goBackToProfiles() {
+    // Hide start screen and go back to profile selection
+    document.getElementById('startScreen').classList.add('hidden');
+    document.getElementById('step-greeting').classList.add('hidden');
+    authActiveUser = null;
+    const savedUsers = JSON.parse(localStorage.getItem('savedUsers') || '[]');
+    if (savedUsers.length > 0) {
+        showProfileSelection(savedUsers);
+    } else {
+        showLoginScreen(true);
+    }
 }

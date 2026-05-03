@@ -9,6 +9,7 @@ const client = new CosmosClient({ endpoint, key });
 const container = client.database('Val-EslApp').container('Students');
 
 app.http('login', {
+    route: 'login',
     methods: ['POST'],
     authLevel: 'anonymous',
     handler: async (request, context) => {
@@ -45,7 +46,8 @@ app.http('login', {
                     fullName: user.fullName,
                     avatar: user.avatar || null,
                     needsPasswordChange: user.needsPasswordChange,
-                    role: user.role
+                    role: user.role,
+                    classTime: user.classTime || null
                 }
             };
         } catch (error) {

@@ -1,6 +1,70 @@
 const API_BASE = 'http://localhost:7071/api';
 let authActiveUser = null;
 
+// --- ANALYTICS TRACKING ---
+let analyticsQueue = [];
+let analyticsFlushTimer = null;
+
+// Exercise tracking state
+let exerciseStartTime = 0;
+let exerciseAttempts = 0;
+
+function startExerciseTracking() {
+    exerciseStartTime = Date.now();
+    exerciseAttempts = 1; // First attempt counts as 1
+}
+
+function incrementExerciseAttempts() {
+    exerciseAttempts++;
+}
+
+function queueExerciseEvent(exerciseType, mode) {
+    if (!authActiveUser) return;
+    const durationMs = Date.now() - exerciseStartTime;
+    analyticsQueue.push({
+        type: 'exercise',
+        exerciseType: exerciseType,
+        mode: mode,
+        attempts: exerciseAttempts,
+        durationMs: durationMs,
+        timestamp: new Date().toISOString()
+    });
+    scheduleAnalyticsFlush();
+}
+
+function queueSessionEvent(sessionType, data) {
+    if (!authActiveUser) return;
+    analyticsQueue.push({
+        type: 'session',
+        sessionType: sessionType,
+        data: data,
+        timestamp: new Date().toISOString()
+    });
+    scheduleAnalyticsFlush();
+}
+
+function scheduleAnalyticsFlush() {
+    if (analyticsFlushTimer) clearTimeout(analyticsFlushTimer);
+    analyticsFlushTimer = setTimeout(flushAnalytics, 2000);
+}
+
+async function flushAnalytics() {
+    if (!authActiveUser || analyticsQueue.length === 0) return;
+    const events = [...analyticsQueue];
+    analyticsQueue = [];
+    try {
+        await fetch(`${API_BASE}/saveAnalytics`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ studentId: authActiveUser.id, events })
+        });
+    } catch (e) {
+        console.warn('Failed to flush analytics:', e);
+        // Re-queue failed events
+        analyticsQueue = events.concat(analyticsQueue);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initAuth();
 });

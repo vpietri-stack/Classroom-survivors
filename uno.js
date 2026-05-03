@@ -610,6 +610,17 @@ function endUno(winner) {
     document.getElementById('unoGameTime').innerText = f(gs);
     document.getElementById('unoQuestTime').innerText = f(qs);
     document.getElementById('unoTotalTime').innerText = f(gs + qs);
+
+    // Track session analytics
+    queueSessionEvent('uno', {
+        winner: winner,
+        winnerName: winner === 0 ? nm : unoPlayerNames[winner],
+        gameTimeSec: gs,
+        questTimeSec: qs,
+        totalTimeSec: gs + qs
+    });
+    flushAnalytics();
+
     document.getElementById('unoScreen').classList.add('hidden');
     document.getElementById('unoGameOverScreen').classList.remove('hidden');
 }

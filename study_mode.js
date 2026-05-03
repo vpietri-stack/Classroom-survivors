@@ -139,6 +139,7 @@ function startRoundB() {
     STUDY_STATE.round = 'B';
     STUDY_STATE.currentWordIndex = 0;
     updateStudyUI("Round B: Word Scramble", "Unscramble the letters.");
+    startExerciseTracking();
     nextRoundBWord();
 }
 
@@ -289,12 +290,15 @@ function checkRoundBLogic(targetWord) {
 
     if (allCorrect) {
         playHappySound();
+        queueExerciseEvent('wordScramble', 'study');
         setTimeout(() => {
             STUDY_STATE.currentWordIndex++;
+            startExerciseTracking();
             nextRoundBWord();
         }, 1000);
     } else {
         synthError();
+        incrementExerciseAttempts();
         // User has to try again. they can click red slots to remove them.
     }
 }
@@ -309,6 +313,7 @@ function startRoundC() {
     STUDY_STATE.round = 'C';
     STUDY_STATE.currentWordIndex = 0;
     updateStudyUI("Round C: Spelling", "Type the word.");
+    startExerciseTracking();
     nextRoundCWord();
 }
 
@@ -473,13 +478,16 @@ function checkRoundC(targetWord) {
 
     if (allCorrect) {
         playHappySound();
+        queueExerciseEvent('spelling', 'study');
         setTimeout(() => {
             roundCInput = "";
             STUDY_STATE.currentWordIndex++;
+            startExerciseTracking();
             nextRoundCWord();
         }, 1000);
     } else {
         synthError();
+        incrementExerciseAttempts();
         setTimeout(() => {
             clearRoundC();
         }, 2000);
@@ -496,6 +504,7 @@ function startRoundD() {
     STUDY_STATE.round = 'D';
     STUDY_STATE.currentSentenceIndex = 0;
     updateStudyUI("Round D: Sentence Scramble", "Order the words.");
+    startExerciseTracking();
     nextRoundDSentence();
 }
 
@@ -591,12 +600,15 @@ function checkRoundD(targetSentence) {
 
     if (allCorrect) {
         playHappySound();
+        queueExerciseEvent('sentenceScramble', 'study');
         setTimeout(() => {
             STUDY_STATE.currentSentenceIndex++;
+            startExerciseTracking();
             nextRoundDSentence();
         }, 1000);
     } else {
         synthError();
+        incrementExerciseAttempts();
         dropZone.classList.add('border-red-500');
         setTimeout(() => dropZone.classList.remove('border-red-500'), 500);
     }
@@ -607,6 +619,7 @@ function checkRoundD(targetSentence) {
 function startRoundE() {
     STUDY_STATE.round = 'E';
     STUDY_STATE.subRound = 1; // Initialize sub-round counter
+    startExerciseTracking();
     nextRoundESubRound();
 }
 
@@ -778,12 +791,15 @@ function checkRoundE() {
 
     if (allCorrect) {
         playHappySound();
+        queueExerciseEvent('sentenceMatch', 'study');
         setTimeout(() => {
             STUDY_STATE.subRound++;
+            startExerciseTracking();
             nextRoundESubRound();
         }, 1500);
     } else {
         synthError();
+        incrementExerciseAttempts();
         // Reset after 2 seconds
         setTimeout(() => {
             resetRoundE();
@@ -816,6 +832,13 @@ function finishStudySession() {
     const timeStr = `${mm}m ${ss}s`;
 
     const player = selectedStudent || "Student";
+
+    // Track session completion
+    queueSessionEvent('study', {
+        durationMs: durationMs,
+        durationFormatted: timeStr
+    });
+    flushAnalytics(); // Flush immediately on session end
 
     const container = document.getElementById('study-game-area');
     container.innerHTML = `

@@ -9,6 +9,7 @@ const client = new CosmosClient({ endpoint, key });
 const container = client.database('Val-EslApp').container('Students');
 
 app.http('changePassword', {
+    route: 'changePassword',
     methods: ['POST'],
     authLevel: 'anonymous',
     handler: async (request, context) => {
@@ -20,12 +21,21 @@ app.http('changePassword', {
                 return { status: 400, body: "Missing id or newPassword." };
             }
 
-            // Read existing user first
-            const { resource: user } = await container.item(id, id).read();
+            context.log("changePassword called with id:", id);
 
-            if (!user) {
-                return { status: 404, body: "User not found." };
+            // Read existing user first
+            const querySpec = {
+                query: "SELECT * FROM c WHERE c.id = @id",
+                parameters: [{ name: "@id", value: id }]
+            };
+            const { resources: items } = await container.items.query(querySpec).fetchAll();
+            context.log("Found items length:", items.length);
+
+            if (items.length === 0) {
+                return { status: 404, body: "User not found for id: " + id + " and " + JSON.stringify(body) };
             }
+            
+            const user = items[0];
 
             // Update fields
             user.password = newPassword;

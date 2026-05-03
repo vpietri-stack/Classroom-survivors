@@ -679,6 +679,17 @@ function endGomokuGame(result) {
     document.getElementById('gomokuQuestTime').innerText = format(questTimeSec);
     document.getElementById('gomokuTotalTime').innerText = format(totalTimeSec);
 
+    // Track session analytics
+    queueSessionEvent('gomoku', {
+        result: result,
+        mode: gomokuMode,
+        difficulty: gomokuDifficulty,
+        gameTimeSec: gameTimeSec,
+        questTimeSec: questTimeSec,
+        totalTimeSec: totalTimeSec
+    });
+    flushAnalytics();
+
     document.getElementById('gomokuGameOverScreen').classList.remove('hidden');
 }
 

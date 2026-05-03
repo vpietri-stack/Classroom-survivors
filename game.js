@@ -651,6 +651,7 @@ function loadContent() {
 
 function startSpellingGame() {
     if (SPELLING_WORDS.length === 0) { handleMinigameSuccess('spelling'); return; }
+    startExerciseTracking();
 
     // Weighted selection
     const { book, unit, page } = selectedClassContent;
@@ -798,6 +799,7 @@ function checkSpelling() {
         synthError();
         setTimeout(() => display.classList.remove('shake'), 500);
         isFirstAttempt = false;
+        incrementExerciseAttempts();
     }
 }
 
@@ -881,6 +883,7 @@ function checkWordRec(selected, target, btn) {
 
 function startGrammarGame() {
     if (GRAMMAR_SENTENCES.length === 0) { handleMinigameSuccess('grammar'); return; }
+    startExerciseTracking();
 
     const { book, unit, page } = selectedClassContent;
     const rawEntry = getWeightedItemForGame(book, unit, page, 'sentences');
@@ -1043,6 +1046,7 @@ function checkGrammar() {
     if (anyFilled && !allCorrect) {
         synthError();
         isFirstAttempt = false;
+        incrementExerciseAttempts();
     }
 
     if (allCorrect) {
@@ -1055,6 +1059,7 @@ function checkGrammar() {
 let gameModeSelectedBTile = null;
 
 function startSentenceMatchGame() {
+    startExerciseTracking();
     const { book, unit, page } = selectedClassContent;
     // Get sentence pairs using weighted selection (similar to other minigames but for 5 items)
     const sortedPages = getSortedPagesForBook(book);
@@ -1196,6 +1201,7 @@ function checkSentenceMatch() {
     } else {
         synthError();
         isFirstAttempt = false;
+        incrementExerciseAttempts();
         // Reset after 2 seconds
         setTimeout(() => {
             const tiles = document.querySelectorAll('.gm-sentence-b-tile');
@@ -1217,6 +1223,12 @@ function handleMinigameSuccess(gameType) {
     else if (gameType === 'rec') { actionsId = 'rec-options'; resultId = 'rec-result-action'; }
     else if (gameType === 'sentencematch') { actionsId = 'sentencematch-actions'; resultId = 'sentencematch-result-action'; }
     else { actionsId = 'grammar-actions'; resultId = 'grammar-result-action'; }
+
+    // Track exercise analytics (skip word rec)
+    if (gameType !== 'rec') {
+        const exerciseTypeMap = { 'spelling': 'spelling', 'grammar': 'sentenceScramble', 'sentencematch': 'sentenceMatch' };
+        queueExerciseEvent(exerciseTypeMap[gameType] || gameType, 'game');
+    }
 
     if (actionsId) document.getElementById(actionsId).classList.add('hidden');
     const resultDiv = document.getElementById(resultId);

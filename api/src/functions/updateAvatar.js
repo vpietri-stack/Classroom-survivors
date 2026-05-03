@@ -9,6 +9,7 @@ const client = new CosmosClient({ endpoint, key });
 const container = client.database('Val-EslApp').container('Students');
 
 app.http('updateAvatar', {
+    route: 'updateAvatar',
     methods: ['POST'],
     authLevel: 'anonymous',
     handler: async (request, context) => {
@@ -25,11 +26,17 @@ app.http('updateAvatar', {
             }
 
             // Read existing user
-            const { resource: user } = await container.item(id, id).read();
+            const querySpec = {
+                query: "SELECT * FROM c WHERE c.id = @id",
+                parameters: [{ name: "@id", value: id }]
+            };
+            const { resources: items } = await container.items.query(querySpec).fetchAll();
 
-            if (!user) {
+            if (items.length === 0) {
                 return { status: 404, body: "User not found." };
             }
+            
+            const user = items[0];
 
             // Update avatar
             user.avatar = avatarValue;

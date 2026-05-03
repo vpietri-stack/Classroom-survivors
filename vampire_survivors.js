@@ -1154,6 +1154,16 @@ class MainScene extends Phaser.Scene {
                     const displayText = studentName ? `${studentName} (${classInfo})` : classInfo;
                     document.getElementById('finalContentDisplay').innerText = displayText;
 
+                    // Track session analytics
+                    queueSessionEvent('vampireSurvivors', {
+                        level: this.playerStats.level,
+                        survivalTimeSec: survivalTimeSec,
+                        minigameTimeSec: minigameTimeSec,
+                        scoreSec: scoreSec,
+                        kills: this.killCount
+                    });
+                    flushAnalytics();
+
                     document.getElementById('gameOverScreen').classList.remove('hidden');
                 });
             }
@@ -1218,6 +1228,7 @@ function triggerVampireSurvivors() {
     document.getElementById('gameIntroOverlay').classList.add('hidden');
     document.getElementById('gameSelectionOverlay').classList.add('hidden');
     initAudio();
+    totalMinigameTimeMs = 0;
     if (!game) game = new Phaser.Game(config);
     else { game.scene.resume('MainScene'); }
 }

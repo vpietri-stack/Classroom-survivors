@@ -18,6 +18,53 @@
 
 <body>
 
+    <!-- AUTH SCREENS -->
+    <div id="profileSelectionOverlay" class="overlay hidden bg-[#141414] flex-col items-center justify-center z-50">
+        <h1 class="text-4xl sm:text-5xl font-bold text-white mb-10 tracking-wider">Who is playing?</h1>
+        <div id="profile-list" class="flex flex-wrap justify-center gap-6 sm:gap-10 max-w-4xl mx-auto px-4">
+            <!-- Profiles injected here -->
+        </div>
+    </div>
+
+    <div id="loginOverlay" class="overlay hidden bg-[#141414] flex-col items-center justify-center z-50">
+        <div class="bg-black/70 p-8 sm:p-12 rounded-xl w-full max-w-md border border-gray-800">
+            <h2 class="text-3xl font-bold text-white mb-8">Sign In</h2>
+            <div id="login-error" class="hidden bg-red-500/20 text-red-500 p-3 rounded mb-4 text-sm"></div>
+            <div class="flex flex-col gap-5">
+                <input type="text" id="login-username" placeholder="Username" class="bg-[#333] text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-gray-500">
+                <input type="password" id="login-password" placeholder="Password" class="bg-[#333] text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-gray-500">
+                <button onclick="handleLoginSubmit()" class="game-btn bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded mt-4 w-full">Sign In</button>
+                <button onclick="cancelLogin()" id="login-cancel-btn" class="text-gray-400 hover:text-white mt-2">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="changePasswordOverlay" class="overlay hidden bg-[#141414] flex-col items-center justify-center z-50">
+        <div class="bg-black/70 p-8 sm:p-12 rounded-xl w-full max-w-md border border-gray-800 text-center">
+            <h2 id="change-pw-greeting" class="text-2xl font-bold text-white mb-2">Hello, User</h2>
+            <p class="text-gray-400 mb-8">Please set your new password.</p>
+            <div id="change-pw-error" class="hidden bg-red-500/20 text-red-500 p-3 rounded mb-4 text-sm"></div>
+            <div class="flex flex-col gap-5">
+                <input type="password" id="new-password" placeholder="New Password" class="bg-[#333] text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-gray-500">
+                <button onclick="handleChangePasswordSubmit()" class="game-btn bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded mt-4 w-full">Update Password</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="avatarSelectionOverlay" class="overlay hidden bg-[#141414] flex-col items-center justify-center z-50">
+        <h1 class="text-4xl sm:text-5xl font-bold text-white mb-10 tracking-wider">Choose your avatar</h1>
+        <div id="avatar-error" class="hidden bg-red-500/20 text-red-500 p-3 rounded mb-4 text-sm"></div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-8 max-w-3xl mx-auto px-4">
+            <!-- Example static avatars, using emojis or placeholder colors for now -->
+            <button onclick="selectAvatar('🐱')" class="w-24 h-24 sm:w-32 sm:h-32 rounded-md bg-blue-500 flex items-center justify-center text-5xl hover:border-4 border-white transition-all">🐱</button>
+            <button onclick="selectAvatar('🐶')" class="w-24 h-24 sm:w-32 sm:h-32 rounded-md bg-green-500 flex items-center justify-center text-5xl hover:border-4 border-white transition-all">🐶</button>
+            <button onclick="selectAvatar('🦊')" class="w-24 h-24 sm:w-32 sm:h-32 rounded-md bg-purple-500 flex items-center justify-center text-5xl hover:border-4 border-white transition-all">🦊</button>
+            <button onclick="selectAvatar('🐼')" class="w-24 h-24 sm:w-32 sm:h-32 rounded-md bg-yellow-500 flex items-center justify-center text-5xl hover:border-4 border-white transition-all">🐼</button>
+            <button onclick="selectAvatar('🐯')" class="w-24 h-24 sm:w-32 sm:h-32 rounded-md bg-red-500 flex items-center justify-center text-5xl hover:border-4 border-white transition-all">🐯</button>
+            <button onclick="selectAvatar('🦁')" class="w-24 h-24 sm:w-32 sm:h-32 rounded-md bg-orange-500 flex items-center justify-center text-5xl hover:border-4 border-white transition-all">🦁</button>
+        </div>
+    </div>
+
     <!-- HUD -->
     <div id="hud">
         <div class="xp-bar-container">
@@ -41,7 +88,7 @@
     </div>
 
     <!-- Start Screen -->
-    <div id="startScreen" class="overlay p-4">
+    <div id="startScreen" class="overlay hidden p-4">
 
         <!-- Step-based Selector Wizard -->
         <div id="selection-wizard" class="w-full max-w-md mx-auto">
@@ -551,6 +598,7 @@
     </div>
 
     <script src="translations.js"></script>
+    <script src="frontend_auth.js"></script>
     <script src="teaching_content.js"></script>
     <script src="content_pu1.js"></script>
     <script src="content_pu2.js"></script>

@@ -1700,10 +1700,39 @@ TEACHING_CONTENT["PU1"] = {
                 { a: "Can dogs fly?", b: "No, they can't, but they can swim." },
                 { a: "Can ducks fly?", b: "Yes, they can, and they can swim." },
                 { a: "I can play the piano,", b: "but I can't play the guitar." },
-                { a: "I can play football,", b: "but I can't baseball." },
+                { a: "I can play football,", b: "but I can't play baseball." },
                 { a: "Dogs can swim,", b: "but they can't fly." },
                 { a: "Ducks can swim,", b: "and they can fly." },
                 { a: "He can't ride a horse,", b: "but he can ride a bike." }
+            ]
+        },
+        "99": {
+            vocab: [
+                'armchair', 'clock', 'lamp', 'painting', 'phone', 'rug', 'sofa', 'hall', 'floor',
+                'behind', 'between', 'in front of', 'next to', 'on', 'under', 'in'
+            ],
+            sentences: [
+                "There's a red sofa under the window.",
+                "A yellow lamp is in the dining room.",
+                "The rug's on the floor, next to the door.",
+                "There's a rug in front of the armchair.",
+                "The clock is on the wall behind the sofa.",
+                "The armchair is next to the phone.",
+                "The sofa is between the armchairs.",
+                "Sam is sitting in front of his grandpa.",
+                "I'm sitting between Alex and Kim."
+            ],
+            sentencePairs: [
+                { a: "Where are the armchairs?", b: "They're in the living room." },
+                { a: "Where's the sofa?", b: "It's between the armchairs." },
+                { a: "Where's the clock?", b: "It's behind the sofa." },
+                { a: "What's next to the phone?", b: "A painting." },
+                { a: "Where's the rug?", b: "It's on the floor, next to the door." },
+                { a: "Is the sofa in front of the clock?", b: "Yes, it is." },
+                { a: "Are the armchairs in the living room?", b: "Yes, they are." },
+                { a: "Is the sofa behind the armchairs?", b: "No, it isn't. It's between them." },
+                { a: "Are the armchairs next to the sofa?", b: "Yes, they are." },
+                { a: "Are the armchairs in front of the sofa?", b: "No, they aren't. They're next to it." }
             ]
         }
     },
@@ -1813,6 +1842,6 @@ AVAILABLE_CONTENT["PU1"] = {
     "5": [66],
     "6": [78, 81],
     "7": [83, 84, 92],
-    "8": [95, 97],
+    "8": [95, 97, 99],
     "9": [107, 108, 110, 111]
 };

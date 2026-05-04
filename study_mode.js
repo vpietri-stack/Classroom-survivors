@@ -14,7 +14,7 @@ const STUDY_STATE = {
 // Entry point
 function initStudyMode() {
     // Determine book/unit/page from current selection
-    let book = "PU1", unit = "0", page = "4";
+    let book = "PU1", unit = "0", page = "5";
     if (typeof selectedClassContent !== 'undefined' && selectedClassContent) {
         book = selectedClassContent.book;
         unit = selectedClassContent.unit;
@@ -173,7 +173,6 @@ function nextRoundBWord() {
         const slot = document.createElement('div');
         slot.className = "study-slot";
 
-        // Pre-fill space if character is a space
         if (word[i] === ' ') {
             slot.innerText = ' '; // Or keeping it empty visually but filled logically? 
             // Better to show it's a gap.
@@ -183,6 +182,12 @@ function nextRoundBWord() {
             slot.style.borderColor = "transparent";
             slot.style.background = "transparent";
             slot.dataset.fixed = "true"; // Mark as fixed
+        } else if (word[i] === "'" || word[i] === "-" || word[i] === "." || word[i] === "?" || word[i] === "!") {
+            slot.innerText = word[i];
+            slot.classList.add('border-transparent', 'flex', 'items-end', 'pb-2', 'text-2xl', 'font-bold', 'text-white');
+            slot.style.borderColor = "transparent";
+            slot.style.background = "transparent";
+            slot.dataset.fixed = "true"; // Mark punctuation as fixed too
         } else {
             slot.onclick = () => removeLetterFromSlot(i, word);
         }
@@ -192,8 +197,9 @@ function nextRoundBWord() {
 
     // Setup Bank (Scrambled letters, excluding spaces)
     const bankDiv = document.getElementById('scramble-bank');
-    // Filter out spaces from scramble
-    const letters = word.split('').filter(c => c !== ' ').sort(() => 0.5 - Math.random());
+    // Filter out spaces and punctuation from scramble
+    const punctuation = [' ', "'", "-", ".", "?", "!"];
+    const letters = word.split('').filter(c => !punctuation.includes(c)).sort(() => 0.5 - Math.random());
 
     letters.forEach((char) => {
         const btn = document.createElement('button');
@@ -290,7 +296,7 @@ function checkRoundBLogic(targetWord) {
 
     if (allCorrect) {
         playHappySound();
-        queueExerciseEvent('wordScramble', 'study');
+        queueExerciseEvent('wordScramble', 'study', targetWord);
         setTimeout(() => {
             STUDY_STATE.currentWordIndex++;
             startExerciseTracking();
@@ -478,7 +484,7 @@ function checkRoundC(targetWord) {
 
     if (allCorrect) {
         playHappySound();
-        queueExerciseEvent('spelling', 'study');
+        queueExerciseEvent('spelling', 'study', targetWord);
         setTimeout(() => {
             roundCInput = "";
             STUDY_STATE.currentWordIndex++;
@@ -600,7 +606,7 @@ function checkRoundD(targetSentence) {
 
     if (allCorrect) {
         playHappySound();
-        queueExerciseEvent('sentenceScramble', 'study');
+        queueExerciseEvent('sentenceScramble', 'study', STUDY_STATE.sentences[STUDY_STATE.currentSentenceIndex]);
         setTimeout(() => {
             STUDY_STATE.currentSentenceIndex++;
             startExerciseTracking();
@@ -667,6 +673,8 @@ function nextRoundESubRound() {
     }
 
     STUDY_STATE.sentencePairs = pairs;
+    STUDY_STATE.pairAttempts = pairs.map(() => 1);
+    STUDY_STATE.pairQueued = pairs.map(() => false);
     renderRoundE();
 }
 
@@ -772,6 +780,13 @@ function checkRoundE() {
                 tile.classList.remove('wrong-match');
                 tile.classList.add('correct-match');
                 tile.style.backgroundColor = '#10b981'; // green
+                
+                // Record analytics for this pair if not already recorded
+                if (!STUDY_STATE.pairQueued[targetIndex]) {
+                    const itemDetails = `A: ${pairs[targetIndex].a} | B: ${pairs[targetIndex].b}`;
+                    queueExerciseEvent('sentenceMatch', 'study', itemDetails, STUDY_STATE.pairAttempts[targetIndex]);
+                    STUDY_STATE.pairQueued[targetIndex] = true;
+                }
             } else {
                 // Incorrect match
                 tile.classList.remove('correct-match');
@@ -791,7 +806,7 @@ function checkRoundE() {
 
     if (allCorrect) {
         playHappySound();
-        queueExerciseEvent('sentenceMatch', 'study');
+        // Note: The individual pairs were already queued during the check above.
         setTimeout(() => {
             STUDY_STATE.subRound++;
             startExerciseTracking();
@@ -800,6 +815,14 @@ function checkRoundE() {
     } else {
         synthError();
         incrementExerciseAttempts();
+        
+        // Increment attempts for any pairs that have not yet been successfully matched
+        for (let i = 0; i < pairs.length; i++) {
+            if (!STUDY_STATE.pairQueued[i]) {
+                STUDY_STATE.pairAttempts[i]++;
+            }
+        }
+
         // Reset after 2 seconds
         setTimeout(() => {
             resetRoundE();

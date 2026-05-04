@@ -15,15 +15,18 @@ app.http('login', {
     handler: async (request, context) => {
         try {
             const body = await request.json();
-            const { login, password } = body;
+            const { login, password, id } = body;
 
-            if (!login || !password) {
-                return { status: 400, body: "Missing login or password." };
+            if (!id && (!login || !password)) {
+                return { status: 400, body: "Missing credentials." };
             }
 
-            const querySpec = {
+            const querySpec = login ? {
                 query: "SELECT * FROM c WHERE c.login = @login",
                 parameters: [{ name: "@login", value: login }]
+            } : {
+                query: "SELECT * FROM c WHERE c.id = @id",
+                parameters: [{ name: "@id", value: id }]
             };
 
             const { resources: items } = await container.items.query(querySpec).fetchAll();
@@ -34,7 +37,9 @@ app.http('login', {
 
             const user = items[0];
 
-            if (user.password !== password) {
+            // If we authenticated via login, verify password. 
+            // If authenticated via id (silent refresh from local cache), bypass password check.
+            if (login && user.password !== password) {
                 return { status: 401, body: "Invalid credentials." };
             }
 
@@ -47,7 +52,10 @@ app.http('login', {
                     avatar: user.avatar || null,
                     needsPasswordChange: user.needsPasswordChange,
                     role: user.role,
-                    classTime: user.classTime || null
+                    classTime: user.classTime || null,
+                    book: user.book || null,
+                    unit: user.unit || null,
+                    page: user.page || null
                 }
             };
         } catch (error) {

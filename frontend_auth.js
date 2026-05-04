@@ -1,13 +1,9 @@
-const API_BASE = 'http://localhost:7071/api';
-let authActiveUser = null;
+// API_BASE_URL is defined in config.js (loaded before this script)
+const API_BASE = API_BASE_URL;
+// --- AUTH & ANALYTICS STATE (Moved to teaching_content.js) ---
 
-// --- ANALYTICS TRACKING ---
-let analyticsQueue = [];
-let analyticsFlushTimer = null;
-
-// Exercise tracking state
-let exerciseStartTime = 0;
-let exerciseAttempts = 0;
+// --- TEST MODE FLAG ---
+var isTestMode = false;
 
 function startExerciseTracking() {
     exerciseStartTime = Date.now();
@@ -18,22 +14,29 @@ function incrementExerciseAttempts() {
     exerciseAttempts++;
 }
 
-function queueExerciseEvent(exerciseType, mode) {
-    if (!authActiveUser) return;
+function queueExerciseEvent(exerciseType, mode, itemDetails = null, customAttempts = null) {
+    if (!authActiveUser || isTestMode) return;  // Skip recording in test mode
     const durationMs = Date.now() - exerciseStartTime;
-    analyticsQueue.push({
+    
+    const event = {
         type: 'exercise',
         exerciseType: exerciseType,
         mode: mode,
-        attempts: exerciseAttempts,
+        attempts: customAttempts !== null ? customAttempts : exerciseAttempts,
         durationMs: durationMs,
         timestamp: new Date().toISOString()
-    });
+    };
+    
+    if (itemDetails) {
+        event.itemDetails = itemDetails;
+    }
+    
+    analyticsQueue.push(event);
     scheduleAnalyticsFlush();
 }
 
 function queueSessionEvent(sessionType, data) {
-    if (!authActiveUser) return;
+    if (!authActiveUser || isTestMode) return;  // Skip recording in test mode
     analyticsQueue.push({
         type: 'session',
         sessionType: sessionType,
@@ -70,6 +73,46 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initAuth() {
+    // Check for test mode (teacher testing student content)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('testMode') === 'true') {
+        isTestMode = true;
+        const studentName = urlParams.get('studentName') || 'Test Student';
+        const studentAvatar = urlParams.get('studentAvatar') || '👤';
+        const studentBook = urlParams.get('studentBook') || '';
+        const studentUnit = urlParams.get('studentUnit') || '';
+        const studentPage = urlParams.get('studentPage') || '';
+        const studentClassTime = urlParams.get('studentClassTime') || '';
+
+        authActiveUser = {
+            id: 'test-mode',
+            name: studentName,
+            avatar: studentAvatar,
+            role: 'student',
+            classTime: studentClassTime,
+            book: studentBook,
+            unit: studentUnit,
+            page: studentPage
+        };
+
+        // Hide start screen and go directly to greeting
+        document.getElementById('startScreen').classList.add('hidden');
+        selectedStudent = studentName;
+        if (studentBook && studentUnit && studentPage) {
+            loadContent();
+        } else if (studentClassTime) {
+            resolveContentFromClassTime(studentClassTime, studentName);
+        }
+
+        document.getElementById('startScreen').classList.remove('hidden');
+        ['step-day', 'step-time', 'step-student', 'step-book', 'step-unit'].forEach(id => {
+            document.getElementById(id).classList.add('hidden');
+        });
+        document.getElementById('step-greeting').classList.remove('hidden');
+        document.getElementById('greeting-text').innerText = `Hello, ${studentName}!`;
+        return;
+    }
+
     // Hide start screen if it is visible
     document.getElementById('startScreen').classList.add('hidden');
     
@@ -132,8 +175,60 @@ function showProfileSelection(users) {
     container.appendChild(addBtn);
 }
 
-function loginWithProfile(user) {
-    // In a real app we might verify token, here we just trust localStorage and drop them in
+async function loginWithProfile(user) {
+    // Refresh user data from API to ensure we have the latest DB fields (like book/unit/page)
+    try {
+        const response = await fetch(`${API_BASE}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: user.id, login: user.login, password: user.password })
+        });
+        if (response.ok) {
+            const data = await response.json();
+            if (data.needsPasswordChange) {
+                // Edge case: admin reset password while user was logged out
+                authActiveUser = {
+                    id: data.id,
+                    login: user.login,
+                    name: data.fullName,
+                    avatar: data.avatar,
+                    role: data.role,
+                    classTime: data.classTime,
+                    book: data.book,
+                    unit: data.unit,
+                    page: data.page,
+                    password: user.password
+                };
+                showChangePasswordScreen(data.fullName);
+                return;
+            }
+            authActiveUser = {
+                id: data.id,
+                login: user.login,
+                name: data.fullName,
+                avatar: data.avatar,
+                role: data.role,
+                classTime: data.classTime,
+                book: data.book,
+                unit: data.unit,
+                page: data.page,
+                password: user.password
+            };
+            
+            // Update the local cache with the fresh data
+            let savedUsers = JSON.parse(localStorage.getItem('savedUsers') || '[]');
+            savedUsers = savedUsers.filter(u => u.id !== authActiveUser.id);
+            savedUsers.unshift(authActiveUser);
+            localStorage.setItem('savedUsers', JSON.stringify(savedUsers));
+            
+            finishLogin();
+            return;
+        }
+    } catch(e) {
+        console.warn("Failed to refresh profile from server, falling back to local cache", e);
+    }
+
+    // Fallback to cached user if offline or server error
     authActiveUser = user;
     finishLogin();
 }
@@ -188,10 +283,15 @@ async function handleLoginSubmit() {
         const data = await response.json();
         authActiveUser = {
             id: data.id,
+            login: loginVal,
             name: data.fullName,
             avatar: data.avatar,
             role: data.role,
-            classTime: data.classTime
+            classTime: data.classTime,
+            book: data.book,
+            unit: data.unit,
+            page: data.page,
+            password: passVal
         };
         
         if (data.needsPasswordChange) {
@@ -289,9 +389,22 @@ function saveUserToLocalAndStart(user) {
 function finishLogin() {
     hideAllAuthScreens();
 
-    // Auto-resolve the student's class content from their classTime
-    if (authActiveUser && authActiveUser.classTime) {
-        resolveContentFromClassTime(authActiveUser.classTime, authActiveUser.name);
+    // Redirect teachers to the dashboard
+    if (authActiveUser && authActiveUser.role === 'teacher') {
+        window.location.href = 'teacher_dashboard.html';
+        return;
+    }
+
+    // Auto-resolve the student's class content
+    if (authActiveUser) {
+        selectedStudent = authActiveUser.fullName || authActiveUser.name;
+        if (authActiveUser.book && authActiveUser.unit && authActiveUser.page) {
+            // Priority: Directly use content assigned from DB
+            loadContent();
+        } else if (authActiveUser.classTime) {
+            // Fallback: Resolve via classTime mapping
+            resolveContentFromClassTime(authActiveUser.classTime, authActiveUser.name);
+        }
     }
 
     // Show the start screen but skip directly to the greeting step

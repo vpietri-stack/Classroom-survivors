@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Teacher Dashboard for Classroom Survivors ESL App - View student progress, analytics, and test student content.">
+    <title>Teacher Dashboard — Classroom Survivors</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="teacher_dashboard.css">
+</head>
+<body>
+    <!-- MAIN DASHBOARD -->
+    <div id="dashboardMain" class="dashboard-container">
+        <!-- Top Bar -->
+        <header class="dash-header">
+            <div class="dash-header-left">
+                <i class="fas fa-graduation-cap dash-logo-icon"></i>
+                <h1 class="dash-title">Teacher Dashboard</h1>
+            </div>
+            <div class="dash-header-right">
+                <span id="teacherNameDisplay" class="dash-teacher-name"></span>
+                <button onclick="logoutTeacher()" class="dash-logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </header>
+
+        <!-- Filters Bar -->
+        <div class="dash-filters">
+            <div class="filter-group">
+                <label class="filter-label">Class Time</label>
+                <select id="filterClassTime" onchange="applyFilters()" class="filter-select">
+                    <option value="">All Classes</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Date Range</label>
+                <div class="date-range-group">
+                    <input type="date" id="filterDateFrom" onchange="applyFilters()" class="filter-date">
+                    <span class="date-range-sep">→</span>
+                    <input type="date" id="filterDateTo" onchange="applyFilters()" class="filter-date">
+                </div>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Search</label>
+                <div class="search-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="filterName" oninput="applyFilters()" placeholder="Search by name..." class="filter-search">
+                </div>
+            </div>
+            <button onclick="clearFilters()" class="clear-filters-btn" title="Clear all filters">
+                <i class="fas fa-times"></i> Clear
+            </button>
+        </div>
+
+        <!-- Student Table -->
+        <div class="dash-table-wrap">
+            <table class="dash-table" id="studentsTable">
+                <thead>
+                    <tr>
+                        <th class="sortable" onclick="sortTable('name')">
+                            Student <i class="fas fa-sort sort-icon"></i>
+                        </th>
+                        <th class="sortable" onclick="sortTable('classTime')">
+                            Class Time <i class="fas fa-sort sort-icon"></i>
+                        </th>
+                        <th class="sortable" onclick="sortTable('sessions')">
+                            Sessions <i class="fas fa-sort sort-icon"></i>
+                        </th>
+                        <th class="sortable" onclick="sortTable('avgStudy')">
+                            Avg Study Length <i class="fas fa-sort sort-icon"></i>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                    <!-- Injected by JS -->
+                </tbody>
+            </table>
+            <div id="noResultsMsg" class="no-results hidden">
+                <i class="fas fa-search"></i>
+                <p>No students match the current filters.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- STUDENT DETAIL VIEW -->
+    <div id="studentDetailView" class="dashboard-container hidden">
+        <header class="dash-header">
+            <div class="dash-header-left">
+                <button onclick="backToDashboard()" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div class="student-detail-info">
+                    <span id="detailStudentAvatar" class="detail-avatar"></span>
+                    <div>
+                        <h1 id="detailStudentName" class="dash-title"></h1>
+                        <span id="detailStudentClass" class="detail-class-badge"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="dash-header-right">
+                <span id="detailStudentBook" class="detail-content-badge"></span>
+            </div>
+        </header>
+
+        <!-- Tab Bar -->
+        <div class="detail-tabs">
+            <button class="tab-btn active" data-tab="sessions" onclick="switchTab('sessions')">
+                <i class="fas fa-history"></i> Sessions
+            </button>
+            <button class="tab-btn" data-tab="exercises" onclick="switchTab('exercises')">
+                <i class="fas fa-dumbbell"></i> Exercises
+            </button>
+            <button class="tab-btn tab-test" data-tab="test" onclick="switchTab('test')">
+                <i class="fas fa-play-circle"></i> Test Content
+            </button>
+        </div>
+
+        <!-- Date filter for detail view -->
+        <div class="detail-date-filter" id="detailDateFilter">
+            <label class="filter-label">Filter by date:</label>
+            <div class="date-range-group">
+                <input type="date" id="detailDateFrom" onchange="applyDetailFilters()" class="filter-date">
+                <span class="date-range-sep">→</span>
+                <input type="date" id="detailDateTo" onchange="applyDetailFilters()" class="filter-date">
+            </div>
+            <button onclick="clearDetailDates()" class="clear-filters-btn small">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- SESSIONS TAB -->
+        <div id="tabSessions" class="tab-content">
+            <div class="dash-table-wrap">
+                <table class="dash-table" id="sessionsTable">
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Type</th>
+                            <th>Game</th>
+                            <th>Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sessionsTableBody"></tbody>
+                </table>
+                <div id="noSessionsMsg" class="no-results hidden">
+                    <i class="fas fa-calendar-times"></i>
+                    <p>No sessions found for this period.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SESSION DETAIL (exercises within a session) -->
+        <div id="sessionDetailPanel" class="session-detail-panel hidden">
+            <div class="session-detail-header">
+                <button onclick="closeSessionDetail()" class="back-btn small">
+                    <i class="fas fa-arrow-left"></i> Back to Sessions
+                </button>
+                <h3 id="sessionDetailTitle" class="session-detail-title"></h3>
+            </div>
+            <div class="dash-table-wrap">
+                <table class="dash-table compact">
+                    <thead>
+                        <tr>
+                            <th>Exercise</th>
+                            <th>Item</th>
+                            <th>Attempts</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sessionExercisesBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- EXERCISES TAB -->
+        <div id="tabExercises" class="tab-content hidden">
+            <div class="exercise-filters">
+                <div class="filter-group">
+                    <label class="filter-label">Exercise Type</label>
+                    <select id="filterExerciseType" onchange="applyExerciseFilters()" class="filter-select">
+                        <option value="">All Types</option>
+                        <option value="wordScramble">Word Scramble</option>
+                        <option value="spelling">Spelling</option>
+                        <option value="sentenceScramble">Sentence Scramble</option>
+                        <option value="sentenceMatch">Sentence Match</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Item Search</label>
+                    <div class="search-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="filterExerciseItem" oninput="applyExerciseFilters()" placeholder="Search items..." class="filter-search">
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Min Attempts</label>
+                    <input type="number" id="filterMinAttempts" min="1" oninput="applyExerciseFilters()" placeholder="Any" class="filter-number">
+                </div>
+            </div>
+            <div class="dash-table-wrap">
+                <table class="dash-table" id="exercisesTable">
+                    <thead>
+                        <tr>
+                            <th class="sortable" onclick="sortExerciseTable('type')">
+                                Exercise <i class="fas fa-sort sort-icon"></i>
+                            </th>
+                            <th>Item Details</th>
+                            <th class="sortable" onclick="sortExerciseTable('attempts')">
+                                Attempts <i class="fas fa-sort sort-icon"></i>
+                            </th>
+                            <th>Mode</th>
+                            <th class="sortable" onclick="sortExerciseTable('timestamp')">
+                                Date <i class="fas fa-sort sort-icon"></i>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="exercisesTableBody"></tbody>
+                </table>
+                <div id="noExercisesMsg" class="no-results hidden">
+                    <i class="fas fa-dumbbell"></i>
+                    <p>No exercises found for this period.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TEST CONTENT TAB -->
+        <div id="tabTest" class="tab-content hidden">
+            <div class="test-content-panel">
+                <div class="test-info-banner">
+                    <i class="fas fa-info-circle"></i>
+                    <p>You are viewing the app as <strong id="testStudentNameBanner"></strong>. No data will be recorded to the database.</p>
+                </div>
+                <div class="test-iframe-container">
+                    <iframe id="testIframe" src="" class="test-iframe"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="teacher_dashboard.js"></script>
+</body>
+</html>

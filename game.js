@@ -284,12 +284,7 @@ function showGameSelection() {
 }
 
 // --- WIZARD STATE ---
-let selectedDay = null;
-let selectedTime = null;
-let selectedStudent = null;
-let selectedBook = null;
-let selectedUnit = null;
-let selectedClassContent = null;
+// --- WIZARD STATE (Moved to teaching_content.js for global access) ---
 
 function initMenus() {
     if (typeof CLASS_CONFIG === 'undefined' || typeof CLASS_DAYS === 'undefined') {
@@ -585,7 +580,12 @@ function claimReward(success) {
 function loadContent() {
     let book, unit, page;
 
-    if (selectedBook && selectedUnit) {
+    if (typeof authActiveUser !== 'undefined' && authActiveUser && authActiveUser.book && authActiveUser.unit && authActiveUser.page) {
+        book = authActiveUser.book;
+        unit = authActiveUser.unit.toString();
+        page = authActiveUser.page.toString();
+        selectedClassContent = { book, unit, page };
+    } else if (selectedBook && selectedUnit) {
         book = selectedBook;
         unit = selectedUnit;
         // Assign the LAST page of that unit
@@ -657,6 +657,7 @@ function startSpellingGame() {
     const { book, unit, page } = selectedClassContent;
     const word = getWeightedItemForGame(book, unit, page, 'vocab');
     currentTTSWord = word;
+    document.getElementById('spellingGame').dataset.targetWord = word;
     showTranslation('spelling-translation', word);
     showVocabImage('spelling-image', word);
 
@@ -899,7 +900,9 @@ function startGrammarGame() {
     }
 
     // Store valid possibilities for validation
-    document.getElementById('grammarGame').dataset.validOptions = JSON.stringify(possibilities);
+    const grammarGameEl = document.getElementById('grammarGame');
+    grammarGameEl.dataset.validOptions = JSON.stringify(possibilities);
+    grammarGameEl.dataset.targetSentence = primarySentence;
     showTranslation('grammar-translation', primarySentence);
 
 
@@ -1096,6 +1099,8 @@ function startSentenceMatchGame() {
     // Store in game element for later reference
     const gameEl = document.getElementById('sentenceMatchGame');
     gameEl.dataset.pairs = JSON.stringify(shuffledPairs);
+    gameEl.dataset.pairAttempts = JSON.stringify(shuffledPairs.map(() => 1));
+    gameEl.dataset.pairQueued = JSON.stringify(shuffledPairs.map(() => false));
 
     // Create shuffled B sentences
     const bSentences = shuffledPairs.map((p, i) => ({ text: p.b, correctIndex: i }));
@@ -1185,6 +1190,16 @@ function checkSentenceMatch() {
 
             if (placedText === expectedText) {
                 tile.style.backgroundColor = '#10b981'; // green
+                
+                // Track pair individually
+                let pairQueued = JSON.parse(gameEl.dataset.pairQueued);
+                if (!pairQueued[targetIndex]) {
+                    let pairAttempts = JSON.parse(gameEl.dataset.pairAttempts);
+                    const itemDetails = `A: ${pairsData[targetIndex].a} | B: ${pairsData[targetIndex].b}`;
+                    queueExerciseEvent('sentenceMatch', 'game', itemDetails, pairAttempts[targetIndex]);
+                    pairQueued[targetIndex] = true;
+                    gameEl.dataset.pairQueued = JSON.stringify(pairQueued);
+                }
             } else {
                 tile.style.backgroundColor = '#ef4444'; // red
                 allCorrect = false;
@@ -1202,6 +1217,14 @@ function checkSentenceMatch() {
         synthError();
         isFirstAttempt = false;
         incrementExerciseAttempts();
+        
+        let pairAttempts = JSON.parse(gameEl.dataset.pairAttempts);
+        let pairQueued = JSON.parse(gameEl.dataset.pairQueued);
+        for (let i = 0; i < pairsData.length; i++) {
+            if (!pairQueued[i]) pairAttempts[i]++;
+        }
+        gameEl.dataset.pairAttempts = JSON.stringify(pairAttempts);
+
         // Reset after 2 seconds
         setTimeout(() => {
             const tiles = document.querySelectorAll('.gm-sentence-b-tile');
@@ -1218,16 +1241,28 @@ function checkSentenceMatch() {
 
 
 function handleMinigameSuccess(gameType) {
-    let actionsId, resultId;
-    if (gameType === 'spelling') { actionsId = 'spelling-actions'; resultId = 'spelling-result-action'; }
+    let actionsId, resultId, itemDetails = null;
+    if (gameType === 'spelling') { 
+        actionsId = 'spelling-actions'; 
+        resultId = 'spelling-result-action'; 
+        itemDetails = document.getElementById('spellingGame').dataset.targetWord;
+    }
     else if (gameType === 'rec') { actionsId = 'rec-options'; resultId = 'rec-result-action'; }
     else if (gameType === 'sentencematch') { actionsId = 'sentencematch-actions'; resultId = 'sentencematch-result-action'; }
-    else { actionsId = 'grammar-actions'; resultId = 'grammar-result-action'; }
+    else { 
+        actionsId = 'grammar-actions'; 
+        resultId = 'grammar-result-action'; 
+        itemDetails = document.getElementById('grammarGame').dataset.targetSentence;
+    }
 
     // Track exercise analytics (skip word rec)
     if (gameType !== 'rec') {
         const exerciseTypeMap = { 'spelling': 'spelling', 'grammar': 'sentenceScramble', 'sentencematch': 'sentenceMatch' };
-        queueExerciseEvent(exerciseTypeMap[gameType] || gameType, 'game');
+        
+        // Only queue globally for spelling and grammar. Sentence Match handles its own item queuing.
+        if (gameType !== 'sentencematch') {
+            queueExerciseEvent(exerciseTypeMap[gameType] || gameType, 'game', itemDetails);
+        }
     }
 
     if (actionsId) document.getElementById(actionsId).classList.add('hidden');

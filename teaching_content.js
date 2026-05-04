@@ -11,8 +11,26 @@ const BOOK_SERIES = {
     "PU2": ["PU2"],
     "PU3": ["PU3"],
     "Think0": ["Think0"],
-    "Think1": ["Think1"]
+    "Think1": ["Think1"],
+    "Think2": ["Think2"]
 };
+
+// --- SHARED WIZARD STATE ---
+var selectedDay = null;
+var selectedTime = null;
+var selectedStudent = null;
+var selectedBook = null;
+var selectedUnit = null;
+var selectedClassContent = null;
+
+// --- AUTH & ANALYTICS STATE ---
+var authActiveUser = null;
+var analyticsQueue = [];
+var analyticsFlushTimer = null;
+var exerciseStartTime = 0;
+var exerciseAttempts = 0;
+
+
 
 /**
  * Returns a sorted array of all pages in a book series: [{book, unit, page, absIndex}, ...]

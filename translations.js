@@ -480,6 +480,8 @@ const LOCAL_TRANSLATIONS = {
     "Thursday": "星期四",
     "Tuesday": "星期二",
     "Wednesday": "星期三",
+    "week": "周/星期",
+    "weekend": "周末",
     "week after next": "下下周",
     "years from now": "几年后",
     "yesterday": "昨天",
@@ -1007,7 +1009,10 @@ const LOCAL_TRANSLATIONS = {
     "as soon as": "一...就",
     "at": "在",
     "away from": "远离",
+    // --- Prepositions & Adverbs of Place ---
+    "after": "在...之后",
     "backwards": "向后",
+    "before": "在...之前",
     "for": "为了",
     "forwards": "向前",
     "from": "来自",
@@ -4181,5 +4186,13 @@ const LOCAL_TRANSLATIONS = {
     "It is difficult to see in the dark.": "在黑暗中很难看清。",
     "You must wear a helmet, because skateboarding is dangerous.": "你必须戴头盔，因为滑板很危险。",
     "Jim slept on the train, because he was tired.": "吉姆在火车上睡着了，因为他累了。",
-    "Jane was surprised when she saw a giraffe in the classroom.": "当简在教室里看到长颈鹿时，她很惊讶。"
+    "Jane was surprised when she saw a giraffe in the classroom.": "当简在教室里看到长颈鹿时，她很惊讶。",
+
+    // --- PU2 Unit 2 Page 19 ---
+    "Monday comes before Tuesday.": "星期一在星期二之前。",
+    "Sunday comes after Saturday.": "星期日在星期六之后。",
+    "Thursday comes between Wednesday and Friday.": "星期四在星期三和星期五之间。",
+    "Saturday and Sunday are the weekend.": "星期六和星期日是周末。",
+    "They don't go to school at the weekend.": "他们在周末不去学校。",
+    "I go to school from Monday to Friday.": "我从星期一到星期五去学校。"
 };

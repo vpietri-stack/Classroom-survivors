@@ -444,6 +444,30 @@ TEACHING_CONTENT["PU2"] = {
         }
     },
     "2": {
+        "19": {
+            vocab: [
+                'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday',
+                'after', 'before', 'between', 'weekend', 'week'
+            ],
+            sentences: [
+                "Monday comes before Tuesday.",
+                "Sunday comes after Saturday.",
+                "Thursday comes between Wednesday and Friday.",
+                "Saturday and Sunday are the weekend.",
+                "They don't go to school at the weekend.",
+                "I go to school from Monday to Friday."
+            ],
+            sentencePairs: [
+                { a: "Monday comes before", b: "Tuesday." },
+                { a: "Saturday comes after", b: "Friday." },
+                { a: "Which day comes between Tuesday and Thursday?", b: "Wednesday." },
+                { a: "Saturday and Sunday are", b: "the weekend." },
+                { a: "Friday comes after", b: "Thursday." },
+                { a: "Monday comes after", b: "Sunday." },
+                { a: "Tuesday comes before", b: "Monday." },
+                { a: "Sunday comes after", b: "Saturday." }
+            ]
+        },
         "28": {
             vocab: [
                 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'weekend',
@@ -1216,7 +1240,7 @@ TEACHING_CONTENT["PU2"] = {
 AVAILABLE_CONTENT["PU2"] = {
     "0": [5],
     "1": [7, 9, 10, 16],
-    "2": [28],
+    "2": [19, 28],
     "3": [40, 43],
     "4": [45, 46, 54],
     "5": [66],

@@ -444,6 +444,30 @@ TEACHING_CONTENT["PU2"] = {
         }
     },
     "2": {
+        "19": {
+            vocab: [
+                'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday',
+                'after', 'before', 'between', 'weekend', 'week'
+            ],
+            sentences: [
+                "Monday comes before Tuesday.",
+                "Sunday comes after Saturday.",
+                "Thursday comes between Wednesday and Friday.",
+                "Saturday and Sunday are the weekend.",
+                "They don't go to school at the weekend.",
+                "I go to school from Monday to Friday."
+            ],
+            sentencePairs: [
+                { a: "Monday comes before", b: "Tuesday." },
+                { a: "Saturday comes after", b: "Friday." },
+                { a: "Which day comes between Tuesday and Thursday?", b: "Wednesday." },
+                { a: "Saturday and Sunday are", b: "the weekend." },
+                { a: "Friday comes after", b: "Thursday." },
+                { a: "Monday comes after", b: "Sunday." },
+                { a: "Tuesday comes before", b: "Monday." },
+                { a: "Sunday comes after", b: "Saturday." }
+            ]
+        },
         "28": {
             vocab: [
                 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'weekend',
@@ -664,10 +688,10 @@ TEACHING_CONTENT["PU2"] = {
         },
         "47": {
             vocab: [
-                'long', 'longer', 'short', 'shorter', 'straight', 'straighter', 'tall', 'taller', 'young', 'younger',
-                'angry', 'angrier', 'curly', 'curlier', 'happy', 'happier', 'naughty', 'naughtier', 'ugly', 'uglier',
-                'big', 'bigger', 'fat', 'fatter', 'sad', 'sadder', 'thin', 'thinner',
-                'good', 'better', 'bad', 'worse', 'than'
+                'long - longer than', 'short - shorter than', 'straight - straighter than', 'tall - taller than', 'young - younger than',
+                'angry - angrier than', 'curly - curlier than', 'happy - happier than', 'naughty - naughtier than', 'ugly - uglier than',
+                'big - bigger than', 'fat - fatter than', 'sad - sadder than', 'thin - thinner than',
+                'good - better than', 'bad - worse than'
             ],
             sentences: [
                 "My mum's hair's curlier than my aunt's.",
@@ -720,6 +744,48 @@ TEACHING_CONTENT["PU2"] = {
         }
     },
     "5": {
+        "57": {
+            vocab: [
+                'bat', 'bear', 'dolphin', 'kangaroo', 'lion', 'panda', 'parrot', 'penguin', 'rabbit', 'whale',
+                'wildlife park', 'cage'
+            ],
+            sentences: [
+                "Bats often sleep in the day.",
+                "The parrot is prettier than the bats.",
+                "The whale is bigger than the dolphins.",
+                "There aren't any cages here.",
+                "Penguins can't fly, but they can swim.",
+                "The kangaroo is next to the tree.",
+                "The bat in the tree isn't moving.",
+                "The bear isn't with the rabbits, because it sometimes eats meat.",
+                "Pandas don't eat meat.",
+                "Penguins are birds, but they can't fly.",
+                "The lions aren't in a cage.",
+                "Whales and dolphins aren't fish.",
+                "The dolphins are cleverer than a lot of animals."
+            ],
+            sentencePairs: [
+                { a: "This black and white bird can't fly.", b: "It's a penguin." },
+                { a: "These black and white sea birds like cold water.", b: "They're penguins." },
+                { a: "This clever animal lives in the sea. It's got a long nose and mouth.", b: "It's a dolphin." },
+                { a: "These sea animals are cleverer than a lot of other animals.", b: "They're dolphins." },
+                { a: "This small animal sleeps under the ground and jumps a lot.", b: "It's a rabbit." },
+                { a: "These little animals like eating carrots.", b: "They're rabbits." },
+                { a: "This small black and brown animal can fly, but it isn't a bird.", b: "It's a bat." },
+                { a: "These small black animals sleep in the day and are awake at night.", b: "They're bats." },
+                { a: "This is a very big cat. It likes eating and sleeping.", b: "It's a lion." },
+                { a: "This beautiful bird's got a lot of colours.", b: "It's a parrot." },
+                { a: "These beautiful birds can sometimes speak.", b: "They're parrots." },
+                { a: "This big brown and black animal can climb trees and swim.", b: "It's a bear." },
+                { a: "These black or brown animals eat plants, fruit, fish and meat.", b: "They're bears." },
+                { a: "This big animal's got long legs and a long tail.", b: "It's a kangaroo." },
+                { a: "These big brown animals have got short arms and long tails.", b: "They're kangaroos." },
+                { a: "This black and white bear doesn't eat meat, it eats leaves.", b: "It's a panda." },
+                { a: "These big black and white bears come from China.", b: "They're pandas." },
+                { a: "This grey or black animal is bigger than all other sea animals.", b: "It's a whale." },
+                { a: "These animals live in the sea. They're bigger than dolphins.", b: "They're whales." }
+            ]
+        },
         "66": {
             vocab: [
                 'bat', 'bear', 'dolphin', 'kangaroo', 'lion', 'panda', 'parrot', 'penguin', 'rabbit', 'whale', 'shark',
@@ -989,7 +1055,7 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "Did the animals see the food?", b: "No, they didn't. Rocky only saw the children." },
                 { a: "What did you put in the soup, Gracie?", b: "I put some old red socks in it." },
                 { a: "Where did Fred go yesterday?", b: "He went to the shop to buy vegetables." },
-                { a: "Who went to Jim and Jenny’s classroom?", b: "Mr Friendly went to the classroom." },
+                { a: "Who went to Jim and Jenny's classroom?", b: "Mr Friendly went to the classroom." },
                 { a: "When did Daisy make carrot soup?", b: "She made it last Saturday." }
             ]
         }
@@ -1141,6 +1207,35 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "Do you like scary films?", b: "No, I don't, I'm frightened of them!" }
             ]
         },
+        "109": {
+            vocab: [
+                'long - longer than', 'short - shorter than', 'big - bigger than', 'fat - fatter than',
+                'good - better than', 'bad - worse than', 'hungry - hungrier than', 'thirsty - thirstier than', 'easy - easier than',
+                'beautiful - more beautiful than', 'boring - more boring than', 'dangerous - more dangerous than',
+                'difficult - more difficult than', 'exciting - more exciting than', 'frightened - more frightened than',
+                'surprised - more surprised than', 'tired - more tired than'
+            ],
+            sentences: [
+                "I think your mother's more surprised than me.",
+                "She thinks the circus is more exciting than the farm.",
+                "I think parrots are more beautiful than bats.",
+                "Bears are more dangerous than rabbits.",
+                "Mary thinks skateboarding's more exciting than roller skating.",
+                "Jack thinks climbing's more difficult than riding a bike."
+            ],
+            sentencePairs: [
+                { a: "I think English", b: "is easier than Chinese." },
+                { a: "I think Chinese", b: "is more difficult than English." },
+                { a: "Bears are", b: "more dangerous than rabbits." },
+                { a: "I think doing homework is", b: "more boring than playing games." },
+                { a: "She thinks the circus is more", b: "exciting than the farm." },
+                { a: "His mum was more surprised", b: "than him." },
+                { a: "Their mum was", b: "more frightened than them." },
+                { a: "Our teacher", b: "is more tired than us today." },
+                { a: "He was hungrier than me,", b: "because there wasn't any food at his home." },
+                { a: "I was thirstier than her,", b: "because I hadn't had any water that day." }
+            ]
+        },
         "116": {
             vocab: [
                 'afraid', 'angry', 'boring', 'busy', 'dangerous', 'difficult', 'easy', 'exciting', 'frightened', 'hungry', 'interesting', 'surprised', 'thirsty', 'tired', 'beautiful', 'famous',
@@ -1216,12 +1311,12 @@ TEACHING_CONTENT["PU2"] = {
 AVAILABLE_CONTENT["PU2"] = {
     "0": [5],
     "1": [7, 9, 10, 16],
-    "2": [28],
+    "2": [19, 28],
     "3": [40, 43],
     "4": [45, 46, 54],
-    "5": [66],
+    "5": [57, 66],
     "6": [78, 81],
     "7": [83, 85, 87, 93],
     "8": [95, 96, 104],
-    "9": [107, 116, 119]
+    "9": [107, 109, 116, 119]
 };

@@ -483,6 +483,12 @@ const LOCAL_TRANSLATIONS = {
     "Tuesday": "星期二",
     "Wednesday": "星期三",
     "week": "周/星期",
+    "every day": "每天",
+    "every week": "每周",
+    "once a day": "一天一次",
+    "once a week": "一周一次",
+    "twice a day": "一天两次",
+    "twice a week": "一周两次",
     "weekend": "周末",
     "week after next": "下下周",
     "years from now": "几年后",
@@ -1049,6 +1055,7 @@ const LOCAL_TRANSLATIONS = {
     "A VR/AR headset": "VR/AR 头显",
     "address": "地址",
     "always": "总是",
+    "ever": "曾经",
     "An electric toothbrush": "电动牙刷",
     "and": "和",
     "aren't": "不是",
@@ -4248,5 +4255,21 @@ const LOCAL_TRANSLATIONS = {
     "I think parrots are more beautiful than bats.": "我觉得鹦鹉比蝙蝠更漂亮。",
     "Bears are more dangerous than rabbits.": "熊比兔子更危险。",
     "Mary thinks skateboarding's more exciting than roller skating.": "玛丽觉得滑滑板比溜旱冰更令人兴奋。",
-    "Jack thinks climbing's more difficult than riding a bike.": "杰克觉得爬树比骑自行车更困难。"
+    "Jack thinks climbing's more difficult than riding a bike.": "杰克觉得爬树比骑自行车更困难。",
+
+    // --- PU2 Unit 2 Page 21 ---
+    "I never go to school by plane.": "我从不坐飞机去学校。",
+    "She is never angry with her mum.": "她从不和她妈妈生气。",
+    "I often have eggs for breakfast.": "我经常早餐吃鸡蛋。",
+    "He is often late for class.": "他上课经常迟到。",
+    "He sometimes has a shower at night.": "他有时在晚上洗澡。",
+    "I am sometimes angry with my dog.": "我有时会生我狗的气。",
+    "They always do their homework.": "他们总是做作业。",
+    "We are always kind in class.": "我们在课堂上总是很友善。",
+    "I clean my teeth twice a day.": "我一天刷牙两次。",
+    "We have breakfast once a day.": "我们一天吃一次早餐。",
+    "I play football twice a week.": "我一周踢两次足球。",
+    "I do my homework every day.": "我每天都做作业。",
+    "I go swimming once a week.": "我一周去游泳一次。",
+    "I go to English class every week.": "我每周都去上英语课。"
 };

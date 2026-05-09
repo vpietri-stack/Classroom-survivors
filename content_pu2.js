@@ -468,6 +468,40 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "Sunday comes after", b: "Saturday." }
             ]
         },
+        "21": {
+            vocab: [
+                'always', 'often', 'sometimes', 'never',
+                'once a day', 'once a week', 'twice a day', 'twice a week', 'every day', 'every week', 'at the weekend',
+                'late', 'ever'
+            ],
+            sentences: [
+                "I never go to school by plane.",
+                "She is never angry with her mum.",
+                "I often have eggs for breakfast.",
+                "He is often late for class.",
+                "He sometimes has a shower at night.",
+                "I am sometimes angry with my dog.",
+                "They always do their homework.",
+                "We are always kind in class.",
+                "I clean my teeth twice a day.",
+                "We have breakfast once a day.",
+                "I play football twice a week.",
+                "I do my homework every day.",
+                "I go swimming once a week.",
+                "I go to English class every week."
+            ],
+            sentencePairs: [
+                { a: "Are you ever late for class?", b: "No, I'm not. I'm always on time." },
+                { a: "How often do you clean your teeth?", b: "Twice a day. Once in the morning, and once before going to bed." },
+                { a: "Does Peter often go for a swim?", b: "Yes, he does. He goes to the pool every week." },
+                { a: "Does Peter always have a shower in the morning?", b: "No, he doesn't, but he often has one in the evening." },
+                { a: "How often does she feed her fish?", b: "Once a day." },
+                { a: "Does Clare sometimes have burgers for breakfast?", b: "No, she doesn't, but she sometimes has pizza in the morning." },
+                { a: "Does Clare sometimes have pizza for breakfast?", b: "Yes, she does." },
+                { a: "How often are fish in water?", b: "They always are." },
+                { a: "Is the teacher ever angry?", b: "Yes, he sometimes is when we're naughty in class." }
+            ]
+        },
         "28": {
             vocab: [
                 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'weekend',
@@ -1311,7 +1345,7 @@ TEACHING_CONTENT["PU2"] = {
 AVAILABLE_CONTENT["PU2"] = {
     "0": [5],
     "1": [7, 9, 10, 16],
-    "2": [19, 28],
+    "2": [19, 21, 28],
     "3": [40, 43],
     "4": [45, 46, 54],
     "5": [57, 66],

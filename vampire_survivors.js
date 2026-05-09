@@ -1154,7 +1154,10 @@ class MainScene extends Phaser.Scene {
                     const displayText = studentName ? `${studentName} (${classInfo})` : classInfo;
                     document.getElementById('finalContentDisplay').innerText = displayText;
 
-                    // Track session analytics
+                    // Track session analytics and finalize SR
+                    if (typeof srGameResults !== 'undefined') {
+                        finalizeSession(srGameResults);
+                    }
                     queueSessionEvent('vampireSurvivors', {
                         level: this.playerStats.level,
                         survivalTimeSec: survivalTimeSec,
@@ -1224,6 +1227,12 @@ function startGameFromIntro() {
 
 function triggerVampireSurvivors() {
     activeGameMode = 'VS';
+    
+    // Reset SR tracking for this game session
+    if (typeof srGameResults !== 'undefined') srGameResults = [];
+    if (typeof srInSessionFailures !== 'undefined') srInSessionFailures = new Set();
+    if (typeof srInSessionSuccesses !== 'undefined') srInSessionSuccesses = new Set();
+    
     document.getElementById('startScreen').classList.add('hidden');
     document.getElementById('gameIntroOverlay').classList.add('hidden');
     document.getElementById('gameSelectionOverlay').classList.add('hidden');

@@ -11,6 +11,10 @@ const STUDY_STATE = {
     timerInterval: null
 };
 
+// SR result tracking for this study session
+var srStudyResults = [];  // [{ type, key, firstAttempt }, ...]
+var srUsedPageIndices = new Set();  // abs page indices used by Round E sub-rounds
+
 // Entry point
 function initStudyMode() {
     // Determine book/unit/page from current selection
@@ -21,9 +25,9 @@ function initStudyMode() {
         page = selectedClassContent.page;
     }
 
-    // Get Spaced Repetition Content
-    const SR_WORDS = getSpacedRepetitionContent(book, unit, page, 'vocab', true);
-    const SR_SENTENCES = getSpacedRepetitionContent(book, unit, page, 'sentences', true);
+    // Get Spaced Repetition Content (SR-aware)
+    const SR_WORDS = getStudyContentSR(book, unit, page, 'vocab', 5);
+    const SR_SENTENCES = getStudyContentSR(book, unit, page, 'sentences', 5);
 
     if (SR_WORDS.length < 5 || SR_SENTENCES.length < 5) {
         alert("Not enough content for Study Mode! Need at least 5 words and 5 sentences from current and previous pages.");
@@ -33,6 +37,10 @@ function initStudyMode() {
     STUDY_STATE.active = true;
     STUDY_STATE.startTime = Date.now();
     STUDY_STATE.round = 'A';
+
+    // Reset SR tracking for this session
+    srStudyResults = [];
+    srUsedPageIndices = new Set();
 
     // Pick exactly 5 (SR logic already tries to do this, but let's be sure)
     STUDY_STATE.words = SR_WORDS.slice(0, 5);
@@ -296,6 +304,8 @@ function checkRoundBLogic(targetWord) {
 
     if (allCorrect) {
         playHappySound();
+        // Record SR result: first attempt = exerciseAttempts is still 1
+        srStudyResults.push({ type: 'vocab', key: itemKey(targetWord), firstAttempt: exerciseAttempts === 1 });
         queueExerciseEvent('wordScramble', 'study', targetWord);
         setTimeout(() => {
             STUDY_STATE.currentWordIndex++;
@@ -606,6 +616,8 @@ function checkRoundD(targetSentence) {
 
     if (allCorrect) {
         playHappySound();
+        // Record SR result
+        srStudyResults.push({ type: 'sentences', key: itemKey(STUDY_STATE.sentences[STUDY_STATE.currentSentenceIndex]), firstAttempt: exerciseAttempts === 1 });
         queueExerciseEvent('sentenceScramble', 'study', STUDY_STATE.sentences[STUDY_STATE.currentSentenceIndex]);
         setTimeout(() => {
             STUDY_STATE.currentSentenceIndex++;
@@ -637,22 +649,27 @@ function nextRoundESubRound() {
 
     updateStudyUI(`Round E${STUDY_STATE.subRound}: Sentence Matching`, "Match each question with its answer.");
 
-    // Get sentence pairs using Spaced Repetition logic
+    // Get sentence pairs using SR-aware same-page selection
     const { book, unit, page } = selectedClassContent;
-    const sortedPages = getSortedPagesForBook(book);
-    const activePageIndex = sortedPages.findIndex(p => p.book === book && p.unit === unit && p.page === page.toString());
 
+    const result = getStudySentencePairsSubRoundSR(book, unit, page, srUsedPageIndices);
     let pairs = [];
 
-    if (STUDY_STATE.subRound === 1) {
-        // E1: 3 pairs from the CURRENT page
-        const currentPage = sortedPages[activePageIndex] ? [sortedPages[activePageIndex]] : [];
-        pairs = pickUniqueItems(currentPage, 3, 'sentencePairs', activePageIndex, false, true);
+    if (result && result.pairs && result.pairs.length > 0) {
+        srUsedPageIndices.add(result.pageAbsIndex);
+        pairs = result.pairs;
     } else {
-        // E2, E3: 3 pairs from a PREVIOUS page (weighted)
-        const previousPages = sortedPages.slice(0, activePageIndex);
-        if (previousPages.length > 0) {
-            pairs = pickUniqueItems(previousPages, 3, 'sentencePairs', activePageIndex, true, true);
+        // Fallback: legacy selection
+        const sortedPages = getSortedPagesForBook(book);
+        const activePageIndex = sortedPages.findIndex(p => p.book === book && p.unit === unit && p.page === page.toString());
+        if (STUDY_STATE.subRound === 1) {
+            const currentPage = sortedPages[activePageIndex] ? [sortedPages[activePageIndex]] : [];
+            pairs = pickUniqueItems(currentPage, 3, 'sentencePairs', activePageIndex, false, true);
+        } else {
+            const previousPages = sortedPages.slice(0, activePageIndex);
+            if (previousPages.length > 0) {
+                pairs = pickUniqueItems(previousPages, 3, 'sentencePairs', activePageIndex, true, true);
+            }
         }
     }
 
@@ -784,6 +801,8 @@ function checkRoundE() {
                 // Record analytics for this pair if not already recorded
                 if (!STUDY_STATE.pairQueued[targetIndex]) {
                     const itemDetails = `A: ${pairs[targetIndex].a} | B: ${pairs[targetIndex].b}`;
+                    // SR: first attempt = pairAttempts still at 1
+                    srStudyResults.push({ type: 'sentencePairs', key: itemKey(pairs[targetIndex]), firstAttempt: STUDY_STATE.pairAttempts[targetIndex] === 1 });
                     queueExerciseEvent('sentenceMatch', 'study', itemDetails, STUDY_STATE.pairAttempts[targetIndex]);
                     STUDY_STATE.pairQueued[targetIndex] = true;
                 }
@@ -857,6 +876,9 @@ function finishStudySession() {
     const player = selectedStudent || "Student";
 
     // Track session completion
+    // Finalize SR state for this session before flushing
+    finalizeSession(srStudyResults);
+
     queueSessionEvent('study', {
         durationMs: durationMs,
         durationFormatted: timeStr

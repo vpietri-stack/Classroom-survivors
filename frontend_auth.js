@@ -5,6 +5,37 @@ const API_BASE = API_BASE_URL;
 // --- TEST MODE FLAG ---
 var isTestMode = false;
 
+// --- SR STATE (set on login, finalised at session end) ---
+var srPendingState = null;       // computed new srState waiting for the next flush
+var srIncrementSession = false;  // whether this flush should increment sessionCount
+
+/** Current session index = completed sessions so far (0-based). */
+function getCurrentSession() {
+    return (authActiveUser && authActiveUser.sessionCount) || 0;
+}
+
+/**
+ * Called by study_mode.js / game.js at the end of every session.
+ * Computes the new srState and marks the next analytics flush to persist it.
+ *
+ * @param {Array} sessionResults  [{ type, key, firstAttempt }, ...]
+ */
+function finalizeSession(sessionResults) {
+    if (!authActiveUser || isTestMode || !sessionResults || sessionResults.length === 0) return;
+
+    const currentSession = getCurrentSession();
+    const currentSRState = authActiveUser.srState || { vocab: {}, sentences: {}, sentencePairs: {} };
+    const newSRState = updateSRStateForSession(currentSRState, sessionResults, currentSession);
+
+    // Eagerly update in-memory user so the next session in the same page-load gets fresh data
+    authActiveUser.srState = newSRState;
+    authActiveUser.sessionCount = currentSession + 1;
+
+    // Queue for next flush
+    srPendingState = newSRState;
+    srIncrementSession = true;
+}
+
 function startExerciseTracking() {
     exerciseStartTime = Date.now();
     exerciseAttempts = 1; // First attempt counts as 1
@@ -55,16 +86,29 @@ async function flushAnalytics() {
     if (!authActiveUser || analyticsQueue.length === 0) return;
     const events = [...analyticsQueue];
     analyticsQueue = [];
+
+    // Capture and clear pending SR update
+    const srPayload = srPendingState;
+    const incrementSession = srIncrementSession;
+    srPendingState = null;
+    srIncrementSession = false;
+
+    const body = { studentId: authActiveUser.id, events };
+    if (srPayload)       body.srState          = srPayload;
+    if (incrementSession) body.incrementSession = true;
+
     try {
         await fetch(`${API_BASE}/saveAnalytics`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ studentId: authActiveUser.id, events })
+            body: JSON.stringify(body)
         });
     } catch (e) {
         console.warn('Failed to flush analytics:', e);
-        // Re-queue failed events
+        // Re-queue failed events and restore SR pending state
         analyticsQueue = events.concat(analyticsQueue);
+        if (srPayload && !srPendingState) srPendingState = srPayload;
+        if (incrementSession) srIncrementSession = true;
     }
 }
 
@@ -212,7 +256,9 @@ async function loginWithProfile(user) {
                 book: data.book,
                 unit: data.unit,
                 page: data.page,
-                password: user.password
+                password: user.password,
+                srState: data.srState || { vocab: {}, sentences: {}, sentencePairs: {} },
+                sessionCount: data.sessionCount || 0
             };
             
             // Update the local cache with the fresh data
@@ -291,7 +337,9 @@ async function handleLoginSubmit() {
             book: data.book,
             unit: data.unit,
             page: data.page,
-            password: passVal
+            password: passVal,
+            srState: data.srState || { vocab: {}, sentences: {}, sentencePairs: {} },
+            sessionCount: data.sessionCount || 0
         };
         
         if (data.needsPasswordChange) {

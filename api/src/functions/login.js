@@ -55,7 +55,9 @@ app.http('login', {
                     classTime: user.classTime || null,
                     book: user.book || null,
                     unit: user.unit || null,
-                    page: user.page || null
+                    page: user.page || null,
+                    srState: user.srState || null,
+                    sessionCount: user.sessionCount || 0
                 }
             };
         } catch (error) {

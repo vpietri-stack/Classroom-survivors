@@ -647,15 +647,20 @@ function loadContent() {
     }
 }
 
+// SR result tracking for game session
+var srGameResults = [];  // [{ type, key, firstAttempt }, ...]
+var srInSessionFailures = new Set();  // Set of keys failed at least once this session
+var srInSessionSuccesses = new Set(); // Set of keys succeeded on first attempt this session
+
 // --- MINIGAMES ---
 
 function startSpellingGame() {
     if (SPELLING_WORDS.length === 0) { handleMinigameSuccess('spelling'); return; }
     startExerciseTracking();
 
-    // Weighted selection
+    // SR-aware selection
     const { book, unit, page } = selectedClassContent;
-    const word = getWeightedItemForGame(book, unit, page, 'vocab');
+    const word = getGameItemSR(book, unit, page, 'vocab', srInSessionFailures, srInSessionSuccesses);
     currentTTSWord = word;
     document.getElementById('spellingGame').dataset.targetWord = word;
     showTranslation('spelling-translation', word);
@@ -887,7 +892,7 @@ function startGrammarGame() {
     startExerciseTracking();
 
     const { book, unit, page } = selectedClassContent;
-    const rawEntry = getWeightedItemForGame(book, unit, page, 'sentences');
+    const rawEntry = getGameItemSR(book, unit, page, 'sentences', srInSessionFailures, srInSessionSuccesses);
     let possibilities = [];
     let primarySentence = "";
 
@@ -1064,26 +1069,13 @@ let gameModeSelectedBTile = null;
 function startSentenceMatchGame() {
     startExerciseTracking();
     const { book, unit, page } = selectedClassContent;
-    // Get sentence pairs using weighted selection (similar to other minigames but for 5 items)
-    const sortedPages = getSortedPagesForBook(book);
-    const activePageIndex = sortedPages.findIndex(p => p.book === book && p.unit === unit && p.page === page.toString());
 
-    // Game Mode logic: content from beginning up to current page
-    // (Ensure we don't show future content)
-    let gamePages = [];
-    if (activePageIndex !== -1) {
-        const gamePageIndices = [];
-        for (let i = 0; i <= activePageIndex; i++) {
-            gamePageIndices.push(i);
-        }
-        gamePages = gamePageIndices.map(idx => sortedPages[idx]);
-    } else {
-        // Fallback if page not found in sorted list
-        gamePages = [{ book, unit, page: page.toString(), absIndex: 0 }];
+    let pairs = [];
+    const result = getGameSentencePairsSR(book, unit, page, srInSessionFailures, srInSessionSuccesses);
+    
+    if (result && result.pairs && result.pairs.length > 0) {
+        pairs = result.pairs;
     }
-
-    // Pick 3 pairs from the same page using the weighted logic
-    let pairs = pickUniqueItems(gamePages, 3, 'sentencePairs', activePageIndex, true, true);
 
     // Fallback if selection returns nothing
     if (pairs.length === 0) {
@@ -1196,6 +1188,17 @@ function checkSentenceMatch() {
                 if (!pairQueued[targetIndex]) {
                     let pairAttempts = JSON.parse(gameEl.dataset.pairAttempts);
                     const itemDetails = `A: ${pairsData[targetIndex].a} | B: ${pairsData[targetIndex].b}`;
+                    // Record SR result for sentence pair
+                    const pairItem = JSON.parse(document.getElementById('sentenceMatchGame').dataset.pairs)[targetIndex];
+                    const pairKey = itemKey(pairItem);
+                    const isFirstAttempt = pairAttempts[targetIndex] === 1;
+                    srGameResults.push({ type: 'sentencePairs', key: pairKey, firstAttempt: isFirstAttempt });
+                    if (!isFirstAttempt) {
+                        srInSessionFailures.add(pairKey);
+                    } else {
+                        srInSessionSuccesses.add(pairKey);
+                    }
+
                     queueExerciseEvent('sentenceMatch', 'game', itemDetails, pairAttempts[targetIndex]);
                     pairQueued[targetIndex] = true;
                     gameEl.dataset.pairQueued = JSON.stringify(pairQueued);
@@ -1220,6 +1223,14 @@ function checkSentenceMatch() {
         
         let pairAttempts = JSON.parse(gameEl.dataset.pairAttempts);
         let pairQueued = JSON.parse(gameEl.dataset.pairQueued);
+        
+        // Mark as failed for SR
+        pairsData.forEach((pair, idx) => {
+            if (!pairQueued[idx]) {
+                srInSessionFailures.add(itemKey(pair));
+            }
+        });
+
         for (let i = 0; i < pairsData.length; i++) {
             if (!pairQueued[i]) pairAttempts[i]++;
         }
@@ -1259,6 +1270,20 @@ function handleMinigameSuccess(gameType) {
     if (gameType !== 'rec') {
         const exerciseTypeMap = { 'spelling': 'spelling', 'grammar': 'sentenceScramble', 'sentencematch': 'sentenceMatch' };
         
+        // SR result tracking for spelling (vocab) and grammar (sentences)
+        if (gameType === 'spelling' || gameType === 'grammar') {
+            const srType = gameType === 'spelling' ? 'vocab' : 'sentences';
+            const key = itemKey(itemDetails);
+            const isFirstAttempt = exerciseAttempts === 1;
+            
+            srGameResults.push({ type: srType, key: key, firstAttempt: isFirstAttempt });
+            if (!isFirstAttempt) {
+                srInSessionFailures.add(key);
+            } else {
+                srInSessionSuccesses.add(key);
+            }
+        }
+
         // Only queue globally for spelling and grammar. Sentence Match handles its own item queuing.
         if (gameType !== 'sentencematch') {
             queueExerciseEvent(exerciseTypeMap[gameType] || gameType, 'game', itemDetails);

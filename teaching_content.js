@@ -267,3 +267,161 @@ function getWeightedItemForGame(book, unit, page, type) {
     const items = pickUniqueItems(gamePages, 1, type, activePageIndex, true);
     return items[0];
 }
+
+// ============================================================
+// SR-AWARE CONTENT SELECTION (uses sr_engine.js)
+// ============================================================
+
+/**
+ * Builds a deduplicated flat pool of { item, key, pageAbsIndex }
+ * and a pagesWithItems structure from a set of sorted page objects.
+ * Pages are processed newest-first so the current page "claims" shared items.
+ */
+function buildItemPool(pages, type) {
+    const seen = new Set();
+    const flatPool = [];
+    const pagesWithItems = [];
+
+    const reversed = [...pages].reverse();
+    reversed.forEach(p => {
+        const content = TEACHING_CONTENT[p.book] &&
+                        TEACHING_CONTENT[p.book][p.unit] &&
+                        TEACHING_CONTENT[p.book][p.unit][p.page];
+        if (!content || !content[type] || content[type].length === 0) return;
+
+        const pageItems = [];
+        content[type].forEach(item => {
+            const k = itemKey(item);
+            if (seen.has(k)) return;
+            seen.add(k);
+            const entry = { item, key: k, pageAbsIndex: p.absIndex };
+            flatPool.push(entry);
+            pageItems.push(entry);
+        });
+        if (pageItems.length > 0) {
+            pagesWithItems.push({ pageAbsIndex: p.absIndex, items: pageItems });
+        }
+    });
+
+    return { flatPool, pagesWithItems };
+}
+
+/**
+ * Study mode: selects `count` vocab or sentence items using SR priority.
+ * Falls back to legacy algorithm if no SR data is available.
+ */
+function getStudyContentSR(book, unit, page, type, count) {
+    if (!authActiveUser || !authActiveUser.srState) {
+        // No SR state — use legacy function
+        return getSpacedRepetitionContent(book, unit, page, type, true, count);
+    }
+
+    const sortedPages = getSortedPagesForBook(book);
+    const activePageIndex = sortedPages.findIndex(
+        p => p.book === book && p.unit === unit && p.page === page.toString()
+    );
+    if (activePageIndex === -1) {
+        return getSpacedRepetitionContent(book, unit, page, type, true, count);
+    }
+
+    // All pages up to and including current page
+    const candidatePages = sortedPages.slice(0, activePageIndex + 1);
+    const { flatPool } = buildItemPool(candidatePages, type);
+    const srTypeState = authActiveUser.srState[type === 'vocab' ? 'vocab' : 'sentences'] || {};
+
+    return selectItemsSR(flatPool, count, srTypeState, getCurrentSession(), activePageIndex);
+}
+
+/**
+ * Round E sub-round: selects 3 sentence pairs from the best-priority page,
+ * excluding already-used pages.
+ *
+ * @param {string} book
+ * @param {string} unit
+ * @param {string} page
+ * @param {Set<number>} usedPageIndices  abs indices of pages already used in earlier sub-rounds
+ * @returns {{ pageAbsIndex: number, pairs: Array }|null}
+ */
+function getStudySentencePairsSubRoundSR(book, unit, page, usedPageIndices) {
+    const sortedPages = getSortedPagesForBook(book);
+    const activePageIndex = sortedPages.findIndex(
+        p => p.book === book && p.unit === unit && p.page === page.toString()
+    );
+    if (activePageIndex === -1) return null;
+
+    const candidatePages = sortedPages.slice(0, activePageIndex + 1);
+    const { pagesWithItems } = buildItemPool(candidatePages, 'sentencePairs');
+
+    if (pagesWithItems.length === 0) return null;
+
+    const srTypeState = (authActiveUser && authActiveUser.srState && authActiveUser.srState.sentencePairs) || {};
+    const result = selectSamePageSR(
+        pagesWithItems, 3, srTypeState, getCurrentSession(),
+        activePageIndex, usedPageIndices, null
+    );
+    return result ? { pageAbsIndex: result.pageAbsIndex, pairs: result.items } : null;
+}
+
+/**
+ * Game mode: selects one item using SR priority (with in-session failure boost).
+ *
+ * @param {string} book
+ * @param {string} unit
+ * @param {string} page
+ * @param {'vocab'|'sentences'} type
+ * @param {Set<string>} inSessionFailures  keys failed earlier this game session
+ * @param {Set<string>} inSessionSuccesses keys succeeded earlier this game session
+ * @returns {*} a single item value (string)
+ */
+function getGameItemSR(book, unit, page, type, inSessionFailures, inSessionSuccesses) {
+    if (!authActiveUser || !authActiveUser.srState) {
+        return getWeightedItemForGame(book, unit, page, type);
+    }
+
+    const sortedPages = getSortedPagesForBook(book);
+    const activePageIndex = sortedPages.findIndex(
+        p => p.book === book && p.unit === unit && p.page === page.toString()
+    );
+    if (activePageIndex === -1) return getWeightedItemForGame(book, unit, page, type);
+
+    const candidatePages = sortedPages.slice(0, activePageIndex + 1);
+    const { flatPool } = buildItemPool(candidatePages, type);
+    const srKey = type === 'vocab' ? 'vocab' : 'sentences';
+    const srTypeState = authActiveUser.srState[srKey] || {};
+
+    const selected = selectItemsSR(
+        flatPool, 1, srTypeState, getCurrentSession(), activePageIndex, inSessionFailures, inSessionSuccesses
+    );
+    return selected[0];
+}
+
+/**
+ * Game mode sentence match: selects 3 pairs from the best-priority page,
+ * with in-session failure boost.
+ *
+ * @param {string} book
+ * @param {string} unit
+ * @param {string} page
+ * @param {Set<string>} inSessionFailures
+ * @param {Set<string>} inSessionSuccesses
+ * @returns {{ pageAbsIndex: number, pairs: Array }|null}
+ */
+function getGameSentencePairsSR(book, unit, page, inSessionFailures, inSessionSuccesses) {
+    const sortedPages = getSortedPagesForBook(book);
+    const activePageIndex = sortedPages.findIndex(
+        p => p.book === book && p.unit === unit && p.page === page.toString()
+    );
+    if (activePageIndex === -1) return null;
+
+    const candidatePages = sortedPages.slice(0, activePageIndex + 1);
+    const { pagesWithItems } = buildItemPool(candidatePages, 'sentencePairs');
+    if (pagesWithItems.length === 0) return null;
+
+    const srTypeState = (authActiveUser && authActiveUser.srState && authActiveUser.srState.sentencePairs) || {};
+    const result = selectSamePageSR(
+        pagesWithItems, 3, srTypeState, getCurrentSession(),
+        activePageIndex, null, inSessionFailures, inSessionSuccesses
+    );
+    return result ? { pageAbsIndex: result.pageAbsIndex, pairs: result.items } : null;
+}
+

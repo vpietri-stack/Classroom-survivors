@@ -61,6 +61,12 @@ function showGomokuModeSelection() {
 function triggerGomoku(mode = gomokuMode) {
     if (mode) gomokuMode = mode;
     activeGameMode = 'Gomoku';
+    
+    // Reset SR tracking for this game session
+    if (typeof srGameResults !== 'undefined') srGameResults = [];
+    if (typeof srInSessionFailures !== 'undefined') srInSessionFailures = new Set();
+    if (typeof srInSessionSuccesses !== 'undefined') srInSessionSuccesses = new Set();
+    
     document.getElementById('startScreen').classList.add('hidden');
     document.getElementById('gameSelectionOverlay').classList.add('hidden');
     document.getElementById('gomokuModeSelectionOverlay').classList.add('hidden');
@@ -679,7 +685,10 @@ function endGomokuGame(result) {
     document.getElementById('gomokuQuestTime').innerText = format(questTimeSec);
     document.getElementById('gomokuTotalTime').innerText = format(totalTimeSec);
 
-    // Track session analytics
+    // Track session analytics and finalize SR
+    if (typeof srGameResults !== 'undefined') {
+        finalizeSession(srGameResults);
+    }
     queueSessionEvent('gomoku', {
         result: result,
         mode: gomokuMode,

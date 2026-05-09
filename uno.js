@@ -130,6 +130,12 @@ function initUnoGame() {
 
 function triggerUno() {
     activeGameMode = 'Uno';
+    
+    // Reset SR tracking for this game session
+    if (typeof srGameResults !== 'undefined') srGameResults = [];
+    if (typeof srInSessionFailures !== 'undefined') srInSessionFailures = new Set();
+    if (typeof srInSessionSuccesses !== 'undefined') srInSessionSuccesses = new Set();
+    
     ['startScreen', 'gameSelectionOverlay', 'gomokuScreen', 'gomokuGameOverScreen',
         'gomokuModeSelectionOverlay', 'gomokuDifficultySelectionOverlay',
         'gameOverScreen', 'gameIntroOverlay', 'studyModeOverlay', 'unoGameOverScreen'
@@ -611,7 +617,10 @@ function endUno(winner) {
     document.getElementById('unoQuestTime').innerText = f(qs);
     document.getElementById('unoTotalTime').innerText = f(gs + qs);
 
-    // Track session analytics
+    // Track session analytics and finalize SR
+    if (typeof srGameResults !== 'undefined') {
+        finalizeSession(srGameResults);
+    }
     queueSessionEvent('uno', {
         winner: winner,
         winnerName: winner === 0 ? nm : unoPlayerNames[winner],

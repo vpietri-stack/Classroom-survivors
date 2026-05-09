@@ -14,7 +14,7 @@ app.http('saveAnalytics', {
     handler: async (request, context) => {
         try {
             const body = await request.json();
-            const { studentId, events } = body;
+            const { studentId, events, srState, incrementSession } = body;
 
             if (!studentId || !events || !Array.isArray(events) || events.length === 0) {
                 return { status: 400, body: "Missing studentId or events array." };
@@ -43,12 +43,26 @@ app.http('saveAnalytics', {
                 user.analytics.push(event);
             });
 
+            // Merge SR state if provided (frontend computes it; backend just stores it)
+            if (srState && typeof srState === 'object') {
+                user.srState = srState;
+            }
+
+            // Increment session count when this flush marks a completed session
+            if (incrementSession) {
+                user.sessionCount = (user.sessionCount || 0) + 1;
+            }
+
             // Upsert
             await container.items.upsert(user);
 
             return {
                 status: 200,
-                jsonBody: { success: true, message: `${events.length} event(s) saved.` }
+                jsonBody: {
+                    success: true,
+                    message: `${events.length} event(s) saved.`,
+                    sessionCount: user.sessionCount || 0
+                }
             };
         } catch (error) {
             context.error("saveAnalytics failed:", error);

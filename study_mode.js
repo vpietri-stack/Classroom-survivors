@@ -8,7 +8,8 @@ const STUDY_STATE = {
     currentSentenceIndex: 0, // For Round D (0 to 4)
     round: 'A',     // 'A', 'B', 'C', 'D'
     startTime: 0,
-    timerInterval: null
+    timerInterval: null,
+    isTransitioning: false
 };
 
 // Entry point
@@ -33,6 +34,7 @@ function initStudyMode() {
     STUDY_STATE.active = true;
     STUDY_STATE.startTime = Date.now();
     STUDY_STATE.round = 'A';
+    STUDY_STATE.isTransitioning = false;
 
     // Pick exactly 5 (SR logic already tries to do this, but let's be sure)
     STUDY_STATE.words = SR_WORDS.slice(0, 5);
@@ -107,7 +109,9 @@ function playRoundAPrompt() {
 }
 
 function checkRoundA(word, btnElement) {
+    if (STUDY_STATE.isTransitioning) return;
     if (word === currentTTSWord) {
+        STUDY_STATE.isTransitioning = true;
         // Correct
         playHappySound(); // Need to implement or reuse
         btnElement.classList.add('scale-0', 'transition-transform', 'duration-300'); // Animate out
@@ -117,6 +121,7 @@ function checkRoundA(word, btnElement) {
 
         setTimeout(() => {
             btnElement.remove();
+            STUDY_STATE.isTransitioning = false;
             playRoundAPrompt();
         }, 500);
     } else {
@@ -209,6 +214,7 @@ function nextRoundBWord() {
 let roundBInput = []; // Array of chars
 
 function addLetterToSlot(char, btnElement, targetWord) {
+    if (STUDY_STATE.isTransitioning) return;
     // Find first empty slot
     const slots = document.getElementById('scramble-slots').children;
     let insertedIndex = -1;
@@ -238,6 +244,7 @@ function addLetterToSlot(char, btnElement, targetWord) {
 }
 
 function removeLetterFromSlot(index, targetWord) {
+    if (STUDY_STATE.isTransitioning) return;
     const slots = document.getElementById('scramble-slots').children;
     const slot = slots[index];
     if (slot.innerText) {
@@ -260,6 +267,7 @@ function resetSlotColors() {
 }
 
 function checkRoundBLogic(targetWord) {
+    if (STUDY_STATE.isTransitioning) return;
     const slots = document.getElementById('scramble-slots').children;
     let currentStr = "";
     let isFull = true;
@@ -288,9 +296,11 @@ function checkRoundBLogic(targetWord) {
     }
 
     if (allCorrect) {
+        STUDY_STATE.isTransitioning = true;
         playHappySound();
         setTimeout(() => {
             STUDY_STATE.currentWordIndex++;
+            STUDY_STATE.isTransitioning = false;
             nextRoundBWord();
         }, 1000);
     } else {
@@ -375,11 +385,13 @@ function nextRoundCWord() {
 let roundCInput = "";
 
 function typeRoundC(char) {
+    if (STUDY_STATE.isTransitioning) return;
     roundCInput += char;
     updateRoundCDisplay();
 }
 
 function clearRoundC() {
+    if (STUDY_STATE.isTransitioning) return;
     roundCInput = "";
     updateRoundCDisplay();
 }
@@ -432,6 +444,7 @@ function updateRoundCDisplay() {
 // We must skip spaces in target when checking.
 
 function checkRoundC(targetWord) {
+    if (STUDY_STATE.isTransitioning) return;
     const disp = document.getElementById('spelling-display');
 
     // Target without spaces
@@ -472,16 +485,20 @@ function checkRoundC(targetWord) {
     disp.innerHTML = html;
 
     if (allCorrect) {
+        STUDY_STATE.isTransitioning = true;
         playHappySound();
         setTimeout(() => {
             roundCInput = "";
             STUDY_STATE.currentWordIndex++;
+            STUDY_STATE.isTransitioning = false;
             nextRoundCWord();
         }, 1000);
     } else {
+        STUDY_STATE.isTransitioning = true;
         synthError();
         setTimeout(() => {
             clearRoundC();
+            STUDY_STATE.isTransitioning = false;
         }, 2000);
     }
 }
@@ -556,6 +573,7 @@ function createWordTile(word, id) {
 }
 
 function moveWordTile(btn) {
+    if (STUDY_STATE.isTransitioning) return;
     const dropZone = document.getElementById('sentence-drop-zone');
     const bank = document.getElementById('sentence-word-bank');
 
@@ -569,6 +587,7 @@ function moveWordTile(btn) {
 }
 
 function checkRoundD(targetSentence) {
+    if (STUDY_STATE.isTransitioning) return;
     const dropZone = document.getElementById('sentence-drop-zone');
     const currentWords = Array.from(dropZone.children).map(b => b.dataset.word);
     const targetWords = targetSentence.split(' ');
@@ -590,15 +609,21 @@ function checkRoundD(targetSentence) {
     }
 
     if (allCorrect) {
+        STUDY_STATE.isTransitioning = true;
         playHappySound();
         setTimeout(() => {
             STUDY_STATE.currentSentenceIndex++;
+            STUDY_STATE.isTransitioning = false;
             nextRoundDSentence();
         }, 1000);
     } else {
+        STUDY_STATE.isTransitioning = true;
         synthError();
         dropZone.classList.add('border-red-500');
-        setTimeout(() => dropZone.classList.remove('border-red-500'), 500);
+        setTimeout(() => {
+            dropZone.classList.remove('border-red-500');
+            STUDY_STATE.isTransitioning = false;
+        }, 500);
     }
 }
 
@@ -702,6 +727,7 @@ function renderRoundE() {
 let selectedBTile = null;
 
 function selectBTile(tile) {
+    if (STUDY_STATE.isTransitioning) return;
     // Clear previous selection
     document.querySelectorAll('.sentence-b-tile').forEach(t => t.classList.remove('ring-4', 'ring-yellow-400'));
 
@@ -711,6 +737,7 @@ function selectBTile(tile) {
 }
 
 function handleSlotClick(slotIndex) {
+    if (STUDY_STATE.isTransitioning) return;
     const slot = document.querySelector(`.sentence-b-slot[data-target-index="${slotIndex}"]`);
 
     // If clicking a slot that already has a tile, return it to dock
@@ -738,6 +765,7 @@ function returnTileToDock(tile) {
 }
 
 function checkRoundE() {
+    if (STUDY_STATE.isTransitioning) return;
     const pairs = STUDY_STATE.sentencePairs;
     const slots = document.querySelectorAll('.sentence-b-slot');
     let allCorrect = true;
@@ -777,16 +805,20 @@ function checkRoundE() {
     }
 
     if (allCorrect) {
+        STUDY_STATE.isTransitioning = true;
         playHappySound();
         setTimeout(() => {
             STUDY_STATE.subRound++;
+            STUDY_STATE.isTransitioning = false;
             nextRoundESubRound();
         }, 1500);
     } else {
+        STUDY_STATE.isTransitioning = true;
         synthError();
         // Reset after 2 seconds
         setTimeout(() => {
             resetRoundE();
+            STUDY_STATE.isTransitioning = false;
         }, 2000);
     }
 }

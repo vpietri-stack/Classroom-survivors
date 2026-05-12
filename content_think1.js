@@ -448,6 +448,60 @@ TEACHING_CONTENT["Think1"] = {
                 { a: "Why don't we go to the park?", b: "That sounds like a great idea." },
                 { a: "It is raining, so let's go for a walk.", b: "That sounds like a bad idea." }
             ]
+        },
+        "71": {
+            vocab: [
+                'vacuum the floor', 'mop the floor', 'tidy up', 'do the ironing', 'do the shopping',
+                'clear the table', 'set the table', 'do the washing-up', 'wash the dishes',
+                'make the bed', 'do the cooking', 'do the washing',
+                'load the washing-machine', 'empty the washing-machine',
+                'load the dishwasher', 'empty the dishwasher'
+            ],
+            sentences: [
+                "I don't have to vacuum the floor, my robot does it.",
+                "Do you have to vacuum the floor everyday?",
+                "Tidy up your bedroom before you go to school, please.",
+                "Does he have to tidy up the living room?",
+                "Dad doesn't have to do the ironing, Mum does it.",
+                "Mum, do I do the ironing this afternoon?",
+                "My sister does the shopping twice a week.",
+                "Do they have to do the shopping today?",
+                "We're going to have dinner in 5 minutes, please set the table.",
+                "My brother has to set the table before dinner, and I have to clear it after.",
+                "I don't have to do the washing-up, I just load the dishwasher.",
+                "Should I wash up the dirty plates?",
+                "He has to make his bed every morning.",
+                "Do you have to make your bed?",
+                "My brother doesn't have to do the cooking, my grandma does it.",
+                "Who does the cooking in your family?",
+                "Your clothes are dirty, remember to do the washing please!",
+                "We use a washing-machine to do the washing.",
+                "We usually load the dishwasher after we clear the table.",
+                "I have to empty the dishwasher once a day."
+            ],
+            sentencePairs: [
+                { a: "Do you have to vacuum the floor?", b: "No, I don't, my robot does it." },
+                { a: "I don't have to vacuum the floor in my house,", b: "because my robot does it." },
+                { a: "Do I have to tidy up my bedroom?", b: "Yes, because it is a mess." },
+                { a: "I have to tidy up the house,", b: "but my vacuum cleaner robot can help me." },
+                { a: "Does your dad have to do the ironing?", b: "No, he doesn't, my mom does it." },
+                { a: "I don't like to do the ironing,", b: "because it is very boring." },
+                { a: "Do we have to do the shopping today?", b: "Yes, we haven't got any food." },
+                { a: "I don't have to do the shopping today,", b: "because Dad did it yesterday." },
+                { a: "Can you help me set the table, please?", b: "Dinner is almost ready." },
+                { a: "We usually set the table", b: "before eating." },
+                { a: "We usually clear the table", b: "after eating." },
+                { a: "My brother has to set the table before dinner,", b: "and I have to clear it after." },
+                { a: "Do I have to do the washing-up?", b: "No, you can just load the dishwasher." },
+                { a: "You should wash up your cup before drinking,", b: "there's peepee lemonade in it." },
+                { a: "Do you have to make your bed everyday?", b: "Yes, I do. My parents are very strict." },
+                { a: "Who has to do the cooking in your family?", b: "My dad usually does it." },
+                { a: "I love it when my mum does the cooking,", b: "because her food tastes delicious." },
+                { a: "Do I have to do the washing?", b: "Yes, you do. Your clothes are dirty." },
+                { a: "We can use a washing-machine,", b: "to do the washing." },
+                { a: "We usually load the dishwasher", b: "after we clear the table." },
+                { a: "I have to empty the dishwasher now,", b: "because the plates are clean." }
+            ]
         }
     }
 };
@@ -460,5 +514,5 @@ AVAILABLE_CONTENT["Think1"] = {
     "4": [46],
     "5": [55],
     "6": [58, 64],
-    "7": [66, 68, 69, 70]
+    "7": [66, 68, 69, 70, 71]
 };

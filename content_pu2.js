@@ -468,6 +468,40 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "Sunday comes after", b: "Saturday." }
             ]
         },
+        "21": {
+            vocab: [
+                'always', 'often', 'sometimes', 'never',
+                'once a day', 'once a week', 'twice a day', 'twice a week', 'every day', 'every week', 'at the weekend',
+                'late', 'ever'
+            ],
+            sentences: [
+                "I never go to school by plane.",
+                "She is never angry with her mum.",
+                "I often have eggs for breakfast.",
+                "He is often late for class.",
+                "He sometimes has a shower at night.",
+                "I am sometimes angry with my dog.",
+                "They always do their homework.",
+                "We are always kind in class.",
+                "I clean my teeth twice a day.",
+                "We have breakfast once a day.",
+                "I play football twice a week.",
+                "I do my homework every day.",
+                "I go swimming once a week.",
+                "I go to English class every week."
+            ],
+            sentencePairs: [
+                { a: "Are you ever late for class?", b: "No, I'm not. I'm always on time." },
+                { a: "How often do you clean your teeth?", b: "Twice a day. Once in the morning, and once before going to bed." },
+                { a: "Does Peter often go for a swim?", b: "Yes, he does. He goes to the pool every week." },
+                { a: "Does Peter always have a shower in the morning?", b: "No, he doesn't, but he often has one in the evening." },
+                { a: "How often does she feed her fish?", b: "Once a day." },
+                { a: "Does Clare sometimes have burgers for breakfast?", b: "No, she doesn't, but she sometimes has pizza in the morning." },
+                { a: "Does Clare sometimes have pizza for breakfast?", b: "Yes, she does." },
+                { a: "How often are fish in water?", b: "They always are." },
+                { a: "Is the teacher ever angry?", b: "Yes, he sometimes is when we're naughty in class." }
+            ]
+        },
         "28": {
             vocab: [
                 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'weekend',
@@ -784,6 +818,41 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "These big black and white bears come from China.", b: "They're pandas." },
                 { a: "This grey or black animal is bigger than all other sea animals.", b: "It's a whale." },
                 { a: "These animals live in the sea. They're bigger than dolphins.", b: "They're whales." }
+            ]
+        },
+        "60": {
+            vocab: [
+                'clean - the cleanest', 'clever - the cleverest', 'long - the longest', 'new - the newest', 'nice - the nicest',
+                'old - the oldest', 'quiet - the quietest', 'short - the shortest', 'straight - the straightest', 'tall - the tallest', 'young - the youngest',
+                'angry - the angriest', 'curly - the curliest', 'dirty - the dirtiest', 'funny - the funniest', 'happy - the happiest',
+                'naughty - the naughtiest', 'pretty - the prettiest', 'silly - the silliest', 'ugly - the ugliest',
+                'big - the biggest', 'fat - the fattest', 'sad - the saddest', 'thin - the thinnest',
+                'bad - the worst', 'good - the best', 'fast - the fastest', 'quick - the quickest', 'slow - the slowest',
+                'brave - the bravest',
+                'climb - climbing', 'fall - falling', 'fly - flying', 'get - getting', 'hide - hiding',
+                'jump - jumping', 'lose - losing', 'move - moving', 'run - running', 'walk - walking'
+            ],
+            sentences: [
+                "Blue whales are the biggest animals.",
+                "Snails can't move fast.",
+                "Kangaroos can jump but they can't run.",
+                "Dolphins are the cleverest sea animals.",
+                "Penguins walk slowly but they can swim fast.",
+                "Gracie is the oldest animal in the barn.",
+                "Rocky is the youngest animal in the barn.",
+                "Giraffes are the tallest animals.",
+                "I think parrots are the prettiest birds.",
+                "You musn't lose your books.",
+                "Pandas are the fattest bears."
+            ],
+            sentencePairs: [
+                { a: "Which animal is the biggest?", b: "The blue whale is." },
+                { a: "Is Gracie the youngest in the barn?", b: "No, she isn't. Rocky is." },
+                { a: "Is Rocky the youngest in the barn?", b: "Yes, he is." },
+                { a: "Penguins walk slowly,", b: "but they can swim fast." },
+                { a: "Dolphins are", b: "the cleverest sea animals." },
+                { a: "Which birds are the prettiest?", b: "I think the parrots are." },
+                { a: "Are elephants the biggest animals?", b: "No, they aren't. Blue whales are bigger." }
             ]
         },
         "66": {
@@ -1311,10 +1380,10 @@ TEACHING_CONTENT["PU2"] = {
 AVAILABLE_CONTENT["PU2"] = {
     "0": [5],
     "1": [7, 9, 10, 16],
-    "2": [19, 28],
+    "2": [19, 21, 28],
     "3": [40, 43],
     "4": [45, 46, 54],
-    "5": [57, 66],
+    "5": [57, 60, 66],
     "6": [78, 81],
     "7": [83, 85, 87, 93],
     "8": [95, 96, 104],

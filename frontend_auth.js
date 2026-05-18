@@ -1,5 +1,13 @@
 // API_BASE_URL is defined in config.js (loaded before this script)
 const API_BASE = API_BASE_URL;
+
+function apiFetch(url, options = {}) {
+    options.headers = {
+        ...options.headers,
+        'X-App-Key': APP_API_KEY
+    };
+    return fetch(url, options);
+}
 // --- AUTH & ANALYTICS STATE (Moved to teaching_content.js) ---
 
 // --- TEST MODE FLAG ---
@@ -63,17 +71,28 @@ function queueExerciseEvent(exerciseType, mode, itemDetails = null, customAttemp
     }
     
     analyticsQueue.push(event);
+    if (authActiveUser) {
+        if (!authActiveUser.analytics) authActiveUser.analytics = [];
+        authActiveUser.analytics.push(event);
+        saveActiveUserToCache();
+    }
     scheduleAnalyticsFlush();
 }
 
 function queueSessionEvent(sessionType, data) {
     if (!authActiveUser || isTestMode) return;  // Skip recording in test mode
-    analyticsQueue.push({
+    const event = {
         type: 'session',
         sessionType: sessionType,
         data: data,
         timestamp: new Date().toISOString()
-    });
+    };
+    analyticsQueue.push(event);
+    if (authActiveUser) {
+        if (!authActiveUser.analytics) authActiveUser.analytics = [];
+        authActiveUser.analytics.push(event);
+        saveActiveUserToCache();
+    }
     scheduleAnalyticsFlush();
 }
 
@@ -98,7 +117,7 @@ async function flushAnalytics() {
     if (incrementSession) body.incrementSession = true;
 
     try {
-        await fetch(`${API_BASE}/saveAnalytics`, {
+        await apiFetch(`${API_BASE}/saveAnalytics`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
@@ -222,7 +241,7 @@ function showProfileSelection(users) {
 async function loginWithProfile(user) {
     // Refresh user data from API to ensure we have the latest DB fields (like book/unit/page)
     try {
-        const response = await fetch(`${API_BASE}/login`, {
+        const response = await apiFetch(`${API_BASE}/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: user.id, login: user.login, password: user.password })
@@ -241,7 +260,8 @@ async function loginWithProfile(user) {
                     book: data.book,
                     unit: data.unit,
                     page: data.page,
-                    password: user.password
+                    password: user.password,
+                    analytics: data.analytics || []
                 };
                 showChangePasswordScreen(data.fullName);
                 return;
@@ -258,7 +278,9 @@ async function loginWithProfile(user) {
                 page: data.page,
                 password: user.password,
                 srState: data.srState || { vocab: {}, sentences: {}, sentencePairs: {} },
-                sessionCount: data.sessionCount || 0
+                sessionCount: data.sessionCount || 0,
+                targets: data.targets || [],
+                analytics: data.analytics || []
             };
             
             // Update the local cache with the fresh data
@@ -313,7 +335,7 @@ async function handleLoginSubmit() {
     }
     
     try {
-        const response = await fetch(`${API_BASE}/login`, {
+        const response = await apiFetch(`${API_BASE}/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ login: loginVal, password: passVal })
@@ -339,7 +361,9 @@ async function handleLoginSubmit() {
             page: data.page,
             password: passVal,
             srState: data.srState || { vocab: {}, sentences: {}, sentencePairs: {} },
-            sessionCount: data.sessionCount || 0
+            sessionCount: data.sessionCount || 0,
+            targets: data.targets || [],
+            analytics: data.analytics || []
         };
         
         if (data.needsPasswordChange) {
@@ -374,7 +398,7 @@ async function handleChangePasswordSubmit() {
     }
     
     try {
-        const response = await fetch(`${API_BASE}/changePassword`, {
+        const response = await apiFetch(`${API_BASE}/changePassword`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: authActiveUser.id, newPassword: newPass })
@@ -403,7 +427,7 @@ async function selectAvatar(avatarEmoji) {
     const errorDiv = document.getElementById('avatar-error');
     
     try {
-        const response = await fetch(`${API_BASE}/updateAvatar`, {
+        const response = await apiFetch(`${API_BASE}/updateAvatar`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: authActiveUser.id, avatar: avatarEmoji })
@@ -434,11 +458,22 @@ function saveUserToLocalAndStart(user) {
     finishLogin();
 }
 
+/**
+ * Updates the currently active user in the local storage cache
+ */
+function saveActiveUserToCache() {
+    if (!authActiveUser) return;
+    let savedUsers = JSON.parse(localStorage.getItem('savedUsers') || '[]');
+    savedUsers = savedUsers.filter(u => u.id !== authActiveUser.id);
+    savedUsers.unshift(authActiveUser);
+    localStorage.setItem('savedUsers', JSON.stringify(savedUsers));
+}
+
 function finishLogin() {
     hideAllAuthScreens();
 
-    // Redirect teachers to the dashboard
-    if (authActiveUser && authActiveUser.role === 'teacher') {
+    // Redirect teachers and admins to the dashboard
+    if (authActiveUser && (authActiveUser.role === 'teacher' || authActiveUser.role === 'admin')) {
         window.location.href = 'teacher_dashboard.html';
         return;
     }
@@ -466,6 +501,16 @@ function finishLogin() {
     // Show greeting directly
     document.getElementById('step-greeting').classList.remove('hidden');
     document.getElementById('greeting-text').innerText = `Hello, ${authActiveUser.name}!`;
+
+    // Handle target banner
+    const targetBanner = document.getElementById('greeting-target-banner');
+    const targetText = getActiveTargetText();
+    if (targetText) {
+        targetBanner.innerText = targetText;
+        targetBanner.classList.remove('hidden');
+    } else {
+        targetBanner.classList.add('hidden');
+    }
 }
 
 /**
@@ -519,4 +564,45 @@ function goBackToProfiles() {
     } else {
         showLoginScreen(true);
     }
+}
+
+/**
+ * Returns a formatted string if there is an active target, else null.
+ */
+function getActiveTargetText(studentOverride) {
+    const student = studentOverride || authActiveUser;
+    if (!student || !student.targets || student.targets.length === 0) return null;
+
+    const now = new Date();
+    // Find an active target (now is between start and end)
+    const activeTarget = student.targets.find(t => {
+        const start = new Date(t.startTime);
+        const end = new Date(t.endTime);
+        return now >= start && now <= end;
+    });
+
+    if (!activeTarget) return null;
+
+    const completed = countCompletedSessionsForTarget(student, activeTarget.startTime, activeTarget.endTime);
+    
+    // Format dates for display (e.g., 2026/05/14)
+    const startStr = new Date(activeTarget.startTime).toLocaleString('en-GB', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' });
+    const endStr = new Date(activeTarget.endTime).toLocaleString('en-GB', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' });
+    
+    return `${startStr} - ${endStr} 打卡记录: ${completed}/${activeTarget.targetSessions}`;
+}
+
+/**
+ * Helper to count completed sessions in a time range for a student.
+ */
+function countCompletedSessionsForTarget(student, startTimeStr, endTimeStr) {
+    if (!student.analytics || !Array.isArray(student.analytics)) return 0;
+    const start = new Date(startTimeStr).getTime();
+    const end = new Date(endTimeStr).getTime();
+    
+    return student.analytics.filter(e => {
+        if (e.type !== 'session') return false;
+        const ts = new Date(e.timestamp).getTime();
+        return ts >= start && ts <= end;
+    }).length;
 }

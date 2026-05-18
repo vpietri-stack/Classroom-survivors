@@ -1167,6 +1167,15 @@ class MainScene extends Phaser.Scene {
                     });
                     flushAnalytics();
 
+                    const targetText = typeof getActiveTargetText === 'function' ? getActiveTargetText() : null;
+                    const banner = document.getElementById('vs-target-banner');
+                    if (targetText && banner) {
+                        banner.innerText = targetText;
+                        banner.classList.remove('hidden');
+                    } else if (banner) {
+                        banner.classList.add('hidden');
+                    }
+
                     document.getElementById('gameOverScreen').classList.remove('hidden');
                 });
             }

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Teacher Dashboard for Classroom Survivors ESL App - View student progress, analytics, and test student content.">
-    <title>Teacher Dashboard — Classroom Survivors</title>
+    <meta name="description" content="Dashboard for Classroom Survivors ESL App - View student progress, manage content, and set targets.">
+    <title>Dashboard — Classroom Survivors</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -17,9 +17,12 @@
         <header class="dash-header">
             <div class="dash-header-left">
                 <i class="fas fa-graduation-cap dash-logo-icon"></i>
-                <h1 class="dash-title">Teacher Dashboard</h1>
+                <h1 id="dashboardTitle" class="dash-title">Teacher Dashboard</h1>
             </div>
             <div class="dash-header-right">
+                <button id="addStudentBtn" onclick="openAddStudentModal()" class="dash-action-btn admin-only hidden">
+                    <i class="fas fa-user-plus"></i> Add Student
+                </button>
                 <span id="teacherNameDisplay" class="dash-teacher-name"></span>
                 <button onclick="logoutTeacher()" class="dash-logout-btn">
                     <i class="fas fa-sign-out-alt"></i> Logout
@@ -55,33 +58,28 @@
             </button>
         </div>
 
+        <!-- Bulk Actions Bar (admin only) -->
+        <div id="bulkActionsBar" class="bulk-actions-bar admin-only hidden">
+            <button onclick="openBulkTargetsModal()" class="dash-action-btn"><i class="fas fa-bullseye"></i> Set Targets</button>
+            <button onclick="openBulkContentModal()" class="dash-action-btn"><i class="fas fa-book"></i> Edit Content</button>
+        </div>
+
         <!-- Student Table -->
         <div class="dash-table-wrap">
             <table class="dash-table" id="studentsTable">
                 <thead>
                     <tr>
-                        <th class="sortable" onclick="sortTable('name')">
-                            Student <i class="fas fa-sort sort-icon"></i>
-                        </th>
-                        <th class="sortable" onclick="sortTable('classTime')">
-                            Class Time <i class="fas fa-sort sort-icon"></i>
-                        </th>
-                        <th class="sortable" onclick="sortTable('sessions')">
-                            Sessions <i class="fas fa-sort sort-icon"></i>
-                        </th>
-                        <th class="sortable" onclick="sortTable('avgStudy')">
-                            Avg Study Length <i class="fas fa-sort sort-icon"></i>
-                        </th>
+                        <th class="sortable" onclick="sortTable('name')">Student <i class="fas fa-sort sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('classTime')">Class Time <i class="fas fa-sort sort-icon"></i></th>
+                        <th class="admin-col">Content</th>
+                        <th class="sortable" onclick="sortTable('sessions')">Sessions <i class="fas fa-sort sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('avgStudy')">Avg Study <i class="fas fa-sort sort-icon"></i></th>
+                        <th class="admin-col">Password</th>
                     </tr>
                 </thead>
-                <tbody id="studentsTableBody">
-                    <!-- Injected by JS -->
-                </tbody>
+                <tbody id="studentsTableBody"></tbody>
             </table>
-            <div id="noResultsMsg" class="no-results hidden">
-                <i class="fas fa-search"></i>
-                <p>No students match the current filters.</p>
-            </div>
+            <div id="noResultsMsg" class="no-results hidden"><i class="fas fa-search"></i><p>No students match the current filters.</p></div>
         </div>
     </div>
 
@@ -89,9 +87,7 @@
     <div id="studentDetailView" class="dashboard-container hidden">
         <header class="dash-header">
             <div class="dash-header-left">
-                <button onclick="backToDashboard()" class="back-btn">
-                    <i class="fas fa-arrow-left"></i>
-                </button>
+                <button onclick="backToDashboard()" class="back-btn"><i class="fas fa-arrow-left"></i></button>
                 <div class="student-detail-info">
                     <span id="detailStudentAvatar" class="detail-avatar"></span>
                     <div>
@@ -107,15 +103,12 @@
 
         <!-- Tab Bar -->
         <div class="detail-tabs">
-            <button class="tab-btn active" data-tab="sessions" onclick="switchTab('sessions')">
-                <i class="fas fa-history"></i> Sessions
-            </button>
-            <button class="tab-btn" data-tab="exercises" onclick="switchTab('exercises')">
-                <i class="fas fa-dumbbell"></i> Exercises
-            </button>
-            <button class="tab-btn tab-test" data-tab="test" onclick="switchTab('test')">
-                <i class="fas fa-play-circle"></i> Test Content
-            </button>
+            <button class="tab-btn active" data-tab="sessions" onclick="switchTab('sessions')"><i class="fas fa-history"></i> Sessions</button>
+            <button class="tab-btn" data-tab="exercises" onclick="switchTab('exercises')"><i class="fas fa-dumbbell"></i> Exercises</button>
+            <button class="tab-btn" data-tab="sr" onclick="switchTab('sr')"><i class="fas fa-brain"></i> SR State</button>
+            <button class="tab-btn admin-only hidden" data-tab="settings" onclick="switchTab('settings')"><i class="fas fa-cog"></i> Settings</button>
+            <button class="tab-btn admin-only hidden" data-tab="targets" onclick="switchTab('targets')"><i class="fas fa-bullseye"></i> Targets</button>
+            <button class="tab-btn tab-test" data-tab="test" onclick="switchTab('test')"><i class="fas fa-play-circle"></i> Test</button>
         </div>
 
         <!-- Date filter for detail view -->
@@ -126,51 +119,28 @@
                 <span class="date-range-sep">→</span>
                 <input type="date" id="detailDateTo" onchange="applyDetailFilters()" class="filter-date">
             </div>
-            <button onclick="clearDetailDates()" class="clear-filters-btn small">
-                <i class="fas fa-times"></i>
-            </button>
+            <button onclick="clearDetailDates()" class="clear-filters-btn small"><i class="fas fa-times"></i></button>
         </div>
 
         <!-- SESSIONS TAB -->
         <div id="tabSessions" class="tab-content">
             <div class="dash-table-wrap">
                 <table class="dash-table" id="sessionsTable">
-                    <thead>
-                        <tr>
-                            <th>Date & Time</th>
-                            <th>Type</th>
-                            <th>Game</th>
-                            <th>Duration</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Date & Time</th><th>Type</th><th>Game</th><th>Duration</th></tr></thead>
                     <tbody id="sessionsTableBody"></tbody>
                 </table>
-                <div id="noSessionsMsg" class="no-results hidden">
-                    <i class="fas fa-calendar-times"></i>
-                    <p>No sessions found for this period.</p>
-                </div>
+                <div id="noSessionsMsg" class="no-results hidden"><i class="fas fa-calendar-times"></i><p>No sessions found for this period.</p></div>
             </div>
         </div>
 
-        <!-- SESSION DETAIL (exercises within a session) -->
+        <!-- SESSION DETAIL -->
         <div id="sessionDetailPanel" class="session-detail-panel hidden">
             <div class="session-detail-header">
-                <button onclick="closeSessionDetail()" class="back-btn small">
-                    <i class="fas fa-arrow-left"></i> Back to Sessions
-                </button>
+                <button onclick="closeSessionDetail()" class="back-btn small"><i class="fas fa-arrow-left"></i> Back to Sessions</button>
                 <h3 id="sessionDetailTitle" class="session-detail-title"></h3>
             </div>
             <div class="dash-table-wrap">
-                <table class="dash-table compact">
-                    <thead>
-                        <tr>
-                            <th>Exercise</th>
-                            <th>Item</th>
-                            <th>Attempts</th>
-                        </tr>
-                    </thead>
-                    <tbody id="sessionExercisesBody"></tbody>
-                </table>
+                <table class="dash-table compact"><thead><tr><th>Exercise</th><th>Item</th><th>Attempts</th></tr></thead><tbody id="sessionExercisesBody"></tbody></table>
             </div>
         </div>
 
@@ -189,10 +159,7 @@
                 </div>
                 <div class="filter-group">
                     <label class="filter-label">Item Search</label>
-                    <div class="search-wrapper">
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="text" id="filterExerciseItem" oninput="applyExerciseFilters()" placeholder="Search items..." class="filter-search">
-                    </div>
+                    <div class="search-wrapper"><i class="fas fa-search search-icon"></i><input type="text" id="filterExerciseItem" oninput="applyExerciseFilters()" placeholder="Search items..." class="filter-search"></div>
                 </div>
                 <div class="filter-group">
                     <label class="filter-label">Min Attempts</label>
@@ -201,26 +168,111 @@
             </div>
             <div class="dash-table-wrap">
                 <table class="dash-table" id="exercisesTable">
-                    <thead>
-                        <tr>
-                            <th class="sortable" onclick="sortExerciseTable('type')">
-                                Exercise <i class="fas fa-sort sort-icon"></i>
-                            </th>
-                            <th>Item Details</th>
-                            <th class="sortable" onclick="sortExerciseTable('attempts')">
-                                Attempts <i class="fas fa-sort sort-icon"></i>
-                            </th>
-                            <th>Mode</th>
-                            <th class="sortable" onclick="sortExerciseTable('timestamp')">
-                                Date <i class="fas fa-sort sort-icon"></i>
-                            </th>
-                        </tr>
-                    </thead>
+                    <thead><tr>
+                        <th class="sortable" onclick="sortExerciseTable('type')">Exercise <i class="fas fa-sort sort-icon"></i></th>
+                        <th>Item Details</th>
+                        <th class="sortable" onclick="sortExerciseTable('attempts')">Attempts <i class="fas fa-sort sort-icon"></i></th>
+                        <th>Mode</th>
+                        <th class="sortable" onclick="sortExerciseTable('timestamp')">Date <i class="fas fa-sort sort-icon"></i></th>
+                    </tr></thead>
                     <tbody id="exercisesTableBody"></tbody>
                 </table>
-                <div id="noExercisesMsg" class="no-results hidden">
-                    <i class="fas fa-dumbbell"></i>
-                    <p>No exercises found for this period.</p>
+                <div id="noExercisesMsg" class="no-results hidden"><i class="fas fa-dumbbell"></i><p>No exercises found for this period.</p></div>
+            </div>
+        </div>
+
+        <!-- SETTINGS TAB (admin) -->
+        <div id="tabSettings" class="tab-content hidden">
+            <div class="admin-panel">
+                <h3 class="panel-title"><i class="fas fa-cog"></i> Student Settings</h3>
+                <div class="admin-form-grid">
+                    <div class="form-field"><label>Full Name</label><input type="text" id="settingsFullName" class="form-input"></div>
+                    <div class="form-field"><label>Class Time</label>
+                        <select id="settingsClassTime" class="form-input"></select>
+                    </div>
+                    <div class="form-field"><label>Book</label><select id="settingsBook" onchange="onSettingsBookChange()" class="form-input"></select></div>
+                    <div class="form-field"><label>Unit</label><select id="settingsUnit" onchange="onSettingsUnitChange()" class="form-input"></select></div>
+                    <div class="form-field"><label>Page</label><select id="settingsPage" class="form-input"></select></div>
+                    <div class="form-field"><label>Password</label>
+                        <div class="pw-field-row">
+                            <input type="password" id="settingsPassword" class="form-input">
+                            <button type="button" onclick="togglePwVis('settingsPassword','settingsPwIcon')" class="pw-toggle-btn"><i id="settingsPwIcon" class="fas fa-eye"></i></button>
+                        </div>
+                    </div>
+                    <div class="form-field full-width">
+                        <label class="checkbox-label"><input type="checkbox" id="settingsNeedsPwChange"> Require password change on next login</label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button onclick="saveStudentSettings()" class="dash-action-btn primary"><i class="fas fa-save"></i> Save Changes</button>
+                    <span id="settingsSaveStatus" class="save-status"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TARGETS TAB (admin) -->
+        <div id="tabTargets" class="tab-content hidden">
+            <div class="admin-panel">
+                <h3 class="panel-title"><i class="fas fa-bullseye"></i> Session Targets</h3>
+                <div class="dash-table-wrap" style="margin-bottom:20px;">
+                    <table class="dash-table compact"><thead><tr><th>Period</th><th>Target</th><th>Completed</th><th>Status</th><th></th></tr></thead>
+                    <tbody id="targetsTableBody"></tbody></table>
+                    <div id="noTargetsMsg" class="no-results hidden"><i class="fas fa-bullseye"></i><p>No targets set.</p></div>
+                </div>
+                <h4 class="panel-subtitle">Add New Target</h4>
+                <div class="admin-form-grid">
+                    <div class="form-field"><label>Start (Beijing Time)</label><input type="datetime-local" id="targetStart" class="form-input"></div>
+                    <div class="form-field"><label>End (Beijing Time)</label><input type="datetime-local" id="targetEnd" class="form-input"></div>
+                    <div class="form-field"><label>Target Sessions</label><input type="number" id="targetCount" min="1" value="10" class="form-input"></div>
+                </div>
+                <div class="form-actions">
+                    <button onclick="addTargetForStudent()" class="dash-action-btn primary"><i class="fas fa-plus"></i> Add Target</button>
+                    <span id="targetSaveStatus" class="save-status"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SR STATE TAB -->
+        <div id="tabSR" class="tab-content hidden">
+            <div class="sr-state-panel">
+                <div class="sr-state-toolbar">
+                    <div class="filter-group">
+                        <label class="filter-label">Category</label>
+                        <select id="srCategoryFilter" onchange="renderSRTab()" class="filter-select">
+                            <option value="">All</option>
+                            <option value="vocab">Vocabulary</option>
+                            <option value="sentences">Sentences</option>
+                            <option value="sentencePairs">Sentence Pairs</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Item Search</label>
+                        <div class="search-wrapper"><i class="fas fa-search search-icon"></i><input type="text" id="srItemSearch" oninput="renderSRTab()" placeholder="Search items..." class="filter-search"></div>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Sort By</label>
+                        <select id="srSortBy" onchange="renderSRTab()" class="filter-select">
+                            <option value="dueAsc">Due soonest</option>
+                            <option value="dueDesc">Due latest</option>
+                            <option value="intervalAsc">Interval ↑</option>
+                            <option value="intervalDesc">Interval ↓</option>
+                            <option value="key">Item A→Z</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="dash-table-wrap">
+                    <table class="dash-table compact" id="srTable">
+                        <thead><tr>
+                            <th>Category</th>
+                            <th>Item</th>
+                            <th>Interval</th>
+                            <th>Due After Session</th>
+                            <th>Last Session</th>
+                            <th>Last Result</th>
+                        </tr></thead>
+                        <tbody id="srTableBody"></tbody>
+                    </table>
+                    <div id="noSRMsg" class="no-results hidden"><i class="fas fa-brain"></i><p>No SR data yet.</p></div>
                 </div>
             </div>
         </div>
@@ -228,18 +280,96 @@
         <!-- TEST CONTENT TAB -->
         <div id="tabTest" class="tab-content hidden">
             <div class="test-content-panel">
-                <div class="test-info-banner">
-                    <i class="fas fa-info-circle"></i>
-                    <p>You are viewing the app as <strong id="testStudentNameBanner"></strong>. No data will be recorded to the database.</p>
-                </div>
-                <div class="test-iframe-container">
-                    <iframe id="testIframe" src="" class="test-iframe"></iframe>
-                </div>
+                <div class="test-info-banner"><i class="fas fa-info-circle"></i><p>Viewing as <strong id="testStudentNameBanner"></strong>. No data recorded.</p></div>
+                <div class="test-iframe-container"><iframe id="testIframe" src="" class="test-iframe"></iframe></div>
             </div>
         </div>
     </div>
 
+    <!-- ====== MODALS ====== -->
+
+    <!-- Add Student Modal -->
+    <div id="addStudentModal" class="modal-overlay hidden" onclick="if(event.target===this)closeModal('addStudentModal')">
+        <div class="modal-box">
+            <div class="modal-header"><h2><i class="fas fa-user-plus"></i> Add Student</h2><button onclick="closeModal('addStudentModal')" class="modal-close">&times;</button></div>
+            <div class="modal-body">
+                <div class="admin-form-grid">
+                    <div class="form-field"><label>DB ID *</label><input type="text" id="addId" class="form-input" placeholder="e.g. student_john"></div>
+                    <div class="form-field"><label>DB Login *</label><input type="text" id="addLogin" class="form-input" placeholder="e.g. john"></div>
+                    <div class="form-field"><label>Password *</label>
+                        <div class="pw-field-row"><input type="password" id="addPassword" class="form-input"><button type="button" onclick="togglePwVis('addPassword','addPwIcon')" class="pw-toggle-btn"><i id="addPwIcon" class="fas fa-eye"></i></button></div>
+                    </div>
+                    <div class="form-field"><label class="checkbox-label"><input type="checkbox" id="addNeedsPwChange" checked> Require password change</label></div>
+                    <div class="form-field"><label>Full Name *</label><input type="text" id="addFullName" class="form-input" placeholder="Display name"></div>
+                    <div class="form-field"><label>Class Time</label>
+                        <select id="addClassTime" class="form-input" onchange="if(this.value==='__custom__')document.getElementById('addClassTimeCustom').classList.remove('hidden')"><option value="">— None —</option></select>
+                        <input type="text" id="addClassTimeCustom" class="form-input hidden" placeholder="e.g. Mon 16:30" style="margin-top:6px;">
+                    </div>
+                    <div class="form-field"><label>Book</label><select id="addBook" onchange="onAddBookChange()" class="form-input"></select></div>
+                    <div class="form-field"><label>Unit</label><select id="addUnit" onchange="onAddUnitChange()" class="form-input"></select></div>
+                    <div class="form-field"><label>Page</label><select id="addPage" class="form-input"></select></div>
+                </div>
+                <div id="addStudentError" class="modal-error hidden"></div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeModal('addStudentModal')" class="dash-action-btn">Cancel</button>
+                <button onclick="submitAddStudent()" class="dash-action-btn primary"><i class="fas fa-plus"></i> Create Student</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Set Targets Modal -->
+    <div id="bulkTargetsModal" class="modal-overlay hidden" onclick="if(event.target===this)closeModal('bulkTargetsModal')">
+        <div class="modal-box">
+            <div class="modal-header"><h2><i class="fas fa-bullseye"></i> Set Targets for Class</h2><button onclick="closeModal('bulkTargetsModal')" class="modal-close">&times;</button></div>
+            <div class="modal-body">
+                <div class="admin-form-grid">
+                    <div class="form-field"><label>Class Time</label><select id="bulkTargetClass" onchange="previewBulkStudents('bulkTargetClass','bulkTargetPreview')" class="form-input"></select></div>
+                    <div class="form-field"><label>Start (Beijing Time)</label><input type="datetime-local" id="bulkTargetStart" class="form-input"></div>
+                    <div class="form-field"><label>End (Beijing Time)</label><input type="datetime-local" id="bulkTargetEnd" class="form-input"></div>
+                    <div class="form-field"><label>Target Sessions</label><input type="number" id="bulkTargetCount" min="1" value="10" class="form-input"></div>
+                </div>
+                <div id="bulkTargetPreview" class="bulk-preview"></div>
+                <div id="bulkTargetError" class="modal-error hidden"></div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeModal('bulkTargetsModal')" class="dash-action-btn">Cancel</button>
+                <button onclick="submitBulkTargets()" class="dash-action-btn primary"><i class="fas fa-bullseye"></i> Set Targets</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Edit Content Modal -->
+    <div id="bulkContentModal" class="modal-overlay hidden" onclick="if(event.target===this)closeModal('bulkContentModal')">
+        <div class="modal-box">
+            <div class="modal-header"><h2><i class="fas fa-book"></i> Edit Content for Class</h2><button onclick="closeModal('bulkContentModal')" class="modal-close">&times;</button></div>
+            <div class="modal-body">
+                <div class="admin-form-grid">
+                    <div class="form-field"><label>Class Time</label><select id="bulkContentClass" onchange="previewBulkStudents('bulkContentClass','bulkContentPreview')" class="form-input"></select></div>
+                    <div class="form-field"><label>Book</label><select id="bulkBook" onchange="onBulkBookChange()" class="form-input"></select></div>
+                    <div class="form-field"><label>Unit</label><select id="bulkUnit" onchange="onBulkUnitChange()" class="form-input"></select></div>
+                    <div class="form-field"><label>Page</label><select id="bulkPage" class="form-input"></select></div>
+                </div>
+                <div id="bulkContentPreview" class="bulk-preview"></div>
+                <div id="bulkContentError" class="modal-error hidden"></div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeModal('bulkContentModal')" class="dash-action-btn">Cancel</button>
+                <button onclick="submitBulkContent()" class="dash-action-btn primary"><i class="fas fa-save"></i> Apply to Class</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="config.js"></script>
+    <script>var TEACHING_CONTENT = {}; var AVAILABLE_CONTENT = {};</script>
+    <script src="content_pu1.js"></script>
+    <script src="content_pu2.js"></script>
+    <script src="content_pu3.js"></script>
+    <script src="content_think0.js"></script>
+    <script src="content_think1.js"></script>
+    <script src="content_think2.js"></script>
     <script src="teacher_dashboard.js"></script>
+    <script src="admin_dashboard.js"></script>
 </body>
 </html>

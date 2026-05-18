@@ -699,6 +699,15 @@ function endGomokuGame(result) {
     });
     flushAnalytics();
 
+    const targetText = typeof getActiveTargetText === 'function' ? getActiveTargetText() : null;
+    const banner = document.getElementById('gomoku-target-banner');
+    if (targetText && banner) {
+        banner.innerText = targetText;
+        banner.classList.remove('hidden');
+    } else if (banner) {
+        banner.classList.add('hidden');
+    }
+
     document.getElementById('gomokuGameOverScreen').classList.remove('hidden');
 }
 

@@ -917,12 +917,17 @@ function finishStudySession() {
     });
     flushAnalytics(); // Flush immediately on session end
 
+    const targetText = typeof getActiveTargetText === 'function' ? getActiveTargetText() : null;
+    const messageHtml = targetText 
+        ? `<div class="mb-8 py-3 px-6 bg-indigo-900/50 border border-indigo-400/50 rounded-xl inline-block"><p class="study-text-xl text-indigo-200 font-bold tracking-wide">${targetText}</p></div>`
+        : `<p class="study-text-xl text-yellow-400 mb-8 font-bold">记得发图片在群里给Val看看！!</p>`;
+
     const container = document.getElementById('study-game-area');
     container.innerHTML = `
         <div class="text-center px-4">
             <h2 class="study-text-2xl text-green-400 font-bold mb-4">Great job ${player}!</h2>
             <p class="study-text-xl text-white mb-2">You completed this session in ${timeStr}</p>
-            <p class="study-text-xl text-yellow-400 mb-8 font-bold">记得发图片在群里给Val看看！!</p>
+            ${messageHtml}
             
             <div class="flex flex-col gap-4 items-center">
                 <button onclick="initStudyMode()" class="game-btn bg-blue-600 text-xl sm:text-2xl w-full max-w-[280px]">再学习一下</button>

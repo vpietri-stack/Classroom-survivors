@@ -1,5 +1,6 @@
 const { app } = require('@azure/functions');
 const { CosmosClient } = require('@azure/cosmos');
+const { validateApiKey } = require('./shared/validateApiKey');
 
 const endpoint = process.env.COSMOS_ENDPOINT;
 const key = process.env.COSMOS_KEY;
@@ -15,6 +16,7 @@ app.http('updateAvatar', {
     handler: async (request, context) => {
         try {
             const body = await request.json();
+            if (!validateApiKey(request)) return { status: 403, body: 'Forbidden.' };
             // The frontend might pass avatarUrl or avatarId depending on naming, 
             // but we'll accept 'avatar' or 'avatarUrl' or 'avatarId' and map it.
             const { id, avatar, avatarUrl, avatarId } = body;

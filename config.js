@@ -9,3 +9,5 @@ const API_BASE_URL = (
 )
     ? 'http://localhost:7071/api'
     : 'https://brave-bush-0438ab000.7.azurestaticapps.net/api';
+
+const APP_API_KEY = 'cs-app-9kXmR7pL2wQz8vNb4tYj6cEd3hFs5mKr';

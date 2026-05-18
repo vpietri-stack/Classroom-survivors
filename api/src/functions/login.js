@@ -1,5 +1,6 @@
 const { app } = require('@azure/functions');
 const { CosmosClient } = require('@azure/cosmos');
+const { validateApiKey } = require('./shared/validateApiKey');
 
 const endpoint = process.env.COSMOS_ENDPOINT;
 const key = process.env.COSMOS_KEY;
@@ -15,6 +16,7 @@ app.http('login', {
     handler: async (request, context) => {
         try {
             const body = await request.json();
+            if (!validateApiKey(request)) return { status: 403, body: 'Forbidden.' };
             const { login, password, id } = body;
 
             if (!id && (!login || !password)) {
@@ -57,7 +59,9 @@ app.http('login', {
                     unit: user.unit || null,
                     page: user.page || null,
                     srState: user.srState || null,
-                    sessionCount: user.sessionCount || 0
+                    sessionCount: user.sessionCount || 0,
+                    targets: user.targets || [],
+                    analytics: user.analytics || []
                 }
             };
         } catch (error) {

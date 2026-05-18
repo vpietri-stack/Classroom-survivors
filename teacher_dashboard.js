@@ -17,15 +17,36 @@ document.addEventListener('DOMContentLoaded', () => {
     checkTeacherAuth();
 });
 
-function checkTeacherAuth() {
+async function checkTeacherAuth() {
     const savedUsers = JSON.parse(localStorage.getItem('savedUsers') || '[]');
-    const teacher = savedUsers.find(u => u.role === 'teacher');
+    const teacher = savedUsers.find(u => u.role === 'teacher' || u.role === 'admin');
     if (!teacher) {
-        // No cached teacher, redirect to main app to login
         window.location.href = 'index.html';
         return;
     }
+
+    // Re-verify role against the server to prevent localStorage spoofing
+    try {
+        const res = await apiFetch(`${API_BASE}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: teacher.id })
+        });
+
+        if (!res.ok) throw new Error('Auth failed');
+        const data = await res.json();
+
+        if (data.role !== 'teacher' && data.role !== 'admin') {
+            window.location.href = 'index.html';
+            return;
+        }
+    } catch (e) {
+        // If offline, allow cached access (graceful degradation)
+        console.warn('Could not verify role with server, using cached data:', e);
+    }
+
     document.getElementById('teacherNameDisplay').innerText = teacher.name;
+    if (typeof initAdminUI === 'function') initAdminUI();
     loadAllStudents();
 }
 
@@ -34,11 +55,13 @@ async function loadAllStudents() {
     tbody.innerHTML = `<tr><td colspan="4"><div class="loading-spinner"></div></td></tr>`;
 
     try {
-        const res = await fetch(`${API_BASE}/getStudents`);
+        const includeSecure = isAdmin ? '?includeSecure=true' : '';
+        const url = `${API_BASE}/getStudents${includeSecure}`;
+        const res = await apiFetch(url);
         if (!res.ok) throw new Error('Failed to fetch students');
         const data = await res.json();
-        // Filter out teachers
-        allStudents = data.filter(s => s.role !== 'teacher');
+        // Filter out teachers and admins from list
+        allStudents = data.filter(s => s.role !== 'teacher' && s.role !== 'admin');
         populateClassTimeFilter();
         applyFilters();
     } catch (e) {
@@ -232,17 +255,16 @@ function renderStudentsTable(dateFrom, dateTo) {
     tbody.innerHTML = filteredStudents.map(s => {
         const sessions = countSessions(s, dateFrom, dateTo);
         const avgMs = avgStudyDuration(s, dateFrom, dateTo);
+        const contentCol = isAdmin ? `<td style="font-size:0.8rem">${s.book ? `${s.book} U${s.unit} P${s.page}` : '—'}</td>` : '';
+        const pwCol = isAdmin ? `<td><span data-visible="false" style="font-size:0.82rem;color:var(--dash-text-dim)">••••••</span><button onclick="event.stopPropagation();toggleRowPw(this,'${(s.password||'').replace(/'/g,"\\'")}')" class="row-action-btn" style="margin-left:6px"><i class="fas fa-eye"></i></button></td>` : '';
 
         return `<tr class="clickable" onclick="openStudentDetail('${s.id}')">
-            <td>
-                <div class="student-name-cell">
-                    <span class="cell-avatar">${s.avatar || '👤'}</span>
-                    ${s.fullName || s.login || 'Unknown'}
-                </div>
-            </td>
+            <td><div class="student-name-cell"><span class="cell-avatar">${s.avatar || '👤'}</span>${s.fullName || s.login || 'Unknown'}</div></td>
             <td>${s.classTime || '—'}</td>
+            ${contentCol}
             <td>${sessions}</td>
             <td>${formatDuration(avgMs)}</td>
+            ${pwCol}
         </tr>`;
     }).join('');
 }
@@ -287,11 +309,11 @@ function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
 
-    document.getElementById('tabSessions').classList.add('hidden');
-    document.getElementById('tabExercises').classList.add('hidden');
-    document.getElementById('tabTest').classList.add('hidden');
+    ['tabSessions','tabExercises','tabTest','tabSettings','tabTargets','tabSR'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+    });
 
-    // Show/hide the date filter and session detail panel
     const dateFilter = document.getElementById('detailDateFilter');
     const sessionDetail = document.getElementById('sessionDetailPanel');
     sessionDetail.classList.add('hidden');
@@ -308,6 +330,18 @@ function switchTab(tab) {
         document.getElementById('tabTest').classList.remove('hidden');
         dateFilter.classList.add('hidden');
         startTestMode();
+    } else if (tab === 'sr') {
+        document.getElementById('tabSR').classList.remove('hidden');
+        dateFilter.classList.add('hidden');
+        if (typeof renderSRTab === 'function') renderSRTab();
+    } else if (tab === 'settings') {
+        document.getElementById('tabSettings').classList.remove('hidden');
+        dateFilter.classList.add('hidden');
+        if (typeof populateSettingsTab === 'function') populateSettingsTab();
+    } else if (tab === 'targets') {
+        document.getElementById('tabTargets').classList.remove('hidden');
+        dateFilter.classList.add('hidden');
+        if (typeof renderTargetsTab === 'function') renderTargetsTab();
     }
 }
 
@@ -496,9 +530,15 @@ function applyExerciseFilters() {
             ? `<span class="badge badge-study">Study</span>`
             : `<span class="badge badge-game">Game</span>`;
 
-        return `<tr>
+        // SR lookup: determine SR key and category from this exercise
+        const srKey = getSRKeyForExercise(ex);
+        const srClickAttr = srKey
+            ? `style="cursor:pointer" onclick="showSRPopup(${JSON.stringify(JSON.stringify(srKey))})" title="Click to view SR state"`
+            : '';
+
+        return `<tr ${srClickAttr}>
             <td><span class="badge badge-type">${exerciseTypeLabel(ex.exerciseType)}</span></td>
-            <td><span class="item-detail-text" title="${(ex.itemDetails || '—').replace(/"/g, '&quot;')}">${ex.itemDetails || '—'}</span></td>
+            <td><span class="item-detail-text" title="${(ex.itemDetails || '—').replace(/"/g, '&quot;')}">${ex.itemDetails || '—'}</span>${srKey ? ' <i class="fas fa-brain" style="color:var(--dash-primary);font-size:0.7rem;opacity:0.7"></i>' : ''}</td>
             <td>${attBadge}</td>
             <td>${modeBadge}</td>
             <td style="color: var(--dash-text-dim); font-size: 0.78rem;">${formatTimestamp(ex.timestamp)}</td>

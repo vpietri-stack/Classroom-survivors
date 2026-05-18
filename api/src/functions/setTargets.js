@@ -1,0 +1,84 @@
+const { app } = require('@azure/functions');
+const { CosmosClient } = require('@azure/cosmos');
+const { validateApiKey } = require('./shared/validateApiKey');
+
+const endpoint = process.env.COSMOS_ENDPOINT;
+const key = process.env.COSMOS_KEY;
+
+const client = new CosmosClient({ endpoint, key });
+const container = client.database('Val-EslApp').container('Students');
+
+app.http('setTargets', {
+    route: 'setTargets',
+    methods: ['POST'],
+    authLevel: 'anonymous',
+    handler: async (request, context) => {
+        try {
+            const body = await request.json();
+            if (!validateApiKey(request)) return { status: 403, body: 'Forbidden.' };
+            const { studentIds, target } = body;
+
+            if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
+                return { status: 400, body: "Missing or empty studentIds array." };
+            }
+            if (!target || !target.startTime || !target.endTime || !target.targetSessions) {
+                return { status: 400, body: "Missing target fields: startTime, endTime, targetSessions." };
+            }
+
+            const targetStart = new Date(target.startTime).getTime();
+            const targetEnd = new Date(target.endTime).getTime();
+
+            if (isNaN(targetStart) || isNaN(targetEnd) || targetEnd <= targetStart) {
+                return { status: 400, body: "Invalid date range: endTime must be after startTime." };
+            }
+
+            const results = [];
+
+            for (const studentId of studentIds) {
+                const querySpec = {
+                    query: "SELECT * FROM c WHERE c.id = @id",
+                    parameters: [{ name: "@id", value: studentId }]
+                };
+                const { resources: items } = await container.items.query(querySpec).fetchAll();
+
+                if (items.length === 0) {
+                    results.push({ studentId, success: false, error: "Not found" });
+                    continue;
+                }
+
+                const user = items[0];
+                if (!user.targets) user.targets = [];
+
+                // Generate a unique target id
+                const targetId = `t_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+
+                // Remove any existing target that fully overlaps with the new one
+                user.targets = user.targets.filter(t => {
+                    const existStart = new Date(t.startTime).getTime();
+                    const existEnd = new Date(t.endTime).getTime();
+                    // Remove if the new target completely covers the existing one
+                    return !(targetStart <= existStart && targetEnd >= existEnd);
+                });
+
+                // Add the new target
+                user.targets.push({
+                    id: targetId,
+                    startTime: target.startTime,
+                    endTime: target.endTime,
+                    targetSessions: target.targetSessions
+                });
+
+                await container.items.upsert(user);
+                results.push({ studentId, success: true, targetId });
+            }
+
+            return {
+                status: 200,
+                jsonBody: { success: true, results }
+            };
+        } catch (error) {
+            context.error("setTargets failed:", error);
+            return { status: 500, body: "Server error setting targets." };
+        }
+    }
+});

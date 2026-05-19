@@ -4546,5 +4546,23 @@ const LOCAL_TRANSLATIONS = {
     "wear - wore": "穿/戴 - 穿/戴(过去式)",
     "is - was": "是 - 是(过去式)",
     "am - was": "是 - 是(过去式)",
-    "are - were": "是 - 是(过去式)"
+    "are - were": "是 - 是(过去式)",
+
+    // --- PU2 Unit 2 Page 22 ---
+    "go shopping": "去购物",
+    "go skating": "去滑冰",
+    "read a comic": "读漫画",
+    "watch a DVD": "看DVD",
+    "listen to a CD": "听CD",
+    "watch films": "看电影",
+    "listen to music": "听音乐",
+    "write an email": "写邮件",
+    "I always listen to music in the car.": "我总是在车里听音乐。",
+    "She often watches films on Friday evenings.": "她经常在周五晚上看电影。",
+    "I sometimes read comics after class.": "我有时下课后看漫画。",
+    "I never go shopping for clothes, I don't like it!": "我从不去买衣服，我不喜欢！",
+    "I listen to music everyday.": "我每天听音乐。",
+    "She goes skating once a week, on Saturday afternoons.": "她一周去滑冰一次，在周六下午。",
+    "My dad writes emails everyday.": "我爸爸每天都写邮件。",
+    "My mum goes shopping for food twice a week.": "我妈妈一周买两次食品。"
 };

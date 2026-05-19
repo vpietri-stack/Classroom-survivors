@@ -502,6 +502,30 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "Is the teacher ever angry?", b: "Yes, he sometimes is when we're naughty in class." }
             ]
         },
+        "22": {
+            vocab: [
+                'go shopping', 'go skating', 'read a comic', 'watch a DVD', 'listen to a CD', 'watch films', 'listen to music', 'write an email'
+            ],
+            sentences: [
+                "I always listen to music in the car.",
+                "She often watches films on Friday evenings.",
+                "I sometimes read comics after class.",
+                "I never go shopping for clothes, I don't like it!",
+                "I listen to music everyday.",
+                "She goes skating once a week, on Saturday afternoons.",
+                "My dad writes emails everyday.",
+                "My mum goes shopping for food twice a week."
+            ],
+            sentencePairs: [
+                { a: "Does she ever go skating in the park?", b: "Yes, she does. Once a week, on Saturday afternoons" },
+                { a: "How often does May watch DVD?", b: "Never. She watches films on Youku." },
+                { a: "Jane enjoys reading", b: "comics. Her mum buys her one once a week." },
+                { a: "How often do you shop for shoes ?", b: "Once a year, when they get too small for me." },
+                { a: "I always listen", b: "to music in the car." },
+                { a: "He never writes", b: "emails. He hasn't got a computer." },
+                { a: "Do you ever listen to CDs?", b: "No, I don't. I listen to music on my phone." }
+            ]
+        },
         "28": {
             vocab: [
                 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'weekend',
@@ -1380,7 +1404,7 @@ TEACHING_CONTENT["PU2"] = {
 AVAILABLE_CONTENT["PU2"] = {
     "0": [5],
     "1": [7, 9, 10, 16],
-    "2": [19, 21, 28],
+    "2": [19, 21, 22, 28],
     "3": [40, 43],
     "4": [45, 46, 54],
     "5": [57, 60, 66],

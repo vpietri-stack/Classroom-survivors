@@ -879,39 +879,27 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "Are elephants the biggest animals?", b: "No, they aren't. Blue whales are bigger." }
             ]
         },
-        "66": {
+        "62": {
             vocab: [
-                'bat', 'bear', 'dolphin', 'kangaroo', 'lion', 'panda', 'parrot', 'penguin', 'rabbit', 'whale', 'shark',
-                'climb', 'fall', 'fly', 'hide', 'hop', 'jump', 'run', 'swim', 'walk',
-                'cage', 'above', 'below', 'near', 'opposite',
-                'the best', 'the worst', 'most', 'least', 'biggest', 'smallest', 'tallest', 'shortest', 'fastest', 'slowest'
+                'above', 'below', 'near', 'opposite',
             ],
             sentences: [
-                "The blue whale is the biggest animal.",
-                "The cheetah is the fastest animal.",
-                "The giraffe is the tallest animal.",
-                "The ant is the smallest animal.",
                 "The bat is above the tree.",
-                "The shark is below the boat.",
-                "The rabbit is near the hole.",
+                "The snail is below the flower.",
+                "The parrot is near the cage.",
                 "The zoo is opposite the park.",
-                "The lion is in the cage.",
-                "Who is the tallest in the class?",
-                "Which animal is the most dangerous?",
-                "This is the best day ever.",
-                "That was the worst movie.",
-                "Dolphins can swim and jump.",
-                "Kangaroos can jump very high.",
-                "Parrots can fly and talk.",
-                "Penguins can swim but they can't fly."
+                "Lions are carnivores.",
+                "Pandas are herbivores.",
+                "Dogs are omnivores."
             ],
             sentencePairs: [
-                { a: "Which animal is the biggest?", b: "The blue whale is the biggest animal." },
-                { a: "Who is the tallest?", b: "The giraffe is the tallest." },
-                { a: "Where is the bat?", b: "The bat is above the tree." },
-                { a: "Where is the bus stop?", b: "The bus stop is opposite the zoo." },
-                { a: "Can penguins fly?", b: "No, penguins can't fly, but they can swim." },
-                { a: "Which is the best animal?", b: "I think the dolphin is the best animal." }
+                { a: "Where are the bats?", b: "They're above the tree." },
+                { a: "Where is the zoo?", b: "It's opposite the park." },
+                { a: "Where are the snails?", b: "They're below the flower." },
+                { a: "Where is the parrot?", b: "It's near the cage." },
+                { a: "Lions and dolphins", b: "are carnivores." },
+                { a: "Pandas and rabbits", b: "are herbivores." },
+                { a: "Dogs and pigs", b: "are omnivores." }
             ]
         }
     },
@@ -1407,7 +1395,7 @@ AVAILABLE_CONTENT["PU2"] = {
     "2": [19, 21, 22, 28],
     "3": [40, 43],
     "4": [45, 46, 54],
-    "5": [57, 60, 66],
+    "5": [57, 60, 62],
     "6": [78, 81],
     "7": [83, 85, 87, 93],
     "8": [95, 96, 104],

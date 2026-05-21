@@ -677,6 +677,35 @@ TEACHING_CONTENT["PU3"] = {
                 { a: "I want to use the internet.", b: "Is there Wifi here?" }
             ]
         }
+    },
+    "7": {
+        "83": {
+            vocab: [
+                'Spain', 'actor', 'artist', 'cook', 'designer', 'driver', 'journalist', 'photographer', 'singer', 'waiter', 'newspaper'
+            ],
+            sentences: [
+                "A driver drives a lorry, taxi, or bus.",
+                "A cook makes food in a restaurant.",
+                "A waiter serves food in a restaurant.",
+                "A singer sings in a band and does concerts.",
+                "An actor works in films or at the theatre.",
+                "A designer designs clothes and costumes.",
+                "An artist draws and paints pictures.",
+                "A photographer takes photos with a camera.",
+                "A journalist writes for a newspaper."
+            ],
+            sentencePairs: [
+                { a: "Who drives a lorry, taxi, or bus?", b: "A driver." },
+                { a: "Who makes food in a restaurant?", b: "A cook." },
+                { a: "Who serves food in a restaurant?", b: "A waiter." },
+                { a: "Who sings in a band and does concerts?", b: "A singer." },
+                { a: "Who works in films or at the theatre?", b: "An actor." },
+                { a: "Who designs clothes and costumes?", b: "A designer." },
+                { a: "Who draws and paints pictures?", b: "An artist." },
+                { a: "Who takes photos with a camera?", b: "A photographer." },
+                { a: "Who writes for a newspaper?", b: "A journalist." }
+            ]
+        }
     }
 };
 
@@ -687,5 +716,6 @@ AVAILABLE_CONTENT["PU3"] = {
     "3": [40],
     "4": [54],
     "5": [57, 59, 66],
-    "6": [69, 71, 73]
+    "6": [69, 71, 73],
+    "7": [83]
 };

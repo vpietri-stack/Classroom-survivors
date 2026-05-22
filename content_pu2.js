@@ -526,44 +526,25 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "Do you ever listen to CDs?", b: "No, I don't. I listen to music on my phone." }
             ]
         },
-        "28": {
+        "25": {
             vocab: [
-                'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'weekend',
-                'do homework', 'go shopping', 'go skating', 'listen to music', 'read a comic', 'watch a film', 'write an email',
-                'always', 'often', 'sometimes', 'never',
-                'morning', 'afternoon', 'evening',
-                'before', 'after',
-                'once', 'twice',
-                'everyday', 'every',
-                'day', 'week', 'month', 'year',
-                'wear', 'helmet', 'gloves', 'goggles', 'knee pads', 'must', "mustn't",
+                'must', "mustn't", 'helmet', 'goggles', 'knee pads', 'gloves'
             ],
             sentences: [
-                "I always do my homework after school.",
-                "He often goes shopping on Saturdays.",
-                "She sometimes listens to music before bed.",
-                "They never go skating at the weekend.",
-                "We watch a film every Friday evening.",
-                "I write an email once a week.",
-                "She reads a comic twice a month.",
-                "They go shopping everyday.",
-                "You must wear a helmet.",
+                "You must wear a helmet and knee pads when you go skating.",
                 "I must wear goggles when I swim.",
                 "He must wear gloves in the winter.",
                 "You mustn't kick the teacher.",
                 "You mustn't eat poopoo.",
-                "We mustn't drink peepee.",
-                "How often do you listen to music? I always listen to music in the car.",
-                "How often does she go shopping? She goes shopping once a week.",
-                "How often do they watch a film? They watch a film every weekend."
+                "We mustn't drink peepee."
             ],
             sentencePairs: [
-                { a: "How often do you do homework?", b: "I always do homework after school." },
-                { a: "How often does she go shopping?", b: "She goes shopping once a week." },
-                { a: "How often do they watch a film?", b: "They often watch a film at the weekend." },
-                { a: "What must you wear when you go skating?", b: "I must wear a helmet and knee pads." },
-                { a: "How often do you write an email?", b: "I write an email twice a month." },
-                { a: "How often do you go skating?", b: "I go skating twice a year." }
+                { a: "What must you wear when you go skating?", b: "A helmet and knee pads." },
+                { a: "What must you wear when you go swimming?", b: "Goggles." },
+                { a: "What must you wear when it's cold?", b: "Gloves." },
+                { a: "What mustn't you do in class?", b: "Kick the teacher." },
+                { a: "What mustn't you eat?", b: "Poopoo." },
+                { a: "What mustn't you drink?", b: "Peepee." }
             ]
         }
     },
@@ -1392,7 +1373,7 @@ TEACHING_CONTENT["PU2"] = {
 AVAILABLE_CONTENT["PU2"] = {
     "0": [5],
     "1": [7, 9, 10, 16],
-    "2": [19, 21, 22, 28],
+    "2": [19, 21, 22, 25],
     "3": [40, 43],
     "4": [45, 46, 54],
     "5": [57, 60, 62],

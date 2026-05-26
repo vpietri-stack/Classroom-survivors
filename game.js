@@ -400,7 +400,7 @@ function selectUnit(unit) {
     document.getElementById('step-unit').classList.add('hidden');
     document.getElementById('step-greeting').classList.remove('hidden');
 
-    document.getElementById('greeting-text').innerText = `Welcome!`;
+    document.getElementById('greeting-text').innerText = `欢迎！`;
     loadContent();
 }
 

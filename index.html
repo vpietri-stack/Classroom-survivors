@@ -25,7 +25,7 @@
 
     <!-- AUTH SCREENS -->
     <div id="profileSelectionOverlay" class="overlay hidden bg-[#141414] flex-col items-center justify-center z-50">
-        <h1 class="text-4xl sm:text-5xl font-bold text-white mb-10 tracking-wider">Who is playing?</h1>
+        <h1 class="text-4xl sm:text-5xl font-bold text-white mb-10 tracking-wider">谁在玩？</h1>
         <div id="profile-list" class="flex flex-wrap justify-center gap-6 sm:gap-10 max-w-4xl mx-auto px-4">
             <!-- Profiles injected here -->
         </div>
@@ -33,31 +33,31 @@
 
     <div id="loginOverlay" class="overlay hidden bg-[#141414] flex-col items-center justify-center z-50">
         <div class="bg-black/70 p-8 sm:p-12 rounded-xl w-full max-w-md border border-gray-800">
-            <h2 class="text-3xl font-bold text-white mb-8">Sign In</h2>
+            <h2 class="text-3xl font-bold text-white mb-8">登录</h2>
             <div id="login-error" class="hidden bg-red-500/20 text-red-500 p-3 rounded mb-4 text-sm"></div>
             <div class="flex flex-col gap-5">
-                <input type="text" id="login-username" placeholder="Username" class="bg-[#333] text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-gray-500">
-                <input type="password" id="login-password" placeholder="Password" class="bg-[#333] text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-gray-500">
-                <button onclick="handleLoginSubmit()" class="game-btn bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded mt-4 w-full">Sign In</button>
-                <button onclick="cancelLogin()" id="login-cancel-btn" class="text-gray-400 hover:text-white mt-2">Cancel</button>
+                <input type="text" id="login-username" placeholder="用户名" class="bg-[#333] text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-gray-500">
+                <input type="password" id="login-password" placeholder="密码" class="bg-[#333] text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-gray-500">
+                <button onclick="handleLoginSubmit()" class="game-btn bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded mt-4 w-full">登录</button>
+                <button onclick="cancelLogin()" id="login-cancel-btn" class="text-gray-400 hover:text-white mt-2">取消</button>
             </div>
         </div>
     </div>
 
     <div id="changePasswordOverlay" class="overlay hidden bg-[#141414] flex-col items-center justify-center z-50">
         <div class="bg-black/70 p-8 sm:p-12 rounded-xl w-full max-w-md border border-gray-800 text-center">
-            <h2 id="change-pw-greeting" class="text-2xl font-bold text-white mb-2">Hello, User</h2>
-            <p class="text-gray-400 mb-8">Please set your new password.</p>
+            <h2 id="change-pw-greeting" class="text-2xl font-bold text-white mb-2">你好，用户</h2>
+            <p class="text-gray-400 mb-8">请设置您的新密码。</p>
             <div id="change-pw-error" class="hidden bg-red-500/20 text-red-500 p-3 rounded mb-4 text-sm"></div>
             <div class="flex flex-col gap-5">
-                <input type="password" id="new-password" placeholder="New Password" class="bg-[#333] text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-gray-500">
-                <button onclick="handleChangePasswordSubmit()" class="game-btn bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded mt-4 w-full">Update Password</button>
+                <input type="password" id="new-password" placeholder="新密码" class="bg-[#333] text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-gray-500">
+                <button onclick="handleChangePasswordSubmit()" class="game-btn bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded mt-4 w-full">更新密码</button>
             </div>
         </div>
     </div>
 
     <div id="avatarSelectionOverlay" class="overlay hidden bg-[#141414] flex-col items-center justify-center z-50">
-        <h1 class="text-4xl sm:text-5xl font-bold text-white mb-10 tracking-wider">Choose your avatar</h1>
+        <h1 class="text-4xl sm:text-5xl font-bold text-white mb-10 tracking-wider">选择你的头像</h1>
         <div id="avatar-error" class="hidden bg-red-500/20 text-red-500 p-3 rounded mb-4 text-sm"></div>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-8 max-w-3xl mx-auto px-4">
             <!-- Example static avatars, using emojis or placeholder colors for now -->
@@ -145,7 +145,7 @@
                 <div id="greeting-target-banner" class="hidden w-full text-center py-2 px-4 bg-indigo-900/50 border border-indigo-400/50 rounded-lg text-indigo-200 font-bold tracking-wide mt-2"></div>
                 <div class="flex flex-col gap-4 w-full mt-4">
                     <button class="game-btn text-2xl bg-blue-600 hover:bg-blue-500 w-full"
-                        onclick="initStudyMode()">我想打卡</button>
+                        onclick="initStudyMode()">我想直接练习</button>
                     <button class="game-btn text-2xl bg-orange-600 hover:bg-orange-500 w-full"
                         onclick="showGameSelection()">我想边学边玩</button>
                 </div>
@@ -512,7 +512,7 @@
                 <button class="game-btn bg-blue-600 hover:bg-blue-500 text-xl py-3 rounded-lg"
                     onclick="showGameSelection()">我想玩别的</button>
                 <button class="game-btn bg-orange-600 hover:bg-orange-500 text-xl py-3 rounded-lg"
-                    onclick="initStudyMode()">学习模式</button>
+                    onclick="initStudyMode()">直接练习模式</button>
             </div>
         </div>
     </div>
@@ -622,7 +622,7 @@
             <div class="flex flex-col gap-4">
                 <button class="game-btn bg-green-600 hover:bg-green-500 text-xl py-3 rounded-lg" onclick="triggerUno()">再玩一次</button>
                 <button class="game-btn bg-blue-600 hover:bg-blue-500 text-xl py-3 rounded-lg" onclick="showGameSelection()">我想玩别的</button>
-                <button class="game-btn bg-orange-600 hover:bg-orange-500 text-xl py-3 rounded-lg" onclick="initStudyMode()">学习模式</button>
+                <button class="game-btn bg-orange-600 hover:bg-orange-500 text-xl py-3 rounded-lg" onclick="initStudyMode()">直接练习模式</button>
             </div>
         </div>
     </div>

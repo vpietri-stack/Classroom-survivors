@@ -2,8 +2,7 @@
 // TEACHER DASHBOARD - JavaScript Logic
 // ============================================================
 
-// API_BASE_URL is defined in config.js (loaded before this script)
-const API_BASE = API_BASE_URL;
+// API_BASE is defined in frontend_auth.js (loaded before this script)
 
 let allStudents = [];        // Raw student data from DB
 let filteredStudents = [];   // After applying filters
@@ -52,7 +51,7 @@ async function checkTeacherAuth() {
 
 async function loadAllStudents() {
     const tbody = document.getElementById('studentsTableBody');
-    tbody.innerHTML = `<tr><td colspan="4"><div class="loading-spinner"></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6"><div class="loading-spinner"></div></td></tr>`;
 
     try {
         const includeSecure = isAdmin ? '?includeSecure=true' : '';
@@ -65,7 +64,7 @@ async function loadAllStudents() {
         populateClassTimeFilter();
         applyFilters();
     } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="4" class="no-results"><p>Error loading students: ${e.message}</p></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="no-results"><p>Error loading students: ${e.message}</p></td></tr>`;
     }
 }
 
@@ -119,11 +118,11 @@ function sortFilteredStudents() {
             vb = b.classTime || '';
             return va < vb ? -dir : va > vb ? dir : 0;
         }
-        if (column === 'sessions') {
-            const dateFrom = document.getElementById('filterDateFrom').value;
-            const dateTo = document.getElementById('filterDateTo').value;
-            va = countSessions(a, dateFrom, dateTo);
-            vb = countSessions(b, dateFrom, dateTo);
+        if (column === 'target') {
+            const infoA = getStudentTargetInfo(a);
+            const infoB = getStudentTargetInfo(b);
+            va = infoA ? infoA.completed / infoA.target.targetSessions : -1;
+            vb = infoB ? infoB.completed / infoB.target.targetSessions : -1;
             return (va - vb) * dir;
         }
         if (column === 'avgStudy') {
@@ -239,6 +238,72 @@ function getSessionGameType(session) {
     return sessionTypeLabel(session.sessionType);
 }
 
+// ----- TARGET HELPERS (main table) -----
+
+function getStudentTargetInfo(student) {
+    if (!student.targets || student.targets.length === 0) return null;
+    const now = new Date();
+
+    // 1. Active target
+    for (const t of student.targets) {
+        const start = new Date(t.startTime);
+        const end = new Date(t.endTime);
+        if (now >= start && now <= end) {
+            const completed = countTargetSessions(student, start, end);
+            return { target: t, completed, status: 'active' };
+        }
+    }
+
+    // 2. Most recent past target
+    const past = student.targets
+        .filter(t => new Date(t.endTime) < now)
+        .sort((a, b) => new Date(b.endTime) - new Date(a.endTime));
+    if (past.length > 0) {
+        const t = past[0];
+        const start = new Date(t.startTime);
+        const end = new Date(t.endTime);
+        const completed = countTargetSessions(student, start, end);
+        return { target: t, completed, status: completed >= t.targetSessions ? 'completed' : 'missed' };
+    }
+
+    // 3. Nearest upcoming target
+    const upcoming = student.targets
+        .filter(t => new Date(t.startTime) > now)
+        .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+    if (upcoming.length > 0) {
+        return { target: upcoming[0], completed: 0, status: 'upcoming' };
+    }
+
+    return null;
+}
+
+function countTargetSessions(student, start, end) {
+    if (!student.analytics || !Array.isArray(student.analytics)) return 0;
+    return student.analytics.filter(e => {
+        if (e.type !== 'session') return false;
+        const ts = new Date(e.timestamp);
+        return ts >= start && ts <= end;
+    }).length;
+}
+
+function renderTargetCell(info) {
+    if (!info) return '<td style="color:var(--dash-text-dim)">—</td>';
+    const { target, completed, status } = info;
+    const total = target.targetSessions;
+    let badgeClass, statusIcon;
+    if (status === 'active')    { badgeClass = 'badge-active';   statusIcon = ''; }
+    else if (status === 'completed') { badgeClass = 'badge-complete'; statusIcon = ' ✓'; }
+    else if (status === 'missed')    { badgeClass = 'badge-missed';   statusIcon = ' ✗'; }
+    else                             { badgeClass = 'badge-upcoming'; statusIcon = ''; }
+    return `<td><span class="badge ${badgeClass}">${completed}/${total}${statusIcon}</span></td>`;
+}
+
+function renderPeriodCell(info) {
+    if (!info) return '<td style="color:var(--dash-text-dim)">—</td>';
+    const fmt = d => d.toLocaleDateString('en-GB', { timeZone: 'Asia/Shanghai', day: 'numeric', month: 'short' });
+    return `<td style="font-size:0.82rem">${fmt(new Date(info.target.startTime))} → ${fmt(new Date(info.target.endTime))}</td>`;
+}
+
 // ----- RENDER STUDENTS TABLE -----
 
 function renderStudentsTable(dateFrom, dateTo) {
@@ -253,16 +318,15 @@ function renderStudentsTable(dateFrom, dateTo) {
     noResults.classList.add('hidden');
 
     tbody.innerHTML = filteredStudents.map(s => {
-        const sessions = countSessions(s, dateFrom, dateTo);
         const avgMs = avgStudyDuration(s, dateFrom, dateTo);
-        const contentCol = isAdmin ? `<td style="font-size:0.8rem">${s.book ? `${s.book} U${s.unit} P${s.page}` : '—'}</td>` : '';
+        const targetInfo = getStudentTargetInfo(s);
         const pwCol = isAdmin ? `<td><span data-visible="false" style="font-size:0.82rem;color:var(--dash-text-dim)">••••••</span><button onclick="event.stopPropagation();toggleRowPw(this,'${(s.password||'').replace(/'/g,"\\'")}')" class="row-action-btn" style="margin-left:6px"><i class="fas fa-eye"></i></button></td>` : '';
 
         return `<tr class="clickable" onclick="openStudentDetail('${s.id}')">
             <td><div class="student-name-cell"><span class="cell-avatar">${s.avatar || '👤'}</span>${s.fullName || s.login || 'Unknown'}</div></td>
             <td>${s.classTime || '—'}</td>
-            ${contentCol}
-            <td>${sessions}</td>
+            ${renderTargetCell(targetInfo)}
+            ${renderPeriodCell(targetInfo)}
             <td>${formatDuration(avgMs)}</td>
             ${pwCol}
         </tr>`;

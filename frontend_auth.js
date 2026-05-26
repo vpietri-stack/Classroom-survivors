@@ -136,6 +136,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initAuth() {
+    // Only run on pages that have the student UI (not teacher_dashboard.html)
+    if (!document.getElementById('startScreen')) return;
+
     // Check for test mode (teacher testing student content)
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('testMode') === 'true') {
@@ -329,7 +332,7 @@ async function handleLoginSubmit() {
     const errorDiv = document.getElementById('login-error');
     
     if (!loginVal || !passVal) {
-        errorDiv.innerText = "Please enter username and password.";
+        errorDiv.innerText = "请输入用户名和密码。";
         errorDiv.classList.remove('hidden');
         return;
     }
@@ -343,7 +346,7 @@ async function handleLoginSubmit() {
         
         if (!response.ok) {
             const errText = await response.text();
-            errorDiv.innerText = errText || "Login failed.";
+            errorDiv.innerText = errText || "登录失败。";
             errorDiv.classList.remove('hidden');
             return;
         }
@@ -374,7 +377,7 @@ async function handleLoginSubmit() {
             saveUserToLocalAndStart(authActiveUser);
         }
     } catch (e) {
-        errorDiv.innerText = "Error connecting to server.";
+        errorDiv.innerText = "连接服务器出错。";
         errorDiv.classList.remove('hidden');
     }
 }
@@ -382,7 +385,7 @@ async function handleLoginSubmit() {
 function showChangePasswordScreen(name) {
     hideAllAuthScreens();
     document.getElementById('changePasswordOverlay').classList.remove('hidden');
-    document.getElementById('change-pw-greeting').innerText = `Hello ${name}`;
+    document.getElementById('change-pw-greeting').innerText = `你好，${name}`;
     document.getElementById('change-pw-error').classList.add('hidden');
     document.getElementById('new-password').value = '';
 }
@@ -392,7 +395,7 @@ async function handleChangePasswordSubmit() {
     const errorDiv = document.getElementById('change-pw-error');
     
     if (!newPass) {
-        errorDiv.innerText = "Please enter a new password.";
+        errorDiv.innerText = "请输入新密码。";
         errorDiv.classList.remove('hidden');
         return;
     }
@@ -405,14 +408,14 @@ async function handleChangePasswordSubmit() {
         });
         
         if (!response.ok) {
-            errorDiv.innerText = "Failed to change password.";
+            errorDiv.innerText = "修改密码失败。";
             errorDiv.classList.remove('hidden');
             return;
         }
         
         showAvatarSelectionScreen();
     } catch (e) {
-        errorDiv.innerText = "Error connecting to server.";
+        errorDiv.innerText = "连接服务器出错。";
         errorDiv.classList.remove('hidden');
     }
 }
@@ -434,7 +437,7 @@ async function selectAvatar(avatarEmoji) {
         });
         
         if (!response.ok) {
-            errorDiv.innerText = "Failed to update avatar.";
+            errorDiv.innerText = "更新头像失败。";
             errorDiv.classList.remove('hidden');
             return;
         }
@@ -442,7 +445,7 @@ async function selectAvatar(avatarEmoji) {
         authActiveUser.avatar = avatarEmoji;
         saveUserToLocalAndStart(authActiveUser);
     } catch (e) {
-        errorDiv.innerText = "Error connecting to server.";
+        errorDiv.innerText = "连接服务器出错。";
         errorDiv.classList.remove('hidden');
     }
 }

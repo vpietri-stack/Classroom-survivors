@@ -709,3 +709,202 @@ body {
     transform: translateY(2px);
     border-bottom-width: 1px;
 }
+
+/* ========== THEME TOGGLE BUTTON ========== */
+.theme-toggle-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #1e1b4b; /* dark indigo base for dark mode */
+    color: #facc15;
+    border: 3px solid #facc15;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    z-index: 9999;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    outline: none;
+    pointer-events: auto;
+}
+
+.theme-toggle-btn:hover {
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.theme-toggle-btn:active {
+    transform: scale(0.95);
+}
+
+/* ========== KID-FRIENDLY THEME OVERRIDES ========== */
+body.kid-friendly {
+    background: linear-gradient(135deg, #fff5e6 0%, #ffd1b3 100%);
+    font-family: 'Nunito', 'Fredoka', sans-serif;
+    color: #4a2c11;
+}
+
+/* Floating theme toggle when kid-friendly is active */
+body.kid-friendly .theme-toggle-btn {
+    background: #fff5e6;
+    color: #ff7043;
+    border-color: #ff7043;
+    box-shadow: 0 4px 15px rgba(220, 100, 50, 0.2);
+}
+
+/* Overlays in kid-friendly mode */
+body.kid-friendly .overlay {
+    background: radial-gradient(circle, #fffbf5 0%, #ffeae0 100%) !important;
+    backdrop-filter: blur(8px);
+}
+
+/* Cards & containers in kid-friendly mode */
+body.kid-friendly .step-container,
+body.kid-friendly #loginOverlay > div,
+body.kid-friendly #changePasswordOverlay > div,
+body.kid-friendly #gameSelectionOverlay > div,
+body.kid-friendly #gomokuModeSelectionOverlay > div,
+body.kid-friendly #gomokuDifficultySelectionOverlay > div,
+body.kid-friendly #gomokuGameOverScreen > div,
+body.kid-friendly #unoGameOverScreen > div,
+body.kid-friendly #gameOverScreen > div,
+body.kid-friendly .minigame-container {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    border: 3px solid #ffccbc !important;
+    color: #4e342e !important;
+    box-shadow: 0 10px 30px rgba(220, 100, 50, 0.15) !important;
+    border-radius: 24px !important;
+}
+
+/* Headings color */
+body.kid-friendly h1,
+body.kid-friendly h2,
+body.kid-friendly h3,
+body.kid-friendly h4 {
+    color: #e65100 !important;
+    background: none !important;
+    -webkit-text-fill-color: initial !important;
+    background-clip: border-box !important;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+}
+
+/* Text elements */
+body.kid-friendly p,
+body.kid-friendly span:not(#themeToggleIcon),
+body.kid-friendly label {
+    color: #5d4037 !important;
+}
+
+/* Inputs styling */
+body.kid-friendly input {
+    background-color: #efebe9 !important;
+    color: #3e2723 !important;
+    border: 2px solid #d7ccc8 !important;
+    border-radius: 12px !important;
+}
+
+body.kid-friendly input:focus {
+    border-color: #ff8a65 !important;
+    box-shadow: 0 0 0 2px rgba(255, 138, 101, 0.2) !important;
+}
+
+/* Game buttons in kid mode */
+body.kid-friendly .game-btn {
+    background: #ff7043 !important;
+    border-bottom: 4px solid #d84315 !important;
+    color: white !important;
+    border-radius: 16px !important;
+    font-family: 'Fredoka', sans-serif;
+    transition: transform 0.1s, background-color 0.2s;
+}
+
+body.kid-friendly .game-btn:hover {
+    background: #ff8a65 !important;
+}
+
+body.kid-friendly .game-btn:active {
+    transform: translateY(4px);
+    border-bottom-width: 0 !important;
+}
+
+/* Wizard / selector buttons */
+body.kid-friendly .step-container button:not(.game-btn) {
+    background: #ffe0b2 !important;
+    color: #e65100 !important;
+    border: 2px solid #ffcc80 !important;
+    border-radius: 12px !important;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+body.kid-friendly .step-container button:not(.game-btn):hover {
+    background: #ffcc80 !important;
+    transform: translateY(-2px);
+}
+
+/* Study mode specific overrides */
+body.kid-friendly #studyModeOverlay {
+    background: radial-gradient(circle, #fffcf7 0%, #ffd9c2 100%) !important;
+}
+
+body.kid-friendly #study-title {
+    color: #e65100 !important;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+}
+
+body.kid-friendly #study-instruction {
+    color: #6d4c41 !important;
+}
+
+body.kid-friendly .study-slot {
+    background: #efebe9 !important;
+    border: 2px solid #d7ccc8 !important;
+    color: #4e342e !important;
+    border-radius: 10px !important;
+}
+
+body.kid-friendly .study-letter-btn {
+    background: #ffb74d !important;
+    color: #3e2723 !important;
+    border-bottom: 4px solid #f57c00 !important;
+}
+
+body.kid-friendly .study-letter-btn:hover {
+    background: #ffa726 !important;
+}
+
+body.kid-friendly .study-key {
+    background: #d7ccc8 !important;
+    color: #4e342e !important;
+}
+
+body.kid-friendly .study-key:hover {
+    background: #bcaaa4 !important;
+}
+
+body.kid-friendly .study-word-tile {
+    background: #ffb74d !important;
+    color: #3e2723 !important;
+}
+
+body.kid-friendly .draggable {
+    background: #ff7043 !important;
+    border-bottom: 4px solid #d84315 !important;
+}
+
+body.kid-friendly .drop-zone {
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    border-bottom: 3px dashed #ffab91 !important;
+}
+
+body.kid-friendly .sentence-row {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border: 2px solid #ffe0b2 !important;
+}

@@ -1362,3 +1362,32 @@ function handleGameSpellingKeyDown(key) {
         }
     }
 }
+
+// --- THEME SYSTEM (KID FRIENDLY / DARK THEME) ---
+function toggleTheme() {
+    const isKidFriendly = document.body.classList.toggle('kid-friendly');
+    localStorage.setItem('theme-kid-friendly', isKidFriendly ? 'true' : 'false');
+    updateThemeUI(isKidFriendly);
+}
+
+function updateThemeUI(isKidFriendly) {
+    const themeToggleIcon = document.getElementById('themeToggleIcon');
+    if (themeToggleIcon) {
+        themeToggleIcon.textContent = isKidFriendly ? '🧸' : '☀️';
+    }
+}
+
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme-kid-friendly');
+    const isKidFriendly = savedTheme === 'true';
+    if (isKidFriendly) {
+        document.body.classList.add('kid-friendly');
+    } else {
+        document.body.classList.remove('kid-friendly');
+    }
+    updateThemeUI(isKidFriendly);
+}
+
+// Auto-run theme initialization
+initTheme();
+

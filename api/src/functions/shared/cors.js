@@ -20,13 +20,6 @@ function isAllowedOrigin(origin) {
 }
 
 function getCorsHeaders(request) {
-    // If running on Azure Static Web Apps backend (production), we do NOT return CORS headers
-    // from the function itself because staticwebapp.config.json routes config handles it
-    // at the SWA proxy layer. This prevents duplicate headers in the browser.
-    if (process.env.AZURE_FUNCTIONS_ENVIRONMENT !== 'Development' && !process.env.FUNCTIONS_EMULATOR) {
-        return {};
-    }
-
     const origin = request?.headers?.get?.('Origin') || '';
     const allowOrigin = isAllowedOrigin(origin)
         ? origin

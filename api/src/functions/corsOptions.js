@@ -18,7 +18,8 @@ for (const route of API_ROUTES) {
         methods: ['OPTIONS'],
         authLevel: 'anonymous',
         handler: async (request) => ({
-            status: 204,
+            status: 200,
+            body: '',
             headers: getCorsHeaders(request),
         }),
     });

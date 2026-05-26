@@ -1,4 +1,15 @@
 {
+    "routes": [
+        {
+            "route": "/api/*",
+            "headers": {
+                "Access-Control-Allow-Origin": "https://vpietri-stack.github.io",
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type, X-App-Key",
+                "Access-Control-Max-Age": "86400"
+            }
+        }
+    ],
     "globalHeaders": {
         "Access-Control-Allow-Origin": "https://vpietri-stack.github.io",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",

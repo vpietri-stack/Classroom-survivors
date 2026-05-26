@@ -201,6 +201,11 @@
                 onclick="startGameFromIntro()">
                 <i class="fas fa-play mr-2"></i>开始游戏
             </button>
+            <button
+                onclick="document.getElementById('gameIntroOverlay').classList.add('hidden'); document.getElementById('gameSelectionOverlay').classList.remove('hidden');"
+                class="mt-6 text-gray-300 hover:text-white text-sm w-full text-center">
+                <i class="fas fa-arrow-left mr-1"></i>返回 (Back)
+            </button>
         </div>
     </div>
 
@@ -396,6 +401,11 @@
                     class="game-btn text-2xl bg-rose-600 hover:bg-rose-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all"
                     onclick="triggerUno()">🃏 UNO</button>
             </div>
+            <button
+                onclick="goBackFromGameSelection()"
+                class="mt-6 text-gray-300 hover:text-white text-sm w-full text-center block">
+                <i class="fas fa-arrow-left mr-1"></i>返回 (Back)
+            </button>
         </div>
     </div>
 
@@ -414,6 +424,11 @@
                     class="game-btn text-2xl bg-red-600 hover:bg-red-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all"
                     onclick="triggerGomoku('speed')">竞速五子棋</button>
             </div>
+            <button
+                onclick="document.getElementById('gomokuModeSelectionOverlay').classList.add('hidden'); document.getElementById('gameSelectionOverlay').classList.remove('hidden');"
+                class="mt-6 text-gray-300 hover:text-white text-sm w-full text-center block">
+                <i class="fas fa-arrow-left mr-1"></i>返回 (Back)
+            </button>
         </div>
     </div>
 
@@ -444,7 +459,10 @@
     <!-- Gomoku Screen -->
     <div id="gomokuScreen" class="overlay hidden p-4 flex flex-col items-center justify-center">
         <div class="bg-[#dcb35c] p-4 sm:p-8 rounded-2xl border-8 border-[#8b4513] shadow-2xl relative">
-            <div class="flex justify-between items-center mb-4 text-black font-bold">
+            <div class="flex justify-between items-center mb-4 text-black font-bold gap-4">
+                <button onclick="exitGomokuGame()" class="text-[#5d2b06] hover:text-black font-bold text-xs bg-white/30 px-2 py-1 rounded border border-[#8b4513]/40 pointer-events-auto">
+                    <i class="fas fa-arrow-left mr-1"></i>返回 (Exit)
+                </button>
                 <div class="text-xl">五子棋 (5 in a row)</div>
                 <div id="gomoku-timer" class="text-red-800">Game: 00:00</div>
             </div>
@@ -504,6 +522,9 @@
         <div class="w-full max-w-2xl mx-auto flex flex-col items-center gap-2" style="min-height:100vh;">
             <!-- Top bar -->
             <div class="w-full flex justify-between items-center px-2 py-1">
+                <button onclick="exitUnoGame()" class="text-gray-400 hover:text-white font-bold text-xs bg-black/40 px-2.5 py-1 rounded border border-gray-600/50 pointer-events-auto">
+                    <i class="fas fa-arrow-left mr-1"></i>返回 (Exit)
+                </button>
                 <span class="text-lg font-bold text-yellow-400">🃏 UNO</span>
                 <span id="uno-timer" class="text-lg font-bold text-white">00:00</span>
                 <span id="uno-direction" class="text-sm text-gray-300">🔄 →</span>

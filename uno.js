@@ -770,3 +770,12 @@ function playUnoSaySound() {
     osc('sine', 600, 0.2, 0.1);
     setTimeout(() => osc('sine', 800, 0.2, 0.2), 100);
 }
+
+function exitUnoGame() {
+    unoGameActive = false;
+    if (window.unoTimerInterval) clearInterval(window.unoTimerInterval);
+    if (unoTurnTimer) clearTimeout(unoTurnTimer);
+    document.getElementById('unoScreen').classList.add('hidden');
+    document.getElementById('gameSelectionOverlay').classList.remove('hidden');
+}
+

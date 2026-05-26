@@ -711,3 +711,12 @@ function endGomokuGame(result) {
     document.getElementById('gomokuGameOverScreen').classList.remove('hidden');
 }
 
+function exitGomokuGame() {
+    gomokuGameActive = false;
+    clearInterval(window.gomokuTimerInterval);
+    if (gomokuSpeedInterval) clearInterval(gomokuSpeedInterval);
+    document.getElementById('gomokuScreen').classList.add('hidden');
+    document.getElementById('gameSelectionOverlay').classList.remove('hidden');
+}
+
+

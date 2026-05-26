@@ -1391,3 +1391,13 @@ function initTheme() {
 // Auto-run theme initialization
 initTheme();
 
+function goBackFromGameSelection() {
+    document.getElementById('gameSelectionOverlay').classList.add('hidden');
+    document.getElementById('startScreen').classList.remove('hidden');
+    // Ensure step-greeting is visible and others are hidden
+    const stepContainers = document.querySelectorAll('.step-container');
+    stepContainers.forEach(container => container.classList.add('hidden'));
+    document.getElementById('step-greeting').classList.remove('hidden');
+}
+
+

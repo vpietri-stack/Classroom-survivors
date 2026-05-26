@@ -4,10 +4,12 @@ on:
   push:
     branches:
       - main
+      - v2-login
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
       - main
+      - v2-login
 
 jobs:
   build_and_deploy_job:

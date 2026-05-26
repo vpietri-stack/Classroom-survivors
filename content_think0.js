@@ -406,6 +406,38 @@ TEACHING_CONTENT["Think0"] = {
                 { a: "Are you excited?", b: "Yes, I am! This game is so much fun!" },
                 { a: "Are you sad?", b: "No, I'm not. I'm feeling great!" }
             ]
+        },
+        "25": {
+            vocab: [
+                'I - me', 'you - you', 'he - him', 'she - her', 'it - it', 'we - us', 'they - them',
+                'awful', 'bad', 'excellent', 'exciting', 'funny', 'good', 'great', 'terrible'
+            ],
+            sentences: [
+                "I like her, I think she's great.",
+                "I don't like them, they're terrible.",
+                "I think it's an exciting film.",
+                "Do you like Peppa Pig?",
+                "Dad isn't very happy with us.",
+                "I really like you too, Alice.",
+                "I don't like him any more.",
+                "It's an excellent book.",
+                "It's a funny story.",
+                "She's an awful actress.",
+                "Do you like my new bike?"
+            ],
+            sentencePairs: [
+                { a: "I really like her,", b: "I think she's great." },
+                { a: "Do you like her ?", b: "No, I don't. I think she's an awful actress." },
+                { a: "The teacher's angry with us,", b: "because we're naughty." },
+                { a: "Is the teacher happy with us ?", b: "No he isn't, because we're naughty students." },
+                { a: "Do you like scary films?", b: "No, I don't like them. They're terrible." },
+                { a: "He likes funny films.", b: "He thinks they're excellent." },
+                { a: "She really doesn't like them.", b: "She thinks they're awful." },
+                { a: "Is Dad happy with Tom?", b: "No, he isn't. He's angry with him." },
+                { a: "Bob is in the bin,", b: "the teacher put him there." },
+                { a: "Do you like me?", b: "No, I don't. You're awful." },
+                { a: "My mum is happy with me,", b: "because I'm a great kid." }
+            ]
         }
     }
 };
@@ -413,5 +445,5 @@ TEACHING_CONTENT["Think0"] = {
 AVAILABLE_CONTENT["Think0"] = {
     "0": [11],
     "1": [15, 17, 18],
-    "2": [23]
+    "2": [23, 25]
 };

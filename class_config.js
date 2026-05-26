@@ -18,7 +18,7 @@ const CLASS_DAYS = ["周一", "周四", "周五", "周六", "周日", "其他老
     "PU2": {
     "0": [5],
     "1": [7, 9, 10, 16],
-    "2": [19, 28],
+    "2": [19, 21, 22, 25],
     "3": [40, 43],
     "4": [45, 46, 54],
     "5": [57, 66],
@@ -34,7 +34,8 @@ const CLASS_DAYS = ["周一", "周四", "周五", "周六", "周日", "其他老
     "3": [40],
     "4": [54],
     "5": [57, 59, 66],
-    "6": [69, 71, 73]
+    "6": [69, 71, 73],
+    "7": [83]
     },
 
     "Think0": {
@@ -76,7 +77,7 @@ const CLASS_CONFIG = {
     "周一": {
         "1810-1940": {
             students: ["Selena", "Nick", "Sean", "Sophie"],
-            content: { book: "PU2", unit: "2", page: "21" }
+            content: { book: "PU2", unit: "2", page: "25" }
         }
     },
     "周四": {
@@ -94,11 +95,11 @@ const CLASS_CONFIG = {
     "周六": {
         "0900-1030": {
             students: ["Angel", "Loky", "Dylan", "Mia", "YaoYao", "Julia"],
-            content: { book: "PU2", unit: "0", page: "5" }
+            content: { book: "PU2", unit: "1", page: "7" }
         },
         "1040-1210": {
             students: ["Amy", "Annie", "Doris", "Harvey", "May", "Milk"],
-            content: { book: "PU2", unit: "8", page: "95" }
+            content: { book: "PU2", unit: "8", page: "97" }
         },
         "1310-1440": {
             students: ["Apple", "Lily", "Ryan", "Terry", "Toby"],
@@ -110,11 +111,11 @@ const CLASS_CONFIG = {
         },
         "1630-1800": {
             students: ["Coco", "Grayson", "Laura", "Leo", "Frank", "William"],
-            content: { book: "Think0", unit: "2", page: "23" }
+            content: { book: "Think0", unit: "2", page: "25" }
         },
         "1810-1940": {
             students: ["Annie", "Clarence", "Coco", "Gabriel", "Cody", "Ellie"],
-            content: { book: "PU3", unit: "6", page: "73" }
+            content: { book: "PU3", unit: "7", page: "83" }
         }
     },
     "周日": {
@@ -123,12 +124,12 @@ const CLASS_CONFIG = {
             content: { book: "PU3", unit: "6", page: "69" }
         },
         "1040-1210": {
-            students: ["Amber", "Cindy", "Gaby", "Louis", "Kelly", "Susie"],
-            content: { book: "Think1", unit: "7", page: "68" }
+            students: ["Amber", "Cindy", "Gaby", "Kelly", "Susie"],
+            content: { book: "Think1", unit: "7", page: "70" }
         },
         "1450-1620": {
             students: ["Dave", "Irene", "Mia", "Sylvia", "Leon", "Neal", "Zoe"],
-            content: { book: "PU2", unit: "5", page: "60" }
+            content: { book: "PU2", unit: "5", page: "62" }
         },
         "1630-1800": {
             students: ["James", "Jenny", "Koey", "Minnie", "Mia", "Pudding"],
@@ -136,7 +137,7 @@ const CLASS_CONFIG = {
         },
         "1810-1940": {
             students: ["Andy", "Iris", "Ivan", "Ruly", "Zozo", "Doris"],
-            content: { book: "PU1", unit: "2", page: "19" }
+            content: { book: "PU1", unit: "2", page: "21" }
         }
     }
 };

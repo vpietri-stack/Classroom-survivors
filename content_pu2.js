@@ -502,44 +502,49 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "Is the teacher ever angry?", b: "Yes, he sometimes is when we're naughty in class." }
             ]
         },
-        "28": {
+        "22": {
             vocab: [
-                'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'weekend',
-                'do homework', 'go shopping', 'go skating', 'listen to music', 'read a comic', 'watch a film', 'write an email',
-                'always', 'often', 'sometimes', 'never',
-                'morning', 'afternoon', 'evening',
-                'before', 'after',
-                'once', 'twice',
-                'everyday', 'every',
-                'day', 'week', 'month', 'year',
-                'wear', 'helmet', 'gloves', 'goggles', 'knee pads', 'must', "mustn't",
+                'go shopping', 'go skating', 'read a comic', 'watch a DVD', 'listen to a CD', 'watch films', 'listen to music', 'write an email'
             ],
             sentences: [
-                "I always do my homework after school.",
-                "He often goes shopping on Saturdays.",
-                "She sometimes listens to music before bed.",
-                "They never go skating at the weekend.",
-                "We watch a film every Friday evening.",
-                "I write an email once a week.",
-                "She reads a comic twice a month.",
-                "They go shopping everyday.",
-                "You must wear a helmet.",
+                "I always listen to music in the car.",
+                "She often watches films on Friday evenings.",
+                "I sometimes read comics after class.",
+                "I never go shopping for clothes, I don't like it!",
+                "I listen to music everyday.",
+                "She goes skating once a week, on Saturday afternoons.",
+                "My dad writes emails everyday.",
+                "My mum goes shopping for food twice a week."
+            ],
+            sentencePairs: [
+                { a: "Does she ever go skating in the park?", b: "Yes, she does. Once a week, on Saturday afternoons" },
+                { a: "How often does May watch DVD?", b: "Never. She watches films on Youku." },
+                { a: "Jane enjoys reading", b: "comics. Her mum buys her one once a week." },
+                { a: "How often do you shop for shoes ?", b: "Once a year, when they get too small for me." },
+                { a: "I always listen", b: "to music in the car." },
+                { a: "He never writes", b: "emails. He hasn't got a computer." },
+                { a: "Do you ever listen to CDs?", b: "No, I don't. I listen to music on my phone." }
+            ]
+        },
+        "25": {
+            vocab: [
+                'must', "mustn't", 'helmet', 'goggles', 'knee pads', 'gloves'
+            ],
+            sentences: [
+                "You must wear a helmet and knee pads when you go skating.",
                 "I must wear goggles when I swim.",
                 "He must wear gloves in the winter.",
                 "You mustn't kick the teacher.",
                 "You mustn't eat poopoo.",
-                "We mustn't drink peepee.",
-                "How often do you listen to music? I always listen to music in the car.",
-                "How often does she go shopping? She goes shopping once a week.",
-                "How often do they watch a film? They watch a film every weekend."
+                "We mustn't drink peepee."
             ],
             sentencePairs: [
-                { a: "How often do you do homework?", b: "I always do homework after school." },
-                { a: "How often does she go shopping?", b: "She goes shopping once a week." },
-                { a: "How often do they watch a film?", b: "They often watch a film at the weekend." },
-                { a: "What must you wear when you go skating?", b: "I must wear a helmet and knee pads." },
-                { a: "How often do you write an email?", b: "I write an email twice a month." },
-                { a: "How often do you go skating?", b: "I go skating twice a year." }
+                { a: "What must you wear when you go skating?", b: "A helmet and knee pads." },
+                { a: "What must you wear when you go swimming?", b: "Goggles." },
+                { a: "What must you wear when it's cold?", b: "Gloves." },
+                { a: "What mustn't you do in class?", b: "Kick the teacher." },
+                { a: "What mustn't you eat?", b: "Poopoo." },
+                { a: "What mustn't you drink?", b: "Peepee." }
             ]
         }
     },
@@ -855,39 +860,27 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "Are elephants the biggest animals?", b: "No, they aren't. Blue whales are bigger." }
             ]
         },
-        "66": {
+        "62": {
             vocab: [
-                'bat', 'bear', 'dolphin', 'kangaroo', 'lion', 'panda', 'parrot', 'penguin', 'rabbit', 'whale', 'shark',
-                'climb', 'fall', 'fly', 'hide', 'hop', 'jump', 'run', 'swim', 'walk',
-                'cage', 'above', 'below', 'near', 'opposite',
-                'the best', 'the worst', 'most', 'least', 'biggest', 'smallest', 'tallest', 'shortest', 'fastest', 'slowest'
+                'above', 'below', 'near', 'opposite',
             ],
             sentences: [
-                "The blue whale is the biggest animal.",
-                "The cheetah is the fastest animal.",
-                "The giraffe is the tallest animal.",
-                "The ant is the smallest animal.",
                 "The bat is above the tree.",
-                "The shark is below the boat.",
-                "The rabbit is near the hole.",
+                "The snail is below the flower.",
+                "The parrot is near the cage.",
                 "The zoo is opposite the park.",
-                "The lion is in the cage.",
-                "Who is the tallest in the class?",
-                "Which animal is the most dangerous?",
-                "This is the best day ever.",
-                "That was the worst movie.",
-                "Dolphins can swim and jump.",
-                "Kangaroos can jump very high.",
-                "Parrots can fly and talk.",
-                "Penguins can swim but they can't fly."
+                "Lions are carnivores.",
+                "Pandas are herbivores.",
+                "Dogs are omnivores."
             ],
             sentencePairs: [
-                { a: "Which animal is the biggest?", b: "The blue whale is the biggest animal." },
-                { a: "Who is the tallest?", b: "The giraffe is the tallest." },
-                { a: "Where is the bat?", b: "The bat is above the tree." },
-                { a: "Where is the bus stop?", b: "The bus stop is opposite the zoo." },
-                { a: "Can penguins fly?", b: "No, penguins can't fly, but they can swim." },
-                { a: "Which is the best animal?", b: "I think the dolphin is the best animal." }
+                { a: "Where are the bats?", b: "They're above the tree." },
+                { a: "Where is the zoo?", b: "It's opposite the park." },
+                { a: "Where are the snails?", b: "They're below the flower." },
+                { a: "Where is the parrot?", b: "It's near the cage." },
+                { a: "Lions and dolphins", b: "are carnivores." },
+                { a: "Pandas and rabbits", b: "are herbivores." },
+                { a: "Dogs and pigs", b: "are omnivores." }
             ]
         }
     },
@@ -1380,10 +1373,10 @@ TEACHING_CONTENT["PU2"] = {
 AVAILABLE_CONTENT["PU2"] = {
     "0": [5],
     "1": [7, 9, 10, 16],
-    "2": [19, 21, 28],
+    "2": [19, 21, 22, 25],
     "3": [40, 43],
     "4": [45, 46, 54],
-    "5": [57, 60, 66],
+    "5": [57, 60, 62],
     "6": [78, 81],
     "7": [83, 85, 87, 93],
     "8": [95, 96, 104],

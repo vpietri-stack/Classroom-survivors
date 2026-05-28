@@ -134,7 +134,12 @@
 
             <!-- Step 4: Greeting & Actions (hidden initially) -->
             <div id="step-greeting"
-                class="step-container hidden mb-6 flex flex-col items-center gap-4 bg-black/40 p-6 rounded-xl border border-white/20">
+                class="step-container hidden mb-6 flex flex-col items-center gap-4 bg-black/40 p-6 rounded-xl border border-white/20 relative">
+                <!-- User Avatar Block (Top Right) -->
+                <div class="absolute top-4 right-4 flex flex-col items-center gap-1">
+                    <div id="greeting-avatar" class="w-12 h-12 rounded-md bg-[#333] border-2 border-white/20 flex items-center justify-center text-2xl shadow-md">👤</div>
+                    <button onclick="showAvatarSelectionScreen()" class="text-xs text-gray-400 hover:text-white underline">换头像</button>
+                </div>
                 <button onclick="goBackToProfiles()" class="self-start text-gray-400 hover:text-white text-sm mb-2">
                     <i class="fas fa-arrow-left mr-1"></i>返回
                 </button>

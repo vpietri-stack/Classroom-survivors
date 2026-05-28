@@ -176,6 +176,7 @@ function initAuth() {
         });
         document.getElementById('step-greeting').classList.remove('hidden');
         document.getElementById('greeting-text').innerText = `Hello, ${studentName}!`;
+        document.getElementById('greeting-avatar').innerText = studentAvatar || '👤';
         return;
     }
 
@@ -504,6 +505,7 @@ function finishLogin() {
     // Show greeting directly
     document.getElementById('step-greeting').classList.remove('hidden');
     document.getElementById('greeting-text').innerText = `Hello, ${authActiveUser.name}!`;
+    document.getElementById('greeting-avatar').innerText = authActiveUser.avatar || '👤';
 
     // Handle target banner
     const targetBanner = document.getElementById('greeting-target-banner');

@@ -12,7 +12,8 @@ const BOOK_SERIES = {
     "PU3": ["PU3"],
     "Think0": ["Think0"],
     "Think1": ["Think1"],
-    "Think2": ["Think2"]
+    "Think2": ["Think2"],
+    "test": ["test"]
 };
 
 // --- SHARED WIZARD STATE ---

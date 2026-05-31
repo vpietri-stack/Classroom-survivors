@@ -42,6 +42,9 @@ function finalizeSession(sessionResults) {
     // Queue for next flush
     srPendingState = newSRState;
     srIncrementSession = true;
+
+    // Check if we need to auto-advance the page
+    checkAndAdvancePageIfAllOnCooldown();
 }
 
 function startExerciseTracking() {
@@ -487,6 +490,7 @@ function finishLogin() {
         selectedStudent = authActiveUser.fullName || authActiveUser.name;
         if (authActiveUser.book && authActiveUser.unit && authActiveUser.page) {
             // Priority: Directly use content assigned from DB
+            checkAndAdvancePageIfAllOnCooldown();
             loadContent();
         } else if (authActiveUser.classTime) {
             // Fallback: Resolve via classTime mapping
@@ -611,3 +615,100 @@ function countCompletedSessionsForTarget(student, startTimeStr, endTimeStr) {
         return ts >= start && ts <= end;
     }).length;
 }
+
+/**
+ * Checks if the user's content is entirely on SR cooldown and advances their assigned page if so.
+ */
+function checkAndAdvancePageIfAllOnCooldown() {
+    if (!authActiveUser || !authActiveUser.srState) return false;
+    
+    if (!authActiveUser.book || !authActiveUser.unit || !authActiveUser.page) return false;
+
+    let book = authActiveUser.book;
+    let unit = authActiveUser.unit.toString();
+    let page = authActiveUser.page.toString();
+    
+    let advanced = false;
+    const currentSession = getCurrentSession();
+
+    while (true) {
+        const sortedPages = getSortedPagesForBook(book);
+        const activePageIndex = sortedPages.findIndex(
+            p => p.book === book && p.unit === unit && p.page === page
+        );
+        
+        if (activePageIndex === -1) break;
+
+        const candidatePages = sortedPages.slice(0, activePageIndex + 1);
+        
+        const vocabPool = buildItemPool(candidatePages, 'vocab').flatPool;
+        const sentencesPool = buildItemPool(candidatePages, 'sentences').flatPool;
+        const pairsPool = buildItemPool(candidatePages, 'sentencePairs').flatPool;
+
+        let vocabAllCooldown = false;
+        if (vocabPool.length > 0) {
+            const vocabSR = authActiveUser.srState.vocab || {};
+            vocabAllCooldown = vocabPool.every(e => {
+                const priority = getSRPriority(e.key, vocabSR, currentSession, null, null);
+                return priority.group === 4;
+            });
+        }
+        
+        let sentencesAllCooldown = false;
+        if (sentencesPool.length > 0) {
+            const sentencesSR = authActiveUser.srState.sentences || {};
+            sentencesAllCooldown = sentencesPool.every(e => {
+                const priority = getSRPriority(e.key, sentencesSR, currentSession, null, null);
+                return priority.group === 4;
+            });
+        }
+        
+        let pairsAllCooldown = false;
+        if (pairsPool.length > 0) {
+            const pairsSR = authActiveUser.srState.sentencePairs || {};
+            pairsAllCooldown = pairsPool.every(e => {
+                const priority = getSRPriority(e.key, pairsSR, currentSession, null, null);
+                return priority.group === 4;
+            });
+        }
+        
+        if ((vocabPool.length > 0 && vocabAllCooldown) || 
+            (sentencesPool.length > 0 && sentencesAllCooldown) || 
+            (pairsPool.length > 0 && pairsAllCooldown)) {
+            
+            if (activePageIndex + 1 < sortedPages.length) {
+                const nextPage = sortedPages[activePageIndex + 1];
+                book = nextPage.book;
+                unit = nextPage.unit;
+                page = nextPage.page;
+                advanced = true;
+            } else {
+                break; // No more pages in this series
+            }
+        } else {
+            break; // Content is available, stay on this page
+        }
+    }
+    
+    if (advanced) {
+        authActiveUser.book = book;
+        authActiveUser.unit = unit;
+        authActiveUser.page = page;
+        saveActiveUserToCache();
+        
+        // Fire-and-forget update to backend
+        apiFetch(`${API_BASE}/updateStudent`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                studentId: authActiveUser.id,
+                fields: { book, unit, page }
+            })
+        }).catch(e => console.warn("Failed to auto-update student page", e));
+        
+        return true;
+    }
+    
+    return false;
+}
+

@@ -1202,6 +1202,34 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "Where did the rabbit sleep?", b: "It slept in the garden." }
             ]
         },
+        "98": {
+            vocab: [
+                'bus station', 'café', 'cinema', 'hospital', 'library', 'market', 'shopping centre', 'sports centre', 'supermarket', 'swimming pool',
+            ],
+            sentences: [
+                "They sat under a tree in the square",
+                "She got a book from the library.",
+                "We went to the market to buy fresh vegetables.",
+                "He bought new clothes at the shopping centre.",
+                "Vicky went to the hospital to see her baby cousin.",
+                "I drank lemonade at the café.",
+                "We got a lot of food from the supermarket.",
+                "I swam for an hour at the swimming pool.",
+                "He played tennis at the sports centre.",
+                "We caught a bus at the station.",
+            ],
+            sentencePairs: [
+                { a: "Where did Jane and her mum sit?", b: "They sat under a tree in the square." },
+                { a: "What did Daisy get from the library?", b: "She got a book." },
+                { a: "What did the children buy at the market?", b: "They bought fresh vegetables." },
+                { a: "Where did Vicky see her cousin?", b: "She saw him at the hospital." },
+                { a: "What did the children drink at the cafe?", b: "They drank lemonade." },
+                { a: "What did the family buy at the supermarket?", b: "They bought a lot of food." },
+                { a: "Where did the children go for a swim?", b: "They swam at the swimming pool." },
+                { a: "Where did Tom play tennis?", b: "He played at the sports centre." },
+                { a: "Where did the children catch the bus?", b: "They caught it at the station." }
+            ]
+        },
         "104": {
             vocab: [
                 'bus station', 'café', 'cinema', 'hospital', 'library', 'market', 'shopping centre', 'sports centre', 'supermarket', 'swimming pool', 'zoo',
@@ -1379,6 +1407,6 @@ AVAILABLE_CONTENT["PU2"] = {
     "5": [57, 60, 62],
     "6": [78, 81],
     "7": [83, 85, 87, 93],
-    "8": [95, 96, 104],
+    "8": [95, 96, 97, 98, 104],
     "9": [107, 109, 116, 119]
 };

@@ -426,12 +426,12 @@ TEACHING_CONTENT["PU1"] = {
 
                 // 'Have Got' (Positive & Negative)
                 "I've got", "I haven't got",
-                "you've got", " haven't got",
-                "we've got", " haven't got",
-                "they've got", " haven't got",
-                "he's got", "hasn't got",
-                "hasn't got",
-                "it's got", "hasn't got",
+                "you've got", "you haven't got",
+                "we've got", "we haven't got",
+                "they've got", "they haven't got",
+                "he's got", "he hasn't got",
+                "she's got", "she hasn't got",
+                "it's got", "it hasn't got",
 
                 // Family & People Nouns
                 'family', 'mother', 'mum', 'father', 'dad', 'brother', 'sister',
@@ -1325,45 +1325,32 @@ TEACHING_CONTENT["PU1"] = {
             ]
         },
         "5": {
-            "66": {
+            "57": {
                 vocab: [
-                    "ball", "kite", "plane", "doll", "car", "robot", "bike", "computer", "mouse",
-                    "keyboard", "toy box", "balloon", "balloons", "radio", "helicopter", "teddy",
-                    "teddy bear", "board game", "ship", "monster", "alien", "present",
-                    "Shapes", "circle", "square", "triangle", "rectangle",
-                    "big", "small", "old", "new", "cool", "grey", "happy", "angry",
-                    "birthday", "party", "card", "share", "twins", "house", "hat", "horse"
+                    "ball", "kite", "plane", "doll", "car", "robot", "bike", "present",
+                    "birthday", "house", "favourite", "toy"
                 ],
                 sentences: [
-                    "Whose car is that?",
-                    "Whose bike is this?",
-                    "It's Jim's bike.",
-                    "It's Jenny's car.",
-                    "It's Grandma and Grandpa's farm.",
-                    "His bike's orange.",
-                    "It's his favourite toy.",
-                    "Her car's red.",
-                    "Her radio's new.",
-                    "Their house is yellow.",
-                    "It's their farm.",
-                    "Our board game's new.",
-                    "Does he want a teddy?",
-                    "What does he want?",
-                    "He wants a helicopter.",
-                    "No, he doesn't want that one.",
-                    "Yes, he does.",
-                    "No, he doesn't.",
-                    "Can I have your red car, please?",
-                    "Would you like my robot?",
-                    "Here you are."
+                    "Jim has got a blue kite.",
+                    "Jenny has got a red car.",
+                    "The toy house is yellow.",
+                    "Grandma's favourite toy is a plane.",
+                    "Tom is on Jenny's bike.",
+                    "The robot is grey.",
+                    "Jim has got an orange bike.",
+                    "Eva likes the doll.",
+                    "Cameron doesn't like the plane.",
+                    "The ball is black and white.",
                 ],
                 sentencePairs: [
-                    { a: "Whose car is that?", b: "It's Jenny's car." },
-                    { a: "Does he want a teddy?", b: "Yes, he does." },
-                    { a: "Is it his favourite toy?", b: "Yes, it is." },
-                    { a: "Whose bike is this?", b: "It's Jim's bike." },
-                    { a: "What does he want?", b: "He wants a helicopter." },
-                    { a: "Can I have your red car?", b: "Here you are." }
+                    { a: "What's Jim birthday present?", b: "He's got a blue kite." },
+                    { a: "What's Jenny birthday present?", b: "She's got a red car." },
+                    { a: "Is Tom on Jim's bike?", b: "No, he isn't. He's on Jenny's bike." },
+                    { a: "Is Tom on Jenny's bike?", b: "Yes, he is." },
+                    { a: "Is Grandma's favourite toy a ball?", b: "No, it isn't. It's a plane." },
+                    { a: "Whose birthday is it?", b: "It's Jenny and Jim's birthday." },
+                    { a: "Has Jenny got a blue bike?", b: "Yes, she has." },
+                    { a: "Has Jim got a blue bike?", b: "No, he hasn't. He's got an orange bike." }
                 ]
             }
         }
@@ -1839,7 +1826,7 @@ AVAILABLE_CONTENT["PU1"] = {
     "2": [19, 20, 21, 22, 23, 24, 25, 26, 27, 28],
     "3": [31, 32, 33, 34, 35, 36, 37, 43],
     "4": [45, 47, 48, 54],
-    "5": [66],
+    "5": [57],
     "6": [78, 81],
     "7": [83, 84, 92],
     "8": [95, 97, 99],

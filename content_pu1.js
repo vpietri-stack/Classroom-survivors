@@ -1323,36 +1323,36 @@ TEACHING_CONTENT["PU1"] = {
                 { a: "Do you like peepee lemonade?", b: "No, I don't." },
                 { a: "I like apples ...", b: "but I don't like beans." }
             ]
-        },
-        "5": {
-            "57": {
-                vocab: [
-                    "ball", "kite", "plane", "doll", "car", "robot", "bike", "present",
-                    "birthday", "house", "favourite", "toy"
-                ],
-                sentences: [
-                    "Jim has got a blue kite.",
-                    "Jenny has got a red car.",
-                    "The toy house is yellow.",
-                    "Grandma's favourite toy is a plane.",
-                    "Tom is on Jenny's bike.",
-                    "The robot is grey.",
-                    "Jim has got an orange bike.",
-                    "Eva likes the doll.",
-                    "Cameron doesn't like the plane.",
-                    "The ball is black and white.",
-                ],
-                sentencePairs: [
-                    { a: "What's Jim birthday present?", b: "He's got a blue kite." },
-                    { a: "What's Jenny birthday present?", b: "She's got a red car." },
-                    { a: "Is Tom on Jim's bike?", b: "No, he isn't. He's on Jenny's bike." },
-                    { a: "Is Tom on Jenny's bike?", b: "Yes, he is." },
-                    { a: "Is Grandma's favourite toy a ball?", b: "No, it isn't. It's a plane." },
-                    { a: "Whose birthday is it?", b: "It's Jenny and Jim's birthday." },
-                    { a: "Has Jenny got a blue bike?", b: "Yes, she has." },
-                    { a: "Has Jim got a blue bike?", b: "No, he hasn't. He's got an orange bike." }
-                ]
-            }
+        }
+    },
+    "5": {
+        "57": {
+            vocab: [
+                "ball", "kite", "plane", "doll", "car", "robot", "bike", "present",
+                "birthday", "house", "favourite", "toy"
+            ],
+            sentences: [
+                "Jim has got a blue kite.",
+                "Jenny has got a red car.",
+                "The toy house is yellow.",
+                "Grandma's favourite toy is a plane.",
+                "Tom is on Jenny's bike.",
+                "The robot is grey.",
+                "Jim has got an orange bike.",
+                "Eva likes the doll.",
+                "Cameron doesn't like the plane.",
+                "The ball is black and white.",
+            ],
+            sentencePairs: [
+                { a: "What's Jim birthday present?", b: "He's got a blue kite." },
+                { a: "What's Jenny birthday present?", b: "She's got a red car." },
+                { a: "Is Tom on Jim's bike?", b: "No, he isn't. He's on Jenny's bike." },
+                { a: "Is Tom on Jenny's bike?", b: "Yes, he is." },
+                { a: "Is Grandma's favourite toy a ball?", b: "No, it isn't. It's a plane." },
+                { a: "Whose birthday is it?", b: "It's Jenny and Jim's birthday." },
+                { a: "Has Jenny got a blue bike?", b: "Yes, she has." },
+                { a: "Has Jim got a blue bike?", b: "No, he hasn't. He's got an orange bike." }
+            ]
         }
     },
     "6": {
@@ -1395,9 +1395,7 @@ TEACHING_CONTENT["PU1"] = {
                 { a: "Is there a train?", b: "No, there isn't, but there is a bus." },
                 { a: "Are there any shops?", b: "No, there aren't, but there are some animals." }
             ]
-        }
-    },
-    "6": {
+        },
         "81": {
             vocab: [
                 'banana', 'bread', 'burger', 'cake', 'chicken', 'chocolate', 'lemonade', 'mango', 'salad', 'water', 'fruit', 'grapes', 'apple', 'orange', 'juice', 'meat', 'meatballs', 'sausage', 'beans', 'potato', 'onion', 'tomato', 'cheese', 'pasta', 'rice', 'egg', 'kiwi',

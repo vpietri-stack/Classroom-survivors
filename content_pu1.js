@@ -1286,7 +1286,7 @@ TEACHING_CONTENT["PU1"] = {
                 "banana", "bananas", "mango", "mangoes", "salad", "fruit", "grapes", "apple",
                 "juice", "orange", "meat", "sausages", "meatballs", "beans", "rice",
                 "pasta", "carrots", "tomato", "onion", "potato", "cheese", "egg",
-                "please", "thank you", "sorry", "Here you are",
+                "please", "thank you", "sorry", "here you are",
                 "I like", "you like", "we like", "they like", "he likes", "she likes",
                 "Yes, he does", "No, he doesn't", "Yes, she does", "No, she doesn't",
                 "he doesn't like", "she doesn't like",

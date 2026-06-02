@@ -27,23 +27,31 @@ function showGomokuDifficultySelection() {
     document.getElementById('gomokuDifficultySelectionOverlay').classList.remove('hidden');
 
     const easyBtn = document.getElementById('gomokuEasyBtn');
+    const easyNote = document.getElementById('gomokuEasyNote');
     if (easyBtn) {
-        let isPu1OrPu2 = false;
+        let isPu1 = false;
         if (typeof selectedClassContent !== 'undefined' && selectedClassContent) {
             const book = selectedClassContent.book;
-            if (book === 'PU1' || book === 'PU2') {
-                isPu1OrPu2 = true;
+            if (book === 'PU1') {
+                isPu1 = true;
             }
         }
 
-        if (isPu1OrPu2 || typeof selectedDay === 'undefined' || selectedDay === null) {
+        if (isPu1 || typeof selectedDay === 'undefined' || selectedDay === null) {
             easyBtn.disabled = false;
             easyBtn.className = "game-btn text-xl bg-blue-600 hover:bg-blue-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all";
             easyBtn.innerText = "Easy (Good for kids)";
+            if (easyNote) {
+                easyNote.classList.add('hidden');
+            }
         } else {
             easyBtn.disabled = true;
             easyBtn.className = "game-btn text-xl bg-gray-500 w-full py-4 rounded-xl shadow-lg transform cursor-not-allowed opacity-50";
-            easyBtn.innerText = "Easy (PU1 & PU2 only)";
+            easyBtn.innerText = "Easy (PU1 only)";
+            if (easyNote) {
+                easyNote.innerText = "简单模式仅限 PU1 学生。";
+                easyNote.classList.remove('hidden');
+            }
         }
     }
 }

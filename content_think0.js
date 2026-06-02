@@ -410,7 +410,8 @@ TEACHING_CONTENT["Think0"] = {
         "25": {
             vocab: [
                 'I - me', 'you - you', 'he - him', 'she - her', 'it - it', 'we - us', 'they - them',
-                'awful', 'bad', 'excellent', 'exciting', 'funny', 'good', 'great', 'terrible'
+                'awful', 'bad', 'excellent', 'exciting', 'funny', 'good', 'great', 'terrible', 'afraid'
+                , 'difficult', 'easy', 'happy', 'heavy', 'strong',
             ],
             sentences: [
                 "I like her, I think she's great.",

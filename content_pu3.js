@@ -705,6 +705,31 @@ TEACHING_CONTENT["PU3"] = {
                 { a: "Who takes photos with a camera?", b: "A photographer." },
                 { a: "Who writes for a newspaper?", b: "A journalist." }
             ]
+        },
+        "85": {
+            vocab: [
+                'Spain', 'actor', 'artist', 'cook', 'designer', 'driver', 'journalist', 'photographer', 'singer', 'waiter', 'newspaper'
+            ],
+            sentences: [
+                "When the teacher is speaking, we should listen carefully.",
+                "You can dance better, if you look in the mirror.",
+                "When she grows up, she wants to be a journalist.",
+                "If I don't eat a big breakfast, I'm always hungry at ten o'clock.",
+                "If you want to be a cook, you should practise cooking everyday.",
+                "We can't go swimming in the sea, when it's stormy.",
+                "I can't play football, when I'm tired."
+
+            ],
+            sentencePairs: [
+                { a: "When the teacher is speaking,", b: "we should listen carefully." },
+                { a: "You can dance better,", b: "if you look in the mirror." },
+                { a: "When she grows up,", b: "she wants to be a journalist." },
+                { a: "If I don't eat a big breakfast,", b: "I'm always hungry at ten o'clock." },
+                { a: "If you want to be a cook,", b: "you should practise cooking everyday." },
+                { a: "We can't go swimming in the sea,", b: "when it's stormy." },
+                { a: "I can't play football,", b: "when I'm tired." }
+
+            ]
         }
     }
 };
@@ -717,5 +742,5 @@ AVAILABLE_CONTENT["PU3"] = {
     "4": [54],
     "5": [57, 59, 66],
     "6": [69, 71, 73],
-    "7": [83]
+    "7": [83, 85]
 };

@@ -4607,8 +4607,16 @@ const LOCAL_TRANSLATIONS = {
     "A designer designs clothes and costumes.": "设计师设计衣服和戏服。",
     "An artist draws and paints pictures.": "艺术家画画。",
     "A photographer takes photos with a camera.": "摄影师用相机拍照。",
-    "A journalist writes for a newspaper.": "记者为报纸撰稿。"
-,
+    "A journalist writes for a newspaper.": "记者为报纸撰稿。",
+
+    // --- PU3 Unit 7 Page 85 ---
+    "When the teacher is speaking, we should listen carefully.": "当老师说话时，我们应该仔细听。",
+    "You can dance better, if you look in the mirror.": "如果你在镜子里看，你可以跳得更好。",
+    "When she grows up, she wants to be a journalist.": "当她长大后，她想成为一名记者。",
+    "If I don't eat a big breakfast, I'm always hungry at ten o'clock.": "如果我不吃丰盛的早餐，我总是在十点钟感到饥饿。",
+    "If you want to be a cook, you should practise cooking everyday.": "如果你想成为一名厨师，你应该每天练习烹饪。",
+    "We can't go swimming in the sea, when it's stormy.": "当海面刮风的时候，我们不能去海里游泳。",
+    "I can't play football, when I'm tired.": "当我累的时候，我不能踢足球。",
 
     // --- PU1 and PU2 Check Additions ---
     "yes, it is": "是的，它是。",

@@ -2,10 +2,15 @@
 const API_BASE = API_BASE_URL;
 
 function apiFetch(url, options = {}) {
+    const savedUsers = JSON.parse(localStorage.getItem('savedUsers') || '[]');
+    const currentUser = savedUsers.find(u => u.role === 'admin' || u.role === 'BM');
     options.headers = {
         ...options.headers,
         'X-App-Key': APP_API_KEY
     };
+    if (currentUser) {
+        options.headers['X-Creator-Id'] = currentUser.id;
+    }
     return fetch(url, options);
 }
 // --- AUTH & ANALYTICS STATE (Moved to teaching_content.js) ---

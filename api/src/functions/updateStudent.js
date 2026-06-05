@@ -40,15 +40,40 @@ app.http('updateStudent', {
             }
 
             const user = items[0];
+            const changes = {};
 
             // Merge only allowed fields
             for (const key of allowedFields) {
                 if (fields[key] !== undefined) {
+                    if (user[key] !== fields[key]) {
+                        changes[key] = { from: user[key], to: fields[key] };
+                    }
                     user[key] = fields[key];
                 }
             }
 
             await container.items.upsert(user);
+
+            // Log activity if updated by a teacher/BM or admin
+            const creatorId = request.headers.get('X-Creator-Id') || 'unknown';
+            if (creatorId !== 'unknown' && Object.keys(changes).length > 0) {
+                const logId = `activity_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const activityLog = {
+                    id: logId,
+                    role: 'bmActivity',
+                    timestamp: new Date().toISOString(),
+                    bmId: creatorId,
+                    action: 'update_student',
+                    details: {
+                        studentId: studentId,
+                        studentName: user.fullName || user.login,
+                        changes: changes
+                    }
+                };
+                await container.items.create(activityLog).catch(err => {
+                    context.error("Failed to write activity log:", err);
+                });
+            }
 
             return {
                 status: 200,

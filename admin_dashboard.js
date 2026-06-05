@@ -15,14 +15,17 @@ function initAdminUI() {
         document.getElementById('dashboardTitle').textContent = 'Admin Dashboard';
         document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
         document.querySelectorAll('.admin-col').forEach(el => el.style.display = '');
+        document.querySelectorAll('.bm-or-admin-col').forEach(el => el.classList.remove('hidden'));
     } else if (isBM) {
         document.getElementById('dashboardTitle').textContent = 'BM Dashboard';
         document.querySelectorAll('.admin-col').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.bm-or-admin-col').forEach(el => el.classList.remove('hidden'));
     } else {
         document.querySelectorAll('.admin-col').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.bm-or-admin-col').forEach(el => el.classList.add('hidden'));
     }
 
-    // Both admin and BM can add students
+    // Both admin and BM can add students and modify student detail settings/targets
     if (isAdmin || isBM) {
         document.querySelectorAll('.bm-or-admin-only').forEach(el => el.classList.remove('hidden'));
     }
@@ -571,5 +574,207 @@ function showSRPopup(keyJson) {
     }
 
     document.body.appendChild(popup);
+}
+
+// ============================================================
+// ADMIN - MANAGE BMs PANEL
+// ============================================================
+
+function openManageBmsModal() {
+    document.getElementById('manageBmsModal').classList.remove('hidden');
+    switchBmModalTab('bms');
+}
+
+function switchBmModalTab(tab) {
+    // Switch active tab buttons
+    ['bmTabBms', 'bmTabAdd', 'bmTabLogs'].forEach(id => {
+        document.getElementById(id).classList.remove('active');
+    });
+    document.getElementById(`bmTab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.add('active');
+
+    // Switch tab contents
+    ['bmContentBms', 'bmContentAdd', 'bmContentLogs'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+    });
+    document.getElementById(`bmContent${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove('hidden');
+
+    if (tab === 'bms') {
+        loadBmsList();
+    } else if (tab === 'logs') {
+        loadBmActivityLogs();
+    }
+}
+
+async function loadBmsList() {
+    const tbody = document.getElementById('bmsTableBody');
+    tbody.innerHTML = `<tr><td colspan="4"><div class="loading-spinner"></div></td></tr>`;
+
+    try {
+        const res = await apiFetch(`${API_BASE}/manageBms?action=list`);
+        if (!res.ok) throw new Error(await res.text());
+        const bms = await res.json();
+        renderBmsList(bms);
+    } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="4" class="no-results"><p>Error: ${e.message}</p></td></tr>`;
+    }
+}
+
+function renderBmsList(bms) {
+    const tbody = document.getElementById('bmsTableBody');
+    if (bms.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="no-results"><p>No BM accounts found.</p></td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = bms.map(bm => {
+        return `<tr>
+            <td><strong>${bm.fullName || '—'}</strong></td>
+            <td><code>${bm.login}</code></td>
+            <td>
+                <div class="pw-field-row" style="max-width: 250px;">
+                    <input type="password" value="${bm.password}" id="bmPw_${bm.id}" class="form-input" style="height: 32px; font-size: 0.85rem;" readonly>
+                    <button type="button" onclick="togglePwVis('bmPw_${bm.id}', 'bmPwIcon_${bm.id}')" class="pw-toggle-btn" style="height: 32px; width: 32px;"><i id="bmPwIcon_${bm.id}" class="fas fa-eye"></i></button>
+                </div>
+            </td>
+            <td>
+                <div style="display: flex; gap: 8px;">
+                    <button onclick="changeBmPasswordPrompt('${bm.id}')" class="dash-action-btn" style="padding: 4px 8px; font-size: 0.8rem;" title="Change Password"><i class="fas fa-key"></i> Pass</button>
+                    <button onclick="submitDeleteBm('${bm.id}')" class="dash-action-btn" style="padding: 4px 8px; font-size: 0.8rem; background-color: var(--dash-danger);" title="Delete BM"><i class="fas fa-trash"></i></button>
+                </div>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+async function submitAddBm() {
+    const id = document.getElementById('addBmId').value.trim();
+    const login = document.getElementById('addBmLogin').value.trim();
+    const fullName = document.getElementById('addBmFullName').value.trim();
+    const password = document.getElementById('addBmPassword').value.trim();
+    const errEl = document.getElementById('addBmError');
+
+    errEl.classList.add('hidden');
+    errEl.textContent = '';
+
+    if (!id || !login || !fullName || !password) {
+        errEl.textContent = 'All fields are required.';
+        errEl.classList.remove('hidden');
+        return;
+    }
+
+    try {
+        const res = await apiFetch(`${API_BASE}/manageBms`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'add', id, login, fullName, password })
+        });
+        if (!res.ok) throw new Error(await res.text());
+
+        // Reset fields
+        ['addBmId', 'addBmLogin', 'addBmFullName', 'addBmPassword'].forEach(fId => {
+            document.getElementById(fId).value = '';
+        });
+        
+        switchBmModalTab('bms');
+    } catch (e) {
+        errEl.textContent = 'Error: ' + e.message;
+        errEl.classList.remove('hidden');
+    }
+}
+
+async function changeBmPasswordPrompt(bmId) {
+    const newPw = prompt("Enter new password for this BM:");
+    if (newPw === null) return; // user cancelled
+    const password = newPw.trim();
+    if (!password) {
+        alert("Password cannot be empty.");
+        return;
+    }
+
+    try {
+        const res = await apiFetch(`${API_BASE}/manageBms`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'changePassword', bmId, password })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        alert("Password updated successfully!");
+        loadBmsList();
+    } catch (e) {
+        alert("Error changing password: " + e.message);
+    }
+}
+
+async function submitDeleteBm(bmId) {
+    if (!confirm(`Are you sure you want to delete BM with ID: ${bmId}? This cannot be undone.`)) return;
+
+    try {
+        const res = await apiFetch(`${API_BASE}/manageBms`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'delete', bmId })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        loadBmsList();
+    } catch (e) {
+        alert("Error deleting BM: " + e.message);
+    }
+}
+
+async function loadBmActivityLogs() {
+    const tbody = document.getElementById('bmLogsTableBody');
+    tbody.innerHTML = `<tr><td colspan="4"><div class="loading-spinner"></div></td></tr>`;
+
+    try {
+        const res = await apiFetch(`${API_BASE}/manageBms?action=logs`);
+        if (!res.ok) throw new Error(await res.text());
+        const logs = await res.json();
+        renderBmActivityLog(logs);
+    } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="4" class="no-results"><p>Error: ${e.message}</p></td></tr>`;
+    }
+}
+
+function renderBmActivityLog(logs) {
+    const tbody = document.getElementById('bmLogsTableBody');
+    if (logs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="no-results"><p>No activity logs found yet.</p></td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = logs.map(log => {
+        const ts = formatBeijingDT(new Date(log.timestamp));
+        let actionLabel = '';
+        let detailsHtml = '';
+
+        if (log.action === 'create_student') {
+            actionLabel = '<span class="badge badge-complete">Created Student</span>';
+            detailsHtml = `Student ID: <code>${log.details.studentId}</code>, Name: <strong>${log.details.studentName}</strong>`;
+        } else if (log.action === 'update_student') {
+            actionLabel = '<span class="badge badge-active">Updated Student</span>';
+            const changeItems = [];
+            const changes = log.details.changes || {};
+            for (const field of Object.keys(changes)) {
+                let fromVal = changes[field].from;
+                let toVal = changes[field].to;
+                if (typeof fromVal === 'object') fromVal = JSON.stringify(fromVal);
+                if (typeof toVal === 'object') toVal = JSON.stringify(toVal);
+                changeItems.push(`<li><code>${field}</code>: <span style="text-decoration: line-through; color: var(--dash-danger);">${fromVal ?? 'none'}</span> → <span style="color: var(--dash-accent); font-weight: bold;">${toVal ?? 'none'}</span></li>`);
+            }
+            detailsHtml = `
+                <div>Student: <strong>${log.details.studentName}</strong> (<code>${log.details.studentId}</code>)</div>
+                <ul style="margin: 4px 0 0 15px; padding: 0; font-size: 0.8rem; line-height: 1.3;">
+                    ${changeItems.join('')}
+                </ul>
+            `;
+        }
+
+        return `<tr>
+            <td style="font-size:0.8rem; white-space: nowrap;">${ts}</td>
+            <td><code>${log.bmId}</code></td>
+            <td>${actionLabel}</td>
+            <td style="font-size:0.85rem;">${detailsHtml}</td>
+        </tr>`;
+    }).join('');
 }
 

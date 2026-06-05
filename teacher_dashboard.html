@@ -23,6 +23,9 @@
                 <button id="addStudentBtn" onclick="openAddStudentModal()" class="dash-action-btn bm-or-admin-only hidden">
                     <i class="fas fa-user-plus"></i> Add Student
                 </button>
+                <button id="manageBmsBtn" onclick="openManageBmsModal()" class="dash-action-btn admin-only hidden" style="margin-right: 10px;">
+                    <i class="fas fa-users-cog"></i> Manage BMs
+                </button>
                 <span id="teacherNameDisplay" class="dash-teacher-name"></span>
                 <button onclick="logoutTeacher()" class="dash-logout-btn">
                     <i class="fas fa-sign-out-alt"></i> Logout
@@ -81,7 +84,7 @@
                         <th class="sortable" onclick="sortTable('target')">Target <i class="fas fa-sort sort-icon"></i></th>
                         <th>Period</th>
                         <th class="sortable" onclick="sortTable('avgStudy')">Avg Study <i class="fas fa-sort sort-icon"></i></th>
-                        <th class="admin-col">Password</th>
+                        <th class="bm-or-admin-col hidden">Password</th>
                     </tr>
                 </thead>
                 <tbody id="studentsTableBody"></tbody>
@@ -113,8 +116,8 @@
             <button class="tab-btn active" data-tab="sessions" onclick="switchTab('sessions')"><i class="fas fa-history"></i> Sessions</button>
             <button class="tab-btn" data-tab="exercises" onclick="switchTab('exercises')"><i class="fas fa-dumbbell"></i> Exercises</button>
             <button class="tab-btn" data-tab="sr" onclick="switchTab('sr')"><i class="fas fa-brain"></i> SR State</button>
-            <button class="tab-btn admin-only hidden" data-tab="settings" onclick="switchTab('settings')"><i class="fas fa-cog"></i> Settings</button>
-            <button class="tab-btn admin-only hidden" data-tab="targets" onclick="switchTab('targets')"><i class="fas fa-bullseye"></i> Targets</button>
+            <button class="tab-btn bm-or-admin-only hidden" data-tab="settings" onclick="switchTab('settings')"><i class="fas fa-cog"></i> Settings</button>
+            <button class="tab-btn bm-or-admin-only hidden" data-tab="targets" onclick="switchTab('targets')"><i class="fas fa-bullseye"></i> Targets</button>
             <button class="tab-btn tab-test" data-tab="test" onclick="switchTab('test')"><i class="fas fa-play-circle"></i> Test</button>
         </div>
 
@@ -298,6 +301,76 @@
     </div>
 
     <!-- ====== MODALS ====== -->
+
+    <!-- Manage BMs Modal -->
+    <div id="manageBmsModal" class="modal-overlay hidden" onclick="if(event.target===this)closeModal('manageBmsModal')">
+        <div class="modal-box" style="max-width: 800px; width: 90%;">
+            <div class="modal-header">
+                <h2><i class="fas fa-users-cog"></i> Manage BMs</h2>
+                <button onclick="closeModal('manageBmsModal')" class="modal-close">&times;</button>
+            </div>
+            
+            <div class="detail-tabs" style="margin: 0; border-bottom: 1px solid var(--dash-border);">
+                <button class="tab-btn active" id="bmTabBms" onclick="switchBmModalTab('bms')"><i class="fas fa-users"></i> BMs</button>
+                <button class="tab-btn" id="bmTabAdd" onclick="switchBmModalTab('add')"><i class="fas fa-plus"></i> Add BM</button>
+                <button class="tab-btn" id="bmTabLogs" onclick="switchBmModalTab('logs')"><i class="fas fa-list-alt"></i> Activity Logs</button>
+            </div>
+
+            <!-- BMs List Tab Content -->
+            <div id="bmContentBms" class="modal-body bm-modal-tab-content">
+                <div class="dash-table-wrap">
+                    <table class="dash-table compact">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Login ID</th>
+                                <th>Password</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bmsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Add BM Tab Content -->
+            <div id="bmContentAdd" class="modal-body bm-modal-tab-content hidden">
+                <div class="admin-form-grid">
+                    <div class="form-field"><label>BM ID (System ID) *</label><input type="text" id="addBmId" class="form-input" placeholder="e.g. teacher_john"></div>
+                    <div class="form-field"><label>Login ID *</label><input type="text" id="addBmLogin" class="form-input" placeholder="e.g. john"></div>
+                    <div class="form-field"><label>Full Name *</label><input type="text" id="addBmFullName" class="form-input" placeholder="e.g. John Doe"></div>
+                    <div class="form-field">
+                        <label>Password *</label>
+                        <div class="pw-field-row">
+                            <input type="password" id="addBmPassword" class="form-input">
+                            <button type="button" onclick="togglePwVis('addBmPassword','addBmPwIcon')" class="pw-toggle-btn"><i id="addBmPwIcon" class="fas fa-eye"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div id="addBmError" class="modal-error hidden" style="margin-top: 15px;"></div>
+                <div class="modal-footer" style="padding-left:0; padding-right:0; margin-top:15px;">
+                    <button onclick="submitAddBm()" class="dash-action-btn primary"><i class="fas fa-plus"></i> Create BM</button>
+                </div>
+            </div>
+
+            <!-- Logs Tab Content -->
+            <div id="bmContentLogs" class="modal-body bm-modal-tab-content hidden">
+                <div class="dash-table-wrap" style="max-height: 400px; overflow-y: auto;">
+                    <table class="dash-table compact">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>BM</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bmLogsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Add Student Modal -->
     <div id="addStudentModal" class="modal-overlay hidden" onclick="if(event.target===this)closeModal('addStudentModal')">

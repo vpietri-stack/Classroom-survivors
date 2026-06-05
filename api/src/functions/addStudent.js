@@ -63,6 +63,26 @@ app.http('addStudent', {
 
             await container.items.create(newStudent);
 
+            // Log activity if created by a teacher/BM or admin
+            const creatorId = request.headers.get('X-Creator-Id') || 'unknown';
+            if (creatorId !== 'unknown') {
+                const logId = `activity_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const activityLog = {
+                    id: logId,
+                    role: 'bmActivity',
+                    timestamp: new Date().toISOString(),
+                    bmId: creatorId,
+                    action: 'create_student',
+                    details: {
+                        studentId: id,
+                        studentName: fullName
+                    }
+                };
+                await container.items.create(activityLog).catch(err => {
+                    context.error("Failed to write activity log:", err);
+                });
+            }
+
             return {
                 status: 201,
                 jsonBody: { success: true, message: "Student created.", student: newStudent }

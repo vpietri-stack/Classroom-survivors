@@ -9,6 +9,7 @@ let filteredStudents = [];   // After applying filters
 let currentStudent = null;   // Currently selected student for detail view
 let sortState = { column: 'name', direction: 'asc' };
 let exerciseSortState = { column: 'timestamp', direction: 'desc' };
+let isBM = false;            // Flag for Branch Manager role
 
 // ----- INIT -----
 
@@ -39,9 +40,11 @@ async function checkTeacherAuth() {
             window.location.href = 'index.html';
             return;
         }
+        isBM = data.role === 'BM';
     } catch (e) {
         // If offline, allow cached access (graceful degradation)
         console.warn('Could not verify role with server, using cached data:', e);
+        isBM = teacher.role === 'BM';
     }
 
     document.getElementById('teacherNameDisplay').innerText = teacher.name;
@@ -54,7 +57,7 @@ async function loadAllStudents() {
     tbody.innerHTML = `<tr><td colspan="6"><div class="loading-spinner"></div></td></tr>`;
 
     try {
-        const includeSecure = isAdmin ? '?includeSecure=true' : '';
+        const includeSecure = (isAdmin || isBM) ? '?includeSecure=true' : '';
         const url = `${API_BASE}/getStudents${includeSecure}`;
         const res = await apiFetch(url);
         if (!res.ok) throw new Error('Failed to fetch students');
@@ -356,7 +359,7 @@ function renderStudentsTable(dateFrom, dateTo) {
     tbody.innerHTML = filteredStudents.map(s => {
         const avgMs = avgStudyDuration(s, dateFrom, dateTo);
         const targetInfo = getStudentTargetInfo(s);
-        const pwCol = isAdmin ? `<td><span data-visible="false" style="font-size:0.82rem;color:var(--dash-text-dim)">••••••</span><button onclick="event.stopPropagation();toggleRowPw(this,'${(s.password||'').replace(/'/g,"\\'")}')" class="row-action-btn" style="margin-left:6px"><i class="fas fa-eye"></i></button></td>` : '';
+        const pwCol = (isAdmin || isBM) ? `<td><span data-visible="false" style="font-size:0.82rem;color:var(--dash-text-dim)">••••••</span><button onclick="event.stopPropagation();toggleRowPw(this,'${(s.password||'').replace(/'/g,"\\'")}')" class="row-action-btn" style="margin-left:6px"><i class="fas fa-eye"></i></button></td>` : '';
 
         return `<tr class="clickable" onclick="openStudentDetail('${s.id}')">
             <td><div class="student-name-cell"><span class="cell-avatar">${s.avatar || '👤'}</span>${s.fullName || s.login || 'Unknown'}</div></td>

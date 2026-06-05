@@ -7,7 +7,8 @@ let isAdmin = false;
 
 function initAdminUI() {
     const savedUsers = JSON.parse(localStorage.getItem('savedUsers') || '[]');
-    const user = savedUsers.find(u => u.role === 'admin' || u.role === 'BM');
+    const activeUserId = localStorage.getItem('activeUserId') || (savedUsers[0] && savedUsers[0].id);
+    const user = savedUsers.find(u => u.id === activeUserId && (u.role === 'admin' || u.role === 'BM')) || savedUsers.find(u => u.role === 'admin' || u.role === 'BM');
     isAdmin = user && user.role === 'admin';
     const isBM = user && user.role === 'BM';
 

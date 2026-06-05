@@ -10,6 +10,7 @@ const API_ROUTES = [
     'addStudent',
     'updateStudent',
     'setTargets',
+    'manageBms',
 ];
 
 for (const route of API_ROUTES) {

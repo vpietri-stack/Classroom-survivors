@@ -61,7 +61,8 @@ app.http('login', {
                     srState: user.srState || null,
                     sessionCount: user.sessionCount || 0,
                     targets: user.targets || [],
-                    analytics: user.analytics || []
+                    analytics: user.analytics || [],
+                    teacher: user.teacher || null
                 }
             };
         } catch (error) {

@@ -25,7 +25,7 @@ app.http('updateStudent', {
             // Allowed fields that admin can update
             const allowedFields = [
                 'book', 'unit', 'page', 'classTime', 'password',
-                'needsPasswordChange', 'fullName', 'login', 'targets'
+                'needsPasswordChange', 'fullName', 'login', 'targets', 'teacher'
             ];
 
             // Read existing student

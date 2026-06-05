@@ -7,15 +7,24 @@ let isAdmin = false;
 
 function initAdminUI() {
     const savedUsers = JSON.parse(localStorage.getItem('savedUsers') || '[]');
-    const user = savedUsers.find(u => u.role === 'admin' || u.role === 'teacher');
+    const user = savedUsers.find(u => u.role === 'admin' || u.role === 'BM');
     isAdmin = user && user.role === 'admin';
+    const isBM = user && user.role === 'BM';
 
     if (isAdmin) {
         document.getElementById('dashboardTitle').textContent = 'Admin Dashboard';
         document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
         document.querySelectorAll('.admin-col').forEach(el => el.style.display = '');
+    } else if (isBM) {
+        document.getElementById('dashboardTitle').textContent = 'BM Dashboard';
+        document.querySelectorAll('.admin-col').forEach(el => el.style.display = 'none');
     } else {
         document.querySelectorAll('.admin-col').forEach(el => el.style.display = 'none');
+    }
+
+    // Both admin and BM can add students
+    if (isAdmin || isBM) {
+        document.querySelectorAll('.bm-or-admin-only').forEach(el => el.classList.remove('hidden'));
     }
 }
 
@@ -128,6 +137,9 @@ function showStatus(elId, msg, isError) {
 function populateSettingsTab() {
     if (!currentStudent) return;
     document.getElementById('settingsFullName').value = currentStudent.fullName || '';
+    populateTeacherSelect('settingsTeacher', currentStudent.teacher || '');
+    document.getElementById('settingsTeacherCustom').classList.add('hidden');
+    document.getElementById('settingsTeacherCustom').value = '';
     populateClassTimeSelect('settingsClassTime', currentStudent.classTime || '', false);
     populateBookSelect('settingsBook', currentStudent.book || '');
     populateUnitSelect('settingsUnit', currentStudent.book || '', currentStudent.unit || '');
@@ -138,10 +150,22 @@ function populateSettingsTab() {
     document.getElementById('settingsNeedsPwChange').checked = !!currentStudent.needsPasswordChange;
 }
 
+function onSettingsTeacherChange() {
+    const val = document.getElementById('settingsTeacher').value;
+    if (val === '__custom__') {
+        document.getElementById('settingsTeacherCustom').classList.remove('hidden');
+    } else {
+        document.getElementById('settingsTeacherCustom').classList.add('hidden');
+    }
+}
+
 async function saveStudentSettings() {
     if (!currentStudent) return;
+    let teacher = document.getElementById('settingsTeacher').value;
+    if (teacher === '__custom__') teacher = document.getElementById('settingsTeacherCustom').value.trim();
     const fields = {
         fullName: document.getElementById('settingsFullName').value.trim(),
+        teacher: teacher,
         classTime: document.getElementById('settingsClassTime').value,
         book: document.getElementById('settingsBook').value,
         unit: document.getElementById('settingsUnit').value,
@@ -258,12 +282,36 @@ function openAddStudentModal() {
     document.getElementById('addStudentError').classList.add('hidden');
     ['addId','addLogin','addPassword','addFullName'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('addNeedsPwChange').checked = true;
+    populateTeacherSelect('addTeacher', '');
+    document.getElementById('addTeacherCustom').classList.add('hidden');
+    document.getElementById('addTeacherCustom').value = '';
     populateClassTimeSelect('addClassTime', '', true);
     document.getElementById('addClassTimeCustom').classList.add('hidden');
     document.getElementById('addClassTimeCustom').value = '';
     populateBookSelect('addBook', '');
     populateUnitSelect('addUnit', '', '');
     populatePageSelect('addPage', '', '', '');
+}
+
+function populateTeacherSelect(selId, currentVal) {
+    const sel = document.getElementById(selId);
+    const teachers = [...new Set(allStudents.map(s => s.teacher).filter(Boolean))].sort();
+    // Ensure 'Val' is always present
+    if (!teachers.includes('Val')) teachers.unshift('Val');
+    sel.innerHTML = '<option value="">— Select Teacher —</option>';
+    teachers.forEach(t => {
+        sel.innerHTML += `<option value="${t}" ${t===currentVal?'selected':''}>${t}</option>`;
+    });
+    sel.innerHTML += '<option value="__custom__">+ New teacher...</option>';
+}
+
+function onAddTeacherChange() {
+    const val = document.getElementById('addTeacher').value;
+    if (val === '__custom__') {
+        document.getElementById('addTeacherCustom').classList.remove('hidden');
+    } else {
+        document.getElementById('addTeacherCustom').classList.add('hidden');
+    }
 }
 
 async function submitAddStudent() {
@@ -273,13 +321,16 @@ async function submitAddStudent() {
     const login = document.getElementById('addLogin').value.trim();
     const password = document.getElementById('addPassword').value.trim();
     const fullName = document.getElementById('addFullName').value.trim();
-    if (!id || !login || !password || !fullName) { errEl.textContent = 'Fill required fields (*)'; errEl.classList.remove('hidden'); return; }
+
+    let teacher = document.getElementById('addTeacher').value;
+    if (teacher === '__custom__') teacher = document.getElementById('addTeacherCustom').value.trim();
+    if (!id || !login || !password || !fullName || !teacher) { errEl.textContent = 'Fill required fields (*)'; errEl.classList.remove('hidden'); return; }
 
     let classTime = document.getElementById('addClassTime').value;
     if (classTime === '__custom__') classTime = document.getElementById('addClassTimeCustom').value.trim();
 
     const body = {
-        id, login, password, fullName, classTime,
+        id, login, password, fullName, classTime, teacher,
         book: document.getElementById('addBook').value,
         unit: document.getElementById('addUnit').value,
         page: document.getElementById('addPage').value,
@@ -303,7 +354,7 @@ function previewBulkStudents(classSelId, previewId) {
     const classTime = document.getElementById(classSelId).value;
     const preview = document.getElementById(previewId);
     if (!classTime) { preview.innerHTML = ''; return; }
-    const students = allStudents.filter(s => s.classTime === classTime && s.role !== 'teacher' && s.role !== 'admin');
+    const students = allStudents.filter(s => s.classTime === classTime && s.role !== 'BM' && s.role !== 'admin');
     preview.innerHTML = `<div class="bulk-preview-label">Will apply to ${students.length} student(s):</div>` +
         students.map(s => `<span class="bulk-chip">${s.avatar||'👤'} ${s.fullName||s.login}</span>`).join('');
 }
@@ -327,7 +378,7 @@ async function submitBulkTargets() {
     const count = parseInt(document.getElementById('bulkTargetCount').value);
     if (!classTime || !startVal || !endVal || !count) { errEl.textContent = 'Fill all fields'; errEl.classList.remove('hidden'); return; }
 
-    const ids = allStudents.filter(s => s.classTime === classTime && s.role !== 'teacher' && s.role !== 'admin').map(s => s.id);
+    const ids = allStudents.filter(s => s.classTime === classTime && s.role !== 'BM' && s.role !== 'admin').map(s => s.id);
     if (ids.length === 0) { errEl.textContent = 'No students in this class'; errEl.classList.remove('hidden'); return; }
 
     try {
@@ -362,7 +413,7 @@ async function submitBulkContent() {
     const page = document.getElementById('bulkPage').value;
     if (!classTime || !book || !unit || !page) { errEl.textContent = 'Fill all fields'; errEl.classList.remove('hidden'); return; }
 
-    const students = allStudents.filter(s => s.classTime === classTime && s.role !== 'teacher' && s.role !== 'admin');
+    const students = allStudents.filter(s => s.classTime === classTime && s.role !== 'BM' && s.role !== 'admin');
     if (students.length === 0) { errEl.textContent = 'No students in this class'; errEl.classList.remove('hidden'); return; }
 
     try {

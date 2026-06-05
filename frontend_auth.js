@@ -268,7 +268,8 @@ async function loginWithProfile(user) {
                     unit: data.unit,
                     page: data.page,
                     password: user.password,
-                    analytics: data.analytics || []
+                    analytics: data.analytics || [],
+                    teacher: data.teacher || null
                 };
                 showChangePasswordScreen(data.fullName);
                 return;
@@ -287,7 +288,8 @@ async function loginWithProfile(user) {
                 srState: data.srState || { vocab: {}, sentences: {}, sentencePairs: {} },
                 sessionCount: data.sessionCount || 0,
                 targets: data.targets || [],
-                analytics: data.analytics || []
+                analytics: data.analytics || [],
+                teacher: data.teacher || null
             };
             
             // Update the local cache with the fresh data
@@ -370,7 +372,8 @@ async function handleLoginSubmit() {
             srState: data.srState || { vocab: {}, sentences: {}, sentencePairs: {} },
             sessionCount: data.sessionCount || 0,
             targets: data.targets || [],
-            analytics: data.analytics || []
+            analytics: data.analytics || [],
+            teacher: data.teacher || null
         };
         
         if (data.needsPasswordChange) {
@@ -480,7 +483,7 @@ function finishLogin() {
     hideAllAuthScreens();
 
     // Redirect teachers and admins to the dashboard
-    if (authActiveUser && (authActiveUser.role === 'teacher' || authActiveUser.role === 'admin')) {
+    if (authActiveUser && (authActiveUser.role === 'BM' || authActiveUser.role === 'admin')) {
         window.location.href = 'teacher_dashboard.html';
         return;
     }

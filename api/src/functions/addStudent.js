@@ -16,7 +16,7 @@ app.http('addStudent', {
         try {
             const body = await request.json();
             if (!validateApiKey(request)) return { status: 403, body: 'Forbidden.' };
-            const { id, login, password, fullName, classTime, book, unit, page, needsPasswordChange } = body;
+            const { id, login, password, fullName, classTime, book, unit, page, needsPasswordChange, teacher } = body;
 
             if (!id || !login || !password || !fullName) {
                 return { status: 400, body: "Missing required fields: id, login, password, fullName." };
@@ -48,6 +48,7 @@ app.http('addStudent', {
                 password: password,
                 fullName: fullName,
                 role: 'student',
+                teacher: teacher || 'Val',
                 classTime: classTime || null,
                 book: book || null,
                 unit: unit || null,

@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function checkTeacherAuth() {
     const savedUsers = JSON.parse(localStorage.getItem('savedUsers') || '[]');
-    const teacher = savedUsers.find(u => u.role === 'teacher' || u.role === 'admin');
+    const teacher = savedUsers.find(u => u.role === 'BM' || u.role === 'admin');
     if (!teacher) {
         window.location.href = 'index.html';
         return;
@@ -35,7 +35,7 @@ async function checkTeacherAuth() {
         if (!res.ok) throw new Error('Auth failed');
         const data = await res.json();
 
-        if (data.role !== 'teacher' && data.role !== 'admin') {
+        if (data.role !== 'BM' && data.role !== 'admin') {
             window.location.href = 'index.html';
             return;
         }
@@ -60,11 +60,12 @@ async function loadAllStudents() {
         if (!res.ok) throw new Error('Failed to fetch students');
         const data = await res.json();
         // Filter out teachers and admins from list
-        allStudents = data.filter(s => s.role !== 'teacher' && s.role !== 'admin');
+        allStudents = data.filter(s => s.role !== 'BM' && s.role !== 'admin');
+        populateTeacherFilter();
         populateClassTimeFilter();
         applyFilters();
     } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="6" class="no-results"><p>Error loading students: ${e.message}</p></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="no-results"><p>Error loading students: ${e.message}</p></td></tr>`;
     }
 }
 
@@ -72,24 +73,52 @@ async function loadAllStudents() {
 
 function populateClassTimeFilter() {
     const select = document.getElementById('filterClassTime');
-    const times = [...new Set(allStudents.map(s => s.classTime).filter(Boolean))].sort();
-    // Keep the first "All Classes" option
+    const currentVal = select.value;
+    const teacherFilter = document.getElementById('filterTeacher');
+    const selectedTeacher = teacherFilter ? teacherFilter.value : '';
+    // Filter students by teacher first
+    const relevantStudents = selectedTeacher
+        ? allStudents.filter(s => s.teacher === selectedTeacher)
+        : allStudents;
+    const times = [...new Set(relevantStudents.map(s => s.classTime).filter(Boolean))].sort();
     select.innerHTML = '<option value="">All Classes</option>';
     times.forEach(t => {
         const opt = document.createElement('option');
         opt.value = t;
         opt.textContent = t;
+        if (t === currentVal) opt.selected = true;
+        select.appendChild(opt);
+    });
+    // If current value is no longer available, reset
+    if (currentVal && !times.includes(currentVal)) {
+        select.value = '';
+    }
+}
+
+function populateTeacherFilter() {
+    const select = document.getElementById('filterTeacher');
+    if (!select) return;
+    const currentVal = select.value;
+    const teachers = [...new Set(allStudents.map(s => s.teacher).filter(Boolean))].sort();
+    select.innerHTML = '<option value="">All Teachers</option>';
+    teachers.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = t;
+        if (t === currentVal) opt.selected = true;
         select.appendChild(opt);
     });
 }
 
 function applyFilters() {
+    const teacherVal = document.getElementById('filterTeacher') ? document.getElementById('filterTeacher').value : '';
     const classTime = document.getElementById('filterClassTime').value;
     const nameSearch = document.getElementById('filterName').value.trim().toLowerCase();
     const dateFrom = document.getElementById('filterDateFrom').value;
     const dateTo = document.getElementById('filterDateTo').value;
 
     filteredStudents = allStudents.filter(s => {
+        if (teacherVal && s.teacher !== teacherVal) return false;
         if (classTime && s.classTime !== classTime) return false;
         if (nameSearch && !(s.fullName || '').toLowerCase().includes(nameSearch)) return false;
         return true;
@@ -147,10 +176,17 @@ function sortTable(col) {
 }
 
 function clearFilters() {
+    if (document.getElementById('filterTeacher')) document.getElementById('filterTeacher').value = '';
     document.getElementById('filterClassTime').value = '';
     document.getElementById('filterName').value = '';
     document.getElementById('filterDateFrom').value = '';
     document.getElementById('filterDateTo').value = '';
+    populateClassTimeFilter();
+    applyFilters();
+}
+
+function onTeacherFilterChange() {
+    populateClassTimeFilter();
     applyFilters();
 }
 
@@ -324,6 +360,7 @@ function renderStudentsTable(dateFrom, dateTo) {
 
         return `<tr class="clickable" onclick="openStudentDetail('${s.id}')">
             <td><div class="student-name-cell"><span class="cell-avatar">${s.avatar || '👤'}</span>${s.fullName || s.login || 'Unknown'}</div></td>
+            <td>${s.teacher || '—'}</td>
             <td>${s.classTime || '—'}</td>
             ${renderTargetCell(targetInfo)}
             ${renderPeriodCell(targetInfo)}

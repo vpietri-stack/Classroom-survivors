@@ -20,7 +20,7 @@
                 <h1 id="dashboardTitle" class="dash-title">Teacher Dashboard</h1>
             </div>
             <div class="dash-header-right">
-                <button id="addStudentBtn" onclick="openAddStudentModal()" class="dash-action-btn admin-only hidden">
+                <button id="addStudentBtn" onclick="openAddStudentModal()" class="dash-action-btn bm-or-admin-only hidden">
                     <i class="fas fa-user-plus"></i> Add Student
                 </button>
                 <span id="teacherNameDisplay" class="dash-teacher-name"></span>
@@ -32,6 +32,12 @@
 
         <!-- Filters Bar -->
         <div class="dash-filters">
+            <div class="filter-group">
+                <label class="filter-label">Teacher</label>
+                <select id="filterTeacher" onchange="onTeacherFilterChange()" class="filter-select">
+                    <option value="">All Teachers</option>
+                </select>
+            </div>
             <div class="filter-group">
                 <label class="filter-label">Class Time</label>
                 <select id="filterClassTime" onchange="applyFilters()" class="filter-select">
@@ -70,6 +76,7 @@
                 <thead>
                     <tr>
                         <th class="sortable" onclick="sortTable('name')">Student <i class="fas fa-sort sort-icon"></i></th>
+                        <th>Teacher</th>
                         <th class="sortable" onclick="sortTable('classTime')">Class Time <i class="fas fa-sort sort-icon"></i></th>
                         <th class="sortable" onclick="sortTable('target')">Target <i class="fas fa-sort sort-icon"></i></th>
                         <th>Period</th>
@@ -187,6 +194,10 @@
                 <h3 class="panel-title"><i class="fas fa-cog"></i> Student Settings</h3>
                 <div class="admin-form-grid">
                     <div class="form-field"><label>Full Name</label><input type="text" id="settingsFullName" class="form-input"></div>
+                    <div class="form-field"><label>Teacher</label>
+                        <select id="settingsTeacher" class="form-input" onchange="onSettingsTeacherChange()"></select>
+                        <input type="text" id="settingsTeacherCustom" class="form-input hidden" placeholder="New teacher name..." style="margin-top:6px;">
+                    </div>
                     <div class="form-field"><label>Class Time</label>
                         <select id="settingsClassTime" class="form-input"></select>
                     </div>
@@ -301,6 +312,10 @@
                     </div>
                     <div class="form-field"><label class="checkbox-label"><input type="checkbox" id="addNeedsPwChange" checked> Require password change</label></div>
                     <div class="form-field"><label>Full Name *</label><input type="text" id="addFullName" class="form-input" placeholder="Display name"></div>
+                    <div class="form-field"><label>Teacher *</label>
+                        <select id="addTeacher" class="form-input" onchange="onAddTeacherChange()"><option value="">— Select Teacher —</option></select>
+                        <input type="text" id="addTeacherCustom" class="form-input hidden" placeholder="New teacher name..." style="margin-top:6px;">
+                    </div>
                     <div class="form-field"><label>Class Time</label>
                         <select id="addClassTime" class="form-input" onchange="if(this.value==='__custom__')document.getElementById('addClassTimeCustom').classList.remove('hidden')"><option value="">— None —</option></select>
                         <input type="text" id="addClassTimeCustom" class="form-input hidden" placeholder="e.g. Mon 16:30" style="margin-top:6px;">

@@ -64,7 +64,7 @@ app.http('addStudent', {
             await container.items.create(newStudent);
 
             // Log activity if created by a teacher/BM or admin
-            const creatorId = request.headers.get('X-Creator-Id') || 'unknown';
+            const creatorId = request.query.get('creatorId') || 'unknown';
             if (creatorId !== 'unknown') {
                 const logId = `activity_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
                 const activityLog = {

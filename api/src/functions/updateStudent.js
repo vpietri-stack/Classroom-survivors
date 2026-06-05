@@ -55,7 +55,7 @@ app.http('updateStudent', {
             await container.items.upsert(user);
 
             // Log activity if updated by a teacher/BM or admin
-            const creatorId = request.headers.get('X-Creator-Id') || 'unknown';
+            const creatorId = request.query.get('creatorId') || 'unknown';
             if (creatorId !== 'unknown' && Object.keys(changes).length > 0) {
                 const logId = `activity_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
                 const activityLog = {

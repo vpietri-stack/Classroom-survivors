@@ -10,7 +10,7 @@ function apiFetch(url, options = {}) {
         'X-App-Key': APP_API_KEY
     };
     if (currentUser) {
-        options.headers['X-Creator-Id'] = currentUser.id;
+        url += (url.includes('?') ? '&' : '?') + 'creatorId=' + encodeURIComponent(currentUser.id);
     }
     return fetch(url, options);
 }

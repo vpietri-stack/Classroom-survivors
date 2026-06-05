@@ -19,7 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function checkTeacherAuth() {
     const savedUsers = JSON.parse(localStorage.getItem('savedUsers') || '[]');
-    const teacher = savedUsers.find(u => u.role === 'BM' || u.role === 'admin');
+    // Try to find the currently active teacher first, otherwise fallback to finding the first teacher/BM/admin in profiles
+    const activeUserId = localStorage.getItem('activeUserId') || (savedUsers[0] && savedUsers[0].id);
+    const teacher = savedUsers.find(u => u.id === activeUserId && (u.role === 'BM' || u.role === 'admin')) || savedUsers.find(u => u.role === 'BM' || u.role === 'admin');
     if (!teacher) {
         window.location.href = 'index.html';
         return;
@@ -674,6 +676,7 @@ function startTestMode() {
 // ----- LOGOUT -----
 
 function logoutTeacher() {
+    localStorage.removeItem('activeUserId');
     // Go back to profile selection on main app
     window.location.href = 'index.html';
 }

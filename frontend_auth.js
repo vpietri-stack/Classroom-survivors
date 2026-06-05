@@ -3,7 +3,8 @@ const API_BASE = API_BASE_URL;
 
 function apiFetch(url, options = {}) {
     const savedUsers = JSON.parse(localStorage.getItem('savedUsers') || '[]');
-    const currentUser = savedUsers.find(u => u.role === 'admin' || u.role === 'BM');
+    const activeUserId = localStorage.getItem('activeUserId') || (savedUsers[0] && savedUsers[0].id);
+    const currentUser = savedUsers.find(u => u.id === activeUserId);
     options.headers = {
         ...options.headers,
         'X-App-Key': APP_API_KEY
@@ -302,6 +303,7 @@ async function loginWithProfile(user) {
             savedUsers = savedUsers.filter(u => u.id !== authActiveUser.id);
             savedUsers.unshift(authActiveUser);
             localStorage.setItem('savedUsers', JSON.stringify(savedUsers));
+            localStorage.setItem('activeUserId', authActiveUser.id);
             
             finishLogin();
             return;
@@ -469,6 +471,7 @@ function saveUserToLocalAndStart(user) {
     // Add to front
     savedUsers.unshift(user);
     localStorage.setItem('savedUsers', JSON.stringify(savedUsers));
+    localStorage.setItem('activeUserId', user.id);
     
     finishLogin();
 }

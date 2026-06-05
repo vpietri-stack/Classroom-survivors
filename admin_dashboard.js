@@ -358,7 +358,8 @@ function previewBulkStudents(classSelId, previewId) {
     const classTime = document.getElementById(classSelId).value;
     const preview = document.getElementById(previewId);
     if (!classTime) { preview.innerHTML = ''; return; }
-    const students = allStudents.filter(s => s.classTime === classTime && s.role !== 'BM' && s.role !== 'admin');
+    const currentTeacher = document.getElementById('filterTeacher') ? document.getElementById('filterTeacher').value : '';
+    const students = allStudents.filter(s => s.classTime === classTime && s.role !== 'BM' && s.role !== 'admin' && (!currentTeacher || s.teacher === currentTeacher));
     preview.innerHTML = `<div class="bulk-preview-label">Will apply to ${students.length} student(s):</div>` +
         students.map(s => `<span class="bulk-chip">${s.avatar||'👤'} ${s.fullName||s.login}</span>`).join('');
 }
@@ -382,7 +383,8 @@ async function submitBulkTargets() {
     const count = parseInt(document.getElementById('bulkTargetCount').value);
     if (!classTime || !startVal || !endVal || !count) { errEl.textContent = 'Fill all fields'; errEl.classList.remove('hidden'); return; }
 
-    const ids = allStudents.filter(s => s.classTime === classTime && s.role !== 'BM' && s.role !== 'admin').map(s => s.id);
+    const currentTeacher = document.getElementById('filterTeacher') ? document.getElementById('filterTeacher').value : '';
+    const ids = allStudents.filter(s => s.classTime === classTime && s.role !== 'BM' && s.role !== 'admin' && (!currentTeacher || s.teacher === currentTeacher)).map(s => s.id);
     if (ids.length === 0) { errEl.textContent = 'No students in this class'; errEl.classList.remove('hidden'); return; }
 
     try {
@@ -417,7 +419,8 @@ async function submitBulkContent() {
     const page = document.getElementById('bulkPage').value;
     if (!classTime || !book || !unit || !page) { errEl.textContent = 'Fill all fields'; errEl.classList.remove('hidden'); return; }
 
-    const students = allStudents.filter(s => s.classTime === classTime && s.role !== 'BM' && s.role !== 'admin');
+    const currentTeacher = document.getElementById('filterTeacher') ? document.getElementById('filterTeacher').value : '';
+    const students = allStudents.filter(s => s.classTime === classTime && s.role !== 'BM' && s.role !== 'admin' && (!currentTeacher || s.teacher === currentTeacher));
     if (students.length === 0) { errEl.textContent = 'No students in this class'; errEl.classList.remove('hidden'); return; }
 
     try {

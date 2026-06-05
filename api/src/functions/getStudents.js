@@ -20,8 +20,8 @@ app.http('getStudents', {
             const database = client.database('Val-EslApp');
             const container = database.container('Students');
 
-            // 3. Fetch all items in the container
-            const { resources } = await container.items.readAll().fetchAll();
+            // 3. Fetch all items in the container that are students
+            const { resources } = await container.items.query("SELECT * FROM c WHERE c.role = 'student' OR NOT IS_DEFINED(c.role)").fetchAll();
 
             // Check if admin is requesting secure fields
             const includeSecure = request.query.get('includeSecure') === 'true';

@@ -1353,6 +1353,29 @@ TEACHING_CONTENT["PU1"] = {
                 { a: "Has Jenny got a blue bike?", b: "Yes, she has." },
                 { a: "Has Jim got a blue bike?", b: "No, he hasn't. He's got an orange bike." }
             ]
+        },
+        "59": {
+            vocab: [
+                "I - my", "you - your", "he - his", "she - her", "it - its", "we - our", "they - their"
+            ],
+            sentences: [
+                "Whose kite is it? It's my kite.",
+                "Whose robot is it? It's his robot.",
+                "Whose plane is it? It's her plane.",
+                "Whose balls are they? They're our balls.",
+                "Whose bike is it? It's their bike.",
+                "It's Jenny's car. It's her car.",
+                "They're Jim's toys. They're his toys.",
+
+            ],
+            sentencePairs: [
+                { a: "I've got a", b: "robot. It's my robot." },
+                { a: "Jim's got a", b: "kite. It's his kite." },
+                { a: "Jenny's got a", b: "car. It's her car." },
+                { a: "We've got", b: "balls. They're our balls." },
+                { a: "Grandma and Grandpa have got a", b: "house. It's their house." },
+                { a: "You've got a", b: "doll. It's your doll." },
+            ]
         }
     },
     "6": {
@@ -1824,7 +1847,7 @@ AVAILABLE_CONTENT["PU1"] = {
     "2": [19, 20, 21, 22, 23, 24, 25, 26, 27, 28],
     "3": [31, 32, 33, 34, 35, 36, 37, 43],
     "4": [45, 47, 48, 54],
-    "5": [57],
+    "5": [57, 59],
     "6": [78, 81],
     "7": [83, 84, 92],
     "8": [95, 97, 99],

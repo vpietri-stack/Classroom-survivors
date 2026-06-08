@@ -4625,6 +4625,21 @@ const LOCAL_TRANSLATIONS = {
     "We can't go swimming in the sea, when it's stormy.": "当海面刮风的时候，我们不能去海里游泳。",
     "I can't play football, when I'm tired.": "当我累的时候，我不能踢足球。",
 
+    // --- PU1 Content Check Additions ---
+    "I - my": "我 - 我的",
+    "you - your": "你 - 你的",
+    "he - his": "他 - 他的",
+    "she - her": "她 - 她的",
+    "it - its": "它 - 它的",
+    "we - our": "我们 - 我们的",
+    "they - their": "他们 - 他们的",
+    "Whose kite is it? It's my kite.": "这是谁的风筝？是我的风筝。",
+    "Whose robot is it? It's his robot.": "这是谁的机器人？是他的机器人。",
+    "Whose plane is it? It's her plane.": "这是谁的飞机？是她的飞机。",
+    "Whose balls are they? They're our balls.": "这些球是谁的？是我们的球。",
+    "Whose bike is it? It's their bike.": "这辆自行车是谁的？是他们的自行车。",
+    "It's Jenny's car. It's her car.": "这是珍妮的车。是她的车。",
+    "They're Jim's toys. They're his toys.": "这些玩具是吉姆的。是他的玩具。",
     // --- PU1 and PU2 Check Additions ---
     "yes, it is": "是的，它是。",
     "yes, they are": "是的，它们是。",

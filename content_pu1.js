@@ -1747,7 +1747,7 @@ TEACHING_CONTENT["PU1"] = {
     "9": {
         "107": {
             vocab: [
-                'holiday', 'wear', 'wearing', 'hat', 'cap', 'trousers', 'shorts', 'jeans', 'skirt', 'dress', 'shirt', 'T-shirt', 'jacket', 'sunglasses', 'boots', 'shoes',
+                'holiday', 'wear - wearing', 'hat', 'cap', 'trousers', 'shorts', 'jeans', 'skirt', 'dress', 'shirt', 'T-shirt', 'jacket', 'sunglasses', 'boots', 'shoes',
                 'nice', 'great', 'ugly', 'look', 'looks', 'this', 'these', 'do', 'you', 'like', "I'm", "he's", "she's"
             ],
             sentences: [

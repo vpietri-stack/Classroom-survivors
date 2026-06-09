@@ -730,7 +730,38 @@ TEACHING_CONTENT["PU3"] = {
                 { a: "I can't play football,", b: "when I'm tired." }
 
             ]
-        }
+        },
+        "87": {
+            vocab: [
+                'brave', 'clever', 'interesting', 'funny', 'lovely', 'friendly', 'popular', 'kind', 'lazy',
+                'interesting', 'brilliant', 'terrible', 'unkind', 'boring', 'unfriendly', 'naughty', 'dangerous', 'scary', 'ugly', 'silly', 'smart'
+            ],
+            sentences: [
+                "What's she like? She's very brave and popular.",
+                "What's he like? He's interesting and funny.",
+                "What's your maths teacher like? He's very clever and kind.",
+                "What's your English teacher like? She's unkind and unfriendly.",
+                "What's your brother like? He's very naughty and silly.",
+                "What does he look like? He's tall and thin.",
+                "What does she look like? She's pretty and she's got long black hair.",
+                "What does the monster look like? It's ugly and scary.",
+                "What's your dog like? It's lazy but lovely!"
+
+            ],
+            sentencePairs: [
+                { a: "Firefighters do dangerous things to help people.", b: "They are brave." },
+                { a: "Scientists are", b: "very clever/smart." },
+                { a: "I'm always laughing in class, my teacher is", b: "very funny." },
+                { a: "What's she like?", b: "She's unkind and unfriendly." },
+                { a: "What does she look like?", b: "She's pretty and she's got long black hair." },
+                { a: "What's your brother like?", b: "He's very naughty and silly." },
+                { a: "What does he look like?", b: "He's tall and thin." },
+                { a: "What does your dog look like?", b: "It's big, black and white, and it's got a long tail." },
+                { a: "My dog's always sleeping.", b: "It's very lazy" }
+
+
+            ]
+        },
     }
 };
 
@@ -742,5 +773,5 @@ AVAILABLE_CONTENT["PU3"] = {
     "4": [54],
     "5": [57, 59, 66],
     "6": [69, 71, 73],
-    "7": [83, 85]
+    "7": [83, 85, 87]
 };

@@ -761,7 +761,7 @@ TEACHING_CONTENT["PU3"] = {
 
 
             ]
-        },
+        }
     }
 };
 

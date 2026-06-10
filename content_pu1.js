@@ -417,7 +417,8 @@ TEACHING_CONTENT["PU1"] = {
             ]
         },
         "26": {
-            vocab: [ // Verbs & Pronoun Contractions
+            vocab: [
+                // Verbs & Pronoun Contractions
                 'I am', "I'm", "I'm not",
                 'he is', "he's", "he isn't",
                 'she is', "she's", "she isn't",
@@ -441,126 +442,9 @@ TEACHING_CONTENT["PU1"] = {
                 'body', 'face', 'hair', 'eye', 'eyes', 'ear', 'ears', 'nose', 'mouth',
                 'foot', 'feet', 'leg', 'legs', 'arm', 'arms',
 
-                // Adjectives (Description & Feelings)
-                'young', 'old', 'beautiful', 'ugly', 'long', 'short',
-                'big', 'small', 'nice', 'happy', 'sad', 'angry',
-
                 // Question Words
-                "who's", 'who'],
-            sentences: [
-                // Identification Statements (Pronouns - Positive & Negative)
-                "She's my mother.",
-                "She isn't my sister.",
-                "He's my grandfather.",
-                "He isn't my dad.",
-                "They're my cousins.",
-                "They aren't my brothers.",
-                "She's a nice girl.",
-                "She isn't an angry girl.",
-
-                // Description Statements (To Be - Positive & Negative)
-                "The boy is happy.",
-                "The boy isn't sad.",
-                "My dad is tall.", // Implicit in 'big'/'long' context or general descriptions
-                "My dad isn't short.",
-                "She's beautiful.",
-                "She isn't ugly.",
-
-                // Possession Statements (Have Got - Positive & Negative)
-                "I've got a big family.",
-                "I haven't got a small family.",
-                "She's got blue eyes.",
-                "She hasn't got green eyes.",
-                "He's got long legs.",
-                "He hasn't got short legs.",
-                "It's got big feet.",
-                "It hasn't got small feet.",
-                "You've got two arms.",
-                "You haven't got four arms.",
-
-                // Yes/No Questions & Answers (To Be)
-                "Is he your brother? Yes, he is.",
-                "Is he your father? No, he isn't.",
-                "Is she happy? Yes, she is.",
-                "Is she angry? No, she isn't.",
-                "Are they your sisters? Yes, they are.",
-                "Are they your friends? No, they aren't.",
-
-                // Yes/No Questions & Answers (Have Got)
-                "Have you got a brother? Yes, I have.",
-                "Have you got a sister? No, I haven't.",
-                "Has she got long hair? Yes, she has.",
-                "Has she got short hair? No, she hasn't.",
-                "Has he got big feet? Yes, he has.",
-                "Has he got small feet? No, he hasn't.",
-
-                // Wh- Questions (Identity with Pronouns)
-                "Who's she? She's my grandma.",
-                "Who's she? She isn't my mum.",
-                "Who are they? They're my cousins.",
-                "Who are they? They aren't my brothers."
+                "who's", 'who'
             ],
-            sentencePairs: [
-                { a: "Is Mr. Friendly Jim's father?", b: "Yes, he is." },
-                { a: "Is Ms. Friendly Jenny's mother?", b: "Yes, she is." },
-                { a: "Is Grandpa Friendly Jim's grandfather?", b: "Yes, he is." },
-                { a: "Is Grandma Friendly Jim's grandmother?", b: "Yes, she is." },
-                { a: "Is Jim Jenny's brother?", b: "Yes, he is." },
-                { a: "Is Jenny Jim's sister?", b: "Yes, she is." },
-                { a: "Are they the Friendly family?", b: "Yes, they are." },
-                { a: "Is Shelly Rocky's sister?", b: "No, she isn't." },
-                { a: "Is Harry Rocky's brother?", b: "No, he isn't." },
-                { a: "Is Henrietta Rocky's mother?", b: "Yes, she is." },
-                { a: "Is Henrietta Rocky's father?", b: "No, she isn't." },
-                { a: "Who's she?", b: "She's Jenny." },
-                { a: "Who's he?", b: "He's Jim." },
-                { a: "Is Jenny a girl?", b: "Yes, she is." },
-                { a: "Is Jim a boy?", b: "Yes, he is." },
-                { a: "Is Jenny a boy?", b: "No, she isn't." },
-                { a: "Is Jim a girl?", b: "No, he isn't." },
-                { a: "Close ...", b: "your eyes." },
-                { a: "Put ...", b: "your arms up." },
-                { a: "Move ...", b: "your tail Cameron." },
-                { a: "Have you got pink eyes?", b: "No, I haven't." },
-                { a: "Have you got 2 arms?", b: "Yes, I have." },
-                { a: "Have you got 2 legs?", b: "Yes, I have." },
-                { a: "Have you got 5 eyes?", b: "No, I haven't." },
-                { a: "Have you got 2 ears?", b: "Yes, I have." },
-                { a: "Have you got 2 noses?", b: "No, I haven't." },
-                { a: "Have you got 2 mouths?", b: "No, I haven't." },
-            ]
-        },
-        "27": {
-            vocab: [ // Verbs & Pronoun Contractions
-                'I am', "I'm", "I'm not",
-                'he is', "he's", "he isn't",
-                'she is', "she's", "she isn't",
-                'it is', "it's", "it isn't",
-                'they are', "they're", "they aren't",
-
-                // 'Have Got' (Positive & Negative)
-                "I've got", "I haven't got",
-                "you've got", "haven't got",
-                "we've got", "haven't got",
-                "they've got", "haven't got",
-                "he's got", "hasn't got",
-                "hasn't got",
-                "it's got", "hasn't got",
-
-                // Family & People Nouns
-                'family', 'mother', 'mum', 'father', 'dad', 'brother', 'sister',
-                'grandmother', 'grandma', 'grandfather', 'grandpa', 'baby', 'cousin', 'boy', 'girl',
-
-                // Body & Face Nouns
-                'body', 'face', 'hair', 'eye', 'eyes', 'ear', 'ears', 'nose', 'mouth',
-                'foot', 'feet', 'leg', 'legs', 'arm', 'arms',
-
-                // Adjectives (Description & Feelings)
-                'young', 'old', 'beautiful', 'ugly', 'long', 'short',
-                'big', 'small', 'nice', 'happy', 'sad', 'angry',
-
-                // Question Words
-                "who's", 'who'],
             sentences: [
                 // Identification Statements (Pronouns - Positive & Negative)
                 "She's my mother.",
@@ -569,16 +453,8 @@ TEACHING_CONTENT["PU1"] = {
                 "He isn't my dad.",
                 "They're my cousins.",
                 "They aren't my brothers.",
-                "She's a nice girl.",
-                "She isn't an angry girl.",
 
-                // Description Statements (To Be - Positive & Negative)
-                "The boy is happy.",
-                "The boy isn't sad.",
-                "My dad is tall.", // Implicit in 'big'/'long' context or general descriptions
-                "My dad isn't short.",
-                "She's beautiful.",
-                "She isn't ugly.",
+
 
                 // Possession Statements (Have Got - Positive & Negative)
                 "I've got a big family.",
@@ -595,120 +471,6 @@ TEACHING_CONTENT["PU1"] = {
                 // Yes/No Questions & Answers (To Be)
                 "Is he your brother? Yes, he is.",
                 "Is he your father? No, he isn't.",
-                "Is she happy? Yes, she is.",
-                "Is she angry? No, she isn't.",
-                "Are they your sisters? Yes, they are.",
-                "Are they your friends? No, they aren't.",
-
-                // Yes/No Questions & Answers (Have Got)
-                "Have you got a brother? Yes, I have.",
-                "Have you got a sister? No, I haven't.",
-                "Has she got long hair? Yes, she has.",
-                "Has she got short hair? No, she hasn't.",
-                "Has he got big feet? Yes, he has.",
-                "Has he got small feet? No, he hasn't.",
-
-                // Wh- Questions (Identity with Pronouns)
-                "Who's she? She's my grandma.",
-                "Who's she? She isn't my mum.",
-                "Who are they? They're my cousins.",
-                "Who are they? They aren't my brothers."
-            ],
-            sentencePairs: [
-                { a: "Is Mr. Friendly Jim's father?", b: "Yes, he is." },
-                { a: "Is Ms. Friendly Jenny's mother?", b: "Yes, she is." },
-                { a: "Is Grandpa Friendly Jim's grandfather?", b: "Yes, he is." },
-                { a: "Is Grandma Friendly Jim's grandmother?", b: "Yes, she is." },
-                { a: "Is Jim Jenny's brother?", b: "Yes, he is." },
-                { a: "Is Jenny Jim's sister?", b: "Yes, she is." },
-                { a: "Are they the Friendly family?", b: "Yes, they are." },
-                { a: "Is Shelly Rocky's sister?", b: "No, she isn't." },
-                { a: "Is Harry Rocky's brother?", b: "No, he isn't." },
-                { a: "Is Henrietta Rocky's mother?", b: "Yes, she is." },
-                { a: "Is Henrietta Rocky's father?", b: "No, she isn't." },
-                { a: "Who's she?", b: "She's Jenny." },
-                { a: "Who's he?", b: "He's Jim." },
-                { a: "Is Jenny a girl?", b: "Yes, she is." },
-                { a: "Is Jim a boy?", b: "Yes, he is." },
-                { a: "Is Jenny a boy?", b: "No, she isn't." },
-                { a: "Is Jim a girl?", b: "No, he isn't." }, { a: "Close ...", b: "your eyes." },
-                { a: "Put ...", b: "your arms up." },
-                { a: "Move ...", b: "your tail Cameron." }, { a: "Have you got pink eyes?", b: "No, I haven't." },
-                { a: "Have you got 2 arms?", b: "Yes, I have." },
-                { a: "Have you got 2 legs?", b: "Yes, I have." },
-                { a: "Have you got 5 eyes?", b: "No, I haven't." },
-                { a: "Have you got 2 ears?", b: "Yes, I have." },
-                { a: "Have you got 2 noses?", b: "No, I haven't." },
-                { a: "Have you got 2 mouths?", b: "No, I haven't." },
-            ]
-        },
-        "28": {
-            vocab: [ // Verbs & Pronoun Contractions
-                'I am', "I'm", "I'm not",
-                'he is', "he's", "he isn't",
-                'she is', "she's", "she isn't",
-                'it is', "it's", "it isn't",
-                'they are', "they're", "they aren't",
-
-                // 'Have Got' (Positive & Negative)
-                "I've got", "I haven't got",
-                "you've got", "haven't got",
-                "we've got", "haven't got",
-                "they've got", "haven't got",
-                "he's got", "he hasn't got",
-                "hasn't got",
-                "it's got", "hasn't got",
-
-                // Family & People Nouns
-                'family', 'mother', 'mum', 'father', 'dad', 'brother', 'sister',
-                'grandmother', 'grandma', 'grandfather', 'grandpa', 'baby', 'cousin', 'boy', 'girl',
-
-                // Body & Face Nouns
-                'body', 'face', 'hair', 'eye', 'eyes', 'ear', 'ears', 'nose', 'mouth',
-                'foot', 'feet', 'leg', 'legs', 'arm', 'arms',
-
-                // Adjectives (Description & Feelings)
-                'young', 'old', 'beautiful', 'ugly', 'long', 'short',
-                'big', 'small', 'nice', 'happy', 'sad', 'angry',
-
-                // Question Words
-                "who's", 'who'],
-            sentences: [
-                // Identification Statements (Pronouns - Positive & Negative)
-                "She's my mother.",
-                "She isn't my sister.",
-                "He's my grandfather.",
-                "He isn't my dad.",
-                "They're my cousins.",
-                "They aren't my brothers.",
-                "She's a nice girl.",
-                "She isn't an angry girl.",
-
-                // Description Statements (To Be - Positive & Negative)
-                "The boy is happy.",
-                "The boy isn't sad.",
-                "My dad is tall.", // Implicit in 'big'/'long' context or general descriptions
-                "My dad isn't short.",
-                "She's beautiful.",
-                "She isn't ugly.",
-
-                // Possession Statements (Have Got - Positive & Negative)
-                "I've got a big family.",
-                "I haven't got a small family.",
-                "She's got blue eyes.",
-                "She hasn't got green eyes.",
-                "He's got long legs.",
-                "He hasn't got short legs.",
-                "It's got big feet.",
-                "It hasn't got small feet.",
-                "You've got two arms.",
-                "You haven't got four arms.",
-
-                // Yes/No Questions & Answers (To Be)
-                "Is he your brother? Yes, he is.",
-                "Is he your father? No, he isn't.",
-                "Is she happy? Yes, she is.",
-                "Is she angry? No, she isn't.",
                 "Are they your sisters? Yes, they are.",
                 "Are they your friends? No, they aren't.",
 
@@ -1844,7 +1606,7 @@ TEACHING_CONTENT["PU1"] = {
 AVAILABLE_CONTENT["PU1"] = {
     "0": [5, 7, 8],
     "1": [9, 10, 11, 12, 13, 16],
-    "2": [19, 20, 21, 22, 23, 24, 25, 26, 27, 28],
+    "2": [19, 20, 21, 22, 23, 24, 25, 26],
     "3": [31, 32, 33, 34, 35, 36, 37, 43],
     "4": [45, 47, 48, 54],
     "5": [57, 59],

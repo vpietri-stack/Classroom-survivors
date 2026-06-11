@@ -25,7 +25,6 @@ class UnoScene extends Phaser.Scene {
     create() {
         this.generateCardTextures();
         
-        // Setup layout
         const cw = this.scale.width;
         const ch = this.scale.height;
         this.layout = {
@@ -46,92 +45,125 @@ class UnoScene extends Phaser.Scene {
         this.input.on('gameobjectover', this.onCardHover, this);
         this.input.on('gameobjectout', this.onCardOut, this);
 
+        this.scale.on('resize', this.handleResize, this);
+
         this.initUnoGame();
     }
 
+    handleResize(gameSize) {
+        if (!unoGameActive) return;
+        this.renderAll();
+    }
+
     generateCardTextures() {
-        const w = 80;
-        const h = 120;
-        const r = 10;
+        const w = 90;
+        const h = 135;
+        const r = 12;
         
         const colors = {
-            red: 0xef4444,
-            yellow: 0xfacc15,
-            green: 0x22c55e,
-            blue: 0x3b82f6,
-            black: 0x1f2937
+            red: 0xe53935, yellow: 0xfdd835, green: 0x43a047, blue: 0x1e88e5, black: 0x212121
         };
 
         const drawCard = (key, bgColor, symbol, textColor) => {
             if (this.textures.exists(key)) return;
-            const g = this.make.graphics({add: false});
             
+            const rt = this.add.renderTexture(0, 0, w, h);
+
             // White border
-            g.fillStyle(0xffffff);
-            g.fillRoundedRect(0, 0, w, h, r);
+            const gBase = this.make.graphics({add: false});
+            gBase.fillStyle(0xffffff, 1);
+            gBase.fillRoundedRect(0, 0, w, h, r);
             
             // Inner color
-            g.fillStyle(bgColor);
-            g.fillRoundedRect(4, 4, w-8, h-8, r-2);
-            
-            // Oval
-            g.fillStyle(0xffffff);
-            g.fillEllipse(w/2, h/2, w*0.8, h*0.6);
-            // Inner oval
-            g.fillStyle(bgColor);
-            g.fillEllipse(w/2, h/2, w*0.7, h*0.5);
+            gBase.fillStyle(bgColor, 1);
+            gBase.fillRoundedRect(5, 5, w-10, h-10, r-3);
+            rt.draw(gBase, 0, 0);
+            gBase.destroy();
 
-            g.generateTexture(key + '_bg', w, h);
-            g.destroy();
+            // Slanted inner oval (white)
+            const gOvalWhite = this.make.graphics({add: false});
+            gOvalWhite.fillStyle(0xffffff, 1);
+            gOvalWhite.fillEllipse(0, 0, w*0.85, h*0.45);
+            gOvalWhite.setPosition(w/2, h/2);
+            gOvalWhite.setAngle(-25);
+            rt.draw(gOvalWhite);
+            gOvalWhite.destroy();
+
+            // Slanted inner oval (color)
+            const gOvalColor = this.make.graphics({add: false});
+            gOvalColor.fillStyle(bgColor, 1);
+            gOvalColor.fillEllipse(0, 0, w*0.75, h*0.35);
+            gOvalColor.setPosition(w/2, h/2);
+            gOvalColor.setAngle(-25);
+            rt.draw(gOvalColor);
+            gOvalColor.destroy();
 
             // Text
-            const rt = this.add.renderTexture(0, 0, w, h);
-            rt.draw(key + '_bg', 0, 0);
-            
             if (symbol) {
+                // Main symbol
                 const ts = this.add.text(w/2, h/2, symbol, {
-                    fontSize: '40px', fontStyle: 'bold', color: textColor, fontFamily: 'Arial'
+                    fontSize: '48px', fontStyle: '900', color: textColor, fontFamily: 'Arial Black, Impact, sans-serif'
                 }).setOrigin(0.5);
+                ts.setStroke('#ffffff', 4);
+                ts.setShadow(2, 2, '#000000', 2, true, false);
                 
-                // small corners
-                const tl = this.add.text(12, 16, symbol, {
-                    fontSize: '16px', fontStyle: 'bold', color: '#ffffff', fontFamily: 'Arial'
+                // Top-left
+                const tl = this.add.text(14, 18, symbol, {
+                    fontSize: '18px', fontStyle: 'bold', color: '#ffffff', fontFamily: 'Arial'
                 }).setOrigin(0.5);
-                const br = this.add.text(w-12, h-16, symbol, {
-                    fontSize: '16px', fontStyle: 'bold', color: '#ffffff', fontFamily: 'Arial'
+                tl.setShadow(1, 1, '#000000', 1);
+
+                // Bottom-right
+                const br = this.add.text(w-14, h-18, symbol, {
+                    fontSize: '18px', fontStyle: 'bold', color: '#ffffff', fontFamily: 'Arial'
                 }).setOrigin(0.5).setAngle(180);
+                br.setShadow(1, 1, '#000000', 1);
 
                 rt.draw(ts, w/2, h/2);
-                rt.draw(tl, 12, 16);
-                rt.draw(br, w-12, h-16);
+                rt.draw(tl, 14, 18);
+                rt.draw(br, w-14, h-18);
+                
                 ts.destroy(); tl.destroy(); br.destroy();
             }
 
             rt.saveTexture(key);
             rt.destroy();
-            this.textures.remove(key + '_bg');
         };
 
         ['red', 'yellow', 'green', 'blue'].forEach(c => {
             const hex = colors[c];
             const tc = c === 'yellow' ? '#000000' : '#ffffff';
-            for (let i=0; i<=9; i++) drawCard(`${c}_${i}`, hex, String(i), hex);
-            drawCard(`${c}_skip`, hex, '⊘', hex);
-            drawCard(`${c}_reverse`, hex, '⇄', hex);
-            drawCard(`${c}_+2`, hex, '+2', hex);
+            for (let i=0; i<=9; i++) drawCard(`${c}_${i}`, hex, String(i), tc);
+            drawCard(`${c}_skip`, hex, '⊘', tc);
+            drawCard(`${c}_reverse`, hex, '⇄', tc);
+            drawCard(`${c}_+2`, hex, '+2', tc);
         });
 
-        drawCard('wild', colors.black, 'W', '#ef4444');
-        drawCard('p4', colors.black, '+4', '#3b82f6');
+        drawCard('wild', colors.black, 'W', '#ffffff');
+        drawCard('p4', colors.black, '+4', '#ffffff');
         
         // Card back
-        const g = this.make.graphics({add: false});
-        g.fillStyle(0xffffff); g.fillRoundedRect(0, 0, w, h, r);
-        g.fillStyle(0x111827); g.fillRoundedRect(4, 4, w-8, h-8, r-2);
-        g.fillStyle(0xffffff); g.fillEllipse(w/2, h/2, w*0.8, h*0.6);
-        g.fillStyle(0xef4444); g.fillEllipse(w/2, h/2, w*0.7, h*0.5);
-        g.generateTexture('card_back', w, h);
-        g.destroy();
+        const g2 = this.make.graphics({add: false});
+        g2.fillStyle(0xffffff, 1); g2.fillRoundedRect(0, 0, w, h, r);
+        g2.fillStyle(0x111111, 1); g2.fillRoundedRect(5, 5, w-10, h-10, r-3);
+        const rt2 = this.add.renderTexture(0, 0, w, h);
+        rt2.draw(g2, 0, 0);
+        g2.destroy();
+
+        const gOvalRed = this.make.graphics({add: false});
+        gOvalRed.fillStyle(0xe53935, 1);
+        gOvalRed.fillEllipse(0, 0, w*0.8, h*0.5);
+        gOvalRed.setPosition(w/2, h/2);
+        gOvalRed.setAngle(-25);
+        rt2.draw(gOvalRed);
+        gOvalRed.destroy();
+        
+        const textBack = this.add.text(w/2, h/2, 'UNO', { fontSize: '28px', fontStyle: '900', color: '#fdd835', fontFamily: 'Arial Black' }).setOrigin(0.5).setAngle(-25);
+        textBack.setStroke('#000000', 3);
+        rt2.draw(textBack, w/2, h/2);
+        rt2.saveTexture('card_back');
+        rt2.destroy();
+        textBack.destroy();
     }
 
     createDeckData() {
@@ -205,12 +237,12 @@ class UnoScene extends Phaser.Scene {
         else if (first.type === 'reverse') { this.direction = -1; this.currentPlayer = 3; }
         else if (first.type === '+2') { this.pendingStack = 2; this.pendingStackType = '+2'; }
 
-        this.deckSprite = this.add.image(this.layout.deck.x, this.layout.deck.y, 'card_back');
-        this.deckSprite.setInteractive(); // for drawing
+        this.deckSprite = this.add.image(0, 0, 'card_back');
+        this.deckSprite.setInteractive({ useHandCursor: true }); // for drawing
 
         // Init AI text
         for(let i=1; i<=3; i++) {
-            const txt = this.add.text(this.layout.aiX[i-1], this.layout.aiY[i-1] - 70, this.playerNames[i], {
+            const txt = this.add.text(0, 0, this.playerNames[i], {
                 fontSize: '18px', color: '#ffffff', fontStyle: 'bold'
             }).setOrigin(0.5);
             this.aiTextSprites[i] = txt;
@@ -235,13 +267,18 @@ class UnoScene extends Phaser.Scene {
         this.layout = {
             deck: { x: cw / 2 + 70, y: ch / 2 - 20 },
             discard: { x: cw / 2 - 70, y: ch / 2 - 20 },
-            playerHandY: ch - 120,
+            playerHandY: ch - 100,
             aiY: [80, 80, 80],
             aiX: [cw * 0.15, cw / 2, cw * 0.85]
         };
 
         if (this.deckSprite) {
             this.deckSprite.setPosition(this.layout.deck.x, this.layout.deck.y);
+            this.deckSprite.setDepth(10);
+            
+            // Rebind interactive area safely
+            this.deckSprite.disableInteractive();
+            this.deckSprite.setInteractive({ useHandCursor: true });
         }
 
         this.cardSprites.forEach(s => s.destroy());
@@ -251,16 +288,18 @@ class UnoScene extends Phaser.Scene {
         if (this.discard.length > 0) {
             const top = this.discard[this.discard.length - 1];
             const ds = this.add.image(this.layout.discard.x, this.layout.discard.y, top.tex);
+            ds.setDepth(15);
             this.cardSprites.push(ds);
             
             // show chosen color for black cards
             if (top.color === 'black' && top.chosenColor) {
-                const colors = { red: 0xef4444, yellow: 0xfacc15, green: 0x22c55e, blue: 0x3b82f6 };
+                const colors = { red: 0xe53935, yellow: 0xfdd835, green: 0x43a047, blue: 0x1e88e5 };
                 const cg = this.add.graphics();
                 cg.fillStyle(colors[top.chosenColor]);
-                cg.fillCircle(this.layout.discard.x, this.layout.discard.y, 20);
+                cg.fillCircle(this.layout.discard.x + 30, this.layout.discard.y - 45, 15);
                 cg.lineStyle(2, 0xffffff);
-                cg.strokeCircle(this.layout.discard.x, this.layout.discard.y, 20);
+                cg.strokeCircle(this.layout.discard.x + 30, this.layout.discard.y - 45, 15);
+                cg.setDepth(16);
                 this.cardSprites.push(cg);
             }
         }
@@ -279,15 +318,16 @@ class UnoScene extends Phaser.Scene {
             s.setData('card', c);
             s.setData('index', i);
             s.setData('owner', 0);
+            s.setDepth(20 + i);
             
             const ok = isMyTurn && this.canPlay(c, topCard, this.pendingStack, this.pendingStackType);
             const snap = this.currentPlayer !== 0 && this.snapEnabled && this.exactSame(c, topCard);
 
             if (ok || snap) {
                 s.setInteractive({ useHandCursor: true });
-                s.y -= 10; // pop up slightly
+                s.y -= 15; // pop up slightly
                 // Add glow
-                s.preFX.addGlow(ok ? 0xffff00 : 0x00ffff, 4, 0, false, 0.1, 10);
+                s.preFX.addGlow(ok ? 0xfdd835 : 0x00ffff, 4, 0, false, 0.1, 10);
             } else {
                 s.setTint(0x888888); // dim unplayable
             }
@@ -305,25 +345,27 @@ class UnoScene extends Phaser.Scene {
             
             for(let j=0; j<Math.min(n, 10); j++) {
                 const bs = this.add.image(aStartX + j*aiSpace, ay, 'card_back').setScale(0.5);
+                bs.setDepth(5 + j);
                 this.cardSprites.push(bs);
             }
             if (n > 10) {
-                const txt = this.add.text(ax, ay + 30, `+${n-10}`, {fontSize:'14px', color:'#fff'}).setOrigin(0.5);
+                const txt = this.add.text(ax, ay + 45, `+${n-10}`, {fontSize:'16px', color:'#fff', fontStyle:'bold'}).setOrigin(0.5);
                 this.cardSprites.push(txt);
             }
 
-            this.aiTextSprites[pi].setPosition(ax, ay - 70);
+            if (this.aiTextSprites[pi]) {
+                this.aiTextSprites[pi].setPosition(ax, ay - 70);
+                if (this.vulnerable[pi]) {
+                    this.aiTextSprites[pi].setText(this.playerNames[pi] + " (NO UNO!)").setColor('#ff0000');
+                    this.aiTextSprites[pi].setInteractive({useHandCursor:true}).once('pointerdown', () => this.humanCatchBot(pi));
+                } else {
+                    this.aiTextSprites[pi].setText(this.playerNames[pi]).setColor('#ffffff');
+                    this.aiTextSprites[pi].disableInteractive();
+                }
 
-            if (this.vulnerable[pi]) {
-                this.aiTextSprites[pi].setText(this.playerNames[pi] + " (NO UNO!)").setColor('#ff0000');
-                this.aiTextSprites[pi].setInteractive({useHandCursor:true}).once('pointerdown', () => this.humanCatchBot(pi));
-            } else {
-                this.aiTextSprites[pi].setText(this.playerNames[pi]).setColor('#ffffff');
-                this.aiTextSprites[pi].disableInteractive();
-            }
-
-            if (this.currentPlayer === pi) {
-                this.aiTextSprites[pi].setColor('#facc15'); // Highlight active
+                if (this.currentPlayer === pi) {
+                    this.aiTextSprites[pi].setColor('#fdd835'); // Highlight active
+                }
             }
         }
 
@@ -390,14 +432,13 @@ class UnoScene extends Phaser.Scene {
 
     onCardHover(pointer, gameObject) {
         if (gameObject.getData('card') && gameObject.getData('owner') === 0) {
-            this.tweens.add({ targets: gameObject, y: this.layout.playerHandY - 30, duration: 100 });
+            this.tweens.add({ targets: gameObject, y: this.layout.playerHandY - 40, duration: 150, ease: 'Quad.easeOut' });
         }
     }
 
     onCardOut(pointer, gameObject) {
         if (gameObject.getData('card') && gameObject.getData('owner') === 0) {
-            // Restore position
-            this.renderAll(); 
+            this.tweens.add({ targets: gameObject, y: this.layout.playerHandY - 15, duration: 150, ease: 'Quad.easeOut' });
         }
     }
 
@@ -508,13 +549,14 @@ class UnoScene extends Phaser.Scene {
 
     animatePlay(cardTex, startX, startY, cb) {
         const sprite = this.add.image(startX, startY, cardTex);
+        sprite.setDepth(100);
         this.tweens.add({
             targets: sprite,
             x: this.layout.discard.x,
             y: this.layout.discard.y,
-            angle: Phaser.Math.Between(-15, 15),
-            duration: 300,
-            ease: 'Quad.easeOut',
+            angle: Phaser.Math.Between(-25, 25),
+            duration: 350,
+            ease: 'Cubic.easeOut',
             onComplete: () => {
                 sprite.destroy();
                 if (cb) cb();
@@ -532,10 +574,11 @@ class UnoScene extends Phaser.Scene {
         }
 
         for (let i = 0; i < amount; i++) {
-            this.time.delayedCall(i * 100, () => {
+            this.time.delayedCall(i * 120, () => {
                 const s = this.add.image(this.layout.deck.x, this.layout.deck.y, 'card_back').setScale(0.8);
+                s.setDepth(100 + i);
                 this.tweens.add({
-                    targets: s, x: destX, y: destY, angle: 180, duration: 250,
+                    targets: s, x: destX, y: destY, angle: 180, duration: 300, ease: 'Quad.easeInOut',
                     onComplete: () => {
                         s.destroy();
                         count++;
@@ -616,7 +659,7 @@ class UnoScene extends Phaser.Scene {
             // Particle burst for wild
             this.burstParticles(this.layout.discard.x, this.layout.discard.y, 0xffffff);
             if (pi === 0) {
-                this.tensionBlackCardESL(); // Human played it, tension for Human? Actually tension is for NEXT player. But original logic triggered tension for human anyway or for next? Original said: Wild triggers ESL immediately. Let's keep it exactly as it was.
+                this.tensionBlackCardESL(); 
             } else {
                 this.tensionBlackCardESL(); 
             }
@@ -634,12 +677,12 @@ class UnoScene extends Phaser.Scene {
     burstParticles(x, y, color) {
         const emitter = this.add.particles(0, 0, 'uno_particle', {
             x: x, y: y,
-            speed: { min: 100, max: 300 },
+            speed: { min: 100, max: 400 },
             angle: { min: 0, max: 360 },
             scale: { start: 1, end: 0 },
             tint: color,
-            lifespan: 600,
-            quantity: 30,
+            lifespan: 800,
+            quantity: 40,
             emitting: false
         });
         emitter.explode();
@@ -828,11 +871,10 @@ class UnoScene extends Phaser.Scene {
         el.style.animation = 'none'; el.offsetHeight; el.style.animation = '';
         if (typeof osc === 'function') osc('sine', 880, 0.3, 0.15);
         
-        // Phaser particles
         let px = this.scale.width / 2;
         let py = this.layout.playerHandY;
         if (pi > 0) { px = this.layout.aiX[pi-1]; py = this.layout.aiY[pi-1]; }
-        this.burstParticles(px, py, 0xfacc15);
+        this.burstParticles(px, py, 0xfdd835);
 
         setTimeout(() => el.classList.add('hidden'), 2500);
     }
@@ -897,11 +939,10 @@ class UnoScene extends Phaser.Scene {
         const rem = Math.max(0, UNO_ESL_TIME_LIMIT - (Date.now() - unoESLTimerStart));
         const s = Math.ceil(rem / 1000);
         const el = document.getElementById('uno-esl-timer');
-        if (el) { el.innerText = '⏱ ' + s + 's'; el.style.color = s <= 5 ? '#ef4444' : '#facc15'; }
+        if (el) { el.innerText = '⏱ ' + s + 's'; el.style.color = s <= 5 ? '#ef4444' : '#fdd835'; }
         if (rem <= 0 && !unoESLTimedOut) unoESLTimedOut = true;
     }
 
-    // Called globally by completeUnoESLQuestion
     handleESLResult(success) {
         if (unoESLTimerInterval) { clearInterval(unoESLTimerInterval); unoESLTimerInterval = null; }
         document.getElementById('unoESLOverlay').classList.add('hidden');
@@ -1021,6 +1062,11 @@ function triggerUno() {
     } else {
         const parentEl = document.getElementById('uno-phaser-container');
         parentEl.appendChild(game.canvas);
+        if (game.scale && typeof game.scale.updateBounds === 'function') {
+            game.scale.updateBounds();
+        } else if (game.scale && typeof game.scale.refresh === 'function') {
+            game.scale.refresh();
+        }
         game.scene.stop('MainScene');
         game.scene.start('UnoScene');
     }

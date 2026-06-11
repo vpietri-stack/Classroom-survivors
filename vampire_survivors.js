@@ -1253,6 +1253,7 @@ function triggerVampireSurvivors() {
         game = new Phaser.Game(config);
     } else {
         document.body.appendChild(game.canvas);
+        game.scale.refresh();
         game.scene.stop('UnoScene');
         // if MainScene was paused, we could resume, but usually trigger restarts or resumes.
         // Let's just start or resume.

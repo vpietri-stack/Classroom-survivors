@@ -2,6 +2,25 @@
 <html lang="en">
 
 <head>
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            const div = document.createElement('div');
+            div.style.position = 'fixed';
+            div.style.top = '0';
+            div.style.left = '0';
+            div.style.width = '100%';
+            div.style.background = 'rgba(220, 38, 38, 0.95)';
+            div.style.color = 'white';
+            div.style.zIndex = '999999';
+            div.style.padding = '20px';
+            div.style.fontFamily = 'monospace';
+            div.style.whiteSpace = 'pre-wrap';
+            div.style.fontSize = '14px';
+            div.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.3)';
+            div.innerText = '⚠️ RUNTIME ERROR CAUGHT:\n\n' + message + '\n\nSource: ' + source + '\nLine: ' + lineno + ' | Col: ' + colno + '\n\nStack Trace:\n' + (error ? error.stack : 'N/A');
+            document.body.appendChild(div);
+        };
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"

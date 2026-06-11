@@ -92,6 +92,9 @@ class MainScene extends Phaser.Scene {
         window.addEventListener('touchcancel', preventDefault, { passive: false });
 
         this.scale.on('resize', this.handleResize, this);
+        this.events.once('shutdown', () => {
+            this.scale.off('resize', this.handleResize, this);
+        });
         this.handleResize(this.scale.gameSize);
 
         this.input.addPointer(2);

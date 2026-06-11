@@ -46,6 +46,9 @@ class UnoScene extends Phaser.Scene {
         this.input.on('gameobjectout', this.onCardOut, this);
 
         this.scale.on('resize', this.handleResize, this);
+        this.events.once('shutdown', () => {
+            this.scale.off('resize', this.handleResize, this);
+        });
 
         this.initUnoGame();
     }

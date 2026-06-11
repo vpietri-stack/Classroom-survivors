@@ -205,7 +205,7 @@ class UnoScene extends Phaser.Scene {
         this.pendingStackType = null;
         unoWinner = null;
         this.snapEnabled = false;
-        this.isProcessing = false;
+        this.isProcessing = true; // Block interaction during dealing
         this.freePlay = false;
         this.vulnerable = [false, false, false, false];
         
@@ -220,23 +220,6 @@ class UnoScene extends Phaser.Scene {
         // Clear existing sprites
         this.children.removeAll();
 
-        // Deal 7 to each
-        for (let r = 0; r < 7; r++) {
-            for (let p = 0; p < 4; p++) this.players[p].push(this.deck.pop());
-        }
-
-        let first = this.deck.pop();
-        while (first.color === 'black') { 
-            this.deck.unshift(first); 
-            this.shuffleArr(this.deck); 
-            first = this.deck.pop(); 
-        }
-        this.discard.push(first);
-
-        if (first.type === 'skip') this.currentPlayer = 1;
-        else if (first.type === 'reverse') { this.direction = -1; this.currentPlayer = 3; }
-        else if (first.type === '+2') { this.pendingStack = 2; this.pendingStackType = '+2'; }
-
         this.deckSprite = this.add.image(0, 0, 'card_back');
         this.deckSprite.setInteractive({ useHandCursor: true }); // for drawing
 
@@ -248,6 +231,18 @@ class UnoScene extends Phaser.Scene {
             this.aiTextSprites[i] = txt;
         }
 
+        // Set initial layout positions
+        const cw = this.scale.width;
+        const ch = this.scale.height;
+        this.layout = {
+            deck: { x: cw / 2 + 70, y: ch / 2 - 20 },
+            discard: { x: cw / 2 - 70, y: ch / 2 - 20 },
+            playerHandY: ch - 100,
+            aiY: [80, 80, 80],
+            aiX: [cw * 0.15, cw / 2, cw * 0.85]
+        };
+        this.deckSprite.setPosition(this.layout.deck.x, this.layout.deck.y);
+
         this.renderAll();
         
         if (window.unoTimerInterval) clearInterval(window.unoTimerInterval);
@@ -258,7 +253,87 @@ class UnoScene extends Phaser.Scene {
             if (el) el.innerText = String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
         }, 1000);
 
-        this.time.delayedCall(600, () => this.startTurn());
+        // Start sequential dealing animation
+        this.dealNext(0, () => {
+            this.isProcessing = false;
+            this.startTurn();
+        });
+    }
+
+    dealNext(step, cb) {
+        if (!unoGameActive) return;
+        if (step >= 28) {
+            // Dealing finished. Now deal the first discard card.
+            let first = this.deck.pop();
+            while (first.color === 'black') {
+                this.deck.unshift(first);
+                this.shuffleArr(this.deck);
+                first = this.deck.pop();
+            }
+            // Animate card from deck to discard
+            this.animatePlay(first.tex, this.layout.deck.x, this.layout.deck.y, () => {
+                this.discard.push(first);
+                
+                // Check if first card has immediate effects
+                if (first.type === 'skip') this.currentPlayer = 1;
+                else if (first.type === 'reverse') { this.direction = -1; this.currentPlayer = 3; }
+                else if (first.type === '+2') { this.pendingStack = 2; this.pendingStackType = '+2'; }
+
+                this.renderAll();
+                cb();
+            });
+            return;
+        }
+
+        const p = step % 4;
+        const card = this.deck.pop();
+        
+        let destX, destY;
+        if (p === 0) {
+            const nextHandLen = this.players[0].length + 1;
+            const spacing = Math.min(80, (this.scale.width - 40) / Math.max(1, nextHandLen));
+            const startX = this.scale.width / 2 - ((nextHandLen - 1) * spacing) / 2;
+            destX = startX + (nextHandLen - 1) * spacing;
+            destY = this.layout.playerHandY;
+        } else {
+            const nextHandLen = this.players[p].length + 1;
+            const ax = this.layout.aiX[p-1];
+            const ay = this.layout.aiY[p-1];
+            const aiSpace = 10;
+            if (nextHandLen <= 10) {
+                const aStartX = ax - ((nextHandLen - 1) * aiSpace) / 2;
+                destX = aStartX + (nextHandLen - 1) * aiSpace;
+            } else {
+                destX = ax;
+            }
+            destY = ay;
+        }
+
+        // Create a temporary card_back sprite moving from deck to destination
+        const s = this.add.image(this.layout.deck.x, this.layout.deck.y, 'card_back').setScale(p === 0 ? 0.8 : 0.5);
+        s.setDepth(100 + step);
+
+        if (typeof osc === 'function') {
+            // Play a soft card deal sound
+            osc('triangle', 350 - p * 30, 0.05, 0.05);
+        }
+
+        this.tweens.add({
+            targets: s,
+            x: destX,
+            y: destY,
+            angle: p === 0 ? 0 : 180,
+            duration: 250,
+            ease: 'Quad.easeOut',
+            onComplete: () => {
+                s.destroy();
+                this.players[p].push(card);
+                this.renderAll();
+                
+                // Deal next card after a small delay
+                this.time.delayedCall(80, () => this.dealNext(step + 1, cb));
+            }
+        });
     }
 
     renderAll() {
@@ -357,7 +432,7 @@ class UnoScene extends Phaser.Scene {
                 this.aiTextSprites[pi].setPosition(ax, ay - 70);
                 if (this.vulnerable[pi]) {
                     this.aiTextSprites[pi].setText(this.playerNames[pi] + " (NO UNO!)").setColor('#ff0000');
-                    this.aiTextSprites[pi].setInteractive({useHandCursor:true}).once('pointerdown', () => this.humanCatchBot(pi));
+                    this.aiTextSprites[pi].setInteractive({useHandCursor:true}).once('pointerdown', () => this.time.delayedCall(0, () => this.humanCatchBot(pi)));
                 } else {
                     this.aiTextSprites[pi].setText(this.playerNames[pi]).setColor('#ffffff');
                     this.aiTextSprites[pi].disableInteractive();
@@ -449,7 +524,7 @@ class UnoScene extends Phaser.Scene {
                 const hand = this.players[0];
                 const topCard = this.discard[this.discard.length - 1];
                 if (!hand.some(c => this.canPlay(c, topCard, 0, null))) {
-                    this.humanDeclareNoPlay();
+                    this.time.delayedCall(0, () => this.humanDeclareNoPlay());
                 }
             }
             return;
@@ -463,13 +538,13 @@ class UnoScene extends Phaser.Scene {
             
             if (this.currentPlayer === 0 && !this.isProcessing) {
                 if (this.canPlay(card, topCard, this.pendingStack, this.pendingStackType)) {
-                    this.humanPlay(idx);
+                    this.time.delayedCall(0, () => this.humanPlay(idx));
                 } else {
                     this.cameras.main.shake(200, 0.01);
                     if (typeof synthError === 'function') synthError();
                 }
             } else if (this.currentPlayer !== 0 && this.snapEnabled && this.exactSame(card, topCard)) {
-                this.humanSnapCard(idx);
+                this.time.delayedCall(0, () => this.humanSnapCard(idx));
             }
         }
     }

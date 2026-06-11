@@ -16,7 +16,8 @@ const config = {
     type: Phaser.AUTO,
     width: window.innerWidth,
     height: window.innerHeight,
-    parent: document.body,
+    parent: null, // dynamically assigned
+    transparent: true,
     backgroundColor: '#2d5016',
     physics: {
         default: 'arcade',
@@ -1220,7 +1221,7 @@ class MainScene extends Phaser.Scene {
     }
 }
 
-config.scene = MainScene;
+config.scene = [MainScene];
 
 // --- VS WRAPPER FUNCTIONS ---
 function showGameIntro() {
@@ -1247,8 +1248,20 @@ function triggerVampireSurvivors() {
     document.getElementById('gameSelectionOverlay').classList.add('hidden');
     initAudio();
     totalMinigameTimeMs = 0;
-    if (!game) game = new Phaser.Game(config);
-    else { game.scene.resume('MainScene'); }
+    if (!game) {
+        config.parent = document.body;
+        game = new Phaser.Game(config);
+    } else {
+        document.body.appendChild(game.canvas);
+        game.scene.stop('UnoScene');
+        // if MainScene was paused, we could resume, but usually trigger restarts or resumes.
+        // Let's just start or resume.
+        if (game.scene.isSleeping('MainScene') || game.scene.isPaused('MainScene')) {
+            game.scene.resume('MainScene');
+        } else {
+            game.scene.start('MainScene');
+        }
+    }
 }
 
 function showPowerUpSelection(context) {

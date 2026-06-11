@@ -536,48 +536,12 @@
             </div>
 
             <!-- Status -->
-            <div id="uno-status" class="text-center text-base sm:text-lg font-bold text-yellow-300 h-8">Your turn!</div>
-            <div id="uno-callout" class="hidden text-3xl font-bold text-yellow-400 animate-bounce text-center">UNO!</div>
-            <div id="uno-stack" class="hidden text-xl font-bold text-red-400 text-center animate-pulse"></div>
+            <div id="uno-status" class="text-center text-base sm:text-lg font-bold text-yellow-300 h-8 z-10 drop-shadow-md">Your turn!</div>
+            <div id="uno-callout" class="hidden text-5xl font-bold text-yellow-400 animate-bounce text-center absolute top-1/4 z-50 pointer-events-none w-full drop-shadow-[0_0_10px_rgba(250,204,21,0.8)]">UNO!</div>
+            <div id="uno-stack" class="hidden text-3xl font-bold text-red-400 text-center animate-pulse absolute top-1/3 z-50 pointer-events-none w-full drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]"></div>
 
-            <!-- AI Players (top) -->
-            <div class="w-full grid grid-cols-3 gap-2 mb-1">
-                <div id="uno-ai-area-1" class="uno-ai-box rounded-xl p-2 text-center">
-                    <div id="uno-ai-name-1" class="text-xs font-bold text-gray-300">Bot A</div>
-                    <div class="text-lg font-bold text-white"><span id="uno-ai-count-1">7</span> 🂠</div>
-                    <div id="uno-ai-cards-1" class="flex flex-wrap justify-center gap-0.5 mt-1"></div>
-                </div>
-                <div id="uno-ai-area-2" class="uno-ai-box rounded-xl p-2 text-center">
-                    <div id="uno-ai-name-2" class="text-xs font-bold text-gray-300">Bot B</div>
-                    <div class="text-lg font-bold text-white"><span id="uno-ai-count-2">7</span> 🂠</div>
-                    <div id="uno-ai-cards-2" class="flex flex-wrap justify-center gap-0.5 mt-1"></div>
-                </div>
-                <div id="uno-ai-area-3" class="uno-ai-box rounded-xl p-2 text-center">
-                    <div id="uno-ai-name-3" class="text-xs font-bold text-gray-300">Bot C</div>
-                    <div class="text-lg font-bold text-white"><span id="uno-ai-count-3">7</span> 🂠</div>
-                    <div id="uno-ai-cards-3" class="flex flex-wrap justify-center gap-0.5 mt-1"></div>
-                </div>
-            </div>
-
-            <!-- Table center: discard + deck -->
-            <div class="flex items-center justify-center gap-6 my-2">
-                <div class="text-center">
-                    <div class="text-xs text-gray-400 mb-1">DISCARD</div>
-                    <div id="uno-discard" class="flex items-center justify-center"></div>
-                </div>
-                <div class="text-center">
-                    <div class="text-xs text-gray-400 mb-1">DECK</div>
-                    <div class="uno-card-back-big flex items-center justify-center">
-                        <span id="uno-deck-count" class="text-white font-bold text-lg">0</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Human hand (bottom) -->
-            <div id="uno-player-area" class="w-full rounded-xl p-2 mt-auto">
-                <div class="text-xs text-gray-400 text-center mb-1">YOUR HAND</div>
-                <div id="uno-player-hand" class="flex flex-wrap justify-center gap-1"></div>
-            </div>
+            <!-- Phaser Container -->
+            <div id="uno-phaser-container" class="w-full flex-grow relative overflow-hidden rounded-xl border-4 border-yellow-600/50 shadow-2xl bg-[#0f172a] min-h-[500px]"></div>
         </div>
     </div>
 

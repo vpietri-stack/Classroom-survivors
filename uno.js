@@ -477,13 +477,39 @@ class UnoScene extends Phaser.Scene {
             const n = this.players[pi].length;
             const ax = this.layout.aiX[pi-1];
             const ay = this.layout.aiY[pi-1];
+            const isActive = this.currentPlayer === pi;
             
-            const aiSpace = 10;
+            const aiSpace = isActive ? 14 : 10;
+            const cardScale = isActive ? (0.6 / 3) : (0.5 / 3);
             const aStartX = ax - ((Math.min(n, 10) - 1) * aiSpace) / 2;
+
+            // Pulsing glow ring behind active bot's cards
+            if (isActive) {
+                const ring = this.add.graphics();
+                ring.lineStyle(3, 0xfdd835, 0.7);
+                const ringW = Math.max(80, (Math.min(n, 10) - 1) * aiSpace + 60);
+                const ringH = 70;
+                ring.strokeRoundedRect(ax - ringW / 2, ay - ringH / 2, ringW, ringH, 16);
+                ring.setDepth(3);
+                this.cardSprites.push(ring);
+
+                // Animate the ring pulsing
+                this.tweens.add({
+                    targets: ring,
+                    alpha: { from: 0.4, to: 1 },
+                    duration: 600,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+            }
             
             for(let j=0; j<Math.min(n, 10); j++) {
-                const bs = this.add.image(aStartX + j*aiSpace, ay, 'card_back').setScale(0.5 / 3);
+                const bs = this.add.image(aStartX + j*aiSpace, ay, 'card_back').setScale(cardScale);
                 bs.setDepth(5 + j);
+                if (isActive) {
+                    bs.preFX.addGlow(0xfdd835, 4, 0, false, 0.1, 10);
+                }
                 this.cardSprites.push(bs);
             }
             if (n > 10) {
@@ -496,13 +522,14 @@ class UnoScene extends Phaser.Scene {
                 if (this.vulnerable[pi]) {
                     this.aiTextSprites[pi].setText(this.playerNames[pi] + " (NO UNO!)").setColor('#ff0000');
                     this.aiTextSprites[pi].setInteractive({useHandCursor:true}).once('pointerdown', () => this.time.delayedCall(0, () => this.humanCatchBot(pi)));
+                } else if (isActive) {
+                    this.aiTextSprites[pi].setText('▶ ' + this.playerNames[pi] + ' ▶').setColor('#fdd835');
+                    this.aiTextSprites[pi].setFontSize('20px');
+                    this.aiTextSprites[pi].disableInteractive();
                 } else {
                     this.aiTextSprites[pi].setText(this.playerNames[pi]).setColor('#ffffff');
+                    this.aiTextSprites[pi].setFontSize('18px');
                     this.aiTextSprites[pi].disableInteractive();
-                }
-
-                if (this.currentPlayer === pi) {
-                    this.aiTextSprites[pi].setColor('#fdd835'); // Highlight active
                 }
             }
         }

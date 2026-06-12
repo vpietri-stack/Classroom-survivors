@@ -713,8 +713,24 @@ class UnoScene extends Phaser.Scene {
         return a.type === 'number' && b.type === 'number' && a.color === b.color && a.value === b.value;
     }
 
+    clearAllTurnTimers() {
+        if (this.turnTimers) {
+            this.turnTimers.forEach(t => {
+                if (t) t.destroy();
+            });
+        }
+        this.turnTimers = [];
+    }
+
+    addTurnTimer(t) {
+        if (!this.turnTimers) this.turnTimers = [];
+        this.turnTimers.push(t);
+        return t;
+    }
+
     startTurn() {
         if (!unoGameActive || unoWinner !== null) return;
+        this.clearAllTurnTimers();
         this.isProcessing = false;
         const p = this.currentPlayer;
         const hand = this.players[p];
@@ -740,7 +756,7 @@ class UnoScene extends Phaser.Scene {
             this.snapEnabled = true;
             this.setStatus(this.playerNames[p] + "'s turn...");
             this.renderAll();
-            this.time.delayedCall(UNO_AI_DELAY, () => this.aiTurn(p));
+            this.addTurnTimer(this.time.delayedCall(UNO_AI_DELAY, () => this.aiTurn(p)));
         }
     }
 
@@ -817,7 +833,7 @@ class UnoScene extends Phaser.Scene {
             if (this.checkEnd(pi)) return;
             this.renderAll(); 
             this.nextUP(); 
-            this.time.delayedCall(500, () => this.startTurn());
+            this.addTurnTimer(this.time.delayedCall(1000, () => this.startTurn()));
             return;
         }
 
@@ -862,7 +878,12 @@ class UnoScene extends Phaser.Scene {
         }
 
         this.nextUP(); 
-        this.time.delayedCall(500, () => this.startTurn());
+        
+        let delay = (this.currentPlayer !== 0) ? 700 : 500;
+        if (card.type === 'skip' || card.type === 'reverse' || card.type === '+2' || card.type === '+4') {
+            delay += 500;
+        }
+        this.addTurnTimer(this.time.delayedCall(delay, () => this.startTurn()));
     }
 
     burstParticles(x, y, color) {
@@ -886,8 +907,7 @@ class UnoScene extends Phaser.Scene {
         this.resolveUnoVulnerabilities(() => {
             this.playUnoSnapSound();
             
-            // Introduce half a second pause before snapping animation begins
-            this.time.delayedCall(500, () => {
+            this.addTurnTimer(this.time.delayedCall(500, () => {
                 const card = this.players[0].splice(idx, 1)[0];
                 const spacing = Math.min(80, (this.scale.width - 40) / Math.max(1, this.players[0].length));
                 const startX = this.scale.width / 2 - ((this.players[0].length) * spacing) / 2 + idx * spacing;
@@ -902,9 +922,9 @@ class UnoScene extends Phaser.Scene {
                     this.renderAll();
                     this.currentPlayer = 0; // Snap steals turn
                     this.nextUP();
-                    this.time.delayedCall(500, () => this.startTurn());
+                    this.addTurnTimer(this.time.delayedCall(500, () => this.startTurn()));
                 });
-            });
+            }));
         });
     }
 
@@ -926,22 +946,19 @@ class UnoScene extends Phaser.Scene {
         this.isProcessing = true;
         this.resolveUnoVulnerabilities(() => {
             const a = this.pendingStack;
-            const wasPlus4 = this.pendingStackType === '+4';
             
-            this.animateDraw(0, a, () => {
-                this.drawCards(0, a);
-                this.pendingStack = 0; 
-                this.pendingStackType = null;
-                this.setStatus('You drew ' + a + ' cards!');
-                this.renderAll();
-                
-                if (wasPlus4) {
-                    this.time.delayedCall(800, () => this.tensionBlackCardESL());
-                } else {
+            this.addTurnTimer(this.time.delayedCall(500, () => {
+                this.animateDraw(0, a, () => {
+                    this.drawCards(0, a);
+                    this.pendingStack = 0; 
+                    this.pendingStackType = null;
+                    this.setStatus('You drew ' + a + ' cards!');
+                    this.renderAll();
+                    
                     this.nextUP(); 
-                    this.time.delayedCall(500, () => this.startTurn());
-                }
-            });
+                    this.addTurnTimer(this.time.delayedCall(1000, () => this.startTurn()));
+                });
+            }));
         });
     }
 
@@ -973,16 +990,19 @@ class UnoScene extends Phaser.Scene {
                     const wasPlus4 = this.pendingStackType === '+4';
                     this.setStatus(this.playerNames[pi] + ' drew ' + this.pendingStack + ' cards!');
                     
-                    this.animateDraw(pi, this.pendingStack, () => {
-                        this.drawCards(pi, this.pendingStack);
-                        this.pendingStack = 0; this.pendingStackType = null;
-                        this.renderAll();
-                        if (wasPlus4) {
-                            this.time.delayedCall(800, () => this.tensionBlackCardESL());
-                        } else {
-                            this.nextUP(); this.time.delayedCall(500, () => this.startTurn());
-                        }
-                    });
+                    this.addTurnTimer(this.time.delayedCall(500, () => {
+                        this.animateDraw(pi, this.pendingStack, () => {
+                            this.drawCards(pi, this.pendingStack);
+                            this.pendingStack = 0; this.pendingStackType = null;
+                            this.renderAll();
+                            if (wasPlus4) {
+                                this.addTurnTimer(this.time.delayedCall(800, () => this.tensionBlackCardESL()));
+                            } else {
+                                this.nextUP(); 
+                                this.addTurnTimer(this.time.delayedCall(1000, () => this.startTurn()));
+                            }
+                        });
+                    }));
                 }
                 return;
             }
@@ -990,11 +1010,16 @@ class UnoScene extends Phaser.Scene {
             const playable = hand.map((c, i) => ({ c, i })).filter(({ c }) => this.canPlay(c, top, 0, null));
             if (playable.length === 0) {
                 this.setStatus(this.playerNames[pi] + ' drew a card.');
-                this.animateDraw(pi, 1, () => {
-                    this.drawCards(pi, 1);
-                    this.renderAll();
-                    this.nextUP(); this.time.delayedCall(500, () => this.startTurn());
-                });
+                
+                this.addTurnTimer(this.time.delayedCall(200, () => {
+                    this.animateDraw(pi, 1, () => {
+                        this.drawCards(pi, 1);
+                        this.renderAll();
+                        this.nextUP(); 
+                        let delay = (this.currentPlayer !== 0) ? 700 : 500;
+                        this.addTurnTimer(this.time.delayedCall(delay, () => this.startTurn()));
+                    });
+                }));
                 return;
             }
 
@@ -1037,13 +1062,16 @@ class UnoScene extends Phaser.Scene {
             this.vulnerable[0] = false;
             this.playUnoCatchSound();
             this.setStatus('You forgot to say UNO! You drew 2 penalty cards!');
-            this.animateDraw(0, 2, () => {
-                this.drawCards(0, 2);
-                this.renderAll();
-                this.time.delayedCall(500, () => {
-                    if (cb) cb();
+            
+            this.addTurnTimer(this.time.delayedCall(500, () => {
+                this.animateDraw(0, 2, () => {
+                    this.drawCards(0, 2);
+                    this.renderAll();
+                    this.addTurnTimer(this.time.delayedCall(500, () => {
+                        if (cb) cb();
+                    }));
                 });
-            });
+            }));
             return;
         }
         for (let i = 1; i <= 3; i++) {
@@ -1060,13 +1088,14 @@ class UnoScene extends Phaser.Scene {
         this.playUnoCatchSound();
         this.setStatus('CAUGHT ' + this.playerNames[pi] + '! They drew 2 cards!');
         this.isProcessing = true;
-        this.time.delayedCall(500, () => {
+        
+        this.addTurnTimer(this.time.delayedCall(500, () => {
             this.isProcessing = false;
             this.animateDraw(pi, 2, () => {
                 this.drawCards(pi, 2);
                 this.renderAll();
             });
-        });
+        }));
     }
 
     unoCallout(pi) {

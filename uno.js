@@ -524,9 +524,9 @@ class UnoScene extends Phaser.Scene {
                     this.aiTextSprites[pi].setFontSize('18px');
                     this.aiTextSprites[pi].disableInteractive();
 
-                    // Create a beautiful, pulsing red "CATCH!" button below their cards
-                    const catchBtn = this.add.text(ax, ay + 50, 'CATCH! 🚨', {
-                        fontSize: '12px',
+                    // Create a beautiful, pulsing red "NO UNO!" button below their cards
+                    const catchBtn = this.add.text(ax, ay + 50, 'NO UNO! 🚨', {
+                        fontSize: '11px',
                         fontStyle: 'bold',
                         color: '#ffffff',
                         backgroundColor: '#dc2626', // Tailwind red-600
@@ -1085,7 +1085,38 @@ class UnoScene extends Phaser.Scene {
             o.start(); o.stop(audioCtx.currentTime + 0.3);
         }
     }
-    playUnoCatchSound() { if (typeof osc === 'function') { osc('square', 250, 0.4, 0.1); setTimeout(() => osc('sawtooth', 150, 0.5, 0.3), 100); } }
+    playUnoCatchSound() {
+        if (typeof audioCtx !== 'undefined' && audioCtx) {
+            const now = audioCtx.currentTime;
+            
+            // First cheeky "Ha!"
+            const o1 = audioCtx.createOscillator();
+            const g1 = audioCtx.createGain();
+            o1.type = 'sawtooth';
+            o1.frequency.setValueAtTime(650, now);
+            o1.frequency.exponentialRampToValueAtTime(500, now + 0.12);
+            g1.gain.setValueAtTime(0.25, now);
+            g1.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+            o1.connect(g1);
+            g1.connect(audioCtx.destination);
+            o1.start(now);
+            o1.stop(now + 0.12);
+
+            // Second cheeky "ha!" (slightly delayed, lower pitch)
+            const delay = 0.15;
+            const o2 = audioCtx.createOscillator();
+            const g2 = audioCtx.createGain();
+            o2.type = 'sawtooth';
+            o2.frequency.setValueAtTime(520, now + delay);
+            o2.frequency.exponentialRampToValueAtTime(385, now + delay + 0.25);
+            g2.gain.setValueAtTime(0.25, now + delay);
+            g2.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.25);
+            o2.connect(g2);
+            g2.connect(audioCtx.destination);
+            o2.start(now + delay);
+            o2.stop(now + delay + 0.25);
+        }
+    }
     playUnoSaySound() { if (typeof osc === 'function') { osc('sine', 600, 0.2, 0.1); setTimeout(() => osc('sine', 800, 0.2, 0.2), 100); } }
 
     // --- ESL ---

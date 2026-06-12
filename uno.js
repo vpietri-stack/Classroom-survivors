@@ -832,8 +832,12 @@ class UnoScene extends Phaser.Scene {
             this.setStatus((pi === 0 ? 'You' : this.playerNames[pi]) + ' reversed the +' + this.pendingStack + '!');
             if (this.checkEnd(pi)) return;
             this.renderAll(); 
-            this.nextUP(); 
-            this.addTurnTimer(this.time.delayedCall(1000, () => this.startTurn()));
+            
+            const nextPlayer = (this.currentPlayer + this.direction + 4) % 4;
+            this.addTurnTimer(this.time.delayedCall(1000, () => {
+                this.currentPlayer = nextPlayer;
+                this.startTurn();
+            }));
             return;
         }
 
@@ -855,8 +859,19 @@ class UnoScene extends Phaser.Scene {
 
     afterPlayEffect(pi, card) {
         if (card.type === '+2') { this.pendingStack += 2; this.pendingStackType = '+2'; }
-        if (card.type === 'skip') { this.playUnoSkipSound(); this.nextUP(); }
-        if (card.type === 'reverse') { this.playUnoReverseSound(); this.direction *= -1; }
+        
+        let localDirection = this.direction;
+        if (card.type === 'reverse') { 
+            this.playUnoReverseSound(); 
+            this.direction *= -1; 
+            localDirection = this.direction;
+        }
+        
+        let steps = 1;
+        if (card.type === 'skip') { 
+            this.playUnoSkipSound(); 
+            steps = 2; 
+        }
         
         if (this.checkEnd(pi)) return;
         this.renderAll();
@@ -877,13 +892,21 @@ class UnoScene extends Phaser.Scene {
             this.burstParticles(this.layout.discard.x, this.layout.discard.y, 0xff0000);
         }
 
-        this.nextUP(); 
+        // Calculate the next player, but don't set it to this.currentPlayer yet so the active player stays highlighted
+        const nextPlayer = (this.currentPlayer + steps * localDirection + 4) % 4;
         
         let delay = (this.currentPlayer !== 0) ? 700 : 500;
         if (card.type === 'skip' || card.type === 'reverse' || card.type === '+2' || card.type === '+4') {
             delay += 500;
         }
-        this.addTurnTimer(this.time.delayedCall(delay, () => this.startTurn()));
+        this.addTurnTimer(this.time.delayedCall(delay, () => {
+            // Clear vulnerability if they missed the catch window
+            if (pi > 0 && this.vulnerable[pi]) {
+                this.vulnerable[pi] = false;
+            }
+            this.currentPlayer = nextPlayer;
+            this.startTurn();
+        }));
     }
 
     burstParticles(x, y, color) {
@@ -923,8 +946,11 @@ class UnoScene extends Phaser.Scene {
                     if (this.checkEnd(0)) return;
                     this.renderAll();
                     this.currentPlayer = 0; // Snap steals turn
-                    this.nextUP();
-                    this.addTurnTimer(this.time.delayedCall(500, () => this.startTurn()));
+                    const nextPlayer = (this.currentPlayer + this.direction + 4) % 4;
+                    this.addTurnTimer(this.time.delayedCall(500, () => {
+                        this.currentPlayer = nextPlayer;
+                        this.startTurn();
+                    }));
                 });
             }));
         });
@@ -957,8 +983,11 @@ class UnoScene extends Phaser.Scene {
                     this.setStatus('You drew ' + a + ' cards!');
                     this.renderAll();
                     
-                    this.nextUP(); 
-                    this.addTurnTimer(this.time.delayedCall(1000, () => this.startTurn()));
+                    const nextPlayer = (this.currentPlayer + this.direction + 4) % 4;
+                    this.addTurnTimer(this.time.delayedCall(1000, () => {
+                        this.currentPlayer = nextPlayer;
+                        this.startTurn();
+                    }));
                 });
             }));
         });
@@ -1000,8 +1029,11 @@ class UnoScene extends Phaser.Scene {
                             if (wasPlus4) {
                                 this.addTurnTimer(this.time.delayedCall(800, () => this.tensionBlackCardESL()));
                             } else {
-                                this.nextUP(); 
-                                this.addTurnTimer(this.time.delayedCall(1000, () => this.startTurn()));
+                                const nextPlayer = (this.currentPlayer + this.direction + 4) % 4;
+                                this.addTurnTimer(this.time.delayedCall(1000, () => {
+                                    this.currentPlayer = nextPlayer;
+                                    this.startTurn();
+                                }));
                             }
                         });
                     }));
@@ -1017,9 +1049,12 @@ class UnoScene extends Phaser.Scene {
                     this.animateDraw(pi, 1, () => {
                         this.drawCards(pi, 1);
                         this.renderAll();
-                        this.nextUP(); 
+                        const nextPlayer = (this.currentPlayer + this.direction + 4) % 4;
                         let delay = (this.currentPlayer !== 0) ? 700 : 500;
-                        this.addTurnTimer(this.time.delayedCall(delay, () => this.startTurn()));
+                        this.addTurnTimer(this.time.delayedCall(delay, () => {
+                            this.currentPlayer = nextPlayer;
+                            this.startTurn();
+                        }));
                     });
                 }));
                 return;
@@ -1096,15 +1131,19 @@ class UnoScene extends Phaser.Scene {
         this.isProcessing = true;
         this.renderAll(); // Re-render to clear "NO UNO!" button instantly
         
-        // Wait 500ms before starting drawing animation
-        this.addTurnTimer(this.time.delayedCall(500, () => {
+        // Wait 1000ms (1 second pause) before starting drawing animation
+        this.addTurnTimer(this.time.delayedCall(1000, () => {
             this.animateDraw(pi, 2, () => {
                 this.drawCards(pi, 2);
                 this.renderAll();
                 
-                // Wait another 500ms after drawing before continuing the game
+                // Wait another 500ms after drawing before letting the game continue
                 this.addTurnTimer(this.time.delayedCall(500, () => {
                     this.isProcessing = false;
+                    
+                    // Now advance the turn to the next player
+                    const nextPlayer = (this.currentPlayer + this.direction + 4) % 4;
+                    this.currentPlayer = nextPlayer;
                     this.startTurn();
                 }));
             });
@@ -1211,13 +1250,23 @@ class UnoScene extends Phaser.Scene {
                 this.setStatus('Correct in time! Drew 1 card.');
                 this.animateDraw(0, 1, () => {
                     this.drawCards(0, 1);
-                    this.renderAll(); this.nextUP(); this.addTurnTimer(this.time.delayedCall(500, () => this.startTurn()));
+                    const nextPlayer = (this.currentPlayer + this.direction + 4) % 4;
+                    this.renderAll();
+                    this.addTurnTimer(this.time.delayedCall(500, () => {
+                        this.currentPlayer = nextPlayer;
+                        this.startTurn();
+                    }));
                 });
             } else { 
                 this.setStatus('Too slow! Drew 2 cards.');
                 this.animateDraw(0, 2, () => {
                     this.drawCards(0, 2);
-                    this.renderAll(); this.nextUP(); this.addTurnTimer(this.time.delayedCall(500, () => this.startTurn()));
+                    const nextPlayer = (this.currentPlayer + this.direction + 4) % 4;
+                    this.renderAll();
+                    this.addTurnTimer(this.time.delayedCall(500, () => {
+                        this.currentPlayer = nextPlayer;
+                        this.startTurn();
+                    }));
                 });
             }
         } else {
@@ -1230,7 +1279,13 @@ class UnoScene extends Phaser.Scene {
                 this.freePlay = true; 
                 this.animateDraw(0, 1, () => {
                     this.drawCards(0, 1);
-                    this.currentPlayer = 0; this.nextUP(); this.renderAll(); this.addTurnTimer(this.time.delayedCall(500, () => this.startTurn()));
+                    this.currentPlayer = 0;
+                    const nextPlayer = (this.currentPlayer + this.direction + 4) % 4;
+                    this.renderAll();
+                    this.addTurnTimer(this.time.delayedCall(500, () => {
+                        this.currentPlayer = nextPlayer;
+                        this.startTurn();
+                    }));
                 });
             }
         }

@@ -670,7 +670,7 @@ class UnoScene extends Phaser.Scene {
                     this.cameras.main.shake(200, 0.01);
                     if (typeof synthError === 'function') synthError();
                 }
-            } else if (this.currentPlayer !== 0 && this.snapEnabled && this.exactSame(card, topCard)) {
+            } else if (this.currentPlayer !== 0 && !this.isProcessing && this.snapEnabled && this.exactSame(card, topCard)) {
                 this.time.delayedCall(0, () => this.humanSnapCard(idx));
             }
         }
@@ -902,6 +902,8 @@ class UnoScene extends Phaser.Scene {
     }
 
     humanSnapCard(idx) {
+        // Cancel any pending AI actions/timers before executing snap
+        this.clearAllTurnTimers();
         this.isProcessing = true;
         this.snapEnabled = false;
         this.resolveUnoVulnerabilities(() => {
@@ -1085,15 +1087,26 @@ class UnoScene extends Phaser.Scene {
     humanCatchBot(pi) {
         if (!this.vulnerable[pi] || !unoGameActive) return;
         this.vulnerable[pi] = false;
+        
+        // Cancel any pending turn timers (AI delays, turn transitions) immediately!
+        this.clearAllTurnTimers();
+        
         this.playUnoCatchSound();
         this.setStatus('CAUGHT ' + this.playerNames[pi] + '! They drew 2 cards!');
         this.isProcessing = true;
+        this.renderAll(); // Re-render to clear "NO UNO!" button instantly
         
+        // Wait 500ms before starting drawing animation
         this.addTurnTimer(this.time.delayedCall(500, () => {
-            this.isProcessing = false;
             this.animateDraw(pi, 2, () => {
                 this.drawCards(pi, 2);
                 this.renderAll();
+                
+                // Wait another 500ms after drawing before continuing the game
+                this.addTurnTimer(this.time.delayedCall(500, () => {
+                    this.isProcessing = false;
+                    this.startTurn();
+                }));
             });
         }));
     }
@@ -1198,26 +1211,26 @@ class UnoScene extends Phaser.Scene {
                 this.setStatus('Correct in time! Drew 1 card.');
                 this.animateDraw(0, 1, () => {
                     this.drawCards(0, 1);
-                    this.renderAll(); this.nextUP(); this.time.delayedCall(500, () => this.startTurn());
+                    this.renderAll(); this.nextUP(); this.addTurnTimer(this.time.delayedCall(500, () => this.startTurn()));
                 });
             } else { 
                 this.setStatus('Too slow! Drew 2 cards.');
                 this.animateDraw(0, 2, () => {
                     this.drawCards(0, 2);
-                    this.renderAll(); this.nextUP(); this.time.delayedCall(500, () => this.startTurn());
+                    this.renderAll(); this.nextUP(); this.addTurnTimer(this.time.delayedCall(500, () => this.startTurn()));
                 });
             }
         } else {
             if (!timedOut) {
                 this.freePlay = true; 
                 this.setStatus('Correct! Play any card!');
-                this.currentPlayer = 0; this.renderAll(); this.time.delayedCall(500, () => this.startTurn());
+                this.currentPlayer = 0; this.renderAll(); this.addTurnTimer(this.time.delayedCall(500, () => this.startTurn()));
             } else {
                 this.setStatus('Too slow! Drew 1 card.');
                 this.freePlay = true; 
                 this.animateDraw(0, 1, () => {
                     this.drawCards(0, 1);
-                    this.currentPlayer = 0; this.nextUP(); this.renderAll(); this.time.delayedCall(500, () => this.startTurn());
+                    this.currentPlayer = 0; this.nextUP(); this.renderAll(); this.addTurnTimer(this.time.delayedCall(500, () => this.startTurn()));
                 });
             }
         }

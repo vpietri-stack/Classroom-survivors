@@ -795,16 +795,16 @@ class UnoScene extends Phaser.Scene {
     humanPlay(idx) {
         this.isProcessing = true;
         this.freePlay = false;
-        this.resolveUnoVulnerabilities();
+        this.resolveUnoVulnerabilities(() => {
+            const card = this.players[0].splice(idx, 1)[0];
+            const spacing = Math.min(80, (this.scale.width - 40) / Math.max(1, this.players[0].length));
+            const startX = this.scale.width / 2 - ((this.players[0].length) * spacing) / 2 + idx * spacing;
+            
+            this.renderAll(); // refresh hand
 
-        const card = this.players[0].splice(idx, 1)[0];
-        const spacing = Math.min(80, (this.scale.width - 40) / Math.max(1, this.players[0].length));
-        const startX = this.scale.width / 2 - ((this.players[0].length) * spacing) / 2 + idx * spacing;
-        
-        this.renderAll(); // refresh hand
-
-        this.animatePlay(card.tex, startX, this.layout.playerHandY, () => {
-            this.handleCardEffect(0, card);
+            this.animatePlay(card.tex, startX, this.layout.playerHandY, () => {
+                this.handleCardEffect(0, card);
+            });
         });
     }
 
@@ -883,23 +883,28 @@ class UnoScene extends Phaser.Scene {
     humanSnapCard(idx) {
         this.isProcessing = true;
         this.snapEnabled = false;
-        this.resolveUnoVulnerabilities();
+        this.resolveUnoVulnerabilities(() => {
+            this.playUnoSnapSound();
+            
+            // Introduce half a second pause before snapping animation begins
+            this.time.delayedCall(500, () => {
+                const card = this.players[0].splice(idx, 1)[0];
+                const spacing = Math.min(80, (this.scale.width - 40) / Math.max(1, this.players[0].length));
+                const startX = this.scale.width / 2 - ((this.players[0].length) * spacing) / 2 + idx * spacing;
+                
+                this.renderAll();
+                this.burstParticles(startX, this.layout.playerHandY, 0xfacc15);
 
-        const card = this.players[0].splice(idx, 1)[0];
-        const spacing = Math.min(80, (this.scale.width - 40) / Math.max(1, this.players[0].length));
-        const startX = this.scale.width / 2 - ((this.players[0].length) * spacing) / 2 + idx * spacing;
-        
-        this.renderAll();
-        this.burstParticles(startX, this.layout.playerHandY, 0xfacc15);
-
-        this.animatePlay(card.tex, startX, this.layout.playerHandY, () => {
-            this.discard.push(card);
-            this.setStatus('SNAP! 🎯');
-            if (this.checkEnd(0)) return;
-            this.renderAll();
-            this.currentPlayer = 0; // Snap steals turn
-            this.nextUP();
-            this.time.delayedCall(500, () => this.startTurn());
+                this.animatePlay(card.tex, startX, this.layout.playerHandY, () => {
+                    this.discard.push(card);
+                    this.setStatus('SNAP! 🎯');
+                    if (this.checkEnd(0)) return;
+                    this.renderAll();
+                    this.currentPlayer = 0; // Snap steals turn
+                    this.nextUP();
+                    this.time.delayedCall(500, () => this.startTurn());
+                });
+            });
         });
     }
 
@@ -919,31 +924,33 @@ class UnoScene extends Phaser.Scene {
 
     humanDrawPending() {
         this.isProcessing = true;
-        this.resolveUnoVulnerabilities();
-        const a = this.pendingStack;
-        const wasPlus4 = this.pendingStackType === '+4';
-        
-        this.animateDraw(0, a, () => {
-            this.drawCards(0, a);
-            this.pendingStack = 0; 
-            this.pendingStackType = null;
-            this.setStatus('You drew ' + a + ' cards!');
-            this.renderAll();
+        this.resolveUnoVulnerabilities(() => {
+            const a = this.pendingStack;
+            const wasPlus4 = this.pendingStackType === '+4';
             
-            if (wasPlus4) {
-                this.time.delayedCall(800, () => this.tensionBlackCardESL());
-            } else {
-                this.nextUP(); 
-                this.time.delayedCall(500, () => this.startTurn());
-            }
+            this.animateDraw(0, a, () => {
+                this.drawCards(0, a);
+                this.pendingStack = 0; 
+                this.pendingStackType = null;
+                this.setStatus('You drew ' + a + ' cards!');
+                this.renderAll();
+                
+                if (wasPlus4) {
+                    this.time.delayedCall(800, () => this.tensionBlackCardESL());
+                } else {
+                    this.nextUP(); 
+                    this.time.delayedCall(500, () => this.startTurn());
+                }
+            });
         });
     }
 
     humanDeclareNoPlay() {
         this.isProcessing = true;
-        this.resolveUnoVulnerabilities();
-        this.setStatus('Answering question...');
-        this.triggerUnoESL('draw');
+        this.resolveUnoVulnerabilities(() => {
+            this.setStatus('Answering question...');
+            this.triggerUnoESL('draw');
+        });
     }
 
     aiTurn(pi) {
@@ -951,65 +958,61 @@ class UnoScene extends Phaser.Scene {
         const hand = this.players[pi];
         const top = this.discard[this.discard.length - 1];
 
-        if (this.pendingStack > 0) {
-            const opts = hand.map((c, i) => ({ c, i })).filter(({ c }) => this.canPlay(c, top, this.pendingStack, this.pendingStackType));
-            if (opts.length > 0) {
-                const pk = opts[0]; const card = pk.c;
-                this.resolveUnoVulnerabilities();
-                
-                hand.splice(pk.i, 1);
-                this.renderAll();
-
-                this.animatePlay('card_back', this.layout.aiX[pi-1], this.layout.aiY[pi-1], () => {
-                    this.handleCardEffect(pi, card);
-                });
-            } else {
-                const wasPlus4 = this.pendingStackType === '+4';
-                this.resolveUnoVulnerabilities();
-                this.setStatus(this.playerNames[pi] + ' drew ' + this.pendingStack + ' cards!');
-                
-                this.animateDraw(pi, this.pendingStack, () => {
-                    this.drawCards(pi, this.pendingStack);
-                    this.pendingStack = 0; this.pendingStackType = null;
+        this.resolveUnoVulnerabilities(() => {
+            if (this.pendingStack > 0) {
+                const opts = hand.map((c, i) => ({ c, i })).filter(({ c }) => this.canPlay(c, top, this.pendingStack, this.pendingStackType));
+                if (opts.length > 0) {
+                    const pk = opts[0]; const card = pk.c;
+                    hand.splice(pk.i, 1);
                     this.renderAll();
-                    if (wasPlus4) {
-                        this.time.delayedCall(800, () => this.tensionBlackCardESL());
-                    } else {
-                        this.nextUP(); this.time.delayedCall(500, () => this.startTurn());
-                    }
-                });
+
+                    this.animatePlay('card_back', this.layout.aiX[pi-1], this.layout.aiY[pi-1], () => {
+                        this.handleCardEffect(pi, card);
+                    });
+                } else {
+                    const wasPlus4 = this.pendingStackType === '+4';
+                    this.setStatus(this.playerNames[pi] + ' drew ' + this.pendingStack + ' cards!');
+                    
+                    this.animateDraw(pi, this.pendingStack, () => {
+                        this.drawCards(pi, this.pendingStack);
+                        this.pendingStack = 0; this.pendingStackType = null;
+                        this.renderAll();
+                        if (wasPlus4) {
+                            this.time.delayedCall(800, () => this.tensionBlackCardESL());
+                        } else {
+                            this.nextUP(); this.time.delayedCall(500, () => this.startTurn());
+                        }
+                    });
+                }
+                return;
             }
-            return;
-        }
 
-        const playable = hand.map((c, i) => ({ c, i })).filter(({ c }) => this.canPlay(c, top, 0, null));
-        if (playable.length === 0) {
-            this.resolveUnoVulnerabilities();
-            this.setStatus(this.playerNames[pi] + ' drew a card.');
-            this.animateDraw(pi, 1, () => {
-                this.drawCards(pi, 1);
-                this.renderAll();
-                this.nextUP(); this.time.delayedCall(500, () => this.startTurn());
+            const playable = hand.map((c, i) => ({ c, i })).filter(({ c }) => this.canPlay(c, top, 0, null));
+            if (playable.length === 0) {
+                this.setStatus(this.playerNames[pi] + ' drew a card.');
+                this.animateDraw(pi, 1, () => {
+                    this.drawCards(pi, 1);
+                    this.renderAll();
+                    this.nextUP(); this.time.delayedCall(500, () => this.startTurn());
+                });
+                return;
+            }
+
+            const colM = playable.filter(({ c }) => c.color === this.effColor(top) && c.color !== 'black');
+            const oth = playable.filter(({ c }) => c.color !== 'black' && c.color !== this.effColor(top));
+            const wld = playable.filter(({ c }) => c.color === 'black');
+            let pk;
+            if (colM.length) pk = colM[Math.floor(Math.random() * colM.length)];
+            else if (oth.length) pk = oth[Math.floor(Math.random() * oth.length)];
+            else pk = wld[Math.floor(Math.random() * wld.length)];
+
+            const card = pk.c;
+            hand.splice(pk.i, 1);
+            this.renderAll();
+
+            this.animatePlay('card_back', this.layout.aiX[pi-1], this.layout.aiY[pi-1], () => {
+                this.handleCardEffect(pi, card);
             });
-            return;
-        }
-
-        const colM = playable.filter(({ c }) => c.color === this.effColor(top) && c.color !== 'black');
-        const oth = playable.filter(({ c }) => c.color !== 'black' && c.color !== this.effColor(top));
-        const wld = playable.filter(({ c }) => c.color === 'black');
-        let pk;
-        if (colM.length) pk = colM[Math.floor(Math.random() * colM.length)];
-        else if (oth.length) pk = oth[Math.floor(Math.random() * oth.length)];
-        else pk = wld[Math.floor(Math.random() * wld.length)];
-
-        const card = pk.c;
-        this.resolveUnoVulnerabilities();
-        
-        hand.splice(pk.i, 1);
-        this.renderAll();
-
-        this.animatePlay('card_back', this.layout.aiX[pi-1], this.layout.aiY[pi-1], () => {
-            this.handleCardEffect(pi, card);
         });
     }
 
@@ -1029,18 +1032,26 @@ class UnoScene extends Phaser.Scene {
 
     nextUP() { this.currentPlayer = (this.currentPlayer + this.direction + 4) % 4; }
 
-    resolveUnoVulnerabilities() {
+    resolveUnoVulnerabilities(cb) {
         if (this.vulnerable[0]) {
             this.vulnerable[0] = false;
             this.playUnoCatchSound();
             this.setStatus('You forgot to say UNO! You drew 2 penalty cards!');
-            this.drawCards(0, 2);
+            this.animateDraw(0, 2, () => {
+                this.drawCards(0, 2);
+                this.renderAll();
+                this.time.delayedCall(500, () => {
+                    if (cb) cb();
+                });
+            });
+            return;
         }
         for (let i = 1; i <= 3; i++) {
             if (this.vulnerable[i]) {
                 this.vulnerable[i] = false;
             }
         }
+        if (cb) cb();
     }
 
     humanCatchBot(pi) {
@@ -1048,9 +1059,13 @@ class UnoScene extends Phaser.Scene {
         this.vulnerable[pi] = false;
         this.playUnoCatchSound();
         this.setStatus('CAUGHT ' + this.playerNames[pi] + '! They drew 2 cards!');
-        this.animateDraw(pi, 2, () => {
-            this.drawCards(pi, 2);
-            this.renderAll();
+        this.isProcessing = true;
+        this.time.delayedCall(500, () => {
+            this.isProcessing = false;
+            this.animateDraw(pi, 2, () => {
+                this.drawCards(pi, 2);
+                this.renderAll();
+            });
         });
     }
 
@@ -1086,36 +1101,14 @@ class UnoScene extends Phaser.Scene {
         }
     }
     playUnoCatchSound() {
-        if (typeof audioCtx !== 'undefined' && audioCtx) {
-            const now = audioCtx.currentTime;
-            
-            // First cheeky "Ha!"
-            const o1 = audioCtx.createOscillator();
-            const g1 = audioCtx.createGain();
-            o1.type = 'sawtooth';
-            o1.frequency.setValueAtTime(650, now);
-            o1.frequency.exponentialRampToValueAtTime(500, now + 0.12);
-            g1.gain.setValueAtTime(0.25, now);
-            g1.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
-            o1.connect(g1);
-            g1.connect(audioCtx.destination);
-            o1.start(now);
-            o1.stop(now + 0.12);
-
-            // Second cheeky "ha!" (slightly delayed, lower pitch)
-            const delay = 0.15;
-            const o2 = audioCtx.createOscillator();
-            const g2 = audioCtx.createGain();
-            o2.type = 'sawtooth';
-            o2.frequency.setValueAtTime(520, now + delay);
-            o2.frequency.exponentialRampToValueAtTime(385, now + delay + 0.25);
-            g2.gain.setValueAtTime(0.25, now + delay);
-            g2.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.25);
-            o2.connect(g2);
-            g2.connect(audioCtx.destination);
-            o2.start(now + delay);
-            o2.stop(now + delay + 0.25);
-        }
+        const audio = new Audio('audio_mp3/Haha Nelson.mp3');
+        audio.volume = 0.5;
+        audio.play().catch(e => console.error("Haha Nelson play failed: ", e));
+    }
+    playUnoSnapSound() {
+        const audio = new Audio('audio_mp3/Oh yeah.mp3');
+        audio.volume = 0.5;
+        audio.play().catch(e => console.error("Oh yeah play failed: ", e));
     }
     playUnoSaySound() { if (typeof osc === 'function') { osc('sine', 600, 0.2, 0.1); setTimeout(() => osc('sine', 800, 0.2, 0.2), 100); } }
 

@@ -5043,5 +5043,17 @@ const LOCAL_TRANSLATIONS = {
     "We got a lot of food from the supermarket.": "我们从超市得到了很多食物。",
     "I swam for an hour at the swimming pool.": "我在游泳池游了一个小时。",
     "He played tennis at the sports centre.": "他在体育中心打了网球。",
-    "We caught a bus at the station.": "我们在车站坐了公交车。"
+    "We caught a bus at the station.": "我们在车站坐了公交车。",
+    "A clown makes people laugh.": "小丑逗人发笑。",
+    "A cook makes food.": "厨师做饭。",
+    "A dentist helps people with their teeth.": "牙医帮助人们治疗牙齿。",
+    "A doctor helps sick people.": "医生帮助病人。",
+    "A farmer grows food.": "农民种植食物。",
+    "A film star acts in films.": "电影明星在电影中表演。",
+    "A nurse helps doctors.": "护士帮助医生。",
+    "The pirate has a treasure.": "海盗有一个宝藏。",
+    "A pop star sings songs.": "流行歌星唱歌。",
+    "I've got a present for my birthday.": "我收到生日礼物了。",
+    "It's a surprise party!": "这是一个惊喜派对！",
+    "What costume are you wearing?": "你穿的是什么服装？"
 };

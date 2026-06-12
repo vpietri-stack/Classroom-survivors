@@ -549,6 +549,39 @@ TEACHING_CONTENT["PU2"] = {
         }
     },
     "3": {
+        "31": {
+            vocab: [
+                'clown', 'cook', 'dentist', 'doctor', 'farmer', 'film star', 'nurse', 'pirate', 'pop star', 'treasure', 'surprise', 'present', 'party', 'costume'
+            ],
+            sentences: [
+                "A clown makes people laugh.",
+                "A cook makes food.",
+                "A dentist helps people with their teeth.",
+                "A doctor helps sick people.",
+                "A farmer grows food.",
+                "A film star acts in films.",
+                "A nurse helps doctors.",
+                "The pirate has a treasure",
+                "A pop star sings songs.",
+                "I've got a present for my birthday.",
+                "It's a surprise party!",
+                "What costume are you wearing?"
+            ],
+            sentencePairs: [
+                { a: "A clown makes", b: "people laugh." },
+                { a: "A cook makes", b: "food." },
+                { a: "A dentist helps", b: "people with their teeth." },
+                { a: "A doctor helps", b: "sick people." },
+                { a: "A farmer grows", b: "food." },
+                { a: "A film star acts", b: "in films." },
+                { a: "A nurse helps", b: "doctors." },
+                { a: "A pirate has", b: "a treasure." },
+                { a: "A pop star sings", b: "songs." },
+                { a: "I've got a", b: "present for my birthday." },
+                { a: "It's a surprise", b: "party!" },
+                { a: "What costume are", b: "you wearing?" }
+            ]
+        },
         "40": {
             vocab: [
                 'clown', 'cook', 'dentist', 'doctor', 'farmer', 'film star', 'nurse', 'pirate', 'pop star', 'vet',
@@ -576,7 +609,7 @@ TEACHING_CONTENT["PU2"] = {
                 "She's short and has got curly blonde hair."
             ],
             sentencePairs: [
-                { a: "What does a doctor do?", b: "A doctor helps people." },
+                { a: "What do doctors do?", b: "They help people." },
                 { a: "What is the doctor doing?", b: "She's helping the girl." },
                 { a: "What does he do?", b: "He's a firefighter." },
                 { a: "What is the firefighter doing?", b: "He's saving the cat." },
@@ -1402,7 +1435,7 @@ AVAILABLE_CONTENT["PU2"] = {
     "0": [5],
     "1": [7, 9, 10, 16],
     "2": [19, 21, 22, 25],
-    "3": [40, 43],
+    "3": [31, 40, 43],
     "4": [45, 46, 54],
     "5": [57, 60, 62],
     "6": [78, 81],

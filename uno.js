@@ -59,9 +59,10 @@ class UnoScene extends Phaser.Scene {
     }
 
     generateCardTextures() {
-        const w = 90;
-        const h = 135;
-        const r = 12;
+        const sf = 3;
+        const w = 90 * sf;
+        const h = 135 * sf;
+        const r = 12 * sf;
         
         const colors = {
             red: 0xe53935, yellow: 0xfdd835, green: 0x43a047, blue: 0x1e88e5, black: 0x212121
@@ -72,21 +73,32 @@ class UnoScene extends Phaser.Scene {
             
             const rt = this.add.renderTexture(0, 0, w, h);
 
-            // White border
+            // Base white card body
             const gBase = this.make.graphics({add: false});
             gBase.fillStyle(0xffffff, 1);
             gBase.fillRoundedRect(0, 0, w, h, r);
             
-            // Inner color
+            // Soft inner gray border for 3D depth
+            gBase.lineStyle(2 * sf, 0xcccccc, 1);
+            gBase.strokeRoundedRect(sf, sf, w - 2*sf, h - 2*sf, r - sf);
+            
+            // Inner colored background
             gBase.fillStyle(bgColor, 1);
-            gBase.fillRoundedRect(5, 5, w-10, h-10, r-3);
+            gBase.fillRoundedRect(5 * sf, 5 * sf, w - 10 * sf, h - 10 * sf, r - 3 * sf);
             rt.draw(gBase, 0, 0);
             gBase.destroy();
+
+            // Soft radial top highlight (simulating light source)
+            const gHighlight = this.make.graphics({add: false});
+            gHighlight.fillStyle(0xffffff, 0.15);
+            gHighlight.fillCircle(w / 2, 0, w * 0.7);
+            rt.draw(gHighlight);
+            gHighlight.destroy();
 
             // Slanted inner oval (white)
             const gOvalWhite = this.make.graphics({add: false});
             gOvalWhite.fillStyle(0xffffff, 1);
-            gOvalWhite.fillEllipse(0, 0, w*0.85, h*0.45);
+            gOvalWhite.fillEllipse(0, 0, w * 0.85, h * 0.45);
             gOvalWhite.setPosition(w/2, h/2);
             gOvalWhite.setAngle(-25);
             rt.draw(gOvalWhite);
@@ -95,39 +107,61 @@ class UnoScene extends Phaser.Scene {
             // Slanted inner oval (color)
             const gOvalColor = this.make.graphics({add: false});
             gOvalColor.fillStyle(bgColor, 1);
-            gOvalColor.fillEllipse(0, 0, w*0.75, h*0.35);
+            gOvalColor.fillEllipse(0, 0, w * 0.75, h * 0.35);
             gOvalColor.setPosition(w/2, h/2);
             gOvalColor.setAngle(-25);
             rt.draw(gOvalColor);
             gOvalColor.destroy();
 
-            // Text
+            // Text / Symbols
             if (symbol) {
                 // Main symbol
                 const ts = this.add.text(w/2, h/2, symbol, {
-                    fontSize: '48px', fontStyle: '900', color: textColor, fontFamily: 'Arial Black, Impact, sans-serif'
+                    fontSize: (48 * sf) + 'px', fontStyle: '900', color: textColor, fontFamily: 'Arial Black, Impact, sans-serif'
                 }).setOrigin(0.5);
-                ts.setStroke('#ffffff', 4);
-                ts.setShadow(2, 2, '#000000', 2, true, false);
+                ts.setStroke('#ffffff', 4 * sf);
+                ts.setShadow(2 * sf, 2 * sf, '#000000', 2 * sf, true, false);
                 
                 // Top-left
-                const tl = this.add.text(14, 18, symbol, {
-                    fontSize: '18px', fontStyle: 'bold', color: '#ffffff', fontFamily: 'Arial'
+                const tl = this.add.text(14 * sf, 18 * sf, symbol, {
+                    fontSize: (18 * sf) + 'px', fontStyle: 'bold', color: '#ffffff', fontFamily: 'Arial'
                 }).setOrigin(0.5);
-                tl.setShadow(1, 1, '#000000', 1);
+                tl.setShadow(1 * sf, 1 * sf, '#000000', 1 * sf);
 
                 // Bottom-right
-                const br = this.add.text(w-14, h-18, symbol, {
-                    fontSize: '18px', fontStyle: 'bold', color: '#ffffff', fontFamily: 'Arial'
+                const br = this.add.text(w - 14 * sf, h - 18 * sf, symbol, {
+                    fontSize: (18 * sf) + 'px', fontStyle: 'bold', color: '#ffffff', fontFamily: 'Arial'
                 }).setOrigin(0.5).setAngle(180);
-                br.setShadow(1, 1, '#000000', 1);
+                br.setShadow(1 * sf, 1 * sf, '#000000', 1 * sf);
 
                 rt.draw(ts, w/2, h/2);
-                rt.draw(tl, 14, 18);
-                rt.draw(br, w-14, h-18);
+                rt.draw(tl, 14 * sf, 18 * sf);
+                rt.draw(br, w - 14 * sf, h - 18 * sf);
                 
                 ts.destroy(); tl.destroy(); br.destroy();
             }
+
+            // Glossy diagonal sheens for plastic reflection
+            const gSheen = this.make.graphics({add: false});
+            gSheen.fillStyle(0xffffff, 0.07);
+            gSheen.beginPath();
+            gSheen.moveTo(w * 0.15, 0);
+            gSheen.lineTo(w * 0.45, 0);
+            gSheen.lineTo(0, h * 0.65);
+            gSheen.lineTo(0, h * 0.35);
+            gSheen.closePath();
+            gSheen.fillPath();
+
+            gSheen.fillStyle(0xffffff, 0.03);
+            gSheen.beginPath();
+            gSheen.moveTo(w * 0.52, 0);
+            gSheen.lineTo(w * 0.60, 0);
+            gSheen.lineTo(0, h * 0.85);
+            gSheen.lineTo(0, h * 0.77);
+            gSheen.closePath();
+            gSheen.fillPath();
+            rt.draw(gSheen);
+            gSheen.destroy();
 
             rt.saveTexture(key);
             rt.destroy();
@@ -145,25 +179,50 @@ class UnoScene extends Phaser.Scene {
         drawCard('wild', colors.black, 'W', '#ffffff');
         drawCard('p4', colors.black, '+4', '#ffffff');
         
-        // Card back
+        // Card back texture with premium border & reflection
         const g2 = this.make.graphics({add: false});
-        g2.fillStyle(0xffffff, 1); g2.fillRoundedRect(0, 0, w, h, r);
-        g2.fillStyle(0x111111, 1); g2.fillRoundedRect(5, 5, w-10, h-10, r-3);
+        g2.fillStyle(0xffffff, 1); 
+        g2.fillRoundedRect(0, 0, w, h, r);
+        g2.lineStyle(2 * sf, 0xcccccc, 1);
+        g2.strokeRoundedRect(sf, sf, w - 2*sf, h - 2*sf, r - sf);
+        
+        g2.fillStyle(0x111111, 1); 
+        g2.fillRoundedRect(5 * sf, 5 * sf, w - 10 * sf, h - 10 * sf, r - 3 * sf);
+        
         const rt2 = this.add.renderTexture(0, 0, w, h);
         rt2.draw(g2, 0, 0);
         g2.destroy();
 
+        const gHighlight2 = this.make.graphics({add: false});
+        gHighlight2.fillStyle(0xffffff, 0.15);
+        gHighlight2.fillCircle(w / 2, 0, w * 0.7);
+        rt2.draw(gHighlight2);
+        gHighlight2.destroy();
+
         const gOvalRed = this.make.graphics({add: false});
         gOvalRed.fillStyle(0xe53935, 1);
-        gOvalRed.fillEllipse(0, 0, w*0.8, h*0.5);
+        gOvalRed.fillEllipse(0, 0, w * 0.8, h * 0.5);
         gOvalRed.setPosition(w/2, h/2);
         gOvalRed.setAngle(-25);
         rt2.draw(gOvalRed);
         gOvalRed.destroy();
         
-        const textBack = this.add.text(w/2, h/2, 'UNO', { fontSize: '28px', fontStyle: '900', color: '#fdd835', fontFamily: 'Arial Black' }).setOrigin(0.5).setAngle(-25);
-        textBack.setStroke('#000000', 3);
+        const textBack = this.add.text(w/2, h/2, 'UNO', { fontSize: (28 * sf) + 'px', fontStyle: '900', color: '#fdd835', fontFamily: 'Arial Black' }).setOrigin(0.5).setAngle(-25);
+        textBack.setStroke('#000000', 3 * sf);
         rt2.draw(textBack, w/2, h/2);
+        
+        // Add sheen to back card too
+        const gSheen2 = this.make.graphics({add: false});
+        gSheen2.fillStyle(0xffffff, 0.07);
+        gSheen2.beginPath();
+        gSheen2.moveTo(w * 0.15, 0); gSheen2.lineTo(w * 0.45, 0); gSheen2.lineTo(0, h * 0.65); gSheen2.lineTo(0, h * 0.35); gSheen2.closePath(); gSheen2.fillPath();
+        
+        gSheen2.fillStyle(0xffffff, 0.03);
+        gSheen2.beginPath();
+        gSheen2.moveTo(w * 0.52, 0); gSheen2.lineTo(w * 0.60, 0); gSheen2.lineTo(0, h * 0.85); gSheen2.lineTo(0, h * 0.77); gSheen2.closePath(); gSheen2.fillPath();
+        rt2.draw(gSheen2);
+        gSheen2.destroy();
+
         rt2.saveTexture('card_back');
         rt2.destroy();
         textBack.destroy();
@@ -223,7 +282,7 @@ class UnoScene extends Phaser.Scene {
         // Clear existing sprites
         this.children.removeAll();
 
-        this.deckSprite = this.add.image(0, 0, 'card_back');
+        this.deckSprite = this.add.image(0, 0, 'card_back').setScale(1 / 3);
         this.deckSprite.setInteractive({ useHandCursor: true }); // for drawing
 
         // Init AI text
@@ -313,7 +372,7 @@ class UnoScene extends Phaser.Scene {
         }
 
         // Create a temporary card_back sprite moving from deck to destination
-        const s = this.add.image(this.layout.deck.x, this.layout.deck.y, 'card_back').setScale(p === 0 ? 0.8 : 0.5);
+        const s = this.add.image(this.layout.deck.x, this.layout.deck.y, 'card_back').setScale(p === 0 ? 0.8 / 3 : 0.5 / 3);
         s.setDepth(100 + step);
 
         if (typeof osc === 'function') {
@@ -357,6 +416,7 @@ class UnoScene extends Phaser.Scene {
             // Rebind interactive area safely
             this.deckSprite.disableInteractive();
             this.deckSprite.setInteractive({ useHandCursor: true });
+            this.deckSprite.setScale(1 / 3);
         }
 
         this.cardSprites.forEach(s => s.destroy());
@@ -365,7 +425,7 @@ class UnoScene extends Phaser.Scene {
         // Discard pile
         if (this.discard.length > 0) {
             const top = this.discard[this.discard.length - 1];
-            const ds = this.add.image(this.layout.discard.x, this.layout.discard.y, top.tex);
+            const ds = this.add.image(this.layout.discard.x, this.layout.discard.y, top.tex).setScale(1 / 3);
             ds.setDepth(15);
             this.cardSprites.push(ds);
             
@@ -392,7 +452,7 @@ class UnoScene extends Phaser.Scene {
 
         hand.forEach((c, i) => {
             const x = startX + i * spacing;
-            const s = this.add.image(x, this.layout.playerHandY, c.tex);
+            const s = this.add.image(x, this.layout.playerHandY, c.tex).setScale(1 / 3);
             s.setData('card', c);
             s.setData('index', i);
             s.setData('owner', 0);
@@ -422,7 +482,7 @@ class UnoScene extends Phaser.Scene {
             const aStartX = ax - ((Math.min(n, 10) - 1) * aiSpace) / 2;
             
             for(let j=0; j<Math.min(n, 10); j++) {
-                const bs = this.add.image(aStartX + j*aiSpace, ay, 'card_back').setScale(0.5);
+                const bs = this.add.image(aStartX + j*aiSpace, ay, 'card_back').setScale(0.5 / 3);
                 bs.setDepth(5 + j);
                 this.cardSprites.push(bs);
             }
@@ -626,7 +686,7 @@ class UnoScene extends Phaser.Scene {
     }
 
     animatePlay(cardTex, startX, startY, cb) {
-        const sprite = this.add.image(startX, startY, cardTex);
+        const sprite = this.add.image(startX, startY, cardTex).setScale(1 / 3);
         sprite.setDepth(100);
         this.tweens.add({
             targets: sprite,
@@ -653,7 +713,7 @@ class UnoScene extends Phaser.Scene {
 
         for (let i = 0; i < amount; i++) {
             this.time.delayedCall(i * 120, () => {
-                const s = this.add.image(this.layout.deck.x, this.layout.deck.y, 'card_back').setScale(0.8);
+                const s = this.add.image(this.layout.deck.x, this.layout.deck.y, 'card_back').setScale(0.8 / 3);
                 s.setDepth(100 + i);
                 this.tweens.add({
                     targets: s, x: destX, y: destY, angle: 180, duration: 300, ease: 'Quad.easeInOut',

@@ -762,21 +762,10 @@ class UnoScene extends Phaser.Scene {
             card.originalColor = 'black';
             this.discard.push(card);
             
-            if (pi === 0) {
-                // Show color picker via HTML overlay
-                document.getElementById('unoColorPicker').classList.remove('hidden');
-                // Temporarily store callback globally
-                window.pickUnoColor = (col) => {
-                    document.getElementById('unoColorPicker').classList.add('hidden');
-                    card.chosenColor = col;
-                    this.afterPlayEffect(pi, card);
-                };
-            } else {
-                // AI picks random color
-                const cArr = ['red', 'yellow', 'green', 'blue'];
-                card.chosenColor = cArr[Math.floor(Math.random() * cArr.length)];
-                this.afterPlayEffect(pi, card);
-            }
+            // Auto-assign random fallback color (so game won't lock if turn is skipped/failed)
+            const cArr = ['red', 'yellow', 'green', 'blue'];
+            card.chosenColor = cArr[Math.floor(Math.random() * cArr.length)];
+            this.afterPlayEffect(pi, card);
             return;
         }
 

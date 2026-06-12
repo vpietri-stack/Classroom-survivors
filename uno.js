@@ -520,8 +520,45 @@ class UnoScene extends Phaser.Scene {
             if (this.aiTextSprites[pi]) {
                 this.aiTextSprites[pi].setPosition(ax, ay - 70);
                 if (this.vulnerable[pi]) {
-                    this.aiTextSprites[pi].setText(this.playerNames[pi] + " (NO UNO!)").setColor('#ff0000');
-                    this.aiTextSprites[pi].setInteractive({useHandCursor:true}).once('pointerdown', () => this.time.delayedCall(0, () => this.humanCatchBot(pi)));
+                    this.aiTextSprites[pi].setText(this.playerNames[pi] + " ⚠️").setColor('#ff4444');
+                    this.aiTextSprites[pi].setFontSize('18px');
+                    this.aiTextSprites[pi].disableInteractive();
+
+                    // Create a beautiful, pulsing red "CATCH!" button below their cards
+                    const catchBtn = this.add.text(ax, ay + 50, 'CATCH! 🚨', {
+                        fontSize: '12px',
+                        fontStyle: 'bold',
+                        color: '#ffffff',
+                        backgroundColor: '#dc2626', // Tailwind red-600
+                        padding: { x: 10, y: 5 },
+                        fontFamily: 'Arial, sans-serif'
+                    }).setOrigin(0.5);
+                    catchBtn.setDepth(50);
+                    catchBtn.setInteractive({ useHandCursor: true });
+
+                    // Hover effects
+                    catchBtn.on('pointerover', () => catchBtn.setBackgroundColor('#ef4444'));
+                    catchBtn.on('pointerout', () => catchBtn.setBackgroundColor('#dc2626'));
+
+                    // Handle catching bot
+                    catchBtn.once('pointerdown', () => this.time.delayedCall(0, () => {
+                        catchBtn.destroy();
+                        this.humanCatchBot(pi);
+                    }));
+
+                    // Add to cardSprites array so it is automatically cleared during renderAll
+                    this.cardSprites.push(catchBtn);
+
+                    // Add a pulsing zoom animation to draw attention
+                    this.tweens.add({
+                        targets: catchBtn,
+                        scaleX: 1.15,
+                        scaleY: 1.15,
+                        duration: 500,
+                        yoyo: true,
+                        repeat: -1,
+                        ease: 'Sine.easeInOut'
+                    });
                 } else if (isActive) {
                     this.aiTextSprites[pi].setText('▶ ' + this.playerNames[pi] + ' ▶').setColor('#fdd835');
                     this.aiTextSprites[pi].setFontSize('20px');

@@ -1138,6 +1138,33 @@ TEACHING_CONTENT["PU1"] = {
                 { a: "Grandma and Grandpa have got a", b: "house. It's their house." },
                 { a: "You've got a", b: "doll. It's your doll." },
             ]
+        },
+        "60": {
+            vocab: [
+                "balloon", "helicopter", "toy box", "keyboard", "mouse", "computer", "board game", "teddy bear",
+                "ship", "radio", "cool", "new"
+            ],
+            sentences: [
+                "We've got a big white toy ship.",
+                "The computer has got a grey keyboard.",
+                "The computer's mouse is blue.",
+                "She's got a purple toy box.",
+                "Her radio's new.",
+                "His helicopter's small.",
+                "Our board game's new.",
+                "His teddy's blue.",
+                "We've got a cool computer.",
+                "Her balloon is big.",
+            ],
+            sentencePairs: [
+                { a: "I've got a", b: "computer. My computer's cool." },
+                { a: "Jim's got a", b: "toy box. His toy box is purple." },
+                { a: "Jenny's got a", b: "balloon. Her balloon's big." },
+                { a: "We've got", b: "board game. Our board game's new." },
+                { a: "Jenny and Jim have got a", b: "toy ship. Their toy ship's big and white." },
+                { a: "The computer's got a", b: "keyboard. Its keyboard's grey." },
+                { a: "You've got a", b: "helicopter. Your helicopter's small." },
+            ]
         }
     },
     "6": {
@@ -1609,7 +1636,7 @@ AVAILABLE_CONTENT["PU1"] = {
     "2": [19, 20, 21, 22, 23, 24, 25, 26],
     "3": [31, 32, 33, 34, 35, 36, 37, 43],
     "4": [45, 47, 48, 54],
-    "5": [57, 59],
+    "5": [57, 59, 60,],
     "6": [78, 81],
     "7": [83, 84, 92],
     "8": [95, 97, 99],

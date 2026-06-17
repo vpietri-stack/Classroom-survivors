@@ -502,6 +502,28 @@ TEACHING_CONTENT["Think1"] = {
                 { a: "We usually load the dishwasher", b: "after we clear the table." },
                 { a: "I have to empty the dishwasher now,", b: "because the plates are clean." }
             ]
+        },
+        "72": {
+            vocab: [
+                'no chance', '...and stuff', 'never mind', 'all right?', 'absolutely'
+            ],
+            sentences: [
+                "All right, Mum?",
+                "We can play computer games and stuff.",
+                "Never mind, you don't have to help me.",
+                "Do you want a burger? Absolutely, I'm so hungry!",
+                "Can you do the washing up? No chance! You do it."
+
+
+
+            ],
+            sentencePairs: [
+                { a: "All right,", b: "Dad?" },
+                { a: "I've got lots to do,", b: "like homework and stuff." },
+                { a: "Can you do my homework?", b: "No chance! You do it." },
+                { a: "Can I ask you something?", b: "Absolutely. What do you need?" },
+                { a: "Nevermind,", b: "I can do it myself." }
+            ]
         }
     }
 };
@@ -514,5 +536,5 @@ AVAILABLE_CONTENT["Think1"] = {
     "4": [46],
     "5": [55],
     "6": [58, 64],
-    "7": [66, 68, 69, 70, 71]
+    "7": [66, 68, 69, 70, 71, 72]
 };

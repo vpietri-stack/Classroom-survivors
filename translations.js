@@ -4310,6 +4310,19 @@ const LOCAL_TRANSLATIONS = {
     "We usually load the dishwasher after we clear the table.": "我们通常在收拾完桌子后把碗放进洗碗机。",
     "I have to empty the dishwasher once a day.": "我每天必须清空一次洗碗机。",
 
+    // --- Think1 Unit 7 Page 72 ---
+
+    'no chance': "没门",
+    '...and stuff': "...之类的",
+    'never mind': "没关系",
+    'all right?': "好吗？/ 没事吧？/ 你好吗？",
+    'absolutely': "当然/绝对",
+    "All right, Mum?": "妈妈，你好吗？",
+    "We can play computer games and stuff.": "我们可以玩电脑游戏之类的。",
+    "Never mind, you don't have to help me.": "没关系，你不必帮我。",
+    "Do you want a burger? Absolutely, I'm so hungry!": "想吃汉堡吗？当然，我太饿了！",
+    "Can you do the washing up? No chance! You do it.": "你能洗碗吗？没门！你自己洗。",
+
     // --- PU2 Unit 5 Page 60 ---
     "clean - the cleanest": "干净 - 最干净",
     "clever - the cleverest": "聪明 - 最聪明",

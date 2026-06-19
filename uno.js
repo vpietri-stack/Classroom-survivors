@@ -38,11 +38,13 @@ class UnoScene extends Phaser.Scene {
             aiX: [cw * 0.15, cw / 2, cw * 0.85]
         };
 
-        const pt = this.make.graphics({x:0,y:0,add:false});
-        pt.fillStyle(0xffffff);
-        pt.fillCircle(5, 5, 5);
-        pt.generateTexture('uno_particle', 10, 10);
-        pt.destroy();
+        if (!this.textures.exists('uno_particle')) {
+            const pt = this.make.graphics({x:0,y:0,add:false});
+            pt.fillStyle(0xffffff);
+            pt.fillCircle(5, 5, 5);
+            pt.generateTexture('uno_particle', 10, 10);
+            pt.destroy();
+        }
 
         this.input.on('gameobjectdown', this.onCardClicked, this);
         this.input.on('gameobjectover', this.onCardHover, this);
@@ -183,52 +185,54 @@ class UnoScene extends Phaser.Scene {
         drawCard('p4', colors.black, '+4', '#ffffff');
         
         // Card back texture with premium border & reflection
-        const g2 = this.make.graphics({add: false});
-        g2.fillStyle(0xffffff, 1); 
-        g2.fillRoundedRect(0, 0, w, h, r);
-        g2.lineStyle(2 * sf, 0xcccccc, 1);
-        g2.strokeRoundedRect(sf, sf, w - 2*sf, h - 2*sf, r - sf);
-        
-        g2.fillStyle(0x111111, 1); 
-        g2.fillRoundedRect(5 * sf, 5 * sf, w - 10 * sf, h - 10 * sf, r - 3 * sf);
-        
-        const rt2 = this.add.renderTexture(0, 0, w, h);
-        rt2.draw(g2, 0, 0);
-        g2.destroy();
+        if (!this.textures.exists('card_back')) {
+            const g2 = this.make.graphics({add: false});
+            g2.fillStyle(0xffffff, 1); 
+            g2.fillRoundedRect(0, 0, w, h, r);
+            g2.lineStyle(2 * sf, 0xcccccc, 1);
+            g2.strokeRoundedRect(sf, sf, w - 2*sf, h - 2*sf, r - sf);
+            
+            g2.fillStyle(0x111111, 1); 
+            g2.fillRoundedRect(5 * sf, 5 * sf, w - 10 * sf, h - 10 * sf, r - 3 * sf);
+            
+            const rt2 = this.add.renderTexture(0, 0, w, h);
+            rt2.draw(g2, 0, 0);
+            g2.destroy();
 
-        const gHighlight2 = this.make.graphics({add: false});
-        gHighlight2.fillStyle(0xffffff, 0.15);
-        gHighlight2.fillCircle(w / 2, 0, w * 0.7);
-        rt2.draw(gHighlight2);
-        gHighlight2.destroy();
+            const gHighlight2 = this.make.graphics({add: false});
+            gHighlight2.fillStyle(0xffffff, 0.15);
+            gHighlight2.fillCircle(w / 2, 0, w * 0.7);
+            rt2.draw(gHighlight2);
+            gHighlight2.destroy();
 
-        const gOvalRed = this.make.graphics({add: false});
-        gOvalRed.fillStyle(0xe53935, 1);
-        gOvalRed.fillEllipse(0, 0, w * 0.8, h * 0.5);
-        gOvalRed.setPosition(w/2, h/2);
-        gOvalRed.setAngle(-25);
-        rt2.draw(gOvalRed);
-        gOvalRed.destroy();
-        
-        const textBack = this.add.text(w/2, h/2, 'UNO', { fontSize: (28 * sf) + 'px', fontStyle: '900', color: '#fdd835', fontFamily: 'Arial Black' }).setOrigin(0.5).setAngle(-25);
-        textBack.setStroke('#000000', 3 * sf);
-        rt2.draw(textBack, w/2, h/2);
-        
-        // Add sheen to back card too
-        const gSheen2 = this.make.graphics({add: false});
-        gSheen2.fillStyle(0xffffff, 0.07);
-        gSheen2.beginPath();
-        gSheen2.moveTo(w * 0.15, 0); gSheen2.lineTo(w * 0.45, 0); gSheen2.lineTo(0, h * 0.65); gSheen2.lineTo(0, h * 0.35); gSheen2.closePath(); gSheen2.fillPath();
-        
-        gSheen2.fillStyle(0xffffff, 0.03);
-        gSheen2.beginPath();
-        gSheen2.moveTo(w * 0.52, 0); gSheen2.lineTo(w * 0.60, 0); gSheen2.lineTo(0, h * 0.85); gSheen2.lineTo(0, h * 0.77); gSheen2.closePath(); gSheen2.fillPath();
-        rt2.draw(gSheen2);
-        gSheen2.destroy();
+            const gOvalRed = this.make.graphics({add: false});
+            gOvalRed.fillStyle(0xe53935, 1);
+            gOvalRed.fillEllipse(0, 0, w * 0.8, h * 0.5);
+            gOvalRed.setPosition(w/2, h/2);
+            gOvalRed.setAngle(-25);
+            rt2.draw(gOvalRed);
+            gOvalRed.destroy();
+            
+            const textBack = this.add.text(w/2, h/2, 'UNO', { fontSize: (28 * sf) + 'px', fontStyle: '900', color: '#fdd835', fontFamily: 'Arial Black' }).setOrigin(0.5).setAngle(-25);
+            textBack.setStroke('#000000', 3 * sf);
+            rt2.draw(textBack, w/2, h/2);
+            
+            // Add sheen to back card too
+            const gSheen2 = this.make.graphics({add: false});
+            gSheen2.fillStyle(0xffffff, 0.07);
+            gSheen2.beginPath();
+            gSheen2.moveTo(w * 0.15, 0); gSheen2.lineTo(w * 0.45, 0); gSheen2.lineTo(0, h * 0.65); gSheen2.lineTo(0, h * 0.35); gSheen2.closePath(); gSheen2.fillPath();
+            
+            gSheen2.fillStyle(0xffffff, 0.03);
+            gSheen2.beginPath();
+            gSheen2.moveTo(w * 0.52, 0); gSheen2.lineTo(w * 0.60, 0); gSheen2.lineTo(0, h * 0.85); gSheen2.lineTo(0, h * 0.77); gSheen2.closePath(); gSheen2.fillPath();
+            rt2.draw(gSheen2);
+            gSheen2.destroy();
 
-        rt2.saveTexture('card_back');
-        rt2.destroy();
-        textBack.destroy();
+            rt2.saveTexture('card_back');
+            rt2.destroy();
+            textBack.destroy();
+        }
     }
 
     createDeckData() {
@@ -1713,15 +1717,20 @@ function triggerUno() {
         game.events.once('ready', () => {
             game.scene.stop('MainScene');
             game.scene.start('UnoScene');
+            setTimeout(() => {
+                if (game && game.scale) game.scale.refresh();
+            }, 50);
         });
     } else {
         const parentEl = document.getElementById('uno-phaser-container');
-        parentEl.appendChild(game.canvas);
-        if (game.scale && typeof game.scale.updateBounds === 'function') {
-            game.scale.updateBounds();
-        } else if (game.scale && typeof game.scale.refresh === 'function') {
-            game.scale.refresh();
+        if (game.scale && typeof game.scale.setParent === 'function') {
+            game.scale.setParent(parentEl);
+        } else {
+            parentEl.appendChild(game.canvas);
         }
+        setTimeout(() => {
+            if (game && game.scale) game.scale.refresh();
+        }, 50);
         game.scene.stop('MainScene');
         game.scene.start('UnoScene');
     }

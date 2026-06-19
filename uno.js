@@ -1625,9 +1625,6 @@ class UnoScene extends Phaser.Scene {
         if (window.unoTimerInterval) clearInterval(window.unoTimerInterval);
         unoAccumulatedTime += (Date.now() - unoStartTime);
 
-        // Clean up scene state before showing game over screen
-        this.cleanupScene();
-
         const t = document.getElementById('unoResultTitle'), m = document.getElementById('unoResultMsg');
         const nm = (typeof selectedStudent !== 'undefined' && selectedStudent) ? selectedStudent : 'Player';
         if (winner === 0) {
@@ -1665,8 +1662,12 @@ class UnoScene extends Phaser.Scene {
         document.getElementById('unoScreen').classList.add('hidden');
         document.getElementById('unoGameOverScreen').classList.remove('hidden');
 
-        // Stop the scene so it's properly re-created on next triggerUno()
-        game.scene.stop('UnoScene');
+        // Defer stopping the scene to the next frame to avoid breaking the current update loop
+        setTimeout(() => {
+            if (game && game.scene) {
+                game.scene.stop('UnoScene');
+            }
+        }, 0);
     }
 
     cleanupScene() {

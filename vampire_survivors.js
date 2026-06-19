@@ -63,14 +63,17 @@ class MainScene extends Phaser.Scene {
 
         this.physics.world.setBounds(-4000, -4000, 8000, 8000);
 
-        const gr = this.make.graphics({ x: 0, y: 0, add: false });
-        gr.fillStyle(0x2d5016);
-        gr.fillRect(0, 0, 512, 512);
-        for (let i = 0; i < 50; i++) {
-            gr.fillStyle(0x3d6b1e, 0.5);
-            gr.fillCircle(Phaser.Math.Between(0, 512), Phaser.Math.Between(0, 512), Phaser.Math.Between(2, 10));
+        if (!this.textures.exists('grass')) {
+            const gr = this.make.graphics({ x: 0, y: 0, add: false });
+            gr.fillStyle(0x2d5016);
+            gr.fillRect(0, 0, 512, 512);
+            for (let i = 0; i < 50; i++) {
+                gr.fillStyle(0x3d6b1e, 0.5);
+                gr.fillCircle(Phaser.Math.Between(0, 512), Phaser.Math.Between(0, 512), Phaser.Math.Between(2, 10));
+            }
+            gr.generateTexture('grass', 512, 512);
+            gr.destroy();
         }
-        gr.generateTexture('grass', 512, 512);
 
         this.bg = this.add.tileSprite(0, 0, this.scale.width, this.scale.height, 'grass').setOrigin(0, 0);
         this.bg.setScrollFactor(0);

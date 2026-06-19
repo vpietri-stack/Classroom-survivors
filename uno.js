@@ -25,6 +25,9 @@ class UnoScene extends Phaser.Scene {
     create() {
         this.generateCardTextures();
         
+        // Reset camera angle in case a previous game left it tilted
+        this.cameras.main.setAngle(0);
+
         const cw = this.scale.width;
         const ch = this.scale.height;
         this.layout = {
@@ -47,7 +50,7 @@ class UnoScene extends Phaser.Scene {
 
         this.scale.on('resize', this.handleResize, this);
         this.events.once('shutdown', () => {
-            this.scale.off('resize', this.handleResize, this);
+            this.cleanupScene();
         });
 
         this.initUnoGame();
@@ -275,6 +278,11 @@ class UnoScene extends Phaser.Scene {
         unoAccumulatedTime = 0;
         if (typeof totalMinigameTimeMs !== 'undefined') totalMinigameTimeMs = 0;
         unoGameActive = true;
+
+        // Kill any lingering tweens and timers from a previous game
+        this.clearAllTurnTimers();
+        this.tweens.killAll();
+        this.cameras.main.setAngle(0);
 
         this.cardSprites = []; // track all active sprites
         this.aiTextSprites = [];
@@ -1612,6 +1620,10 @@ class UnoScene extends Phaser.Scene {
         unoGameActive = false;
         if (window.unoTimerInterval) clearInterval(window.unoTimerInterval);
         unoAccumulatedTime += (Date.now() - unoStartTime);
+
+        // Clean up scene state before showing game over screen
+        this.cleanupScene();
+
         const t = document.getElementById('unoResultTitle'), m = document.getElementById('unoResultMsg');
         const nm = (typeof selectedStudent !== 'undefined' && selectedStudent) ? selectedStudent : 'Player';
         if (winner === 0) {
@@ -1648,6 +1660,20 @@ class UnoScene extends Phaser.Scene {
 
         document.getElementById('unoScreen').classList.add('hidden');
         document.getElementById('unoGameOverScreen').classList.remove('hidden');
+
+        // Stop the scene so it's properly re-created on next triggerUno()
+        game.scene.stop('UnoScene');
+    }
+
+    cleanupScene() {
+        // Clear all pending turn timers
+        this.clearAllTurnTimers();
+        // Kill all active tweens (camera tilt, card animations, etc.)
+        this.tweens.killAll();
+        // Reset camera angle to zero (animateReverseCamera may have left it tilted)
+        this.cameras.main.setAngle(0);
+        // Remove resize listener
+        this.scale.off('resize', this.handleResize, this);
     }
 }
 

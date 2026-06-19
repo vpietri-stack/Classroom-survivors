@@ -280,6 +280,13 @@ function showGameSelection() {
         if (el) el.classList.add('hidden');
     });
 
+    // Stop UNO scene if it's still running (prevents residual timers/tweens)
+    if (typeof unoGameActive !== 'undefined') unoGameActive = false;
+    if (window.unoTimerInterval) clearInterval(window.unoTimerInterval);
+    if (typeof game !== 'undefined' && game && game.scene.isActive('UnoScene')) {
+        game.scene.stop('UnoScene');
+    }
+
     document.getElementById('gameSelectionOverlay').classList.remove('hidden');
 }
 

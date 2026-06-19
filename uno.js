@@ -1679,11 +1679,17 @@ class UnoScene extends Phaser.Scene {
         // Clear all pending turn timers
         this.clearAllTurnTimers();
         // Kill all active tweens (camera tilt, card animations, etc.)
-        this.tweens.killAll();
+        if (this.tweens) {
+            this.tweens.killAll();
+        }
         // Reset camera angle to zero (animateReverseCamera may have left it tilted)
-        this.cameras.main.setAngle(0);
+        if (this.cameras && this.cameras.main) {
+            this.cameras.main.setAngle(0);
+        }
         // Remove resize listener
-        this.scale.off('resize', this.handleResize, this);
+        if (this.scale) {
+            this.scale.off('resize', this.handleResize, this);
+        }
     }
 }
 
@@ -1752,11 +1758,13 @@ function triggerUno() {
 }
 
 function exitUnoGame() {
+    console.log('[DEBUG] exitUnoGame called, game:', !!game, 'isActive:', (game && game.scene) ? game.scene.isActive('UnoScene') : false);
     unoGameActive = false;
     if (window.unoTimerInterval) clearInterval(window.unoTimerInterval);
     // Cancel any pending stop from endUno()
     if (window.unoStopTimeout) { clearTimeout(window.unoStopTimeout); window.unoStopTimeout = null; }
     if (game && game.scene && game.scene.isActive('UnoScene')) {
+        console.log('[DEBUG] stopping UnoScene...');
         game.scene.stop('UnoScene');
     }
     document.getElementById('unoScreen').classList.add('hidden');

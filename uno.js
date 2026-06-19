@@ -1664,12 +1664,15 @@ class UnoScene extends Phaser.Scene {
         document.getElementById('unoScreen').classList.add('hidden');
         document.getElementById('unoGameOverScreen').classList.remove('hidden');
 
-        // Defer stopping the scene to the next frame to avoid breaking the current update loop
-        setTimeout(() => {
-            if (game && game.scene) {
+        // Store the stop timeout handle so triggerUno/triggerVS can cancel it if user clicks replay quickly.
+        // This prevents a stale stop() from killing a freshly restarted scene.
+        if (window.unoStopTimeout) clearTimeout(window.unoStopTimeout);
+        window.unoStopTimeout = setTimeout(() => {
+            window.unoStopTimeout = null;
+            if (game && game.scene && game.scene.isActive('UnoScene')) {
                 game.scene.stop('UnoScene');
             }
-        }, 0);
+        }, 200);
     }
 
     cleanupScene() {
@@ -1719,30 +1722,41 @@ function triggerUno() {
         game = new Phaser.Game(config);
         game.events.once('ready', () => {
             game.scene.stop('MainScene');
-            game.scene.start('UnoScene');
             setTimeout(() => {
                 if (game && game.scale) game.scale.refresh();
+                game.scene.start('UnoScene');
             }, 50);
         });
     } else {
+        // Cancel any pending stop from endUno()
+        if (window.unoStopTimeout) { clearTimeout(window.unoStopTimeout); window.unoStopTimeout = null; }
+
+        // Stop scenes
+        if (game.scene.isActive('MainScene')) game.scene.stop('MainScene');
+        if (game.scene.isActive('UnoScene')) game.scene.stop('UnoScene');
+
+        // Move canvas to container
         const parentEl = document.getElementById('uno-phaser-container');
         if (game.scale && typeof game.scale.setParent === 'function') {
             game.scale.setParent(parentEl);
         } else {
             parentEl.appendChild(game.canvas);
         }
+
+        // Defer refresh and start
         setTimeout(() => {
             if (game && game.scale) game.scale.refresh();
+            game.scene.start('UnoScene');
         }, 50);
-        game.scene.stop('MainScene');
-        game.scene.start('UnoScene');
     }
 }
 
 function exitUnoGame() {
     unoGameActive = false;
     if (window.unoTimerInterval) clearInterval(window.unoTimerInterval);
-    if (game && game.scene.isActive('UnoScene')) {
+    // Cancel any pending stop from endUno()
+    if (window.unoStopTimeout) { clearTimeout(window.unoStopTimeout); window.unoStopTimeout = null; }
+    if (game && game.scene && game.scene.isActive('UnoScene')) {
         game.scene.stop('UnoScene');
     }
     document.getElementById('unoScreen').classList.add('hidden');

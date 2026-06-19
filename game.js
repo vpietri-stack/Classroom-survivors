@@ -280,10 +280,11 @@ function showGameSelection() {
         if (el) el.classList.add('hidden');
     });
 
-    // Stop UNO scene if it's still running (prevents residual timers/tweens)
+    // Cancel any pending stop from endUno(), then stop UNO scene properly
     if (typeof unoGameActive !== 'undefined') unoGameActive = false;
     if (window.unoTimerInterval) clearInterval(window.unoTimerInterval);
-    if (typeof game !== 'undefined' && game && game.scene.isActive('UnoScene')) {
+    if (window.unoStopTimeout) { clearTimeout(window.unoStopTimeout); window.unoStopTimeout = null; }
+    if (typeof game !== 'undefined' && game && game.scene && game.scene.isActive('UnoScene')) {
         game.scene.stop('UnoScene');
     }
 

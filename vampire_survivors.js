@@ -1264,22 +1264,31 @@ function triggerVampireSurvivors() {
             }, 50);
         });
     } else {
+        // Cancel any pending stop from endUno() — prevents stale stop() killing the new scene
+        if (typeof window.unoStopTimeout !== 'undefined' && window.unoStopTimeout) {
+            clearTimeout(window.unoStopTimeout);
+            window.unoStopTimeout = null;
+        }
+
+        // Stop all active scenes immediately
+        if (game.scene.isActive('UnoScene')) game.scene.stop('UnoScene');
+        if (game.scene.isActive('MainScene')) game.scene.stop('MainScene');
+
+        // Move canvas to body
         if (game.scale && typeof game.scale.setParent === 'function') {
             game.scale.setParent(document.body);
         } else {
             document.body.appendChild(game.canvas);
         }
+
+        // Defer BOTH scale.refresh() and scene start into the same setTimeout so that
+        // the browser has time to update layout/dimensions before create() reads them.
+        // This is the critical fix for the VS blank screen bug.
         setTimeout(() => {
             if (game && game.scale) game.scale.refresh();
-        }, 50);
-        game.scene.stop('UnoScene');
-        // if MainScene was paused, we could resume, but usually trigger restarts or resumes.
-        // Let's just start or resume.
-        if (game.scene.isSleeping('MainScene') || game.scene.isPaused('MainScene')) {
-            game.scene.resume('MainScene');
-        } else {
+            // Always do a fresh start so create() runs and entities spawn correctly
             game.scene.start('MainScene');
-        }
+        }, 100);
     }
 }
 

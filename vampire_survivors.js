@@ -1260,7 +1260,12 @@ function triggerVampireSurvivors() {
         game = new Phaser.Game(config);
         game.events.once('ready', () => {
             setTimeout(() => {
-                if (game && game.scale) game.scale.refresh();
+                if (game && game.scale) {
+                    game.scale.parent = document.body;
+                    game.scale.parentIsWindow = true;
+                    game.scale.resize(window.innerWidth, window.innerHeight);
+                    game.scale.refresh();
+                }
             }, 50);
         });
     } else {
@@ -1283,9 +1288,13 @@ function triggerVampireSurvivors() {
 
         // Defer BOTH scale.refresh() and scene start into the same setTimeout so that
         // the browser has time to update layout/dimensions before create() reads them.
-        // This is the critical fix for the VS blank screen bug.
         setTimeout(() => {
-            if (game && game.scale) game.scale.refresh();
+            if (game && game.scale) {
+                game.scale.parent = document.body;
+                game.scale.parentIsWindow = true;
+                game.scale.resize(window.innerWidth, window.innerHeight);
+                game.scale.refresh();
+            }
             // Always do a fresh start so create() runs and entities spawn correctly
             game.scene.start('MainScene');
         }, 100);

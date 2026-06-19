@@ -1729,7 +1729,15 @@ function triggerUno() {
         game.events.once('ready', () => {
             game.scene.stop('MainScene');
             setTimeout(() => {
-                if (game && game.scale) game.scale.refresh();
+                if (game && game.scale) {
+                    const parentEl = document.getElementById('uno-phaser-container');
+                    game.scale.parent = parentEl;
+                    game.scale.parentIsWindow = false;
+                    if (parentEl) {
+                        game.scale.resize(parentEl.clientWidth, parentEl.clientHeight);
+                    }
+                    game.scale.refresh();
+                }
                 game.scene.start('UnoScene');
             }, 50);
         });
@@ -1751,7 +1759,14 @@ function triggerUno() {
 
         // Defer refresh and start
         setTimeout(() => {
-            if (game && game.scale) game.scale.refresh();
+            if (game && game.scale) {
+                game.scale.parent = parentEl;
+                game.scale.parentIsWindow = false;
+                if (parentEl) {
+                    game.scale.resize(parentEl.clientWidth, parentEl.clientHeight);
+                }
+                game.scale.refresh();
+            }
             game.scene.start('UnoScene');
         }, 50);
     }

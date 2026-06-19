@@ -795,6 +795,11 @@ class UnoScene extends Phaser.Scene {
             this.time.delayedCall(i * 120, () => {
                 const s = this.add.image(this.layout.deck.x, this.layout.deck.y, 'card_back').setScale(0.8 / 3);
                 s.setDepth(100 + i);
+                
+                // Play gunshot sound and shake camera per card
+                this.playUnoDrawCardSound();
+                this.cameras.main.shake(80, 0.004 + (amount > 3 ? 0.002 : 0));
+
                 this.tweens.add({
                     targets: s, x: destX, y: destY, angle: 180, duration: 300, ease: 'Quad.easeInOut',
                     onComplete: () => {
@@ -828,6 +833,7 @@ class UnoScene extends Phaser.Scene {
         if (this.pendingStack > 0 && card.type === 'reverse') {
             this.discard.push(card);
             this.playUnoReverseSound();
+            this.animateReverseCamera();
             this.direction *= -1;
             this.setStatus((pi === 0 ? 'You' : this.playerNames[pi]) + ' reversed the +' + this.pendingStack + '!');
             if (this.checkEnd(pi)) return;
@@ -862,14 +868,17 @@ class UnoScene extends Phaser.Scene {
         
         let localDirection = this.direction;
         if (card.type === 'reverse') { 
-            this.playUnoReverseSound(); 
+            this.playUnoReverseSound();
+            this.animateReverseCamera();
             this.direction *= -1; 
             localDirection = this.direction;
         }
         
         let steps = 1;
         if (card.type === 'skip') { 
-            this.playUnoSkipSound(); 
+            this.playUnoSkipSound();
+            const skipped = (this.currentPlayer + localDirection + 4) % 4;
+            this.animateSkipPlayer(skipped);
             steps = 2; 
         }
         
@@ -909,6 +918,66 @@ class UnoScene extends Phaser.Scene {
         }));
     }
 
+    animateReverseCamera() {
+        // Tween a dummy object to tilt camera angle and snap back
+        const dummy = { angle: 0 };
+        this.tweens.add({
+            targets: dummy,
+            angle: 3,
+            duration: 200,
+            ease: 'Quad.easeOut',
+            onUpdate: () => {
+                this.cameras.main.setAngle(dummy.angle);
+            },
+            onComplete: () => {
+                dummy.angle = -6;
+                this.tweens.add({
+                    targets: dummy,
+                    angle: 0,
+                    duration: 350,
+                    ease: 'Back.easeOut',
+                    onUpdate: () => {
+                        this.cameras.main.setAngle(dummy.angle);
+                    },
+                    onComplete: () => {
+                        this.cameras.main.setAngle(0);
+                    }
+                });
+            }
+        });
+    }
+
+    animateSkipPlayer(skippedPi) {
+        // Find card sprites belonging to the skipped player and shake them
+        const targets = this.cardSprites.filter(s => {
+            if (skippedPi === 0) return s.y > this.layout.playerHandY - 50;
+            const ax = this.layout.aiX[skippedPi - 1];
+            return Math.abs(s.x - ax) < 120 && s.y < 150;
+        });
+
+        if (targets.length === 0) return;
+
+        const origPositions = targets.map(s => ({ x: s.x, y: s.y }));
+        let phase = 0;
+        const shakeTimer = this.time.addEvent({
+            delay: 30,
+            repeat: 8,
+            callback: () => {
+                phase++;
+                const offset = Math.sin(phase * Math.PI * 1.5) * 6;
+                targets.forEach((s, i) => {
+                    s.x = origPositions[i].x + offset;
+                });
+                if (phase >= 8) {
+                    targets.forEach((s, i) => {
+                        s.x = origPositions[i].x;
+                    });
+                }
+            }
+        });
+        this.addTurnTimer(shakeTimer);
+    }
+
     burstParticles(x, y, color) {
         const emitter = this.add.particles(0, 0, 'uno_particle', {
             x: x, y: y,
@@ -942,6 +1011,42 @@ class UnoScene extends Phaser.Scene {
 
                 this.animatePlay(card.tex, startX, this.layout.playerHandY, () => {
                     this.discard.push(card);
+                    this.playUnoSnapImpactSound();
+                    
+                    // Camera shake and explosion graphics
+                    this.cameras.main.shake(250, 0.008);
+                    
+                    const ring1 = this.add.graphics();
+                    ring1.lineStyle(4, 0xfacc15, 1);
+                    ring1.strokeCircle(0, 0, 10);
+                    ring1.setPosition(this.layout.discard.x, this.layout.discard.y);
+                    ring1.setDepth(200);
+
+                    this.tweens.add({
+                        targets: ring1,
+                        scaleX: 6, scaleY: 6,
+                        alpha: 0,
+                        duration: 500,
+                        ease: 'Quad.easeOut',
+                        onComplete: () => ring1.destroy()
+                    });
+
+                    const ring2 = this.add.graphics();
+                    ring2.lineStyle(2, 0xffffff, 0.8);
+                    ring2.strokeCircle(0, 0, 15);
+                    ring2.setPosition(this.layout.discard.x, this.layout.discard.y);
+                    ring2.setDepth(201);
+
+                    this.tweens.add({
+                        targets: ring2,
+                        scaleX: 8, scaleY: 8,
+                        alpha: 0,
+                        delay: 80,
+                        duration: 600,
+                        ease: 'Quad.easeOut',
+                        onComplete: () => ring2.destroy()
+                    });
+
                     this.setStatus('SNAP! 🎯');
                     if (this.checkEnd(0)) return;
                     this.renderAll();
@@ -1167,18 +1272,186 @@ class UnoScene extends Phaser.Scene {
     }
 
     // --- Audio Wrappers ---
-    playUnoSkipSound() { if (typeof osc === 'function') { osc('sawtooth', 150, 0.3, 0.1); setTimeout(() => osc('sawtooth', 100, 0.3, 0.2), 100); } }
+    playUnoDrawCardSound() {
+        if (typeof audioCtx !== 'undefined' && audioCtx) {
+            // Gunshot synth
+            // Noise burst (body)
+            const bufferSize = audioCtx.sampleRate * 0.08; // 80ms
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+
+            const noiseFilter = audioCtx.createBiquadFilter();
+            noiseFilter.type = 'lowpass';
+            noiseFilter.frequency.setValueAtTime(400, audioCtx.currentTime);
+
+            const noiseGain = audioCtx.createGain();
+            noiseGain.gain.setValueAtTime(0, audioCtx.currentTime);
+            noiseGain.gain.linearRampToValueAtTime(0.6, audioCtx.currentTime + 0.002);
+            noiseGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+
+            noise.connect(noiseFilter);
+            noiseFilter.connect(noiseGain);
+            noiseGain.connect(audioCtx.destination);
+
+            // Click transient (crack)
+            const oscNode = audioCtx.createOscillator();
+            oscNode.type = 'sawtooth';
+            oscNode.frequency.setValueAtTime(180, audioCtx.currentTime);
+
+            const oscGain = audioCtx.createGain();
+            oscGain.gain.setValueAtTime(0, audioCtx.currentTime);
+            oscGain.gain.linearRampToValueAtTime(0.4, audioCtx.currentTime + 0.001);
+            oscGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.025);
+
+            oscNode.connect(oscGain);
+            oscGain.connect(audioCtx.destination);
+
+            noise.start();
+            oscNode.start();
+            noise.stop(audioCtx.currentTime + 0.08);
+            oscNode.stop(audioCtx.currentTime + 0.03);
+        } else if (typeof osc === 'function') {
+            osc('triangle', 200, 0.3, 0.08);
+        }
+    }
+    playUnoSkipSound() {
+        if (typeof audioCtx !== 'undefined' && audioCtx) {
+            // Heavy metal prison door clang
+            // Layer 1: Clang impact
+            const osc1 = audioCtx.createOscillator();
+            osc1.type = 'square';
+            osc1.frequency.setValueAtTime(120, audioCtx.currentTime);
+            osc1.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.08);
+
+            const filter1 = audioCtx.createBiquadFilter();
+            filter1.type = 'bandpass';
+            filter1.frequency.setValueAtTime(150, audioCtx.currentTime);
+            filter1.Q.setValueAtTime(5, audioCtx.currentTime);
+
+            const gain1 = audioCtx.createGain();
+            gain1.gain.setValueAtTime(0.7, audioCtx.currentTime);
+            gain1.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+
+            osc1.connect(filter1);
+            filter1.connect(gain1);
+            gain1.connect(audioCtx.destination);
+
+            // Layer 2: Metallic high ring
+            const osc2 = audioCtx.createOscillator();
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(900, audioCtx.currentTime);
+
+            const gain2 = audioCtx.createGain();
+            gain2.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+
+            osc2.connect(gain2);
+            gain2.connect(audioCtx.destination);
+
+            // Layer 3: Lock bolt click at 80ms
+            const bufferSize = audioCtx.sampleRate * 0.02; // 20ms
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+
+            const noiseGain = audioCtx.createGain();
+            noiseGain.gain.setValueAtTime(0, audioCtx.currentTime);
+            noiseGain.gain.setValueAtTime(0.5, audioCtx.currentTime + 0.08);
+            noiseGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+
+            noise.connect(noiseGain);
+            noiseGain.connect(audioCtx.destination);
+
+            osc1.start();
+            osc2.start();
+            noise.start();
+
+            osc1.stop(audioCtx.currentTime + 0.4);
+            osc2.stop(audioCtx.currentTime + 0.6);
+            noise.stop(audioCtx.currentTime + 0.11);
+        } else if (typeof osc === 'function') {
+            osc('sawtooth', 150, 0.3, 0.1); setTimeout(() => osc('sawtooth', 100, 0.3, 0.2), 100);
+        }
+    }
     playUnoReverseSound() {
         if (typeof audioCtx !== 'undefined' && audioCtx) {
-            const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-            o.type = 'sine'; o.frequency.setValueAtTime(300, audioCtx.currentTime);
-            o.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 0.15);
-            o.frequency.linearRampToValueAtTime(300, audioCtx.currentTime + 0.3);
-            g.gain.setValueAtTime(0, audioCtx.currentTime);
-            g.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.15);
-            g.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
-            o.connect(g); g.connect(audioCtx.destination);
-            o.start(); o.stop(audioCtx.currentTime + 0.3);
+            // Layer 1: whoosh directional sweep (600ms total)
+            const osc1 = audioCtx.createOscillator();
+            osc1.type = 'sawtooth';
+            osc1.frequency.setValueAtTime(80, audioCtx.currentTime);
+            osc1.frequency.linearRampToValueAtTime(400, audioCtx.currentTime + 0.2);
+            osc1.frequency.linearRampToValueAtTime(60, audioCtx.currentTime + 0.4);
+            osc1.frequency.linearRampToValueAtTime(350, audioCtx.currentTime + 0.6);
+
+            const filter1 = audioCtx.createBiquadFilter();
+            filter1.type = 'bandpass';
+            filter1.frequency.setValueAtTime(300, audioCtx.currentTime);
+            filter1.Q.setValueAtTime(2, audioCtx.currentTime);
+
+            const gain1 = audioCtx.createGain();
+            gain1.gain.setValueAtTime(0, audioCtx.currentTime);
+            gain1.gain.linearRampToValueAtTime(0.25, audioCtx.currentTime + 0.3);
+            gain1.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.6);
+
+            osc1.connect(filter1);
+            filter1.connect(gain1);
+            gain1.connect(audioCtx.destination);
+
+            // Layer 2: impact thud at 300ms
+            const bufferSize = audioCtx.sampleRate * 0.06; // 60ms
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+
+            const noiseFilter = audioCtx.createBiquadFilter();
+            noiseFilter.type = 'lowpass';
+            noiseFilter.frequency.setValueAtTime(200, audioCtx.currentTime);
+
+            const noiseGain = audioCtx.createGain();
+            noiseGain.gain.setValueAtTime(0, audioCtx.currentTime);
+            noiseGain.gain.setValueAtTime(0.5, audioCtx.currentTime + 0.3);
+            noiseGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.36);
+
+            noise.connect(noiseFilter);
+            noiseFilter.connect(noiseGain);
+            noiseGain.connect(audioCtx.destination);
+
+            // Layer 3: rubber band spring tone at 300ms
+            const osc3 = audioCtx.createOscillator();
+            osc3.type = 'sine';
+            osc3.frequency.setValueAtTime(220, audioCtx.currentTime + 0.3);
+            osc3.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.45);
+
+            const gain3 = audioCtx.createGain();
+            gain3.gain.setValueAtTime(0, audioCtx.currentTime);
+            gain3.gain.setValueAtTime(0.3, audioCtx.currentTime + 0.3);
+            gain3.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+
+            osc3.connect(gain3);
+            gain3.connect(audioCtx.destination);
+
+            osc1.start();
+            osc3.start();
+            noise.start();
+
+            osc1.stop(audioCtx.currentTime + 0.6);
+            osc3.stop(audioCtx.currentTime + 0.5);
+            noise.stop(audioCtx.currentTime + 0.37);
+        } else if (typeof osc === 'function') {
+            osc('sine', 300, 0.3, 0.3);
         }
     }
     playUnoCatchSound() {
@@ -1188,8 +1461,52 @@ class UnoScene extends Phaser.Scene {
     }
     playUnoSnapSound() {
         const audio = new Audio('audio_mp3/Oh yeah.mp3');
-        audio.volume = 0.5;
+        audio.volume = 0.4; // Slightly reduced volume so synth layers nicely
         audio.play().catch(e => console.error("Oh yeah play failed: ", e));
+    }
+    playUnoSnapImpactSound() {
+        if (typeof audioCtx !== 'undefined' && audioCtx) {
+            // Layer 1: explosion crack
+            const bufferSize = audioCtx.sampleRate * 0.4;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+            
+            // Low boom
+            const oscLow = audioCtx.createOscillator();
+            oscLow.type = 'sine';
+            oscLow.frequency.setValueAtTime(60, audioCtx.currentTime);
+            
+            const lowGain = audioCtx.createGain();
+            lowGain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+            lowGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+            
+            oscLow.connect(lowGain);
+            lowGain.connect(audioCtx.destination);
+            
+            // High sizzle tail
+            const sizzleSource = audioCtx.createBufferSource();
+            sizzleSource.buffer = buffer;
+            
+            const sizzleFilter = audioCtx.createBiquadFilter();
+            sizzleFilter.type = 'highpass';
+            sizzleFilter.frequency.setValueAtTime(3000, audioCtx.currentTime);
+            
+            const sizzleGain = audioCtx.createGain();
+            sizzleGain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            sizzleGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+            
+            sizzleSource.connect(sizzleFilter);
+            sizzleFilter.connect(sizzleGain);
+            sizzleGain.connect(audioCtx.destination);
+            
+            oscLow.start();
+            sizzleSource.start();
+            oscLow.stop(audioCtx.currentTime + 0.3);
+            sizzleSource.stop(audioCtx.currentTime + 0.4);
+        }
     }
     playUnoSaySound() { if (typeof osc === 'function') { osc('sine', 600, 0.2, 0.1); setTimeout(() => osc('sine', 800, 0.2, 0.2), 100); } }
 

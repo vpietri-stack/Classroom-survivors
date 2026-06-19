@@ -169,6 +169,7 @@ class UnoScene extends Phaser.Scene {
             gSheen.destroy();
 
             rt.saveTexture(key);
+            rt.texture = null;
             rt.destroy();
         };
 
@@ -230,6 +231,7 @@ class UnoScene extends Phaser.Scene {
             gSheen2.destroy();
 
             rt2.saveTexture('card_back');
+            rt2.texture = null;
             rt2.destroy();
             textBack.destroy();
         }

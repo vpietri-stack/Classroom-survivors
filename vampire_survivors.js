@@ -111,6 +111,7 @@ class MainScene extends Phaser.Scene {
                 rt.draw(t, wh * 0.1, wh * 0.1); // Center slightly
                 rt.saveTexture(key);
                 t.destroy();
+                rt.texture = null;
                 rt.destroy();
             }
         };

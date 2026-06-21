@@ -582,6 +582,36 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "What costume are", b: "you wearing?" }
             ]
         },
+        "33": {
+            vocab: [
+                'firefighter', 'police officer', 'fire station', 'teacher', 'school', 'hospital', 'police station'
+            ],
+            sentences: [
+                "What does a doctor do? A doctor helps people.",
+                "What is the doctor doing? She's helping a child.",
+                "What does a farmer do? A farmer grows food.",
+                "What is the farmer doing? He's driving a tractor.",
+                "What do dentists do? They help people with their teeth.",
+                "What are the dentists doing? They're working in the clinic.",
+                "What does she do? She's a pop star.",
+                "What is the pop star doing? She's singing a song.",
+
+            ],
+            sentencePairs: [
+                { a: "Doctors always", b: "help people." },
+                { a: "The doctors", b: "are helping a child." },
+                { a: "The farmer drives", b: "a tractor every day." },
+                { a: "The farmer is driving", b: "a tractor now." },
+                { a: "I go", b: "to school at 08:00 every morning." },
+                { a: "I'm going", b: "to school now." },
+                { a: "She does", b: "her homework everyday." },
+                { a: "She's doing", b: "her homework now." },
+                { a: "They play", b: "football twice a week." },
+                { a: "They're playing", b: "football now." },
+                { a: "What are you doing?", b: "I'm cooking dinner." },
+                { a: "What do you do?", b: "I'm a cook." },
+            ]
+        },
         "40": {
             vocab: [
                 'clown', 'cook', 'dentist', 'doctor', 'farmer', 'film star', 'nurse', 'pirate', 'pop star', 'vet',
@@ -1435,7 +1465,7 @@ AVAILABLE_CONTENT["PU2"] = {
     "0": [5],
     "1": [7, 9, 10, 16],
     "2": [19, 21, 22, 25],
-    "3": [31, 40, 43],
+    "3": [31, 33, 40, 43],
     "4": [45, 46, 54],
     "5": [57, 60, 62],
     "6": [78, 81],

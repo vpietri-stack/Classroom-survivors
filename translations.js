@@ -4068,6 +4068,7 @@ const LOCAL_TRANSLATIONS = {
     "Do Jim and Jenny like chicken poo?": "吉姆和珍妮喜欢鸡屎吗？",
     "Do they like bread?": "他们喜欢面包吗？",
     "Do they like poopoo bread?": "他们喜欢便便面包吗？",
+
     // --- PU1 Unit 4 Page 48 ---
     "breakfast": "早餐",
     "lunch": "午餐",
@@ -4087,6 +4088,17 @@ const LOCAL_TRANSLATIONS = {
     "I eat chicken salad for lunch.": "我午餐吃鸡肉沙拉。",
     "I eat burgers for dinner.": "我晚餐吃汉堡。",
     "What fruit do you like?": "你喜欢什么水果？",
+
+
+    // --- PU1 Unit 5 Page 61 ---
+    "Does he want?": "他想要...吗？",
+    "Does she want?": "她想要...吗？",
+    "Does he want a plane?": "他想要一架飞机吗？",
+    "Does she want some balloons?": "她想要一些气球吗？",
+    "She wants a big purple teddy.": "她想要一只大大的紫色泰迪熊。",
+    "She doesn't want a plane.": "她不想要一架飞机。",
+    "He wants a small white helicopter.": "他想要一架小小的白色直升机。",
+    "He doesn't want a toy house.": "他不想一间玩具房子。",
 
     // --- PU1 Unit 8 Page 97 ---
     "I can": "我会 / 我能",

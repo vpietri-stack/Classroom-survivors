@@ -1165,6 +1165,27 @@ TEACHING_CONTENT["PU1"] = {
                 { a: "The computer's got a", b: "keyboard. Its keyboard's grey." },
                 { a: "You've got a", b: "helicopter. Your helicopter's small." },
             ]
+        },
+        "61": {
+            vocab: [
+                "Does he want?", "Does she want?", "yes, he does", "no, he doesn't", "yes, she does", "no, she doesn't",
+                "he wants", "he doesn't want", "she wants", "she doesn't want"
+            ],
+            sentences: [
+                "Does he want a plane?",
+                "Does she want some balloons?",
+                "She wants a big purple teddy.",
+                "She doesn't want a plane.",
+                "He wants a small white helicopter.",
+                "He doesn't want a toy house.",
+
+            ],
+            sentencePairs: [
+                { a: "Does he want a helicopter?", b: "Yes, he does." },
+                { a: "Does he want a toy house?", b: "No, he doesn't. He wants a helicopter." },
+                { a: "Does she want a teddy bear?", b: "Yes, she does." },
+                { a: "Does she want a plane?", b: "No, she doesn't. She wants a teddy bear." }
+            ]
         }
     },
     "6": {
@@ -1636,7 +1657,7 @@ AVAILABLE_CONTENT["PU1"] = {
     "2": [19, 20, 21, 22, 23, 24, 25, 26],
     "3": [31, 32, 33, 34, 35, 36, 37, 43],
     "4": [45, 47, 48, 54],
-    "5": [57, 59, 60,],
+    "5": [57, 59, 60, 61],
     "6": [78, 81],
     "7": [83, 84, 92],
     "8": [95, 97, 99],

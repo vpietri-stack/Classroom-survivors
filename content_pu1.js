@@ -1186,6 +1186,30 @@ TEACHING_CONTENT["PU1"] = {
                 { a: "Does she want a teddy bear?", b: "Yes, she does." },
                 { a: "Does she want a plane?", b: "No, she doesn't. She wants a teddy bear." }
             ]
+        },
+        "63": {
+            vocab: [
+                "shapes", "circle", "square", "triangle", "rectangle", "helicopter", "computer", "ball"
+            ],
+            sentences: [
+                "The ball is a circle.",
+                "The computer is a rectangle.",
+                "The board game is a square.",
+                "The kite is a triangle.",
+                "A circle is a shape.",
+                "A square is a shape.",
+                "A triangle is a shape.",
+                "A rectangle is a shape.",
+
+
+            ],
+            sentencePairs: [
+                { a: "Circles, triangles, squares, and rectangles", b: "are shapes." },
+                { a: "He's got a", b: "ball. His ball is a circle." },
+                { a: "She's got a", b: "computer. Her computer is a rectangle." },
+                { a: "They've got a", b: "board game. Their board game is a square." },
+                { a: "I've got a", b: "kite. My kite is a triangle." }
+            ]
         }
     },
     "6": {
@@ -1657,7 +1681,7 @@ AVAILABLE_CONTENT["PU1"] = {
     "2": [19, 20, 21, 22, 23, 24, 25, 26],
     "3": [31, 32, 33, 34, 35, 36, 37, 43],
     "4": [45, 47, 48, 54],
-    "5": [57, 59, 60, 61],
+    "5": [57, 59, 60, 61, 63],
     "6": [78, 81],
     "7": [83, 84, 92],
     "8": [95, 97, 99],

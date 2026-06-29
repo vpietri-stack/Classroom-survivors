@@ -376,7 +376,7 @@ const LOCAL_TRANSLATIONS = {
     "circle": "圆形",
     "rectangle": "长方形",
     "shape": "形状",
-    "Shapes": "形状",
+    "shapes": "形状",
     "triangle": "三角形",
 
     // --- Colors ---
@@ -4099,6 +4099,16 @@ const LOCAL_TRANSLATIONS = {
     "She doesn't want a plane.": "她不想要一架飞机。",
     "He wants a small white helicopter.": "他想要一架小小的白色直升机。",
     "He doesn't want a toy house.": "他不想一间玩具房子。",
+
+    // --- PU1 Unit 5 Page 63 ---
+    "The ball is a circle.": "球是圆形的。",
+    "The computer is a rectangle.": "电脑是长方形的。",
+    "The board game is a square.": "棋盘游戏是正方形的。",
+    "The kite is a triangle.": "风筝是三角形的。",
+    "A circle is a shape.": "圆形是一种形状。",
+    "A square is a shape.": "正方形是一种形状。",
+    "A triangle is a shape.": "三角形是一种形状。",
+    "A rectangle is a shape.": "长方形是一种形状。",
 
     // --- PU1 Unit 8 Page 97 ---
     "I can": "我会 / 我能",

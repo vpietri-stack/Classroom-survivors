@@ -144,6 +144,7 @@ class MainScene extends Phaser.Scene {
 
         this.enemies = this.physics.add.group();
         this.bullets = this.physics.add.group();
+        this.fireWakes = this.physics.add.group();
         this.gems = this.physics.add.group();
         this.powerUps = this.physics.add.group();
         this.tornados = this.physics.add.group();
@@ -213,6 +214,13 @@ class MainScene extends Phaser.Scene {
                 b.destroy();
             }
         });
+        this.physics.add.overlap(this.fireWakes, this.enemies, (f, e) => {
+            const now = this.time.now;
+            if (!e.lastFireWakeTime || now - e.lastFireWakeTime > 200) {
+                e.lastFireWakeTime = now;
+                this.damageEnemy(e, f.dmg, f.knockback !== undefined ? f.knockback : 10);
+            }
+        }, null, this);
         this.physics.add.overlap(this.player, this.gems, (p, g) => {
             if (g.type === 'chest') {
                 this.triggerTreasureEvent();
@@ -229,7 +237,7 @@ class MainScene extends Phaser.Scene {
         this.physics.add.overlap(this.player, this.powerUps, this.handlePowerUpPickup, null, this);
         this.physics.add.overlap(this.tornados, this.enemies, (t, e) => this.damageEnemy(e, 999), null, this);
 
-        this.applyReward({ id: 'wand', name: 'Spirit Wand', type: 'weapon' });
+        this.applyReward({ id: 'whip', name: 'Magic Whip', type: 'weapon' });
         updateDOMHUD(this.playerStats, 0, 0);
 
         for (let i = 0; i < 50; i++) {
@@ -275,8 +283,15 @@ class MainScene extends Phaser.Scene {
             this.player.alpha = 1;
             this.player.clearTint();
         }
-        if (dx < 0) this.player.setScale(-1.5, 1.5);
-        if (dx > 0) this.player.setScale(1.5, 1.5);
+        const wobble = Math.sin(this.gameTime * 0.25) * 0.08;
+        if (dx !== 0 || dy !== 0) {
+            const facingX = dx < 0 ? -1.5 : (dx > 0 ? 1.5 : (this.player.scaleX > 0 ? 1.5 : -1.5));
+            this.player.setScale(facingX * (1 + wobble), 1.5 * (1 - wobble));
+        } else {
+            const idleWobble = Math.sin(this.gameTime * 0.08) * 0.04;
+            const facingX = this.player.scaleX > 0 ? 1.5 : -1.5;
+            this.player.setScale(facingX * (1 + idleWobble), 1.5 * (1 - idleWobble));
+        }
 
         this.bg.tilePositionX = this.cameras.main.scrollX;
         this.bg.tilePositionY = this.cameras.main.scrollY;
@@ -402,6 +417,28 @@ class MainScene extends Phaser.Scene {
         boss.isBoss = true;
         boss.stunTimer = 0;
         this.enemies.add(boss);
+
+        // Boss Spawn visual juice
+        this.cameras.main.shake(500, 0.015);
+        this.cameras.main.flash(300, 255, 0, 0, 0.4);
+        
+        const warningText = this.add.text(this.scale.width / 2, this.scale.height / 3, '⚠️ BOSS INCOMING! ⚠️', {
+            fontSize: '40px',
+            fontFamily: 'Fredoka',
+            color: '#ff0055',
+            stroke: '#000000',
+            strokeThickness: 6,
+            fontStyle: 'bold'
+        }).setOrigin(0.5).setScrollFactor(0);
+        
+        this.tweens.add({
+            targets: warningText,
+            scale: 1.4,
+            alpha: { from: 1, to: 0 },
+            duration: 2000,
+            ease: 'Sine.easeOut',
+            onComplete: () => warningText.destroy()
+        });
     }
 
     spawnEnemyCircle() {
@@ -560,7 +597,84 @@ class MainScene extends Phaser.Scene {
             if (e.stunTimer > 0) {
                 e.stunTimer--;
             } else if (!e.isSwarm) {
-                this.physics.moveToObject(e, this.player, e.speed);
+                // Calculate direct vector towards the player
+                let tx = this.player.x - e.x;
+                let ty = this.player.y - e.y;
+                let tDist = Math.hypot(tx, ty);
+                let vx = 0;
+                let vy = 0;
+                if (tDist > 0) {
+                    vx = (tx / tDist) * e.speed;
+                    vy = (ty / tDist) * e.speed;
+                }
+
+                // Add separation repulsion force from neighboring enemies
+                let sepX = 0;
+                let sepY = 0;
+                let neighborsCount = 0;
+                const separationRadius = 35; // optimal radius to match enemy graphic boundaries
+                const children = this.enemies.getChildren();
+                const count = children.length;
+
+                for (let j = 0; j < count; j++) {
+                    const other = children[j];
+                    if (other === e || !other.active || other.isSwarm) continue;
+
+                    // Quick bounding box check for high performance
+                    const dx = e.x - other.x;
+                    if (Math.abs(dx) < separationRadius) {
+                        const dy = e.y - other.y;
+                        if (Math.abs(dy) < separationRadius) {
+                            const dist = Math.hypot(dx, dy);
+                            if (dist > 0 && dist < separationRadius) {
+                                // Stronger repulsion force the closer they are
+                                const force = (separationRadius - dist) / separationRadius;
+                                sepX += (dx / dist) * force;
+                                sepY += (dy / dist) * force;
+                                neighborsCount++;
+                            }
+                        }
+                    }
+                }
+
+                if (neighborsCount > 0) {
+                    sepX /= neighborsCount;
+                    sepY /= neighborsCount;
+
+                    // Blend player attraction and neighbor separation vectors
+                    vx += sepX * e.speed * 1.5;
+                    vy += sepY * e.speed * 1.5;
+
+                    // Smooth speed control
+                    const currentSpeed = Math.hypot(vx, vy);
+                    const maxAllowedSpeed = e.speed * 1.3;
+                    if (currentSpeed > maxAllowedSpeed) {
+                        vx = (vx / currentSpeed) * maxAllowedSpeed;
+                        vy = (vy / currentSpeed) * maxAllowedSpeed;
+                    }
+                }
+
+                if (e.body) {
+                    e.body.setVelocity(vx, vy);
+                }
+            }
+
+            // Squash and stretch wobble based on whether they are moving
+            if (e.active && e.body) {
+                const isMoving = e.body.velocity.x !== 0 || e.body.velocity.y !== 0;
+                const wobbleSpeed = e.isBoss ? 0.08 : 0.2;
+                const wobbleAmp = e.isBoss ? 0.04 : 0.08;
+                const seed = e.x + e.y; // unique phase offset per enemy
+                const wobbleVal = Math.sin(this.gameTime * wobbleSpeed + seed) * wobbleAmp;
+                
+                const baseScale = e.isBoss ? 1.0 : (e.isSwarm ? 0.8 : 1.0);
+                const facingX = e.body.velocity.x < 0 ? -baseScale : baseScale;
+                
+                if (isMoving) {
+                    e.setScale(facingX * (1 + wobbleVal), baseScale * (1 - wobbleVal));
+                } else {
+                    e.setScale(facingX, baseScale);
+                }
             }
         });
 
@@ -627,94 +741,506 @@ class MainScene extends Phaser.Scene {
 
     fireWhip(w) {
         const sequence = ['front'];
-        if (w.level >= 2) sequence.push('back');
-        if (w.level >= 3) sequence.push('up');
-        if (w.level >= 4) sequence.push('down');
 
-        let dmgBonus = 0;
-        let rangeBonus = 0;
+        // Damage upgrades are at level 2, 5, 8, etc.
+        const dmgUpgrades = Math.floor((w.level + 1) / 3);
+        const damage = (15 + dmgUpgrades * 15) * this.playerStats.might;
 
-        if (w.level >= 5) {
-            const post4 = w.level - 4;
-            // Odd levels (5, 7, ...) increase range
-            rangeBonus += Math.ceil(post4 / 2) * 50;
-            // Even levels (6, 8, ...) increase damage
-            dmgBonus += Math.floor(post4 / 2) * 10;
-        }
-
-        const range = 330 + rangeBonus; // 220 * 1.5 = 330
-        const damage = (15 + dmgBonus) * this.playerStats.might;
+        const range = 330; 
         const strikeDuration = 150;
 
         sequence.forEach((dir, index) => {
             this.time.delayedCall(index * strikeDuration, () => {
-                this.performWhipStrike(dir, damage, range, strikeDuration);
+                this.performWhipStrike(dir, damage, range, strikeDuration, w.level);
             });
         });
     }
 
-    performWhipStrike(direction, damage, range, duration) {
+    performWhipStrike(direction, damage, range, duration, whipLevel = 1) {
         synthShoot('whip');
         const whip = this.add.graphics();
-        const px = this.player.x;
-        const py = this.player.y;
-
-        let angleOffset = 0;
-        if (direction === 'back') angleOffset = Math.PI;
-        if (direction === 'up') angleOffset = -Math.PI / 2;
-        if (direction === 'down') angleOffset = Math.PI / 2;
+        const cpx = this.player.x;
+        const cpy = this.player.y;
 
         const facing = this.player.scaleX > 0 ? 1 : -1;
-        const baseAngle = facing === 1 ? 0 : Math.PI;
-        const finalAngle = baseAngle + angleOffset;
+        let strikeAngle = facing === 1 ? 0 : Math.PI;
 
-        [
-            { color: 0x0000cc, thick: 60, alpha: 0.4, scale: 1.1 }, // thick * 1.5
-            { color: 0x00ffff, thick: 22.5, alpha: 0.8, scale: 1.0 },
-            { color: 0xffffff, thick: 7.5, alpha: 1.0, scale: 0.9 }
-        ].forEach(l => {
-            whip.lineStyle(l.thick, l.color, l.alpha);
+        const hitEnemies = new Set();
+        const progress = { value: 0 };
+        
+        let hasShakedCrack = false;
+        let hasShakedHit = false;
+        let finalPoints = [];
 
-            const path = new Phaser.Curves.Path(px, py);
+        this.tweens.add({
+            targets: progress,
+            value: 1,
+            duration: duration,
+            ease: 'Quad.easeOut',
+            onUpdate: () => {
+                if (!whip.active) return;
+                whip.clear();
 
-            const cp1x = px + Math.cos(finalAngle) * range * l.scale * 0.5;
-            const cp1y = py + Math.sin(finalAngle) * range * l.scale * 0.5;
+                const currentCpx = this.player.x;
+                const currentCpy = this.player.y;
+                
+                // Segment points of the curving, arching whip using a pure cubic Bezier curve
+                const numSegments = 16;
+                const points = [];
 
-            const cp2x = px + Math.cos(finalAngle + 0.2 * facing) * range * l.scale * 0.8;
-            const cp2y = py + Math.sin(finalAngle + 0.2 * facing) * range * l.scale * 0.8;
+                const angle = strikeAngle;
+                const dx = Math.cos(angle);
+                const dy = Math.sin(angle);
+                const px_perp = -Math.sin(angle);
+                const py_perp = Math.cos(angle);
 
-            const endX = px + Math.cos(finalAngle - 0.1 * facing) * range * l.scale;
-            const endY = py + Math.sin(finalAngle - 0.1 * facing) * range * l.scale;
+                const currentRange = range * (0.25 + 0.75 * progress.value);
+                
+                // The arch is deep in the middle of the swing and straightens at full extension
+                const archOffset = 65 * (1.1 - progress.value) * facing;
 
-            path.moveTo(px, py);
-            path.cubicBezierTo(cp1x, cp1y, cp2x, cp2y, endX, endY);
-            path.draw(whip);
-        });
+                const p0 = { x: currentCpx, y: currentCpy };
+                const p3 = { x: currentCpx + dx * currentRange, y: currentCpy + dy * currentRange };
 
-        whip.fillStyle(0xaaddff, 0.8);
-        for (let i = 0; i < 8; i++) {
-            const dist = Math.random() * range * 0.8;
-            const pAngle = finalAngle + (Math.random() - 0.5) * 0.3;
-            const pxr = px + Math.cos(pAngle) * dist;
-            const pyr = py + Math.sin(pAngle) * dist;
-            whip.fillCircle(pxr, pyr, Phaser.Math.Between(2, 4));
-        }
+                // Control points placed to form a beautiful, single-direction convex crescent arch
+                const p1 = {
+                    x: p0.x + dx * currentRange * 0.33 + px_perp * archOffset * 0.7,
+                    y: p0.y + dy * currentRange * 0.33 + py_perp * archOffset * 0.7
+                };
+                const p2 = {
+                    x: p0.x + dx * currentRange * 0.66 + px_perp * archOffset * 1.1,
+                    y: p0.y + dy * currentRange * 0.66 + py_perp * archOffset * 1.1
+                };
 
-        this.enemies.getChildren().forEach(e => {
-            const dx = e.x - px;
-            const dy = e.y - py;
-            const dist = Math.sqrt(dx * dx + dy * dy);
+                for (let i = 0; i <= numSegments; i++) {
+                    const t = i / numSegments;
+                    
+                    // Cubic Bezier interpolation (mathematically perfect, single-arc curve with no zig-zags)
+                    const mt = 1 - t;
+                    const mt2 = mt * mt;
+                    const mt3 = mt2 * mt;
+                    const t2 = t * t;
+                    const t3 = t2 * t;
 
-            if (dist <= range) {
-                const angleToEnemy = Math.atan2(dy, dx);
-                let diff = Math.abs(Phaser.Math.Angle.Normalize(angleToEnemy - finalAngle));
-                if (diff < 0.6) {
-                    this.damageEnemy(e, damage, 300);
+                    const sx = mt3 * p0.x + 3 * mt2 * t * p1.x + 3 * mt * t2 * p2.x + t3 * p3.x;
+                    const sy = mt3 * p0.y + 3 * mt2 * t * p1.y + 3 * mt * t2 * p2.y + t3 * p3.y;
+                    
+                    points.push({ x: sx, y: sy, t: t });
                 }
+                finalPoints = points;
+
+                const isFire = whipLevel >= 2;
+                const widthUpgrades = Math.floor((whipLevel - 1) / 3);
+                const hitTolerance = 45 + widthUpgrades * 18;
+
+                // 0. Powerful shockwave underlay for visual wind displacement pressure
+                const underlayWidth = 24 + widthUpgrades * 12;
+                const underlayColor = 0xddffff;
+                const underlayAlpha = 0.28;
+                whip.lineStyle(underlayWidth, underlayColor, underlayAlpha * (1 - progress.value));
+                whip.beginPath();
+                whip.moveTo(points[0].x, points[0].y);
+                for (let i = 1; i < points.length; i++) {
+                    whip.lineTo(points[i].x, points[i].y);
+                }
+                whip.strokePath();
+
+                // 1. Draw leather shadow outline
+                const shadowWidth = 10 + widthUpgrades * 4;
+                const shadowColor = 0x221104;
+                whip.lineStyle(shadowWidth, shadowColor, 0.55 * (1 - progress.value * 0.3));
+                whip.beginPath();
+                whip.moveTo(points[0].x, points[0].y);
+                for (let i = 1; i < points.length; i++) {
+                    whip.lineTo(points[i].x, points[i].y);
+                }
+                whip.strokePath();
+
+                // 2. Draw whip body
+                const bodyWidth = 4 + widthUpgrades * 2;
+                const bodyColor = 0x6e350d;
+                whip.lineStyle(bodyWidth, bodyColor, 0.95 * (1 - progress.value * 0.3));
+                whip.beginPath();
+                whip.moveTo(points[0].x, points[0].y);
+                for (let i = 1; i < points.length; i++) {
+                    whip.lineTo(points[i].x, points[i].y);
+                }
+                whip.strokePath();
+
+                // 3. Draw whip segment beads (gives classic 2D pixel-art segmented look)
+                points.forEach(p => {
+                    const baseSize = 8.5 + widthUpgrades * 3;
+                    const size = baseSize * (1 - p.t * 0.5); // tapers from handle to tip
+                    const alpha = (p.t > 0.8) ? 1.0 : 0.85;
+                    const color = (p.t > 0.85) ? 0xffffff : (p.t > 0.55 ? 0xd4a373 : 0x8b5a2b);
+                    whip.fillStyle(color, alpha * (1 - progress.value * 0.35));
+                    whip.fillCircle(p.x, p.y, size);
+                });
+
+                // 4. Draw retro "CRACK!" starburst at the tip when fully extended
+                if (progress.value > 0.75) {
+                    const tip = points[points.length - 1];
+                    
+                    if (!hasShakedCrack) {
+                        this.cameras.main.shake(70, 0.005);
+                        hasShakedCrack = true;
+                    }
+
+                    // Starburst backdrop glow
+                    const starColor = 0xffeb3b;
+                    whip.fillStyle(starColor, 0.85 * (1 - progress.value));
+                    whip.fillCircle(tip.x, tip.y, 16);
+                    whip.fillStyle(0xffffff, 1.0 * (1 - progress.value));
+                    whip.fillCircle(tip.x, tip.y, 10);
+
+                    // Crosshair crack lines radiating outwards
+                    whip.lineStyle(3, 0xffffff, 0.95 * (1 - progress.value));
+                    const spikeLen = 18;
+                    whip.lineBetween(tip.x - spikeLen, tip.y, tip.x + spikeLen, tip.y);
+                    whip.lineBetween(tip.x, tip.y - spikeLen, tip.x, tip.y + spikeLen);
+                    
+                    // Slanted spike accents
+                    whip.lineStyle(2, starColor, 0.75 * (1 - progress.value));
+                    whip.lineBetween(tip.x - spikeLen * 0.7, tip.y - spikeLen * 0.7, tip.x + spikeLen * 0.7, tip.y + spikeLen * 0.7);
+                    whip.lineBetween(tip.x - spikeLen * 0.7, tip.y + spikeLen * 0.7, tip.x + spikeLen * 0.7, tip.y - spikeLen * 0.7);
+
+                    // Chance to spawn crack particles on tip snap
+                    if (Math.random() < 0.3) {
+                        this.spawnBurstParticles(tip.x, tip.y, starColor, 4, 3);
+                    }
+                }
+
+                // 5. Accurate segment-by-segment proximity hitbox detection
+                this.enemies.getChildren().forEach(e => {
+                    if (hitEnemies.has(e) || !e.active) return;
+
+                    // Iterate over segment points to check for localized collision
+                    for (let i = 1; i < points.length; i++) {
+                        const p = points[i];
+                        const dist = Phaser.Math.Distance.Between(e.x, e.y, p.x, p.y);
+                        
+                        // Generous hit tolerance to make it feel super satisfying and responsive
+                        if (dist < hitTolerance) {
+                            this.damageEnemy(e, damage, 300);
+                            hitEnemies.add(e);
+
+                            // Extra electric whip snap impact spark burst right at collision coordinate
+                            const sparkColor = isFire ? 0xff5500 : 0xffeb3b;
+                            this.spawnBurstParticles(p.x, p.y, sparkColor, 8, 3.5);
+                            this.spawnBurstParticles(p.x, p.y, 0xffffff, 5, 2.0);
+
+                            if (!hasShakedHit) {
+                                this.cameras.main.shake(90, 0.006);
+                                hasShakedHit = true;
+                            }
+                            break; // Stop checking segments for this enemy since they are hit
+                        }
+                    }
+                });
+            },
+            onComplete: () => {
+                const isFire = whipLevel >= 2;
+                if (isFire) {
+                    const widthUpgrades = Math.floor((whipLevel - 1) / 3);
+                    const currentCpx = this.player.x;
+                    const currentCpy = this.player.y;
+                    
+                    // Create a beautiful, sweeping asymmetric "comma" wave (curves down, hooks inward/backward at the head)
+                    const numArcPoints = 32;
+                    const arcPoints = [];
+                    
+                    // Starts slightly in front of the player, extends to the full whip range in the facing direction
+                    const startX = currentCpx + 15 * facing;
+                    const endX = currentCpx + range * facing;
+                    
+                    // In Phaser, Y is positive downwards. The whip always arches downwards (a smile curve under the player),
+                    // so we make the fire path arch downward to perfectly trace and match the whip's sweep!
+                    const verticalBulge = 45 + widthUpgrades * 10; 
+                    
+                    for (let i = 0; i <= numArcPoints; i++) {
+                        const t = i / numArcPoints;
+                        
+                        // Sweeps forward to peak range at t ~ 0.91, then hooks slightly back/inward
+                        const x_scale = (1.5 * t - 0.6 * t * t * t) / 0.914;
+                        const ax = startX + (endX - startX) * x_scale;
+                        
+                        // Gentle smile curve initially, sweeping down into a sharp downward hook at the head
+                        const y_scale = 0.35 * Math.sin(t * Math.PI) + 0.8 * Math.pow(t, 2.2);
+                        const ay = currentCpy + verticalBulge * y_scale;
+                        
+                        arcPoints.push({ x: ax, y: ay, t: t });
+                    }
+
+                    // Helper function to draw a gorgeous, tapered crescent polygon in Phaser
+                    const drawCrescent = (graphics, points, baseThickness, color, alpha) => {
+                        if (points.length < 3) return;
+                        graphics.fillStyle(color, alpha);
+                        graphics.beginPath();
+                        
+                        const outerPoints = [];
+                        const innerPoints = [];
+                        
+                        for (let i = 0; i < points.length; i++) {
+                            const p = points[i];
+                            const t = p.t;
+                            
+                            let dx, dy;
+                            if (i === 0) {
+                                dx = points[1].x - p.x;
+                                dy = points[1].y - p.y;
+                            } else if (i === points.length - 1) {
+                                dx = p.x - points[i-1].x;
+                                dy = p.y - points[i-1].y;
+                            } else {
+                                dx = points[i+1].x - points[i-1].x;
+                                dy = points[i+1].y - points[i-1].y;
+                            }
+                            
+                            const len = Math.sqrt(dx * dx + dy * dy);
+                            const nx = len > 0 ? -dy / len : 0;
+                            const ny = len > 0 ? dx / len : 0;
+                            
+                            // Beautiful asymmetrical comma-shaped thickness (thin tail near player, thick sweeping head at outer edge)
+                            // Pushed power to 4.0 so the crescent has a long thin neck and massive fiery head before hooking back
+                            const thickness = baseThickness * Math.sin(Math.pow(t, 4.0) * Math.PI);
+                            
+                            outerPoints.push({ x: p.x + nx * thickness, y: p.y + ny * thickness });
+                            innerPoints.push({ x: p.x - nx * thickness, y: p.y - ny * thickness });
+                        }
+                        
+                        // Draw outer boundary forward
+                        graphics.moveTo(outerPoints[0].x, outerPoints[0].y);
+                        for (let i = 1; i < outerPoints.length; i++) {
+                            graphics.lineTo(outerPoints[i].x, outerPoints[i].y);
+                        }
+                        // Draw inner boundary backward to close the shape
+                        for (let i = innerPoints.length - 1; i >= 0; i--) {
+                            graphics.lineTo(innerPoints[i].x, innerPoints[i].y);
+                        }
+                        
+                        graphics.closePath();
+                        graphics.fillPath();
+                    };
+
+                    const burningPath = this.add.graphics();
+                    const totalDuration = 1800;
+                    
+                    const flameColors = [0xff2200, 0xff5500, 0xff9c00, 0xffea00];
+                    const sparkColors = [0xffea00, 0xffbb00, 0xffffff];
+                    const smokeColors = [0x222222, 0x3d3d3d, 0x5a5a5a];
+
+                    // Add lightweight, invisible physics triggers along this perfect arc to handle damage detection
+                    // We instantiate them immediately so they can track the expanding shockwave front dynamically
+                    const hitBodies = [];
+                    const step = Math.max(1, Math.floor(numArcPoints / 7));
+                    for (let i = 1; i < numArcPoints - 1; i += step) {
+                        const p = arcPoints[i];
+                        if (p) {
+                            const triggerSize = 25 + widthUpgrades * 6; // generous size for explosive feel
+                            const trigger = this.add.circle(p.x, p.y, triggerSize, 0x000000, 0); // fully invisible trigger
+                            this.fireWakes.add(trigger);
+                            this.physics.add.existing(trigger);
+                            trigger.body.setCircle(triggerSize);
+                            trigger.dmg = Math.ceil(damage * 0.10); // 10% of initial whip strike
+                            trigger.knockback = 10; // small knockback effect so it affects enemies without launching them
+                            hitBodies.push(trigger);
+                        }
+                    }
+
+                    // --- INITIAL EXPLOSION / DENSE FIRE BURST ---
+                    // Spawn highly visible, gorgeous burning particle effects along the entire arc to ignite it!
+                    arcPoints.forEach((p, index) => {
+                        // Skip the absolute tips a tiny bit for a nice tapered fire effect
+                        if (index < 2 || index > numArcPoints - 2) return;
+                        
+                        // 1. Blazing rising flame circles
+                        if (Math.random() < 0.85) {
+                            const flameColor = flameColors[Phaser.Math.Between(0, flameColors.length - 1)];
+                            const flameSize = Phaser.Math.Between(7, 13);
+                            const flame = this.add.circle(p.x + Phaser.Math.Between(-4, 4), p.y + Phaser.Math.Between(-4, 4), flameSize, flameColor, 0.9);
+                            
+                            this.tweens.add({
+                                targets: flame,
+                                y: flame.y - Phaser.Math.Between(30, 60),
+                                x: flame.x + Phaser.Math.Between(-12, 12),
+                                scale: { from: 1.3, to: 0.1 },
+                                alpha: { from: 0.9, to: 0 },
+                                duration: Phaser.Math.Between(800, 1200),
+                                ease: 'Quad.easeOut',
+                                onComplete: () => flame.destroy()
+                             });
+                        }
+                        
+                        // 2. High-speed rising hot spark embers
+                        if (Math.random() < 0.65) {
+                            const sparkColor = sparkColors[Phaser.Math.Between(0, sparkColors.length - 1)];
+                            const sparkSize = Phaser.Math.Between(2.2, 4.0);
+                            const spark = this.add.circle(p.x, p.y, sparkSize, sparkColor, 1.0);
+                            
+                            this.tweens.add({
+                                targets: spark,
+                                x: spark.x + Phaser.Math.Between(-20, 20),
+                                y: spark.y - Phaser.Math.Between(50, 85),
+                                alpha: 0,
+                                scale: 0.1,
+                                duration: Phaser.Math.Between(700, 1200),
+                                ease: 'Sine.easeOut',
+                                onComplete: () => spark.destroy()
+                            });
+                        }
+
+                        // 3. Puffy dark smoke clouds rising
+                        if (Math.random() < 0.45) {
+                            const smokeColor = smokeColors[Phaser.Math.Between(0, smokeColors.length - 1)];
+                            const smokeSize = Phaser.Math.Between(9, 16);
+                            const smoke = this.add.circle(p.x + Phaser.Math.Between(-8, 8), p.y + Phaser.Math.Between(-8, 8), smokeSize, smokeColor, 0.35);
+                            
+                            this.tweens.add({
+                                targets: smoke,
+                                y: smoke.y - Phaser.Math.Between(45, 75),
+                                x: smoke.x + Phaser.Math.Between(-18, 18),
+                                scale: { from: 1.0, to: 2.8 },
+                                alpha: { from: 0.35, to: 0 },
+                                duration: Phaser.Math.Between(1200, 1700),
+                                ease: 'Cubic.easeOut',
+                                onComplete: () => smoke.destroy()
+                            });
+                        }
+                    });
+
+                    // We run a dynamic simulation where the fire path expands and travels outwards like a real pressure wave!
+                    this.tweens.add({
+                        targets: { val: 1 },
+                        val: 0,
+                        duration: totalDuration,
+                        ease: 'Quad.easeIn',
+                        onUpdate: (tween, target) => {
+                            if (!burningPath || !burningPath.active) return;
+                            burningPath.clear();
+                            
+                            const alpha = target.val;
+                            const t_elapsed = 1 - alpha;
+                            const flicker = 0.80 + Math.random() * 0.20;
+
+                            // Calculate dynamic expanding arc points
+                            const rangeFactor = 1.0 + t_elapsed * 0.45; // grows 45% longer
+                            const bulgeFactor = 1.0 + t_elapsed * 0.75; // grows 75% deeper
+                            const shiftX = t_elapsed * 90 * facing; // travels forward
+                            const shiftY = t_elapsed * 55; // travels downward in sweeping direction
+                            
+                            const d_startX = currentCpx + 15 * facing + shiftX;
+                            const d_endX = currentCpx + range * facing * rangeFactor + shiftX;
+                            const d_verticalBulge = verticalBulge * bulgeFactor;
+                            
+                            const dynamicPoints = [];
+                            for (let i = 0; i <= numArcPoints; i++) {
+                                const t = i / numArcPoints;
+                                const x_scale = (1.5 * t - 0.6 * t * t * t) / 0.914;
+                                const ax = d_startX + (d_endX - d_startX) * x_scale;
+                                
+                                const y_scale = 0.35 * Math.sin(t * Math.PI) + 0.8 * Math.pow(t, 2.2);
+                                const ay = currentCpy + d_verticalBulge * y_scale + shiftY;
+                                
+                                dynamicPoints.push({ x: ax, y: ay, t: t });
+                            }
+
+                            // Update invisible physics trigger positions to follow the expanding shockwave front!
+                            let triggerIdx = 0;
+                            for (let i = 1; i < numArcPoints - 1; i += step) {
+                                const p = dynamicPoints[i];
+                                const trigger = hitBodies[triggerIdx];
+                                if (trigger && trigger.active && p) {
+                                    const currentSize = (25 + widthUpgrades * 6) * (1.0 + t_elapsed * 1.2); // expands up to 2.2x size
+                                    trigger.setPosition(p.x, p.y);
+                                    trigger.setRadius(currentSize);
+                                    if (trigger.body) {
+                                        trigger.body.setCircle(currentSize);
+                                        trigger.body.updateFromGameObject();
+                                    }
+                                }
+                                triggerIdx++;
+                            }
+
+                            // Shockwave inflates and broadens as it diffuses in the air
+                            const thicknessScale = 1.0 + t_elapsed * 1.5;
+                            
+                            // 1. Draw a smoky, charred grass crack underlay (very thick)
+                            drawCrescent(burningPath, dynamicPoints, (14.0 + widthUpgrades * 3.5) * thicknessScale, 0x110800, 0.75 * alpha);
+                            
+                            // 2. Draw a gorgeous outer crimson/red flame crescent
+                            drawCrescent(burningPath, dynamicPoints, (9.0 + widthUpgrades * 2.5) * thicknessScale, 0xb30000, 0.9 * alpha * flicker);
+                            
+                            // 3. Draw a vibrant inner burning orange crescent
+                            drawCrescent(burningPath, dynamicPoints, (5.0 + widthUpgrades * 1.5) * thicknessScale, 0xff5500, 1.0 * alpha * flicker);
+                            
+                            // 4. Draw a razor-thin golden-white core crescent
+                            drawCrescent(burningPath, dynamicPoints, (1.6 + widthUpgrades * 0.5) * thicknessScale, 0xffea00, 1.0 * alpha * flicker);
+
+                            // --- CONTINUOUS ACTIVE PARTICLE GENERATION ---
+                            // Particles blast outward from the expanding shockwave front in the direction of the wave's expansion!
+                            for (let k = 0; k < 2; k++) {
+                                if (Math.random() < 0.45) {
+                                    const p = dynamicPoints[Phaser.Math.Between(2, dynamicPoints.length - 3)];
+                                    if (p) {
+                                        const flameColor = flameColors[Phaser.Math.Between(0, flameColors.length - 1)];
+                                        const flameSize = Phaser.Math.Between(5, 10) * alpha;
+                                        const flame = this.add.circle(p.x, p.y, flameSize, flameColor, 0.8 * alpha);
+                                        
+                                        const blastX = (Phaser.Math.Between(40, 100) * facing) + Phaser.Math.Between(-15, 15);
+                                        const blastY = Phaser.Math.Between(30, 90) + Phaser.Math.Between(-15, 15);
+                                        
+                                        this.tweens.add({
+                                            targets: flame,
+                                            x: flame.x + blastX * (1.2 - alpha),
+                                            y: flame.y + blastY * (1.2 - alpha),
+                                            scale: { from: 1.1, to: 0.1 },
+                                            alpha: 0,
+                                            duration: Phaser.Math.Between(500, 850),
+                                            ease: 'Quad.easeOut',
+                                            onComplete: () => flame.destroy()
+                                        });
+                                    }
+                                }
+
+                                if (Math.random() < 0.35) {
+                                    const p = dynamicPoints[Phaser.Math.Between(2, dynamicPoints.length - 3)];
+                                    if (p) {
+                                        const sparkColor = sparkColors[Phaser.Math.Between(0, sparkColors.length - 1)];
+                                        const sparkSize = Phaser.Math.Between(1.8, 3.2);
+                                        const spark = this.add.circle(p.x, p.y, sparkSize, sparkColor, 0.95 * alpha);
+                                        
+                                        const blastX = (Phaser.Math.Between(50, 120) * facing) + Phaser.Math.Between(-20, 20);
+                                        const blastY = Phaser.Math.Between(40, 110) + Phaser.Math.Between(-20, 20);
+                                        
+                                        this.tweens.add({
+                                            targets: spark,
+                                            x: spark.x + blastX * (1.2 - alpha),
+                                            y: spark.y + blastY * (1.2 - alpha),
+                                            alpha: 0,
+                                            scale: 0.1,
+                                            duration: Phaser.Math.Between(450, 800),
+                                            ease: 'Sine.easeOut',
+                                            onComplete: () => spark.destroy()
+                                        });
+                                    }
+                                }
+                            }
+                        },
+                        onComplete: () => {
+                            if (burningPath) burningPath.destroy();
+                        }
+                    });
+
+                    // Destroy triggers after totalDuration so they deal damage while the wave is active, expanding, and fading
+                    this.time.delayedCall(totalDuration, () => {
+                        hitBodies.forEach(b => {
+                            if (b && b.active) b.destroy();
+                        });
+                    });
+                }
+                whip.destroy();
             }
         });
-
-        this.tweens.add({ targets: whip, alpha: 0, duration: duration, onComplete: () => whip.destroy() });
     }
 
     fireAxe(w) {
@@ -722,24 +1248,46 @@ class MainScene extends Phaser.Scene {
         const count = w.level;
         for (let i = 0; i < count; i++) {
             const spread = (i - (count - 1) / 2) * 50;
-            const axe = this.add.image(this.player.x, this.player.y, 'axe').setOrigin(0.5).setScale(1.5);
+            const axe = this.add.image(this.player.x, this.player.y, 'axe').setOrigin(0.5).setScale(0.5);
             this.bullets.add(axe);
             this.physics.add.existing(axe);
             axe.body.setCircle(15);
             axe.body.setVelocity(this.player.scaleX * 150 + spread, -400);
             axe.body.gravity.y = 800;
             axe.dmg = 12 * this.playerStats.might; axe.type = 'axe';
+
+            // Squash & stretch heave throw
+            this.tweens.add({
+                targets: axe,
+                scaleX: 1.8,
+                scaleY: 1.3,
+                duration: 200,
+                ease: 'Back.easeOut',
+                onComplete: () => {
+                    if (axe.active) {
+                        axe.setScale(1.5);
+                    }
+                }
+            });
         }
     }
 
     fireCross(w) {
         synthShoot('cross');
-        const cross = this.add.image(this.player.x, this.player.y, 'cross').setOrigin(0.5).setScale(1.5);
+        const cross = this.add.image(this.player.x, this.player.y, 'cross').setOrigin(0.5).setScale(0.5);
         this.bullets.add(cross);
         this.physics.add.existing(cross);
         cross.body.setCircle(15);
         cross.body.setVelocity(this.player.scaleX * 300, 0);
         cross.dmg = 6 * this.playerStats.might; cross.type = 'cross'; cross.returnTimer = 40;
+
+        // Bouncy expanding pop-out
+        this.tweens.add({
+            targets: cross,
+            scale: 1.5,
+            duration: 250,
+            ease: 'Bounce.easeOut'
+        });
     }
 
     fireKnife(w) {
@@ -749,7 +1297,7 @@ class MainScene extends Phaser.Scene {
 
         for (let i = 0; i < count; i++) {
             const offset = (i - (count - 1) / 2) * spreadAngle;
-            const knife = this.add.image(this.player.x, this.player.y, 'knife').setOrigin(0.5).setScale(1.5);
+            const knife = this.add.image(this.player.x, this.player.y, 'knife').setOrigin(0.5).setScale(0.4);
             this.bullets.add(knife);
             this.physics.add.existing(knife);
             knife.body.setCircle(12);
@@ -761,6 +1309,21 @@ class MainScene extends Phaser.Scene {
             const speed = 500;
             knife.body.setVelocity(Math.cos(finalAngle) * speed, Math.sin(finalAngle) * speed);
             knife.dmg = 8 * this.playerStats.might; knife.type = 'knife';
+
+            // Elastic thrust scaling
+            this.tweens.add({
+                targets: knife,
+                scaleX: 2.3,
+                scaleY: 0.9,
+                duration: 120,
+                ease: 'Quad.easeOut',
+                yoyo: true,
+                onComplete: () => {
+                    if (knife.active) {
+                        knife.setScale(1.5);
+                    }
+                }
+            });
         }
     }
 
@@ -793,6 +1356,31 @@ class MainScene extends Phaser.Scene {
 
                 this.tweens.add({ targets: puddle, alpha: 0.2, scaleX: 1.1, scaleY: 1.1, yoyo: true, repeat: -1, duration: 600 });
 
+                // Splash droplets inside the boiling puddle
+                const bubbleTimer = this.time.addEvent({
+                    delay: 200,
+                    loop: true,
+                    callback: () => {
+                        if (!puddle || !puddle.active) { 
+                            bubbleTimer.remove(); 
+                            return; 
+                        }
+                        const rad = (size / 2) * Math.random();
+                        const ang = Math.random() * Math.PI * 2;
+                        const bx = tx + Math.cos(ang) * rad;
+                        const by = ty + Math.sin(ang) * rad;
+                        const drop = this.add.circle(bx, by, Phaser.Math.Between(2, 5), 0xaaddff, 0.8);
+                        this.tweens.add({
+                            targets: drop,
+                            y: by - Phaser.Math.Between(10, 20),
+                            alpha: 0,
+                            scale: 1.5,
+                            duration: 400,
+                            onComplete: () => drop.destroy()
+                        });
+                    }
+                });
+
                 const tick = this.time.addEvent({
                     delay: 250,
                     repeat: Math.floor(duration / 250),
@@ -806,6 +1394,7 @@ class MainScene extends Phaser.Scene {
                 });
 
                 this.time.delayedCall(duration, () => {
+                    bubbleTimer.remove();
                     tick.remove();
                     this.tweens.add({
                         targets: puddle, alpha: 0, duration: 500,
@@ -824,6 +1413,26 @@ class MainScene extends Phaser.Scene {
             }
             if (b.type === 'axe') b.rotation += 0.2;
             else b.rotation += 0.1;
+            
+            // Spawn trailing particles
+            if (this.gameTime % 2 === 0) {
+                let trailColor = 0xffffff;
+                let trailSize = 3;
+                if (b.type === 'wand') { trailColor = 0x00ffff; trailSize = 5; }
+                else if (b.type === 'cross') { trailColor = 0xffeb3b; trailSize = 4; }
+                else if (b.type === 'axe') { trailColor = 0x9e9e9e; trailSize = 5; }
+                else if (b.type === 'knife') { trailColor = 0xe0e0e0; trailSize = 3; }
+                
+                const trail = this.add.circle(b.x, b.y, trailSize, trailColor, 0.6);
+                this.tweens.add({
+                    targets: trail,
+                    alpha: 0,
+                    scale: 0.1,
+                    duration: 300,
+                    onComplete: () => trail.destroy()
+                });
+            }
+
             const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, b.x, b.y);
             if (dist > 1000) b.destroy();
         });
@@ -839,6 +1448,12 @@ class MainScene extends Phaser.Scene {
         this.playerStats.hp -= dmg;
         synthHurt();
         this.invulnTimer = 60;
+        
+        // Visual Hit Juice
+        this.cameras.main.shake(150, 0.012);
+        this.cameras.main.flash(100, 255, 0, 0, 0.2); // slight red flash
+        this.spawnBurstParticles(this.player.x, this.player.y, 0xff0000, 10, 4);
+
         if (this.playerStats.hp <= 0) this.gameOver();
         updateDOMHUD(this.playerStats, Math.floor(this.accumulatedTime / 1000), this.killCount);
     }
@@ -864,8 +1479,12 @@ class MainScene extends Phaser.Scene {
             enemy.stunTimer = 15;
         }
 
-        // Damage Text (Juice)
-        this.spawnDamagePop(enemy.x, enemy.y, Math.round(amount));
+        // Damage hit spark particles
+        this.spawnBurstParticles(enemy.x, enemy.y, 0xff5555, 4, 3);
+
+        // Damage Text (Juice) with Crit indicators
+        const isCrit = amount > 15 || enemy.isBoss;
+        this.spawnDamagePop(enemy.x, enemy.y, Math.round(amount), isCrit);
 
         if (enemy.hp <= 0) {
             enemy.active = false;
@@ -874,21 +1493,11 @@ class MainScene extends Phaser.Scene {
             enemy.body.setDrag(1000);
             synthHit();
 
-            // Dust Effect (Thanos Snap)
-            const particles = this.add.graphics();
-            particles.fillStyle(0xcccccc, 0.8);
-            for (let i = 0; i < 8; i++) {
-                const px = enemy.x + (Math.random() - 0.5) * 40;
-                const py = enemy.y + (Math.random() - 0.5) * 40;
-                particles.fillCircle(px, py, 4);
-            }
-            this.tweens.add({
-                targets: particles,
-                alpha: 0,
-                y: '-=30',
-                duration: 600,
-                onComplete: () => particles.destroy()
-            });
+            // Death Ring Explosion Particles
+            const explosionColor = enemy.isBoss ? 0xff00ff : 0x00ff88;
+            const particleCount = enemy.isBoss ? 35 : 15;
+            const particleSize = enemy.isBoss ? 6 : 4;
+            this.spawnBurstParticles(enemy.x, enemy.y, explosionColor, particleCount, particleSize);
 
             // Death animation: fade out and float up
             this.tweens.add({
@@ -1009,23 +1618,85 @@ class MainScene extends Phaser.Scene {
         });
     }
 
-    spawnDamagePop(x, y, amount) {
-        const txt = this.add.text(x, y + (Math.random() - 0.5) * 20, amount, {
-            fontSize: '18px',
+    spawnBurstParticles(x, y, color = 0xffffff, count = 10, size = 4) {
+        const container = this.add.graphics();
+        const particles = [];
+        
+        for (let i = 0; i < count; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Phaser.Math.FloatBetween(2, 6);
+            particles.push({
+                x: 0,
+                y: 0,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                size: Phaser.Math.FloatBetween(size * 0.5, size * 1.5)
+            });
+        }
+        
+        container.setPosition(x, y);
+        
+        const updateEvent = this.time.addEvent({
+            delay: 16,
+            loop: true,
+            callback: () => {
+                if (!container.active) {
+                    updateEvent.remove();
+                    return;
+                }
+                container.clear();
+                container.fillStyle(color, 0.8);
+                let allDead = true;
+                
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vx *= 0.95; // drag
+                    p.vy *= 0.95;
+                    p.size *= 0.95; // fade size
+                    
+                    if (p.size > 0.5) {
+                        container.fillCircle(p.x, p.y, p.size);
+                        allDead = false;
+                    }
+                });
+                
+                if (allDead) {
+                    updateEvent.remove();
+                    container.destroy();
+                }
+            }
+        });
+        
+        // Safety destroy after 1s
+        this.time.delayedCall(1000, () => {
+            updateEvent.remove();
+            if (container && container.active) container.destroy();
+        });
+    }
+
+    spawnDamagePop(x, y, amount, isCrit = false) {
+        const color = isCrit ? '#ffcc00' : (amount > 15 ? '#ff4444' : '#ffffff');
+        const size = isCrit ? '26px' : (amount > 15 ? '22px' : '16px');
+        const driftX = (Math.random() - 0.5) * 60;
+        
+        const txt = this.add.text(x, y, amount, {
+            fontSize: size,
             fontFamily: 'Fredoka',
-            color: '#ffffff',
+            color: color,
             stroke: '#000000',
-            strokeThickness: 3,
+            strokeThickness: isCrit ? 4 : 3,
             fontStyle: 'bold'
         }).setOrigin(0.5);
 
         this.tweens.add({
             targets: txt,
-            y: y - 50,
+            x: x + driftX,
+            y: y - Phaser.Math.Between(60, 90),
             alpha: 0,
-            scale: 1.5,
-            duration: 600,
-            ease: 'Back.easeOut',
+            scale: isCrit ? 1.8 : 1.4,
+            duration: 800,
+            ease: 'Cubic.easeOut',
             onComplete: () => txt.destroy()
         });
     }
@@ -1069,6 +1740,7 @@ class MainScene extends Phaser.Scene {
             if (d < 150 || g.vortexed) this.physics.moveToObject(g, this.player, 600);
             if (d < 30) {
                 synthGem();
+                this.spawnBurstParticles(this.player.x, this.player.y, 0x00ffff, 5, 2.5);
                 if (g.type === 'chest') this.triggerTreasureEvent();
                 else this.addXp(g.val);
                 g.destroy();
@@ -1083,6 +1755,29 @@ class MainScene extends Phaser.Scene {
             this.playerStats.level++;
             this.playerStats.nextLevelXp = Math.floor(this.playerStats.nextLevelXp * 1.5);
             synthLevelUp();
+            
+            // Level up juice!
+            this.spawnBurstParticles(this.player.x, this.player.y, 0xffff00, 25, 5);
+            this.cameras.main.flash(300, 255, 255, 255, 0.3);
+            
+            const lvlText = this.add.text(this.player.x, this.player.y - 60, '⭐ LEVEL UP! ⭐', {
+                fontSize: '28px',
+                fontFamily: 'Fredoka',
+                color: '#ffff00',
+                stroke: '#000000',
+                strokeThickness: 5,
+                fontStyle: 'bold'
+            }).setOrigin(0.5);
+            
+            this.tweens.add({
+                targets: lvlText,
+                y: this.player.y - 120,
+                alpha: 0,
+                scale: 1.5,
+                duration: 1200,
+                onComplete: () => lvlText.destroy()
+            });
+
             this.triggerLevelUp();
 
             if (this.playerStats.level % 5 === 0) {
@@ -1197,6 +1892,10 @@ class MainScene extends Phaser.Scene {
             const existing = p.weapons.find(w => w.type === reward.id);
             if (existing) {
                 existing.level++;
+                if (reward.id === 'whip') {
+                    const speedUpgrades = Math.floor(existing.level / 3);
+                    existing.cooldown = Math.max(40, 120 - speedUpgrades * 25);
+                }
                 if (reward.id === 'wand') existing.cooldown = Math.max(5, existing.cooldown - 8);
                 if (reward.id === 'cross') existing.cooldown = Math.max(20, existing.cooldown - 5);
                 if (reward.id === 'knife') existing.cooldown = Math.max(5, existing.cooldown - 2);
@@ -1323,13 +2022,17 @@ function showPowerUpSelection(context) {
             const weapon = existingWeapons.find(w => w.type === 'whip');
             if (weapon) {
                 const nextLevel = weapon.level + 1;
-                if (nextLevel === 2) description = "Increased Damage";
-                else if (nextLevel === 3) description = "Back Attack";
-                else if (nextLevel === 4) description = "Up Attack";
-                else if (nextLevel === 5) description = "Down Attack";
-                else {
-                    const post5 = nextLevel - 5;
-                    description = post5 % 2 !== 0 ? "Increased Range" : "Increased Damage";
+                if (nextLevel === 2) {
+                    description = "Flaming Wake (+Damage & Fire Arc)";
+                } else if (nextLevel === 3) {
+                    description = "Whip Speed (Attack More Often)";
+                } else if (nextLevel === 4) {
+                    description = "Fiery Expansion (+Whip Width & Flame Aura)";
+                } else {
+                    const cycle = (nextLevel - 2) % 3;
+                    if (cycle === 0) description = "Searing Heat (+Damage)";
+                    else if (cycle === 1) description = "Blazing Speed (Attack More Often)";
+                    else description = "Wildfire Scope (+Whip Width & Flame Aura)";
                 }
             }
         }

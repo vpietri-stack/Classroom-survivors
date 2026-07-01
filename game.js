@@ -101,9 +101,70 @@ const noise = (dur) => {
     n.connect(g); g.connect(audioCtx.destination);
     n.start();
 }
+const synthWhipCrack = () => {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+
+    // 1. Whoosh/Swell (the swing)
+    const oscSwing = audioCtx.createOscillator();
+    const gainSwing = audioCtx.createGain();
+    oscSwing.type = 'triangle';
+    oscSwing.frequency.setValueAtTime(100, now);
+    oscSwing.frequency.exponentialRampToValueAtTime(700, now + 0.08);
+    gainSwing.gain.setValueAtTime(0.001, now);
+    gainSwing.gain.linearRampToValueAtTime(0.08, now + 0.06);
+    gainSwing.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+    
+    oscSwing.connect(gainSwing);
+    gainSwing.connect(audioCtx.destination);
+    oscSwing.start(now);
+    oscSwing.stop(now + 0.1);
+
+    // 2. The Crack (extremely sharp high-intensity pop)
+    const oscCrack = audioCtx.createOscillator();
+    const gainCrack = audioCtx.createGain();
+    oscCrack.type = 'sawtooth';
+    oscCrack.frequency.setValueAtTime(2800, now + 0.07);
+    oscCrack.frequency.exponentialRampToValueAtTime(150, now + 0.13);
+    
+    gainCrack.gain.setValueAtTime(0.001, now);
+    gainCrack.gain.setValueAtTime(0.35, now + 0.07); // loud, crisp snap!
+    gainCrack.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+    
+    oscCrack.connect(gainCrack);
+    gainCrack.connect(audioCtx.destination);
+    oscCrack.start(now + 0.07);
+    oscCrack.stop(now + 0.15);
+
+    // 3. Noise Snap (high frequency white noise snap/shockwave)
+    const bufferSize = audioCtx.sampleRate * 0.08;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+    }
+    const noiseNode = audioCtx.createBufferSource();
+    noiseNode.buffer = buffer;
+
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(1500, now + 0.07);
+    filter.Q.setValueAtTime(1.5, now + 0.07);
+
+    const gainNoise = audioCtx.createGain();
+    gainNoise.gain.setValueAtTime(0.001, now);
+    gainNoise.gain.setValueAtTime(0.3, now + 0.07);
+    gainNoise.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+
+    noiseNode.connect(filter);
+    filter.connect(gainNoise);
+    gainNoise.connect(audioCtx.destination);
+    noiseNode.start(now + 0.07);
+};
+
 const synthShoot = (type) => {
     if (type === 'wand') osc('sine', 800, 0.1, 0.05);
-    if (type === 'whip') noise(0.2);
+    if (type === 'whip') synthWhipCrack();
     if (type === 'orb') osc('triangle', 200, 0.3, 0.05);
     if (type === 'axe') osc('square', 150, 0.15, 0.05);
     if (type === 'cross') osc('sine', 600, 0.2, 0.05);

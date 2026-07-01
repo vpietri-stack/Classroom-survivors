@@ -4,6 +4,17 @@
 <head>
     <script>
         window.onerror = function(message, source, lineno, colno, error) {
+            // Ignore generic script errors with no details (often caused by CORS or browser extensions)
+            if (message === 'Script error.' || message === 'Script error') {
+                return;
+            }
+            // Only show the visual error overlay on localhost or when ?debug=true is present in the URL
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const showDebug = new URLSearchParams(window.location.search).has('debug');
+            if (!isLocal && !showDebug) {
+                return;
+            }
+
             const div = document.createElement('div');
             div.style.position = 'fixed';
             div.style.top = '0';

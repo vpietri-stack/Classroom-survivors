@@ -292,7 +292,7 @@ TEACHING_CONTENT["PU3"] = {
             ],
             sentencePairs: [
                 { a: "What time is it?", b: "It's half past twelve." },
-                { a: "What time do you have breakfast?", b: "At three o'clock." },
+                { a: "What time do you have breakfast?", b: "At half past seven in the morning." },
                 { a: "Could you skip when you were four?", b: "No, I couldn't." },
                 { a: "Could she climb a tree when she was six?", b: "Yes, she could." },
                 { a: "What could you do when you were young?", b: "I could hop on one leg." },

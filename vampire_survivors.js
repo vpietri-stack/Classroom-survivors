@@ -75,7 +75,7 @@ class MainScene extends Phaser.Scene {
             gr.destroy();
         }
 
-        this.bg = this.add.tileSprite(0, 0, this.scale.width, this.scale.height, 'grass').setOrigin(0, 0);
+        this.bg = this.add.tileSprite(this.scale.width / 2, this.scale.height / 2, this.scale.width, this.scale.height, 'grass').setOrigin(0.5);
         this.bg.setScrollFactor(0);
 
         this.game.canvas.style.touchAction = 'none';
@@ -1922,6 +1922,7 @@ class MainScene extends Phaser.Scene {
         zoom = Phaser.Math.Clamp(zoom, 0.4, 1.0);
         this.cameras.main.setZoom(zoom);
         if (this.bg) {
+            this.bg.setPosition(width / 2, this.scale.height / 2);
             this.bg.setSize(width / zoom + 100, this.scale.height / zoom + 100);
         }
     }

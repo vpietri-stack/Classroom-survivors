@@ -218,7 +218,7 @@ function showProfileSelection(users) {
     users.forEach(user => {
         const btn = document.createElement('div');
         btn.className = 'profile-btn flex flex-col items-center gap-2 cursor-pointer transform hover:scale-110 transition-transform';
-        btn.onclick = () => loginWithProfile(user);
+        btn.onclick = () => loginWithProfile(user, btn);
         
         const img = document.createElement('div');
         img.className = 'w-24 h-24 sm:w-32 sm:h-32 rounded-md flex items-center justify-center text-5xl bg-[#333] border-4 border-transparent hover:border-white transition-all shadow-lg';
@@ -251,7 +251,44 @@ function showProfileSelection(users) {
     container.appendChild(addBtn);
 }
 
-async function loginWithProfile(user) {
+async function loginWithProfile(user, clickedBtn) {
+    // Prevent double-clicks while a login is already in progress
+    if (window.authLoading) return;
+    window.authLoading = true;
+
+    // --- Visual feedback: dim all profiles, show spinner on the clicked one ---
+    const allProfileBtns = document.querySelectorAll('#profile-list .profile-btn');
+    const originalAvatar = clickedBtn ? clickedBtn.querySelector('div')?.innerText : null;
+    const originalName = clickedBtn ? clickedBtn.querySelector('span')?.innerText : null;
+    allProfileBtns.forEach(b => {
+        if (b !== clickedBtn) {
+            b.style.opacity = '0.35';
+            b.style.pointerEvents = 'none';
+        }
+    });
+    if (clickedBtn) {
+        clickedBtn.style.pointerEvents = 'none';
+        const avatarDiv = clickedBtn.querySelector('div');
+        const nameSpan = clickedBtn.querySelector('span');
+        if (avatarDiv) avatarDiv.innerHTML = '<i class="fas fa-circle-notch fa-spin text-white"></i>';
+        if (nameSpan) nameSpan.innerText = '登录中...';
+    }
+
+    // Helper to restore the profile list UI (used on failure / fallback)
+    function restoreProfileUI() {
+        allProfileBtns.forEach(b => {
+            b.style.opacity = '';
+            b.style.pointerEvents = '';
+        });
+        if (clickedBtn) {
+            const avatarDiv = clickedBtn.querySelector('div');
+            const nameSpan = clickedBtn.querySelector('span');
+            if (avatarDiv) avatarDiv.innerText = originalAvatar || '👤';
+            if (nameSpan) nameSpan.innerText = originalName || '';
+        }
+        window.authLoading = false;
+    }
+
     // Refresh user data from API to ensure we have the latest DB fields (like book/unit/page)
     try {
         const response = await apiFetch(`${API_BASE}/login`, {
@@ -277,6 +314,7 @@ async function loginWithProfile(user) {
                     analytics: data.analytics || [],
                     teacher: data.teacher || null
                 };
+                window.authLoading = false;
                 showChangePasswordScreen(data.fullName);
                 return;
             }
@@ -305,6 +343,7 @@ async function loginWithProfile(user) {
             localStorage.setItem('savedUsers', JSON.stringify(savedUsers));
             localStorage.setItem('activeUserId', authActiveUser.id);
             
+            window.authLoading = false;
             finishLogin();
             return;
         }
@@ -314,6 +353,7 @@ async function loginWithProfile(user) {
 
     // Fallback to cached user if offline or server error
     authActiveUser = user;
+    window.authLoading = false;
     finishLogin();
 }
 
@@ -340,14 +380,48 @@ function cancelLogin() {
 }
 
 async function handleLoginSubmit() {
+    // Prevent double-clicks while a login is already in progress
+    if (window.authLoading) return;
+
     const loginVal = document.getElementById('login-username').value.trim();
     const passVal = document.getElementById('login-password').value.trim();
     const errorDiv = document.getElementById('login-error');
+    const submitBtn = document.querySelector('#loginOverlay .game-btn.bg-red-600');
+    const cancelBtn = document.getElementById('login-cancel-btn');
+    const usernameInput = document.getElementById('login-username');
+    const passwordInput = document.getElementById('login-password');
     
     if (!loginVal || !passVal) {
         errorDiv.innerText = "请输入用户名和密码。";
         errorDiv.classList.remove('hidden');
         return;
+    }
+
+    // --- Visual feedback: disable form, show spinner on button ---
+    window.authLoading = true;
+    errorDiv.classList.add('hidden');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '登录中... <i class="fas fa-circle-notch fa-spin ml-2"></i>';
+        submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+    }
+    if (usernameInput) usernameInput.disabled = true;
+    if (passwordInput) passwordInput.disabled = true;
+    if (cancelBtn) cancelBtn.classList.add('hidden');
+
+    // Helper to restore the login form UI (used on failure)
+    function restoreLoginUI() {
+        window.authLoading = false;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '登录';
+            submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+        }
+        if (usernameInput) usernameInput.disabled = false;
+        if (passwordInput) passwordInput.disabled = false;
+        // Only re-show cancel if there are saved profiles
+        const hasSaved = JSON.parse(localStorage.getItem('savedUsers') || '[]').length > 0;
+        if (cancelBtn && hasSaved) cancelBtn.classList.remove('hidden');
     }
     
     try {
@@ -361,6 +435,7 @@ async function handleLoginSubmit() {
             const errText = await response.text();
             errorDiv.innerText = errText || "登录失败。";
             errorDiv.classList.remove('hidden');
+            restoreLoginUI();
             return;
         }
         
@@ -383,6 +458,7 @@ async function handleLoginSubmit() {
             teacher: data.teacher || null
         };
         
+        window.authLoading = false;
         if (data.needsPasswordChange) {
             showChangePasswordScreen(data.fullName);
         } else if (!data.avatar) {
@@ -393,6 +469,7 @@ async function handleLoginSubmit() {
     } catch (e) {
         errorDiv.innerText = "连接服务器出错。";
         errorDiv.classList.remove('hidden');
+        restoreLoginUI();
     }
 }
 

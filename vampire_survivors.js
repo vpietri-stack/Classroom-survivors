@@ -1858,15 +1858,17 @@ class MainScene extends Phaser.Scene {
                     document.getElementById('finalContentDisplay').innerText = displayText;
 
                     // Track session analytics and finalize SR
+                    const isSessionIgnored = totalPlayedTimeSec < 120;
                     if (typeof srGameResults !== 'undefined') {
-                        finalizeSession(srGameResults);
+                        finalizeSession(srGameResults, !isSessionIgnored);
                     }
                     queueSessionEvent('vampireSurvivors', {
                         level: this.playerStats.level,
                         survivalTimeSec: survivalTimeSec,
                         minigameTimeSec: minigameTimeSec,
                         scoreSec: scoreSec,
-                        kills: this.killCount
+                        kills: this.killCount,
+                        ignored: isSessionIgnored
                     });
                     flushAnalytics();
 
@@ -1877,6 +1879,16 @@ class MainScene extends Phaser.Scene {
                         banner.classList.remove('hidden');
                     } else if (banner) {
                         banner.classList.add('hidden');
+                    }
+
+                    const warning = document.getElementById('vsTargetWarning');
+                    if (warning) {
+                        if (isSessionIgnored) {
+                            warning.innerText = "用时不到2分钟且挑战失败，本次练习不计入每周目标。";
+                            warning.classList.remove('hidden');
+                        } else {
+                            warning.classList.add('hidden');
+                        }
                     }
 
                     document.getElementById('gameOverScreen').classList.remove('hidden');

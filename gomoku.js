@@ -30,14 +30,20 @@ function showGomokuDifficultySelection() {
     const easyNote = document.getElementById('gomokuEasyNote');
     if (easyBtn) {
         let isPu1 = false;
-        if (typeof selectedClassContent !== 'undefined' && selectedClassContent) {
+        if (typeof authActiveUser !== 'undefined' && authActiveUser && authActiveUser.book) {
+            if (authActiveUser.book === 'PU1') {
+                isPu1 = true;
+            }
+        } else if (typeof selectedClassContent !== 'undefined' && selectedClassContent) {
             const book = selectedClassContent.book;
             if (book === 'PU1') {
                 isPu1 = true;
             }
         }
 
-        if (isPu1 || typeof selectedDay === 'undefined' || selectedDay === null) {
+        const hasActiveStudent = (typeof authActiveUser !== 'undefined' && authActiveUser) || (typeof selectedStudent !== 'undefined' && selectedStudent);
+
+        if (!hasActiveStudent || isPu1) {
             easyBtn.disabled = false;
             easyBtn.className = "game-btn text-xl bg-blue-600 hover:bg-blue-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all";
             easyBtn.innerText = "Easy (Good for kids)";
@@ -585,7 +591,9 @@ function findBestMove(perfect = false) {
 
 function getGomokuSpeedInterval() {
     let book = 'PU3'; // Default
-    if (typeof selectedClassContent !== 'undefined' && selectedClassContent) {
+    if (typeof authActiveUser !== 'undefined' && authActiveUser && authActiveUser.book) {
+        book = authActiveUser.book;
+    } else if (typeof selectedClassContent !== 'undefined' && selectedClassContent) {
         book = selectedClassContent.book;
     }
 
@@ -694,8 +702,9 @@ function endGomokuGame(result) {
     document.getElementById('gomokuTotalTime').innerText = format(totalTimeSec);
 
     // Track session analytics and finalize SR
+    const isSessionIgnored = (result !== 'win' && totalTimeSec < 120);
     if (typeof srGameResults !== 'undefined') {
-        finalizeSession(srGameResults);
+        finalizeSession(srGameResults, !isSessionIgnored);
     }
     queueSessionEvent('gomoku', {
         result: result,
@@ -703,7 +712,8 @@ function endGomokuGame(result) {
         difficulty: gomokuDifficulty,
         gameTimeSec: gameTimeSec,
         questTimeSec: questTimeSec,
-        totalTimeSec: totalTimeSec
+        totalTimeSec: totalTimeSec,
+        ignored: isSessionIgnored
     });
     flushAnalytics();
 
@@ -714,6 +724,16 @@ function endGomokuGame(result) {
         banner.classList.remove('hidden');
     } else if (banner) {
         banner.classList.add('hidden');
+    }
+
+    const warning = document.getElementById('gomokuTargetWarning');
+    if (warning) {
+        if (isSessionIgnored) {
+            warning.innerText = "用时不到2分钟且挑战失败，本次练习不计入每周目标。";
+            warning.classList.remove('hidden');
+        } else {
+            warning.classList.add('hidden');
+        }
     }
 
     document.getElementById('gomokuGameOverScreen').classList.remove('hidden');

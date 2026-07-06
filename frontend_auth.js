@@ -34,7 +34,7 @@ function getCurrentSession() {
  *
  * @param {Array} sessionResults  [{ type, key, firstAttempt }, ...]
  */
-function finalizeSession(sessionResults) {
+function finalizeSession(sessionResults, shouldIncrementSession = true) {
     if (!authActiveUser || isTestMode || !sessionResults || sessionResults.length === 0) return;
 
     const currentSession = getCurrentSession();
@@ -43,11 +43,13 @@ function finalizeSession(sessionResults) {
 
     // Eagerly update in-memory user so the next session in the same page-load gets fresh data
     authActiveUser.srState = newSRState;
-    authActiveUser.sessionCount = currentSession + 1;
+    if (shouldIncrementSession) {
+        authActiveUser.sessionCount = currentSession + 1;
+        srIncrementSession = true;
+    }
 
     // Queue for next flush
     srPendingState = newSRState;
-    srIncrementSession = true;
 
     // Check if we need to auto-advance the page
     checkAndAdvancePageIfAllOnCooldown();
@@ -699,6 +701,7 @@ function countCompletedSessionsForTarget(student, startTimeStr, endTimeStr) {
     
     return student.analytics.filter(e => {
         if (e.type !== 'session') return false;
+        if (e.data && e.data.ignored) return false;
         const ts = new Date(e.timestamp).getTime();
         return ts >= start && ts <= end;
     }).length;

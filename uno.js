@@ -1647,8 +1647,9 @@ class UnoScene extends Phaser.Scene {
         document.getElementById('unoQuestTime').innerText = f(qs);
         document.getElementById('unoTotalTime').innerText = f(gs + qs);
 
+        const isSessionIgnored = (winner !== 0 && (gs + qs) < 60);
         if (typeof srGameResults !== 'undefined' && typeof finalizeSession === 'function') {
-            finalizeSession(srGameResults);
+            finalizeSession(srGameResults, !isSessionIgnored);
         }
         if (typeof queueSessionEvent === 'function') {
             queueSessionEvent('uno', {
@@ -1656,10 +1657,21 @@ class UnoScene extends Phaser.Scene {
                 winnerName: winner === 0 ? nm : this.playerNames[winner],
                 gameTimeSec: gs,
                 questTimeSec: qs,
-                totalTimeSec: gs + qs
+                totalTimeSec: gs + qs,
+                ignored: isSessionIgnored
             });
         }
         if (typeof flushAnalytics === 'function') flushAnalytics();
+
+        const warning = document.getElementById('unoTargetWarning');
+        if (warning) {
+            if (isSessionIgnored) {
+                warning.innerText = "用时不到1分钟且挑战失败，本次练习不计入每周目标。";
+                warning.classList.remove('hidden');
+            } else {
+                warning.classList.add('hidden');
+            }
+        }
 
         document.getElementById('unoScreen').classList.add('hidden');
         document.getElementById('unoGameOverScreen').classList.remove('hidden');

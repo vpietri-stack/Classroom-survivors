@@ -253,7 +253,8 @@ function sessionTypeLabel(sessionType) {
         'study': 'Study Mode',
         'gomoku': 'Gomoku',
         'uno': 'UNO',
-        'vampire': 'Vampire Survivors'
+        'vampire': 'Vampire Survivors',
+        'vampireSurvivors': 'Vampire Survivors'
     };
     return map[sessionType] || sessionType;
 }
@@ -277,6 +278,42 @@ function getSessionDuration(session) {
 function getSessionGameType(session) {
     if (session.sessionType === 'study') return '—';
     return sessionTypeLabel(session.sessionType);
+}
+
+function getSessionDifficulty(session) {
+    if (session.sessionType === 'gomoku') {
+        if (session.data?.mode === 'speed') {
+            return `<span class="badge badge-diff-speed">Speed</span>`;
+        }
+        const diff = session.data?.difficulty;
+        if (diff) {
+            const capitalized = diff.charAt(0).toUpperCase() + diff.slice(1);
+            return `<span class="badge badge-diff-${diff.toLowerCase()}">${capitalized}</span>`;
+        }
+    }
+    return '—';
+}
+
+function getSessionResult(session) {
+    if (session.sessionType === 'gomoku') {
+        const res = session.data?.result;
+        if (res === 'win') {
+            return `<span class="badge badge-result-win">Win</span>`;
+        } else if (res === 'loss') {
+            return `<span class="badge badge-result-loss">Loss</span>`;
+        } else if (res) {
+            const capitalized = res.charAt(0).toUpperCase() + res.slice(1);
+            return `<span class="badge">${capitalized}</span>`;
+        }
+    } else if (session.sessionType === 'uno') {
+        const winner = session.data?.winner;
+        if (winner === 0) {
+            return `<span class="badge badge-result-win">Win</span>`;
+        } else if (winner !== undefined) {
+            return `<span class="badge badge-result-loss">Loss</span>`;
+        }
+    }
+    return '—';
 }
 
 // ----- TARGET HELPERS (main table) -----
@@ -490,6 +527,8 @@ function renderSessions() {
             <td>${formatTimestamp(s.timestamp)}</td>
             <td>${sessionModeBadge(s.sessionType)}</td>
             <td>${getSessionGameType(s)}</td>
+            <td>${getSessionDifficulty(s)}</td>
+            <td>${getSessionResult(s)}</td>
             <td>${formatDuration(getSessionDuration(s))}</td>
         </tr>`;
     }).join('');

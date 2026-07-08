@@ -564,7 +564,7 @@ function findBestMove(perfect = false) {
         return allMoves[0];
     }
 
-    let difficultyToUse = (gomokuMode === 'speed') ? 'hard' : gomokuDifficulty;
+    let difficultyToUse = (gomokuMode === 'speed') ? 'hardest' : gomokuDifficulty;
     const hasCriticalMove = allMoves[0].score >= 2000;
     const rand = Math.random();
 

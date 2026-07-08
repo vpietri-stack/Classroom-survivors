@@ -1857,7 +1857,6 @@ class MainScene extends Phaser.Scene {
                     const displayText = studentName ? `${studentName} (${classInfo})` : classInfo;
                     document.getElementById('finalContentDisplay').innerText = displayText;
 
-                    // Track session analytics and finalize SR
                     const isSessionIgnored = totalPlayedTimeSec < 60;
                     if (typeof srGameResults !== 'undefined') {
                         finalizeSession(srGameResults, !isSessionIgnored);

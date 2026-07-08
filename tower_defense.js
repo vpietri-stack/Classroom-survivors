@@ -1,24 +1,25 @@
 // ============================================================
 // TOWER DEFENSE GAME MODE (Classroom Survivors)
-// Extends Phaser.Scene. Self-registers via registerScene() (boot.js).
-// Full-screen, body-parented (like VampireSurvivors). Integrates with the
-// existing no-pause ESL minigame system via startMiniGame('spelling','towerdefense')
-// and claimReward(success) -> tdCreditCoins(50).
+// Plant-vs-Zombies-style LANE layout, school-themed, placeholders only.
+// Self-registers via registerScene() (boot.js). Full-screen, body-parented.
+// ESL integration UNCHANGED: tdEarnCoins() -> startMiniGame('spelling','towerdefense')
+// -> claimReward success -> tdCreditCoins(50). Gold also from kills.
 // ============================================================
 
-const TD_CELL = 50;                 // grid cell size in px
+const TD_CELL = 64;                 // nominal cell size (grid auto-fits screen)
+const TD_LANES_MAX = 6;             // cap on horizontal lanes
 const TD_START_COINS = 60;
 const TD_START_BASE_HP = 20;
 const TD_TOWER_TYPES = {
-    shooter: { name: 'Shooter', cost: 20, range: 150, fireRate: 600, damage: 8, color: 0xffe14d, proj: 'dot', slow: 0, splash: 0 },
-    slow:    { name: 'Slow',    cost: 25, range: 120, fireRate: 1000, damage: 2, color: 0xff8ad0, proj: 'bubble', slow: 0.5, splash: 0 },
-    splash:  { name: 'Splash',  cost: 40, range: 160, fireRate: 1200, damage: 12, color: 0x8d6e3c, proj: 'mortar', slow: 0, splash: 60 }
+    shooter: { name: 'Pencil', emoji: '🖊️', cost: 20, range: 240, fireRate: 600, damage: 8, color: 0xffe14d, proj: 'dot', slow: 0, splash: 0 },
+    slow:    { name: 'Eraser', emoji: '🧽', cost: 25, range: 200, fireRate: 1000, damage: 2, color: 0xff8ad0, proj: 'bubble', slow: 0.5, splash: 0 },
+    splash:  { name: 'Book',   emoji: '📚', cost: 40, range: 260, fireRate: 1200, damage: 12, color: 0x8d6e3c, proj: 'mortar', slow: 0, splash: 70 }
 };
-const TD_UPGRADE_MULT = { dmg: 1.6, range: 1.15, rate: 0.85 }; // per level
+const TD_UPGRADE_MULT = { dmg: 1.6, range: 1.15, rate: 0.85 };
 const TD_ENEMY_TYPES = {
-    basic: { hp: 30, speed: 60, color: 0xffffff, coins: 3, dmg: 1, emoji: '📄' },
-    fast:  { hp: 18, speed: 120, color: 0xffa500, coins: 2, dmg: 1, emoji: '⏱️' },
-    tank:  { hp: 120, speed: 35, color: 0x9c27b0, coins: 8, dmg: 3, emoji: '📝' }
+    basic: { hp: 30, speed: 55, color: 0xffffff, coins: 3, dmg: 1, emoji: '📄' },
+    fast:  { hp: 18, speed: 115, color: 0xffa500, coins: 2, dmg: 1, emoji: '⏱️' },
+    tank:  { hp: 120, speed: 33, color: 0x9c27b0, coins: 8, dmg: 3, emoji: '📝' }
 };
 
 class TowerDefenseScene extends Phaser.Scene {
@@ -28,157 +29,116 @@ class TowerDefenseScene extends Phaser.Scene {
 
     create() {
         const W = this.scale.width, H = this.scale.height;
-        this.cols = Math.floor(W / TD_CELL);
-        this.rows = Math.floor(H / TD_CELL);
-        this.gridW = this.cols * TD_CELL;
-        this.gridH = this.rows * TD_CELL;
+        this.cols = Math.max(8, Math.floor(W / TD_CELL));
+        this.lanes = Math.min(TD_LANES_MAX, Math.max(4, Math.floor(H / TD_CELL)));
+        this.colW = W / this.cols;
+        this.laneH = H / this.lanes;
+        this.schoolLineX = this.colW * 0.5;   // enemies reaching here hit the school
 
         // --- core state ---
         this.coins = TD_START_COINS;
         this.baseHp = TD_START_BASE_HP;
         this.score = 0;
-        this.towers = [];          // {gx, gy, type, level, lastFire, gfx, rangeGfx}
-        this.enemies = [];         // Enemy instances
-        this.projectiles = [];     // {gfx, x, y, tx, ty, target, speed, damage, slow, splash, scene}
-        this.occupied = {};        // "gx,gy" -> tower
-        this.elapsed = 0;          // ms since start
+        this.towers = [];
+        this.enemies = [];
+        this.projectiles = [];
+        this.occupied = {};       // "col,lane" -> tower
+        this.defenders = new Array(this.lanes).fill(true); // 🧹 hall-monitor per lane
+        this.defenderMarks = new Array(this.lanes).fill(null);
+        this.elapsed = 0;
         this.gameOver = false;
-        this.selected = null;      // selected tower for upgrade
+        this.selected = null;
 
-        // --- generate map + path ---
-        this.generatePath();
-        this.drawMap();
+        this.generateGridVisuals();
 
         // --- layers ---
         this.towerLayer = this.add.container(0, 0);
         this.enemyLayer = this.add.container(0, 0);
         this.projLayer = this.add.container(0, 0);
 
-        // --- input: click grass to open build menu, click tower to upgrade ---
         this.input.on('pointerdown', (pointer) => this.onPointerDown(pointer));
 
         // --- spawn loop ---
         this.spawnTimer = this.time.addEvent({
             delay: 1500, loop: true, callback: () => this.spawnEnemy()
         });
-        this.spawnTimer.paused = true; // started in startLoop
+        this.spawnTimer.paused = true;
 
-        // --- HUD + DOM wiring ---
         this.ensureHud();
         this.refreshHud();
-
         this.startLoop();
     }
 
     // ---------------------------------------------------------
-    // MAP / PATH
+    // GRID / VISUALS (PvZ-style lanes + school wall + defenders)
     // ---------------------------------------------------------
-    generatePath() {
-        // Waypoints from a random screen edge to the center, with random turns.
-        const cx = Math.floor(this.cols / 2);
-        const cy = Math.floor(this.rows / 2);
-        const side = Phaser.Math.Between(0, 3);
-        let start;
-        if (side === 0) start = { gx: Phaser.Math.Between(0, this.cols - 1), gy: 0 };
-        else if (side === 1) start = { gx: this.cols - 1, gy: Phaser.Math.Between(0, this.rows - 1) };
-        else if (side === 2) start = { gx: Phaser.Math.Between(0, this.cols - 1), gy: this.rows - 1 };
-        else start = { gx: 0, gy: Phaser.Math.Between(0, this.rows - 1) };
-
-        const waypoints = [start];
-        let cur = { ...start };
-        let guard = 0;
-        while ((cur.gx !== cx || cur.gy !== cy) && guard++ < 400) {
-            // step one cell toward center, occasionally perpendicular for winding
-            let nx = cur.gx, ny = cur.gy;
-            const dx = Math.sign(cx - cur.gx);
-            const dy = Math.sign(cy - cur.gy);
-            if (dx !== 0 && dy !== 0) {
-                if (Math.random() < 0.5) nx += dx; else ny += dy;
-            } else if (dx !== 0) {
-                nx += dx;
-            } else if (dy !== 0) {
-                ny += dy;
-            }
-            nx = Phaser.Math.Clamp(nx, 0, this.cols - 1);
-            ny = Phaser.Math.Clamp(ny, 0, this.rows - 1);
-            if (nx !== cur.gx || ny !== cur.gy) {
-                cur = { gx: nx, gy: ny };
-                waypoints.push({ ...cur });
-            } else break;
-        }
-        if (cur.gx !== cx || cur.gy !== cy) waypoints.push({ gx: cx, gy: cy });
-
-        // mark path cells
-        this.pathCells = {};
-        this.waypoints = waypoints;
-        for (let i = 0; i < waypoints.length - 1; i++) {
-            let a = waypoints[i], b = waypoints[i + 1];
-            const stepX = Math.sign(b.gx - a.gx), stepY = Math.sign(b.gy - a.gy);
-            let x = a.gx, y = a.gy;
-            this.pathCells[x + ',' + y] = true;
-            while (x !== b.gx || y !== b.gy) {
-                if (x !== b.gx) x += stepX;
-                else if (y !== b.gy) y += stepY;
-                this.pathCells[x + ',' + y] = true;
-            }
-        }
-        // pixel-center waypoints for enemy movement
-        this.pathPx = waypoints.map(w => ({
-            x: w.gx * TD_CELL + TD_CELL / 2,
-            y: w.gy * TD_CELL + TD_CELL / 2
-        }));
-        this.basePx = this.pathPx[this.pathPx.length - 1];
+    cellCenter(col, lane) {
+        return { x: col * this.colW + this.colW / 2, y: lane * this.laneH + this.laneH / 2 };
     }
+    laneCenterY(lane) { return lane * this.laneH + this.laneH / 2; }
 
-    drawMap() {
+    generateGridVisuals() {
+        const W = this.scale.width, H = this.scale.height;
         this.mapGfx = this.add.graphics();
         this.mapGfx.setDepth(-10);
-        for (let gx = 0; gx < this.cols; gx++) {
-            for (let gy = 0; gy < this.rows; gy++) {
-                const isPath = this.pathCells[gx + ',' + gy];
-                this.mapGfx.fillStyle(isPath ? 0x8d6e3c : 0x3c8c34, 1);
-                this.mapGfx.fillRect(gx * TD_CELL, gy * TD_CELL, TD_CELL, TD_CELL);
-                this.mapGfx.lineStyle(1, 0x000000, 0.08);
-                this.mapGfx.strokeRect(gx * TD_CELL, gy * TD_CELL, TD_CELL, TD_CELL);
+        for (let lane = 0; lane < this.lanes; lane++) {
+            for (let col = 0; col < this.cols; col++) {
+                const x = col * this.colW, y = lane * this.laneH;
+                if (col === 0) {
+                    this.mapGfx.fillStyle(0x6d4c41, 1);                 // school brick wall
+                } else {
+                    this.mapGfx.fillStyle((col + lane) % 2 ? 0x3c8c34 : 0x47a03d, 1); // school field
+                }
+                this.mapGfx.fillRect(x, y, this.colW + 1, this.laneH + 1);
             }
+            // lane divider
+            this.mapGfx.lineStyle(1, 0x000000, 0.15);
+            this.mapGfx.lineBetween(0, lane * this.laneH, W, lane * this.laneH);
         }
-        // base marker
-        const b = this.basePx;
-        this.mapGfx.fillStyle(0x2196f3, 1);
-        this.mapGfx.fillRect(b.x - 22, b.y - 22, 44, 44);
-        const baseText = this.add.text(b.x, b.y, '🏫', { fontSize: '32px' }).setOrigin(0.5).setDepth(-9);
-        baseText.name = 'tdBase';
+        // school building 🏫 (also flashes on hit)
+        const sc = this.cellCenter(0, Math.floor(this.lanes / 2));
+        const school = this.add.text(sc.x, sc.y, '🏫', { fontSize: Math.floor(this.laneH * 0.7) + 'px' })
+            .setOrigin(0.5).setDepth(-9);
+        school.name = 'tdBase';
+        // defender (🧹 hall monitor) per lane
+        for (let lane = 0; lane < this.lanes; lane++) {
+            const y = this.laneCenterY(lane);
+            const mark = this.add.text(this.schoolLineX, y, '🧹', { fontSize: '26px' })
+                .setOrigin(0.5).setDepth(-8);
+            this.defenderMarks[lane] = mark;
+        }
     }
 
-    isPath(gx, gy) { return !!this.pathCells[gx + ',' + gy]; }
+    isSchoolCol(col) { return col === 0; }
+    isPath() { return false; } // kept for backward-compat with any external refs
 
     // ---------------------------------------------------------
     // INPUT
     // ---------------------------------------------------------
     onPointerDown(pointer) {
         if (this.gameOver) return;
-        const gx = Math.floor(pointer.x / TD_CELL);
-        const gy = Math.floor(pointer.y / TD_CELL);
-        if (gx < 0 || gy < 0 || gx >= this.cols || gy >= this.rows) return;
-        const key = gx + ',' + gy;
+        const col = Math.floor(pointer.x / this.colW);
+        const lane = Math.floor(pointer.y / this.laneH);
+        if (col < 0 || lane < 0 || col >= this.cols || lane >= this.lanes) return;
+        const key = col + ',' + lane;
         if (this.occupied[key]) {
             this.openUpgradeMenu(this.occupied[key]);
-        } else if (!this.isPath(gx, gy)) {
-            this.openBuildMenu(gx, gy);
+        } else if (!this.isSchoolCol(col)) {
+            this.openBuildMenu(col, lane);
         }
     }
 
     // ---------------------------------------------------------
     // TOWER PLACEMENT / MENU (DOM overlay #tdTowerMenu)
     // ---------------------------------------------------------
-    openBuildMenu(gx, gy) {
+    openBuildMenu(col, lane) {
         this.selected = null;
-        this.menuCell = { gx, gy };
+        this.menuCell = { col, lane };
         const el = document.getElementById('tdTowerMenu');
         if (!el) return;
-        el.dataset.gx = gx;
-        el.dataset.gy = gy;
-        el.querySelector('#tdMenuTitle').textContent = `Build at (${gx}, ${gy})`;
+        el.dataset.gx = col;
+        el.dataset.gy = lane;
+        el.querySelector('#tdMenuTitle').textContent = `Build in lane ${lane + 1}, col ${col}`;
         this.renderMenuButtons(el);
         el.classList.remove('hidden');
     }
@@ -187,8 +147,8 @@ class TowerDefenseScene extends Phaser.Scene {
         this.selected = tower;
         const el = document.getElementById('tdTowerMenu');
         if (!el) return;
-        el.dataset.gx = tower.gx;
-        el.dataset.gy = tower.gy;
+        el.dataset.gx = tower.col;
+        el.dataset.gy = tower.lane;
         el.querySelector('#tdMenuTitle').textContent = `${TD_TOWER_TYPES[tower.type].name} Lv.${tower.level}`;
         this.renderMenuButtons(el);
         el.classList.remove('hidden');
@@ -203,7 +163,7 @@ class TowerDefenseScene extends Phaser.Scene {
                 const affordable = this.coins >= t.cost;
                 const btn = document.createElement('button');
                 btn.className = 'td-menu-btn' + (affordable ? '' : ' disabled');
-                btn.textContent = `Build ${t.name} (${t.cost}c)`;
+                btn.textContent = `Build ${t.emoji} ${t.name} (${t.cost}c)`;
                 btn.disabled = !affordable;
                 btn.onclick = () => tdBuild(type);
                 wrap.appendChild(btn);
@@ -219,10 +179,9 @@ class TowerDefenseScene extends Phaser.Scene {
             upBtn.onclick = () => tdUpgrade();
             wrap.appendChild(upBtn);
         }
-        // ESL earn-coins option
         const earn = document.createElement('button');
         earn.className = 'td-menu-btn earn';
-        earn.textContent = 'Not enough coins? Earn 50 via ESL Minigame';
+        earn.textContent = 'Need coins? Earn 50 via ESL Minigame';
         earn.onclick = () => tdEarnCoins();
         wrap.appendChild(earn);
 
@@ -244,18 +203,16 @@ class TowerDefenseScene extends Phaser.Scene {
     }
 
     buildTower(type) {
-        const gx = +document.getElementById('tdTowerMenu').dataset.gx;
-        const gy = +document.getElementById('tdTowerMenu').dataset.gy;
+        const col = +document.getElementById('tdTowerMenu').dataset.gx;
+        const lane = +document.getElementById('tdTowerMenu').dataset.gy;
         const t = TD_TOWER_TYPES[type];
         if (this.coins < t.cost) { this.tdBeep('error'); return; }
-        const key = gx + ',' + gy;
-        if (this.occupied[key] || this.isPath(gx, gy)) return;
+        if (this.isSchoolCol(col)) return;
+        const key = col + ',' + lane;
+        if (this.occupied[key]) return;
         this.coins -= t.cost;
-        const tower = {
-            gx, gy, type, level: 1, lastFire: 0,
-            x: gx * TD_CELL + TD_CELL / 2,
-            y: gy * TD_CELL + TD_CELL / 2
-        };
+        const c = this.cellCenter(col, lane);
+        const tower = { col, lane, type, level: 1, lastFire: 0, x: c.x, y: c.y };
         const gfx = this.add.graphics();
         this.drawTower(gfx, tower);
         tower.gfx = gfx;
@@ -274,7 +231,6 @@ class TowerDefenseScene extends Phaser.Scene {
         this.coins -= cost;
         tower.level += 1;
         this.drawTower(tower.gfx, tower);
-        // pop tween
         this.tweens.add({ targets: tower.gfx, scale: { from: 1.3, to: 1 }, duration: 250, ease: 'Back.out' });
         this.closeMenu();
         this.refreshHud();
@@ -283,29 +239,23 @@ class TowerDefenseScene extends Phaser.Scene {
     drawTower(gfx, tower) {
         gfx.clear();
         const t = TD_TOWER_TYPES[tower.type];
-        const size = 18 + (tower.level - 1) * 4;
+        const size = 16 + (tower.level - 1) * 4;
         gfx.fillStyle(t.color, 1);
-        if (tower.type === 'splash') {
-            gfx.fillTriangle(0, -size, -size, size, size, size);
-        } else {
-            gfx.fillCircle(0, 0, size);
-        }
+        if (tower.type === 'splash') gfx.fillTriangle(0, -size, -size, size, size, size);
+        else gfx.fillCircle(0, 0, size);
         gfx.setPosition(tower.x, tower.y);
-        // level pips
         gfx.fillStyle(0x000000, 0.6);
-        for (let i = 0; i < tower.level; i++) {
-            gfx.fillCircle(-8 + i * 8, size + 6, 2.5);
-        }
+        for (let i = 0; i < tower.level; i++) gfx.fillCircle(-8 + i * 8, size + 6, 2.5);
     }
 
     // ---------------------------------------------------------
-    // ENEMIES
+    // ENEMIES (straight along a lane, leftward)
     // ---------------------------------------------------------
     getDifficulty() {
         const mins = this.elapsed / 60000;
-        if (mins < 5) return 1 + mins * 0.3;             // gentle linear
+        if (mins < 5) return 1 + mins * 0.3;
         const over = mins - 5;
-        return 2.5 * Math.pow(1.35, over);               // exponential after 5 min
+        return 2.5 * Math.pow(1.35, over);
     }
 
     spawnEnemy() {
@@ -318,6 +268,8 @@ class TowerDefenseScene extends Phaser.Scene {
 
         const base = TD_ENEMY_TYPES[type];
         const hp = Math.round(base.hp * (0.6 + diff * 0.4));
+        const lane = Phaser.Math.Between(0, this.lanes - 1);
+        const y = this.laneCenterY(lane);
         const gfx = this.add.graphics();
         gfx.fillStyle(base.color, 1);
         const s = type === 'tank' ? 16 : (type === 'fast' ? 10 : 13);
@@ -325,15 +277,13 @@ class TowerDefenseScene extends Phaser.Scene {
         else gfx.fillCircle(0, 0, s);
         const enemy = {
             type, hp, maxHp: hp, speed: base.speed, coins: base.coins, dmg: base.dmg,
-            wp: 0, x: this.pathPx[0].x, y: this.pathPx[0].y, gfx, dead: false, slowUntil: 0
+            lane, x: this.scale.width + 20, y, gfx, dead: false, slowUntil: 0
         };
         gfx.setPosition(enemy.x, enemy.y);
-        // hp bar
         enemy.hpBar = this.add.graphics();
         this.enemyLayer.add(gfx); this.enemyLayer.add(enemy.hpBar);
         this.enemies.push(enemy);
 
-        // difficulty-driven spawn rate tightening
         const newDelay = Math.max(350, 1500 - diff * 90);
         this.spawnTimer.delay = newDelay;
     }
@@ -344,35 +294,52 @@ class TowerDefenseScene extends Phaser.Scene {
             if (e.dead) { this.removeEnemy(i); continue; }
             let speed = e.speed;
             if (this.time.now < e.slowUntil) speed *= 0.5;
-            const target = this.pathPx[e.wp + 1];
-            if (!target) { this.enemyReachBase(e, i); continue; }
-            const ang = Math.atan2(target.y - e.y, target.x - e.x);
-            e.x += Math.cos(ang) * speed * (dt / 1000);
-            e.y += Math.sin(ang) * speed * (dt / 1000);
-            e.gfx.setPosition(e.x, e.y);
-            // wobble
-            e.gfx.y += Math.sin(this.time.now / 120 + i) * 1.5;
-            if (Phaser.Math.Distance.Between(e.x, e.y, target.x, target.y) < 4) {
-                e.wp++;
-            }
-            this.drawHpBar(e);
+            const laneY = this.laneCenterY(e.lane);
+            e.x -= speed * (dt / 1000);
+            e.gfx.setPosition(e.x, laneY + Math.sin(this.time.now / 120 + i) * 1.5);
+            this.drawHpBar(e, laneY);
+            if (e.x <= this.schoolLineX) this.enemyReachSchool(e, i);
         }
     }
 
-    drawHpBar(e) {
+    drawHpBar(e, laneY) {
         const g = e.hpBar; g.clear();
         const w = 26, pct = Phaser.Math.Clamp(e.hp / e.maxHp, 0, 1);
-        g.fillStyle(0x000000, 0.5); g.fillRect(e.x - w / 2, e.y - 22, w, 4);
-        g.fillStyle(0x4caf50, 1); g.fillRect(e.x - w / 2, e.y - 22, w * pct, 4);
+        g.fillStyle(0x000000, 0.5); g.fillRect(e.x - w / 2, laneY - 22, w, 4);
+        g.fillStyle(0x4caf50, 1); g.fillRect(e.x - w / 2, laneY - 22, w * pct, 4);
     }
 
-    enemyReachBase(e, i) {
-        this.baseHp -= e.dmg;
-        this.tdBeep('error');
-        this.flashBase();
-        this.removeEnemy(i);
+    enemyReachSchool(e, i) {
+        const lane = e.lane;
+        if (this.defenders[lane]) {
+            this.triggerDefender(lane);
+            this.removeEnemy(i);
+        } else {
+            this.baseHp -= e.dmg;
+            this.tdBeep('error');
+            this.flashBase();
+            this.removeEnemy(i);
+            this.refreshHud();
+            if (this.baseHp <= 0) this.endGame(false);
+        }
+    }
+
+    triggerDefender(lane) {
+        this.defenders[lane] = false;
+        if (this.defenderMarks[lane]) { this.defenderMarks[lane].destroy(); this.defenderMarks[lane] = null; }
+        // sweep: defeat every enemy currently in this lane, awarding coins
+        for (let k = this.enemies.length - 1; k >= 0; k--) {
+            const e = this.enemies[k];
+            if (e.lane === lane && !e.dead) {
+                this.coins += e.coins; this.score += e.coins * 10; this.removeEnemy(k);
+            }
+        }
+        // sweep effect
+        const y = this.laneCenterY(lane);
+        const g = this.add.graphics(); g.setDepth(5);
+        g.fillStyle(0xffff00, 0.5); g.fillRect(0, y - this.laneH / 2, this.scale.width, this.laneH);
+        this.tweens.add({ targets: g, alpha: 0, duration: 350, onComplete: () => g.destroy() });
         this.refreshHud();
-        if (this.baseHp <= 0) this.endGame(false);
     }
 
     removeEnemy(i) {
@@ -395,7 +362,7 @@ class TowerDefenseScene extends Phaser.Scene {
     }
 
     // ---------------------------------------------------------
-    // TOWERS FIRE
+    // TOWERS FIRE (same lane, to the right)
     // ---------------------------------------------------------
     updateTowers(now) {
         this.towers.forEach(t => {
@@ -404,11 +371,12 @@ class TowerDefenseScene extends Phaser.Scene {
             if (now - t.lastFire < rate) return;
             const range = tdef.range * Math.pow(TD_UPGRADE_MULT.range, t.level - 1);
             const dmg = tdef.damage * Math.pow(TD_UPGRADE_MULT.dmg, t.level - 1);
-            // nearest enemy in range
-            let best = null, bestD = range;
+            let best = null, bestDist = range;
             this.enemies.forEach(e => {
-                const d = Phaser.Math.Distance.Between(t.x, t.y, e.x, e.y);
-                if (d < bestD) { bestD = d; best = e; }
+                if (e.lane !== t.lane) return;
+                if (e.x <= t.x) return;                 // only enemies to the right
+                const d = e.x - t.x;
+                if (d < bestDist) { bestDist = d; best = e; }
             });
             if (best) {
                 t.lastFire = now;
@@ -426,7 +394,7 @@ class TowerDefenseScene extends Phaser.Scene {
         gfx.setPosition(tower.x, tower.y);
         this.projLayer.add(gfx);
         this.projectiles.push({
-            gfx, x: tower.x, y: tower.y, target, speed: 420,
+            gfx, x: tower.x, y: tower.y, target, speed: 480,
             damage: dmg, slow: tdef.slow, splash: tdef.splash, scene: this
         });
     }
@@ -440,7 +408,6 @@ class TowerDefenseScene extends Phaser.Scene {
             p.y += Math.sin(ang) * p.speed * (dt / 1000);
             p.gfx.setPosition(p.x, p.y);
             if (Phaser.Math.Distance.Between(p.x, p.y, p.target.x, p.target.y) < 8) {
-                // hit
                 if (p.splash > 0) {
                     this.enemies.forEach(e => {
                         if (Phaser.Math.Distance.Between(p.x, p.y, e.x, e.y) <= p.splash) {
@@ -478,11 +445,6 @@ class TowerDefenseScene extends Phaser.Scene {
         const hp = document.getElementById('tdBaseHp');
         if (c) c.textContent = this.coins;
         if (hp) hp.textContent = this.baseHp;
-        // keep menu affordability fresh
-        const el = document.getElementById('tdTowerMenu');
-        if (el && !el.classList.contains('hidden') && this.selected === null && !this.menuCell) {
-            // no-op
-        }
     }
 
     // ---------------------------------------------------------
@@ -507,17 +469,16 @@ class TowerDefenseScene extends Phaser.Scene {
         this.spawnTimer.paused = true;
         const go = document.getElementById('tdGameOverScreen');
         if (go) {
-            go.querySelector('#tdGameOverText').textContent = won ? 'Base Defended!' : 'Base Overrun!';
+            go.querySelector('#tdGameOverText').textContent = won ? 'School Defended!' : 'School Overrun!';
             go.querySelector('#tdFinalScore').textContent = 'Score: ' + this.score;
             go.classList.remove('hidden');
         }
-        // return to selection
         const hud = document.getElementById('tdHUD'); if (hud) hud.classList.add('hidden');
         const menu = document.getElementById('tdTowerMenu'); if (menu) menu.classList.add('hidden');
     }
 
     // ---------------------------------------------------------
-    // AUDIO (guarded — synth* are global from vampire_survivors.js)
+    // AUDIO (guarded)
     // ---------------------------------------------------------
     tdBeep(kind) {
         if (kind === 'shoot' && typeof synthShoot === 'function') synthShoot();
@@ -531,7 +492,7 @@ class TowerDefenseScene extends Phaser.Scene {
     }
 
     // ---------------------------------------------------------
-    // ESL CREDIT (called from game.js claimReward)
+    // ESL CREDIT (called from game.js claimReward) — UNCHANGED
     // ---------------------------------------------------------
     creditCoins(n) {
         this.coins += n;

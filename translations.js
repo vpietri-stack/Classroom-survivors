@@ -4634,6 +4634,22 @@ const LOCAL_TRANSLATIONS = {
     "She's an awful actress.": "她是一个差劲的女演员。",
     "Do you like my new bike?": "你喜欢我的新自行车吗？",
 
+
+    // --- Think0 Unit 3 Page 30 ---
+    "My aunt and uncle's daughter is my cousin.": "我姑姑和姑父的女儿是我的表妹。",
+    "My uncle and aunt's son is my cousin.": "我姑姑和姑父的儿子是我的表弟。",
+    "My aunt and uncle's children are my cousins.": "我姑姑和姑父的孩子是我的表兄妹。",
+    "My uncle's wife is my aunt.": "我叔叔的妻子是我的阿姨。",
+    "My aunt's husband is my uncle.": "我姑姑的丈夫是我的叔叔。",
+    "My mum's brother is my uncle.": "我妈妈的哥哥是我的叔叔。",
+    "My mum's sister is my aunt.": "我妈妈的姐姐是我的阿姨。",
+    "My dad's brother is my uncle.": "我爸爸的哥哥是我的叔叔。",
+    "My dad's sister is my aunt.": "我爸爸的姐姐是我的阿姨。",
+    "My brother is my mum and dad's son.": "我哥哥是我爸爸妈妈的儿子。",
+    "My sister is my mum and dad's daughter.": "我妹妹是我爸爸妈妈的女儿。",
+    "My sister is my grandma and grandpa's granddaughter.": "我姐姐是我祖母和祖父的孙女。",
+    "My brother is my grandma and grandpa's grandson.": "我哥哥是我祖母和祖父的孙子。",
+
     // --- PU3 Unit 7 Page 83 ---
     "Spain": "西班牙",
     "artist": "艺术家",

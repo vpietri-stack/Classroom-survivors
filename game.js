@@ -621,6 +621,11 @@ function claimReward(success) {
         return;
     }
 
+    if (rewardContext === 'towerdefense' || activeGameMode === 'TowerDefense') {
+        if (success && typeof tdCreditCoins === 'function') tdCreditCoins(50);
+        return;
+    }
+
     const scene = (game && activeGameMode === 'VS') ? game.scene.getScene('MainScene') : null;
 
     // Note: time was already deducted during countdown in startMinigameCountdown

@@ -440,11 +440,69 @@ TEACHING_CONTENT["Think0"] = {
                 { a: "My mum is happy with me,", b: "because I'm a great kid." }
             ]
         }
+    },
+    "3": {
+        "30": {
+            vocab: [
+                'aunt', 'cousin', 'daughter', 'granddaughter', 'grandparents', 'grandson', 'parents', 'son', 'uncle',
+                'mother', 'brother', 'mum', 'father', 'grandmother', 'grandfather', 'wife', 'husband', 'children', 'grandchildren'
+            ],
+            sentences: [
+                "My aunt and uncle's daughter is my cousin.",
+                "My uncle and aunt's son is my cousin.",
+                "My aunt and uncle's children are my cousins.",
+                "My uncle's wife is my aunt.",
+                "My aunt's husband is my uncle.",
+                "My mum's brother is my uncle.",
+                "My mum's sister is my aunt.",
+                "My dad's brother is my uncle.",
+                "My dad's sister is my aunt.",
+                "My brother is my mum and dad's son.",
+                "My sister is my mum and dad's daughter.",
+                "My sister is my grandma and grandpa's granddaughter.",
+                "My brother is my grandma and grandpa's grandson."
+            ],
+            sentencePairs: [
+                { a: "My aunt and uncle's children are", b: "my cousins." },
+                { a: "My uncle's", b: "wife is my aunt." },
+                { a: "My aunt's", b: "husband is my uncle" },
+                { a: "My mum and dad's brothers and sisters", b: "are my uncles and aunts." },
+                { a: "My brother is", b: "my mum and dad's son." },
+                { a: "My sister is", b: "my mum and dad's daughter." },
+                { a: "My brothers, sisters, and cousins are", b: "my grandma and grandpa's grandchildren" },
+                { a: "My sister is", b: "my grandma and grandpa's granddaughter." },
+                { a: "My brother is", b: "my grandma and grandpa's grandson." }
+            ]
+        },
+        "33": {
+            vocab: [
+                "I - my", "you - your", "he - his", "she - her", "it - its", "we - our", "they - their"
+            ],
+            sentences: [
+                "Whose kite is it? It's my kite.",
+                "Whose robot is it? It's his robot.",
+                "Whose plane is it? It's her plane.",
+                "Whose balls are they? They're our balls.",
+                "Whose bike is it? It's their bike.",
+                "It's Jenny's car. It's her car.",
+                "They're Jim's toys. They're his toys.",
+
+            ],
+            sentencePairs: [
+                { a: "I've got a", b: "robot. It's my robot." },
+                { a: "Jim's got a", b: "kite. It's his kite." },
+                { a: "Jenny's got a", b: "car. It's her car." },
+                { a: "We've got", b: "balls. They're our balls." },
+                { a: "Grandma and Grandpa have got a", b: "house. It's their house." },
+                { a: "You've got a", b: "doll. It's your doll." },
+            ]
+        }
     }
 };
 
 AVAILABLE_CONTENT["Think0"] = {
     "0": [11],
     "1": [15, 17, 18],
-    "2": [23, 25]
+    "2": [23, 25],
+    "3": [30]
 };

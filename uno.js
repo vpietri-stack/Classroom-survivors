@@ -1705,12 +1705,7 @@ class UnoScene extends Phaser.Scene {
     }
 }
 
-// Ensure the scene is in the global config
-if (typeof config !== 'undefined' && config.scene) {
-    if (Array.isArray(config.scene)) {
-        config.scene.push(UnoScene);
-    }
-}
+registerScene(UnoScene);
 
 // Global hooks
 function completeUnoESLQuestion(success) {

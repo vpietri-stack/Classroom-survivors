@@ -3,8 +3,7 @@ let SPELLING_WORDS = [];
 let SIGHT_WORDS = [];
 let GRAMMAR_SENTENCES = [];
 
-// --- GLOBAL STATE ---
-let activeGameMode = null; // 'VampireSurvivors' or 'Gomoku' or 'Uno'
+// --- GLOBAL STATE (activeGameMode, game declared in boot.js) ---
 
 // --- TRANSLATION SYSTEM (LOCAL) ---
 function getLocalTranslation(text) {
@@ -301,10 +300,7 @@ const playTTS = () => {
     playYoudao();
 };
 
-// --- PHASER STATE ---
-let game;
-
-
+// --- PHASER STATE (game declared in boot.js) ---
 
 
 // --- DOM FUNCTIONS ---

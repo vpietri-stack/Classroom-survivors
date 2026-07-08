@@ -11,31 +11,6 @@ const POWER_UPS = [
     { id: 'might', name: "Spinach", icon: "🥬", type: "stat", desc: "+10% Damage" }
 ];
 
-// --- PHASER CONFIG ---
-const config = {
-    type: Phaser.AUTO,
-    width: window.innerWidth,
-    height: window.innerHeight,
-    parent: null, // dynamically assigned
-    transparent: true,
-    backgroundColor: '#2d5016',
-    physics: {
-        default: 'arcade',
-        arcade: {
-            gravity: { y: 0 },
-            debug: false
-        }
-    },
-    scene: null,
-    scale: {
-        mode: Phaser.Scale.RESIZE,
-        autoCenter: Phaser.Scale.CENTER_BOTH
-    },
-    input: {
-        activePointers: 3
-    }
-};
-
 // --- MAIN SCENE ---
 class MainScene extends Phaser.Scene {
     constructor() {
@@ -1939,7 +1914,7 @@ class MainScene extends Phaser.Scene {
     }
 }
 
-config.scene = [MainScene];
+registerScene(MainScene);
 
 // --- VS WRAPPER FUNCTIONS ---
 function showGameIntro() {

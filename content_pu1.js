@@ -637,7 +637,7 @@ TEACHING_CONTENT["PU1"] = {
             ]
         },
         "35": {
-            vocab: ['duck', "it's", 'got', 'long', 'ears', "hasn't", 'small', 'feet', 'has', 'it', 'a', 'face', 'yes', 'no', 'of', 'an', 'animal', 'for', 'your', 'to', 'my', 'has', 'big', 'body', 'short', 'tail', 'play', 'guessing', 'game', 'with', 'animal', 'is', 'beautiful', "isn't", 'donkey'],
+            vocab: ['duck', "it's", 'got', 'long', 'ears', "hasn't", 'small', 'feet', 'has', 'it', 'a', 'face', 'yes', 'no', 'of', 'an', 'animal', 'for', 'your', 'to', 'my', 'has', 'big', 'body', 'short', 'tail', 'with', 'animal', 'is', 'beautiful', "isn't", 'donkey'],
             sentences: [
                 "It's got long ears.",
                 "It hasn't got small feet.",

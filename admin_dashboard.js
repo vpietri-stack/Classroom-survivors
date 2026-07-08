@@ -165,6 +165,12 @@ function onSettingsTeacherChange() {
 
 async function saveStudentSettings() {
     if (!currentStudent) return;
+    const saveBtn = document.querySelector('button[onclick="saveStudentSettings()"]');
+    const originalHtml = saveBtn ? saveBtn.innerHTML : '';
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Saving...';
+    }
     let teacher = document.getElementById('settingsTeacher').value;
     if (teacher === '__custom__') teacher = document.getElementById('settingsTeacherCustom').value.trim();
     const fields = {
@@ -192,6 +198,11 @@ async function saveStudentSettings() {
         showStatus('settingsSaveStatus', '✓ Saved!', false);
     } catch(e) {
         showStatus('settingsSaveStatus', 'Error: ' + e.message, true);
+    } finally {
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = originalHtml;
+        }
     }
 }
 
@@ -222,7 +233,7 @@ function renderTargetsTab() {
             <td>${t.targetSessions}</td>
             <td><strong>${completed}</strong> / ${t.targetSessions} (${pct}%)</td>
             <td><span class="badge ${statusClass}">${status}</span></td>
-            <td><button onclick="deleteTarget(${i})" class="row-action-btn" title="Delete"><i class="fas fa-trash"></i></button></td>
+            <td><button onclick="deleteTarget(${i}, this)" class="row-action-btn" title="Delete"><i class="fas fa-trash"></i></button></td>
         </tr>`;
     }).join('');
 }
@@ -247,6 +258,13 @@ async function addTargetForStudent() {
     const count = parseInt(document.getElementById('targetCount').value);
     if (!startVal || !endVal || !count) { showStatus('targetSaveStatus', 'Fill all fields', true); return; }
 
+    const addBtn = document.querySelector('button[onclick="addTargetForStudent()"]');
+    const originalHtml = addBtn ? addBtn.innerHTML : '';
+    if (addBtn) {
+        addBtn.disabled = true;
+        addBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Adding...';
+    }
+
     // datetime-local gives local time; append Beijing offset
     const startTime = startVal + ':00+08:00';
     const endTime = endVal + ':00+08:00';
@@ -265,19 +283,40 @@ async function addTargetForStudent() {
         showStatus('targetSaveStatus', '✓ Target added!', false);
     } catch(e) {
         showStatus('targetSaveStatus', 'Error: ' + e.message, true);
+    } finally {
+        if (addBtn) {
+            addBtn.disabled = false;
+            addBtn.innerHTML = originalHtml;
+        }
     }
 }
 
-async function deleteTarget(idx) {
+async function deleteTarget(idx, clickedBtn) {
     if (!currentStudent || !confirm('Delete this target?')) return;
+
+    const originalHtml = clickedBtn ? clickedBtn.innerHTML : '';
+    if (clickedBtn) {
+        clickedBtn.disabled = true;
+        clickedBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
+    }
+
+    const removedTarget = currentStudent.targets[idx];
     currentStudent.targets.splice(idx, 1);
     try {
         await apiFetch(`${API_BASE}/updateStudent`, {
             method: 'POST', headers: {'Content-Type':'application/json'},
             body: JSON.stringify({ studentId: currentStudent.id, fields: { targets: currentStudent.targets } })
         });
-    } catch(e) { console.warn('Failed to delete target', e); }
-    renderTargetsTab();
+        renderTargetsTab();
+    } catch(e) { 
+        console.warn('Failed to delete target', e);
+        currentStudent.targets.splice(idx, 0, removedTarget);
+        if (clickedBtn) {
+            clickedBtn.disabled = false;
+            clickedBtn.innerHTML = originalHtml;
+        }
+        alert('Failed to delete target: ' + e.message);
+    }
 }
 
 // --- Add Student Modal ---
@@ -340,16 +379,36 @@ async function submitAddStudent() {
         page: document.getElementById('addPage').value,
         needsPasswordChange: document.getElementById('addNeedsPwChange').checked
     };
+
+    const addBtn = document.querySelector('button[onclick="submitAddStudent()"]');
+    const originalHtml = addBtn ? addBtn.innerHTML : '';
+    if (addBtn) {
+        addBtn.disabled = true;
+        addBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Creating...';
+    }
+
     try {
         const res = await apiFetch(`${API_BASE}/addStudent`, {
             method: 'POST', headers: {'Content-Type':'application/json'},
             body: JSON.stringify(body)
         });
-        if (!res.ok) { errEl.textContent = await res.text(); errEl.classList.remove('hidden'); return; }
+        if (!res.ok) { 
+            errEl.textContent = await res.text(); 
+            errEl.classList.remove('hidden'); 
+            if (addBtn) {
+                addBtn.disabled = false;
+                addBtn.innerHTML = originalHtml;
+            }
+            return; 
+        }
         closeModal('addStudentModal');
         loadAllStudents(); // Refresh
     } catch(e) {
         errEl.textContent = 'Network error'; errEl.classList.remove('hidden');
+        if (addBtn) {
+            addBtn.disabled = false;
+            addBtn.innerHTML = originalHtml;
+        }
     }
 }
 
@@ -387,6 +446,13 @@ async function submitBulkTargets() {
     const ids = allStudents.filter(s => s.classTime === classTime && s.role !== 'BM' && s.role !== 'admin' && (!currentTeacher || s.teacher === currentTeacher)).map(s => s.id);
     if (ids.length === 0) { errEl.textContent = 'No students in this class'; errEl.classList.remove('hidden'); return; }
 
+    const submitBtn = document.querySelector('button[onclick="submitBulkTargets()"]');
+    const originalHtml = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Setting...';
+    }
+
     try {
         const res = await apiFetch(`${API_BASE}/setTargets`, {
             method: 'POST', headers: {'Content-Type':'application/json'},
@@ -397,6 +463,10 @@ async function submitBulkTargets() {
         loadAllStudents();
     } catch(e) {
         errEl.textContent = 'Error: ' + e.message; errEl.classList.remove('hidden');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalHtml;
+        }
     }
 }
 
@@ -423,6 +493,13 @@ async function submitBulkContent() {
     const students = allStudents.filter(s => s.classTime === classTime && s.role !== 'BM' && s.role !== 'admin' && (!currentTeacher || s.teacher === currentTeacher));
     if (students.length === 0) { errEl.textContent = 'No students in this class'; errEl.classList.remove('hidden'); return; }
 
+    const submitBtn = document.querySelector('button[onclick="submitBulkContent()"]');
+    const originalHtml = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Applying...';
+    }
+
     try {
         for (const s of students) {
             await apiFetch(`${API_BASE}/updateStudent`, {
@@ -434,6 +511,10 @@ async function submitBulkContent() {
         loadAllStudents();
     } catch(e) {
         errEl.textContent = 'Error: ' + e.message; errEl.classList.remove('hidden');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalHtml;
+        }
     }
 }
 
@@ -642,8 +723,8 @@ function renderBmsList(bms) {
             </td>
             <td>
                 <div style="display: flex; gap: 8px;">
-                    <button onclick="changeBmPasswordPrompt('${bm.id}')" class="dash-action-btn" style="padding: 4px 8px; font-size: 0.8rem;" title="Change Password"><i class="fas fa-key"></i> Pass</button>
-                    <button onclick="submitDeleteBm('${bm.id}')" class="dash-action-btn" style="padding: 4px 8px; font-size: 0.8rem; background-color: var(--dash-danger);" title="Delete BM"><i class="fas fa-trash"></i></button>
+                    <button onclick="changeBmPasswordPrompt('${bm.id}', this)" class="dash-action-btn" style="padding: 4px 8px; font-size: 0.8rem;" title="Change Password"><i class="fas fa-key"></i> Pass</button>
+                    <button onclick="submitDeleteBm('${bm.id}', this)" class="dash-action-btn" style="padding: 4px 8px; font-size: 0.8rem; background-color: var(--dash-danger);" title="Delete BM"><i class="fas fa-trash"></i></button>
                 </div>
             </td>
         </tr>`;
@@ -666,6 +747,13 @@ async function submitAddBm() {
         return;
     }
 
+    const addBtn = document.querySelector('button[onclick="submitAddBm()"]');
+    const originalHtml = addBtn ? addBtn.innerHTML : '';
+    if (addBtn) {
+        addBtn.disabled = true;
+        addBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Creating...';
+    }
+
     try {
         const res = await apiFetch(`${API_BASE}/manageBms`, {
             method: 'POST',
@@ -683,16 +771,26 @@ async function submitAddBm() {
     } catch (e) {
         errEl.textContent = 'Error: ' + e.message;
         errEl.classList.remove('hidden');
+        if (addBtn) {
+            addBtn.disabled = false;
+            addBtn.innerHTML = originalHtml;
+        }
     }
 }
 
-async function changeBmPasswordPrompt(bmId) {
+async function changeBmPasswordPrompt(bmId, clickedBtn) {
     const newPw = prompt("Enter new password for this BM:");
     if (newPw === null) return; // user cancelled
     const password = newPw.trim();
     if (!password) {
         alert("Password cannot be empty.");
         return;
+    }
+
+    const originalHtml = clickedBtn ? clickedBtn.innerHTML : '';
+    if (clickedBtn) {
+        clickedBtn.disabled = true;
+        clickedBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
     }
 
     try {
@@ -706,11 +804,21 @@ async function changeBmPasswordPrompt(bmId) {
         loadBmsList();
     } catch (e) {
         alert("Error changing password: " + e.message);
+        if (clickedBtn) {
+            clickedBtn.disabled = false;
+            clickedBtn.innerHTML = originalHtml;
+        }
     }
 }
 
-async function submitDeleteBm(bmId) {
+async function submitDeleteBm(bmId, clickedBtn) {
     if (!confirm(`Are you sure you want to delete BM with ID: ${bmId}? This cannot be undone.`)) return;
+
+    const originalHtml = clickedBtn ? clickedBtn.innerHTML : '';
+    if (clickedBtn) {
+        clickedBtn.disabled = true;
+        clickedBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
+    }
 
     try {
         const res = await apiFetch(`${API_BASE}/manageBms`, {
@@ -722,6 +830,10 @@ async function submitDeleteBm(bmId) {
         loadBmsList();
     } catch (e) {
         alert("Error deleting BM: " + e.message);
+        if (clickedBtn) {
+            clickedBtn.disabled = false;
+            clickedBtn.innerHTML = originalHtml;
+        }
     }
 }
 

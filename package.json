@@ -1,0 +1,23 @@
+{
+  "name": "classroom-survivors",
+  "version": "1.0.0",
+  "description": "",
+  "main": "admin_dashboard.js",
+  "scripts": {
+    "test": "node test_headless.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vpietri-stack/Classroom-survivors.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vpietri-stack/Classroom-survivors/issues"
+  },
+  "homepage": "https://github.com/vpietri-stack/Classroom-survivors#readme",
+  "dependencies": {
+    "playwright-core": "^1.61.1"
+  }
+}

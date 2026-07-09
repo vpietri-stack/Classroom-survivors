@@ -1,3 +1,22 @@
 api/local.settings.json
 student list.csv
 /reference books PDFs
+
+# --- Agent / dev tooling (not part of the shipped game) ---
+
+# npm dependencies: install via `npm install`; never commit the tree
+node_modules/
+
+# Hermes agent scratch workspace
+.hermes/
+
+# Local dev/test throwaway artifacts (logs, screenshots, one-off verify scripts)
+boot_refactor_plan.md
+boot_refactor_shot.png
+boot_refactor_test.js
+boot_refactor_test_t8.js
+chrome_log.txt
+td_verify.js
+td_verify2.js
+td_verify3.js
+test_screenshot.png

@@ -440,6 +440,8 @@ function nextRoundCWord() {
     roundCInput = "";
     roundCSlots = slots;
     roundCBaseKeys = [...keys];
+    roundCPlacement = [];
+    roundCUsedKeys = [];
     updateRoundCDisplay();
     playTTS();
 }
@@ -447,24 +449,44 @@ function nextRoundCWord() {
 let roundCInput = "";
 let roundCSlots = [];
 let roundCBaseKeys = [];
+// Per-letter-slot -> tile index (which keyboard tile filled this slot), and
+// per-tile used flag. These decouple "which tile is placed" from typing order,
+// so a used tile is blocked by its OWN placement, not by which typing position
+// it landed in (the old bug blocked an 'a' tile just because two 'd's were
+// typed first).
+let roundCPlacement = [];
+let roundCUsedKeys = [];
+
+// Rebuild the typed string from the per-slot placement (slot order), so display
+// and validation read a coherent left-to-right string regardless of which tile
+// was used for each slot.
+function roundCRebuild() {
+    roundCInput = roundCPlacement.map(ki => ki === undefined ? '' : roundCBaseKeys[ki]).join('');
+}
 
 function typeRoundC(keyIndex) {
     if (STUDY_STATE.isTransitioning || STUDY_STATE._roundCFrozen) return;
-    if (roundCInput[keyIndex] !== undefined) return; // key already used
-    roundCInput += roundCBaseKeys[keyIndex];
+    const letterSlotCount = roundCSlots.filter(s => s.type === 'letter').length;
+    // Find the first empty letter-slot to fill (L-to-R slot order, not typing order).
+    let slotFullIdx = -1;
+    for (let i = 0; i < roundCSlots.length; i++) {
+        if (roundCSlots[i].type === 'letter' && roundCPlacement[i] === undefined) { slotFullIdx = i; break; }
+    }
+    if (slotFullIdx === -1) return; // all slots filled
+    if (roundCUsedKeys[keyIndex]) return; // this tile already placed
+    roundCUsedKeys[keyIndex] = true;
+    roundCPlacement[slotFullIdx] = keyIndex;
     updateRoundCDisplay();
 }
 
 function removeRoundCLetter(slotFullIdx) {
     if (STUDY_STATE.isTransitioning || STUDY_STATE._roundCFrozen) return;
-    let letterCount = 0;
-    for (let i = 0; i < slotFullIdx; i++) {
-        if (roundCSlots[i].type === 'letter') letterCount++;
-    }
-    const arr = roundCInput.split('');
-    if (letterCount >= arr.length) return;
-    arr.splice(letterCount, 1);
-    roundCInput = arr.join('');
+    if (roundCSlots[slotFullIdx].type !== 'letter') return;
+    const placedKey = roundCPlacement[slotFullIdx];
+    if (placedKey === undefined) return; // already empty
+    roundCUsedKeys[placedKey] = false;
+    roundCPlacement[slotFullIdx] = undefined;
+    roundCRebuild();
     updateRoundCDisplay();
 }
 
@@ -472,6 +494,8 @@ function clearRoundC() {
     if (STUDY_STATE.isTransitioning || STUDY_STATE._roundCFrozen) return;
     if (STUDY_STATE._roundCResetTimer) { clearTimeout(STUDY_STATE._roundCResetTimer); STUDY_STATE._roundCResetTimer = null; }
     roundCInput = "";
+    roundCPlacement = [];
+    roundCUsedKeys = [];
     updateRoundCDisplay();
 }
 
@@ -482,15 +506,17 @@ function updateRoundCDisplay() {
     const isSuccess = STUDY_STATE._roundCSuccess === true;
     const isFrozen = STUDY_STATE._roundCFrozen === true;
 
-    let letterIdx = 0;
+    // Keep roundCInput coherent with per-slot placement (slot order).
+    roundCRebuild();
+
     let html = "";
     roundCSlots.forEach((slot, fullIdx) => {
         if (slot.type === 'fixed') {
             const c = slot.char === ' ' ? ' ' : slot.char;
             html += `<div class="study-slot border-transparent bg-transparent select-none" style="color:#94a3b8">${c}</div>`;
         } else {
-            const filledChar = roundCInput[letterIdx] !== undefined ? roundCInput[letterIdx] : "";
-            letterIdx++;
+            const placedKey = roundCPlacement[fullIdx];
+            const filledChar = (placedKey !== undefined) ? roundCBaseKeys[placedKey] : "";
             let bg = "bg-gray-800";
             if (isSuccess) bg = "bg-green-500";
             else if (isFeedback && filledChar) {
@@ -504,11 +530,15 @@ function updateRoundCDisplay() {
     disp.innerHTML = html;
     disp.className = "flex flex-wrap justify-center gap-[var(--gap-xs)] min-h-[60px] w-full px-4 text-white";
 
-    // Keyboard stays as a static palette: all keys remain visible & clickable.
+    // Virtual keyboard stays a STATIC palette: all tiles remain visible; a used
+    // tile is flagged (so the player sees what's spent) but never hidden/removed.
     const kbDiv = document.getElementById('virtual-keyboard');
     if (kbDiv) {
         Array.from(kbDiv.children).forEach((btn) => {
+            const ki = Number(btn.dataset.keyIndex);
             btn.style.visibility = 'visible';
+            if (roundCUsedKeys[ki]) btn.classList.add('used');
+            else btn.classList.remove('used');
         });
     }
 }
@@ -534,6 +564,8 @@ function checkRoundC() {
         queueExerciseEvent('spelling', 'study', targetWord);
         setTimeout(() => {
             roundCInput = "";
+            roundCPlacement = [];
+            roundCUsedKeys = [];
             STUDY_STATE._roundCSuccess = false;
             STUDY_STATE._roundCFeedback = false;
             STUDY_STATE._roundCFrozen = false;
@@ -553,6 +585,8 @@ function checkRoundC() {
             STUDY_STATE._roundCFeedback = false;
             STUDY_STATE._roundCFrozen = false;
             roundCInput = "";
+            roundCPlacement = [];
+            roundCUsedKeys = [];
             updateRoundCDisplay();
         }, 5000);
     }
@@ -1064,7 +1098,7 @@ function handleRoundCKeyDown(key) {
         const kb = document.getElementById('virtual-keyboard').children;
         for (let btn of kb) {
             const ki = Number(btn.dataset.keyIndex);
-            if (btn.innerText.toLowerCase() === key.toLowerCase() && roundCInput[ki] === undefined) {
+            if (btn.innerText.toLowerCase() === key.toLowerCase() && !roundCUsedKeys[ki]) {
                 typeRoundC(ki);
                 break;
             }

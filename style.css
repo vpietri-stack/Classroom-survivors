@@ -370,6 +370,22 @@ body {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     cursor: pointer;
     border-bottom: 3px solid #ccc;
+    transition: transform 0.1s, opacity 0.1s;
+}
+
+.letter-bubble:active {
+    transform: translateY(2px);
+    border-bottom-width: 1px;
+}
+
+/* Once a palette bubble has been placed, dim & disable it (it stays visible
+   because the palette never depletes, but can't be used twice). */
+.letter-bubble.used {
+    opacity: 0.35;
+    cursor: default;
+    pointer-events: none;
+    box-shadow: none;
+    border-bottom-color: #eee;
 }
 
 /* Improved Draggable Styles */

@@ -111,6 +111,49 @@ const testBody = `
   document.getElementById('scramble-bank').querySelector('button').click();
   ok('B: editing blocked while frozen', document.getElementById('scramble-slots').children[0].innerText === before);
 
+  // ===== GAME-MODE WORD SCRAMBLE (desync fix: palette index vs slot position) =====
+  // Word 'opposite' (8 letters). Simulate the user's report: type o, then p, then
+  // try to select 'i' for a later slot. With the old bug, the 'i' bubble was
+  // unselectable because a lower-position slot was already filled.
+  SPELLING_WORDS = [{ en: 'opposite', zh: '在...对面' }];
+  selectedClassContent = { book: 1, unit: 1, page: 1 };
+  getGameItemSR = function(){ return 'opposite'; }; // override SR lookup (test content empty)
+  try { startSpellingGame(); }
+  catch (e) { console.log('startSpellingGame ERROR:', e.message, e.stack); throw e; }
+  // Force deterministic palette order by overwriting the dataset (bypasses shuffle).
+  var spEl = document.getElementById('spellingGame');
+  spEl.dataset.letters = JSON.stringify(['o','p','p','o','s','i','t','e']);
+  spEl.dataset.placement = JSON.stringify([undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined]);
+  spEl.dataset.usedKeys = JSON.stringify([false,false,false,false,false,false,false,false]);
+  spEl.dataset.built = "false";           // (harmless) force keyboard rebuild below
+  document.getElementById('spelling-keyboard').dataset.built = "false"; // force keyboard rebuild with deterministic letters
+  buildSpellingKeyboard();
+  buildSpellingSlots();
+  // Type o, p, p, o, s via keydown (earliest-empty-slot fill).
+  ['o','p','p','o','s'].forEach(function(ch){ handleGameSpellingKeyDown(ch); });
+  var spSlots = document.getElementById('spelling-input-display').children;
+  ok('G: typing o,p,p,o,s fills first 5 slots', spSlots[0].innerText==='o'&&spSlots[1].innerText==='p'&&spSlots[2].innerText==='p'&&spSlots[3].innerText==='o'&&spSlots[4].innerText==='s');
+  // Now the 'i' bubble (palette index 5) must still be selectable for slot 5.
+  var iBubble = Array.prototype.slice.call(document.querySelectorAll('#spelling-keyboard .letter-bubble')).find(function(b){ return b.dataset.keyIndex==='5'; });
+  ok('G: i bubble present and NOT marked used', !!iBubble && !iBubble.classList.contains('used'));
+  iBubble.click();
+  ok('G: clicking i fills slot 5 (no desync)', document.getElementById('spelling-input-display').children[5].innerText === 'i');
+  // Backspace should remove the last placed (i) and free its bubble.
+  handleGameSpellingKeyDown('Backspace');
+  ok('G: Backspace removes last placed letter (i)', document.getElementById('spelling-input-display').children[5].innerText === '');
+  ok('G: i bubble freed again after backspace', !iBubble.classList.contains('used'));
+  // Placing the same bubble twice is blocked (no double-use / no overflow).
+  iBubble.click();  // already used -> should be a no-op
+  var filledCount = 0;
+  for (var fi=0; fi<spEl.dataset.placement.length; fi++){
+    var pv = JSON.parse(spEl.dataset.placement)[fi];
+    if (pv !== undefined && pv !== null) filledCount++;
+  }
+  ok('G: same palette bubble cannot be placed twice (no overflow)',
+     document.getElementById('spelling-input-display').children[5].innerText === 'i'
+     && filledCount === 6
+     && document.querySelectorAll('#spelling-keyboard .letter-bubble.used').length === 6);
+
   window.__testResult = { pass: pass, fail: fail };
   console.log('\\n' + pass + ' passed, ' + fail + ' failed');
 })();

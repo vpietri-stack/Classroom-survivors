@@ -737,9 +737,10 @@ function startSpellingGame() {
 
     const gameEl = document.getElementById('spellingGame');
     gameEl.dataset.targetWord = word;
-    gameEl.dataset.currentInput = "";      // string, L-to-R fill (may have gaps)
     gameEl.dataset.feedbackMode = "false";
     if (gameEl._spellingResetTimer) { clearTimeout(gameEl._spellingResetTimer); gameEl._spellingResetTimer = null; }
+    // Reset the static palette keyboard so a new word rebuilds it fresh.
+    document.getElementById('spelling-keyboard').dataset.built = "false";
 
     // Build fixed slots: every character position gets a slot. Non-letters are pre-filled & locked.
     const punct = [' ', "'", "-", ".", "?", "!", ","];
@@ -758,7 +759,11 @@ function startSpellingGame() {
     const letters = word.split('').filter(ch => !punct.includes(ch));
     const shuffled = [...letters].sort(() => 0.5 - Math.random());
     gameEl.dataset.letters = JSON.stringify(shuffled);
-
+    // Placed letters keyed by letter-POSITION (so gaps survive deletes). Each entry
+    // is the palette keyIndex that filled it. Empty slot => undefined.
+    gameEl.dataset.placement = JSON.stringify(new Array(letters.length).fill(undefined));
+    // Which palette bubbles are already used (placed). Length === letters.length.
+    gameEl.dataset.usedKeys = JSON.stringify(new Array(letters.length).fill(false));
     buildSpellingSlots();
     buildSpellingKeyboard();
 
@@ -770,20 +775,22 @@ function startSpellingGame() {
     setTimeout(playTTS, 500);
 }
 
-// Render the fixed + letter slots into #spelling-input-display.
+// Render the fixed + letter slots into #spelling-input-display, then refresh the
+// palette bubble disabled-state (used bubbles -> dimmed & non-interactive).
 function buildSpellingSlots() {
     const gameEl = document.getElementById('spellingGame');
     const slots = JSON.parse(gameEl.dataset.slots);
-    const currentInput = gameEl.dataset.currentInput;
+    const placement = JSON.parse(gameEl.dataset.placement);
+    const usedKeys = JSON.parse(gameEl.dataset.usedKeys);
     const targetWord = gameEl.dataset.targetWord;
     const isFeedback = gameEl.dataset.feedbackMode === "true";
     const isSuccess = !document.getElementById('spelling-result-action').classList.contains('hidden');
     const isFrozen = gameEl.dataset.feedbackMode === "true"; // frozen while revealing
 
-    // Map each letter-slot to a char from currentInput by L-to-R letter index.
-    let letterIdx = 0;
+    // Rebuild the letter-string view from placement[] (one entry per letter-position).
     const container = document.getElementById('spelling-input-display');
     container.innerHTML = '';
+    let letterIdx = 0;
     slots.forEach((slot, fullIdx) => {
         const cell = document.createElement('div');
         if (slot.type === 'fixed') {
@@ -791,13 +798,14 @@ function buildSpellingSlots() {
             cell.style.color = '#475569';
             cell.innerText = slot.char === ' ' ? ' ' : slot.char;
         } else {
-            const filledChar = currentInput[letterIdx] !== undefined ? currentInput[letterIdx] : '';
-            letterIdx++;
+            const placedKey = placement[letterIdx];
+            const filledChar = (placedKey !== undefined && placedKey !== null) ? JSON.parse(gameEl.dataset.letters)[placedKey] : '';
+            const correctChar = targetWord[slot.index];
             cell.className = 'study-slot';
             if (isSuccess) {
                 cell.classList.add('bg-green-500');
             } else if (isFeedback && filledChar) {
-                cell.classList.add(filledChar === targetWord[slot.index] ? 'bg-green-500' : 'bg-red-500');
+                cell.classList.add(filledChar === correctChar ? 'bg-green-500' : 'bg-red-500');
             }
             cell.innerText = filledChar;
             // Click a filled slot to DELETE that letter (frozen during reveal).
@@ -806,8 +814,17 @@ function buildSpellingSlots() {
             } else {
                 cell.onclick = null;
             }
+            letterIdx++;
         }
         container.appendChild(cell);
+    });
+
+    // Refresh palette bubble disabled-state.
+    const bubbles = document.querySelectorAll('#spelling-keyboard .letter-bubble');
+    bubbles.forEach(b => {
+        const ki = Number(b.dataset.keyIndex);
+        if (usedKeys[ki]) b.classList.add('used');
+        else b.classList.remove('used');
     });
 }
 
@@ -831,58 +848,67 @@ function buildSpellingKeyboard() {
     container.dataset.built = "true";
 }
 
-// Place the next letter (key index) into the earliest empty letter-slot.
+// Place the palette letter (keyIndex) into the earliest EMPTY letter-slot.
+// The palette bubble is marked used so it can't be placed twice, but the palette
+// never depletes (the bubble stays visible, just disabled). Each placed letter is
+// tracked by letter-POSITION in placement[], so gaps survive deletes.
 function handleSpellingInput(keyIndex) {
     const gameEl = document.getElementById('spellingGame');
     if (gameEl.dataset.feedbackMode === "true") return; // frozen during reveal
     const slots = JSON.parse(gameEl.dataset.slots);
-    const currentInput = gameEl.dataset.currentInput;
+    const placement = JSON.parse(gameEl.dataset.placement);
+    const usedKeys = JSON.parse(gameEl.dataset.usedKeys);
     const letters = JSON.parse(gameEl.dataset.letters);
 
-    // Find the earliest empty letter-slot.
+    // Already used? ignore (can't place the same palette bubble twice).
+    if (usedKeys[keyIndex]) return;
+
+    // Find the earliest empty letter-slot (by letter-POSITION index).
     let letterIdx = 0;
-    let targetLetterIdx = -1;
+    let targetPos = -1;
     for (let i = 0; i < slots.length; i++) {
         if (slots[i].type !== 'letter') continue;
-        if (currentInput[letterIdx] === undefined) { targetLetterIdx = letterIdx; break; }
+        if (placement[letterIdx] === undefined || placement[letterIdx] === null) { targetPos = letterIdx; break; }
         letterIdx++;
     }
-    if (targetLetterIdx === -1) return; // full
+    if (targetPos === -1) return; // all letter-slots filled
 
-    // Check this key isn't already placed (one use per palette key).
-    if (currentInput[keyIndex] !== undefined) return;
-
-    const arr = currentInput.split('');
-    // Fill any "holes" before targetLetterIdx so the string stays index-aligned.
-    arr[targetLetterIdx] = letters[keyIndex];
-    gameEl.dataset.currentInput = arr.join('');
+    placement[targetPos] = keyIndex;
+    usedKeys[keyIndex] = true;
+    gameEl.dataset.placement = JSON.stringify(placement);
+    gameEl.dataset.usedKeys = JSON.stringify(usedKeys);
     buildSpellingSlots();
 }
 
-// Delete a specific placed letter (by slot position). It simply disappears —
-// nothing goes back to the keyboard (the palette never depletes).
+// Delete a placed letter (by slot position). It simply disappears — nothing goes
+// back to the keyboard (the palette never depletes). The palette bubble that
+// supplied it is freed again so it can be reused.
 function removeSpellingLetter(slotFullIdx) {
     const gameEl = document.getElementById('spellingGame');
     if (gameEl.dataset.feedbackMode === "true") return; // frozen during reveal
     const slots = JSON.parse(gameEl.dataset.slots);
-    const currentInput = gameEl.dataset.currentInput;
+    const placement = JSON.parse(gameEl.dataset.placement);
+    const usedKeys = JSON.parse(gameEl.dataset.usedKeys);
 
     let letterIdx = 0;
     for (let i = 0; i < slotFullIdx; i++) {
         if (slots[i].type === 'letter') letterIdx++;
     }
-    const arr = currentInput.split('');
-    if (letterIdx >= arr.length) return;
-    arr.splice(letterIdx, 1);
-    gameEl.dataset.currentInput = arr.join('');
+    const keyUsed = placement[letterIdx];
+    if (keyUsed === undefined || keyUsed === null) return;
+    usedKeys[keyUsed] = false;
+    placement[letterIdx] = undefined;
+    gameEl.dataset.placement = JSON.stringify(placement);
+    gameEl.dataset.usedKeys = JSON.stringify(usedKeys);
     buildSpellingSlots();
 }
 
 function clearSpelling() {
     const gameEl = document.getElementById('spellingGame');
     if (gameEl.dataset.feedbackMode === "true") return; // frozen during reveal
-    gameEl.dataset.currentInput = "";
-    gameEl.dataset.feedbackMode = "false";
+    const n = JSON.parse(gameEl.dataset.letters).length;
+    gameEl.dataset.placement = JSON.stringify(new Array(n).fill(undefined));
+    gameEl.dataset.usedKeys = JSON.stringify(new Array(n).fill(false));
     if (gameEl._spellingResetTimer) { clearTimeout(gameEl._spellingResetTimer); gameEl._spellingResetTimer = null; }
     buildSpellingSlots();
     const display = document.getElementById('spelling-input-display');
@@ -894,13 +920,19 @@ function checkSpelling() {
     if (gameEl.dataset.feedbackMode === "true") return; // already revealed
 
     const slots = JSON.parse(gameEl.dataset.slots);
-    const currentInput = gameEl.dataset.currentInput;
+    const placement = JSON.parse(gameEl.dataset.placement);
+    const usedKeys = JSON.parse(gameEl.dataset.usedKeys);
+    const letters = JSON.parse(gameEl.dataset.letters);
     const targetWord = gameEl.dataset.targetWord;
     const punct = [' ', "'", "-", ".", "?", "!", ","];
 
     const targetLetters = targetWord.split('').filter(ch => !punct.includes(ch)).join('');
+    // Rebuild the placed string from placement[] (letter-positions L-to-R; gaps => '').
+    const placedArr = placement.map(p => (p === undefined || p === null) ? '' : letters[p]);
+    const currentInput = placedArr.join('');
+
     let placedCount = 0;
-    for (let i = 0; i < currentInput.length; i++) if (currentInput[i] !== undefined) placedCount++;
+    for (let i = 0; i < placement.length; i++) if (placement[i] !== undefined && placement[i] !== null) placedCount++;
     const allCorrect = (currentInput === targetLetters);
 
     if (allCorrect) {
@@ -922,7 +954,9 @@ function checkSpelling() {
         if (gameEl._spellingResetTimer) clearTimeout(gameEl._spellingResetTimer);
         gameEl._spellingResetTimer = setTimeout(() => {
             if (document.getElementById('spelling-result-action').classList.contains('hidden')) {
-                gameEl.dataset.currentInput = "";
+                const n = JSON.parse(gameEl.dataset.letters).length;
+                gameEl.dataset.placement = JSON.stringify(new Array(n).fill(undefined));
+                gameEl.dataset.usedKeys = JSON.stringify(new Array(n).fill(false));
                 gameEl.dataset.feedbackMode = "false";
                 buildSpellingSlots();
             }
@@ -1518,27 +1552,34 @@ function handleGameSpellingKeyDown(key) {
     if (key === 'Enter') {
         if (!frozen) checkSpelling();
     } else if (key === 'Backspace') {
-        // Remove the last placed letter (reflow L-to-R), not a full clear.
+        // Remove the last placed letter (L-to-R), freeing its palette bubble. Not a full clear.
         if (!gameEl.classList.contains('hidden') && !frozen) {
-            const currentInput = gameEl.dataset.currentInput || '';
-            if (currentInput.length > 0) {
-                // Remove the last defined letter char.
-                const arr = currentInput.split('');
-                for (let i = arr.length - 1; i >= 0; i--) {
-                    if (arr[i] !== undefined) { arr.splice(i, 1); break; }
+            const placement = JSON.parse(gameEl.dataset.placement);
+            const usedKeys = JSON.parse(gameEl.dataset.usedKeys);
+            for (let i = placement.length - 1; i >= 0; i--) {
+                if (placement[i] !== undefined && placement[i] !== null) {
+                    usedKeys[placement[i]] = false;
+                    placement[i] = undefined;
+                    break;
                 }
-                gameEl.dataset.currentInput = arr.join('');
-                gameEl.dataset.feedbackMode = "false";
-                buildSpellingSlots();
             }
+            gameEl.dataset.placement = JSON.stringify(placement);
+            gameEl.dataset.usedKeys = JSON.stringify(usedKeys);
+            buildSpellingSlots();
         }
     } else if (key.length === 1 && key.match(/[a-z0-9]/i)) {
         if (frozen) return;
+        const gameEl = document.getElementById('spellingGame');
+        const usedKeys = JSON.parse(gameEl.dataset.usedKeys);
         const bubbles = document.querySelectorAll('#spelling-keyboard .letter-bubble');
+        // Pick the FIRST matching bubble that is NOT already used (so repeated
+        // letters like the two 'p's in "opposite" each get their own bubble).
         for (let bubble of bubbles) {
             if (bubble.innerText.toLowerCase() === key.toLowerCase() && bubble.isConnected) {
-                handleSpellingInput(Number(bubble.dataset.keyIndex));
-                break;
+                if (!usedKeys[Number(bubble.dataset.keyIndex)]) {
+                    handleSpellingInput(Number(bubble.dataset.keyIndex));
+                    break;
+                }
             }
         }
     }

@@ -1174,7 +1174,9 @@ function deleteGrammarWord(item) {
 }
 
 function clearGrammar() {
-    if (grammarGameEl().dataset.frozen === "true") return;
+    // CLEAR works even while frozen (e.g. during the post-check reveal): it
+    // cancels the pending reset and returns every placed word to the dock so
+    // the player can start over.
     if (grammarGameEl()._grammarResetTimer) {
         clearTimeout(grammarGameEl()._grammarResetTimer);
         grammarGameEl()._grammarResetTimer = null;
@@ -1193,6 +1195,8 @@ function clearGrammar() {
         });
         zone.classList.remove('filled');
     });
+    // Re-enable editing (clearing returns to a fresh, editable state).
+    grammarGameEl().dataset.frozen = "false";
 }
 
 function grammarGameEl() {
@@ -1279,16 +1283,23 @@ function checkGrammar() {
         grammarGameEl().dataset.frozen = "true";
         handleMinigameSuccess('grammar');
     } else {
-        // Wrong: reveal for ~5s (frozen), then remove all placed words.
-        // The dock is a static palette and stays as-is.
+        // Wrong: reveal for ~5s (frozen), then return all placed words to the
+        // dock so the player can retry. (This widget depletes on placement, so
+        // the reset must RESTORE tiles — merely removing them would lose words.)
         grammarGameEl().dataset.frozen = "true";
         if (grammarGameEl()._grammarResetTimer) clearTimeout(grammarGameEl()._grammarResetTimer);
         grammarGameEl()._grammarResetTimer = setTimeout(() => {
+            const dock = document.getElementById('word-dock');
             document.querySelectorAll('.drop-zone').forEach(zone => {
-                if (zone.children.length > 0) {
-                    zone.children[0].remove();
-                    zone.classList.remove('filled');
-                }
+                zone.querySelectorAll('.draggable.placed').forEach(p => {
+                    const tile = document.createElement('div');
+                    tile.className = 'draggable';
+                    tile.innerText = p.dataset.word;
+                    tile.dataset.word = p.dataset.word;
+                    dock.appendChild(tile);
+                    p.remove();
+                });
+                zone.classList.remove('filled');
             });
             grammarGameEl().dataset.frozen = "false";
             grammarGameEl()._grammarResetTimer = null;

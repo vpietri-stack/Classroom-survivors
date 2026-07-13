@@ -185,6 +185,52 @@ const testBody = `
     zones[0].children[0].click(); // delegated #sentence-container listener -> deleteGrammarWord
     return document.querySelectorAll('#word-dock .draggable').length === dockCount;
   })());
+
+  // ===== Post-CHECK behaviour (regression from deplete rework) =====
+  // Reproduces two bugs: (a) after a wrong CHECK the 5s reset deleted placed
+  // words instead of returning them to the dock (words vanished permanently now
+  // that the dock depletes); (b) CLEAR was a no-op while frozen (during the
+  // reveal), so the player couldn't start over.
+  GRAMMAR_SENTENCES = ['We are not hungry.'];
+  getGameItemSR = function(){ return 'We are not hungry.'; };
+  threw = false;
+  try { startGrammarGame(); } catch (e) { threw = true; console.log('grammar fresh throw:', e.message, e.stack); }
+  ok('G2b: fresh grammar game renders without throwing', !threw && document.querySelectorAll('.drop-zone').length > 0);
+  var gzones = document.querySelectorAll('.drop-zone');
+  var gdc = document.querySelectorAll('#word-dock .draggable').length;
+  ok('G2b: dock full before placement (one tile per word)', gdc === gzones.length);
+
+  // Override setTimeout so the 5s reset is captured (not auto-fired); we fire it
+  // manually to simulate the reveal window elapsing.
+  var gOrigST = setTimeout;
+  var gCaptured = null;
+  setTimeout = function(fn, ms){ gCaptured = fn; return 1; };
+
+  // Place ONE word (partial fill -> wrong on check).
+  document.querySelectorAll('#word-dock .draggable')[0].click();
+  ok('G2b: one word placed, dock depletes by 1', document.querySelectorAll('#word-dock .draggable').length === gdc - 1 && gzones[0].children.length === 1);
+
+  // WRONG check -> freeze + schedule 5s reset.
+  checkGrammar();
+  ok('G2b: after wrong CHECK, frozen during reveal', grammarGameEl().dataset.frozen === 'true');
+  ok('G2b: placed word still visible during reveal', gzones[0].children.length === 1);
+
+  // CLEAR while frozen must STILL work and unfreeze.
+  clearGrammar();
+  ok('G2b: CLEAR during freeze restores all tiles to dock', document.querySelectorAll('#word-dock .draggable').length === gdc);
+  ok('G2b: CLEAR during freeze empties the slots', document.querySelectorAll('.drop-zone .draggable.placed').length === 0);
+  ok('G2b: CLEAR during freeze unfreezes (editable again)', grammarGameEl().dataset.frozen === 'false');
+
+  // 5s auto-reset must RETURN words to the dock, not lose them.
+  document.querySelectorAll('#word-dock .draggable')[0].click(); // place again
+  checkGrammar(); // schedules reset (captured)
+  ok('G2b: wrong CHECK again freezes the widget', grammarGameEl().dataset.frozen === 'true');
+  if (gCaptured) gCaptured(); // simulate the 5s reveal window elapsing
+  setTimeout = gOrigST;
+  ok('G2b: 5s reset returns placed word to dock (not lost)', document.querySelectorAll('#word-dock .draggable').length === gdc);
+  ok('G2b: 5s reset clears the slots', document.querySelectorAll('.drop-zone .draggable.placed').length === 0);
+  ok('G2b: 5s reset unfreezes the widget', grammarGameEl().dataset.frozen === 'false');
+
   // And with NO sentences available at all, it must auto-pass (no throw, no hang).
   GRAMMAR_SENTENCES = [];
   threw = false;

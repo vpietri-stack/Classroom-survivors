@@ -154,6 +154,27 @@ const testBody = `
      && filledCount === 6
      && document.querySelectorAll('#spelling-keyboard .letter-bubble.used').length === 6);
 
+  // ===== GRAMMAR (sentence scramble) must NOT throw on empty SR result =====
+  // Reproduces the freeze: getGameItemSR can return [] (empty spaced-rep pool).
+  // Old code did primarySentence = rawEntry[0] (=undefined) -> .split(' ') -> throw,
+  // which left the scene paused with a blank white screen. Now it must either
+  // fall back to a loaded sentence, or auto-pass safely.
+  GRAMMAR_SENTENCES = ['The cat sat on the mat.'];
+  activeGameMode = null;  // present in real game (boot.js); harness doesn't load boot.js
+  selectedClassContent = { book: 1, unit: 1, page: 1 };
+  getGameItemSR = function(){ return []; }; // empty SR pool (the crash trigger)
+  var threw = false;
+  try { startGrammarGame(); } catch (e) { threw = true; console.log('grammar throw:', e.message); }
+  ok('G2: startGrammarGame does NOT throw on empty SR result', !threw);
+  ok('G2: overlay shown (not frozen/blank)', !document.getElementById('grammarGame').classList.contains('hidden'));
+  ok('G2: a sentence was rendered into the container', document.getElementById('sentence-container').children.length > 0);
+
+  // And with NO sentences available at all, it must auto-pass (no throw, no hang).
+  GRAMMAR_SENTENCES = [];
+  threw = false;
+  try { startGrammarGame(); } catch (e) { threw = true; console.log('G2 auto-pass throw:', e.message, e.stack); }
+  ok('G2: startGrammarGame does NOT throw when no sentences exist (auto-pass)', !threw);
+
   window.__testResult = { pass: pass, fail: fail };
   console.log('\\n' + pass + ' passed, ' + fail + ' failed');
 })();

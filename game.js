@@ -585,11 +585,18 @@ function startMiniGame(type, context) {
     const scene = game ? game.scene.getScene('MainScene') : null;
     startMinigameCountdown(scene);
 
-
-    if (type === 'spelling') startSpellingGame();
-    if (type === 'wordrec') startWordRecGame();
-    if (type === 'scramble') startGrammarGame();
-    if (type === 'sentencematch') startSentenceMatchGame();
+    try {
+        if (type === 'spelling') startSpellingGame();
+        else if (type === 'wordrec') startWordRecGame();
+        else if (type === 'scramble') startGrammarGame();
+        else if (type === 'sentencematch') startSentenceMatchGame();
+    } catch (err) {
+        // A crash here would otherwise leave the game scene paused with no overlay
+        // shown (a permanent white/frozen screen). Recover by ending the minigame
+        // without crediting a reward, using the same resume logic as claimReward.
+        console.error('Minigame start failed for type "' + type + '":', err);
+        claimReward(false);
+    }
 }
 
 function claimReward(success) {
@@ -1047,17 +1054,20 @@ function startGrammarGame() {
     startExerciseTracking();
 
     const { book, unit, page } = selectedClassContent;
-    const rawEntry = getGameItemSR(book, unit, page, 'sentences', srInSessionFailures, srInSessionSuccesses);
-    let possibilities = [];
-    let primarySentence = "";
+    let rawEntry = getGameItemSR(book, unit, page, 'sentences', srInSessionFailures, srInSessionSuccesses);
 
-    if (Array.isArray(rawEntry)) {
-        possibilities = rawEntry;
-        primarySentence = rawEntry[0];
-    } else {
-        possibilities = [rawEntry];
-        primarySentence = rawEntry;
+    // SR lookup can return undefined or [] (empty spaced-repetition pool).
+    // Normalize to a list of usable sentence strings, falling back to any
+    // loaded sentence so we never crash (a crash here would freeze the game).
+    let possibilities = Array.isArray(rawEntry)
+        ? rawEntry.slice()
+        : (rawEntry !== undefined && rawEntry !== null ? [rawEntry] : []);
+    possibilities = possibilities.filter(p => typeof p === 'string' && p.trim().length > 0);
+    if (possibilities.length === 0) {
+        possibilities = GRAMMAR_SENTENCES.filter(p => typeof p === 'string' && p.trim().length > 0);
     }
+    if (possibilities.length === 0) { handleMinigameSuccess('grammar'); return; }
+    const primarySentence = possibilities[0];
 
     // Store valid possibilities for validation
     const grammarGameEl = document.getElementById('grammarGame');
@@ -1124,7 +1134,7 @@ function startGrammarGame() {
         dock.appendChild(wordDiv);
     });
 
-    grammarGameEl().dataset.frozen = "false";
+    grammarGameEl.dataset.frozen = "false";
     document.getElementById('grammarGame').classList.remove('hidden');
 }
 

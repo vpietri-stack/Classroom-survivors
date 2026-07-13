@@ -213,12 +213,13 @@ function nextRoundBWord() {
         slotsDiv.appendChild(slot);
     }
 
-    // Setup Bank (Scrambled letters, excluding spaces)
+    // Setup Bank (Scrambled letters, excluding spaces). This is a STATIC palette:
+    // clicking a bank letter places a copy in the earliest empty slot; the bank never depletes.
     const bankDiv = document.getElementById('scramble-bank');
-    // Filter out spaces and punctuation from scramble
     const punctuation = [' ', "'", "-", ".", "?", "!"];
     const letters = word.split('').filter(c => !punctuation.includes(c)).sort(() => 0.5 - Math.random());
 
+    bankDiv.innerHTML = '';
     letters.forEach((char) => {
         const btn = document.createElement('button');
         btn.className = "study-letter-btn";
@@ -227,9 +228,8 @@ function nextRoundBWord() {
         btn.onclick = (e) => addLetterToSlot(char, e.target, word);
         bankDiv.appendChild(btn);
     });
-    // Remember the full original bank so we can restore it on reset.
-    document.getElementById('scramble-bank').dataset.chars = JSON.stringify(letters);
 
+    STUDY_STATE._roundBFrozen = false;
     playTTS();
 }
 
@@ -237,34 +237,25 @@ function nextRoundBWord() {
 let roundBInput = []; // Array of chars
 
 function addLetterToSlot(char, btnElement, targetWord) {
-    if (STUDY_STATE.isTransitioning) return;
-    // Find first empty letter-slot (fixed slots skipped).
+    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundBFrozen) return;
     const slots = document.getElementById('scramble-slots').children;
-    let insertedIndex = -1;
+    // Place into the earliest EMPTY letter-slot (fixed slots skipped).
     for (let i = 0; i < slots.length; i++) {
         if (slots[i].dataset.fixed === "true") continue;
         if (!slots[i].innerText) {
             slots[i].innerText = char;
-            slots[i].dataset.sourceBtn = "true";
-            btnElement.style.visibility = 'hidden';
-            slots[i].sourceBtnEntry = btnElement;
-            insertedIndex = i;
             break;
         }
     }
-    // NOTE: no auto-check on fill — player clicks CHECK when ready.
+    // Bank stays as a static palette — the clicked button is NOT hidden/removed.
 }
 
 function removeLetterFromSlot(index, targetWord) {
-    if (STUDY_STATE.isTransitioning) return;
+    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundBFrozen) return;
     const slots = document.getElementById('scramble-slots').children;
     const slot = slots[index];
     if (slot.innerText) {
         slot.innerText = '';
-        if (slot.sourceBtnEntry) {
-            slot.sourceBtnEntry.style.visibility = 'visible';
-            slot.sourceBtnEntry = null;
-        }
         // Cancel any pending reveal/reset so colours clear immediately on edit.
         if (slot._resetTimer) { clearTimeout(slot._resetTimer); slot._resetTimer = null; }
         resetSlotColors();
@@ -314,6 +305,7 @@ function checkRoundB() {
 
     if (allCorrect) {
         STUDY_STATE.isTransitioning = true;
+        STUDY_STATE._roundBFrozen = true;
         playHappySound();
         srStudyResults.push({ type: 'vocab', key: itemKey(targetWord), firstAttempt: exerciseAttempts === 1 });
         queueExerciseEvent('wordScramble', 'study', targetWord);
@@ -321,25 +313,25 @@ function checkRoundB() {
             STUDY_STATE.currentWordIndex++;
             startExerciseTracking();
             STUDY_STATE.isTransitioning = false;
+            STUDY_STATE._roundBFrozen = false;
             nextRoundBWord();
         }, 1000);
         return;
     }
 
-    // Wrong: reveal for ~5s, then send EVERYTHING back to the bank.
+    // Wrong: reveal for ~5s (frozen), then clear all slots.
+    STUDY_STATE._roundBFrozen = true;
     synthError();
     incrementExerciseAttempts();
     const slotsArr = Array.from(slots);
     slotsArr.forEach(s => {
         if (s._resetTimer) clearTimeout(s._resetTimer);
         s._resetTimer = setTimeout(() => {
-            // Clear contents and restore every bank button.
             for (let slot of slots) {
-                if (slot.sourceBtnEntry) { slot.sourceBtnEntry.style.visibility = 'visible'; slot.sourceBtnEntry = null; }
                 slot.innerText = '';
                 resetSlotColors();
             }
-            repositionBank();
+            STUDY_STATE._roundBFrozen = false;
         }, 5000);
     });
 }
@@ -360,16 +352,18 @@ function repositionBank() {
 }
 
 function clearRoundB() {
-    if (STUDY_STATE.isTransitioning) return;
+    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundBFrozen) return;
     const slots = document.getElementById('scramble-slots').children;
     for (let slot of slots) {
         if (slot._resetTimer) { clearTimeout(slot._resetTimer); slot._resetTimer = null; }
-        if (slot.sourceBtnEntry) { slot.sourceBtnEntry.style.visibility = 'visible'; slot.sourceBtnEntry = null; }
         slot.innerText = '';
         resetSlotColors();
     }
-    repositionBank();
+    // Bank is a static palette — it is NOT rebuilt/emptied.
 }
+
+// (repositionBank removed — the bank is now a static palette that never depletes.)
+function repositionBank() {}
 
 function finishRoundB() {
     startRoundC();
@@ -455,14 +449,14 @@ let roundCSlots = [];
 let roundCBaseKeys = [];
 
 function typeRoundC(keyIndex) {
-    if (STUDY_STATE.isTransitioning) return;
+    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundCFrozen) return;
     if (roundCInput[keyIndex] !== undefined) return; // key already used
     roundCInput += roundCBaseKeys[keyIndex];
     updateRoundCDisplay();
 }
 
 function removeRoundCLetter(slotFullIdx) {
-    if (STUDY_STATE.isTransitioning) return;
+    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundCFrozen) return;
     let letterCount = 0;
     for (let i = 0; i < slotFullIdx; i++) {
         if (roundCSlots[i].type === 'letter') letterCount++;
@@ -475,7 +469,7 @@ function removeRoundCLetter(slotFullIdx) {
 }
 
 function clearRoundC() {
-    if (STUDY_STATE.isTransitioning) return;
+    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundCFrozen) return;
     if (STUDY_STATE._roundCResetTimer) { clearTimeout(STUDY_STATE._roundCResetTimer); STUDY_STATE._roundCResetTimer = null; }
     roundCInput = "";
     updateRoundCDisplay();
@@ -486,6 +480,7 @@ function updateRoundCDisplay() {
     const targetWord = currentTTSWord;
     const isFeedback = STUDY_STATE._roundCFeedback === true;
     const isSuccess = STUDY_STATE._roundCSuccess === true;
+    const isFrozen = STUDY_STATE._roundCFrozen === true;
 
     let letterIdx = 0;
     let html = "";
@@ -494,32 +489,32 @@ function updateRoundCDisplay() {
             const c = slot.char === ' ' ? ' ' : slot.char;
             html += `<div class="study-slot border-transparent bg-transparent select-none" style="color:#94a3b8">${c}</div>`;
         } else {
-            const filledChar = roundCInput[letterIdx] || "";
+            const filledChar = roundCInput[letterIdx] !== undefined ? roundCInput[letterIdx] : "";
             letterIdx++;
             let bg = "bg-gray-800";
             if (isSuccess) bg = "bg-green-500";
             else if (isFeedback && filledChar) {
                 bg = (filledChar === targetWord[slot.index]) ? "bg-green-500" : "bg-red-500";
             }
-            const onclick = filledChar ? ` onclick="removeRoundCLetter(${fullIdx})"` : "";
+            // Click a filled slot to DELETE it (frozen during reveal).
+            const onclick = (filledChar && !isFrozen) ? ` onclick="removeRoundCLetter(${fullIdx})"` : "";
             html += `<div class="study-slot ${bg}"${onclick}>${filledChar}</div>`;
         }
     });
     disp.innerHTML = html;
     disp.className = "flex flex-wrap justify-center gap-[var(--gap-xs)] min-h-[60px] w-full px-4 text-white";
 
-    // Keyboard: show only unused keys.
+    // Keyboard stays as a static palette: all keys remain visible & clickable.
     const kbDiv = document.getElementById('virtual-keyboard');
     if (kbDiv) {
         Array.from(kbDiv.children).forEach((btn) => {
-            const ki = Number(btn.dataset.keyIndex);
-            btn.style.visibility = (roundCInput[ki] !== undefined) ? 'hidden' : 'visible';
+            btn.style.visibility = 'visible';
         });
     }
 }
 
 function checkRoundC() {
-    if (STUDY_STATE.isTransitioning) return;
+    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundCFrozen) return;
     const targetWord = currentTTSWord;
     const punct = [' ', "'", "-", ".", "?", "!", ","];
     const targetLetters = targetWord.split('').filter(c => !punct.includes(c)).join('');
@@ -532,6 +527,7 @@ function checkRoundC() {
     if (allCorrect) {
         STUDY_STATE._roundCSuccess = true;
         STUDY_STATE._roundCFeedback = true;
+        STUDY_STATE._roundCFrozen = true;
         updateRoundCDisplay();
         STUDY_STATE.isTransitioning = true;
         playHappySound();
@@ -540,6 +536,7 @@ function checkRoundC() {
             roundCInput = "";
             STUDY_STATE._roundCSuccess = false;
             STUDY_STATE._roundCFeedback = false;
+            STUDY_STATE._roundCFrozen = false;
             STUDY_STATE.currentWordIndex++;
             startExerciseTracking();
             STUDY_STATE.isTransitioning = false;
@@ -547,12 +544,14 @@ function checkRoundC() {
         }, 1000);
     } else {
         STUDY_STATE._roundCFeedback = true;
+        STUDY_STATE._roundCFrozen = true; // freeze: no editing during reveal
         updateRoundCDisplay();
         synthError();
         incrementExerciseAttempts();
         if (STUDY_STATE._roundCResetTimer) clearTimeout(STUDY_STATE._roundCResetTimer);
         STUDY_STATE._roundCResetTimer = setTimeout(() => {
             STUDY_STATE._roundCFeedback = false;
+            STUDY_STATE._roundCFrozen = false;
             roundCInput = "";
             updateRoundCDisplay();
         }, 5000);
@@ -611,20 +610,18 @@ function nextRoundDSentence() {
         slot.className = 'sentence-slot';
         slot.dataset.index = idx;
         slot.dataset.expected = word;
-        slot.onclick = () => {
-            if (slot.firstChild) moveWordTile(slot.firstChild);
-        };
         dropZone.appendChild(slot);
     });
 
-    // Shuffled bank.
+    // Shuffled bank — a STATIC palette. Clicking a word places a copy; the bank stays.
     const shuffled = [...tokens].sort(() => 0.5 - Math.random());
     const bank = document.getElementById('sentence-word-bank');
     bank.innerHTML = '';
-    bank.dataset.words = JSON.stringify(shuffled);
     shuffled.forEach((word, id) => {
         bank.appendChild(createWordTile(word, id));
     });
+
+    STUDY_STATE._roundDFrozen = false;
 }
 
 function createWordTile(word, id) {
@@ -633,48 +630,39 @@ function createWordTile(word, id) {
     btn.innerText = word;
     btn.dataset.word = word;
     btn.dataset.id = id;
-    btn.onclick = () => moveWordTile(btn);
+    btn.onclick = () => placeWordTile(word);
     return btn;
 }
 
-// Move a tile between bank and the earliest empty word-slot (gap fill L-to-R).
-function moveWordTile(btn) {
-    if (STUDY_STATE.isTransitioning) return;
+// Bank is a static palette: clicking a bank word places a COPY into the earliest
+// empty slot. The source word stays in the bank.
+function placeWordTile(word) {
+    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundDFrozen) return;
     const dropZone = document.getElementById('sentence-drop-zone');
-    const bank = document.getElementById('sentence-word-bank');
-
-    btn.classList.remove('!bg-green-500', '!bg-red-500');
-
-    if (btn.parentElement === bank) {
-        // Place into earliest empty slot.
-        const slots = Array.from(dropZone.children);
-        const empty = slots.find(s => !s.firstChild);
-        if (empty) empty.appendChild(btn);
-    } else {
-        // Remove from a slot back to the bank (restore original order).
-        bank.appendChild(btn);
+    const empty = Array.from(dropZone.children).find(s => !s.firstChild);
+    if (empty) {
+        const tile = document.createElement('div');
+        tile.className = 'study-word-tile placed';
+        tile.innerText = word;
+        tile.dataset.word = word;
+        tile.onclick = () => deleteWordTile(tile);
+        empty.appendChild(tile);
     }
 }
 
+// Remove a placed word entirely (it just disappears — nothing returns to the bank).
+function deleteWordTile(tile) {
+    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundDFrozen) return;
+    tile.classList.remove('!bg-green-500', '!bg-red-500');
+    tile.remove();
+}
+
 function clearRoundD() {
-    if (STUDY_STATE.isTransitioning) return;
+    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundDFrozen) return;
     const dropZone = document.getElementById('sentence-drop-zone');
-    const bank = document.getElementById('sentence-word-bank');
     if (STUDY_STATE._roundDResetTimer) { clearTimeout(STUDY_STATE._roundDResetTimer); STUDY_STATE._roundDResetTimer = null; }
-    // Send every tile back to the bank in its original shuffled order.
-    const words = JSON.parse(bank.dataset.words || "[]");
-    bank.innerHTML = '';
-    words.forEach((word, id) => bank.appendChild(createWordTile(word, id)));
-    dropZone.innerHTML = '';
-    const expected = Array.from(dropZone.children).map(s => s.dataset.expected);
-    expected.forEach((word, idx) => {
-        const slot = document.createElement('div');
-        slot.className = 'sentence-slot';
-        slot.dataset.index = idx;
-        slot.dataset.expected = word;
-        slot.onclick = () => { if (slot.firstChild) moveWordTile(slot.firstChild); };
-        dropZone.appendChild(slot);
-    });
+    // Remove all placed tiles; the bank (static palette) is left untouched.
+    Array.from(dropZone.children).forEach(slot => { if (slot.firstChild) slot.firstChild.remove(); });
 }
 
 function checkRoundD() {
@@ -700,6 +688,7 @@ function checkRoundD() {
 
     if (allCorrect) {
         STUDY_STATE.isTransitioning = true;
+        STUDY_STATE._roundDFrozen = true;
         playHappySound();
         srStudyResults.push({ type: 'sentences', key: itemKey(STUDY_STATE.sentences[STUDY_STATE.currentSentenceIndex]), firstAttempt: exerciseAttempts === 1 });
         queueExerciseEvent('sentenceScramble', 'study', STUDY_STATE.sentences[STUDY_STATE.currentSentenceIndex]);
@@ -707,10 +696,12 @@ function checkRoundD() {
             STUDY_STATE.currentSentenceIndex++;
             startExerciseTracking();
             STUDY_STATE.isTransitioning = false;
+            STUDY_STATE._roundDFrozen = false;
             nextRoundDSentence();
         }, 1000);
     } else {
         STUDY_STATE.isTransitioning = true;
+        STUDY_STATE._roundDFrozen = true; // frozen during reveal
         synthError();
         incrementExerciseAttempts();
         dropZone.classList.add('border-red-500');
@@ -718,7 +709,9 @@ function checkRoundD() {
         STUDY_STATE._roundDResetTimer = setTimeout(() => {
             dropZone.classList.remove('border-red-500');
             STUDY_STATE.isTransitioning = false;
-            clearRoundD();
+            STUDY_STATE._roundDFrozen = false;
+            // Remove all placed tiles; the bank (static palette) is left untouched.
+            Array.from(dropZone.children).forEach(slot => { if (slot.firstChild) slot.firstChild.remove(); });
         }, 5000);
     }
 }

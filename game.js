@@ -737,12 +737,11 @@ function startSpellingGame() {
 
     const gameEl = document.getElementById('spellingGame');
     gameEl.dataset.targetWord = word;
-    gameEl.dataset.currentInput = "";
+    gameEl.dataset.currentInput = "";      // string, L-to-R fill (may have gaps)
     gameEl.dataset.feedbackMode = "false";
     if (gameEl._spellingResetTimer) { clearTimeout(gameEl._spellingResetTimer); gameEl._spellingResetTimer = null; }
 
-    // Build fixed slots: every character position gets a slot. Non-letters (space,
-    // apostrophe, hyphen, punctuation) are pre-filled and locked.
+    // Build fixed slots: every character position gets a slot. Non-letters are pre-filled & locked.
     const punct = [' ', "'", "-", ".", "?", "!", ","];
     const slots = [];
     for (let i = 0; i < word.length; i++) {
@@ -755,7 +754,7 @@ function startSpellingGame() {
     }
     gameEl.dataset.slots = JSON.stringify(slots);
 
-    // Letters to pick from (shuffled).
+    // Full palette of letters (shuffled) — rendered once, never depletes.
     const letters = word.split('').filter(ch => !punct.includes(ch));
     const shuffled = [...letters].sort(() => 0.5 - Math.random());
     gameEl.dataset.letters = JSON.stringify(shuffled);
@@ -779,8 +778,9 @@ function buildSpellingSlots() {
     const targetWord = gameEl.dataset.targetWord;
     const isFeedback = gameEl.dataset.feedbackMode === "true";
     const isSuccess = !document.getElementById('spelling-result-action').classList.contains('hidden');
+    const isFrozen = gameEl.dataset.feedbackMode === "true"; // frozen while revealing
 
-    // Map each letter-slot to a character from currentInput (L-to-R fill).
+    // Map each letter-slot to a char from currentInput by L-to-R letter index.
     let letterIdx = 0;
     const container = document.getElementById('spelling-input-display');
     container.innerHTML = '';
@@ -789,9 +789,9 @@ function buildSpellingSlots() {
         if (slot.type === 'fixed') {
             cell.className = 'study-slot border-transparent bg-transparent select-none';
             cell.style.color = '#475569';
-            cell.innerText = slot.char === ' ' ? ' ' : slot.char;
+            cell.innerText = slot.char === ' ' ? ' ' : slot.char;
         } else {
-            const filledChar = currentInput[letterIdx] || '';
+            const filledChar = currentInput[letterIdx] !== undefined ? currentInput[letterIdx] : '';
             letterIdx++;
             cell.className = 'study-slot';
             if (isSuccess) {
@@ -800,101 +800,118 @@ function buildSpellingSlots() {
                 cell.classList.add(filledChar === targetWord[slot.index] ? 'bg-green-500' : 'bg-red-500');
             }
             cell.innerText = filledChar;
-            if (filledChar) {
+            // Click a filled slot to DELETE that letter (frozen during reveal).
+            if (filledChar && !isFrozen) {
                 cell.onclick = () => removeSpellingLetter(fullIdx);
+            } else {
+                cell.onclick = null;
             }
         }
         container.appendChild(cell);
     });
 }
 
-// Build the keyboard of remaining (unplaced) letters.
+// Build the palette keyboard ONCE. It never depletes — clicking a bubble copies a
+// letter into the earliest empty letter-slot. The bubble stays put.
 function buildSpellingKeyboard() {
     const gameEl = document.getElementById('spellingGame');
-    const currentInput = gameEl.dataset.currentInput;
     const letters = JSON.parse(gameEl.dataset.letters);
     const container = document.getElementById('spelling-keyboard');
+    if (container.dataset.built === "true") return; // already built; never rebuild
     container.innerHTML = '';
     letters.forEach((char, i) => {
-        if (currentInput[i] !== undefined) return; // already placed
         const bubble = document.createElement('div');
         bubble.className = 'letter-bubble';
         bubble.innerText = char;
         bubble.dataset.keyIndex = i;
+        bubble.dataset.char = char;
         bubble.onclick = () => handleSpellingInput(i);
         container.appendChild(bubble);
     });
+    container.dataset.built = "true";
 }
 
-// Place the next available letter (i = key index) into the earliest empty letter-slot.
+// Place the next letter (key index) into the earliest empty letter-slot.
 function handleSpellingInput(keyIndex) {
-    if (!document.getElementById('spelling-result-action').classList.contains('hidden')) return;
     const gameEl = document.getElementById('spellingGame');
-    const currentInput = gameEl.dataset.currentInput;
-    const letters = JSON.parse(gameEl.dataset.letters);
-    // Only place if this key hasn't been used yet.
-    if (currentInput[keyIndex] !== undefined) return;
-    gameEl.dataset.currentInput = currentInput + letters[keyIndex];
-    buildSpellingSlots();
-    buildSpellingKeyboard();
-}
-
-// Remove a specific placed letter by its slot position, restoring the key + reflowing L-to-R.
-function removeSpellingLetter(slotFullIdx) {
-    if (!document.getElementById('spelling-result-action').classList.contains('hidden')) return;
-    const gameEl = document.getElementById('spellingGame');
+    if (gameEl.dataset.feedbackMode === "true") return; // frozen during reveal
     const slots = JSON.parse(gameEl.dataset.slots);
     const currentInput = gameEl.dataset.currentInput;
     const letters = JSON.parse(gameEl.dataset.letters);
 
-    // Count how many letter-slots come before this one to find which input char to remove.
-    let letterCount = 0;
-    for (let i = 0; i < slotFullIdx; i++) {
-        if (slots[i].type === 'letter') letterCount++;
+    // Find the earliest empty letter-slot.
+    let letterIdx = 0;
+    let targetLetterIdx = -1;
+    for (let i = 0; i < slots.length; i++) {
+        if (slots[i].type !== 'letter') continue;
+        if (currentInput[letterIdx] === undefined) { targetLetterIdx = letterIdx; break; }
+        letterIdx++;
     }
-    // letterCount is the index within currentInput to drop.
-    const currentArr = currentInput.split('');
-    if (letterCount >= currentArr.length) return;
-    currentArr.splice(letterCount, 1);
-    gameEl.dataset.currentInput = currentArr.join('');
+    if (targetLetterIdx === -1) return; // full
+
+    // Check this key isn't already placed (one use per palette key).
+    if (currentInput[keyIndex] !== undefined) return;
+
+    const arr = currentInput.split('');
+    // Fill any "holes" before targetLetterIdx so the string stays index-aligned.
+    arr[targetLetterIdx] = letters[keyIndex];
+    gameEl.dataset.currentInput = arr.join('');
     buildSpellingSlots();
-    buildSpellingKeyboard();
+}
+
+// Delete a specific placed letter (by slot position). It simply disappears —
+// nothing goes back to the keyboard (the palette never depletes).
+function removeSpellingLetter(slotFullIdx) {
+    const gameEl = document.getElementById('spellingGame');
+    if (gameEl.dataset.feedbackMode === "true") return; // frozen during reveal
+    const slots = JSON.parse(gameEl.dataset.slots);
+    const currentInput = gameEl.dataset.currentInput;
+
+    let letterIdx = 0;
+    for (let i = 0; i < slotFullIdx; i++) {
+        if (slots[i].type === 'letter') letterIdx++;
+    }
+    const arr = currentInput.split('');
+    if (letterIdx >= arr.length) return;
+    arr.splice(letterIdx, 1);
+    gameEl.dataset.currentInput = arr.join('');
+    buildSpellingSlots();
 }
 
 function clearSpelling() {
-    if (!document.getElementById('spelling-result-action').classList.contains('hidden')) return;
     const gameEl = document.getElementById('spellingGame');
+    if (gameEl.dataset.feedbackMode === "true") return; // frozen during reveal
     gameEl.dataset.currentInput = "";
     gameEl.dataset.feedbackMode = "false";
     if (gameEl._spellingResetTimer) { clearTimeout(gameEl._spellingResetTimer); gameEl._spellingResetTimer = null; }
     buildSpellingSlots();
-    buildSpellingKeyboard();
     const display = document.getElementById('spelling-input-display');
     display.classList.remove('shake');
 }
 
 function checkSpelling() {
-    if (!document.getElementById('spelling-result-action').classList.contains('hidden')) return;
-
     const gameEl = document.getElementById('spellingGame');
+    if (gameEl.dataset.feedbackMode === "true") return; // already revealed
+
     const slots = JSON.parse(gameEl.dataset.slots);
     const currentInput = gameEl.dataset.currentInput;
     const targetWord = gameEl.dataset.targetWord;
     const punct = [' ', "'", "-", ".", "?", "!", ","];
 
-    // Validate the full word (non-letters are locked in place; compare only letters).
     const targetLetters = targetWord.split('').filter(ch => !punct.includes(ch)).join('');
+    let placedCount = 0;
+    for (let i = 0; i < currentInput.length; i++) if (currentInput[i] !== undefined) placedCount++;
     const allCorrect = (currentInput === targetLetters);
 
     if (allCorrect) {
-        // Correct: show green briefly, then advance.
         gameEl.dataset.feedbackMode = "true";
         buildSpellingSlots();
         handleMinigameSuccess('spelling');
     } else {
+        // Not all slots filled? give a soft nudge but don't reveal.
+        if (placedCount < targetLetters.length) { synthError(); return; }
         gameEl.dataset.feedbackMode = "true";
-        buildSpellingSlots();
-        // Reveal correct/incorrect for ~5s, then send everything back to the keyboard.
+        buildSpellingSlots(); // shows green/red, freezes editing
         const display = document.getElementById('spelling-input-display');
         display.classList.add('shake');
         synthError();
@@ -908,7 +925,6 @@ function checkSpelling() {
                 gameEl.dataset.currentInput = "";
                 gameEl.dataset.feedbackMode = "false";
                 buildSpellingSlots();
-                buildSpellingKeyboard();
             }
         }, 5000);
     }
@@ -1067,24 +1083,51 @@ function startGrammarGame() {
         const wordDiv = document.createElement('div');
         wordDiv.className = 'draggable';
         wordDiv.innerText = opt;
+        wordDiv.dataset.word = opt;
+        // Clicking a dock word places a COPY into the earliest empty zone.
+        // The dock word itself stays (static palette).
+        wordDiv.onclick = () => placeGrammarWord(opt);
         dock.appendChild(wordDiv);
     });
 
+    grammarGameEl().dataset.frozen = "false";
     document.getElementById('grammarGame').classList.remove('hidden');
 }
 
+// Place a COPY of `word` into the earliest empty drop-zone. The dock never depletes.
+function placeGrammarWord(word) {
+    if (grammarGameEl().dataset.frozen === "true") return;
+    const emptyZone = Array.from(document.querySelectorAll('.drop-zone')).find(z => z.children.length === 0);
+    if (emptyZone) {
+        const item = document.createElement('div');
+        item.className = 'draggable placed';
+        item.innerText = word;
+        item.dataset.word = word;
+        // Clicking a placed word deletes it (nothing returns to the dock).
+        item.onclick = () => deleteGrammarWord(item);
+        emptyZone.appendChild(item);
+        emptyZone.classList.add('filled');
+    }
+}
+
+// Remove a placed word entirely — it just disappears, nothing goes back to the dock.
+function deleteGrammarWord(item) {
+    if (grammarGameEl().dataset.frozen === "true") return;
+    item.classList.remove('wrong', 'correct');
+    if (item.parentElement) item.parentElement.classList.remove('filled');
+    item.remove();
+}
+
 function clearGrammar() {
-    if (grammarGameEl() && grammarGameEl()._grammarResetTimer) {
+    if (grammarGameEl().dataset.frozen === "true") return;
+    if (grammarGameEl()._grammarResetTimer) {
         clearTimeout(grammarGameEl()._grammarResetTimer);
         grammarGameEl()._grammarResetTimer = null;
     }
-    const zones = document.querySelectorAll('.drop-zone');
-    const dock = document.getElementById('word-dock');
-    zones.forEach(zone => {
+    // Remove all placed words (the dock is a static palette — it stays).
+    document.querySelectorAll('.drop-zone').forEach(zone => {
         if (zone.children.length > 0) {
-            const item = zone.children[0];
-            item.classList.remove('wrong', 'correct');
-            dock.appendChild(item);
+            zone.children[0].remove();
             zone.classList.remove('filled');
         }
     });
@@ -1171,20 +1214,21 @@ function checkGrammar() {
     }
 
     if (allCorrect) {
+        grammarGameEl().dataset.frozen = "true";
         handleMinigameSuccess('grammar');
     } else {
-        // Wrong: keep the reveal for ~5s, then send EVERYTHING back to the dock.
+        // Wrong: reveal for ~5s (frozen), then remove all placed words.
+        // The dock is a static palette and stays as-is.
+        grammarGameEl().dataset.frozen = "true";
         if (grammarGameEl()._grammarResetTimer) clearTimeout(grammarGameEl()._grammarResetTimer);
         grammarGameEl()._grammarResetTimer = setTimeout(() => {
-            const dock = document.getElementById('word-dock');
             document.querySelectorAll('.drop-zone').forEach(zone => {
                 if (zone.children.length > 0) {
-                    const item = zone.children[0];
-                    item.classList.remove('wrong', 'correct');
-                    dock.appendChild(item);
+                    zone.children[0].remove();
                     zone.classList.remove('filled');
                 }
             });
+            grammarGameEl().dataset.frozen = "false";
             grammarGameEl()._grammarResetTimer = null;
         }, 5000);
     }
@@ -1435,23 +1479,16 @@ game = null;
 initMenus();
 loadContent();
 
-// DOM Listeners for Grammar
+// DOM Listeners for Grammar (kept for safety, but placement is handled via
+// placeGrammarWord/deleteGrammarWord; these are no-ops while frozen).
 document.getElementById('word-dock').addEventListener('click', (e) => {
     if (e.target.classList.contains('draggable')) {
-        const emptyZone = Array.from(document.querySelectorAll('.drop-zone')).find(z => z.children.length === 0);
-        if (emptyZone) {
-            e.target.classList.remove('wrong', 'correct');
-            emptyZone.appendChild(e.target);
-            emptyZone.classList.add('filled');
-        }
+        placeGrammarWord(e.target.dataset.word);
     }
 });
 document.getElementById('sentence-container').addEventListener('click', (e) => {
-    if (e.target.classList.contains('draggable')) {
-        const dock = document.getElementById('word-dock');
-        e.target.classList.remove('wrong', 'correct');
-        dock.appendChild(e.target);
-        e.target.parentElement.classList.remove('filled');
+    if (e.target.classList.contains('draggable') && e.target.classList.contains('placed')) {
+        deleteGrammarWord(e.target);
     }
 });
 
@@ -1476,23 +1513,28 @@ window.addEventListener('keydown', (e) => {
 });
 
 function handleGameSpellingKeyDown(key) {
+    const gameEl = document.getElementById('spellingGame');
+    const frozen = gameEl.dataset.feedbackMode === "true";
     if (key === 'Enter') {
-        checkSpelling();
+        if (!frozen) checkSpelling();
     } else if (key === 'Backspace') {
         // Remove the last placed letter (reflow L-to-R), not a full clear.
-        const gameEl = document.getElementById('spellingGame');
-        if (!gameEl.classList.contains('hidden') &&
-            document.getElementById('spelling-result-action').classList.contains('hidden')) {
+        if (!gameEl.classList.contains('hidden') && !frozen) {
             const currentInput = gameEl.dataset.currentInput || '';
             if (currentInput.length > 0) {
-                gameEl.dataset.currentInput = currentInput.slice(0, -1);
+                // Remove the last defined letter char.
+                const arr = currentInput.split('');
+                for (let i = arr.length - 1; i >= 0; i--) {
+                    if (arr[i] !== undefined) { arr.splice(i, 1); break; }
+                }
+                gameEl.dataset.currentInput = arr.join('');
                 gameEl.dataset.feedbackMode = "false";
                 buildSpellingSlots();
-                buildSpellingKeyboard();
             }
         }
     } else if (key.length === 1 && key.match(/[a-z0-9]/i)) {
-        const bubbles = document.querySelectorAll('.letter-bubble');
+        if (frozen) return;
+        const bubbles = document.querySelectorAll('#spelling-keyboard .letter-bubble');
         for (let bubble of bubbles) {
             if (bubble.innerText.toLowerCase() === key.toLowerCase() && bubble.isConnected) {
                 handleSpellingInput(Number(bubble.dataset.keyIndex));

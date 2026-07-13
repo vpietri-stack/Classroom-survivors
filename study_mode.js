@@ -213,8 +213,9 @@ function nextRoundBWord() {
         slotsDiv.appendChild(slot);
     }
 
-    // Setup Bank (Scrambled letters, excluding spaces). This is a STATIC palette:
-    // clicking a bank letter places a copy in the earliest empty slot; the bank never depletes.
+    // Setup Bank (Scrambled letters, excluding spaces). This bank DEPLETES:
+    // clicking a bank letter moves it into the earliest empty slot and removes it
+    // from the bank, so it's clear which letters remain (mirrors Round D / game-mode).
     const bankDiv = document.getElementById('scramble-bank');
     const punctuation = [' ', "'", "-", ".", "?", "!"];
     const letters = word.split('').filter(c => !punctuation.includes(c)).sort(() => 0.5 - Math.random());
@@ -225,7 +226,7 @@ function nextRoundBWord() {
         btn.className = "study-letter-btn";
         btn.innerText = char;
         btn.dataset.char = char;
-        btn.onclick = (e) => addLetterToSlot(char, e.target, word);
+        btn.onclick = () => addLetterToSlot(char, btn, word);
         bankDiv.appendChild(btn);
     });
 
@@ -239,15 +240,21 @@ let roundBInput = []; // Array of chars
 function addLetterToSlot(char, btnElement, targetWord) {
     if (STUDY_STATE.isTransitioning || STUDY_STATE._roundBFrozen) return;
     const slots = document.getElementById('scramble-slots').children;
-    // Place into the earliest EMPTY letter-slot (fixed slots skipped).
+    // Place into the earliest EMPTY letter-slot (fixed slots skipped). The gap
+    // stays (no reflow) so positions remain stable for the learner.
+    let placedSlot = null;
     for (let i = 0; i < slots.length; i++) {
         if (slots[i].dataset.fixed === "true") continue;
         if (!slots[i].innerText) {
             slots[i].innerText = char;
+            placedSlot = slots[i];
             break;
         }
     }
-    // Bank stays as a static palette — the clicked button is NOT hidden/removed.
+    if (!placedSlot) return; // no empty slot
+    // Bank DEPLETES: remove the exact tile that was clicked so it's clear which
+    // letters remain.
+    if (btnElement && btnElement.parentElement) btnElement.remove();
 }
 
 function removeLetterFromSlot(index, targetWord) {
@@ -255,7 +262,16 @@ function removeLetterFromSlot(index, targetWord) {
     const slots = document.getElementById('scramble-slots').children;
     const slot = slots[index];
     if (slot.innerText) {
+        const char = slot.innerText;
         slot.innerText = '';
+        // Return the letter to the bank (it depletes on placement, so delete restores it).
+        const bank = document.getElementById('scramble-bank');
+        const btn = document.createElement('button');
+        btn.className = "study-letter-btn";
+        btn.innerText = char;
+        btn.dataset.char = char;
+        btn.onclick = () => addLetterToSlot(char, btn, targetWord);
+        bank.appendChild(btn);
         // Cancel any pending reveal/reset so colours clear immediately on edit.
         if (slot._resetTimer) { clearTimeout(slot._resetTimer); slot._resetTimer = null; }
         resetSlotColors();
@@ -319,7 +335,8 @@ function checkRoundB() {
         return;
     }
 
-    // Wrong: reveal for ~5s (frozen), then clear all slots.
+    // Wrong: reveal for ~5s (frozen), then clear all slots AND return every letter
+    // to the bank (it depletes on placement, so a wrong check must restore them).
     STUDY_STATE._roundBFrozen = true;
     synthError();
     incrementExerciseAttempts();
@@ -327,8 +344,18 @@ function checkRoundB() {
     slotsArr.forEach(s => {
         if (s._resetTimer) clearTimeout(s._resetTimer);
         s._resetTimer = setTimeout(() => {
+            const bank = document.getElementById('scramble-bank');
             for (let slot of slots) {
-                slot.innerText = '';
+                if (slot.innerText) {
+                    const char = slot.innerText;
+                    const btn = document.createElement('button');
+                    btn.className = "study-letter-btn";
+                    btn.innerText = char;
+                    btn.dataset.char = char;
+                    btn.onclick = () => addLetterToSlot(char, btn, targetWord);
+                    bank.appendChild(btn);
+                    slot.innerText = '';
+                }
                 resetSlotColors();
             }
             STUDY_STATE._roundBFrozen = false;
@@ -336,34 +363,26 @@ function checkRoundB() {
     });
 }
 
-// Restore the full original bank (handles shuffled original order vs current visibility).
-function repositionBank() {
-    const bankDiv = document.getElementById('scramble-bank');
-    const chars = JSON.parse(bankDiv.dataset.chars || "[]");
-    bankDiv.innerHTML = '';
-    chars.forEach((char) => {
-        const btn = document.createElement('button');
-        btn.className = "study-letter-btn";
-        btn.innerText = char;
-        btn.dataset.char = char;
-        btn.onclick = (e) => addLetterToSlot(char, e.target, currentTTSWord);
-        bankDiv.appendChild(btn);
-    });
-}
-
 function clearRoundB() {
     if (STUDY_STATE.isTransitioning || STUDY_STATE._roundBFrozen) return;
     const slots = document.getElementById('scramble-slots').children;
+    const bank = document.getElementById('scramble-bank');
     for (let slot of slots) {
         if (slot._resetTimer) { clearTimeout(slot._resetTimer); slot._resetTimer = null; }
-        slot.innerText = '';
+        if (slot.innerText) {
+            // Return the letter to the bank (it depletes on placement).
+            const char = slot.innerText;
+            const btn = document.createElement('button');
+            btn.className = "study-letter-btn";
+            btn.innerText = char;
+            btn.dataset.char = char;
+            btn.onclick = () => addLetterToSlot(char, btn, currentTTSWord);
+            bank.appendChild(btn);
+            slot.innerText = '';
+        }
         resetSlotColors();
     }
-    // Bank is a static palette — it is NOT rebuilt/emptied.
 }
-
-// (repositionBank removed — the bank is now a static palette that never depletes.)
-function repositionBank() {}
 
 function finishRoundB() {
     startRoundC();

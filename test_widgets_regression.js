@@ -53,7 +53,7 @@ const testBody = `
   var pass=0, fail=0;
   function ok(name, cond){ if(cond){pass++;console.log('PASS:',name);} else {fail++;console.log('FAIL:',name);} }
 
-  // ===== STUDY ROUND B (static bank, delete-on-click) =====
+  // ===== STUDY ROUND B (depleting bank, delete-on-click, gap stays) =====
   STUDY_STATE.words = ['wed'];
   STUDY_STATE.currentWordIndex = 0;
   startRoundB(); nextRoundBWord();
@@ -66,17 +66,17 @@ const testBody = `
   var wBtn = bankBtns.find(function(b){ return b.innerText === 'w'; });
   wBtn.click();
   ok('B: clicking bank letter fills earliest slot', bSlots.children[0].innerText === 'w');
-  ok('B: bank letter is NOT removed (palette static)', bankBtns.length === 3 && bBank.contains(wBtn));
+  ok('B: bank letter IS removed on placement (depletes)', !bBank.contains(wBtn) && bBank.querySelectorAll('button').length === 2);
 
   bankBtns.find(function(b){ return b.innerText === 'e'; }).click();
   bankBtns.find(function(b){ return b.innerText === 'd'; }).click();
   ok('B: word fully placed "wed"', Array.prototype.slice.call(bSlots.children).map(function(s){return s.innerText;}).join('') === 'wed');
 
-  // Delete the middle 'e' -> expect 'w_d' (gap stays), NOT 'wd'.
+  // Delete the middle 'e' -> expect 'w_d' (gap stays), NOT 'wd', and the letter returns to bank.
   bSlots.children[1].click();
   ok('B: deleting middle letter leaves a gap (w_d), not reflow',
      bSlots.children[0].innerText==='w' && bSlots.children[1].innerText==='' && bSlots.children[2].innerText==='d');
-  ok('B: delete does NOT return letter to bank (still 3)', bankBtns.length === 3);
+  ok('B: delete returns letter to bank (length back to 1)', bBank.querySelectorAll('button').length === 1);
 
   // ===== STUDY ROUND D (depleting bank — mirrors game-mode word scramble) =====
   STUDY_STATE.sentences = ['The cat sat'];

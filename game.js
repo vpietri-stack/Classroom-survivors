@@ -732,150 +732,185 @@ function startSpellingGame() {
     const { book, unit, page } = selectedClassContent;
     const word = getGameItemSR(book, unit, page, 'vocab', srInSessionFailures, srInSessionSuccesses);
     currentTTSWord = word;
-    document.getElementById('spellingGame').dataset.targetWord = word;
     showTranslation('spelling-translation', word);
     showVocabImage('spelling-image', word);
 
-    const totalChars = word.length;
-    // Always use ALL letters - no level-based scaling
-    // But spaces should be pre-filled
-    const indices = [];
-    for (let i = 0; i < totalChars; i++) {
-        if (word[i] !== ' ') {
-            indices.push(i);
-        }
-    }
-    const missingIndices = [...indices]; // All non-space characters are missing
-    let missingCount = missingIndices.length;
-
-    let template = [];
-    let missingChars = [];
-    for (let i = 0; i < totalChars; i++) {
-        if (missingIndices.includes(i)) {
-            template.push(null);
-            missingChars.push(word[i]);
-        } else {
-            template.push(word[i]);
-        }
-    }
-    missingIndices.sort((a, b) => a - b); // purely for display order if needed, but logic handles it
-
     const gameEl = document.getElementById('spellingGame');
     gameEl.dataset.targetWord = word;
-    gameEl.dataset.template = JSON.stringify(template);
-    gameEl.dataset.missingChars = JSON.stringify(missingChars); // Unsorted for validation logic? No, validation matches input string
-    // Wait, original logic sorted missing chars to create the key sequence.
-    // Let's mirror original logic: "sortedMissingChars = missingIndices.map(idx => word[idx]);"
-    // My missingChars above is in index order? No, loop 0..total. Yes index order.
-
     gameEl.dataset.currentInput = "";
     gameEl.dataset.feedbackMode = "false";
+    if (gameEl._spellingResetTimer) { clearTimeout(gameEl._spellingResetTimer); gameEl._spellingResetTimer = null; }
 
-    updateSpellingDisplay();
+    // Build fixed slots: every character position gets a slot. Non-letters (space,
+    // apostrophe, hyphen, punctuation) are pre-filled and locked.
+    const punct = [' ', "'", "-", ".", "?", "!", ","];
+    const slots = [];
+    for (let i = 0; i < word.length; i++) {
+        const ch = word[i];
+        if (punct.includes(ch)) {
+            slots.push({ type: 'fixed', char: ch });
+        } else {
+            slots.push({ type: 'letter', index: i });
+        }
+    }
+    gameEl.dataset.slots = JSON.stringify(slots);
+
+    // Letters to pick from (shuffled).
+    const letters = word.split('').filter(ch => !punct.includes(ch));
+    const shuffled = [...letters].sort(() => 0.5 - Math.random());
+    gameEl.dataset.letters = JSON.stringify(shuffled);
+
+    buildSpellingSlots();
+    buildSpellingKeyboard();
 
     const display = document.getElementById('spelling-input-display');
     display.classList.remove('shake');
     document.getElementById('spelling-result-action').classList.add('hidden');
     document.getElementById('spelling-actions').classList.remove('hidden');
     document.getElementById('spellingGame').classList.remove('hidden');
-
-    // Keyboard keys (shuffled)
-    const keys = [...missingChars];
-    keys.sort(() => 0.5 - Math.random());
-
-    const container = document.getElementById('spelling-keyboard');
-    container.innerHTML = '';
-    keys.forEach(char => {
-        const bubble = document.createElement('div');
-        bubble.className = 'letter-bubble'; bubble.innerText = char;
-        bubble.onclick = () => handleSpellingInput(char, bubble);
-        container.appendChild(bubble);
-    });
     setTimeout(playTTS, 500);
 }
 
-function handleSpellingInput(char, bubble) {
-    if (!document.getElementById('spelling-result-action').classList.contains('hidden')) return;
-
+// Render the fixed + letter slots into #spelling-input-display.
+function buildSpellingSlots() {
     const gameEl = document.getElementById('spellingGame');
-    const missingChars = JSON.parse(gameEl.dataset.missingChars);
-    let currentInput = gameEl.dataset.currentInput;
-
-    if (currentInput.length < missingChars.length) {
-        currentInput += char;
-        gameEl.dataset.currentInput = currentInput;
-        bubble.style.visibility = 'hidden';
-        updateSpellingDisplay();
-    }
-}
-
-function updateSpellingDisplay() {
-    const gameEl = document.getElementById('spellingGame');
-    const template = JSON.parse(gameEl.dataset.template);
+    const slots = JSON.parse(gameEl.dataset.slots);
     const currentInput = gameEl.dataset.currentInput;
     const targetWord = gameEl.dataset.targetWord;
     const isFeedback = gameEl.dataset.feedbackMode === "true";
     const isSuccess = !document.getElementById('spelling-result-action').classList.contains('hidden');
 
-    let displayHtml = "";
-    let inputIdx = 0;
-
-    template.forEach((char, fullIdx) => {
-        if (char === null) {
-            if (inputIdx < currentInput.length) {
-                let colorClass = "text-blue-600";
-                if (isSuccess) {
-                    colorClass = "text-green-500";
-                } else if (isFeedback) {
-                    colorClass = (currentInput[inputIdx] === targetWord[fullIdx]) ? "text-green-500" : "text-red-500";
-                }
-                displayHtml += `<span class="${colorClass} underline">${currentInput[inputIdx]}</span>`;
-                inputIdx++;
-            } else {
-                displayHtml += "_";
-            }
+    // Map each letter-slot to a character from currentInput (L-to-R fill).
+    let letterIdx = 0;
+    const container = document.getElementById('spelling-input-display');
+    container.innerHTML = '';
+    slots.forEach((slot, fullIdx) => {
+        const cell = document.createElement('div');
+        if (slot.type === 'fixed') {
+            cell.className = 'study-slot border-transparent bg-transparent select-none';
+            cell.style.color = '#475569';
+            cell.innerText = slot.char === ' ' ? ' ' : slot.char;
         } else {
-            // Show literal characters like spaces
-            displayHtml += char === ' ' ? '&nbsp;' : char;
+            const filledChar = currentInput[letterIdx] || '';
+            letterIdx++;
+            cell.className = 'study-slot';
+            if (isSuccess) {
+                cell.classList.add('bg-green-500');
+            } else if (isFeedback && filledChar) {
+                cell.classList.add(filledChar === targetWord[slot.index] ? 'bg-green-500' : 'bg-red-500');
+            }
+            cell.innerText = filledChar;
+            if (filledChar) {
+                cell.onclick = () => removeSpellingLetter(fullIdx);
+            }
         }
+        container.appendChild(cell);
     });
-    document.getElementById('spelling-input-display').innerHTML = displayHtml;
+}
+
+// Build the keyboard of remaining (unplaced) letters.
+function buildSpellingKeyboard() {
+    const gameEl = document.getElementById('spellingGame');
+    const currentInput = gameEl.dataset.currentInput;
+    const letters = JSON.parse(gameEl.dataset.letters);
+    const container = document.getElementById('spelling-keyboard');
+    container.innerHTML = '';
+    letters.forEach((char, i) => {
+        if (currentInput[i] !== undefined) return; // already placed
+        const bubble = document.createElement('div');
+        bubble.className = 'letter-bubble';
+        bubble.innerText = char;
+        bubble.dataset.keyIndex = i;
+        bubble.onclick = () => handleSpellingInput(i);
+        container.appendChild(bubble);
+    });
+}
+
+// Place the next available letter (i = key index) into the earliest empty letter-slot.
+function handleSpellingInput(keyIndex) {
+    if (!document.getElementById('spelling-result-action').classList.contains('hidden')) return;
+    const gameEl = document.getElementById('spellingGame');
+    const currentInput = gameEl.dataset.currentInput;
+    const letters = JSON.parse(gameEl.dataset.letters);
+    // Only place if this key hasn't been used yet.
+    if (currentInput[keyIndex] !== undefined) return;
+    gameEl.dataset.currentInput = currentInput + letters[keyIndex];
+    buildSpellingSlots();
+    buildSpellingKeyboard();
+}
+
+// Remove a specific placed letter by its slot position, restoring the key + reflowing L-to-R.
+function removeSpellingLetter(slotFullIdx) {
+    if (!document.getElementById('spelling-result-action').classList.contains('hidden')) return;
+    const gameEl = document.getElementById('spellingGame');
+    const slots = JSON.parse(gameEl.dataset.slots);
+    const currentInput = gameEl.dataset.currentInput;
+    const letters = JSON.parse(gameEl.dataset.letters);
+
+    // Count how many letter-slots come before this one to find which input char to remove.
+    let letterCount = 0;
+    for (let i = 0; i < slotFullIdx; i++) {
+        if (slots[i].type === 'letter') letterCount++;
+    }
+    // letterCount is the index within currentInput to drop.
+    const currentArr = currentInput.split('');
+    if (letterCount >= currentArr.length) return;
+    currentArr.splice(letterCount, 1);
+    gameEl.dataset.currentInput = currentArr.join('');
+    buildSpellingSlots();
+    buildSpellingKeyboard();
 }
 
 function clearSpelling() {
     if (!document.getElementById('spelling-result-action').classList.contains('hidden')) return;
-
     const gameEl = document.getElementById('spellingGame');
     gameEl.dataset.currentInput = "";
     gameEl.dataset.feedbackMode = "false";
-    updateSpellingDisplay();
+    if (gameEl._spellingResetTimer) { clearTimeout(gameEl._spellingResetTimer); gameEl._spellingResetTimer = null; }
+    buildSpellingSlots();
+    buildSpellingKeyboard();
     const display = document.getElementById('spelling-input-display');
     display.classList.remove('shake');
-    document.querySelectorAll('.letter-bubble').forEach(b => b.style.visibility = 'visible');
 }
 
 function checkSpelling() {
     if (!document.getElementById('spelling-result-action').classList.contains('hidden')) return;
 
     const gameEl = document.getElementById('spellingGame');
+    const slots = JSON.parse(gameEl.dataset.slots);
     const currentInput = gameEl.dataset.currentInput;
-    const missingChars = JSON.parse(gameEl.dataset.missingChars);
+    const targetWord = gameEl.dataset.targetWord;
+    const punct = [' ', "'", "-", ".", "?", "!", ","];
 
-    // The original logic checked if currentInput === missingChars.join('')
-    // Ideally we'd check if the RESULTING word matches target, but since we fill slots in order, matching the sequence of missing characters is equivalent.
+    // Validate the full word (non-letters are locked in place; compare only letters).
+    const targetLetters = targetWord.split('').filter(ch => !punct.includes(ch)).join('');
+    const allCorrect = (currentInput === targetLetters);
 
-    if (currentInput === missingChars.join('')) {
+    if (allCorrect) {
+        // Correct: show green briefly, then advance.
+        gameEl.dataset.feedbackMode = "true";
+        buildSpellingSlots();
         handleMinigameSuccess('spelling');
-        updateSpellingDisplay(); // Refresh to show green
     } else {
         gameEl.dataset.feedbackMode = "true";
-        updateSpellingDisplay();
+        buildSpellingSlots();
+        // Reveal correct/incorrect for ~5s, then send everything back to the keyboard.
         const display = document.getElementById('spelling-input-display');
         display.classList.add('shake');
         synthError();
         setTimeout(() => display.classList.remove('shake'), 500);
         isFirstAttempt = false;
         incrementExerciseAttempts();
+
+        if (gameEl._spellingResetTimer) clearTimeout(gameEl._spellingResetTimer);
+        gameEl._spellingResetTimer = setTimeout(() => {
+            if (document.getElementById('spelling-result-action').classList.contains('hidden')) {
+                gameEl.dataset.currentInput = "";
+                gameEl.dataset.feedbackMode = "false";
+                buildSpellingSlots();
+                buildSpellingKeyboard();
+            }
+        }, 5000);
     }
 }
 
@@ -1039,6 +1074,10 @@ function startGrammarGame() {
 }
 
 function clearGrammar() {
+    if (grammarGameEl() && grammarGameEl()._grammarResetTimer) {
+        clearTimeout(grammarGameEl()._grammarResetTimer);
+        grammarGameEl()._grammarResetTimer = null;
+    }
     const zones = document.querySelectorAll('.drop-zone');
     const dock = document.getElementById('word-dock');
     zones.forEach(zone => {
@@ -1049,6 +1088,10 @@ function clearGrammar() {
             zone.classList.remove('filled');
         }
     });
+}
+
+function grammarGameEl() {
+    return document.getElementById('grammarGame');
 }
 
 function checkGrammar() {
@@ -1129,6 +1172,21 @@ function checkGrammar() {
 
     if (allCorrect) {
         handleMinigameSuccess('grammar');
+    } else {
+        // Wrong: keep the reveal for ~5s, then send EVERYTHING back to the dock.
+        if (grammarGameEl()._grammarResetTimer) clearTimeout(grammarGameEl()._grammarResetTimer);
+        grammarGameEl()._grammarResetTimer = setTimeout(() => {
+            const dock = document.getElementById('word-dock');
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                if (zone.children.length > 0) {
+                    const item = zone.children[0];
+                    item.classList.remove('wrong', 'correct');
+                    dock.appendChild(item);
+                    zone.classList.remove('filled');
+                }
+            });
+            grammarGameEl()._grammarResetTimer = null;
+        }, 5000);
     }
 }
 
@@ -1421,12 +1479,23 @@ function handleGameSpellingKeyDown(key) {
     if (key === 'Enter') {
         checkSpelling();
     } else if (key === 'Backspace') {
-        clearSpelling();
+        // Remove the last placed letter (reflow L-to-R), not a full clear.
+        const gameEl = document.getElementById('spellingGame');
+        if (!gameEl.classList.contains('hidden') &&
+            document.getElementById('spelling-result-action').classList.contains('hidden')) {
+            const currentInput = gameEl.dataset.currentInput || '';
+            if (currentInput.length > 0) {
+                gameEl.dataset.currentInput = currentInput.slice(0, -1);
+                gameEl.dataset.feedbackMode = "false";
+                buildSpellingSlots();
+                buildSpellingKeyboard();
+            }
+        }
     } else if (key.length === 1 && key.match(/[a-z0-9]/i)) {
         const bubbles = document.querySelectorAll('.letter-bubble');
         for (let bubble of bubbles) {
-            if (bubble.innerText.toLowerCase() === key.toLowerCase() && bubble.style.visibility !== 'hidden') {
-                handleSpellingInput(bubble.innerText, bubble);
+            if (bubble.innerText.toLowerCase() === key.toLowerCase() && bubble.isConnected) {
+                handleSpellingInput(Number(bubble.dataset.keyIndex));
                 break;
             }
         }

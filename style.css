@@ -313,6 +313,19 @@ body {
     background: #475569;
 }
 
+.sentence-slot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 70px;
+    min-height: 44px;
+    border: 2px dashed #94a3b8;
+    border-radius: 8px;
+    padding: 0 10px;
+    background-color: rgba(255, 255, 255, 0.06);
+    transition: all 0.2s;
+}
+
 .study-word-tile {
     background: #fbbf24;
     color: black;
@@ -909,4 +922,4 @@ body.kid-friendly .drop-zone {
 body.kid-friendly .sentence-row {
     background: rgba(255, 255, 255, 0.8) !important;
     border: 2px solid #ffe0b2 !important;
-}
+}

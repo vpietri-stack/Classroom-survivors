@@ -175,6 +175,11 @@ function nextRoundBWord() {
             <div id="scramble-slots" class="flex flex-wrap justify-center gap-[var(--gap-sm)] min-h-[60px] w-full px-4"></div>
             
             <div id="scramble-bank" class="flex flex-wrap justify-center gap-[var(--gap-sm)] w-full px-4"></div>
+
+            <div class="flex gap-[var(--gap-md)]">
+                <button onclick="checkRoundB()" class="game-btn bg-green-500 py-3 px-6">CHECK</button>
+                <button onclick="clearRoundB()" class="game-btn bg-gray-500 py-3 px-6">CLEAR</button>
+            </div>
         </div>
     `;
     showTranslation('roundB-translation', word);
@@ -218,9 +223,12 @@ function nextRoundBWord() {
         const btn = document.createElement('button');
         btn.className = "study-letter-btn";
         btn.innerText = char;
+        btn.dataset.char = char;
         btn.onclick = (e) => addLetterToSlot(char, e.target, word);
         bankDiv.appendChild(btn);
     });
+    // Remember the full original bank so we can restore it on reset.
+    document.getElementById('scramble-bank').dataset.chars = JSON.stringify(letters);
 
     playTTS();
 }
@@ -230,32 +238,21 @@ let roundBInput = []; // Array of chars
 
 function addLetterToSlot(char, btnElement, targetWord) {
     if (STUDY_STATE.isTransitioning) return;
-    // Find first empty slot
+    // Find first empty letter-slot (fixed slots skipped).
     const slots = document.getElementById('scramble-slots').children;
     let insertedIndex = -1;
     for (let i = 0; i < slots.length; i++) {
-        // Skip correct spaces or fixed slots
         if (slots[i].dataset.fixed === "true") continue;
-
         if (!slots[i].innerText) {
             slots[i].innerText = char;
-            slots[i].dataset.sourceBtn = "true"; // Mark as filled
-            // Store reference to restore button? 
-            // Simplified: Hide button
+            slots[i].dataset.sourceBtn = "true";
             btnElement.style.visibility = 'hidden';
-            btnElement.id = `bank-btn-${i}`; // Hacky mapping? No.
-            // We need to map slot back to the button to restore visibility.
-            // Let's store the button element in the slot logic? 
             slots[i].sourceBtnEntry = btnElement;
             insertedIndex = i;
             break;
         }
     }
-
-    // Check if full
-    if (insertedIndex !== -1) {
-        checkRoundBLogic(targetWord);
-    }
+    // NOTE: no auto-check on fill — player clicks CHECK when ready.
 }
 
 function removeLetterFromSlot(index, targetWord) {
@@ -268,7 +265,8 @@ function removeLetterFromSlot(index, targetWord) {
             slot.sourceBtnEntry.style.visibility = 'visible';
             slot.sourceBtnEntry = null;
         }
-        // Should we clear coloring?
+        // Cancel any pending reveal/reset so colours clear immediately on edit.
+        if (slot._resetTimer) { clearTimeout(slot._resetTimer); slot._resetTimer = null; }
         resetSlotColors();
     }
 }
@@ -281,24 +279,28 @@ function resetSlotColors() {
     }
 }
 
-function checkRoundBLogic(targetWord) {
+// CHECK button: reveal correct (green) / wrong (red) for ~5s, then reset all to bank.
+function checkRoundB() {
     if (STUDY_STATE.isTransitioning) return;
     const slots = document.getElementById('scramble-slots').children;
-    let currentStr = "";
+    const targetWord = currentTTSWord;
+
+    // Fill state: every non-fixed slot must have a letter.
     let isFull = true;
     for (let s of slots) {
-        if (s.dataset.fixed === "true") continue; // Skip fixed slots
+        if (s.dataset.fixed === "true") continue;
         if (!s.innerText) isFull = false;
     }
+    if (!isFull) {
+        // Nothing to grade yet — give a soft nudge but do not reset.
+        synthError();
+        return;
+    }
 
-    if (!isFull) return;
-
-    // Validate
     let allCorrect = true;
     const correctChars = targetWord.split('');
-
     for (let i = 0; i < slots.length; i++) {
-        if (slots[i].dataset.fixed === "true") continue; // Skip fixed slots
+        if (slots[i].dataset.fixed === "true") continue;
         const char = slots[i].innerText;
         if (char === correctChars[i]) {
             slots[i].classList.remove('bg-gray-800', 'bg-red-500');
@@ -313,7 +315,6 @@ function checkRoundBLogic(targetWord) {
     if (allCorrect) {
         STUDY_STATE.isTransitioning = true;
         playHappySound();
-        // Record SR result: first attempt = exerciseAttempts is still 1
         srStudyResults.push({ type: 'vocab', key: itemKey(targetWord), firstAttempt: exerciseAttempts === 1 });
         queueExerciseEvent('wordScramble', 'study', targetWord);
         setTimeout(() => {
@@ -322,11 +323,52 @@ function checkRoundBLogic(targetWord) {
             STUDY_STATE.isTransitioning = false;
             nextRoundBWord();
         }, 1000);
-    } else {
-        synthError();
-        incrementExerciseAttempts();
-        // User has to try again. they can click red slots to remove them.
+        return;
     }
+
+    // Wrong: reveal for ~5s, then send EVERYTHING back to the bank.
+    synthError();
+    incrementExerciseAttempts();
+    const slotsArr = Array.from(slots);
+    slotsArr.forEach(s => {
+        if (s._resetTimer) clearTimeout(s._resetTimer);
+        s._resetTimer = setTimeout(() => {
+            // Clear contents and restore every bank button.
+            for (let slot of slots) {
+                if (slot.sourceBtnEntry) { slot.sourceBtnEntry.style.visibility = 'visible'; slot.sourceBtnEntry = null; }
+                slot.innerText = '';
+                resetSlotColors();
+            }
+            repositionBank();
+        }, 5000);
+    });
+}
+
+// Restore the full original bank (handles shuffled original order vs current visibility).
+function repositionBank() {
+    const bankDiv = document.getElementById('scramble-bank');
+    const chars = JSON.parse(bankDiv.dataset.chars || "[]");
+    bankDiv.innerHTML = '';
+    chars.forEach((char) => {
+        const btn = document.createElement('button');
+        btn.className = "study-letter-btn";
+        btn.innerText = char;
+        btn.dataset.char = char;
+        btn.onclick = (e) => addLetterToSlot(char, e.target, currentTTSWord);
+        bankDiv.appendChild(btn);
+    });
+}
+
+function clearRoundB() {
+    if (STUDY_STATE.isTransitioning) return;
+    const slots = document.getElementById('scramble-slots').children;
+    for (let slot of slots) {
+        if (slot._resetTimer) { clearTimeout(slot._resetTimer); slot._resetTimer = null; }
+        if (slot.sourceBtnEntry) { slot.sourceBtnEntry.style.visibility = 'visible'; slot.sourceBtnEntry = null; }
+        slot.innerText = '';
+        resetSlotColors();
+    }
+    repositionBank();
 }
 
 function finishRoundB() {
@@ -334,7 +376,7 @@ function finishRoundB() {
 }
 
 
-// --- ROUND C: Spelling ---
+// --- ROUND C: Spelling (type from a 10-key board) ---
 function startRoundC() {
     STUDY_STATE.round = 'C';
     STUDY_STATE.currentWordIndex = 0;
@@ -358,13 +400,13 @@ function nextRoundCWord() {
             <button onclick="playTTS()" aria-label="Play Audio" class="w-16 h-16 rounded-full bg-blue-500 text-white text-2xl shadow-lg transform active:scale-95 transition-transform"><i class="fas fa-volume-up"></i></button>
             <div id="roundC-translation" class="translation-hint hidden"></div>
             <img id="roundC-image" class="w-32 h-32 object-contain mx-auto my-2 hidden border-2 border-slate-300 rounded-xl bg-white/10" alt="Vocabulary Image">
-            
+
             <div id="spelling-display" class="flex flex-wrap justify-center gap-[var(--gap-xs)] min-h-[60px] w-full px-4 text-white"></div>
-            
+
             <div id="virtual-keyboard" class="flex flex-wrap justify-center gap-[var(--gap-sm)] max-w-lg px-4"></div>
-            
+
             <div class="flex gap-[var(--gap-md)]">
-                <button onclick="checkRoundC('${word.replace(/'/g, "\\'")}')" class="game-btn bg-green-500 py-3 px-6">CHECK</button>
+                <button onclick="checkRoundC()" class="game-btn bg-green-500 py-3 px-6">CHECK</button>
                 <button onclick="clearRoundC()" class="game-btn bg-gray-500 py-3 px-6">CLEAR</button>
             </div>
         </div>
@@ -372,158 +414,148 @@ function nextRoundCWord() {
     showTranslation('roundC-translation', word);
     showVocabImage('roundC-image', word);
 
-    // Virtual Keyboard: Actual letters + random
-    // Count exact unique letters needed
-    const needed = word.split('');
+    // Board = the word's own letters (shuffled) + enough random fillers to reach 10 keys.
+    const punct = [' ', "'", "-", ".", "?", "!", ","];
+    const needed = word.split('').filter(c => !punct.includes(c));
     const alphabet = "abcdefghijklmnopqrstuvwxyz";
-    const extraCount = 10 - needed.length; // Target 10 total? Or strictly 10 keys? 
-    // "Virtual keyboard displays 10 letters"
-    // If word is longer than 10? Assuming words are short. 
-    // If word > 10, show more? "displays 10 letters" might correspond to shorter words levels.
-    // Let's ensure at least all word chars are there.
-
     let keys = [...needed];
-    if (keys.length < 10) {
-        for (let i = 0; i < (10 - needed.length); i++) {
-            keys.push(alphabet[Math.floor(Math.random() * alphabet.length)]);
-        }
+    while (keys.length < 10) {
+        keys.push(alphabet[Math.floor(Math.random() * alphabet.length)]);
     }
-    // Alphabetical order
     keys.sort();
 
+    // Persist: which shuffled key index is still unplaced, plus the word's slot layout.
+    const slots = [];
+    for (let i = 0; i < word.length; i++) {
+        const ch = word[i];
+        if (punct.includes(ch)) slots.push({ type: 'fixed', char: ch });
+        else slots.push({ type: 'letter', index: i });
+    }
+
     const kbDiv = document.getElementById('virtual-keyboard');
-    keys.forEach(char => {
+    kbDiv.innerHTML = '';
+    keys.forEach((char, i) => {
         const btn = document.createElement('button');
         btn.className = "study-key";
         btn.innerText = char;
-        btn.onclick = () => typeRoundC(char);
+        btn.dataset.keyIndex = i;
+        btn.onclick = () => typeRoundC(i);
         kbDiv.appendChild(btn);
     });
 
+    roundCInput = "";
+    roundCSlots = slots;
+    roundCBaseKeys = [...keys];
+    updateRoundCDisplay();
     playTTS();
 }
 
 let roundCInput = "";
+let roundCSlots = [];
+let roundCBaseKeys = [];
 
-function typeRoundC(char) {
+function typeRoundC(keyIndex) {
     if (STUDY_STATE.isTransitioning) return;
-    roundCInput += char;
+    if (roundCInput[keyIndex] !== undefined) return; // key already used
+    roundCInput += roundCBaseKeys[keyIndex];
+    updateRoundCDisplay();
+}
+
+function removeRoundCLetter(slotFullIdx) {
+    if (STUDY_STATE.isTransitioning) return;
+    let letterCount = 0;
+    for (let i = 0; i < slotFullIdx; i++) {
+        if (roundCSlots[i].type === 'letter') letterCount++;
+    }
+    const arr = roundCInput.split('');
+    if (letterCount >= arr.length) return;
+    arr.splice(letterCount, 1);
+    roundCInput = arr.join('');
     updateRoundCDisplay();
 }
 
 function clearRoundC() {
     if (STUDY_STATE.isTransitioning) return;
+    if (STUDY_STATE._roundCResetTimer) { clearTimeout(STUDY_STATE._roundCResetTimer); STUDY_STATE._roundCResetTimer = null; }
     roundCInput = "";
     updateRoundCDisplay();
 }
 
 function updateRoundCDisplay() {
     const disp = document.getElementById('spelling-display');
-    const word = currentTTSWord;
+    const targetWord = currentTTSWord;
+    const isFeedback = STUDY_STATE._roundCFeedback === true;
+    const isSuccess = STUDY_STATE._roundCSuccess === true;
 
-    // Build slot display
+    let letterIdx = 0;
     let html = "";
-    let inputIndex = 0;
-
-    // We iterate over the TARGET word length to show slots
-    for (let i = 0; i < word.length; i++) {
-        const char = word[i];
-
-        if (char === ' ') {
-            // Fixed space
-            html += `<div class="w-6 sm:w-8 h-10 flex items-center justify-center text-2xl sm:text-3xl mx-1" data-fixed="true"> </div>`;
-            // If input has a space here? Actually input shouldn't have spaces if user types keys.
-            // We need to skip this index in the input mapping?
-            // Let's assume user input skips spaces.
+    roundCSlots.forEach((slot, fullIdx) => {
+        if (slot.type === 'fixed') {
+            const c = slot.char === ' ' ? ' ' : slot.char;
+            html += `<div class="study-slot border-transparent bg-transparent select-none" style="color:#94a3b8">${c}</div>`;
         } else {
-            // Check if user input has a char for this 'letter' slot
-            // We need to map 'Nth non-space letter' of target to 'Nth char' of input
-
-            // Wait, simple mapping:
-            // Input string contains only typed letters (no spaces).
-            // We fill slots from left to right skipping spaces.
-
-            const filledChar = roundCInput[inputIndex] || "";
-            if (roundCInput[inputIndex] !== undefined) inputIndex++;
-
-            // Visual slot
-            const borderClass = filledChar ? "border-white" : "border-gray-500";
-            const textClass = filledChar ? "text-white" : "text-transparent";
-
-            html += `<div class="study-slot border-b-4 ${borderClass} ${textClass} bg-transparent mx-[var(--gap-xs)]">${filledChar}</div>`;
+            const filledChar = roundCInput[letterIdx] || "";
+            letterIdx++;
+            let bg = "bg-gray-800";
+            if (isSuccess) bg = "bg-green-500";
+            else if (isFeedback && filledChar) {
+                bg = (filledChar === targetWord[slot.index]) ? "bg-green-500" : "bg-red-500";
+            }
+            const onclick = filledChar ? ` onclick="removeRoundCLetter(${fullIdx})"` : "";
+            html += `<div class="study-slot ${bg}"${onclick}>${filledChar}</div>`;
         }
-    }
-
+    });
     disp.innerHTML = html;
-    disp.className = "flex gap-[var(--gap-xs)] justify-center min-h-[var(--slot-size)] flex-wrap w-full px-4"; // Update container style
+    disp.className = "flex flex-wrap justify-center gap-[var(--gap-xs)] min-h-[60px] w-full px-4 text-white";
+
+    // Keyboard: show only unused keys.
+    const kbDiv = document.getElementById('virtual-keyboard');
+    if (kbDiv) {
+        Array.from(kbDiv.children).forEach((btn) => {
+            const ki = Number(btn.dataset.keyIndex);
+            btn.style.visibility = (roundCInput[ki] !== undefined) ? 'hidden' : 'visible';
+        });
+    }
 }
 
-// Logic check needs adjustment too: we compare input against target *without spaces*?
-// Or we assume user types spaces?
-// "keyboard displays 10 letters" ... unlikely to have space bar.
-// So input is letters only. Target has spaces.
-// We must skip spaces in target when checking.
-
-function checkRoundC(targetWord) {
+function checkRoundC() {
     if (STUDY_STATE.isTransitioning) return;
-    const disp = document.getElementById('spelling-display');
+    const targetWord = currentTTSWord;
+    const punct = [' ', "'", "-", ".", "?", "!", ","];
+    const targetLetters = targetWord.split('').filter(c => !punct.includes(c)).join('');
+    const allCorrect = (roundCInput === targetLetters);
 
-    // Target without spaces
-    const targetClean = targetWord.replace(/ /g, '');
-    const input = roundCInput;
-
-    let html = "";
-    let allCorrect = (input === targetClean);
-    let inputIndex = 0;
-
-    // Re-render with colors
-    for (let i = 0; i < targetWord.length; i++) {
-        if (targetWord[i] === ' ') {
-            html += `<div class="w-6 sm:w-8 h-10 flex items-center justify-center text-2xl sm:text-3xl mx-1"> </div>`;
-        } else {
-            const char = input[inputIndex] || "";
-            const targetChar = targetClean[inputIndex] || "";
-            let colorClass = "text-white";
-            let borderColor = "border-white";
-
-            if (inputIndex < input.length) {
-                if (char === targetChar) {
-                    colorClass = "text-green-400";
-                    borderColor = "border-green-400";
-                } else {
-                    colorClass = "text-red-400";
-                    borderColor = "border-red-400";
-                }
-            } else {
-                borderColor = "border-gray-500";
-            }
-
-            html += `<div class="study-slot border-b-4 ${borderColor} ${colorClass} bg-transparent mx-[var(--gap-xs)]">${char}</div>`;
-            inputIndex++;
-        }
-    }
-
-    disp.innerHTML = html;
+    // Full? input length must equal number of letter slots.
+    let letterSlotCount = roundCSlots.filter(s => s.type === 'letter').length;
+    if (roundCInput.length < letterSlotCount) { synthError(); return; }
 
     if (allCorrect) {
+        STUDY_STATE._roundCSuccess = true;
+        STUDY_STATE._roundCFeedback = true;
+        updateRoundCDisplay();
         STUDY_STATE.isTransitioning = true;
         playHappySound();
         queueExerciseEvent('spelling', 'study', targetWord);
         setTimeout(() => {
             roundCInput = "";
+            STUDY_STATE._roundCSuccess = false;
+            STUDY_STATE._roundCFeedback = false;
             STUDY_STATE.currentWordIndex++;
             startExerciseTracking();
             STUDY_STATE.isTransitioning = false;
             nextRoundCWord();
         }, 1000);
     } else {
-        STUDY_STATE.isTransitioning = true;
+        STUDY_STATE._roundCFeedback = true;
+        updateRoundCDisplay();
         synthError();
         incrementExerciseAttempts();
-        setTimeout(() => {
-            clearRoundC();
-            STUDY_STATE.isTransitioning = false;
-        }, 2000);
+        if (STUDY_STATE._roundCResetTimer) clearTimeout(STUDY_STATE._roundCResetTimer);
+        STUDY_STATE._roundCResetTimer = setTimeout(() => {
+            STUDY_STATE._roundCFeedback = false;
+            roundCInput = "";
+            updateRoundCDisplay();
+        }, 5000);
     }
 }
 
@@ -548,9 +580,6 @@ function nextRoundDSentence() {
     }
 
     let sentence = STUDY_STATE.sentences[STUDY_STATE.currentSentenceIndex];
-    // Handle array sentences (dialogues)? Just pick first? 
-    // Existing game logic handles arrays by joining or picking one?
-    // Let's flatten:
     if (Array.isArray(sentence)) sentence = sentence[0];
 
     const container = document.getElementById('study-game-area');
@@ -558,7 +587,7 @@ function nextRoundDSentence() {
         <div class="flex flex-col gap-[var(--gap-md)] w-full max-w-2xl mx-auto px-4">
              <div id="roundD-translation" class="translation-hint hidden"></div>
              <div id="sentence-drop-zone" class="bg-gray-800/50 p-6 rounded-xl min-h-[120px] flex flex-wrap gap-[var(--gap-sm)] items-center justify-center border-2 border-dashed border-gray-600">
-                <!-- Drop words here -->
+                <!-- Word slots -->
              </div>
              
              <div id="sentence-word-bank" class="bg-gray-700/50 p-4 rounded-xl flex flex-wrap gap-[var(--gap-sm)] justify-center min-h-[100px]">
@@ -566,24 +595,35 @@ function nextRoundDSentence() {
              </div>
              
              <div class="flex justify-center gap-4">
-                <button onclick="checkRoundD('${sentence.replace(/'/g, "\\'")}')" class="game-btn bg-green-500 py-3 px-8 text-xl">CHECK</button>
+                <button onclick="checkRoundD()" class="game-btn bg-green-500 py-3 px-8 text-xl">CHECK</button>
+                <button onclick="clearRoundD()" class="game-btn bg-gray-500 py-3 px-8 text-xl">CLEAR</button>
              </div>
         </div>
     `;
     showTranslation('roundD-translation', sentence);
 
-    // Tokenize
-    // Simple space split, retain punctuation attached? 
-    // Existing game uses complex tokenization. Let's start simple or reuse `game.js` helpers if exposed.
-    // I'll stick to simple space split for now to ensure robustness without dep.
+    // Build fixed word-slots (one per token, in order).
     const tokens = sentence.split(' ');
+    const dropZone = document.getElementById('sentence-drop-zone');
+    dropZone.innerHTML = '';
+    tokens.forEach((word, idx) => {
+        const slot = document.createElement('div');
+        slot.className = 'sentence-slot';
+        slot.dataset.index = idx;
+        slot.dataset.expected = word;
+        slot.onclick = () => {
+            if (slot.firstChild) moveWordTile(slot.firstChild);
+        };
+        dropZone.appendChild(slot);
+    });
+
+    // Shuffled bank.
     const shuffled = [...tokens].sort(() => 0.5 - Math.random());
-
     const bank = document.getElementById('sentence-word-bank');
-
-    shuffled.forEach((word, idx) => {
-        const btn = createWordTile(word, idx);
-        bank.appendChild(btn);
+    bank.innerHTML = '';
+    bank.dataset.words = JSON.stringify(shuffled);
+    shuffled.forEach((word, id) => {
+        bank.appendChild(createWordTile(word, id));
     });
 }
 
@@ -593,10 +633,11 @@ function createWordTile(word, id) {
     btn.innerText = word;
     btn.dataset.word = word;
     btn.dataset.id = id;
-    btn.onclick = (e) => moveWordTile(e.target);
+    btn.onclick = () => moveWordTile(btn);
     return btn;
 }
 
+// Move a tile between bank and the earliest empty word-slot (gap fill L-to-R).
 function moveWordTile(btn) {
     if (STUDY_STATE.isTransitioning) return;
     const dropZone = document.getElementById('sentence-drop-zone');
@@ -605,38 +646,61 @@ function moveWordTile(btn) {
     btn.classList.remove('!bg-green-500', '!bg-red-500');
 
     if (btn.parentElement === bank) {
-        dropZone.appendChild(btn);
+        // Place into earliest empty slot.
+        const slots = Array.from(dropZone.children);
+        const empty = slots.find(s => !s.firstChild);
+        if (empty) empty.appendChild(btn);
     } else {
+        // Remove from a slot back to the bank (restore original order).
         bank.appendChild(btn);
     }
 }
 
-function checkRoundD(targetSentence) {
+function clearRoundD() {
     if (STUDY_STATE.isTransitioning) return;
     const dropZone = document.getElementById('sentence-drop-zone');
-    const currentWords = Array.from(dropZone.children).map(b => b.dataset.word);
-    const targetWords = targetSentence.split(' ');
-    let allCorrect = true;
+    const bank = document.getElementById('sentence-word-bank');
+    if (STUDY_STATE._roundDResetTimer) { clearTimeout(STUDY_STATE._roundDResetTimer); STUDY_STATE._roundDResetTimer = null; }
+    // Send every tile back to the bank in its original shuffled order.
+    const words = JSON.parse(bank.dataset.words || "[]");
+    bank.innerHTML = '';
+    words.forEach((word, id) => bank.appendChild(createWordTile(word, id)));
+    dropZone.innerHTML = '';
+    const expected = Array.from(dropZone.children).map(s => s.dataset.expected);
+    expected.forEach((word, idx) => {
+        const slot = document.createElement('div');
+        slot.className = 'sentence-slot';
+        slot.dataset.index = idx;
+        slot.dataset.expected = word;
+        slot.onclick = () => { if (slot.firstChild) moveWordTile(slot.firstChild); };
+        dropZone.appendChild(slot);
+    });
+}
 
-    Array.from(dropZone.children).forEach((btn, index) => {
-        btn.classList.remove('!bg-green-500', '!bg-red-500');
-        
-        if (btn.dataset.word === targetWords[index]) {
-            btn.classList.add('!bg-green-500');
+function checkRoundD() {
+    if (STUDY_STATE.isTransitioning) return;
+    const dropZone = document.getElementById('sentence-drop-zone');
+    const slots = Array.from(dropZone.children);
+    const targetWords = slots.map(s => s.dataset.expected);
+    const currentWords = slots.map(s => s.firstChild ? s.firstChild.dataset.word : null);
+
+    let allCorrect = currentWords.length === targetWords.length &&
+                    currentWords.every((w, i) => w === targetWords[i]);
+
+    slots.forEach((slot, index) => {
+        const tile = slot.firstChild;
+        if (!tile) return;
+        tile.classList.remove('!bg-green-500', '!bg-red-500');
+        if (tile.dataset.word === targetWords[index]) {
+            tile.classList.add('!bg-green-500');
         } else {
-            btn.classList.add('!bg-red-500');
-            allCorrect = false;
+            tile.classList.add('!bg-red-500');
         }
     });
-
-    if (currentWords.length !== targetWords.length) {
-        allCorrect = false;
-    }
 
     if (allCorrect) {
         STUDY_STATE.isTransitioning = true;
         playHappySound();
-        // Record SR result
         srStudyResults.push({ type: 'sentences', key: itemKey(STUDY_STATE.sentences[STUDY_STATE.currentSentenceIndex]), firstAttempt: exerciseAttempts === 1 });
         queueExerciseEvent('sentenceScramble', 'study', STUDY_STATE.sentences[STUDY_STATE.currentSentenceIndex]);
         setTimeout(() => {
@@ -650,10 +714,12 @@ function checkRoundD(targetSentence) {
         synthError();
         incrementExerciseAttempts();
         dropZone.classList.add('border-red-500');
-        setTimeout(() => {
+        if (STUDY_STATE._roundDResetTimer) clearTimeout(STUDY_STATE._roundDResetTimer);
+        STUDY_STATE._roundDResetTimer = setTimeout(() => {
             dropZone.classList.remove('border-red-500');
             STUDY_STATE.isTransitioning = false;
-        }, 500);
+            clearRoundD();
+        }, 5000);
     }
 }
 
@@ -971,7 +1037,7 @@ window.addEventListener('keydown', (e) => {
 function handleRoundBKeyDown(key) {
     if (key === 'Backspace') {
         const slots = document.getElementById('scramble-slots').children;
-        // Find last filled slot
+        // Find last filled letter-slot and remove it.
         for (let i = slots.length - 1; i >= 0; i--) {
             if (slots[i].innerText && slots[i].dataset.fixed !== "true") {
                 removeLetterFromSlot(i, currentTTSWord);
@@ -986,22 +1052,27 @@ function handleRoundBKeyDown(key) {
                 break;
             }
         }
+    } else if (key === 'Enter') {
+        checkRoundB();
     }
 }
 
 function handleRoundCKeyDown(key) {
     if (key === 'Enter') {
-        const word = currentTTSWord;
-        checkRoundC(word);
+        checkRoundC();
     } else if (key === 'Backspace') {
-        roundCInput = roundCInput.slice(0, -1);
-        updateRoundCDisplay();
+        // Remove last placed letter (reflow L-to-R), not a full clear.
+        if (roundCInput.length > 0) {
+            roundCInput = roundCInput.slice(0, -1);
+            updateRoundCDisplay();
+        }
     } else if (key.length === 1 && key.match(/[a-z0-9]/i)) {
-        // Only allow typing if the key is in the visible virtual keyboard
+        // Only allow typing if the key is in the visible virtual keyboard.
         const kb = document.getElementById('virtual-keyboard').children;
         for (let btn of kb) {
-            if (btn.innerText.toLowerCase() === key.toLowerCase()) {
-                typeRoundC(btn.innerText);
+            const ki = Number(btn.dataset.keyIndex);
+            if (btn.innerText.toLowerCase() === key.toLowerCase() && roundCInput[ki] === undefined) {
+                typeRoundC(ki);
                 break;
             }
         }

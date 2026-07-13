@@ -1128,9 +1128,8 @@ function startGrammarGame() {
         wordDiv.className = 'draggable';
         wordDiv.innerText = opt;
         wordDiv.dataset.word = opt;
-        // Clicking a dock word places a COPY into the earliest empty zone.
-        // The dock word itself stays (static palette).
-        wordDiv.onclick = () => placeGrammarWord(opt);
+        // Placement is handled by the delegated #word-dock listener (placeFromDock),
+        // which also depletes the tile. No per-tile onclick (avoids double-placement).
         dock.appendChild(wordDiv);
     });
 
@@ -1138,28 +1137,40 @@ function startGrammarGame() {
     document.getElementById('grammarGame').classList.remove('hidden');
 }
 
-// Place a COPY of `word` into the earliest empty drop-zone. The dock never depletes.
-function placeGrammarWord(word) {
+// Place the dock tile `sourceEl` into the earliest empty drop-zone, then REMOVE
+// it from the dock so it's clear which words are left. If no empty zone, ignore.
+function placeGrammarWord(sourceEl) {
     if (grammarGameEl().dataset.frozen === "true") return;
     const emptyZone = Array.from(document.querySelectorAll('.drop-zone')).find(z => z.children.length === 0);
-    if (emptyZone) {
-        const item = document.createElement('div');
-        item.className = 'draggable placed';
-        item.innerText = word;
-        item.dataset.word = word;
-        // Clicking a placed word deletes it (nothing returns to the dock).
-        item.onclick = () => deleteGrammarWord(item);
-        emptyZone.appendChild(item);
-        emptyZone.classList.add('filled');
-    }
+    if (!emptyZone) return;
+    const word = sourceEl.dataset.word;
+    const item = document.createElement('div');
+    item.className = 'draggable placed';
+    item.innerText = word;
+    item.dataset.word = word;
+    // Removal is handled by the delegated #sentence-container listener (consistent
+    // with the dock). No per-item onclick (avoids double-removal / double-return).
+    emptyZone.appendChild(item);
+    emptyZone.classList.add('filled');
+    if (sourceEl.parentElement) sourceEl.remove();
 }
 
-// Remove a placed word entirely — it just disappears, nothing goes back to the dock.
+// Remove a placed word and RETURN its tile to the dock so it can be reused.
 function deleteGrammarWord(item) {
     if (grammarGameEl().dataset.frozen === "true") return;
     item.classList.remove('wrong', 'correct');
-    if (item.parentElement) item.parentElement.classList.remove('filled');
-    item.remove();
+    const word = item.dataset.word;
+    if (item.parentElement) {
+        item.parentElement.classList.remove('filled');
+        item.remove();
+    }
+    // Return the tile to the dock.
+    const dock = document.getElementById('word-dock');
+    const tile = document.createElement('div');
+    tile.className = 'draggable';
+    tile.innerText = word;
+    tile.dataset.word = word;
+    dock.appendChild(tile);
 }
 
 function clearGrammar() {
@@ -1168,12 +1179,19 @@ function clearGrammar() {
         clearTimeout(grammarGameEl()._grammarResetTimer);
         grammarGameEl()._grammarResetTimer = null;
     }
-    // Remove all placed words (the dock is a static palette — it stays).
+    // Remove all placed words and RETURN every tile to the dock (this widget
+    // depletes on placement, so "clear" must restore the full set).
+    const dock = document.getElementById('word-dock');
     document.querySelectorAll('.drop-zone').forEach(zone => {
-        if (zone.children.length > 0) {
-            zone.children[0].remove();
-            zone.classList.remove('filled');
-        }
+        zone.querySelectorAll('.draggable.placed').forEach(p => {
+            const tile = document.createElement('div');
+            tile.className = 'draggable';
+            tile.innerText = p.dataset.word;
+            tile.dataset.word = p.dataset.word;
+            dock.appendChild(tile);
+            p.remove();
+        });
+        zone.classList.remove('filled');
     });
 }
 
@@ -1527,7 +1545,7 @@ loadContent();
 // placeGrammarWord/deleteGrammarWord; these are no-ops while frozen).
 document.getElementById('word-dock').addEventListener('click', (e) => {
     if (e.target.classList.contains('draggable')) {
-        placeGrammarWord(e.target.dataset.word);
+        placeGrammarWord(e.target);
     }
 });
 document.getElementById('sentence-container').addEventListener('click', (e) => {

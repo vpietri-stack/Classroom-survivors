@@ -169,6 +169,22 @@ const testBody = `
   ok('G2: overlay shown (not frozen/blank)', !document.getElementById('grammarGame').classList.contains('hidden'));
   ok('G2: a sentence was rendered into the container', document.getElementById('sentence-container').children.length > 0);
 
+  // Depletion behaviour: clicking a dock word must place EXACTLY ONE copy and
+  // remove the tile from the dock (the old double-binding placed two copies and
+  // kept the tile — both regressions reported by the user).
+  var dockTiles = Array.prototype.slice.call(document.querySelectorAll('#word-dock .draggable'));
+  var dockCount = dockTiles.length;
+  ok('G2: dock rendered the full set of word tiles', dockCount > 0);
+  var firstTile = dockTiles[0];
+  firstTile.click(); // delegated #word-dock listener handles placement
+  var zones = document.querySelectorAll('.drop-zone');
+  var placedCount = Array.prototype.slice.call(zones).filter(function(z){ return z.children.length > 0; }).length;
+  ok('G2: clicking dock word places exactly ONE copy (no double-write)', placedCount === 1);
+  ok('G2: placed word removed from dock (depletes)', document.querySelectorAll('#word-dock .draggable').length === dockCount - 1);
+  ok('G2: clicking placed word returns tile to dock', (function(){
+    zones[0].children[0].click(); // delegated #sentence-container listener -> deleteGrammarWord
+    return document.querySelectorAll('#word-dock .draggable').length === dockCount;
+  })());
   // And with NO sentences available at all, it must auto-pass (no throw, no hang).
   GRAMMAR_SENTENCES = [];
   threw = false;

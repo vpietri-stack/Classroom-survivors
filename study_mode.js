@@ -479,6 +479,17 @@ function typeRoundC(keyIndex) {
     updateRoundCDisplay();
 }
 
+function deleteRoundCLast() {
+    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundCFrozen) return;
+    // Remove the rightmost placed letter-slot (L-to-R), freeing its tile.
+    for (let i = roundCSlots.length - 1; i >= 0; i--) {
+        if (roundCSlots[i].type === 'letter' && roundCPlacement[i] !== undefined) {
+            removeRoundCLetter(i);
+            return;
+        }
+    }
+}
+
 function removeRoundCLetter(slotFullIdx) {
     if (STUDY_STATE.isTransitioning || STUDY_STATE._roundCFrozen) return;
     if (roundCSlots[slotFullIdx].type !== 'letter') return;
@@ -647,13 +658,27 @@ function nextRoundDSentence() {
         dropZone.appendChild(slot);
     });
 
-    // Shuffled bank — a STATIC palette. Clicking a word places a copy; the bank stays.
+    // Shuffled bank — DEPLETES on placement: clicking a word moves it into the
+    // earliest empty slot and removes it from the bank so it's clear which words
+    // remain. (Mirrors the game-mode sentence-scramble fix.)
     const shuffled = [...tokens].sort(() => 0.5 - Math.random());
     const bank = document.getElementById('sentence-word-bank');
     bank.innerHTML = '';
     shuffled.forEach((word, id) => {
         bank.appendChild(createWordTile(word, id));
     });
+    // Delegated listener: one handler for the whole bank (avoids per-tile binding
+    // and double-placement). Only the placed tile is removed from the bank.
+    bank.onclick = (e) => {
+        const tile = e.target.closest('.study-word-tile');
+        if (tile) placeWordTile(tile);
+    };
+    // Delegated listener on the drop-zone: clicking a placed tile returns it to
+    // the bank (consistent with the bank handler). No per-tile onclick.
+    dropZone.onclick = (e) => {
+        const placed = e.target.closest('.study-word-tile.placed');
+        if (placed) deleteWordTile(placed);
+    };
 
     STUDY_STATE._roundDFrozen = false;
 }
@@ -664,39 +689,61 @@ function createWordTile(word, id) {
     btn.innerText = word;
     btn.dataset.word = word;
     btn.dataset.id = id;
-    btn.onclick = () => placeWordTile(word);
+    // Placement is handled by the delegated #sentence-word-bank listener
+    // (placeWordTile), which also depletes the tile. No per-tile onclick.
     return btn;
 }
 
-// Bank is a static palette: clicking a bank word places a COPY into the earliest
-// empty slot. The source word stays in the bank.
-function placeWordTile(word) {
+// Bank DEPLETES on placement: move the clicked tile into the earliest empty slot
+// and remove it from the bank so it's clear which words remain. Clicking a placed
+// tile (via the delegated drop-zone listener) returns it to the bank.
+function placeWordTile(sourceEl) {
     if (STUDY_STATE.isTransitioning || STUDY_STATE._roundDFrozen) return;
     const dropZone = document.getElementById('sentence-drop-zone');
     const empty = Array.from(dropZone.children).find(s => !s.firstChild);
-    if (empty) {
-        const tile = document.createElement('div');
-        tile.className = 'study-word-tile placed';
-        tile.innerText = word;
-        tile.dataset.word = word;
-        tile.onclick = () => deleteWordTile(tile);
-        empty.appendChild(tile);
-    }
+    if (!empty) return; // no empty slot
+    const word = sourceEl.dataset.word;
+    const tile = document.createElement('div');
+    tile.className = 'study-word-tile placed';
+    tile.innerText = word;
+    tile.dataset.word = word;
+    // Removal is handled by the delegated drop-zone listener (consistent with the
+    // bank). No per-tile onclick (avoids double-removal / double-return).
+    empty.appendChild(tile);
+    if (sourceEl.parentElement) sourceEl.remove();
 }
 
-// Remove a placed word entirely (it just disappears — nothing returns to the bank).
-function deleteWordTile(tile) {
+// Remove a placed word and RETURN its tile to the bank so it can be reused.
+function deleteWordTile(item) {
     if (STUDY_STATE.isTransitioning || STUDY_STATE._roundDFrozen) return;
-    tile.classList.remove('!bg-green-500', '!bg-red-500');
-    tile.remove();
+    const word = item.dataset.word;
+    if (item.parentElement) item.remove();
+    const bank = document.getElementById('sentence-word-bank');
+    const tile = document.createElement('button');
+    tile.className = "study-word-tile";
+    tile.innerText = word;
+    tile.dataset.word = word;
+    bank.appendChild(tile);
 }
 
 function clearRoundD() {
     if (STUDY_STATE.isTransitioning || STUDY_STATE._roundDFrozen) return;
     const dropZone = document.getElementById('sentence-drop-zone');
     if (STUDY_STATE._roundDResetTimer) { clearTimeout(STUDY_STATE._roundDResetTimer); STUDY_STATE._roundDResetTimer = null; }
-    // Remove all placed tiles; the bank (static palette) is left untouched.
-    Array.from(dropZone.children).forEach(slot => { if (slot.firstChild) slot.firstChild.remove(); });
+    // Remove all placed tiles and RETURN every tile to the bank (this widget
+    // depletes on placement, so "clear" must restore the full set).
+    const bank = document.getElementById('sentence-word-bank');
+    Array.from(dropZone.children).forEach(slot => {
+        const p = slot.firstChild;
+        if (p) {
+            const tile = document.createElement('button');
+            tile.className = "study-word-tile";
+            tile.innerText = p.dataset.word;
+            tile.dataset.word = p.dataset.word;
+            bank.appendChild(tile);
+            p.remove();
+        }
+    });
 }
 
 function checkRoundD() {
@@ -744,8 +791,19 @@ function checkRoundD() {
             dropZone.classList.remove('border-red-500');
             STUDY_STATE.isTransitioning = false;
             STUDY_STATE._roundDFrozen = false;
-            // Remove all placed tiles; the bank (static palette) is left untouched.
-            Array.from(dropZone.children).forEach(slot => { if (slot.firstChild) slot.firstChild.remove(); });
+            // Return all placed tiles to the bank (it depletes on placement).
+            const bank = document.getElementById('sentence-word-bank');
+            Array.from(dropZone.children).forEach(slot => {
+                const p = slot.firstChild;
+                if (p) {
+                    const tile = document.createElement('button');
+                    tile.className = "study-word-tile";
+                    tile.innerText = p.dataset.word;
+                    tile.dataset.word = p.dataset.word;
+                    bank.appendChild(tile);
+                    p.remove();
+                }
+            });
         }, 5000);
     }
 }
@@ -1088,11 +1146,7 @@ function handleRoundCKeyDown(key) {
     if (key === 'Enter') {
         checkRoundC();
     } else if (key === 'Backspace') {
-        // Remove last placed letter (reflow L-to-R), not a full clear.
-        if (roundCInput.length > 0) {
-            roundCInput = roundCInput.slice(0, -1);
-            updateRoundCDisplay();
-        }
+        deleteRoundCLast();
     } else if (key.length === 1 && key.match(/[a-z0-9]/i)) {
         // Only allow typing if the key is in the visible virtual keyboard.
         const kb = document.getElementById('virtual-keyboard').children;

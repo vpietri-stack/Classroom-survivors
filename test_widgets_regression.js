@@ -78,7 +78,7 @@ const testBody = `
      bSlots.children[0].innerText==='w' && bSlots.children[1].innerText==='' && bSlots.children[2].innerText==='d');
   ok('B: delete does NOT return letter to bank (still 3)', bankBtns.length === 3);
 
-  // ===== STUDY ROUND D (static bank, delete word) =====
+  // ===== STUDY ROUND D (depleting bank — mirrors game-mode word scramble) =====
   STUDY_STATE.sentences = ['The cat sat'];
   STUDY_STATE.currentSentenceIndex = 0;
   startRoundD(); nextRoundDSentence();
@@ -91,11 +91,17 @@ const testBody = `
   var theBtn = dBtns.find(function(b){ return b.innerText === 'The'; });
   theBtn.click();
   ok('D: placed copy into first slot', !!(dZone.children[0].firstChild && dZone.children[0].firstChild.innerText === 'The'));
-  ok('D: bank tile NOT removed (static palette)', dBtns.length === 3 && dBank.contains(theBtn));
+  ok('D: bank tile REMOVED on placement (depletes)', !dBank.contains(theBtn) && dBank.querySelectorAll('button').length === 2);
 
   dZone.children[0].firstChild.click();
   ok('D: deleting placed word removes it from slot', !dZone.children[0].firstChild);
-  ok('D: delete does NOT return word to bank', dBtns.length === 3);
+  ok('D: delete RETURNS word to bank', dBank.querySelectorAll('button').length === 3);
+
+  // Place all three, then CLEAR restores the full bank.
+  dBank.querySelectorAll('button').forEach(function(b){ b.click(); });
+  ok('D: placing all words empties the bank', dBank.querySelectorAll('button').length === 0);
+  clearRoundD();
+  ok('D: CLEAR restores all tiles to the bank', dBank.querySelectorAll('button').length === 3 && !dZone.children[0].firstChild);
 
   // ===== FREEZE during reveal (Round B, wrong answer) =====
   STUDY_STATE.words = ['abc'];
@@ -211,6 +217,30 @@ const testBody = `
     for (var si=0; si<slots.length; si++){ if (slots[si].textContent){ slots[si].click(); break; } }
     return document.querySelectorAll('#virtual-keyboard .study-key').length === before;
   })());
+
+  // ===== STUDY ROUND C back-key (delete last placed letter) =====
+  STUDY_STATE.words = ['tap'];
+  STUDY_STATE.currentWordIndex = 0;
+  startRoundC(); nextRoundCWord();
+  var kbC = Array.prototype.slice.call(document.getElementById('virtual-keyboard').querySelectorAll('button'));
+  // Force a deterministic board: a,a,t,p...
+  roundCBaseKeys = ['a','a','t','p','b','f','o','x','w','z'];
+  roundCPlacement = []; roundCUsedKeys = []; updateRoundCDisplay();
+  // Place 't' then 'a' (slots 0,1).
+  var tBtn = kbC.find(function(b){ return b.dataset.keyIndex === '2'; }); // 't'
+  var aBtn = kbC.find(function(b){ return b.dataset.keyIndex === '0'; }); // 'a'
+  tBtn.click(); aBtn.click();
+  ok('C(back): two letters placed', (function(){
+    var dis = Array.prototype.slice.call(document.getElementById('spelling-display').children).map(function(s){return s.textContent;}).join('');
+    return dis.indexOf('t') === 0 && dis[1] === 'a';
+  })());
+  // Press Backspace via the keyboard handler -> removes the LAST placed ('a').
+  handleRoundCKeyDown('Backspace');
+  ok('C(back): Backspace removes last placed letter', (function(){
+    var slots = document.getElementById('spelling-display').children;
+    return slots[0].textContent === 't' && slots[1].textContent === '';
+  })());
+  ok('C(back): freed tile is selectable again', roundCUsedKeys[0] === false);
 
   // ===== GRAMMAR (sentence scramble) must NOT throw on empty SR result =====
   // Reproduces the freeze: getGameItemSR can return [] (empty spaced-rep pool).

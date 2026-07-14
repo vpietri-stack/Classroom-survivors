@@ -35,9 +35,13 @@ const stub = `
   window.Phaser = function(){}; window.Phaser.Scene = function(){}; window.Phaser.Game = function(){};
   window.API_BASE_URL = ''; window.FIREBASE_CONFIG = {};
   window.activeGameMode = null; // declared in boot.js (not loaded by harness)
+  window.triggerStartGame = function(){}; // declared in game.js (not loaded by harness)
+  function FakeParam(){ this.setValueAtTime=function(){}; this.exponentialRampToValueAtTime=function(){}; this.linearRampToValueAtTime=function(){}; this.setValueAtTime=function(){}; }
+  function FakeNode(){ this.frequency=new FakeParam(); this.gain=new FakeParam(); this.type=''; this.connect=function(){}; this.start=function(){}; this.stop=function(){}; this.disconnect=function(){}; }
   function FakeAudioCtx(){ this.currentTime=0; this.destination={};
-    this.createOscillator=function(){ return { frequency:{ setValueAtTime:function(){} }, type:'', connect:function(){}, start:function(){}, stop:function(){} }; };
-    this.createGain=function(){ return { gain:{ setValueAtTime:function(){} }, connect:function(){} }; }; }
+    this.createOscillator=function(){ return new FakeNode(); };
+    this.createGain=function(){ return new FakeNode(); };
+  }
   window.AudioContext = FakeAudioCtx; window.webkitAudioContext = FakeAudioCtx;
   window.firebase = { initializeApp:function(){ return {}; }, auth:function(){ return {}; }, database:function(){ return {}; }, firestore:function(){ return {}; } };
   window.speechSynthesis = { speak:function(){ return Promise.resolve(); }, cancel:function(){} };
@@ -79,6 +83,29 @@ const testBody = `
      bSlots.children[0].innerText==='w' && bSlots.children[1].innerText==='' && bSlots.children[2].innerText==='d');
   ok('B: delete returns letter to bank (length back to 1)', bBank.querySelectorAll('button').length === 1);
 
+  // ===== STUDY ROUND B: fixed chars (space / - / .) stay put on check / clear =====
+  // Word 'drop-ed' -> 'drop' + '-' + 'ed' (past tense). The '-' slot is fixed and
+  // must NEVER move to the bank or get blanked.
+  STUDY_STATE.words = ['drop-ed'];
+  STUDY_STATE.currentWordIndex = 0;
+  startRoundB(); nextRoundBWord();
+  var fSlots = document.getElementById('scramble-slots');
+  var fBank = document.getElementById('scramble-bank');
+  var dashSlotIdx = -1;
+  for (var fi=0; fi<fSlots.children.length; fi++){ if (fSlots.children[fi].innerText === '-'){ dashSlotIdx = fi; break; } }
+  ok('B(fixed): a "-" fixed slot exists', dashSlotIdx !== -1 && fSlots.children[dashSlotIdx].dataset.fixed === 'true');
+  var fInitialBank = fBank.querySelectorAll('button').length; // letters only (dash excluded)
+  // Fill ALL letter slots, then CLEAR.
+  Array.prototype.slice.call(fBank.querySelectorAll('button')).forEach(function(b){ b.click(); });
+  ok('B(fixed): all letters placed, bank empty', fBank.querySelectorAll('button').length === 0);
+  clearRoundB();
+  ok('B(fixed): CLEAR keeps the "-" in its original slot', fSlots.children[dashSlotIdx].innerText === '-' && fSlots.children[dashSlotIdx].dataset.fixed === 'true');
+  ok('B(fixed): CLEAR returns only letters to the bank (no dash added)', fBank.querySelectorAll('button').length === fInitialBank);
+  // Wrong CHECK (re-place letters wrong) must also keep the '-' put.
+  Array.prototype.slice.call(fBank.querySelectorAll('button')).forEach(function(b){ b.click(); });
+  checkRoundB();
+  ok('B(fixed): wrong CHECK keeps "-" fixed (not banked/blanked)', fSlots.children[dashSlotIdx].innerText === '-' && fSlots.children[dashSlotIdx].dataset.fixed === 'true');
+
   // ===== STUDY ROUND D (depleting bank — mirrors game-mode word scramble) =====
   STUDY_STATE.sentences = ['The cat sat'];
   STUDY_STATE.currentSentenceIndex = 0;
@@ -105,6 +132,8 @@ const testBody = `
   ok('D: CLEAR restores all tiles to the bank', dBank.querySelectorAll('button').length === 3 && !dZone.children[0].firstChild);
 
   // ===== STUDY ROUND D: CLEAR works during wrong-answer freeze =====
+  // Reset any leaked frozen state from prior sections.
+  STUDY_STATE._roundDFrozen = false; STUDY_STATE.isTransitioning = false;
   STUDY_STATE.sentences = ['The cat sat'];
   STUDY_STATE.currentSentenceIndex = 0;
   startRoundD(); nextRoundDSentence();
@@ -118,6 +147,8 @@ const testBody = `
   ok('D(freeze): CLEAR works while frozen (unfreezes, bank restored)', STUDY_STATE._roundDFrozen === false && dBank.querySelectorAll('button').length === 3);
 
   // ===== FREEZE during reveal (Round B, wrong answer) =====
+  // Reset any leaked frozen/transition state from prior sections.
+  STUDY_STATE._roundBFrozen = false; STUDY_STATE.isTransitioning = false;
   STUDY_STATE.words = ['abc'];
   STUDY_STATE.currentWordIndex = 0;
   startRoundB(); nextRoundBWord();
@@ -370,6 +401,39 @@ const testBody = `
   threw = false;
   try { startGrammarGame(); } catch (e) { threw = true; console.log('G2 auto-pass throw:', e.message, e.stack); }
   ok('G2: startGrammarGame does NOT throw when no sentences exist (auto-pass)', !threw);
+
+  // ===== STUDY -> GAME keyboard handoff (BUG: study.active never reset) =====
+  // Entering study mode set STUDY_STATE.active=true. The game-mode keydown
+  // listener early-returns while it's true, so after leaving study mode the
+  // spelling minigame's physical keyboard typing silently died. Exiting study
+  // mode must reset active=false.
+  STUDY_STATE.words = ['wed'];
+  STUDY_STATE.currentWordIndex = 0;
+  startRoundB(); nextRoundBWord();
+  STUDY_STATE.active = true; // simulate "in study mode" (initStudyMode sets this; not called by direct startRoundB in test)
+  ok('KBD: entering study sets STUDY_STATE.active=true', STUDY_STATE.active === true);
+  exitStudyMode();
+  ok('KBD: exiting study resets STUDY_STATE.active=false', STUDY_STATE.active === false);
+  // Now start the game-mode spelling minigame and type via handleGameSpellingKeyDown.
+  SPELLING_WORDS = [{ en: 'cat', zh: '猫' }];
+  selectedClassContent = { book: 1, unit: 1, page: 1 };
+  getGameItemSR = function(){ return 'cat'; };
+  try { startSpellingGame(); } catch (e) { console.log('startSpellingGame(2) ERROR:', e.message); }
+  var spEl2 = document.getElementById('spellingGame');
+  spEl2.dataset.letters = JSON.stringify(['c','a','t']);
+  spEl2.dataset.placement = JSON.stringify([undefined,undefined,undefined]);
+  spEl2.dataset.usedKeys = JSON.stringify([false, false, false]);
+  document.getElementById('spelling-keyboard').dataset.built = "false";
+  buildSpellingKeyboard();
+  buildSpellingSlots();
+  // Simulate physical typing 'c','a','t' (only works if active=false).
+  handleGameSpellingKeyDown('c');
+  handleGameSpellingKeyDown('a');
+  handleGameSpellingKeyDown('t');
+  ok('KBD: typing works in game-mode spelling after study exit', (function(){
+    var p = JSON.parse(spEl2.dataset.placement);
+    return p[0] !== undefined && p[1] !== undefined && p[2] !== undefined && p.filter(function(v){return v!==undefined&&v!==null;}).length === 3;
+  })());
 
   window.__testResult = { pass: pass, fail: fail };
   console.log('\\n' + pass + ' passed, ' + fail + ' failed');

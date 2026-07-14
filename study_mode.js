@@ -346,6 +346,7 @@ function checkRoundB() {
         s._resetTimer = setTimeout(() => {
             const bank = document.getElementById('scramble-bank');
             for (let slot of slots) {
+                if (slot.dataset.fixed === "true") continue; // never move fixed chars (space / - / . ) into the bank
                 if (slot.innerText) {
                     const char = slot.innerText;
                     const btn = document.createElement('button');
@@ -371,6 +372,7 @@ function clearRoundB() {
     const bank = document.getElementById('scramble-bank');
     for (let slot of slots) {
         if (slot._resetTimer) { clearTimeout(slot._resetTimer); slot._resetTimer = null; }
+        if (slot.dataset.fixed === "true") continue; // never move fixed chars (space / - / . ) into the bank
         if (slot.innerText) {
             // Return the letter to the bank (it depletes on placement).
             const char = slot.innerText;
@@ -1121,6 +1123,7 @@ function finishStudySession() {
 }
 
 function exitStudyMode() {
+    STUDY_STATE.active = false; // so the game-mode keydown listener resumes
     document.getElementById('studyModeOverlay').classList.add('hidden');
     triggerStartGame(); // Call original game start
 }

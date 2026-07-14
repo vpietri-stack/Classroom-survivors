@@ -1,7 +1,9 @@
 /* Core Styles */
 :root {
     /* Responsive sizing variables */
-    --slot-size: clamp(32px, 10vw, 48px);
+    /* Slot/letter-tile box size. Bumped so short words fill the screen; fitAnswerArea
+       shrinks this down for long words. */
+    --slot-size: clamp(38px, 11vw, 54px);
     --tile-size: clamp(40px, 12vw, 56px);
     --key-size: clamp(36px, 11vw, 48px);
     --font-sm: clamp(0.75rem, 2.5vw, 0.875rem);
@@ -15,8 +17,10 @@
     --container-padding: clamp(12px, 3vw, 24px);
     /* Answer-area letter size. Caps low (so a long no-separator word can shrink
        to fit instead of forcing a horizontal scroll) and high (so short words
-       stay big and readable). Driven by viewport width via clamp(). */
-    --answer-font: clamp(0.85rem, 4.5vw, 1.6rem);
+       stay big and readable). Driven by viewport width via clamp(). fitAnswerArea
+       shrinks BOTH --answer-font and --slot-size together (a slot is a fixed-width
+       box, so shrinking the font alone never relieves the row width). */
+    --answer-font: clamp(1rem, 5vw, 1.7rem);
 }
 
 /* A run of letters that must stay on ONE line (e.g. "danced"). Separators such

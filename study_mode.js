@@ -571,9 +571,17 @@ function updateRoundCDisplay() {
     // Keep roundCInput coherent with per-slot placement (slot order).
     roundCRebuild();
 
+    // Build the row, grouping consecutive LETTER slots into a .word-group so the
+    // word never breaks mid-word (fixed chars like space/'/- stay as their own
+    // flex items BETWEEN groups, so the word wraps only at natural points).
     let html = "";
+    let groupBuf = "";
+    const flushGroup = () => {
+        if (groupBuf) { html += `<span class="word-group">${groupBuf}</span>`; groupBuf = ""; }
+    };
     roundCSlots.forEach((slot, fullIdx) => {
         if (slot.type === 'fixed') {
+            flushGroup(); // a separator always ends the current word-run
             const c = slot.char === ' ' ? ' ' : slot.char;
             html += `<div class="study-slot border-transparent bg-transparent select-none" style="color:#94a3b8">${c}</div>`;
         } else {
@@ -586,11 +594,15 @@ function updateRoundCDisplay() {
             }
             // Click a filled slot to DELETE it (frozen during reveal).
             const onclick = (filledChar && !isFrozen) ? ` onclick="removeRoundCLetter(${fullIdx})"` : "";
-            html += `<div class="study-slot ${bg}"${onclick}>${filledChar}</div>`;
+            groupBuf += `<div class="study-slot ${bg}"${onclick}>${filledChar}</div>`;
         }
     });
+    flushGroup();
     disp.innerHTML = html;
     disp.className = "flex flex-wrap justify-center gap-[var(--gap-xs)] min-h-[60px] w-full px-4 text-white";
+
+    // Shrink the answer area if a long no-separator word is too wide for the screen.
+    if (typeof fitAnswerArea === 'function') fitAnswerArea(disp);
 
     // Virtual keyboard stays a STATIC palette: all tiles remain visible; a used
     // tile is flagged (so the player sees what's spent) but never hidden/removed.

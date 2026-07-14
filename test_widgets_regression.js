@@ -323,20 +323,25 @@ const testBody = `
     b.onclick = (function(ki){ return function(){ typeRoundC(ki); }; })(i);
     kb.appendChild(b);
   });
+  // Round C groups letter slots into .word-group wrappers (so a word never
+  // breaks mid-word); flatten to the .study-slot descendants for assertions.
+  function cSlots() {
+    return Array.prototype.slice.call(document.querySelectorAll('#spelling-display .study-slot'));
+  }
   kbBtns = Array.prototype.slice.call(kb.children);
   ok('C: board rendered 10 keys', kbBtns.length === 10);
   // Type the two 'd' tiles first (indices 3 and 4).
   kbBtns.find(function(b){ return b.dataset.keyIndex === '3'; }).click();
   kbBtns.find(function(b){ return b.dataset.keyIndex === '4'; }).click();
   ok('C: typing two d tiles fills first two letter slots', (function(){
-    var dis = Array.prototype.slice.call(document.getElementById('spelling-display').children).map(function(s){return s.textContent;}).join('');
+    var dis = cSlots().map(function(s){return s.textContent;}).join('');
     return dis.indexOf('d') === 0 && dis[1] === 'd';
   })());
   // The 'a' tiles (index 0,1) must now be selectable (the old bug blocked them).
   var a0 = kbBtns.find(function(b){ return b.dataset.keyIndex === '0'; });
   a0.click();
   ok('C: an a tile is selectable after two d tiles (no desync)', (function(){
-    var dis = Array.prototype.slice.call(document.getElementById('spelling-display').children).map(function(s){return s.textContent;}).join('');
+    var dis = cSlots().map(function(s){return s.textContent;}).join('');
     return dis.indexOf('a') !== -1;
   })());
   // Fill the rest via typing: d-a-n-c-e (we have a0 placed; add a1,c, then d,e fill remaining).
@@ -350,7 +355,7 @@ const testBody = `
   ok('C: clicking a placed slot deletes it without losing other tiles', (function(){
     // place one a, then delete it via slot click, board stays intact
     var before = document.querySelectorAll('#virtual-keyboard .study-key').length;
-    var slots = document.getElementById('spelling-display').children;
+    var slots = cSlots();
     // find a filled slot and click it
     for (var si=0; si<slots.length; si++){ if (slots[si].textContent){ slots[si].click(); break; } }
     return document.querySelectorAll('#virtual-keyboard .study-key').length === before;
@@ -369,13 +374,13 @@ const testBody = `
   var aBtn = kbC.find(function(b){ return b.dataset.keyIndex === '0'; }); // 'a'
   tBtn.click(); aBtn.click();
   ok('C(back): two letters placed', (function(){
-    var dis = Array.prototype.slice.call(document.getElementById('spelling-display').children).map(function(s){return s.textContent;}).join('');
+    var dis = cSlots().map(function(s){return s.textContent;}).join('');
     return dis.indexOf('t') === 0 && dis[1] === 'a';
   })());
   // Press Backspace via the keyboard handler -> removes the LAST placed ('a').
   handleRoundCKeyDown('Backspace');
   ok('C(back): Backspace removes last placed letter', (function(){
-    var slots = document.getElementById('spelling-display').children;
+    var slots = cSlots();
     return slots[0].textContent === 't' && slots[1].textContent === '';
   })());
   ok('C(back): freed tile is selectable again', roundCUsedKeys[0] === false);
@@ -520,23 +525,32 @@ const testBody = `
   // never go below the 10px floor. jsdom has no layout, so stub getComputedStyle
   // + the box metrics.
   var fitEl = document.getElementById('spelling-input-display');
-  var fitSize = 24; // start "large"
+  var fitFont = 24, fitSlot = 48; // start "large"
   var realGCS = window.getComputedStyle;
   window.getComputedStyle = function(el){
-    return { getPropertyValue: function(prop){ return prop === '--answer-font' ? fitSize + 'px' : ''; } };
+    return { getPropertyValue: function(prop){
+      if (prop === '--answer-font') return fitFont + 'px';
+      if (prop === '--slot-size') return fitSlot + 'px';
+      return '';
+    } };
   };
   Object.defineProperty(fitEl, 'scrollWidth', { configurable: true, get: function(){ return 400; } });
   Object.defineProperty(fitEl, 'clientWidth', { configurable: true, get: function(){ return 200; } });
-  document.documentElement.style.setProperty('--answer-font', fitSize + 'px');
+  document.documentElement.style.setProperty('--answer-font', fitFont + 'px');
+  document.documentElement.style.setProperty('--slot-size', fitSlot + 'px');
   fitAnswerArea(fitEl);
-  var after = parseFloat(document.documentElement.style.getPropertyValue('--answer-font')) || 0;
-  ok('fit: shrinks --answer-font when container is too narrow', after < fitSize);
-  ok('fit: never falls below the 10px floor', after >= 10);
+  var afterFont = parseFloat(document.documentElement.style.getPropertyValue('--answer-font')) || 0;
+  var afterSlot = parseFloat(document.documentElement.style.getPropertyValue('--slot-size')) || 0;
+  ok('fit: shrinks --answer-font when container is too narrow', afterFont < fitFont);
+  ok('fit: shrinks --slot-size (fixed-width box) when container is too narrow', afterSlot < fitSlot);
+  ok('fit: never falls below the 12px font floor', afterFont >= 12);
+  ok('fit: never falls below the 22px slot floor', afterSlot >= 22);
   // With a wide-enough container, it should not shrink below the (reset) default.
   Object.defineProperty(fitEl, 'clientWidth', { configurable: true, get: function(){ return 2000; } });
   document.documentElement.style.setProperty('--answer-font', '');
+  document.documentElement.style.setProperty('--slot-size', '');
   fitAnswerArea(fitEl);
-  ok('fit: no shrink when content already fits', !document.documentElement.style.getPropertyValue('--answer-font'));
+  ok('fit: no shrink when content already fits', !document.documentElement.style.getPropertyValue('--answer-font') && !document.documentElement.style.getPropertyValue('--slot-size'));
   window.getComputedStyle = realGCS;
   window.__testResult = { pass: pass, fail: fail };
   console.log('\\n' + pass + ' passed, ' + fail + ' failed');

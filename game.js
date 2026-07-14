@@ -849,18 +849,24 @@ function buildSpellingSlots() {
 
 // Keep the answer area on-screen: if the laid-out row is wider than its
 // container (e.g. a long no-separator word like "understandable" on a narrow
-// phone), shrink --answer-font until it fits. Adapts to any window/container
-// size; called after every (re)build and on window resize.
+// phone), shrink BOTH --answer-font and --slot-size until it fits. A slot is a
+// fixed-width box, so shrinking the font alone never relieves the row width —
+// the box must shrink too. Adapts to any window/container size; called after
+// every (re)build and on window resize.
 function fitAnswerArea(container) {
-    const getVar = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--answer-font')) || 0;
-    let size = getVar();
-    const minSize = 10; // px floor — below this we stop and let it scroll
-    // Reset to the responsive default first, then measure from there.
+    const getVar = (name) => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name)) || 0;
+    let font = getVar('--answer-font');
+    let slot = getVar('--slot-size');
+    const minFont = 12; // px floor for the letter glyph
+    const minSlot = 22; // px floor for the slot box — below this we stop and let it scroll
+    // Reset to the responsive defaults first, then measure from there.
     document.documentElement.style.setProperty('--answer-font', '');
-    size = getVar();
-    while (size > minSize && container.scrollWidth > container.clientWidth) {
-        size -= 1;
-        document.documentElement.style.setProperty('--answer-font', size + 'px');
+    document.documentElement.style.setProperty('--slot-size', '');
+    font = getVar('--answer-font');
+    slot = getVar('--slot-size');
+    while ((font > minFont || slot > minSlot) && container.scrollWidth > container.clientWidth) {
+        if (font > minFont) { font -= 1; document.documentElement.style.setProperty('--answer-font', font + 'px'); }
+        if (slot > minSlot) { slot -= 1; document.documentElement.style.setProperty('--slot-size', slot + 'px'); }
     }
 }
 
@@ -1058,7 +1064,7 @@ function startWordRecGame() {
 
     choices.forEach(word => {
         const btn = document.createElement('button');
-        btn.className = "game-btn text-2xl py-8 min-w-[150px]";
+        btn.className = "game-btn text-2xl py-6 min-w-[140px]";
         btn.innerText = word;
         btn.onclick = () => checkWordRec(word, target, btn);
         container.appendChild(btn);

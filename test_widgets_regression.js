@@ -237,6 +237,22 @@ const testBody = `
     var p = JSON.parse(spEl.dataset.placement); return p.every(function(v){ return v === undefined || v === null; });
   })());
 
+  // ===== GAME-MODE SPELLING: comma is a draggable tile (matches study Round B) =====
+  // 'yes, it is' -> the "," must NOT be a pinned fixed slot; it is a draggable letter tile.
+  SPELLING_WORDS = [{ en: 'yes, it is', zh: '是的，它是' }];
+  getGameItemSR = function(){ return 'yes, it is'; };
+  startSpellingGame();
+  var scEl = document.getElementById('spellingGame');
+  // Count fixed (pinned) slots vs letter slots.
+  var scSlots = JSON.parse(scEl.dataset.slots);
+  var commaFixed = scSlots.some(function(s){ return s.type === 'fixed' && s.char === ','; });
+  ok("G(apos): comma is NOT a fixed slot in 'yes, it is'", !commaFixed);
+  // The comma should be part of the draggable palette (letters array includes it).
+  var scLetters = JSON.parse(scEl.dataset.letters);
+  ok('G(apos): comma is in the draggable palette', scLetters.indexOf(',') !== -1);
+  ok('G(apos): fixed slots are only space/period/question/exclaim (no comma)',
+     scSlots.filter(function(s){ return s.type === 'fixed'; }).every(function(s){ return ['.','?','!',' '].includes(s.char); }));
+
   // ===== STUDY ROUND C (spelling desync fix — same class as game-mode word scramble) =====
   // Reproduces the user's report: word "danced" (5 letters d-a-n-c-e), board of
   // 10 tiles. Typing the two 'd's first must NOT block the 'a' tiles. Old bug

@@ -71,23 +71,24 @@ const testBody = `
   startRoundB(); nextRoundBWord();
 
   var bSlots = document.getElementById('scramble-slots');
+  var bSlotEls = function(){ return Array.prototype.slice.call(bSlots.querySelectorAll('.study-slot')); };
   var bBank = document.getElementById('scramble-bank');
   var bankBtns = Array.prototype.slice.call(bBank.querySelectorAll('button'));
   ok('B: bank rendered as full palette (3 keys for "wed")', bankBtns.length === 3);
 
   var wBtn = bankBtns.find(function(b){ return b.innerText === 'w'; });
   wBtn.click();
-  ok('B: clicking bank letter fills earliest slot', bSlots.children[0].innerText === 'w');
+  ok('B: clicking bank letter fills earliest slot', bSlotEls()[0].innerText === 'w');
   ok('B: bank letter IS removed on placement (depletes)', !bBank.contains(wBtn) && bBank.querySelectorAll('button').length === 2);
 
   bankBtns.find(function(b){ return b.innerText === 'e'; }).click();
   bankBtns.find(function(b){ return b.innerText === 'd'; }).click();
-  ok('B: word fully placed "wed"', Array.prototype.slice.call(bSlots.children).map(function(s){return s.innerText;}).join('') === 'wed');
+  ok('B: word fully placed "wed"', bSlotEls().map(function(s){return s.innerText;}).join('') === 'wed');
 
   // Delete the middle 'e' -> expect 'w_d' (gap stays), NOT 'wd', and the letter returns to bank.
-  bSlots.children[1].click();
+  bSlotEls()[1].click();
   ok('B: deleting middle letter leaves a gap (w_d), not reflow',
-     bSlots.children[0].innerText==='w' && bSlots.children[1].innerText==='' && bSlots.children[2].innerText==='d');
+     bSlotEls()[0].innerText==='w' && bSlotEls()[1].innerText==='' && bSlotEls()[2].innerText==='d');
   ok('B: delete returns letter to bank (length back to 1)', bBank.querySelectorAll('button').length === 1);
 
   // ===== STUDY ROUND B: fixed chars (space / - / .) stay put on check / clear =====
@@ -97,21 +98,22 @@ const testBody = `
   STUDY_STATE.currentWordIndex = 0;
   startRoundB(); nextRoundBWord();
   var fSlots = document.getElementById('scramble-slots');
+  var fSlotEls = function(){ return Array.prototype.slice.call(fSlots.querySelectorAll('.study-slot')); };
   var fBank = document.getElementById('scramble-bank');
   var dashSlotIdx = -1;
-  for (var fi=0; fi<fSlots.children.length; fi++){ if (fSlots.children[fi].innerText === '-'){ dashSlotIdx = fi; break; } }
-  ok('B(fixed): a "-" fixed slot exists', dashSlotIdx !== -1 && fSlots.children[dashSlotIdx].dataset.fixed === 'true');
+  for (var fi=0; fi<fSlotEls().length; fi++){ if (fSlotEls()[fi].innerText === '-'){ dashSlotIdx = fi; break; } }
+  ok('B(fixed): a "-" fixed slot exists', dashSlotIdx !== -1 && fSlotEls()[dashSlotIdx].dataset.fixed === 'true');
   var fInitialBank = fBank.querySelectorAll('button').length; // letters only (dash excluded)
   // Fill ALL letter slots, then CLEAR.
   Array.prototype.slice.call(fBank.querySelectorAll('button')).forEach(function(b){ b.click(); });
   ok('B(fixed): all letters placed, bank empty', fBank.querySelectorAll('button').length === 0);
   clearRoundB();
-  ok('B(fixed): CLEAR keeps the "-" in its original slot', fSlots.children[dashSlotIdx].innerText === '-' && fSlots.children[dashSlotIdx].dataset.fixed === 'true');
+  ok('B(fixed): CLEAR keeps the "-" in its original slot', fSlotEls()[dashSlotIdx].innerText === '-' && fSlotEls()[dashSlotIdx].dataset.fixed === 'true');
   ok('B(fixed): CLEAR returns only letters to the bank (no dash added)', fBank.querySelectorAll('button').length === fInitialBank);
   // Wrong CHECK (re-place letters wrong) must also keep the '-' put.
   Array.prototype.slice.call(fBank.querySelectorAll('button')).forEach(function(b){ b.click(); });
   checkRoundB();
-  ok('B(fixed): wrong CHECK keeps "-" fixed (not banked/blanked)', fSlots.children[dashSlotIdx].innerText === '-' && fSlots.children[dashSlotIdx].dataset.fixed === 'true');
+  ok('B(fixed): wrong CHECK keeps "-" fixed (not banked/blanked)', fSlotEls()[dashSlotIdx].innerText === '-' && fSlotEls()[dashSlotIdx].dataset.fixed === 'true');
 
   // ===== STUDY ROUND B: apostrophe is NOT fixed (user must place it) =====
   // 'doesn't' / 'don't' etc. -> the "'" is a draggable letter tile now, not pinned.
@@ -119,10 +121,11 @@ const testBody = `
   STUDY_STATE.currentWordIndex = 0;
   startRoundB(); nextRoundBWord();
   var aSlots = document.getElementById('scramble-slots');
+  var aSlotEls = function(){ return Array.prototype.slice.call(aSlots.querySelectorAll('.study-slot')); };
   var aBank = document.getElementById('scramble-bank');
   // The apostrophe must NOT be a fixed slot...
   var aposFixed = false;
-  for (var ai=0; ai<aSlots.children.length; ai++){ if (aSlots.children[ai].dataset.fixed === 'true' && aSlots.children[ai].innerText === "'"){ aposFixed = true; break; } }
+  for (var ai=0; ai<aSlotEls().length; ai++){ if (aSlotEls()[ai].dataset.fixed === 'true' && aSlotEls()[ai].innerText === "'"){ aposFixed = true; break; } }
   ok("B(apos): apostrophe is NOT a fixed slot in doesn't", !aposFixed);
   // ...and it must be among the draggable bank tiles (count == 7 letters incl. apostrophe).
   var aBtns = Array.prototype.slice.call(aBank.querySelectorAll('button'));
@@ -180,25 +183,46 @@ const testBody = `
   clearRoundD();
   ok('D(freeze): CLEAR works while frozen (unfreezes, bank restored)', STUDY_STATE._roundDFrozen === false && dBank.querySelectorAll('button').length === 3);
 
-  // ===== FREEZE during reveal (Round B, wrong answer) =====
+  // ===== WORD GROUPING (no mid-word break; wrap only at separators) =====
+  // A word with no separator (e.g. "danced") must be ONE unbreakable group,
+  // so it can never split across lines. A word with a separator (e.g. "drop-ed")
+  // must split into separate groups around the fixed separator (so it CAN wrap
+  // at the hyphen) while each word stays intact.
+  STUDY_STATE.words = ['danced'];
+  STUDY_STATE.currentWordIndex = 0;
+  startRoundB(); nextRoundBWord();
+  var dGroups = document.getElementById('scramble-slots').querySelectorAll('.word-group');
+  var dSlots = document.getElementById('scramble-slots').querySelectorAll('.study-slot');
+  ok('B(group): no-separator word is a single word-group', dGroups.length === 1);
+  ok('B(group): single group holds every letter slot', dGroups.length === 1 && dGroups[0].querySelectorAll('.study-slot').length === dSlots.length && dSlots.length === 6);
+
+  STUDY_STATE.words = ['drop-ed'];
+  STUDY_STATE.currentWordIndex = 0;
+  startRoundB(); nextRoundBWord();
+  var peGroups = document.getElementById('scramble-slots').querySelectorAll('.word-group');
+  var peFixed = document.getElementById('scramble-slots').querySelectorAll('.study-slot[data-fixed="true"]');
+  ok('B(group): hyphenated word yields 2 word-groups (drop | ed)', peGroups.length === 2);
+  ok('B(group): the separator stays a fixed, non-grouped slot', peFixed.length === 1 && peFixed[0].innerText === '-');
   // Reset any leaked frozen/transition state from prior sections.
   if (STUDY_STATE._roundBResetTimer) { clearTimeout(STUDY_STATE._roundBResetTimer); STUDY_STATE._roundBResetTimer = null; }
   STUDY_STATE._roundBFrozen = false; STUDY_STATE.isTransitioning = false;
   STUDY_STATE.words = ['abc'];
   STUDY_STATE.currentWordIndex = 0;
   startRoundB(); nextRoundBWord();
+  var freeSlots = document.getElementById('scramble-slots');
+  var freeSlotEls = function(){ return Array.prototype.slice.call(freeSlots.querySelectorAll('.study-slot')); };
   var fb = Array.prototype.slice.call(document.getElementById('scramble-bank').querySelectorAll('button'));
   fb.find(function(b){ return b.innerText==='a'; }).click();
   fb.find(function(b){ return b.innerText==='b'; }).click();
-  document.getElementById('scramble-slots').children[2].innerText = 'x'; // force wrong-but-full
+  freeSlotEls()[2].innerText = 'x'; // force wrong-but-full
   checkRoundB();
   ok('B: frozen flag set after wrong CHECK', STUDY_STATE._roundBFrozen === true);
-  var before = document.getElementById('scramble-slots').children[0].innerText;
+  var before = freeSlotEls()[0].innerText;
   document.getElementById('scramble-bank').querySelector('button').click();
-  ok('B: editing blocked while frozen', document.getElementById('scramble-slots').children[0].innerText === before);
+  ok('B: editing blocked while frozen', freeSlotEls()[0].innerText === before);
   // CLEAR must work DURING the frozen reveal (skip the 5s wait) and unfreeze.
   clearRoundB();
-  ok('B: CLEAR works while frozen (slots emptied)', Array.prototype.slice.call(document.getElementById('scramble-slots').children).every(function(s){ return !s.innerText; }));
+  ok('B: CLEAR works while frozen (slots emptied)', freeSlotEls().every(function(s){ return !s.innerText; }));
   ok('B: CLEAR during freeze unfreezes', STUDY_STATE._roundBFrozen === false);
 
   // ===== GAME-MODE WORD SCRAMBLE (desync fix: palette index vs slot position) =====
@@ -221,16 +245,18 @@ const testBody = `
   buildSpellingSlots();
   // Type o, p, p, o, s via keydown (earliest-empty-slot fill).
   ['o','p','p','o','s'].forEach(function(ch){ handleGameSpellingKeyDown(ch); });
-  var spSlots = document.getElementById('spelling-input-display').children;
+  var spDisp = document.getElementById('spelling-input-display');
+  var spSlotEls = function(){ return Array.prototype.slice.call(spDisp.querySelectorAll('.study-slot')); };
+  ['o','p','p','o','s'].forEach(function(ch){ handleGameSpellingKeyDown(ch); });
+  var spSlots = spSlotEls();
   ok('G: typing o,p,p,o,s fills first 5 slots', spSlots[0].innerText==='o'&&spSlots[1].innerText==='p'&&spSlots[2].innerText==='p'&&spSlots[3].innerText==='o'&&spSlots[4].innerText==='s');
-  // Now the 'i' bubble (palette index 5) must still be selectable for slot 5.
   var iBubble = Array.prototype.slice.call(document.querySelectorAll('#spelling-keyboard .letter-bubble')).find(function(b){ return b.dataset.keyIndex==='5'; });
   ok('G: i bubble present and NOT marked used', !!iBubble && !iBubble.classList.contains('used'));
   iBubble.click();
-  ok('G: clicking i fills slot 5 (no desync)', document.getElementById('spelling-input-display').children[5].innerText === 'i');
+  ok('G: clicking i fills slot 5 (no desync)', spSlotEls()[5].innerText === 'i');
   // Backspace should remove the last placed (i) and free its bubble.
   handleGameSpellingKeyDown('Backspace');
-  ok('G: Backspace removes last placed letter (i)', document.getElementById('spelling-input-display').children[5].innerText === '');
+  ok('G: Backspace removes last placed letter (i)', spSlotEls()[5].innerText === '');
   ok('G: i bubble freed again after backspace', !iBubble.classList.contains('used'));
   // Placing the same bubble twice is blocked (no double-use / no overflow).
   iBubble.click();  // already used -> should be a no-op
@@ -240,7 +266,7 @@ const testBody = `
     if (pv !== undefined && pv !== null) filledCount++;
   }
   ok('G: same palette bubble cannot be placed twice (no overflow)',
-     document.getElementById('spelling-input-display').children[5].innerText === 'i'
+     spSlotEls()[5].innerText === 'i'
      && filledCount === 6
      && document.querySelectorAll('#spelling-keyboard .letter-bubble.used').length === 6);
 
@@ -488,6 +514,30 @@ const testBody = `
     return p[0] !== undefined && p[1] !== undefined && p[2] !== undefined && p.filter(function(v){return v!==undefined&&v!==null;}).length === 3;
   })());
 
+  // ===== RESPONSIVE SHRINK (fitAnswerArea) =====
+  // When the answer area is wider than its container (long no-separator word on a
+  // narrow phone), fitAnswerArea must step --answer-font down until it fits, and
+  // never go below the 10px floor. jsdom has no layout, so stub getComputedStyle
+  // + the box metrics.
+  var fitEl = document.getElementById('spelling-input-display');
+  var fitSize = 24; // start "large"
+  var realGCS = window.getComputedStyle;
+  window.getComputedStyle = function(el){
+    return { getPropertyValue: function(prop){ return prop === '--answer-font' ? fitSize + 'px' : ''; } };
+  };
+  Object.defineProperty(fitEl, 'scrollWidth', { configurable: true, get: function(){ return 400; } });
+  Object.defineProperty(fitEl, 'clientWidth', { configurable: true, get: function(){ return 200; } });
+  document.documentElement.style.setProperty('--answer-font', fitSize + 'px');
+  fitAnswerArea(fitEl);
+  var after = parseFloat(document.documentElement.style.getPropertyValue('--answer-font')) || 0;
+  ok('fit: shrinks --answer-font when container is too narrow', after < fitSize);
+  ok('fit: never falls below the 10px floor', after >= 10);
+  // With a wide-enough container, it should not shrink below the (reset) default.
+  Object.defineProperty(fitEl, 'clientWidth', { configurable: true, get: function(){ return 2000; } });
+  document.documentElement.style.setProperty('--answer-font', '');
+  fitAnswerArea(fitEl);
+  ok('fit: no shrink when content already fits', !document.documentElement.style.getPropertyValue('--answer-font'));
+  window.getComputedStyle = realGCS;
   window.__testResult = { pass: pass, fail: fail };
   console.log('\\n' + pass + ' passed, ' + fail + ' failed');
 })();

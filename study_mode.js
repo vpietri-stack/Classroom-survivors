@@ -185,33 +185,47 @@ function nextRoundBWord() {
     showTranslation('roundB-translation', word);
     showVocabImage('roundB-image', word);
 
-    // Setup Slots
+    // Setup Slots — group consecutive LETTER slots into one .word-group so a word
+    // (e.g. "danced") never breaks across lines; separators stay individual flex
+    // items so wrapping can occur only at space/-/./?/!.
     const slotsDiv = document.getElementById('scramble-slots');
+    slotsDiv.innerHTML = '';
+    let groupEl = null;
+    const flushGroup = () => { if (groupEl && groupEl.children.length) slotsDiv.appendChild(groupEl); groupEl = null; };
     for (let i = 0; i < word.length; i++) {
-        const slot = document.createElement('div');
-        slot.className = "study-slot";
-
         if (word[i] === ' ') {
-            slot.innerText = ' '; // Or keeping it empty visually but filled logically? 
-            // Better to show it's a gap.
-            slot.classList.add('border-transparent'); // Hide border for space? Or keep it?
-            // "gap between the word is already there"
-            // Let's make it invisible border but takes space
+            flushGroup();
+            const slot = document.createElement('div');
+            slot.className = "study-slot";
+            slot.innerText = ' ';
+            slot.classList.add('border-transparent');
             slot.style.borderColor = "transparent";
             slot.style.background = "transparent";
-            slot.dataset.fixed = "true"; // Mark as fixed
+            slot.dataset.fixed = "true";
+            slotsDiv.appendChild(slot);
         } else if (word[i] === "-" || word[i] === "." || word[i] === "?" || word[i] === "!") {
+            flushGroup();
+            const slot = document.createElement('div');
+            slot.className = "study-slot";
             slot.innerText = word[i];
             slot.classList.add('border-transparent', 'flex', 'items-end', 'pb-2', 'text-2xl', 'font-bold', 'text-white');
             slot.style.borderColor = "transparent";
             slot.style.background = "transparent";
-            slot.dataset.fixed = "true"; // Mark punctuation as fixed too
+            slot.dataset.fixed = "true";
+            slotsDiv.appendChild(slot);
         } else {
+            if (!groupEl) {
+                groupEl = document.createElement('div');
+                groupEl.className = 'word-group';
+            }
+            const slot = document.createElement('div');
+            slot.className = "study-slot";
             slot.onclick = () => removeLetterFromSlot(i, word);
+            groupEl.appendChild(slot);
         }
-
-        slotsDiv.appendChild(slot);
     }
+    flushGroup();
+    if (typeof fitAnswerArea === 'function') fitAnswerArea(slotsDiv);
 
     // Setup Bank (Scrambled letters, excluding spaces). This bank DEPLETES:
     // clicking a bank letter moves it into the earliest empty slot and removes it
@@ -237,9 +251,17 @@ function nextRoundBWord() {
 // Round B State
 let roundBInput = []; // Array of chars
 
+// Slots are grouped into .word-group wrappers (so a word like "danced" never
+// breaks across lines), so the live slot elements are .study-slot descendants —
+// in the same document order as the original flat layout. Use this everywhere
+// instead of scramble-slots.children (whose direct children are now groups).
+function roundBSlots() {
+    return Array.from(document.querySelectorAll('#scramble-slots .study-slot'));
+}
+
 function addLetterToSlot(char, btnElement, targetWord) {
     if (STUDY_STATE.isTransitioning || STUDY_STATE._roundBFrozen) return;
-    const slots = document.getElementById('scramble-slots').children;
+    const slots = roundBSlots();
     // Place into the earliest EMPTY letter-slot (fixed slots skipped). The gap
     // stays (no reflow) so positions remain stable for the learner.
     let placedSlot = null;
@@ -259,7 +281,7 @@ function addLetterToSlot(char, btnElement, targetWord) {
 
 function removeLetterFromSlot(index, targetWord) {
     if (STUDY_STATE.isTransitioning || STUDY_STATE._roundBFrozen) return;
-    const slots = document.getElementById('scramble-slots').children;
+    const slots = roundBSlots();
     const slot = slots[index];
     if (slot.innerText) {
         const char = slot.innerText;
@@ -279,7 +301,7 @@ function removeLetterFromSlot(index, targetWord) {
 }
 
 function resetSlotColors() {
-    const slots = document.getElementById('scramble-slots').children;
+    const slots = roundBSlots();
     for (let s of slots) {
         s.classList.remove('bg-green-500', 'bg-red-500');
         s.classList.add('bg-gray-800');
@@ -289,7 +311,7 @@ function resetSlotColors() {
 // CHECK button: reveal correct (green) / wrong (red) for ~5s, then reset all to bank.
 function checkRoundB() {
     if (STUDY_STATE.isTransitioning) return;
-    const slots = document.getElementById('scramble-slots').children;
+    const slots = roundBSlots();
     const targetWord = currentTTSWord;
 
     // Fill state: every non-fixed slot must have a letter.
@@ -368,7 +390,7 @@ function clearRoundB() {
     // Allow CLEAR during the wrong-answer reveal (so the player can skip the 5s
     // wait), but not during the 1s success transition to the next word.
     if (STUDY_STATE.isTransitioning) return;
-    const slots = document.getElementById('scramble-slots').children;
+    const slots = roundBSlots();
     const bank = document.getElementById('scramble-bank');
     for (let slot of slots) {
         if (slot._resetTimer) { clearTimeout(slot._resetTimer); slot._resetTimer = null; }
@@ -1155,7 +1177,7 @@ window.addEventListener('keydown', (e) => {
 
 function handleRoundBKeyDown(key) {
     if (key === 'Backspace') {
-        const slots = document.getElementById('scramble-slots').children;
+        const slots = roundBSlots();
         // Find last filled letter-slot and remove it.
         for (let i = slots.length - 1; i >= 0; i--) {
             if (slots[i].innerText && slots[i].dataset.fixed !== "true") {

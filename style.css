@@ -13,6 +13,22 @@
     --gap-sm: clamp(4px, 1vw, 8px);
     --gap-md: clamp(8px, 2vw, 16px);
     --container-padding: clamp(12px, 3vw, 24px);
+    /* Answer-area letter size. Caps low (so a long no-separator word can shrink
+       to fit instead of forcing a horizontal scroll) and high (so short words
+       stay big and readable). Driven by viewport width via clamp(). */
+    --answer-font: clamp(0.85rem, 4.5vw, 1.6rem);
+}
+
+/* A run of letters that must stay on ONE line (e.g. "danced"). Separators such
+   as space / - / . / ? / ! are rendered as their own flex items BETWEEN groups,
+   so the word breaks only at those natural points. flex:none prevents the group
+   itself from being squashed; white-space:nowrap keeps letters together. */
+.word-group {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    flex: none;
+    gap: var(--gap-xs);
 }
 
 body {
@@ -268,7 +284,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: var(--font-lg);
+    font-size: var(--answer-font);
     font-weight: bold;
     background: #1e293b;
     color: white;

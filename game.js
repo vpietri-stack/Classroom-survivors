@@ -798,16 +798,25 @@ function buildSpellingSlots() {
     const container = document.getElementById('spelling-input-display');
     container.innerHTML = '';
     let letterIdx = 0;
+    let groupEl = null; // current run of consecutive letter slots
+    const flushGroup = () => { if (groupEl && groupEl.children.length) container.appendChild(groupEl); groupEl = null; };
     slots.forEach((slot, fullIdx) => {
-        const cell = document.createElement('div');
         if (slot.type === 'fixed') {
+            flushGroup(); // separators break the letter-run
+            const cell = document.createElement('div');
             cell.className = 'study-slot border-transparent bg-transparent select-none';
             cell.style.color = '#475569';
             cell.innerText = slot.char === ' ' ? ' ' : slot.char;
+            container.appendChild(cell);
         } else {
+            if (!groupEl) {
+                groupEl = document.createElement('div');
+                groupEl.className = 'word-group';
+            }
             const placedKey = placement[letterIdx];
             const filledChar = (placedKey !== undefined && placedKey !== null) ? JSON.parse(gameEl.dataset.letters)[placedKey] : '';
             const correctChar = targetWord[slot.index];
+            const cell = document.createElement('div');
             cell.className = 'study-slot';
             if (isSuccess) {
                 cell.classList.add('bg-green-500');
@@ -821,10 +830,13 @@ function buildSpellingSlots() {
             } else {
                 cell.onclick = null;
             }
+            groupEl.appendChild(cell);
             letterIdx++;
         }
-        container.appendChild(cell);
     });
+    flushGroup();
+
+    fitAnswerArea(container);
 
     // Refresh palette bubble disabled-state.
     const bubbles = document.querySelectorAll('#spelling-keyboard .letter-bubble');
@@ -834,6 +846,36 @@ function buildSpellingSlots() {
         else b.classList.remove('used');
     });
 }
+
+// Keep the answer area on-screen: if the laid-out row is wider than its
+// container (e.g. a long no-separator word like "understandable" on a narrow
+// phone), shrink --answer-font until it fits. Adapts to any window/container
+// size; called after every (re)build and on window resize.
+function fitAnswerArea(container) {
+    const getVar = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--answer-font')) || 0;
+    let size = getVar();
+    const minSize = 10; // px floor — below this we stop and let it scroll
+    // Reset to the responsive default first, then measure from there.
+    document.documentElement.style.setProperty('--answer-font', '');
+    size = getVar();
+    while (size > minSize && container.scrollWidth > container.clientWidth) {
+        size -= 1;
+        document.documentElement.style.setProperty('--answer-font', size + 'px');
+    }
+}
+
+// Re-fit the answer area whenever the viewport/container size changes (rotate,
+// resize, split-screen, different device). Debounced; only acts while the
+// spelling minigame is on screen.
+let _fitAnswerRAF = null;
+window.addEventListener('resize', () => {
+    const gameEl = document.getElementById('spellingGame');
+    if (!gameEl || gameEl.classList.contains('hidden')) return;
+    const c = document.getElementById('spelling-input-display');
+    if (!c) return;
+    if (_fitAnswerRAF) cancelAnimationFrame(_fitAnswerRAF);
+    _fitAnswerRAF = requestAnimationFrame(() => fitAnswerArea(c));
+});
 
 // Build the palette keyboard ONCE. It never depletes — clicking a bubble copies a
 // letter into the earliest empty letter-slot. The bubble stays put.

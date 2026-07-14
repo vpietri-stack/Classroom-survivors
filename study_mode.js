@@ -200,7 +200,7 @@ function nextRoundBWord() {
             slot.style.borderColor = "transparent";
             slot.style.background = "transparent";
             slot.dataset.fixed = "true"; // Mark as fixed
-        } else if (word[i] === "'" || word[i] === "-" || word[i] === "." || word[i] === "?" || word[i] === "!") {
+        } else if (word[i] === "-" || word[i] === "." || word[i] === "?" || word[i] === "!") {
             slot.innerText = word[i];
             slot.classList.add('border-transparent', 'flex', 'items-end', 'pb-2', 'text-2xl', 'font-bold', 'text-white');
             slot.style.borderColor = "transparent";
@@ -217,7 +217,7 @@ function nextRoundBWord() {
     // clicking a bank letter moves it into the earliest empty slot and removes it
     // from the bank, so it's clear which letters remain (mirrors Round D / game-mode).
     const bankDiv = document.getElementById('scramble-bank');
-    const punctuation = [' ', "'", "-", ".", "?", "!"];
+    const punctuation = [' ', "-", ".", "?", "!"];
     const letters = word.split('').filter(c => !punctuation.includes(c)).sort(() => 0.5 - Math.random());
 
     bankDiv.innerHTML = '';

@@ -106,6 +106,22 @@ const testBody = `
   checkRoundB();
   ok('B(fixed): wrong CHECK keeps "-" fixed (not banked/blanked)', fSlots.children[dashSlotIdx].innerText === '-' && fSlots.children[dashSlotIdx].dataset.fixed === 'true');
 
+  // ===== STUDY ROUND B: apostrophe is NOT fixed (user must place it) =====
+  // 'doesn't' / 'don't' etc. -> the "'" is a draggable letter tile now, not pinned.
+  STUDY_STATE.words = ["doesn't"];
+  STUDY_STATE.currentWordIndex = 0;
+  startRoundB(); nextRoundBWord();
+  var aSlots = document.getElementById('scramble-slots');
+  var aBank = document.getElementById('scramble-bank');
+  // The apostrophe must NOT be a fixed slot...
+  var aposFixed = false;
+  for (var ai=0; ai<aSlots.children.length; ai++){ if (aSlots.children[ai].dataset.fixed === 'true' && aSlots.children[ai].innerText === "'"){ aposFixed = true; break; } }
+  ok("B(apos): apostrophe is NOT a fixed slot in doesn't", !aposFixed);
+  // ...and it must be among the draggable bank tiles (count == 7 letters incl. apostrophe).
+  var aBtns = Array.prototype.slice.call(aBank.querySelectorAll('button'));
+  ok('B(apos): apostrophe is a draggable bank tile', aBtns.some(function(b){ return b.innerText === "'"; }));
+  ok('B(apos): bank has 7 tiles (6 letters + apostrophe)', aBtns.length === 7);
+
   // ===== STUDY ROUND D (depleting bank — mirrors game-mode word scramble) =====
   STUDY_STATE.sentences = ['The cat sat'];
   STUDY_STATE.currentSentenceIndex = 0;
@@ -133,7 +149,7 @@ const testBody = `
 
   // ===== STUDY ROUND D: CLEAR works during wrong-answer freeze =====
   // Reset any leaked frozen state from prior sections.
-  STUDY_STATE._roundDFrozen = false; STUDY_STATE.isTransitioning = false;
+  STUDY_STATE._roundDFrozen = false; STUDY_STATE._roundBFrozen = false; STUDY_STATE.isTransitioning = false;
   STUDY_STATE.sentences = ['The cat sat'];
   STUDY_STATE.currentSentenceIndex = 0;
   startRoundD(); nextRoundDSentence();

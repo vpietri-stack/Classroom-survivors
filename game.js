@@ -750,7 +750,7 @@ function startSpellingGame() {
     document.getElementById('spelling-keyboard').dataset.built = "false";
 
     // Build fixed slots: every character position gets a slot. Non-letters are pre-filled & locked.
-    const punct = [' ', "'", "-", ".", "?", "!", ","];
+    const punct = [' ', "-", ".", "?", "!", ","];
     const slots = [];
     for (let i = 0; i < word.length; i++) {
         const ch = word[i];
@@ -938,7 +938,7 @@ function checkSpelling() {
     const usedKeys = JSON.parse(gameEl.dataset.usedKeys);
     const letters = JSON.parse(gameEl.dataset.letters);
     const targetWord = gameEl.dataset.targetWord;
-    const punct = [' ', "'", "-", ".", "?", "!", ","];
+    const punct = [' ', "-", ".", "?", "!", ","];
 
     const targetLetters = targetWord.split('').filter(ch => !punct.includes(ch)).join('');
     // Rebuild the placed string from placement[] (letter-positions L-to-R; gaps => '').

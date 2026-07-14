@@ -36,6 +36,7 @@ const stub = `
   window.API_BASE_URL = ''; window.FIREBASE_CONFIG = {};
   window.activeGameMode = null; // declared in boot.js (not loaded by harness)
   window.triggerStartGame = function(){}; // declared in game.js (not loaded by harness)
+  window.showGameSelection = function(){}; // declared in game.js (not loaded by harness)
   function FakeParam(){ this.setValueAtTime=function(){}; this.exponentialRampToValueAtTime=function(){}; this.linearRampToValueAtTime=function(){}; this.setValueAtTime=function(){}; }
   function FakeNode(){ this.frequency=new FakeParam(); this.gain=new FakeParam(); this.type=''; this.connect=function(){}; this.start=function(){}; this.stop=function(){}; this.disconnect=function(){}; }
   function FakeAudioCtx(){ this.currentTime=0; this.destination={};
@@ -123,6 +124,9 @@ const testBody = `
   ok('B(apos): bank has 7 tiles (6 letters + apostrophe)', aBtns.length === 7);
 
   // ===== STUDY ROUND D (depleting bank — mirrors game-mode word scramble) =====
+  if (STUDY_STATE._roundDResetTimer) { clearTimeout(STUDY_STATE._roundDResetTimer); STUDY_STATE._roundDResetTimer = null; }
+  if (STUDY_STATE._roundBResetTimer) { clearTimeout(STUDY_STATE._roundBResetTimer); STUDY_STATE._roundBResetTimer = null; }
+  STUDY_STATE._roundDFrozen = false; STUDY_STATE._roundBFrozen = false; STUDY_STATE.isTransitioning = false;
   STUDY_STATE.sentences = ['The cat sat'];
   STUDY_STATE.currentSentenceIndex = 0;
   startRoundD(); nextRoundDSentence();
@@ -149,14 +153,22 @@ const testBody = `
 
   // ===== STUDY ROUND D: CLEAR works during wrong-answer freeze =====
   // Reset any leaked frozen state from prior sections.
+  if (STUDY_STATE._roundDResetTimer) { clearTimeout(STUDY_STATE._roundDResetTimer); STUDY_STATE._roundDResetTimer = null; }
+  if (STUDY_STATE._roundBResetTimer) { clearTimeout(STUDY_STATE._roundBResetTimer); STUDY_STATE._roundBResetTimer = null; }
   STUDY_STATE._roundDFrozen = false; STUDY_STATE._roundBFrozen = false; STUDY_STATE.isTransitioning = false;
   STUDY_STATE.sentences = ['The cat sat'];
   STUDY_STATE.currentSentenceIndex = 0;
   startRoundD(); nextRoundDSentence();
   dBank = document.getElementById('sentence-word-bank');
   dZone = document.getElementById('sentence-drop-zone');
-  // Place all 3 (some wrong order) so check reveals + freezes.
-  dBank.querySelectorAll('button').forEach(function(b){ b.click(); });
+  // Place all 3 but force a WRONG order (sat, cat, The) so check REVEALS + FREEZES
+  // (not the success transition, which would block CLEAR).
+  var dAll = Array.prototype.slice.call(dBank.querySelectorAll('button'));
+  var wrongOrder = ['sat','cat','The'];
+  wrongOrder.forEach(function(w){
+    var b = dAll.find(function(x){ return x.innerText === w; });
+    if (b) b.click();
+  });
   checkRoundD();
   ok('D(freeze): frozen after wrong CHECK', STUDY_STATE._roundDFrozen === true);
   clearRoundD();
@@ -164,6 +176,7 @@ const testBody = `
 
   // ===== FREEZE during reveal (Round B, wrong answer) =====
   // Reset any leaked frozen/transition state from prior sections.
+  if (STUDY_STATE._roundBResetTimer) { clearTimeout(STUDY_STATE._roundBResetTimer); STUDY_STATE._roundBResetTimer = null; }
   STUDY_STATE._roundBFrozen = false; STUDY_STATE.isTransitioning = false;
   STUDY_STATE.words = ['abc'];
   STUDY_STATE.currentWordIndex = 0;

@@ -364,7 +364,9 @@ function checkRoundB() {
 }
 
 function clearRoundB() {
-    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundBFrozen) return;
+    // Allow CLEAR during the wrong-answer reveal (so the player can skip the 5s
+    // wait), but not during the 1s success transition to the next word.
+    if (STUDY_STATE.isTransitioning) return;
     const slots = document.getElementById('scramble-slots').children;
     const bank = document.getElementById('scramble-bank');
     for (let slot of slots) {
@@ -382,6 +384,8 @@ function clearRoundB() {
         }
         resetSlotColors();
     }
+    // Cancel any pending reveal reset and unfreeze so editing resumes immediately.
+    STUDY_STATE._roundBFrozen = false;
 }
 
 function finishRoundB() {
@@ -521,8 +525,12 @@ function removeRoundCLetter(slotFullIdx) {
 }
 
 function clearRoundC() {
-    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundCFrozen) return;
+    // Allow CLEAR during the wrong-answer reveal (skip the 5s wait), but not the
+    // 1s success transition to the next word.
+    if (STUDY_STATE.isTransitioning) return;
     if (STUDY_STATE._roundCResetTimer) { clearTimeout(STUDY_STATE._roundCResetTimer); STUDY_STATE._roundCResetTimer = null; }
+    STUDY_STATE._roundCFeedback = false;
+    STUDY_STATE._roundCFrozen = false;
     roundCInput = "";
     roundCPlacement = [];
     roundCUsedKeys = [];
@@ -746,7 +754,9 @@ function deleteWordTile(item) {
 }
 
 function clearRoundD() {
-    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundDFrozen) return;
+    // Allow CLEAR during the wrong-answer reveal (skip the 5s wait). BLOCKED only
+    // during the 1s success transition to the next sentence (handled by isTransitioning).
+    if (STUDY_STATE.isTransitioning) return;
     const dropZone = document.getElementById('sentence-drop-zone');
     if (STUDY_STATE._roundDResetTimer) { clearTimeout(STUDY_STATE._roundDResetTimer); STUDY_STATE._roundDResetTimer = null; }
     // Remove all placed tiles and RETURN every tile to the bank (this widget
@@ -763,10 +773,13 @@ function clearRoundD() {
             p.remove();
         }
     });
+    // Cancel the reveal reset and unfreeze so editing resumes immediately.
+    dropZone.classList.remove('border-red-500');
+    STUDY_STATE._roundDFrozen = false;
 }
 
 function checkRoundD() {
-    if (STUDY_STATE.isTransitioning) return;
+    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundDFrozen) return;
     const dropZone = document.getElementById('sentence-drop-zone');
     const slots = Array.from(dropZone.children);
     const targetWords = slots.map(s => s.dataset.expected);
@@ -800,8 +813,7 @@ function checkRoundD() {
             nextRoundDSentence();
         }, 1000);
     } else {
-        STUDY_STATE.isTransitioning = true;
-        STUDY_STATE._roundDFrozen = true; // frozen during reveal
+        STUDY_STATE._roundDFrozen = true; // freeze during reveal (not a transition, so CLEAR still works)
         synthError();
         incrementExerciseAttempts();
         dropZone.classList.add('border-red-500');

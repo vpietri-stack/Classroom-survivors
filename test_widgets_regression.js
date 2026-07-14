@@ -34,6 +34,7 @@ const document = window.document;
 const stub = `
   window.Phaser = function(){}; window.Phaser.Scene = function(){}; window.Phaser.Game = function(){};
   window.API_BASE_URL = ''; window.FIREBASE_CONFIG = {};
+  window.activeGameMode = null; // declared in boot.js (not loaded by harness)
   function FakeAudioCtx(){ this.currentTime=0; this.destination={};
     this.createOscillator=function(){ return { frequency:{ setValueAtTime:function(){} }, type:'', connect:function(){}, start:function(){}, stop:function(){} }; };
     this.createGain=function(){ return { gain:{ setValueAtTime:function(){} }, connect:function(){} }; }; }
@@ -103,6 +104,19 @@ const testBody = `
   clearRoundD();
   ok('D: CLEAR restores all tiles to the bank', dBank.querySelectorAll('button').length === 3 && !dZone.children[0].firstChild);
 
+  // ===== STUDY ROUND D: CLEAR works during wrong-answer freeze =====
+  STUDY_STATE.sentences = ['The cat sat'];
+  STUDY_STATE.currentSentenceIndex = 0;
+  startRoundD(); nextRoundDSentence();
+  dBank = document.getElementById('sentence-word-bank');
+  dZone = document.getElementById('sentence-drop-zone');
+  // Place all 3 (some wrong order) so check reveals + freezes.
+  dBank.querySelectorAll('button').forEach(function(b){ b.click(); });
+  checkRoundD();
+  ok('D(freeze): frozen after wrong CHECK', STUDY_STATE._roundDFrozen === true);
+  clearRoundD();
+  ok('D(freeze): CLEAR works while frozen (unfreezes, bank restored)', STUDY_STATE._roundDFrozen === false && dBank.querySelectorAll('button').length === 3);
+
   // ===== FREEZE during reveal (Round B, wrong answer) =====
   STUDY_STATE.words = ['abc'];
   STUDY_STATE.currentWordIndex = 0;
@@ -116,6 +130,10 @@ const testBody = `
   var before = document.getElementById('scramble-slots').children[0].innerText;
   document.getElementById('scramble-bank').querySelector('button').click();
   ok('B: editing blocked while frozen', document.getElementById('scramble-slots').children[0].innerText === before);
+  // CLEAR must work DURING the frozen reveal (skip the 5s wait) and unfreeze.
+  clearRoundB();
+  ok('B: CLEAR works while frozen (slots emptied)', Array.prototype.slice.call(document.getElementById('scramble-slots').children).every(function(s){ return !s.innerText; }));
+  ok('B: CLEAR during freeze unfreezes', STUDY_STATE._roundBFrozen === false);
 
   // ===== GAME-MODE WORD SCRAMBLE (desync fix: palette index vs slot position) =====
   // Word 'opposite' (8 letters). Simulate the user's report: type o, then p, then
@@ -159,6 +177,18 @@ const testBody = `
      document.getElementById('spelling-input-display').children[5].innerText === 'i'
      && filledCount === 6
      && document.querySelectorAll('#spelling-keyboard .letter-bubble.used').length === 6);
+
+  // ===== GAME-MODE SPELLING: CLEAR works during wrong-answer freeze =====
+  // Fill a WRONG-but-full word ('opposite' with first two letters swapped -> 'poposite') so check reveals + freezes.
+  spEl.dataset.placement = JSON.stringify([1,0,2,3,4,5,6,7]);
+  spEl.dataset.usedKeys = JSON.stringify([true,true,true,true,true,true,true,true]);
+  buildSpellingSlots();
+  checkSpelling();
+  ok('GS(freeze): feedbackMode set after wrong CHECK', spEl.dataset.feedbackMode === 'true');
+  clearSpelling();
+  ok('GS(freeze): CLEAR works while frozen (empties + unfreezes)', spEl.dataset.feedbackMode === 'false' && (function(){
+    var p = JSON.parse(spEl.dataset.placement); return p.every(function(v){ return v === undefined || v === null; });
+  })());
 
   // ===== STUDY ROUND C (spelling desync fix — same class as game-mode word scramble) =====
   // Reproduces the user's report: word "danced" (5 letters d-a-n-c-e), board of
@@ -242,6 +272,22 @@ const testBody = `
   })());
   ok('C(back): freed tile is selectable again', roundCUsedKeys[0] === false);
 
+  // ===== STUDY ROUND C: CLEAR works during wrong-answer freeze =====
+  STUDY_STATE.words = ['tap'];
+  STUDY_STATE.currentWordIndex = 0;
+  startRoundC(); nextRoundCWord();
+  // Force deterministic board and place a WRONG-but-full word 'aatp' (wrong order) to freeze.
+  roundCBaseKeys = ['a','a','t','p','b','f','o','x','w','z'];
+  roundCPlacement = []; roundCUsedKeys = []; updateRoundCDisplay();
+  var kbC2 = Array.prototype.slice.call(document.getElementById('virtual-keyboard').querySelectorAll('button'));
+  // Fill all 3 letter slots with 'a','a','t' (wrong word) so a check reveals+wfreezes.
+  kbC2.find(function(b){ return b.dataset.keyIndex==='0'; }).click();
+  kbC2.find(function(b){ return b.dataset.keyIndex==='1'; }).click();
+  kbC2.find(function(b){ return b.dataset.keyIndex==='2'; }).click();
+  checkRoundC();
+  ok('C(freeze): frozen after wrong CHECK', STUDY_STATE._roundCFrozen === true);
+  clearRoundC();
+  ok('C(freeze): CLEAR works while frozen (unfreezes)', STUDY_STATE._roundCFrozen === false && roundCPlacement.length === 0);
   // ===== GRAMMAR (sentence scramble) must NOT throw on empty SR result =====
   // Reproduces the freeze: getGameItemSR can return [] (empty spaced-rep pool).
   // Old code did primarySentence = rawEntry[0] (=undefined) -> .split(' ') -> throw,

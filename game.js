@@ -912,11 +912,18 @@ function removeSpellingLetter(slotFullIdx) {
 
 function clearSpelling() {
     const gameEl = document.getElementById('spellingGame');
-    if (gameEl.dataset.feedbackMode === "true") return; // frozen during reveal
+    // Block CLEAR only during the success transition (when the result action is
+    // shown) — during a WRONG reveal, allow CLEAR to skip the 5s wait.
+    const success = !document.getElementById('spelling-result-action').classList.contains('hidden');
+    if (success) return;
+    if (gameEl.dataset.feedbackMode === "true") {
+        // Wrong reveal in progress: cancel the pending reset and finish clearing.
+        if (gameEl._spellingResetTimer) { clearTimeout(gameEl._spellingResetTimer); gameEl._spellingResetTimer = null; }
+        gameEl.dataset.feedbackMode = "false";
+    }
     const n = JSON.parse(gameEl.dataset.letters).length;
     gameEl.dataset.placement = JSON.stringify(new Array(n).fill(undefined));
     gameEl.dataset.usedKeys = JSON.stringify(new Array(n).fill(false));
-    if (gameEl._spellingResetTimer) { clearTimeout(gameEl._spellingResetTimer); gameEl._spellingResetTimer = null; }
     buildSpellingSlots();
     const display = document.getElementById('spelling-input-display');
     display.classList.remove('shake');

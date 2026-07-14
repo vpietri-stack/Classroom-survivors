@@ -37,6 +37,12 @@ const stub = `
   window.activeGameMode = null; // declared in boot.js (not loaded by harness)
   window.triggerStartGame = function(){}; // declared in game.js (not loaded by harness)
   window.showGameSelection = function(){}; // declared in game.js (not loaded by harness)
+  window.goBackFromGameSelection = function(){ // mirror game.js so harness DOM reflects it
+    var gso = document.getElementById('gameSelectionOverlay'); if (gso) gso.classList.add('hidden');
+    var ss = document.getElementById('startScreen'); if (ss) ss.classList.remove('hidden');
+    document.querySelectorAll('.step-container').forEach(function(c){ c.classList.add('hidden'); });
+    var sg = document.getElementById('step-greeting'); if (sg) sg.classList.remove('hidden');
+  };
   function FakeParam(){ this.setValueAtTime=function(){}; this.exponentialRampToValueAtTime=function(){}; this.linearRampToValueAtTime=function(){}; this.setValueAtTime=function(){}; }
   function FakeNode(){ this.frequency=new FakeParam(); this.gain=new FakeParam(); this.type=''; this.connect=function(){}; this.start=function(){}; this.stop=function(){}; this.disconnect=function(){}; }
   function FakeAudioCtx(){ this.currentTime=0; this.destination={};
@@ -459,6 +465,8 @@ const testBody = `
   ok('KBD: entering study sets STUDY_STATE.active=true', STUDY_STATE.active === true);
   exitStudyMode();
   ok('KBD: exiting study resets STUDY_STATE.active=false', STUDY_STATE.active === false);
+  ok('KBD: exiting study hides studyModeOverlay', document.getElementById('studyModeOverlay').classList.contains('hidden'));
+  ok('KBD: exiting study returns to main dashboard (startScreen shown)', !document.getElementById('startScreen').classList.contains('hidden'));
   // Now start the game-mode spelling minigame and type via handleGameSpellingKeyDown.
   SPELLING_WORDS = [{ en: 'cat', zh: '猫' }];
   selectedClassContent = { book: 1, unit: 1, page: 1 };

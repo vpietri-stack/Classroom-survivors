@@ -1124,7 +1124,8 @@ function finishStudySession() {
 
 function exitStudyMode() {
     STUDY_STATE.active = false; // so the game-mode keydown listener resumes
-    showGameSelection(); // back to the main menu (also hides studyModeOverlay)
+    document.getElementById('studyModeOverlay').classList.add('hidden');
+    goBackFromGameSelection(); // back to the main dashboard (also shows startScreen)
 }
 
 

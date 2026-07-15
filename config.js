@@ -10,7 +10,21 @@ const API_BASE_URL = (
     ? 'http://localhost:7071/api'
     : 'https://brave-bush-0438ab000.7.azurestaticapps.net/api';
 
-const APP_API_KEY = 'cs-app-9kXmR7pL2wQz8vNb4tYj6cEd3hFs5mKr';
+// ============================================================
+// APP KEY (client-side)
+// NOTE: a browser-shipped key is NOT a secret — anyone can read it via DevTools.
+// It only gates casual non-app callers. It is delivered at deploy time via a
+// git-ignored, CI-injected /app-config.json (see the GitHub Actions workflow).
+// Local dev without that file -> key is '' and the API accepts it (dev fallback).
+let _appKeyPromise = null;
+function getAppKey() {
+    if (_appKeyPromise) return _appKeyPromise;
+    _appKeyPromise = fetch('app-config.json')
+        .then(r => (r && r.ok) ? r.json() : null)
+        .then(j => (j && j.APP_API_KEY) || '')
+        .catch(() => '');
+    return _appKeyPromise;
+}
 
 // ============================================================
 // TOWER DEFENSE GATING (merge-safe, runtime-detected)

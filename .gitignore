@@ -1,4 +1,10 @@
 api/local.settings.json
+
+# Client app config: holds APP_API_KEY for the browser. NEVER commit it —
+# it is injected at deploy time by the GitHub Actions workflow from a repo
+# secret (APP_CLIENT_KEY). Local dev without this file sends '' and the API
+# accepts it (dev fallback in validateApiKey.js).
+app-config.json
 student list.csv
 /reference books PDFs
 

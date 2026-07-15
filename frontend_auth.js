@@ -1,13 +1,14 @@
 // API_BASE_URL is defined in config.js (loaded before this script)
 const API_BASE = API_BASE_URL;
 
-function apiFetch(url, options = {}) {
+async function apiFetch(url, options = {}) {
     const savedUsers = JSON.parse(localStorage.getItem('savedUsers') || '[]');
     const activeUserId = localStorage.getItem('activeUserId') || (savedUsers[0] && savedUsers[0].id);
     const currentUser = savedUsers.find(u => u.id === activeUserId);
+    const appKey = await getAppKey();
     options.headers = {
         ...options.headers,
-        'X-App-Key': APP_API_KEY
+        'X-App-Key': appKey
     };
     if (currentUser) {
         url += (url.includes('?') ? '&' : '?') + 'creatorId=' + encodeURIComponent(currentUser.id);

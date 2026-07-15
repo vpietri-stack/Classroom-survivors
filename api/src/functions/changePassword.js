@@ -1,13 +1,7 @@
 const { app } = require('@azure/functions');
-const { CosmosClient } = require('@azure/cosmos');
 const { validateApiKey } = require('./shared/validateApiKey');
-
-const endpoint = process.env.COSMOS_ENDPOINT;
-const key = process.env.COSMOS_KEY;
-
-// Create client outside handler to reuse connection
-const client = new CosmosClient({ endpoint, key });
-const container = client.database('Val-EslApp').container('Students');
+const { getContainer } = require('./shared/db');
+const auth = require('./shared/auth');
 
 app.http('changePassword', {
     route: 'changePassword',
@@ -15,44 +9,33 @@ app.http('changePassword', {
     authLevel: 'anonymous',
     handler: async (request, context) => {
         try {
-            const body = await request.json();
             if (!validateApiKey(request)) return { status: 403, body: 'Forbidden.' };
+
+            // Identity from token; a user may only change their own password.
+            // Legacy (no-token) mode allows self-scope by the client id.
+            const authGate = auth.requireAuth(request);
+            if (authGate.error) return authGate.error;
+            const token = authGate.token;
+
+            const body = await request.json();
             const { id, newPassword } = body;
+            if (!auth.requireSelfOrRole(token, id)) return auth.forbidden();
+            if (!newPassword) return { status: 400, body: 'Missing newPassword.' };
 
-            if (!id || !newPassword) {
-                return { status: 400, body: "Missing id or newPassword." };
-            }
+            const { resources: items } = await getContainer().items
+                .query({ query: 'SELECT * FROM c WHERE c.id = @id', parameters: [{ name: '@id', value: id }] })
+                .fetchAll();
+            if (items.length === 0) return { status: 404, body: 'User not found.' };
 
-            context.log("changePassword called with id:", id);
-
-            // Read existing user first
-            const querySpec = {
-                query: "SELECT * FROM c WHERE c.id = @id",
-                parameters: [{ name: "@id", value: id }]
-            };
-            const { resources: items } = await container.items.query(querySpec).fetchAll();
-            context.log("Found items length:", items.length);
-
-            if (items.length === 0) {
-                return { status: 404, body: "User not found for id: " + id + " and " + JSON.stringify(body) };
-            }
-            
             const user = items[0];
-
-            // Update fields
-            user.password = newPassword;
+            user.password = auth.hashPassword(newPassword);
             user.needsPasswordChange = false;
+            await getContainer().items.upsert(user);
 
-            // Upsert updated user
-            await container.items.upsert(user);
-
-            return {
-                status: 200,
-                jsonBody: { success: true, message: "Password updated successfully." }
-            };
+            return { status: 200, jsonBody: { success: true, message: 'Password updated successfully.' } };
         } catch (error) {
-            context.error("Password change failed:", error);
-            return { status: 500, body: "Server error while changing password." };
+            context.error('Password change failed:', error);
+            return { status: 500, body: 'Server error while changing password.' };
         }
     }
 });

@@ -1,12 +1,7 @@
 const { app } = require('@azure/functions');
-const { CosmosClient } = require('@azure/cosmos');
 const { validateApiKey } = require('./shared/validateApiKey');
-
-const endpoint = process.env.COSMOS_ENDPOINT;
-const key = process.env.COSMOS_KEY;
-
-const client = new CosmosClient({ endpoint, key });
-const container = client.database('Val-EslApp').container('Students');
+const { getContainer } = require('./shared/db');
+const auth = require('./shared/auth');
 
 app.http('manageBms', {
     route: 'manageBms',
@@ -15,7 +10,13 @@ app.http('manageBms', {
     handler: async (request, context) => {
         try {
             if (!validateApiKey(request)) return { status: 403, body: 'Forbidden.' };
-            
+            const authGate = auth.requireAuth(request);
+            if (authGate.error) return authGate.error;
+            const token = authGate.token;
+            if (token && !auth.isPrivileged(token, ['teacher', 'BM'])) {
+                return auth.forbidden();
+            }
+            const container = getContainer();
             const method = request.method;
 
             if (method === 'GET') {
@@ -25,7 +26,7 @@ app.http('manageBms', {
                     const { resources: bms } = await container.items
                         .query("SELECT * FROM c WHERE c.role = 'BM'")
                         .fetchAll();
-                    return { status: 200, jsonBody: bms };
+                    return { status: 200, jsonBody: bms.map(auth.publicUser) };
                 } else if (action === 'logs') {
                     const { resources: logs } = await container.items
                         .query("SELECT * FROM c WHERE c.role = 'bmActivity' ORDER BY c.timestamp DESC")
@@ -46,7 +47,6 @@ app.http('manageBms', {
                         return { status: 400, body: 'Missing fields.' };
                     }
 
-                    // Check duplicate
                     const { resources: existing } = await container.items
                         .query({
                             query: "SELECT c.id FROM c WHERE c.id = @id OR c.login = @login",
@@ -59,20 +59,25 @@ app.http('manageBms', {
 
                     const newBm = {
                         id,
+                        studentId: id,
                         login,
-                        password,
+                        password: auth.hashPassword(password),
                         fullName,
                         role: 'BM'
                     };
 
                     await container.items.create(newBm);
-                    return { status: 201, jsonBody: { success: true, bm: newBm } };
-                } 
-                
+                    return { status: 201, jsonBody: { success: true, bm: auth.publicUser(newBm) } };
+                }
+
                 if (action === 'changePassword') {
+                    // Self-service: a BM can only change their own password.
                     const { bmId, password } = body;
                     if (!bmId || !password) {
                         return { status: 400, body: 'Missing BM ID or password.' };
+                    }
+                    if (token && token.sub !== bmId) {
+                        return auth.forbidden();
                     }
 
                     const { resources: items } = await container.items
@@ -86,7 +91,7 @@ app.http('manageBms', {
                     }
 
                     const bm = items[0];
-                    bm.password = password;
+                    bm.password = auth.hashPassword(password);
                     await container.items.upsert(bm);
                     return { status: 200, jsonBody: { success: true } };
                 }

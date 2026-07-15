@@ -1,4 +1,13 @@
-api/local.settings.json
+# Test-only helpers (isolated harness; never commit)
+api/gen_local_settings.sh
+api/gen_manual.sh
+api/run_with_settings.js
+api/seed_test.js
+api/test_auth.js
+api/run_auth_tests.sh
+api/auth_test.log
+/tmp/*.log
+*.log
 
 # Client app config: holds APP_API_KEY for the browser. NEVER commit it —
 # it is injected at deploy time by the GitHub Actions workflow from a repo

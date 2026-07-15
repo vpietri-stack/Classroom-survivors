@@ -7,7 +7,7 @@ const API_BASE_URL = (
     window.location.hostname === 'localhost' ||
     window.location.hostname === '127.0.0.1'
 )
-    ? 'http://localhost:7071/api'
+    ? 'http://localhost:7074/api'
     : 'https://brave-bush-0438ab000.7.azurestaticapps.net/api';
 
 // ============================================================

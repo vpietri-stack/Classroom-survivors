@@ -1,12 +1,7 @@
 const { app } = require('@azure/functions');
-const { CosmosClient } = require('@azure/cosmos');
 const { validateApiKey } = require('./shared/validateApiKey');
-
-const endpoint = process.env.COSMOS_ENDPOINT;
-const key = process.env.COSMOS_KEY;
-
-const client = new CosmosClient({ endpoint, key });
-const container = client.database('Val-EslApp').container('Students');
+const { getContainer } = require('./shared/db');
+const auth = require('./shared/auth');
 
 app.http('setTargets', {
     route: 'setTargets',
@@ -14,8 +9,15 @@ app.http('setTargets', {
     authLevel: 'anonymous',
     handler: async (request, context) => {
         try {
-            const body = await request.json();
             if (!validateApiKey(request)) return { status: 403, body: 'Forbidden.' };
+            const authGate = auth.requireAuth(request);
+            if (authGate.error) return authGate.error;
+            const token = authGate.token;
+            if (token && !auth.isPrivileged(token, ['teacher', 'BM'])) {
+                return auth.forbidden();
+            }
+            const container = getContainer();
+            const body = await request.json();
             const { studentIds, target } = body;
 
             if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
@@ -49,18 +51,14 @@ app.http('setTargets', {
                 const user = items[0];
                 if (!user.targets) user.targets = [];
 
-                // Generate a unique target id
                 const targetId = `t_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
-                // Remove any existing target that fully overlaps with the new one
                 user.targets = user.targets.filter(t => {
                     const existStart = new Date(t.startTime).getTime();
                     const existEnd = new Date(t.endTime).getTime();
-                    // Remove if the new target completely covers the existing one
                     return !(targetStart <= existStart && targetEnd >= existEnd);
                 });
 
-                // Add the new target
                 user.targets.push({
                     id: targetId,
                     startTime: target.startTime,

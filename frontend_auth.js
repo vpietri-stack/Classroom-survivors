@@ -1,18 +1,31 @@
 // API_BASE_URL is defined in config.js (loaded before this script)
 const API_BASE = API_BASE_URL;
 
+// --- SESSION TOKEN (c) design) ---
+// The server mints a signed token on login. We store it in localStorage
+// (parity with the prior savedUsers approach) and send it as a Bearer header.
+// The server derives the acting identity from this token; it NEVER trusts a
+// client-supplied student/creator id for scoping.
+const SESSION_TOKEN_KEY = 'csSessionToken';
+
+function getSessionToken() {
+    try { return localStorage.getItem(SESSION_TOKEN_KEY) || null; } catch { return null; }
+}
+function setSessionToken(token) {
+    try { if (token) localStorage.setItem(SESSION_TOKEN_KEY, token); else localStorage.removeItem(SESSION_TOKEN_KEY); } catch {}
+}
+
 async function apiFetch(url, options = {}) {
-    const savedUsers = JSON.parse(localStorage.getItem('savedUsers') || '[]');
-    const activeUserId = localStorage.getItem('activeUserId') || (savedUsers[0] && savedUsers[0].id);
-    const currentUser = savedUsers.find(u => u.id === activeUserId);
     const appKey = await getAppKey();
+    const token = getSessionToken();
     options.headers = {
         ...options.headers,
         'X-App-Key': appKey
     };
-    if (currentUser) {
-        url += (url.includes('?') ? '&' : '?') + 'creatorId=' + encodeURIComponent(currentUser.id);
+    if (token) {
+        options.headers['Authorization'] = 'Bearer ' + token;
     }
+    // NOTE: we no longer append ?creatorId — the server scopes by the token.
     return fetch(url, options);
 }
 // --- AUTH & ANALYTICS STATE (Moved to teaching_content.js) ---
@@ -301,6 +314,7 @@ async function loginWithProfile(user, clickedBtn) {
         });
         if (response.ok) {
             const data = await response.json();
+            setSessionToken(data.token); // (c) persist session token
             if (data.needsPasswordChange) {
                 // Edge case: admin reset password while user was logged out
                 authActiveUser = {
@@ -443,6 +457,7 @@ async function handleLoginSubmit() {
         }
         
         const data = await response.json();
+        setSessionToken(data.token); // (c) persist session token
         authActiveUser = {
             id: data.id,
             login: loginVal,
@@ -658,6 +673,7 @@ function goBackToProfiles() {
     document.getElementById('startScreen').classList.add('hidden');
     document.getElementById('step-greeting').classList.add('hidden');
     authActiveUser = null;
+    setSessionToken(null); // (c) clear session token on logout
     const savedUsers = JSON.parse(localStorage.getItem('savedUsers') || '[]');
     if (savedUsers.length > 0) {
         showProfileSelection(savedUsers);

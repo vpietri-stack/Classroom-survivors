@@ -346,6 +346,11 @@ function showGameSelection() {
     }
 
     document.getElementById('gameSelectionOverlay').classList.remove('hidden');
+
+    // Gate the Tower Defense entry on sites where it isn't released yet (live).
+    // Preview / localhost keep it selectable. (TD_ENABLED is defined in config.js,
+    // loaded before game.js.)
+    if (typeof applyTowerDefenseGate === 'function') applyTowerDefenseGate();
 }
 
 // --- WIZARD STATE ---

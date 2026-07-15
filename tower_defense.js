@@ -511,6 +511,19 @@ if (typeof config !== 'undefined' && config.scene) {
 // GLOBAL HOOKS (wired into DOM buttons in index.html)
 // ============================================================
 function triggerTowerDefense() {
+    // GATE: when TD is disabled (live site), never actually launch the game.
+    // If reached anyway (e.g. direct call), bounce back to the game picker and
+    // ensure the menu button shows its "Coming soon" disabled state.
+    if (typeof TD_ENABLED !== 'undefined' && !TD_ENABLED) {
+        applyTowerDefenseGate();
+        const picker = document.getElementById('gameSelectionOverlay');
+        if (picker && picker.classList.contains('hidden')) {
+            if (typeof showGameSelection === 'function') showGameSelection();
+            else picker.classList.remove('hidden');
+        }
+        return;
+    }
+
     activeGameMode = 'TowerDefense';
     ['startScreen', 'gameSelectionOverlay', 'gomokuScreen', 'gomokuGameOverScreen',
         'gomokuModeSelectionOverlay', 'gomokuDifficultySelectionOverlay',
@@ -586,4 +599,23 @@ function tdReturnToMenu() {
     activeGameMode = null;
     if (typeof showGameSelection === 'function') showGameSelection();
     else { const e = document.getElementById('gameSelectionOverlay'); if (e) e.classList.remove('hidden'); }
+}
+
+// Show the Tower Defense menu entry as a disabled, greyed "Coming soon" tile on
+// sites where it isn't ready yet (live). Safe to call defensively even when
+// TD_ENABLED is true — it only modifies the button when the gate is active.
+function applyTowerDefenseGate() {
+    if (typeof TD_ENABLED !== 'undefined' && TD_ENABLED) return;
+    const btn = document.getElementById('towerDefenseBtn');
+    if (!btn) return;
+    btn.disabled = true;
+    btn.classList.remove('bg-green-600', 'hover:bg-green-500');
+    btn.classList.add('bg-gray-600', 'opacity-60', 'cursor-not-allowed', 'grayscale');
+    let sub = btn.querySelector('.td-coming-soon');
+    if (!sub) {
+        sub = document.createElement('span');
+        sub.className = 'td-coming-soon block text-sm font-normal mt-1 opacity-80';
+        btn.appendChild(sub);
+    }
+    sub.textContent = 'Coming soon — not ready yet';
 }

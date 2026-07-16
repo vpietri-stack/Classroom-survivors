@@ -6,7 +6,7 @@
       "customHeaders": {
         "Access-Control-Allow-Origin": "https://vpietri-stack.github.io",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, X-App-Key",
+        "Access-Control-Allow-Headers": "Content-Type, X-App-Key, Authorization",
         "Access-Control-Max-Age": "86400"
       }
     }

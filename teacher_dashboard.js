@@ -27,24 +27,27 @@ async function checkTeacherAuth() {
         return;
     }
 
-    // Re-verify role against the server to prevent localStorage spoofing
+    // Re-verify role against the server to prevent localStorage spoofing.
+    // apiFetch() auto-attaches the session token minted when this teacher logged
+    // in via the main app, so privileged calls (getStudents, manageBms) stay
+    // authorized under REQUIRE_AUTH=true. We use GET /login (refresh) which
+    // derives the role from that token — no plaintext password needed here.
     try {
-        const res = await apiFetch(`${API_BASE}/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: teacher.id })
-        });
-
-        if (!res.ok) throw new Error('Auth failed');
+        const res = await apiFetch(`${API_BASE}/login`, { method: 'GET' });
+        if (!res.ok) throw new Error('No valid session');
         const data = await res.json();
 
         if (data.role !== 'BM' && data.role !== 'admin') {
+            // Token is valid but this user isn't privileged: hard-stop spoofing.
             window.location.href = 'index.html';
             return;
         }
         isBM = data.role === 'BM';
     } catch (e) {
-        // If offline, allow cached access (graceful degradation)
+        // No/invalid token, or server unreachable: degrade to the cached role so
+        // the legacy (REQUIRE_AUTH=false) dashboard keeps working unchanged.
+        // Under enforcement a missing token is simply rejected by the privileged
+        // data calls further down.
         console.warn('Could not verify role with server, using cached data:', e);
         isBM = teacher.role === 'BM';
     }

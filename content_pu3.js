@@ -762,6 +762,29 @@ TEACHING_CONTENT["PU3"] = {
 
             ]
         }
+    },
+    "8": {
+        "95": {
+            vocab: [
+                'north', 'south', 'east', 'west', 'left', 'right', 'straight'
+            ],
+            sentences: [
+                "Yunnan is in the south-west of China.",
+                "Harbin is in the north-east of China.",
+                "Guangzhou is in the south-east of China.",
+                "Xinjiang is in the north-west of China.",
+                "In China, people drive on the right side of the road.",
+                "In the UK, people drive on the left side of the road."
+            ],
+            sentencePairs: [
+                { a: "Yunnan is in", b: "the south-west of China." },
+                { a: "Harbin is in", b: "the north-east of China." },
+                { a: "Guangzhou is in", b: "the south-east of China." },
+                { a: "Xinjiang is in", b: "the north-west of China." },
+                { a: "In China, people drive", b: "on the right side of the road." },
+                { a: "In the UK, people drive", b: "on the left side of the road." }
+            ]
+        }
     }
 };
 
@@ -773,5 +796,6 @@ AVAILABLE_CONTENT["PU3"] = {
     "4": [54],
     "5": [57, 59, 66],
     "6": [69, 71, 73],
-    "7": [83, 85, 87]
+    "7": [83, 85, 87],
+    "8": [95]
 };

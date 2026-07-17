@@ -4707,7 +4707,19 @@ const LOCAL_TRANSLATIONS = {
     "terrible": "糟糕的",
     "lazy": "懒惰的",
 
-
+    // --- PU3 Unit 8 Page 95 ---
+    "north": "北",
+    "south": "南",
+    "east": "东",
+    "west": "西",
+    "left": "左",
+    "right": "右",
+    "Yunnan is in the south-west of China.": "云南在中国的西南部。",
+    "Harbin is in the north-east of China.": "哈尔滨在中国的东北部。",
+    "Guangzhou is in the south-east of China.": "广州在中国的东南部。",
+    "Xinjiang is in the north-west of China.": "新疆在中国的西北部。",
+    "In China, people drive on the right side of the road.": "在中国，人们靠路的右侧行驶。",
+    "In the UK, people drive on the left side of the road.": "在英国，人们靠路的左侧行驶。",
 
     // --- PU1 Content Check Additions ---
     "I - my": "我 - 我的",

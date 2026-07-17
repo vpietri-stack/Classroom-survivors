@@ -149,7 +149,6 @@ function populateSettingsTab() {
     populateUnitSelect('settingsUnit', currentStudent.book || '', currentStudent.unit || '');
     populatePageSelect('settingsPage', currentStudent.book || '', currentStudent.unit || '', currentStudent.page || '');
     document.getElementById('settingsPassword').value = currentStudent.password || '';
-    document.getElementById('settingsPassword').type = 'password';
     document.getElementById('settingsPwIcon').className = 'fas fa-eye';
     document.getElementById('settingsNeedsPwChange').checked = !!currentStudent.needsPasswordChange;
 }
@@ -180,9 +179,12 @@ async function saveStudentSettings() {
         book: document.getElementById('settingsBook').value,
         unit: document.getElementById('settingsUnit').value,
         page: document.getElementById('settingsPage').value,
-        password: document.getElementById('settingsPassword').value.trim(),
         needsPasswordChange: document.getElementById('settingsNeedsPwChange').checked
     };
+    // Only send password when the teacher typed one. An empty box means
+    // "leave unchanged" — otherwise the stored password would be wiped.
+    const newPw = document.getElementById('settingsPassword').value.trim();
+    if (newPw) fields.password = newPw;
     try {
         const res = await apiFetch(`${API_BASE}/updateStudent`, {
             method: 'POST', headers: {'Content-Type':'application/json'},

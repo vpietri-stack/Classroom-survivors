@@ -67,9 +67,12 @@ app.http('login', {
                 return { status: 401, body: 'Invalid credentials.' };
             }
 
-            // Transparently upgrade a legacy plaintext password to a hash.
-            if (auth.needsHashUpgrade(user.password)) {
-                user.password = auth.hashPassword(password);
+            // Recovery: if a student logs in with a plaintext password, their
+            // stored value is a hash (from the old scheme) or absent. Re-store the
+            // real plaintext so the teacher dashboard can show it for recovery.
+            // Zero-impact: only runs when the verified plaintext differs from storage.
+            if (auth.needsPlaintextRecovery(user.password)) {
+                user.password = password;
                 await getContainer().items.upsert(user).catch(() => {});
             }
 

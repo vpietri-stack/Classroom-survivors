@@ -45,8 +45,8 @@ app.http('updateStudent', {
                     if (user[key] !== fields[key]) {
                         changes[key] = { from: user[key], to: fields[key] };
                     }
-                    // Hash if a password field is being set.
-                    user[key] = key === 'password' ? auth.hashPassword(fields[key]) : fields[key];
+                    // Store as-is (plaintext) so the teacher dashboard can display it.
+                    user[key] = fields[key];
                 }
             }
 

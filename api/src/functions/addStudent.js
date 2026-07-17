@@ -40,7 +40,7 @@ app.http('addStudent', {
             const newStudent = {
                 id,
                 login,
-                password: auth.hashPassword(password),
+                password: password, // stored plaintext so the teacher dashboard can recover it
                 fullName,
                 role: 'student',
                 teacher: teacher || 'Val',

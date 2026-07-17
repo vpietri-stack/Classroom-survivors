@@ -148,6 +148,14 @@ function needsHashUpgrade(stored) {
     return !!stored && !stored.startsWith('scrypt$');
 }
 
+// A student's stored password needs recovery to plaintext when it's currently
+// a hash (old scheme) or missing. If already plaintext, leave it. Used at login
+// to transparently restore dashboard visibility for students who logged in
+// before plaintext storage was re-enabled.
+function needsPlaintextRecovery(stored) {
+    return !stored || stored.startsWith('scrypt$');
+}
+
 // Remove credential/PII fields before returning a user object to the client.
 // Also drops Cosmos metadata (_rid/_self/_etag/_attachments/_ts) which must
 // never leak to the browser.
@@ -172,6 +180,7 @@ module.exports = {
     hashPassword,
     verifyPassword,
     needsHashUpgrade,
+    needsPlaintextRecovery,
     publicUser,
     DEFAULT_TTL,
 };

@@ -3,7 +3,7 @@ const { validateApiKey } = require('./shared/validateApiKey');
 const { getContainer } = require('./shared/db');
 const auth = require('./shared/auth');
 
-const PRIV_ROLES = ['teacher', 'BM'];
+const PRIV_ROLES = ['teacher', 'BM', 'admin'];
 
 app.http('addStudent', {
     route: 'addStudent',

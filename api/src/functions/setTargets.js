@@ -13,7 +13,7 @@ app.http('setTargets', {
             const authGate = auth.requireAuth(request);
             if (authGate.error) return authGate.error;
             const token = authGate.token;
-            if (token && !auth.isPrivileged(token, ['teacher', 'BM'])) {
+            if (token && !auth.isPrivileged(token)) {
                 return auth.forbidden();
             }
             const container = getContainer();

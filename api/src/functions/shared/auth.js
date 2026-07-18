@@ -5,7 +5,11 @@ const crypto = require('crypto');
 //
 // A session token is a signed (HMAC-SHA256) JWT-shaped string minted by the
 // server on successful login. The browser sends it as:
-//     Authorization: Bearer <token>
+//     X-Auth-Token: ***
+// NOTE: Azure Static Web Apps' managed-functions proxy RESERVES the
+// `Authorization` header (it overwrites it with the host's own internal
+// token), so our client token MUST travel in X-Auth-Token or it can never be
+// verified. We still fall back to `Authorization: Bearer *** for local dev.
 // The server NEVER trusts a client-supplied student/creator id for scoping —
 // it derives the acting identity from the verified token instead.
 //
@@ -65,12 +69,15 @@ function verifyTokenString(token, secret) {
 }
 
 function getBearer(request) {
-    const auth =
-        request.headers && request.headers.get
-            ? request.headers.get('Authorization')
-            : request.headers && request.headers.Authorization
-            ? request.headers.Authorization
-            : '';
+    // Prefer X-Auth-Token: the only header Azure SWA's managed-functions proxy
+    // does NOT overwrite. `Authorization` is reserved by the host (it injects
+    // its own internal token), so any client value sent there is lost.
+    const headers = request.headers || {};
+    const get = (name) =>
+        headers.get ? headers.get(name) : headers[name] || '';
+    const xAuth = get('X-Auth-Token');
+    if (xAuth) return xAuth;
+    const auth = get('Authorization');
     if (!auth) return null;
     const m = auth.match(/^Bearer\s+(.+)$/i);
     return m ? m[1] : null;

@@ -23,7 +23,11 @@ async function apiFetch(url, options = {}) {
         'X-App-Key': appKey
     };
     if (token) {
-        options.headers['Authorization'] = 'Bearer ' + token;
+        // Azure SWA's managed-functions proxy OWNS the `Authorization` header
+        // (it overwrites it with the host's own token), so we ship our session
+        // token in X-Auth-Token — the only header that reaches the function
+        // intact. Without this, every token-protected call returns 403.
+        options.headers['X-Auth-Token'] = token;
     }
     // NOTE: we no longer append ?creatorId — the server scopes by the token.
     return fetch(url, options);

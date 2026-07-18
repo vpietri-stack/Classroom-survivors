@@ -67,14 +67,6 @@ async function loadAllStudents() {
         const res = await apiFetch(url);
         if (!res.ok) throw new Error('Failed to fetch students');
         const data = await res.json();
-        // TEMP DIAG
-        tbody.innerHTML = `<tr><td colspan="7"><pre style="white-space:pre-wrap;font-size:11px">DIAG url=${url}
-status=${res.status}
-isArray=${Array.isArray(data)}
-len=${data && data.length}
-typeof=${typeof data}
-sample=${JSON.stringify(data).slice(0,300)}</pre></td></tr>`;
-        return;
         // Filter out teachers and admins from list
         allStudents = data.filter(s => s.role !== 'BM' && s.role !== 'admin');
         populateTeacherFilter();

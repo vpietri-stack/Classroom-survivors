@@ -124,7 +124,7 @@ function requireSelfOrRole(token, targetId, roles = []) {
     return false;
 }
 
-function isPrivileged(token, roles = ['teacher', 'BM']) {
+function isPrivileged(token, roles = ['teacher', 'BM', 'admin']) {
     return !!(token && roles.includes(token.role));
 }
 

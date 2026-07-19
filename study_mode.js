@@ -15,6 +15,7 @@ const STUDY_STATE = {
 // SR result tracking for this study session
 var srStudyResults = [];  // [{ type, key, firstAttempt }, ...]
 var srUsedPageIndices = new Set();  // abs page indices used by Round E sub-rounds
+var srUsedPairKeys = new Set();    // sentence-pair keys already shown in Round E this session
 
 // Entry point
 function initStudyMode() {
@@ -43,6 +44,7 @@ function initStudyMode() {
     // Reset SR tracking for this session
     srStudyResults = [];
     srUsedPageIndices = new Set();
+    srUsedPairKeys = new Set();
 
     // Pick exactly 5 (SR logic already tries to do this, but let's be sure)
     STUDY_STATE.words = SR_WORDS.slice(0, 5);
@@ -892,45 +894,26 @@ function nextRoundESubRound() {
 
     updateStudyUI(`Round E${STUDY_STATE.subRound}: Sentence Matching`, "Match each question with its answer.");
 
-    // Get sentence pairs using SR-aware same-page selection
+    // Get sentence pairs using SR-aware same-page selection, excluding pairs
+    // already shown in an earlier Round E sub-round this session.
     const { book, unit, page } = selectedClassContent;
 
-    const result = getStudySentencePairsSubRoundSR(book, unit, page, srUsedPageIndices);
+    const result = getStudySentencePairsSubRoundSR(book, unit, page, srUsedPageIndices, srUsedPairKeys);
     let pairs = [];
 
     if (result && result.pairs && result.pairs.length > 0) {
-        srUsedPageIndices.add(result.pageAbsIndex);
         pairs = result.pairs;
     } else {
-        // Fallback: legacy selection
-        const sortedPages = getSortedPagesForBook(book);
-        const activePageIndex = sortedPages.findIndex(p => p.book === book && p.unit === unit && p.page === page.toString());
-        if (STUDY_STATE.subRound === 1) {
-            const currentPage = sortedPages[activePageIndex] ? [sortedPages[activePageIndex]] : [];
-            pairs = pickUniqueItems(currentPage, 3, 'sentencePairs', activePageIndex, false, true);
-        } else {
-            const previousPages = sortedPages.slice(0, activePageIndex);
-            if (previousPages.length > 0) {
-                pairs = pickUniqueItems(previousPages, 3, 'sentencePairs', activePageIndex, true, true);
-            }
-        }
+        // No unseen pairs left anywhere up to the current page.
+        // Don't repeat already-seen pairs — just end Round E cleanly.
+        STUDY_STATE.subRound = 4;
+        finishStudySession();
+        return;
     }
 
-    // Fallback if no pairs found (or no previous pages)
-    if (!pairs || pairs.length === 0) {
-        // If we can't find previous content for E2/E3, try current page again
-        const currentPage = sortedPages[activePageIndex] ? [sortedPages[activePageIndex]] : [];
-        pairs = pickUniqueItems(currentPage, 3, 'sentencePairs', activePageIndex, false, true);
-    }
-
-    // Final fallback for empty content
-    if (!pairs || pairs.length === 0) {
-        pairs = [
-            { a: "What's your name?", b: "My name is Sarah." },
-            { a: "How old are you?", b: "I'm seven years old." },
-            { a: "What colour is the apple?", b: "The apple is red." }
-        ];
-    }
+    // Record which pairs we're about to show so they aren't repeated.
+    pairs.forEach(p => srUsedPairKeys.add(itemKey(p)));
+    srUsedPageIndices.add(result.pageAbsIndex);
 
     STUDY_STATE.sentencePairs = pairs;
     STUDY_STATE.pairAttempts = pairs.map(() => 1);

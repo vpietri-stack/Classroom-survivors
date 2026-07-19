@@ -335,15 +335,16 @@ function getStudyContentSR(book, unit, page, type, count) {
 
 /**
  * Round E sub-round: selects 3 sentence pairs from the best-priority page,
- * excluding already-used pages.
+ * excluding already-used pages AND already-shown pairs (so sub-rounds never repeat).
  *
  * @param {string} book
  * @param {string} unit
  * @param {string} page
  * @param {Set<number>} usedPageIndices  abs indices of pages already used in earlier sub-rounds
- * @returns {{ pageAbsIndex: number, pairs: Array }|null}
+ * @param {Set<string>} usedPairKeys     keys of pairs already shown in earlier sub-rounds this session
+ * @returns {{ pageAbsIndex: number, pairs: Array }|null}  null when no unseen pairs remain
  */
-function getStudySentencePairsSubRoundSR(book, unit, page, usedPageIndices) {
+function getStudySentencePairsSubRoundSR(book, unit, page, usedPageIndices, usedPairKeys) {
     const sortedPages = getSortedPagesForBook(book);
     const activePageIndex = sortedPages.findIndex(
         p => p.book === book && p.unit === unit && p.page === page.toString()
@@ -356,11 +357,41 @@ function getStudySentencePairsSubRoundSR(book, unit, page, usedPageIndices) {
     if (pagesWithItems.length === 0) return null;
 
     const srTypeState = (authActiveUser && authActiveUser.srState && authActiveUser.srState.sentencePairs) || {};
-    const result = selectSamePageSR(
-        pagesWithItems, 3, srTypeState, getCurrentSession(),
-        activePageIndex, usedPageIndices, null
-    );
-    return result ? { pageAbsIndex: result.pageAbsIndex, pairs: result.items } : null;
+
+    // Try to find a page that still has unseen pairs. Keep the SR page-priority
+    // ordering, but fall back to ANY page with remaining unseen pairs if the
+    // top-priority page is exhausted (e.g. a first-page student with <3 pairs).
+    const scored = pagesWithItems
+        .filter(p => !usedPageIndices || !usedPageIndices.has(p.pageAbsIndex))
+        .map(p => {
+            const unseen = p.items.filter(it => !usedPairKeys || !usedPairKeys.has(itemKey(it.item)));
+            const sorted = sortPoolBySR(unseen, srTypeState, getCurrentSession(), activePageIndex, null, null);
+            const bestGroup = sorted.length > 0 ? sorted[0].priority.group : 6;
+            const bestGroupCount = sorted.filter(e => e.priority.group === bestGroup).length;
+            const proximity = 1 / (Math.abs(p.pageAbsIndex - activePageIndex) + 1);
+            let randomScore = 0;
+            if (bestGroup === 3) {
+                const distance = Math.abs(p.pageAbsIndex - activePageIndex);
+                randomScore = Math.random() * Math.pow(0.2, distance);
+            }
+            return { page: p, unseen, sorted, bestGroup, bestGroupCount, proximity, randomScore };
+        })
+        .filter(p => p.unseen.length > 0);
+
+    if (scored.length === 0) return null;
+
+    scored.sort((a, b) => {
+        if (a.bestGroup !== b.bestGroup) return a.bestGroup - b.bestGroup;
+        if (a.bestGroup === 3) return b.randomScore - a.randomScore;
+        if (a.bestGroupCount !== b.bestGroupCount) return b.bestGroupCount - a.bestGroupCount;
+        return b.proximity - a.proximity;
+    });
+
+    const winner = scored[0];
+    return {
+        pageAbsIndex: winner.page.pageAbsIndex,
+        pairs: winner.sorted.slice(0, 3).map(e => e.item)
+    };
 }
 
 /**

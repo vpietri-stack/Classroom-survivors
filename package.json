@@ -4,7 +4,7 @@
   "description": "",
   "main": "admin_dashboard.js",
   "scripts": {
-    "test": "node test_widgets_regression.js && node test_sr_once_per_session.js && node test_td_gate.js"
+    "test": "node test_widgets_regression.js && node test_sr_once_per_session.js && node test_round_e_dedup.js && node test_td_gate.js"
   },
   "repository": {
     "type": "git",

@@ -75,6 +75,9 @@ function shuffleArray(arr) {
  * Within group 2: sorted by dueAfterSession DESC ("closeness" = most recently due first).
  * Within group 3: sorted by ascending page distance from activePageIndex.
  * Groups 0 and 1: randomly shuffled within the group.
+ *
+ * Items already succeeded THIS session (inSessionSuccesses) are excluded entirely:
+ * a first-attempt success should never be re-prompted again this session (bug B).
  */
 function sortPoolBySR(pool, srTypeState, currentSession, activePageIndex, inSessionFailures, inSessionSuccesses) {
     const annotated = pool.map(entry => ({
@@ -86,7 +89,6 @@ function sortPoolBySR(pool, srTypeState, currentSession, activePageIndex, inSess
     const g1 = annotated.filter(e => e.priority.group === 1);
     const g2 = annotated.filter(e => e.priority.group === 2);
     const g3 = annotated.filter(e => e.priority.group === 3);
-    const g5 = annotated.filter(e => e.priority.group === 5);
 
     shuffleArray(g0);
     shuffleArray(g1);
@@ -100,10 +102,8 @@ function sortPoolBySR(pool, srTypeState, currentSession, activePageIndex, inSess
         e._randomScore = Math.random() * weight;
     });
     g3.sort((a, b) => b._randomScore - a._randomScore);
-    
-    shuffleArray(g5);
 
-    return [...g0, ...g1, ...g2, ...g3, ...g5];
+    return [...g0, ...g1, ...g2, ...g3];
 }
 
 /**
@@ -181,9 +181,9 @@ function selectSamePageSR(pagesWithItems, count, srTypeState, currentSession, ac
  * Computes the updated srState after a session ends.
  *
  * Rules:
- *   first attempt success → interval = prev_interval + 1 (or 2 if never seen / after failure)
+ *   first attempt success → interval = prev_interval * 2 (or 2 if never seen / after failure)
  *                           dueAfterSession = currentSession + newInterval
- *   failure               → interval unchanged (will reset on next success)
+ *   failure               → interval = 1 (due next session, no matter what)
  *                           dueAfterSession = currentSession + 1
  *
  * @param {Object} srState        full SR state { vocab:{}, sentences:{}, sentencePairs:{} }
@@ -217,9 +217,10 @@ function updateSRStateForSession(srState, sessionResults, currentSession) {
                 lastResult: 'success'
             };
         } else {
-            const prevInterval = existing && existing.interval || 2;
+            // Failure: interval resets to 1 so the item is due next session,
+            // regardless of whether the session later ends or the item is retried.
             newState[type][key] = {
-                interval: prevInterval,   // will be overridden to 2 on next success
+                interval: 1,
                 dueAfterSession: currentSession + 1,
                 lastSession: currentSession,
                 lastResult: 'failure'

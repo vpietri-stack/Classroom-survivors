@@ -1015,6 +1015,15 @@ function checkSpelling() {
         display.classList.add('shake');
         synthError();
         setTimeout(() => display.classList.remove('shake'), 500);
+
+        // Record SR failure at the FIRST wrong check so the item is due next
+        // session even if the game ends before the student succeeds (spec).
+        const spellKey = itemKey(gameEl.dataset.targetWord);
+        if (!srInSessionFailures.has(spellKey)) {
+            srInSessionFailures.add(spellKey);
+            srGameResults.push({ type: 'vocab', key: spellKey, firstAttempt: false });
+        }
+
         isFirstAttempt = false;
         incrementExerciseAttempts();
 
@@ -1335,6 +1344,12 @@ function checkGrammar() {
 
     if (anyFilled && !allCorrect) {
         synthError();
+        // Record SR failure at the first wrong check (see spelling note above).
+        const gramKey = itemKey(document.getElementById('grammarGame').dataset.targetSentence);
+        if (!srInSessionFailures.has(gramKey)) {
+            srInSessionFailures.add(gramKey);
+            srGameResults.push({ type: 'sentences', key: gramKey, firstAttempt: false });
+        }
         isFirstAttempt = false;
         incrementExerciseAttempts();
     }
@@ -1497,11 +1512,13 @@ function checkSentenceMatch() {
                     const pairItem = JSON.parse(document.getElementById('sentenceMatchGame').dataset.pairs)[targetIndex];
                     const pairKey = itemKey(pairItem);
                     const isFirstAttempt = pairAttempts[targetIndex] === 1;
-                    srGameResults.push({ type: 'sentencePairs', key: pairKey, firstAttempt: isFirstAttempt });
-                    if (!isFirstAttempt) {
-                        srInSessionFailures.add(pairKey);
-                    } else {
+                    if (isFirstAttempt) {
+                        // First-attempt success → record success (doubles interval).
+                        srGameResults.push({ type: 'sentencePairs', key: pairKey, firstAttempt: true });
                         srInSessionSuccesses.add(pairKey);
+                    } else {
+                        // Fail-then-success: never re-prompt again this session (spec A).
+                        srInSessionFailures.delete(pairKey);
                     }
 
                     queueExerciseEvent('sentenceMatch', 'game', itemDetails, pairAttempts[targetIndex]);
@@ -1529,10 +1546,14 @@ function checkSentenceMatch() {
         let pairAttempts = JSON.parse(gameEl.dataset.pairAttempts);
         let pairQueued = JSON.parse(gameEl.dataset.pairQueued);
         
-        // Mark as failed for SR
+        // Mark as failed for SR (record once per pair at first wrong check)
         pairsData.forEach((pair, idx) => {
             if (!pairQueued[idx]) {
-                srInSessionFailures.add(itemKey(pair));
+                const pkey = itemKey(pair);
+                if (!srInSessionFailures.has(pkey)) {
+                    srInSessionFailures.add(pkey);
+                    srGameResults.push({ type: 'sentencePairs', key: pkey, firstAttempt: false });
+                }
             }
         });
 
@@ -1575,17 +1596,20 @@ function handleMinigameSuccess(gameType) {
     if (gameType !== 'rec') {
         const exerciseTypeMap = { 'spelling': 'spelling', 'grammar': 'sentenceScramble', 'sentencematch': 'sentenceMatch' };
         
-        // SR result tracking for spelling (vocab) and grammar (sentences)
+        // SR result tracking for spelling (vocab) and grammar (sentences).
+        // A failure is already recorded at the first wrong check (in the check
+        // handlers), so here we only (a) record a first-attempt-correct success
+        // and (b) on fail-then-success, drop the key from the reprompt set (spec A).
         if (gameType === 'spelling' || gameType === 'grammar') {
             const srType = gameType === 'spelling' ? 'vocab' : 'sentences';
             const key = itemKey(itemDetails);
-            const isFirstAttempt = exerciseAttempts === 1;
-            
-            srGameResults.push({ type: srType, key: key, firstAttempt: isFirstAttempt });
-            if (!isFirstAttempt) {
-                srInSessionFailures.add(key);
-            } else {
+            if (exerciseAttempts === 1) {
+                // First-attempt success → record success (doubles interval).
+                srGameResults.push({ type: srType, key: key, firstAttempt: true });
                 srInSessionSuccesses.add(key);
+            } else {
+                // Fail-then-success: never re-prompt again this session (spec A).
+                srInSessionFailures.delete(key);
             }
         }
 

@@ -47,8 +47,23 @@ function getCurrentSession() {
 }
 
 /**
- * Called by study_mode.js / game.js at the end of every session.
+ * Called by study_mode.js / game.js at the end of every session (in game mode
+ * the whole run's accumulated results are finalised once at game-over).
  * Computes the new srState and marks the next analytics flush to persist it.
+ *
+ * SR interval + success/failure are written ONCE per session per item — at the
+ * FIRST check — then locked. A session is a single finalizeSession call (one
+ * game run / one study session), and its results are accumulated in
+ * srGameResults / srStudyResults before this fires. We therefore collapse each
+ * (type,key) to its canonical first-check outcome so a later same-session
+ * prompt (fail-then-success on the same item) is recorded once, as a failure,
+ * and never re-doubles an interval.
+ *
+ * Canonical outcome for an item's first check this session:
+ *   - firstAttempt correct (firstAttempt === true)            -> success
+ *   - firstAttempt wrong, later correct (firstAttempt false)  -> failure
+ *   - firstAttempt wrong, never succeeded this prompt         -> failure
+ *   (firstAttempt === false means "first recorded check was wrong".)
  *
  * @param {Array} sessionResults  [{ type, key, firstAttempt }, ...]
  */
@@ -57,7 +72,19 @@ function finalizeSession(sessionResults, shouldIncrementSession = true) {
 
     const currentSession = getCurrentSession();
     const currentSRState = authActiveUser.srState || { vocab: {}, sentences: {}, sentencePairs: {} };
-    const newSRState = updateSRStateForSession(currentSRState, sessionResults, currentSession);
+
+    // Collapse each (type,key) to its canonical FIRST-check outcome.
+    // First occurrence in the batch wins (fail-then-success -> recorded as failure).
+    const canonical = new Map();
+    for (const r of sessionResults) {
+        if (!r || !r.type || r.key === undefined || r.key === null) continue;
+        const id = r.type + '|' + r.key;
+        if (!canonical.has(id)) canonical.set(id, r);
+    }
+    const merged = Array.from(canonical.values());
+    if (merged.length === 0) return;
+
+    const newSRState = updateSRStateForSession(currentSRState, merged, currentSession);
 
     // Eagerly update in-memory user so the next session in the same page-load gets fresh data
     authActiveUser.srState = newSRState;

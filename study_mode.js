@@ -142,7 +142,97 @@ function checkRoundA(word, btnElement) {
 }
 
 function finishRoundA() {
-    // Round completed
+    // Round completed → NEW speech round (Round B)
+    startRoundB();
+}
+
+
+// --- ROUND B: Pronunciation (say each word aloud) ---
+function startRoundB() {
+    STUDY_STATE.round = 'B';
+    STUDY_STATE.currentWordIndex = 0;
+    updateStudyUI("Round B: Pronunciation", "Say each word out loud. Hold the red button, then release.");
+    startExerciseTracking();
+    nextRoundBWord();
+}
+
+function nextRoundBWord() {
+    if (STUDY_STATE.currentWordIndex >= STUDY_STATE.words.length) {
+        finishRoundB();
+        return;
+    }
+    const word = STUDY_STATE.words[STUDY_STATE.currentWordIndex];
+    currentTTSWord = word;
+
+    const container = document.getElementById('study-game-area');
+    container.innerHTML = `
+        <div class="text-center">
+            <div class="text-sm text-slate-400 mb-1">Word ${STUDY_STATE.currentWordIndex + 1} of ${STUDY_STATE.words.length}</div>
+            <div id="roundB-word" class="text-5xl font-extrabold text-white my-2">${word}</div>
+            <img id="roundB-image" class="w-32 h-32 object-contain mx-auto my-2 hidden border-2 border-slate-300 rounded-xl bg-white/10" alt="Vocabulary Image">
+            <div id="roundB-translation" class="translation-hint text-slate-300 text-lg mb-2"></div>
+            <button id="roundB-play" class="game-btn bg-slate-600 hover:bg-slate-500 text-base px-4 py-2 rounded-xl mb-3">🔊 Play word</button>
+            <div id="roundB-rec"></div>
+            <div id="roundB-feedback" class="heard-feedback"></div>
+            <div id="roundB-status" class="text-sm text-slate-400 mt-2"></div>
+        </div>
+    `;
+    showTranslation('roundB-translation', word);
+    showVocabImage('roundB-image', word);
+    document.getElementById('roundB-play').onclick = () => { currentTTSWord = word; playTTS(); };
+
+    const recWrap = document.getElementById('roundB-rec');
+    const feedback = document.getElementById('roundB-feedback');
+    const status = document.getElementById('roundB-status');
+
+    function setStatus(t) { status.innerText = t || ''; }
+
+    // If model isn't ready yet, show a gentle waiting state (it's preloading in background).
+    if (!window.SpeechStatus || !window.SpeechStatus.isReady()) {
+        setStatus('Preparing speech model… (it loads automatically in the background)');
+    }
+    window.SpeechUI.ensureReady(function () {
+        setStatus('Model ready. Hold the button and say the word.');
+        const btn = window.SpeechUI.makeRecordButton({
+            idleText: '🎙️ Hold to speak',
+            label: '🔴 Listening… release to send',
+            onResult: function (text) {
+                // Show what the model heard (so the student knows if they're close).
+                feedback.className = 'heard-feedback';
+                feedback.innerText = 'Heard: “' + (text || '(silence)') + '”';
+                // Scoring: lenient for now (Level 2); tune later.
+                const res = window.Scorer.score(word, text, 2);
+                if (res.pass) {
+                    feedback.className = 'heard-feedback ok';
+                    feedback.innerText += '  ✓ close enough!';
+                    playHappySound();
+                    STUDY_STATE.currentWordIndex++;
+                    setTimeout(nextRoundBWord, 700);
+                } else {
+                    feedback.className = 'heard-feedback no';
+                    feedback.innerText += '  — try again (' + res.details + ')';
+                    synthError();
+                }
+            },
+            onError: function (err) {
+                feedback.className = 'heard-feedback no';
+                feedback.innerText = 'Error: ' + ((err && err.message) || err);
+            }
+        });
+        recWrap.appendChild(btn);
+    }, function (st) {
+        if (st && st.state === 'loading') setStatus('Preparing speech model… ' + (st.pct || 0) + '%');
+        else if (st && st.state === 'preparing') setStatus('Compiling model on your device… (~30s)');
+        else if (st && st.state === 'error') setStatus('Model failed to load: ' + (st.message || ''));
+    });
+}
+
+function clearRoundB() {
+    window.SpeechUI && window.SpeechUI.hideOverlay();
+}
+
+function finishRoundB() {
+    clearRoundB();
     startRoundC();
 }
 

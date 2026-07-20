@@ -102,6 +102,7 @@ function enforceAuth() {
 // explicit env flag so it stays OFF in production. When the flag is not 'true',
 // the bypass is skipped and the request falls through to normal login.
 function testModeEnabled() {
+    // Returns false unless TEST_MODE=true is explicitly set in app settings.
     return process.env.TEST_MODE === 'true';
 }
 

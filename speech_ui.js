@@ -106,8 +106,9 @@
       showOverlay();
       rec.start().catch(function (err) {
         hideOverlay();
-        alert('Mic error: ' + (err && err.message || err));
         pointerDown = false;
+        btn.innerText = opts.idleText || '🎙️ Hold to speak';
+        alert('Mic error: ' + (err && err.message || err));
       });
     }
     function stop() {

@@ -82,7 +82,12 @@
 
       const pcm = mergeChunks(this._chunks);
       const rate = this._actualRate || SAMPLE_RATE;
-      const wav = encodeWav(pcm, rate);
+      // Lead-in silence so Whisper's first-word attention window isn't starved
+      // (fixes first word of a phrase being clipped/misheard, e.g. "pretty"→"freddy").
+      const lead = Math.round(rate * 0.4);
+      const padded = new Float32Array(lead + pcm.length);
+      padded.set(pcm, lead);
+      const wav = encodeWav(padded, rate);
       return wav; // Blob, rate Hz / 16-bit PCM WAV
     }
   }

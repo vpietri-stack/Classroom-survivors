@@ -1047,6 +1047,13 @@ let recTimeLeft;
 function startWordRecGame() {
     if (SIGHT_WORDS.length === 0) { handleMinigameSuccess('rec'); return; }
 
+    // Clean up any speech-gate left over from a previous word-rec minigame so it
+    // doesn't linger into the next round (bug: appeared on 2nd minigame onward).
+    const prevGate = document.getElementById('rec-speech-gate');
+    if (prevGate) prevGate.remove();
+    const opts = document.getElementById('rec-options');
+    if (opts) opts.classList.remove('hidden');
+
     // Weighted selection
     const { book, unit, page } = selectedClassContent;
     const target = getWeightedItemForGame(book, unit, page, 'vocab');
@@ -1126,7 +1133,12 @@ function runWordRecSpeechGate(target, btn) {
 
     // Lock further word clicks during the speech step.
     const opts = document.getElementById('rec-options');
-    if (opts) { opts.querySelectorAll('button').forEach(b => b.disabled = true); }
+    if (opts) {
+      opts.querySelectorAll('button').forEach(b => b.disabled = true);
+      // Hide the wrong-word choices so only the target stays visible and the
+      // speech UI gets the room it needs (fixes cramped 2nd+ minigame layout).
+      opts.classList.add('hidden');
+    }
     btn.classList.add('bg-emerald-600');
 
     let gate = document.getElementById('rec-speech-gate');

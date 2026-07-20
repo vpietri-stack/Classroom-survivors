@@ -896,7 +896,10 @@ function nextRoundESubRound() {
     // already shown in an earlier Round E sub-round this session.
     const { book, unit, page } = selectedClassContent;
 
-    const result = getStudySentencePairsSubRoundSR(book, unit, page, srUsedPairKeys);
+    // E1 favors today's page; E2/E3 review previous pages when only new material
+    // is available (due items still take precedence from any page).
+    const preferPrevious = STUDY_STATE.subRound > 1;
+    const result = getStudySentencePairsSubRoundSR(book, unit, page, srUsedPairKeys, preferPrevious);
     let pairs = [];
 
     if (result && result.pairs && result.pairs.length > 0) {

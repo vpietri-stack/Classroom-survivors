@@ -1,17 +1,17 @@
 // Unit test for Round E (study mode sentence matching) sub-round pair selection.
 //
-// Bug under test: a student on the FIRST page of a book got the SAME 3 sentence
-// pairs pre-filled green in E1, E2 and E3, so E2/E3 were trivially skippable.
-// Root cause: the picker locked out the whole page after E1, so later sub-rounds
-// had nothing new and either repeated or (after the first fix) got skipped.
+// Rules under test (user spec):
+//   1. SR due-status ALWAYS wins first — a due/failed pair on ANY page is picked
+//      before new material, regardless of sub-round.
+//   2. For NEW items only (nothing due):
+//        - E1 favors the CURRENT page.
+//        - E2/E3 AVOID the current page and review a PREVIOUS page, weighted by
+//          proximity (closer = higher chance). Falls back to current page only
+//          when no previous page has unseen pairs (first-page student).
+//   3. A pair is never repeated within one Round E session.
 //
-// Fix: getStudySentencePairsSubRoundSR excludes only the individual pairs already
-// SHOWN (not the whole page). A page with >3 pairs keeps feeding FRESH pairs to
-// E2/E3, so all three sub-rounds run with distinct pairs. Only when there are
-// genuinely no unseen pairs left does it return null (UI ends Round E cleanly).
-//
-// We load sr_engine.js + teaching_content.js in a VM with a small TEACHING_CONTENT
-// fixture and drive the 3 sub-rounds exactly as nextRoundESubRound would.
+// We load sr_engine.js + teaching_content.js in a VM with a small fixture and
+// drive the sub-rounds exactly as nextRoundESubRound does.
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
@@ -22,31 +22,35 @@ let src =
   fs.readFileSync(path.join(root, 'teaching_content.js'), 'utf8');
 
 // teaching_content.js declares `const TEACHING_CONTENT` / `const AVAILABLE_CONTENT`.
-// In a vm context, top-level `const` is NOT exposed on the sandbox object, so we
-// append fixture-population code INTO the script string (runs in the same scope).
-// First page has 9 distinct pairs -> enough for 3 sub-rounds of 3 each.
+// Populate them via appended in-scope code (vm const isn't reachable from outside).
+// Book has 3 pages, each with several distinct pairs. Student is on page p3.
 src += `
 TEACHING_CONTENT.test = {
   u0: {
     p1: {
-      vocab: ['apple'],
-      sentences: ['x.'],
+      vocab: ['a'], sentences: ['s.'],
       sentencePairs: [
-        { a: 'q1', b: 'a1' }, { a: 'q2', b: 'a2' }, { a: 'q3', b: 'a3' },
-        { a: 'q4', b: 'a4' }, { a: 'q5', b: 'a5' }, { a: 'q6', b: 'a6' },
-        { a: 'q7', b: 'a7' }, { a: 'q8', b: 'a8' }, { a: 'q9', b: 'a9' },
+        { a: 'p1q1', b: 'p1a1' }, { a: 'p1q2', b: 'p1a2' },
+        { a: 'p1q3', b: 'p1a3' }, { a: 'p1q4', b: 'p1a4' },
       ],
     },
     p2: {
-      vocab: ['cat'],
-      sentences: ['y.'],
+      vocab: ['b'], sentences: ['s.'],
       sentencePairs: [
-        { a: 'only1', b: 'oa1' }, { a: 'only2', b: 'oa2' }, { a: 'only3', b: 'oa3' },
+        { a: 'p2q1', b: 'p2a1' }, { a: 'p2q2', b: 'p2a2' },
+        { a: 'p2q3', b: 'p2a3' }, { a: 'p2q4', b: 'p2a4' },
+      ],
+    },
+    p3: {
+      vocab: ['c'], sentences: ['s.'],
+      sentencePairs: [
+        { a: 'p3q1', b: 'p3a1' }, { a: 'p3q2', b: 'p3a2' },
+        { a: 'p3q3', b: 'p3a3' }, { a: 'p3q4', b: 'p3a4' },
       ],
     },
   },
 };
-AVAILABLE_CONTENT.test = { u0: ['p1', 'p2'] };
+AVAILABLE_CONTENT.test = { u0: ['p1', 'p2', 'p3'] };
 `;
 
 const sandbox = {
@@ -55,52 +59,93 @@ const sandbox = {
   document: { addEventListener: () => {} },
   window: {},
   localStorage: { getItem: () => null, setItem: () => {}, removeItem: () => {} },
-  authActiveUser: { srState: { vocab: {}, sentences: {}, sentencePairs: {} } },
   isTestMode: false,
-  getCurrentSession: () => 0,
+  getCurrentSession: () => 5,   // current session index
 };
 vm.createContext(sandbox);
 vm.runInContext(src, sandbox);
+// teaching_content.js declares `var authActiveUser = null` (attaches to context),
+// so set it AFTER running via in-context assignment.
+vm.runInContext(`authActiveUser = { srState: { vocab: {}, sentences: {}, sentencePairs: {} } };`, sandbox);
 
 const { getStudySentencePairsSubRoundSR, itemKey } = sandbox;
-sandbox.selectedClassContent = { book: 'test', unit: 'u0', page: 'p1' };
+sandbox.selectedClassContent = { book: 'test', unit: 'u0', page: 'p3' };
 
 let pass = 0, fail = 0;
 function ok(name, cond, extra) {
   if (cond) { pass++; console.log('PASS:', name); }
   else { fail++; console.log('FAIL:', name, extra !== undefined ? JSON.stringify(extra) : ''); }
 }
+function keyOf(a, b) { return itemKey({ a, b }); }
 
-// Drive Round E exactly like nextRoundESubRound: keep a usedPairKeys set, record
-// each shown pair, expect a fresh set each sub-round.
-function driveRoundE(book, unit, page, maxSubRounds) {
-  const usedPairs = new Set();
-  const rounds = [];
-  for (let i = 0; i < maxSubRounds; i++) {
-    const res = getStudySentencePairsSubRoundSR(book, unit, page, usedPairs);
-    if (!res || !res.pairs || res.pairs.length === 0) break;  // UI ends Round E
-    res.pairs.forEach(p => usedPairs.add(itemKey(p)));
-    rounds.push(res.pairs.map(p => itemKey(p)));
-  }
-  return rounds;
+// Helper: reset SR state on the in-context user object.
+function setSR(state) { sandbox.authActiveUser.srState.sentencePairs = state || {}; }
+
+// ---------------------------------------------------------------------------
+// Rule 1: a DUE pair on a previous page wins even for E1 (preferPrevious=false).
+// Mark p1q1 as due (dueAfterSession <= currentSession, lastResult failure => group 1).
+setSR({ [keyOf('p1q1', 'p1a1')]: { interval: 1, dueAfterSession: 5, lastSession: 4, lastResult: 'failure' } });
+const due = getStudySentencePairsSubRoundSR('test', 'u0', 'p3', new Set(), false);
+ok('Rule1: due pair on previous page wins E1',
+  due && due.pairs.some(p => itemKey(p) === keyOf('p1q1', 'p1a1')), due && due.pairs.map(itemKey));
+
+// ---------------------------------------------------------------------------
+// Rule 2: NEW items only (empty SR state).
+setSR({});
+
+// E1 (preferPrevious=false) -> CURRENT page is PRIORITIZED (weighted, not guaranteed).
+// Over 20k trials the current page wins ~90%; use 1000 trials + 85% threshold
+// (proves "prioritizes" while tolerating normal sampling variance).
+let e1Current = 0, e1Trials = 1000;
+for (let i = 0; i < e1Trials; i++) {
+  const r = getStudySentencePairsSubRoundSR('test', 'u0', 'p3', new Set(), false);
+  if (r && r.pairs.every(p => itemKey(p).startsWith('p3'))) e1Current++;
 }
+ok('Rule2: E1 (new items) PRIORITIZES the current page (>=85% of trials)',
+  e1Current >= e1Trials * 0.85, { e1Current, e1Trials });
 
-// --- Main scenario: first page, 9 pairs -> E1/E2/E3 all run, all distinct ---
-const rounds = driveRoundE('test', 'u0', 'p1', 3);
-ok('first page (9 pairs): all 3 sub-rounds run (no skip)', rounds.length === 3, { got: rounds.length });
-ok('each sub-round has 3 pairs', rounds.every(r => r.length === 3), rounds);
-const allShown = rounds.flat();
-ok('no pair repeats across E1/E2/E3', new Set(allShown).size === allShown.length, { allShown });
+// E2/E3 (preferPrevious=true) -> a PREVIOUS page (p1 or p2), never p3.
+// Run many times to confirm it NEVER returns the current page for new items.
+let e2CurrentPageHits = 0, e2PrevHits = 0;
+const closerWins = { p2: 0, p1: 0 };
+for (let i = 0; i < 200; i++) {
+  const r = getStudySentencePairsSubRoundSR('test', 'u0', 'p3', new Set(), true);
+  if (!r) continue;
+  const prefix = itemKey(r.pairs[0]).slice(0, 2);
+  if (prefix === 'p3') e2CurrentPageHits++;
+  else { e2PrevHits++; if (prefix === 'p2') closerWins.p2++; if (prefix === 'p1') closerWins.p1++; }
+}
+ok('Rule2: E2/E3 (new items) NEVER pick the current page', e2CurrentPageHits === 0, { e2CurrentPageHits });
+ok('Rule2: E2/E3 pick a previous page', e2PrevHits > 0, { e2PrevHits });
+ok('Rule2: closer previous page (p2) picked more often than farther (p1)',
+  closerWins.p2 > closerWins.p1, closerWins);
 
-// --- Edge case: page with only 3 pairs -> E1 runs, then Round E ends (no fake E2/E3) ---
-const rounds2 = driveRoundE('test', 'u0', 'p2', 3);
-ok('3-pair page: E1 runs', rounds2.length >= 1 && rounds2[0].length === 3, rounds2);
-ok('3-pair page: no repeated pairs (ends after unseen exhausted)',
-  (() => { const f = rounds2.flat(); return new Set(f).size === f.length; })(), rounds2);
-// p2's own 3 pairs get consumed; any further sub-rounds must NOT repeat them.
-// (There are no earlier pages beyond p1; p1's pairs are also eligible as review,
-//  so rounds2 may legitimately pull p1 pairs for E2/E3 — the key invariant is
-//  simply "never repeat a pair", already asserted above.)
+// ---------------------------------------------------------------------------
+// Rule 2 fallback: first-page student (page p1, no previous pages).
+// E2/E3 with preferPrevious=true must fall back to the current page.
+sandbox.selectedClassContent = { book: 'test', unit: 'u0', page: 'p1' };
+setSR({});
+const fb = getStudySentencePairsSubRoundSR('test', 'u0', 'p1', new Set(), true);
+ok('Rule2 fallback: first-page E2 falls back to current page (p1)',
+  fb && fb.pairs.every(p => itemKey(p).startsWith('p1')), fb && fb.pairs.map(itemKey));
+
+// ---------------------------------------------------------------------------
+// Rule 3: no pair repeats across sub-rounds. Drive 3 sub-rounds on p3.
+sandbox.selectedClassContent = { book: 'test', unit: 'u0', page: 'p3' };
+setSR({});
+const used = new Set();
+const rounds = [];
+for (let i = 0; i < 3; i++) {
+  const r = getStudySentencePairsSubRoundSR('test', 'u0', 'p3', used, i > 0);
+  if (!r || r.pairs.length === 0) break;
+  r.pairs.forEach(p => used.add(itemKey(p)));
+  rounds.push(r.pairs.map(itemKey));
+}
+const flat = rounds.flat();
+ok('Rule3: no pair repeats across E1/E2/E3', new Set(flat).size === flat.length, { flat });
+ok('Rule3: E1 was current page, later rounds reviewed previous pages',
+  rounds.length >= 2 && rounds[0].every(k => k.startsWith('p3')) &&
+  rounds[1].every(k => !k.startsWith('p3')), rounds);
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

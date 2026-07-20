@@ -335,16 +335,26 @@ function getStudyContentSR(book, unit, page, type, count) {
 
 /**
  * Round E sub-round: selects up to 3 sentence pairs, excluding pairs already
- * shown in earlier sub-rounds this session (so sub-rounds never repeat a pair,
- * but a rich page keeps feeding fresh pairs to E2/E3).
+ * shown in earlier sub-rounds this session (so sub-rounds never repeat a pair).
+ *
+ * Selection priority:
+ *   1. SR due-status ALWAYS wins first: any page holding a due/failed pair
+ *      (groups 0-2, most-due first) is chosen regardless of sub-round or page.
+ *   2. For NEW items only (nothing due anywhere, group 3):
+ *        - E1 (preferPrevious=false): favors the CURRENT page.
+ *        - E2/E3 (preferPrevious=true): AVOID the current page and review a
+ *          PREVIOUS page instead, weighted by proximity (closer = higher chance,
+ *          not guaranteed). Falls back to the current page only when no previous
+ *          page has unseen pairs (e.g. a first-page student).
  *
  * @param {string} book
  * @param {string} unit
  * @param {string} page
- * @param {Set<string>} usedPairKeys  keys of pairs already shown earlier this session
+ * @param {Set<string>} usedPairKeys   keys of pairs already shown earlier this session
+ * @param {boolean} [preferPrevious]   true for E2/E3 (review earlier pages for new items)
  * @returns {{ pageAbsIndex: number, pairs: Array }|null}  null when no unseen pairs remain
  */
-function getStudySentencePairsSubRoundSR(book, unit, page, usedPairKeys) {
+function getStudySentencePairsSubRoundSR(book, unit, page, usedPairKeys, preferPrevious) {
     const sortedPages = getSortedPagesForBook(book);
     const activePageIndex = sortedPages.findIndex(
         p => p.book === book && p.unit === unit && p.page === page.toString()
@@ -358,11 +368,9 @@ function getStudySentencePairsSubRoundSR(book, unit, page, usedPairKeys) {
 
     const srTypeState = (authActiveUser && authActiveUser.srState && authActiveUser.srState.sentencePairs) || {};
 
-    // Find pages that still have unseen pairs. We DO NOT lock out a whole page
-    // after it's used — a page with 12 pairs should keep feeding E2/E3 fresh pairs.
-    // We only exclude the individual pairs already shown this session. SR page
-    // priority still applies, so due review pairs from earlier pages can win, but
-    // otherwise the current page keeps supplying new pairs (proximity = highest).
+    // Score every page that still has unseen pairs. We exclude only the individual
+    // pairs already shown this session (never lock out a whole page), so a rich
+    // page can keep supplying fresh pairs.
     const scored = pagesWithItems
         .map(p => {
             const unseen = p.items.filter(it => !usedPairKeys || !usedPairKeys.has(itemKey(it.item)));
@@ -381,14 +389,24 @@ function getStudySentencePairsSubRoundSR(book, unit, page, usedPairKeys) {
 
     if (scored.length === 0) return null;
 
-    scored.sort((a, b) => {
+    // If the best available material everywhere is NEW (group 3 = nothing due),
+    // E2/E3 should review a PREVIOUS page rather than the current one. Restrict
+    // the pool to previous pages when any exist; otherwise keep the current page.
+    let pool = scored;
+    const minGroup = Math.min(...scored.map(s => s.bestGroup));
+    if (minGroup === 3 && preferPrevious) {
+        const previous = scored.filter(s => s.page.pageAbsIndex < activePageIndex);
+        if (previous.length > 0) pool = previous;
+    }
+
+    pool.sort((a, b) => {
         if (a.bestGroup !== b.bestGroup) return a.bestGroup - b.bestGroup;
         if (a.bestGroup === 3) return b.randomScore - a.randomScore;
         if (a.bestGroupCount !== b.bestGroupCount) return b.bestGroupCount - a.bestGroupCount;
         return b.proximity - a.proximity;
     });
 
-    const winner = scored[0];
+    const winner = pool[0];
     return {
         pageAbsIndex: winner.page.pageAbsIndex,
         pairs: winner.sorted.slice(0, 3).map(e => e.item)

@@ -36,10 +36,6 @@
   }
   const RAW = rawRepoBase();
   const MODEL_SOURCES = [
-    // modelscope (Alibaba CDN) — China-fast, hot-cached, CORS:*. Serves weights flat
-    // at …/resolve/master/<file>, so we pass modelRoot pointing at the model dir.
-    { name: 'modelscope', base: 'https://modelscope.cn/models/Xenova/whisper-tiny/resolve/master/',
-      modelRoot: 'https://modelscope.cn/models/Xenova/whisper-tiny/resolve/master/' },
     ...(RAW ? [
       { name: 'gh-proxy',    base: `https://gh-proxy.com/https://${RAW}` },   // CN GitHub proxy
       { name: 'ghproxy.net', base: `https://ghproxy.net/https://${RAW}` },    // CN GitHub proxy
@@ -61,7 +57,7 @@
   async function pickSource() {
     if (chosen) return chosen;
     for (const src of MODEL_SOURCES) {
-      const url = src.modelRoot ? `${src.modelRoot}config.json` : `${src.base}models/${MODEL_ID}/config.json`;
+      const url = `${src.base}models/${MODEL_ID}/config.json`;
       try {
         const ctrl = new AbortController();
         const timer = setTimeout(() => ctrl.abort(), 6000);
@@ -84,10 +80,7 @@
 
     loading = (async () => {
       const src = await pickSource();
-      // For flat sources (modelscope) the weight files live directly at modelRoot,
-      // so the effective model id is empty (localModelPath already points at them).
-      const MODEL_DIR = src.modelRoot ? src.modelRoot : src.base + 'models/';
-      const EFFECTIVE_ID = src.modelRoot ? '' : MODEL_ID;
+      const MODEL_DIR = src.base + 'models/';       // …/models/  (parent of the model folder)
 
       log('Engine: importing transformers.js (same-origin) …');
       const { pipeline, env } = await import(LIB_URL);
@@ -101,7 +94,7 @@
       env.backends.onnx.wasm.wasmPaths = WASM_PATH;
 
       log('Engine: loading ' + MODEL_ID + ' from ' + src.name + ' (quantized, wasm) — first load ~41 MB …');
-      const pipe = await pipeline('automatic-speech-recognition', EFFECTIVE_ID || MODEL_ID, {
+      const pipe = await pipeline('automatic-speech-recognition', MODEL_ID, {
         device: 'wasm',
         dtype: { encoder_model: 'q8', decoder_model_merged: 'q8' },
         progress_callback: (p) => {

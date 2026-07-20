@@ -14,7 +14,6 @@ const STUDY_STATE = {
 
 // SR result tracking for this study session
 var srStudyResults = [];  // [{ type, key, firstAttempt }, ...]
-var srUsedPageIndices = new Set();  // abs page indices used by Round E sub-rounds
 var srUsedPairKeys = new Set();    // sentence-pair keys already shown in Round E this session
 
 // Entry point
@@ -43,7 +42,6 @@ function initStudyMode() {
 
     // Reset SR tracking for this session
     srStudyResults = [];
-    srUsedPageIndices = new Set();
     srUsedPairKeys = new Set();
 
     // Pick exactly 5 (SR logic already tries to do this, but let's be sure)
@@ -898,22 +896,21 @@ function nextRoundESubRound() {
     // already shown in an earlier Round E sub-round this session.
     const { book, unit, page } = selectedClassContent;
 
-    const result = getStudySentencePairsSubRoundSR(book, unit, page, srUsedPageIndices, srUsedPairKeys);
+    const result = getStudySentencePairsSubRoundSR(book, unit, page, srUsedPairKeys);
     let pairs = [];
 
     if (result && result.pairs && result.pairs.length > 0) {
         pairs = result.pairs;
     } else {
-        // No unseen pairs left anywhere up to the current page.
-        // Don't repeat already-seen pairs — just end Round E cleanly.
+        // No unseen pairs left anywhere up to the current page (rare: a first page
+        // with only 3 pairs). Don't repeat already-seen pairs — end Round E cleanly.
         STUDY_STATE.subRound = 4;
         finishStudySession();
         return;
     }
 
-    // Record which pairs we're about to show so they aren't repeated.
+    // Record which pairs we're about to show so later sub-rounds pull FRESH pairs.
     pairs.forEach(p => srUsedPairKeys.add(itemKey(p)));
-    srUsedPageIndices.add(result.pageAbsIndex);
 
     STUDY_STATE.sentencePairs = pairs;
     STUDY_STATE.pairAttempts = pairs.map(() => 1);

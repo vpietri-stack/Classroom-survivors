@@ -334,17 +334,17 @@ function getStudyContentSR(book, unit, page, type, count) {
 }
 
 /**
- * Round E sub-round: selects 3 sentence pairs from the best-priority page,
- * excluding already-used pages AND already-shown pairs (so sub-rounds never repeat).
+ * Round E sub-round: selects up to 3 sentence pairs, excluding pairs already
+ * shown in earlier sub-rounds this session (so sub-rounds never repeat a pair,
+ * but a rich page keeps feeding fresh pairs to E2/E3).
  *
  * @param {string} book
  * @param {string} unit
  * @param {string} page
- * @param {Set<number>} usedPageIndices  abs indices of pages already used in earlier sub-rounds
- * @param {Set<string>} usedPairKeys     keys of pairs already shown in earlier sub-rounds this session
+ * @param {Set<string>} usedPairKeys  keys of pairs already shown earlier this session
  * @returns {{ pageAbsIndex: number, pairs: Array }|null}  null when no unseen pairs remain
  */
-function getStudySentencePairsSubRoundSR(book, unit, page, usedPageIndices, usedPairKeys) {
+function getStudySentencePairsSubRoundSR(book, unit, page, usedPairKeys) {
     const sortedPages = getSortedPagesForBook(book);
     const activePageIndex = sortedPages.findIndex(
         p => p.book === book && p.unit === unit && p.page === page.toString()
@@ -358,11 +358,12 @@ function getStudySentencePairsSubRoundSR(book, unit, page, usedPageIndices, used
 
     const srTypeState = (authActiveUser && authActiveUser.srState && authActiveUser.srState.sentencePairs) || {};
 
-    // Try to find a page that still has unseen pairs. Keep the SR page-priority
-    // ordering, but fall back to ANY page with remaining unseen pairs if the
-    // top-priority page is exhausted (e.g. a first-page student with <3 pairs).
+    // Find pages that still have unseen pairs. We DO NOT lock out a whole page
+    // after it's used — a page with 12 pairs should keep feeding E2/E3 fresh pairs.
+    // We only exclude the individual pairs already shown this session. SR page
+    // priority still applies, so due review pairs from earlier pages can win, but
+    // otherwise the current page keeps supplying new pairs (proximity = highest).
     const scored = pagesWithItems
-        .filter(p => !usedPageIndices || !usedPageIndices.has(p.pageAbsIndex))
         .map(p => {
             const unseen = p.items.filter(it => !usedPairKeys || !usedPairKeys.has(itemKey(it.item)));
             const sorted = sortPoolBySR(unseen, srTypeState, getCurrentSession(), activePageIndex, null, null);

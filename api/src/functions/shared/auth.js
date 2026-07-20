@@ -98,6 +98,13 @@ function enforceAuth() {
     return process.env.REQUIRE_AUTH === 'true';
 }
 
+// The password-less `login?testMode=true` teacher/BM bypass is gated behind an
+// explicit env flag so it stays OFF in production. When the flag is not 'true',
+// the bypass is skipped and the request falls through to normal login.
+function testModeEnabled() {
+    return process.env.TEST_MODE === 'true';
+}
+
 // Unified gate. Returns the verified token on success.
 //  - enforceAuth() ON : returns { token } or { error: <401 response> }.
 //  - enforceAuth() OFF: returns { token: <verified|null> } (legacy compat).
@@ -178,6 +185,7 @@ module.exports = {
     verifyTokenString,
     getBearer,
     SESSION_SECRET,
+    testModeEnabled,
     unauthorized,
     forbidden,
     requireSelfOrRole,

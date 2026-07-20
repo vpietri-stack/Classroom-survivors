@@ -13,8 +13,10 @@ app.http('login', {
         try {
             if (!validateApiKey(request)) return { status: 403, body: 'Forbidden.' };
 
-            // DEBUG bypass (Val's local test mode only — never student-facing).
-            if (request.query.get('testMode') === 'true') {
+            // Password-less teacher/BM bypass — ONLY when TEST_MODE=true is set
+            // (local dev / test harness). Off in production, so an anonymous
+            // `?testMode=true` falls through to normal login and returns 401.
+            if (request.query.get('testMode') === 'true' && auth.testModeEnabled()) {
                 const users = await getContainer().items
                     .query("SELECT * FROM c WHERE c.role = 'teacher' OR c.role = 'BM' OFFSET 0 LIMIT 1")
                     .fetchAll();

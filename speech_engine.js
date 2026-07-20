@@ -19,7 +19,7 @@
   // REFUSES to `import()`. So the ESM lib + ORT wasm glue (which ARE imported) stay
   // same-origin (GitHub Pages, correct MIME, already confirmed working in WeChat).
   // Only the model weights — the 41 MB bottleneck, fetched not imported — get proxied.
-  const MODEL_ID = 'whisper-tiny.en';
+  const MODEL_ID = 'whisper-tiny';
 
   // Resolve WHICH GitHub Pages repo we are running on, so the proxies point at
   // the SAME repo that's serving the page (promotion-safe: the same code works
@@ -190,8 +190,10 @@
     log('Transcribing audio (wasm) …');
     const out = await transcriber(audio, {
       chunk_length_s: 30,
-      stride_length_s: 5
-      // tiny.en is English-only: do NOT pass language/task (model rejects them).
+      stride_length_s: 5,
+      language: 'en',           // multilingual model: pin to English so L1-Chinese
+                                // students aren't transcribed into pinyin/Chinese.
+      task: 'transcribe'
     });
     const timeSec = ((performance.now() - t0) / 1000).toFixed(1);
     const text = (out && out.text ? out.text : '').trim();

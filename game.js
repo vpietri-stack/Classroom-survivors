@@ -1105,7 +1105,8 @@ function startWordRecGame() {
 function checkWordRec(selected, target, btn) {
     clearInterval(recTimer);
     if (selected === target) {
-        handleMinigameSuccess('rec');
+        // Correct word clicked → now gate on saying it aloud (speech round).
+        runWordRecSpeechGate(target, btn);
     } else {
         synthError();
         btn.classList.add('bg-red-500', 'shake');
@@ -1114,6 +1115,72 @@ function checkWordRec(selected, target, btn) {
             startWordRecGame();
         }, 500);
     }
+}
+
+// After the correct word is clicked, require the student to say it aloud.
+// Heard-word feedback is shown; on close-enough pronunciation the minigame succeeds,
+// otherwise they keep trying until they get it right.
+function runWordRecSpeechGate(target, btn) {
+    const panel = document.getElementById('wordRecGame');
+    if (!panel) { handleMinigameSuccess('rec'); return; }
+
+    // Lock further word clicks during the speech step.
+    const opts = document.getElementById('rec-options');
+    if (opts) { opts.querySelectorAll('button').forEach(b => b.disabled = true); }
+    btn.classList.add('bg-emerald-600');
+
+    let gate = document.getElementById('rec-speech-gate');
+    if (!gate) {
+        gate = document.createElement('div');
+        gate.id = 'rec-speech-gate';
+        gate.className = 'mt-4 text-center';
+        panel.appendChild(gate);
+    }
+    gate.innerHTML = `
+        <div class="text-lg text-white mb-1">Now say the word: <b class="text-emerald-300">${target}</b></div>
+        <div id="rec-speech-btns"></div>
+        <div id="rec-speech-feedback" class="heard-feedback"></div>
+        <div id="rec-speech-status" class="text-sm text-slate-400 mt-2"></div>
+    `;
+    const fb = gate.querySelector('#rec-speech-feedback');
+    const st = gate.querySelector('#rec-speech-status');
+    const btns = gate.querySelector('#rec-speech-btns');
+
+    function setStatus(t) { st.innerText = t || ''; }
+    if (!window.SpeechStatus || !window.SpeechStatus.isReady()) {
+        setStatus('Preparing speech model… (loads automatically in the background)');
+    }
+
+    window.SpeechUI.ensureReady(function () {
+        setStatus('Model ready. Hold the button and say the word.');
+        const recBtn = window.SpeechUI.makeRecordButton({
+            idleText: '🎙️ Hold to speak',
+            label: '🔴 Listening… release to send',
+            onResult: function (text) {
+                fb.className = 'heard-feedback';
+                fb.innerText = 'Heard: “' + (text || '(silence)') + '”';
+                const res = window.Scorer.score(target, text, 2); // lenient; tune later
+                if (res.pass) {
+                    fb.className = 'heard-feedback ok';
+                    fb.innerText += '  ✓';
+                    handleMinigameSuccess('rec');
+                } else {
+                    fb.className = 'heard-feedback no';
+                    fb.innerText += '  — try again (' + res.details + ')';
+                    synthError();
+                }
+            },
+            onError: function (err) {
+                fb.className = 'heard-feedback no';
+                fb.innerText = 'Error: ' + ((err && err.message) || err);
+            }
+        });
+        btns.appendChild(recBtn);
+    }, function (s) {
+        if (s && s.state === 'loading') setStatus('Preparing speech model… ' + (s.pct || 0) + '%');
+        else if (s && s.state === 'preparing') setStatus('Compiling model on your device… (~30s)');
+        else if (s && s.state === 'error') setStatus('Model failed to load: ' + (s.message || ''));
+    });
 }
 
 // --- GRAMMAR ---

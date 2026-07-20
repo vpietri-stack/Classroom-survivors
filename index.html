@@ -651,6 +651,14 @@
     <script src="vampire_survivors.js"></script>
     <script src="gomoku.js"></script>
     <script src="uno.js"></script>
+
+    <!-- ===== Speech-recognition engine (self-contained, global: LocalEngine / Recorder / Scorer) ===== -->
+    <script src="speech_scorer.js?v=1"></script>
+    <script src="speech_recorder.js?v=1"></script>
+    <script src="speech_engine.js?v=1"></script>
+    <!-- Invisible preload: start fetching + compiling the Whisper model on first page load,
+         BEFORE login, so it's ready by the time the student reaches a speech round. -->
+    <script src="speech_preload.js?v=1"></script>
     <!-- Tower Defense HUD -->
     <div id="tdHUD" class="hidden fixed top-0 left-0 right-0 z-40 flex justify-between items-center px-4 py-2 bg-black/50 text-white pointer-events-none">
         <div class="text-xl font-bold">🪙 Coins: <span id="tdCoins">0</span></div>

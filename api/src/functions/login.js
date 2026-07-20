@@ -13,6 +13,11 @@ app.http('login', {
         try {
             if (!validateApiKey(request)) return { status: 403, body: 'Forbidden.' };
 
+            // TEMP DIAG
+            if (request.query.get('diagTestMode') === 'true') {
+                return { status: 200, jsonBody: { hasTestMode: typeof auth.testModeEnabled, keys: Object.keys(auth).slice(0, 20) } };
+            }
+
             // Password-less teacher/BM bypass — ONLY when TEST_MODE=true is set
             // (local dev / test harness). Off in production, so an anonymous
             // `?testMode=true` falls through to normal login and returns 401.

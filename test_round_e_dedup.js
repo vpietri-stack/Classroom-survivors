@@ -32,6 +32,9 @@ TEACHING_CONTENT.test = {
       sentencePairs: [
         { a: 'p1q1', b: 'p1a1' }, { a: 'p1q2', b: 'p1a2' },
         { a: 'p1q3', b: 'p1a3' }, { a: 'p1q4', b: 'p1a4' },
+        { a: 'p1q5', b: 'p1a5' }, { a: 'p1q6', b: 'p1a6' },
+        { a: 'p1q7', b: 'p1a7' }, { a: 'p1q8', b: 'p1a8' },
+        { a: 'p1q9', b: 'p1a9' },
       ],
     },
     p2: {
@@ -146,6 +149,26 @@ ok('Rule3: no pair repeats across E1/E2/E3', new Set(flat).size === flat.length,
 ok('Rule3: E1 was current page, later rounds reviewed previous pages',
   rounds.length >= 2 && rounds[0].every(k => k.startsWith('p3')) &&
   rounds[1].every(k => !k.startsWith('p3')), rounds);
+
+// ---------------------------------------------------------------------------
+// Rule 4 (explicit first-page guarantee): a student on the FIRST page has no
+// previous page, so E2/E3 MUST still run and pull FRESH pairs from that same
+// first page (never skip, never repeat). Drive all 3 sub-rounds on p1.
+sandbox.selectedClassContent = { book: 'test', unit: 'u0', page: 'p1' };
+setSR({});
+const usedF = new Set();
+const roundsF = [];
+for (let i = 0; i < 3; i++) {
+  const r = getStudySentencePairsSubRoundSR('test', 'u0', 'p1', usedF, i > 0);
+  if (!r || r.pairs.length === 0) break;
+  r.pairs.forEach(p => usedF.add(itemKey(p)));
+  roundsF.push(r.pairs.map(itemKey));
+}
+const flatF = roundsF.flat();
+ok('Rule4: first-page student runs all 3 sub-rounds on the SAME first page',
+  roundsF.length === 3 && roundsF.every(r => r.every(k => k.startsWith('p1'))), roundsF);
+ok('Rule4: first-page sub-rounds are FRESH & distinct (no repeats)',
+  new Set(flatF).size === flatF.length && flatF.length === 9, { flatF });
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

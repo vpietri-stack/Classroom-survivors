@@ -19,7 +19,7 @@
   // REFUSES to `import()`. So the ESM lib + ORT wasm glue (which ARE imported) stay
   // same-origin (GitHub Pages, correct MIME, already confirmed working in WeChat).
   // Only the model weights — the 41 MB bottleneck, fetched not imported — get proxied.
-  const MODEL_ID = 'whisper-tiny';
+  const MODEL_ID = 'whisper-tiny.en';
 
   // Resolve WHICH GitHub Pages repo we are running on, so the proxies point at
   // the SAME repo that's serving the page (promotion-safe: the same code works

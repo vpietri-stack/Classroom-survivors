@@ -144,6 +144,71 @@
     return btn;
   }
 
+  // Build a self-contained "say the sentence aloud" gate (used after a correct
+  // unscramble). Returns a DOM node with: prompt, hold-to-talk record button,
+  // heard-feedback line, and a Skip button that appears after the first attempt.
+  // Callers should only build this when SpeechStatus.isReady() is already true.
+  //   opts: { target, level = 2, onDone }
+  //   onDone() is the single "advance" callback — fired on a pass OR on Skip.
+  function makeSentenceGate(opts) {
+    opts = opts || {};
+    injectAssets();
+    const target = opts.target || '';
+    const level = opts.level || 2;
+    const onDone = typeof opts.onDone === 'function' ? opts.onDone : function () {};
+
+    const wrap = document.createElement('div');
+    wrap.className = 'speech-sentence-gate mt-4 text-center';
+    wrap.innerHTML =
+      '<div class="text-lg text-white mb-2">\uD83C\uDFA4 Now say it: <b class="text-emerald-300"></b></div>' +
+      '<div class="speech-gate-btns flex items-center justify-center gap-3 flex-wrap"></div>' +
+      '<div class="heard-feedback"></div>';
+    // Set target as text (avoids HTML-injection from content strings).
+    wrap.querySelector('b').textContent = target;
+
+    const btns = wrap.querySelector('.speech-gate-btns');
+    const feedback = wrap.querySelector('.heard-feedback');
+    let done = false;
+
+    const skip = document.createElement('button');
+    skip.className = 'game-btn bg-slate-600 hover:bg-slate-500 text-base px-5 py-3 rounded-2xl';
+    skip.innerText = 'Skip \u25B6';
+    skip.style.display = 'none';
+    skip.onclick = function () { if (!done) { done = true; onDone(); } };
+
+    const recBtn = makeRecordButton({
+      idleText: '\uD83C\uDF99\uFE0F Hold to speak',
+      label: '\uD83D\uDD34 Listening\u2026 release to send',
+      onResult: function (text) {
+        // Reveal Skip after the first genuine attempt so a student is never stuck.
+        skip.style.display = '';
+        feedback.className = 'heard-feedback';
+        feedback.innerText = 'Heard: \u201C' + (text || '(silence)') + '\u201D';
+        const res = global.Scorer.score(target, text, level);
+        if (res.pass) {
+          feedback.className = 'heard-feedback ok';
+          feedback.innerText += '  \u2713';
+          if (!done) { done = true; onDone(); }
+        } else {
+          feedback.className = 'heard-feedback no';
+          feedback.innerText += '  \u2014 try again (' + res.details + ')';
+          // synthError is a global lexical fn (defined in game.js); call it the
+          // same defensive way the rest of the codebase does.
+          if (typeof synthError === 'function') synthError();
+        }
+      },
+      onError: function (err) {
+        skip.style.display = '';
+        feedback.className = 'heard-feedback no';
+        feedback.innerText = 'Error: ' + ((err && err.message) || err);
+      }
+    });
+
+    btns.appendChild(recBtn);
+    btns.appendChild(skip);
+    return wrap;
+  }
+
   // Wait until the model is ready; call done() immediately if already ready,
   // otherwise poll SpeechStatus. Returns a cancel function.
   function ensureReady(done, tick) {
@@ -166,6 +231,7 @@
     showOverlay: showOverlay,
     hideOverlay: hideOverlay,
     makeRecordButton: makeRecordButton,
+    makeSentenceGate: makeSentenceGate,
     ensureReady: ensureReady
   };
 })(window);

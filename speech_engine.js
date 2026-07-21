@@ -21,6 +21,89 @@
   // Only the model weights — the 41 MB bottleneck, fetched not imported — get proxied.
   const MODEL_ID = 'whisper-tiny.en';
 
+  // ---- IndexedDB cache for model weights (eliminates repeat downloads on WeChat) ----
+  // WeChat aggressively evicts the browser HTTP cache, so students re-download the
+  // ~41 MB model on every pageload. IndexedDB persists across app restarts. We store
+  // each model file as an ArrayBuffer keyed by basename + unique cache-bust token.
+  const DB_NAME = 'whisper-model-cache';
+  const DB_VERSION = 1;
+  const CACHE_KEY = 'whisper-tiny.en-model-v1'; // bump when model files change
+
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, DB_VERSION);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains('files')) {
+          db.createObjectStore('files', { keyPath: 'name' });
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function cacheGet(name) {
+    try {
+      const db = await openDB();
+      return new Promise((resolve) => {
+        const tx = db.transaction('files', 'readonly');
+        const req = tx.objectStore('files').get(CACHE_KEY + '/' + name);
+        req.onsuccess = () => { resolve(req.result ? req.result.data : null); };
+        req.onerror = () => resolve(null);
+      });
+    } catch (_) { return null; }
+  }
+
+  async function cachePut(name, data) {
+    try {
+      const db = await openDB();
+      return new Promise((resolve) => {
+        const tx = db.transaction('files', 'readwrite');
+        tx.objectStore('files').put({ name: CACHE_KEY + '/' + name, data });
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => resolve();
+      });
+    } catch (_) {}
+  }
+
+  // Set of model file basenames we need (stored under MODELS_DIR on disk):
+  //   config.json (probed by pickSource, small), quantized ONNX files (the big ones).
+  const MODEL_FILES = ['config.json', 'encoder_model_quantized.onnx', 'decoder_model_merged_quantized.onnx'];
+
+  // Intercept fetch() for model files: serve from IndexedDB if cached.
+  function patchFetchForModel(baseURL) {
+    const origFetch = globalThis.fetch.bind(globalThis);
+    globalThis.fetch = async function patchedFetch(url, init) {
+      const urlStr = (typeof url === 'string' ? url : url.url || url.toString());
+      // Only intercept model-file requests (matching the base URL + model dir).
+      if (urlStr.includes('models/' + MODEL_ID + '/')) {
+        const name = urlStr.split('/').pop(); // basename
+        const cached = await cacheGet(name);
+        if (cached) {
+          // Return a Response with the cached ArrayBuffer (no network trip).
+          return new Response(cached, { status: 200, headers: { 'Content-Type': 'application/octet-stream' } });
+        }
+        // First-time download: fetch from network and cache it.
+        const resp = await origFetch(url, init);
+        if (resp.ok) {
+          const blob = await resp.clone().arrayBuffer();
+          // Fire-and-forget cache write (don't block the pipeline load).
+          cachePut(name, blob);
+        }
+        return resp;
+      }
+      return origFetch(url, init);
+    };
+  }
+
+  function unPatchFetch() {
+    globalThis.fetch = globalThis.__origFetch || globalThis.fetch;
+  }
+  // Store original fetch so we can unpatch cleanly if needed (currently we leave
+  // the patch in place — subsequent loads will short-circuit to IndexedDB).
+  if (!globalThis.__origFetch) globalThis.__origFetch = globalThis.fetch;
+
   // Resolve WHICH GitHub Pages repo we are running on, so the proxies point at
   // the SAME repo that's serving the page (promotion-safe: the same code works
   // on the preview site AND the live site without editing at deploy time).
@@ -82,6 +165,11 @@
       const src = await pickSource();
       const MODEL_DIR = src.base + 'models/';       // …/models/  (parent of the model folder)
 
+      // Patch global fetch to serve model files from IndexedDB cache if available.
+      // This eliminates the 41 MB download on repeat visits (critical for WeChat
+      // which aggressively evicts the browser HTTP cache).
+      patchFetchForModel(MODEL_DIR);
+
       log('Engine: importing transformers.js (same-origin) …');
       const { pipeline, env } = await import(LIB_URL);
 
@@ -114,6 +202,7 @@
 
   /**
    * @param {Blob|Float32Array} input  16-bit PCM WAV Blob, or raw Float32Array samples
+   * @param {Object} [opts]   { repeatThresholdSec: 1.5 } — short audio gets repeated
    * @returns {Promise<{text:string, timeSec:number}>}
    */
   const TARGET_SR = 16000;   // Whisper tiny.en expects 16 kHz
@@ -184,7 +273,7 @@
     return text;
   }
 
-  async function transcribe(input) {
+  async function transcribe(input, opts) {
     if (!transcriber) await load();
     let audio, sampleRate;
     if (input instanceof Blob) {
@@ -196,6 +285,21 @@
       throw new Error('transcribe: expected a WAV Blob or Float32Array');
     }
     if (sampleRate !== TARGET_SR) audio = resample(audio, sampleRate, TARGET_SR);
+
+    // --- Audio repeat hack for isolated words ---
+    // Whisper tiny.en struggles on very short utterances (~0.3-0.6s single words)
+    // because the decoder has too little audio context to lock onto a token.
+    // Repeating the audio 3x gives the decoder enough acoustic evidence to
+    // recognise the word correctly. The dedup post-processing handles the rest.
+    const repeatThreshold = (opts && opts.repeatThresholdSec) || 1.5;
+    if (audio.length / TARGET_SR < repeatThreshold) {
+      const orig = audio;
+      audio = new Float32Array(orig.length * 3);
+      audio.set(orig);
+      audio.set(orig, orig.length);
+      audio.set(orig, orig.length * 2);
+      log('Engine: short utterance (' + (orig.length / TARGET_SR).toFixed(2) + 's) repeated 3× for better recognition');
+    }
     if (!audio.length) return { text: '(silence / no audio captured)', timeSec: 0 };
 
     const t0 = performance.now();

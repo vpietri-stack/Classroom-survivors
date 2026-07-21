@@ -201,9 +201,9 @@
     const t0 = performance.now();
     log('Transcribing audio (wasm) …');
     const out = await transcriber(audio, {
-      language: 'en',           // English-only model doesn't need chunking params;
-                                // removing them avoids padding issues on short words
-      task: 'transcribe',
+      // whisper-tiny.en has forced_decoder_ids baked in (English-only), so
+      // language/task must NOT be passed here — they'd conflict with the
+      // model's own forced tokens and raise "Cannot specify task" errors.
       temperature: 0,           // deterministic; stops spooky hallucination loops
       best_of: 5,               // beam-5 search: keeps best, drops single-token repetition
       no_repeat_ngram_size: 3,  // blocks "what, what, what" spills from Android speaker echo

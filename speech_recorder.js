@@ -103,11 +103,11 @@
   // Adaptive front-trim: find where speech actually starts instead of applying
   // a fixed millisecond clip. Scans the first 2 s for the first audio window
   // that exceeds a threshold (12% of the recording's peak amplitude, floor 0.015).
-  // This removes TTS echo from Android speaker bleed while preserving the
-  // leading phonemes of short words like "parrot" (~400 ms) and still catching
-  // echo on long words like "Wednesday" (~700 ms+).
+  // Uses 50 ms window (down from 100 ms) to better preserve leading consonants
+  // on short words like "square" (~300 ms) which can lose ~1/3 of their duration
+  // with a 100 ms window.
   function findSpeechStart(samples, rate) {
-    var windowMs = 100;
+    var windowMs = 50;
     var windowSize = Math.round(rate * windowMs / 1000);
     if (windowSize < 1) return 0;
     var maxScan = Math.min(samples.length, Math.round(rate * 2));

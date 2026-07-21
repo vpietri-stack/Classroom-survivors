@@ -172,6 +172,24 @@
     return out;
   }
 
+  // Collapse Tiny Whisper speaker-echo loops (famous 'what what what' / 'the
+  // the the the' patterns on Android). We only strip obvious loops — not normal
+  // two-repeat intent speech like "Wednesday, Wednesday".
+  function collapseRepetition(text) {
+    if (!text) return text;
+    // Strip leading duplicated word + comma pairs ("what, what, " echo tail).
+    // The pattern: a word, comma, same word, comma — drop the leading copy.
+    text = text.replace(/^([^,\s]+,\s*)\1+/, '$1').trim();
+    // Collapse runs of 4+ identical tokens to 1 token. (2-3 repeats happens in
+    // real speech; 4+ is echo/decode loops without any new content.)
+    text = text.replace(/(\S+)((?:\s+\1){3,})/g, '$1');
+    // Final fallback: if the whole thing is just 1 word repeated (no commas,
+    // no other words), and it's super long (>6 tokens total), that's pure echo
+    // → blank so the scorer shows "try again".
+    if (!text.includes(' ') && text.split(/\s+/).length > 6) return '';
+    return text;
+  }
+
   async function transcribe(input) {
     if (!transcriber) await load();
     let audio, sampleRate;
@@ -193,10 +211,20 @@
       stride_length_s: 5,
       language: 'en',           // multilingual model: pin to English so L1-Chinese
                                 // students aren't transcribed into pinyin/Chinese.
-      task: 'transcribe'
+      task: 'transcribe',
+      temperature: 0,           // deterministic; stops spooky hallucination loops
+      best_of: 5,               // beam-5 search: keeps best, drops single-token repetition
+      no_repeat_ngram_size: 3,  // blocks "what, what, what" spills from Android speaker echo
+      length_penalty: 1.0,
     });
     const timeSec = ((performance.now() - t0) / 1000).toFixed(1);
-    const text = (out && out.text ? out.text : '').trim();
+    let text = (out && out.text ? out.text : '').trim();
+
+    // Post-pass: catch any residual repetition hallucination (tiny models can still
+    // n-gram-loop on TTS echo). If the transcript is literally the same token N+
+    // times, treat it as noise / "try again" — never let it score.
+    text = collapseRepetition(text);
+
     log(`Transcribed in ${timeSec}s → "${text}"`);
     return { text, timeSec: parseFloat(timeSec) };
   }

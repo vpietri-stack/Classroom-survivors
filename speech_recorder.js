@@ -82,13 +82,18 @@
 
       const pcm = mergeChunks(this._chunks);
       const rate = this._actualRate || SAMPLE_RATE;
-      // Lead-in silence so Whisper's first-word attention window isn't starved
-      // (fixes first word of a phrase being clipped/misheard, e.g. "pretty"→"freddy").
-      const lead = Math.round(rate * 0.4);
-      const padded = new Float32Array(lead + pcm.length);
-      padded.set(pcm, lead);
+
+      // Android speaker echo: the device plays TTS out loud, so the mic picks it
+      // up at the very start of the recording. Trim the first 180 ms (echo zone).
+      // We still pad the front with 250 ms of real silence so Whisper's attention
+      // window doesn't starve on the first word (prevents "pretty" → "freddy").
+      const echoClip = Math.round(rate * 0.18);
+      const lead     = Math.round(rate * 0.25);
+      const trimmed  = pcm.slice(Math.min(echoClip, pcm.length));
+      const padded   = new Float32Array(lead + trimmed.length);
+      padded.set(trimmed, lead);
       const wav = encodeWav(padded, rate);
-      return wav; // Blob, rate Hz / 16-bit PCM WAV
+      return wav;
     }
   }
 

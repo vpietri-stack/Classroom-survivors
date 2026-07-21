@@ -25,6 +25,12 @@ node_modules/
 # Hermes agent scratch workspace
 .hermes/
 
+# Qoder IDE auto-generated repo wiki / docs (regenerated locally, not shipped)
+.qoder/
+
+# One-off scratch string dump
+temp_strings.txt
+
 # Local dev/test throwaway artifacts (logs, screenshots, one-off verify scripts)
 boot_refactor_plan.md
 boot_refactor_shot.png

@@ -80,19 +80,13 @@
       try { this.processor.disconnect(); } catch (_) {}
       if (this.stream) this.stream.getTracks().forEach(t => t.stop());
 
+      // Trim speechless lead (Android echo tap + dead air) via adaptive VAD:
+      // keep everything from the first meaningful-amplitude window onward.
       const pcm = mergeChunks(this._chunks);
       const rate = this._actualRate || SAMPLE_RATE;
-
-      // Android speaker echo: the device plays TTS out loud, so the mic picks it
-      // up at the very start of the recording. Trim the first 180 ms (echo zone).
-      // We still pad the front with 250 ms of real silence so Whisper's attention
-      // window doesn't starve on the first word (prevents "pretty" → "freddy").
-      const echoClip = Math.round(rate * 0.18);
-      const lead     = Math.round(rate * 0.25);
-      const trimmed  = pcm.slice(Math.min(echoClip, pcm.length));
-      const padded   = new Float32Array(lead + trimmed.length);
-      padded.set(trimmed, lead);
-      const wav = encodeWav(padded, rate);
+      const start = findSpeechStart(pcm, rate);
+      const trimmed = pcm.slice(start);
+      const wav = encodeWav(trimmed, rate);
       return wav;
     }
   }
@@ -104,6 +98,36 @@
     let off = 0;
     chunks.forEach(c => { out.set(c, off); off += c.length; });
     return out;
+  }
+
+  // Adaptive front-trim: find where speech actually starts instead of applying
+  // a fixed millisecond clip. Scans the first 2 s for the first audio window
+  // that exceeds a threshold (12% of the recording's peak amplitude, floor 0.015).
+  // This removes TTS echo from Android speaker bleed while preserving the
+  // leading phonemes of short words like "parrot" (~400 ms) and still catching
+  // echo on long words like "Wednesday" (~700 ms+).
+  function findSpeechStart(samples, rate) {
+    var windowMs = 100;
+    var windowSize = Math.round(rate * windowMs / 1000);
+    if (windowSize < 1) return 0;
+    var maxScan = Math.min(samples.length, Math.round(rate * 2));
+
+    var peak = 0;
+    for (var i = 0; i < maxScan; i++) {
+      var abs = Math.abs(samples[i]);
+      if (abs > peak) peak = abs;
+    }
+    var threshold = Math.max(0.015, peak * 0.12);
+    var hop = Math.max(1, Math.floor(windowSize / 2));
+
+    for (var i = 0; i < maxScan; i += hop) {
+      var sum = 0;
+      var end = Math.min(i + windowSize, maxScan);
+      var len = end - i;
+      for (var j = i; j < end; j++) sum += samples[j] * samples[j];
+      if (Math.sqrt(sum / len) > threshold) return i;
+    }
+    return 0;
   }
 
   function encodeWav(samples, sampleRate) {

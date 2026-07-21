@@ -207,8 +207,8 @@
     const t0 = performance.now();
     log('Transcribing audio (wasm) …');
     const out = await transcriber(audio, {
-      chunk_length_s: 30,
-      stride_length_s: 5,
+      chunk_length_s: 5,
+      stride_length_s: 1,
       language: 'en',           // multilingual model: pin to English so L1-Chinese
                                 // students aren't transcribed into pinyin/Chinese.
       task: 'transcribe',

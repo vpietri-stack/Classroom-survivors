@@ -11,13 +11,16 @@ app.http('saveAnalytics', {
         try {
             if (!validateApiKey(request)) return { status: 403, body: 'Forbidden.' };
 
-            // Identity comes from the verified session token, never the body.
-            // Legacy (no-token) mode falls back to the client-supplied id.
-            const authGate = auth.requireAuth(request);
+            // Parse first so we can read a token the unload beacon ships in the
+            // body (sendBeacon/keepalive can't set headers; SWA drops POST query
+            // params). Identity still comes from the verified token — never
+            // trusted from the body's studentId — and legacy (no-token) mode
+            // falls back to the client-supplied id.
+            const body = await request.json();
+            const authGate = auth.requireAuth(request, body.authToken);
             if (authGate.error) return authGate.error;
             const token = authGate.token;
 
-            const body = await request.json();
             const studentId = token ? token.sub : body.studentId; // scope to self only
             const { events, srState, incrementSession } = body;
 

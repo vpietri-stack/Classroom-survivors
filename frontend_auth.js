@@ -207,15 +207,22 @@ async function flushAnalyticsViaBeacon() {
     if (srPayload)        body.srState          = srPayload;
     if (incrementSession) body.incrementSession = true;
 
-    const payload = JSON.stringify(body);
     const token = getSessionToken();
     const appKey = await getAppKey();
 
-    // sendBeacon cannot set arbitrary headers, only Content-Type. The server
-    // reads our identity from the body-less cases... so we instead append the
-    // token + app key as query params (the SWA proxy does not strip those) and
-    // send as text/plain (sendBeacon's only settable type). Server-side we read
-    // X-Auth-Token from the query string as a fallback.
+    // sendBeacon (and fetch keepalive) cannot set custom headers, so the auth
+    // token + app key must travel in the request BODY, not headers. We keep the
+    // query-param copy below for backward-compat, BUT Azure SWA's
+    // managed-functions proxy does NOT populate request.query on POST — so the
+    // query fallback 401s while the body is delivered reliably (exactly like the
+    // X-Auth-Token header path). Ship the token in the body so the unload flush
+    // authenticates even when the session is enforced.
+    if (token)  body.authToken = token;
+    if (appKey) body.appKey   = appKey;
+
+    const payload = JSON.stringify(body);
+
+    // (Legacy) query-param copy — ignored by SWA on POST, harmless elsewhere.
     const qs = new URLSearchParams();
     if (token)  qs.set('authToken', token);
     if (appKey) qs.set('appKey', appKey);

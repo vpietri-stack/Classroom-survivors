@@ -118,8 +118,11 @@ function testModeEnabled() {
 // Unified gate. Returns the verified token on success.
 //  - enforceAuth() ON : returns { token } or { error: <401 response> }.
 //  - enforceAuth() OFF: returns { token: <verified|null> } (legacy compat).
-function requireAuth(request) {
-    const token = verifyToken(request, SESSION_SECRET());
+// `overrideToken` lets a caller supply the token directly (e.g. when it was
+// shipped inside a JSON body because sendBeacon/keepalive cannot set headers).
+function requireAuth(request, overrideToken) {
+    const raw = overrideToken || getBearer(request);
+    const token = verifyTokenString(raw, SESSION_SECRET());
     if (token) return { token };
     if (enforceAuth()) return { error: unauthorized() };
     return { token: null };

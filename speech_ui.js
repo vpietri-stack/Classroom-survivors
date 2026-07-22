@@ -17,89 +17,74 @@
       const st = document.createElement('style');
       st.id = CSS_ID;
       st.textContent = `
-#${OVERLAY_ID}{position:fixed;inset:0;z-index:60;display:none;align-items:center;
-  justify-content:center;background:rgba(0,0,0,.45);
-  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
-  touch-action:none;user-select:none;}
-#${OVERLAY_ID}.show{display:flex;}
-.rec-bubble{background:#2f2f2f;color:#fff;border-radius:20px;padding:22px 28px 18px;
-  display:flex;flex-direction:column;align-items:center;gap:12px;
-  box-shadow:0 10px 40px rgba(0,0,0,.4);min-width:180px;}
-.rec-mic{font-size:40px;line-height:1;transform:scale(1);transition:transform .06s ease-out;}
-.rec-bars{display:flex;align-items:flex-end;gap:4px;height:34px;}
-.rec-bars span{width:5px;background:#9be89b;border-radius:3px;height:6px;
-  transition:height .08s ease-out;}
-.rec-stop-wrap{position:relative;width:80px;height:80px;margin:6px 0;}
-.rec-stop-ring{position:absolute;inset:0;border-radius:50%;border:3px solid rgba(96,165,250,.45);animation:recPulse 1.4s ease-in-out infinite;}
-.rec-stop-ring:nth-child(2){inset:-8px;border-color:rgba(96,165,250,.25);animation-delay:.3s;}
-@keyframes recPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.08);opacity:.6}}
-.rec-stop-btn{position:absolute;inset:0;border-radius:50%;background:#3b82f6;border:none;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(59,130,246,.5);}
-.rec-stop-btn:active{transform:scale(.93);}
-.rec-stop-btn .sq{width:26px;height:26px;background:#fff;border-radius:5px;}
-.rec-hint{font-size:13px;color:#d0d0d0;}
-.rec-hint b{color:#fff;}
 .speech-rec-btn{user-select:none;touch-action:none;transition:transform .06s;}
 .speech-rec-btn:active{transform:scale(.97);}
 .heard-feedback{font-size:15px;min-height:22px;margin-top:6px;}
 .heard-feedback.ok{color:#22c55e;} .heard-feedback.no{color:#ef4444;}
-.rec-cancel{margin-top:2px;background:rgba(255,255,255,.12);color:#e5e5e5;border:1px solid rgba(255,255,255,.25);
-  border-radius:12px;padding:6px 16px;font-size:13px;cursor:pointer;}
-.rec-cancel:active{transform:scale(.97);}
+/* Inline recording indicator (no overlay — sentence stays visible) */
+.rec-inline{display:none;flex-direction:column;align-items:center;gap:8px;margin-top:10px;}
+.rec-inline.show{display:flex;}
+.rec-inline-bars{display:flex;align-items:flex-end;gap:3px;height:24px;}
+.rec-inline-bars span{width:4px;background:#9be89b;border-radius:2px;height:4px;
+  transition:height .08s ease-out;}
+.rec-inline-label{display:flex;align-items:center;gap:8px;font-size:15px;color:#fca5a5;
+  background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.4);border-radius:12px;
+  padding:8px 18px;cursor:pointer;}
+.rec-inline-label:active{transform:scale(.97);}
+.rec-inline-label .sq{width:14px;height:14px;background:#ef4444;border-radius:3px;flex-shrink:0;}
+.rec-inline-cancel{font-size:12px;color:#9ca3af;background:none;border:none;cursor:pointer;
+  text-decoration:underline;padding:4px 8px;}
+.rec-inline-cancel:active{color:#fff;}
 `;
       document.head.appendChild(st);
-    }
-    if (!document.getElementById(OVERLAY_ID)) {
-      const ov = document.createElement('div');
-      ov.id = OVERLAY_ID;
-      ov.innerHTML = `<div class="rec-bubble">
-        <div class="rec-mic" id="recMic">🎙️</div>
-        <div class="rec-bars" id="recBars">
-          <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-        </div>
-        <div class="rec-stop-wrap">
-          <div class="rec-stop-ring"></div>
-          <div class="rec-stop-ring"></div>
-          <button class="rec-stop-btn" id="recStop" type="button"><span class="sq"></span></button>
-        </div>
-        <div class="rec-hint">Listening… <b>tap ⬛ to stop</b></div>
-        <button class="rec-cancel" id="recCancel" type="button">Cancel (discard)</button>
-      </div>`;
-      document.body.appendChild(ov);
     }
   }
 
   let _raf = null;
-  // Set by makeRecordButton while a recording is in progress; the overlay's
-  // Cancel button invokes it to discard the recording and return to idle.
-  let _onOverlayStop = null;
-  let _onOverlayCancel = null;
+  let _inlineEl = null; // the inline recording indicator element
+  let _onInlineStop = null;
+  let _onInlineCancel = null;
+
   function loop() {
-    const ov = document.getElementById(OVERLAY_ID);
-    if (!ov || !ov.classList.contains('show')) { _raf = null; return; }
+    if (!_inlineEl || !_inlineEl.classList.contains('show')) { _raf = null; return; }
     const lvl = (global.Recorder && global._activeRecorder) ? global._activeRecorder.level || 0 : 0;
-    const mic = document.getElementById('recMic');
-    if (mic) mic.style.transform = 'scale(' + (1 + Math.min(1, lvl) * 0.35).toFixed(3) + ')';
-    const bars = document.getElementById('recBars');
+    const bars = _inlineEl.querySelector('.rec-inline-bars');
     if (bars) {
       const n = bars.children.length;
       for (let i = 0; i < n; i++) {
-        const h = 6 + Math.max(0, Math.sin(i * 0.9 + performance.now() / 90)) * 10 + lvl * 22;
-        bars.children[i].style.height = (6 + lvl * 26 * (0.5 + 0.5 * Math.abs(Math.sin(i + performance.now() / 120)))).toFixed(0) + 'px';
+        bars.children[i].style.height = (4 + lvl * 18 * (0.5 + 0.5 * Math.abs(Math.sin(i + performance.now() / 120)))).toFixed(0) + 'px';
       }
     }
     _raf = requestAnimationFrame(loop);
   }
 
-  function showOverlay() {
+  function showInline(parentEl) {
     injectAssets();
-    const ov = document.getElementById(OVERLAY_ID);
-    ov.classList.add('show');
+    if (!_inlineEl) {
+      _inlineEl = document.createElement('div');
+      _inlineEl.className = 'rec-inline';
+      _inlineEl.innerHTML = `
+        <div class="rec-inline-bars"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="rec-inline-label" id="recInlineStop"><span class="sq"></span>正在录音，点击停止</div>
+        <button class="rec-inline-cancel" id="recInlineCancel" type="button">取消</button>`;
+    }
+    // Insert after the parent (record button area)
+    if (parentEl && parentEl.parentNode && _inlineEl.parentNode !== parentEl.parentNode) {
+      parentEl.parentNode.insertBefore(_inlineEl, parentEl.nextSibling);
+    }
+    _inlineEl.classList.add('show');
+    // Wire stop/cancel
+    const stopBtn = _inlineEl.querySelector('#recInlineStop');
+    const cancelBtn = _inlineEl.querySelector('#recInlineCancel');
+    stopBtn.onclick = function () { if (_onInlineStop) _onInlineStop(); };
+    cancelBtn.onclick = function () { if (_onInlineCancel) _onInlineCancel(); };
     if (!_raf) _raf = requestAnimationFrame(loop);
   }
-  function hideOverlay() {
-    const ov = document.getElementById(OVERLAY_ID);
-    if (ov) ov.classList.remove('show');
+
+  function hideInline() {
+    if (_inlineEl) _inlineEl.classList.remove('show');
+    _onInlineStop = null;
+    _onInlineCancel = null;
   }
 
   // Build a tap-to-toggle record button. Tap once to start recording, tap again
@@ -127,36 +112,26 @@
 
     function updateUI() {
       if (state === 'recording') {
-        btn.innerText = opts.label || '🔴 Listening… tap to stop';
+        btn.innerText = '⏹ 停止录音';
         btn.classList.remove('bg-red-600', 'hover:bg-red-500');
         btn.classList.add('bg-rose-600', 'hover:bg-rose-500');
         btn.disabled = false;
       } else if (state === 'busy') {
-        btn.innerText = '⏳ …';
+        btn.innerText = '⏳ 识别中…';
         btn.disabled = true;
       } else {
-        btn.innerText = opts.idleText || '🎙️ Tap to speak';
+        btn.innerText = opts.idleText || '🎙️ 点击说话';
         btn.classList.remove('bg-rose-600', 'hover:bg-rose-500');
         btn.classList.add('bg-red-600', 'hover:bg-red-500');
         btn.disabled = false;
       }
     }
     function clearSafety() { if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; } }
-    function toIdle() { state = 'idle'; clearSafety(); _onOverlayStop = null; _onOverlayCancel = null; hideOverlay(); updateUI(); }
+    function toIdle() { state = 'idle'; clearSafety(); hideInline(); updateUI(); }
 
-    // Wire the overlay's Stop + Cancel buttons (active while this button records).
-    _onOverlayStop = function () { if (state === 'recording') finishRecording(); };
-    _onOverlayCancel = function () { if (state === 'recording') cancelRecording(); };
-    const stopBtn = document.getElementById('recStop');
-    if (stopBtn && !stopBtn.dataset.bound) {
-      stopBtn.dataset.bound = '1';
-      stopBtn.addEventListener('click', function () { if (_onOverlayStop) _onOverlayStop(); });
-    }
-    const cancelBtn = document.getElementById('recCancel');
-    if (cancelBtn && !cancelBtn.dataset.bound) {
-      cancelBtn.dataset.bound = '1';
-      cancelBtn.addEventListener('click', function () { if (_onOverlayCancel) _onOverlayCancel(); });
-    }
+    // Wire the inline indicator's Stop + Cancel (active while this button records).
+    _onInlineStop = function () { if (state === 'recording') finishRecording(); };
+    _onInlineCancel = function () { if (state === 'recording') cancelRecording(); };
 
     function startRecording() {
       if (state !== 'idle') return;
@@ -169,7 +144,7 @@
       // there is no gesture to lose — we simply continue once permission resolves.
       rec.start().then(function () {
         state = 'recording';
-        showOverlay();
+        showInline(btn);  // inline indicator, no overlay — sentence stays visible
         updateUI();
         clearSafety();
         safetyTimer = setTimeout(finishRecording, MAX_RECORD_MS);
@@ -185,9 +160,7 @@
       if (state !== 'recording') return;
       state = 'busy';
       clearSafety();
-      _onOverlayStop = null;
-      _onOverlayCancel = null;
-      hideOverlay();
+      hideInline();
       updateUI();
       rec.stop().then(function (blob) {
         if (!blob || !blob.size) { toIdle(); return; }
@@ -251,16 +224,15 @@
 
     const skip = document.createElement('button');
     skip.className = 'game-btn bg-slate-600 hover:bg-slate-500 text-base px-5 py-3 rounded-2xl';
-    skip.innerText = 'Skip \u25B6';
+    skip.innerText = '跳过 \u25B6';
     skip.style.display = 'none';
     skip.onclick = function () { if (!done) { done = true; onDone(); } };
 
     const recBtn = makeRecordButton({
-      idleText: '\uD83C\uDF99\uFE0F Tap to speak',
-      label: '\uD83D\uDD34 Listening\u2026 tap to stop',
+      idleText: '\uD83C\uDF99\uFE0F 点击说话',
       onResult: function (text) {
         feedback.className = 'heard-feedback';
-        feedback.innerText = 'Heard: \u201C' + (text || '(silence)') + '\u201D';
+        feedback.innerText = '听到: \u201C' + (text || '(静音)') + '\u201D';
         const res = global.Scorer.score(target, text, level);
         if (res.pass) {
           // Passed: play the success sound, show the score, and replace the
@@ -268,7 +240,7 @@
           // decides when to advance.
           const pct = Math.round((res.accuracy || 0) * 100);
           feedback.className = 'heard-feedback ok';
-          feedback.innerText += '  \u2713 Score: ' + pct + '%';
+          feedback.innerText += '  \u2713 得分: ' + pct + '%';
           // playHappySound is a global fn (study_mode.js) — reuse the existing
           // success sound rather than inventing a new one.
           if (typeof playHappySound === 'function') playHappySound();
@@ -276,13 +248,13 @@
           skip.style.display = 'none';
           const cont = document.createElement('button');
           cont.className = 'game-btn bg-emerald-600 hover:bg-emerald-500 text-lg px-8 py-4 rounded-2xl shadow-lg';
-          cont.innerText = 'Continue \u25B6';
+          cont.innerText = '继续 \u25B6';
           cont.onclick = function () { if (!done) { done = true; onDone(); } };
           btns.appendChild(cont);
         } else {
           failCount++;
           feedback.className = 'heard-feedback no';
-          feedback.innerText += '  \u2014 try again (' + res.details + ')';
+          feedback.innerText += '  \u2014 再试一次 (' + res.details + ')';
           // synthError is a global lexical fn (defined in game.js); call it the
           // same defensive way the rest of the codebase does.
           if (typeof synthError === 'function') synthError();
@@ -293,7 +265,7 @@
       },
       onError: function (err) {
         feedback.className = 'heard-feedback no';
-        feedback.innerText = 'Error: ' + ((err && err.message) || err);
+        feedback.innerText = '错误: ' + ((err && err.message) || err);
         // A hard mic/engine error also counts toward revealing Skip.
         failCount++;
         if (failCount >= SKIP_AFTER_FAILS) skip.style.display = '';
@@ -324,8 +296,6 @@
 
   global.SpeechUI = {
     injectAssets: injectAssets,
-    showOverlay: showOverlay,
-    hideOverlay: hideOverlay,
     makeRecordButton: makeRecordButton,
     makeSentenceGate: makeSentenceGate,
     ensureReady: ensureReady

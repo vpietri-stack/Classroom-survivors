@@ -88,8 +88,15 @@
   // can hang indefinitely; without a timeout SpeechStatus sits at 'preparing'
   // forever and speech silently never appears. Bound it, retry once, then surface
   // an error (the debug panel's Retry button recovers without a page reload).
-  const COMPILE_TIMEOUT_MS = 180000; // field-tested: mobile compile takes ~170s; 180s per attempt
-  const MAX_COMPILE_RETRIES = 2;    // up to 3 total attempts (some devices need 2 warmup rounds)
+  //
+  // Strategy: first attempt gets a LONG timeout (300s) because mobile WASM compile
+  // is slow on cold start (~170s observed). Retries use a shorter timeout (120s)
+  // since the runtime is already "warm". A heartbeat log every 20s reassures the
+  // user (and the debug panel) that compilation is progressing, not frozen.
+  const COMPILE_TIMEOUT_FIRST_MS = 300000;  // 5 min for cold compile
+  const COMPILE_TIMEOUT_RETRY_MS = 120000;  // 2 min for warm retries
+  const MAX_COMPILE_RETRIES = 2;            // up to 3 total attempts
+  const COMPILE_HEARTBEAT_MS = 20000;       // log "still working" every 20s
 
   // Reject if `promise` doesn't settle within `ms` (a hung compile never resolves).
   function withTimeout(promise, ms, label) {
@@ -281,20 +288,29 @@
       log('Engine: download complete, compiling model (this can take a while on first load) …');
       let pipe;
       for (let attempt = 0; attempt <= MAX_COMPILE_RETRIES; attempt++) {
+        const timeoutMs = attempt === 0 ? COMPILE_TIMEOUT_FIRST_MS : COMPILE_TIMEOUT_RETRY_MS;
+        // Heartbeat: log every 20s so the user/debug panel knows compile is progressing.
+        let heartbeatCount = 0;
+        const heartbeat = setInterval(() => {
+          heartbeatCount++;
+          log(`Engine: still compiling… (${heartbeatCount * COMPILE_HEARTBEAT_MS / 1000}s, attempt ${attempt + 1})`);
+        }, COMPILE_HEARTBEAT_MS);
         try {
           pipe = await withTimeout(
             pipeline('automatic-speech-recognition', MODEL_ID, pipelineOpts),
-            COMPILE_TIMEOUT_MS,
+            timeoutMs,
             'model compile'
           );
+          clearInterval(heartbeat);
           break;
         } catch (e) {
+          clearInterval(heartbeat);
           const timedOut = /timed out/.test((e && e.message) || '');
           if (timedOut && attempt < MAX_COMPILE_RETRIES) {
-            log(`Engine: compile/init did not finish in ${Math.round(COMPILE_TIMEOUT_MS / 1000)}s (attempt ${attempt + 1}) — retrying …`);
+            log(`Engine: compile did not finish in ${Math.round(timeoutMs / 1000)}s (attempt ${attempt + 1}) — retrying with warm runtime …`);
             continue;
           }
-          if (timedOut) log(`Engine: compile/init still not finished after ${MAX_COMPILE_RETRIES + 1} attempts`);
+          if (timedOut) log(`Engine: compile still not finished after ${MAX_COMPILE_RETRIES + 1} attempts`);
           throw e;
         }
       }

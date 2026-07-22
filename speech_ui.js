@@ -35,6 +35,9 @@
 .speech-rec-btn:active{transform:scale(.97);}
 .heard-feedback{font-size:15px;min-height:22px;margin-top:6px;}
 .heard-feedback.ok{color:#22c55e;} .heard-feedback.no{color:#ef4444;}
+.rec-cancel{margin-top:2px;background:rgba(255,255,255,.12);color:#e5e5e5;border:1px solid rgba(255,255,255,.25);
+  border-radius:12px;padding:6px 16px;font-size:13px;cursor:pointer;}
+.rec-cancel:active{transform:scale(.97);}
 `;
       document.head.appendChild(st);
     }
@@ -46,13 +49,17 @@
         <div class="rec-bars" id="recBars">
           <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
         </div>
-        <div class="rec-hint">Listening… <b>release to send</b></div>
+        <div class="rec-hint">Listening… <b>tap to stop</b></div>
+        <button class="rec-cancel" id="recCancel" type="button">Cancel</button>
       </div>`;
       document.body.appendChild(ov);
     }
   }
 
   let _raf = null;
+  // Set by makeRecordButton while a recording is in progress; the overlay's
+  // Cancel button invokes it to discard the recording and return to idle.
+  let _onOverlayCancel = null;
   function loop() {
     const ov = document.getElementById(OVERLAY_ID);
     if (!ov || !ov.classList.contains('show')) { _raf = null; return; }
@@ -81,66 +88,112 @@
     if (ov) ov.classList.remove('show');
   }
 
-  // Build a hold-to-talk record button. onResult(text) called with transcript on release.
-  // opts: { label, idleText, color }
+  // Build a tap-to-toggle record button. Tap once to start recording, tap again
+  // to stop + transcribe; onResult(text) is called with the transcript.
+  //
+  // Why tap-to-toggle (not hold-to-talk): the FIRST tap triggers the OS mic
+  // permission prompt, which steals the pointer gesture — with hold-to-talk the
+  // release (pointerup) was lost, so iPad got stuck "listening" with no way out
+  // and Android errored on the first try. A discrete tap has no release to lose,
+  // so the permission prompt is harmless. Safety nets guarantee we can never get
+  // stuck: a max-duration auto-stop and an overlay Cancel button.
+  //
+  // opts: { label, idleText, color, onResult, onError }
   function makeRecordButton(opts) {
     opts = opts || {};
     injectAssets();
+    const MAX_RECORD_MS = 15000; // safety: auto-stop a runaway recording
     const btn = document.createElement('button');
-    btn.className = 'speech-rec-btn game-btn text-xl px-8 py-4 rounded-2xl shadow-lg ' +
-      (opts.color || 'bg-red-600 hover:bg-red-500');
-    btn.innerText = opts.idleText || '🎙️ Hold to speak';
+    btn.type = 'button';
+    btn.className = 'speech-rec-btn game-btn text-xl px-8 py-4 rounded-2xl shadow-lg';
     const rec = new global.Recorder();
     global._activeRecorder = rec; // so the overlay loop can read .level
-    let busy = false, pointerDown = false;
+    let state = 'idle'; // 'idle' | 'recording' | 'busy'
+    let safetyTimer = null;
 
-    function start(e) {
-      if (busy) return;
+    function updateUI() {
+      if (state === 'recording') {
+        btn.innerText = opts.label || '🔴 Listening… tap to stop';
+        btn.classList.remove('bg-red-600', 'hover:bg-red-500');
+        btn.classList.add('bg-rose-600', 'hover:bg-rose-500');
+        btn.disabled = false;
+      } else if (state === 'busy') {
+        btn.innerText = '⏳ …';
+        btn.disabled = true;
+      } else {
+        btn.innerText = opts.idleText || '🎙️ Tap to speak';
+        btn.classList.remove('bg-rose-600', 'hover:bg-rose-500');
+        btn.classList.add('bg-red-600', 'hover:bg-red-500');
+        btn.disabled = false;
+      }
+    }
+    function clearSafety() { if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; } }
+    function toIdle() { state = 'idle'; clearSafety(); _onOverlayCancel = null; hideOverlay(); updateUI(); }
+
+    // Wire the overlay's Cancel button (only active while this button records).
+    _onOverlayCancel = function () { if (state === 'recording') cancelRecording(); };
+    const cancelBtn = document.getElementById('recCancel');
+    if (cancelBtn && !cancelBtn.dataset.bound) {
+      cancelBtn.dataset.bound = '1';
+      cancelBtn.addEventListener('click', function () { if (_onOverlayCancel) _onOverlayCancel(); });
+    }
+
+    function startRecording() {
+      if (state !== 'idle') return;
       if (!global.Recorder.isSupported()) {
-        alert('Microphone unavailable. Allow mic access in your browser/WeChat settings.');
+        if (opts.onError) opts.onError(new Error('Microphone unavailable. Allow mic access in your browser/WeChat settings.'));
+        else alert('Microphone unavailable. Allow mic access in your browser/WeChat settings.');
         return;
       }
-      pointerDown = true;
-      try { btn.setPointerCapture(e.pointerId); } catch (_) {}
-      btn.innerText = opts.label || '🔴 Listening… release to send';
-      showOverlay();
-      rec.start().catch(function (err) {
-        hideOverlay();
-        pointerDown = false;
-        btn.innerText = opts.idleText || '🎙️ Hold to speak';
-        alert('Mic error: ' + (err && err.message || err));
+      // The permission prompt may appear here; because this is a tap (not a hold),
+      // there is no gesture to lose — we simply continue once permission resolves.
+      rec.start().then(function () {
+        state = 'recording';
+        showOverlay();
+        updateUI();
+        clearSafety();
+        safetyTimer = setTimeout(finishRecording, MAX_RECORD_MS);
+      }).catch(function (err) {
+        // Permission denied / mic error -> clean, retryable reset (no stuck state).
+        toIdle();
+        if (opts.onError) opts.onError(err);
+        else alert('Mic error: ' + ((err && err.message) || err));
       });
     }
-    function stop() {
-      if (!pointerDown) return;
-      pointerDown = false;
-      btn.innerText = '⏳ …';
+
+    function finishRecording() {
+      if (state !== 'recording') return;
+      state = 'busy';
+      clearSafety();
+      _onOverlayCancel = null;
       hideOverlay();
+      updateUI();
       rec.stop().then(function (blob) {
-        if (!blob || !blob.size) { btn.innerText = opts.idleText || '🎙️ Hold to speak'; return; }
-        if (busy) return;
-        busy = true;
+        if (!blob || !blob.size) { toIdle(); return; }
         return global.LocalEngine.transcribe(blob).then(function (r) {
-          busy = false;
-          btn.innerText = opts.idleText || '🎙️ Hold to speak';
+          toIdle();
           if (opts.onResult) opts.onResult(r.text || '');
-        }).catch(function (err) {
-          busy = false;
-          btn.innerText = opts.idleText || '🎙️ Hold to speak';
-          if (opts.onError) opts.onError(err);
         });
       }).catch(function (err) {
-        busy = false;
-        hideOverlay();
-        btn.innerText = opts.idleText || '🎙️ Hold to speak';
+        toIdle();
         if (opts.onError) opts.onError(err);
       });
     }
 
-    btn.addEventListener('pointerdown', start);
-    btn.addEventListener('pointerup', stop);
-    btn.addEventListener('pointercancel', stop);
-    btn.addEventListener('lostpointercapture', stop);
+    function cancelRecording() {
+      if (state !== 'recording') return;
+      clearSafety();
+      // Stop the mic but discard the audio (no transcription).
+      rec.stop().catch(function () {});
+      toIdle();
+    }
+
+    btn.addEventListener('click', function () {
+      if (state === 'idle') startRecording();
+      else if (state === 'recording') finishRecording();
+      // 'busy' (transcribing): ignore taps.
+    });
+    updateUI();
     return btn;
   }
 
@@ -182,8 +235,8 @@
     skip.onclick = function () { if (!done) { done = true; onDone(); } };
 
     const recBtn = makeRecordButton({
-      idleText: '\uD83C\uDF99\uFE0F Hold to speak',
-      label: '\uD83D\uDD34 Listening\u2026 release to send',
+      idleText: '\uD83C\uDF99\uFE0F Tap to speak',
+      label: '\uD83D\uDD34 Listening\u2026 tap to stop',
       onResult: function (text) {
         feedback.className = 'heard-feedback';
         feedback.innerText = 'Heard: \u201C' + (text || '(silence)') + '\u201D';

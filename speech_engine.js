@@ -83,6 +83,22 @@
   const MIRROR_TIMEOUT_MS = 90000; // per-file, per-mirror; tolerates slow GFW links but aborts true stalls
   let mirrorIdx = 0;               // index into MODEL_SOURCES; seeded by pickSource(), advanced on fallback
 
+  // Guard the model compile/init phase (after the download finishes). On some
+  // browsers (notably Chrome on certain devices) the ONNX/WASM session creation
+  // can hang indefinitely; without a timeout SpeechStatus sits at 'preparing'
+  // forever and speech silently never appears. Bound it, retry once, then surface
+  // an error (the debug panel's Retry button recovers without a page reload).
+  const COMPILE_TIMEOUT_MS = 90000; // tunable; first-load compile can be slow on low-end devices
+  const MAX_COMPILE_RETRIES = 1;    // one auto-retry after a compile timeout
+
+  // Reject if `promise` doesn't settle within `ms` (a hung compile never resolves).
+  function withTimeout(promise, ms, label) {
+    return new Promise((resolve, reject) => {
+      const t = setTimeout(() => reject(new Error(label + ' timed out after ' + Math.round(ms / 1000) + 's')), ms);
+      promise.then((v) => { clearTimeout(t); resolve(v); }, (e) => { clearTimeout(t); reject(e); });
+    });
+  }
+
   // Portion of a model-file URL starting at 'models/<MODEL_ID>/...' (mirror-independent).
   function modelRelPath(urlStr) {
     const marker = 'models/' + MODEL_ID + '/';
@@ -250,7 +266,7 @@
       env.backends.onnx.wasm.wasmPaths = WASM_PATH;
 
       log('Engine: loading ' + MODEL_ID + ' from ' + src.name + ' (quantized, wasm) — first load ~41 MB …');
-      const pipe = await pipeline('automatic-speech-recognition', MODEL_ID, {
+      const pipelineOpts = {
         device: 'wasm',
         dtype: { encoder_model: 'q8', decoder_model_merged: 'q8' },
         progress_callback: (p) => {
@@ -259,7 +275,29 @@
             onProgress(pct, p.file || '');
           }
         }
-      });
+      };
+      // Download finishes at 100%; the compile/init phase that follows is silent and
+      // (on some browsers) can hang — narrate it and bound it with a timeout+retry.
+      log('Engine: download complete, compiling model (this can take a while on first load) …');
+      let pipe;
+      for (let attempt = 0; attempt <= MAX_COMPILE_RETRIES; attempt++) {
+        try {
+          pipe = await withTimeout(
+            pipeline('automatic-speech-recognition', MODEL_ID, pipelineOpts),
+            COMPILE_TIMEOUT_MS,
+            'model compile'
+          );
+          break;
+        } catch (e) {
+          const timedOut = /timed out/.test((e && e.message) || '');
+          if (timedOut && attempt < MAX_COMPILE_RETRIES) {
+            log(`Engine: compile/init did not finish in ${Math.round(COMPILE_TIMEOUT_MS / 1000)}s (attempt ${attempt + 1}) — retrying …`);
+            continue;
+          }
+          if (timedOut) log(`Engine: compile/init still not finished after ${MAX_COMPILE_RETRIES + 1} attempts`);
+          throw e;
+        }
+      }
       transcriber = pipe;
       log('Engine: ready ✅');
       return pipe;

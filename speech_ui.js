@@ -29,6 +29,14 @@
 .rec-bars{display:flex;align-items:flex-end;gap:4px;height:34px;}
 .rec-bars span{width:5px;background:#9be89b;border-radius:3px;height:6px;
   transition:height .08s ease-out;}
+.rec-stop-wrap{position:relative;width:80px;height:80px;margin:6px 0;}
+.rec-stop-ring{position:absolute;inset:0;border-radius:50%;border:3px solid rgba(96,165,250,.45);animation:recPulse 1.4s ease-in-out infinite;}
+.rec-stop-ring:nth-child(2){inset:-8px;border-color:rgba(96,165,250,.25);animation-delay:.3s;}
+@keyframes recPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.08);opacity:.6}}
+.rec-stop-btn{position:absolute;inset:0;border-radius:50%;background:#3b82f6;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(59,130,246,.5);}
+.rec-stop-btn:active{transform:scale(.93);}
+.rec-stop-btn .sq{width:26px;height:26px;background:#fff;border-radius:5px;}
 .rec-hint{font-size:13px;color:#d0d0d0;}
 .rec-hint b{color:#fff;}
 .speech-rec-btn{user-select:none;touch-action:none;transition:transform .06s;}
@@ -49,8 +57,13 @@
         <div class="rec-bars" id="recBars">
           <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
         </div>
-        <div class="rec-hint">Listening… <b>tap to stop</b></div>
-        <button class="rec-cancel" id="recCancel" type="button">Cancel</button>
+        <div class="rec-stop-wrap">
+          <div class="rec-stop-ring"></div>
+          <div class="rec-stop-ring"></div>
+          <button class="rec-stop-btn" id="recStop" type="button"><span class="sq"></span></button>
+        </div>
+        <div class="rec-hint">Listening… <b>tap ⬛ to stop</b></div>
+        <button class="rec-cancel" id="recCancel" type="button">Cancel (discard)</button>
       </div>`;
       document.body.appendChild(ov);
     }
@@ -59,6 +72,7 @@
   let _raf = null;
   // Set by makeRecordButton while a recording is in progress; the overlay's
   // Cancel button invokes it to discard the recording and return to idle.
+  let _onOverlayStop = null;
   let _onOverlayCancel = null;
   function loop() {
     const ov = document.getElementById(OVERLAY_ID);
@@ -128,10 +142,16 @@
       }
     }
     function clearSafety() { if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; } }
-    function toIdle() { state = 'idle'; clearSafety(); _onOverlayCancel = null; hideOverlay(); updateUI(); }
+    function toIdle() { state = 'idle'; clearSafety(); _onOverlayStop = null; _onOverlayCancel = null; hideOverlay(); updateUI(); }
 
-    // Wire the overlay's Cancel button (only active while this button records).
+    // Wire the overlay's Stop + Cancel buttons (active while this button records).
+    _onOverlayStop = function () { if (state === 'recording') finishRecording(); };
     _onOverlayCancel = function () { if (state === 'recording') cancelRecording(); };
+    const stopBtn = document.getElementById('recStop');
+    if (stopBtn && !stopBtn.dataset.bound) {
+      stopBtn.dataset.bound = '1';
+      stopBtn.addEventListener('click', function () { if (_onOverlayStop) _onOverlayStop(); });
+    }
     const cancelBtn = document.getElementById('recCancel');
     if (cancelBtn && !cancelBtn.dataset.bound) {
       cancelBtn.dataset.bound = '1';
@@ -165,6 +185,7 @@
       if (state !== 'recording') return;
       state = 'busy';
       clearSafety();
+      _onOverlayStop = null;
       _onOverlayCancel = null;
       hideOverlay();
       updateUI();

@@ -88,8 +88,8 @@
   // can hang indefinitely; without a timeout SpeechStatus sits at 'preparing'
   // forever and speech silently never appears. Bound it, retry once, then surface
   // an error (the debug panel's Retry button recovers without a page reload).
-  const COMPILE_TIMEOUT_MS = 90000; // tunable; first-load compile can be slow on low-end devices
-  const MAX_COMPILE_RETRIES = 1;    // one auto-retry after a compile timeout
+  const COMPILE_TIMEOUT_MS = 180000; // field-tested: mobile compile takes ~170s; 180s per attempt
+  const MAX_COMPILE_RETRIES = 2;    // up to 3 total attempts (some devices need 2 warmup rounds)
 
   // Reject if `promise` doesn't settle within `ms` (a hung compile never resolves).
   function withTimeout(promise, ms, label) {

@@ -69,7 +69,7 @@ function verifyTokenString(token, secret) {
 }
 
 function getBearer(request) {
-    // Prefer X-Auth-Token: the only header Azure SWA's managed-functions proxy
+    // Prefer X-Auth-Token: *** only header Azure SWA's managed-functions proxy
     // does NOT overwrite. `Authorization` is reserved by the host (it injects
     // its own internal token), so any client value sent there is lost.
     const headers = request.headers || {};
@@ -78,9 +78,18 @@ function getBearer(request) {
     const xAuth = get('X-Auth-Token');
     if (xAuth) return xAuth;
     const auth = get('Authorization');
-    if (!auth) return null;
-    const m = auth.match(/^Bearer\s+(.+)$/i);
-    return m ? m[1] : null;
+    if (auth) {
+        const m = auth.match(/^Bearer\s+(.+)$/i);
+        if (m) return m[1];
+    }
+    // Fallback for sendBeacon / fetch(keepalive) paths that cannot set custom
+    // headers (sendBeacon only sends Content-Type). The client ships the token
+    // in the `authToken` query param for these unload-time flushes.
+    try {
+        const q = request.query && request.query.get ? request.query.get('authToken') : null;
+        if (q) return q;
+    } catch { /* noop */ }
+    return null;
 }
 
 function verifyToken(request, secret) {

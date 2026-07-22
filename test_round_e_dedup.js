@@ -133,7 +133,8 @@ ok('Rule2 fallback: first-page E2 falls back to current page (p1)',
   fb && fb.pairs.every(p => itemKey(p).startsWith('p1')), fb && fb.pairs.map(itemKey));
 
 // ---------------------------------------------------------------------------
-// Rule 3: no pair repeats across sub-rounds. Drive 3 sub-rounds on p3.
+// Rule 3: no pair repeats across sub-rounds. Drive 3 sub-rounds on p3 ONCE for
+// the deterministic "no repeat" guarantee (uses the shared `used` set).
 sandbox.selectedClassContent = { book: 'test', unit: 'u0', page: 'p3' };
 setSR({});
 const used = new Set();
@@ -146,9 +147,22 @@ for (let i = 0; i < 3; i++) {
 }
 const flat = rounds.flat();
 ok('Rule3: no pair repeats across E1/E2/E3', new Set(flat).size === flat.length, { flat });
-ok('Rule3: E1 was current page, later rounds reviewed previous pages',
-  rounds.length >= 2 && rounds[0].every(k => k.startsWith('p3')) &&
-  rounds[1].every(k => !k.startsWith('p3')), rounds);
+
+// Rule 3 (statistical, not flaky): E1 LEANS the current page and E2/E3 ALWAYS
+// avoid it. A single E1 draw is weighted (~90% current) and may land on a
+// previous page, so assert over many drives instead of one.
+let e1CurrentWins = 0, e2NeverCurrent = 0, drives = 200;
+for (let d = 0; d < drives; d++) {
+  setSR({});
+  const u = new Set();
+  const r0 = getStudySentencePairsSubRoundSR('test', 'u0', 'p3', u, false); // E1
+  if (r0 && r0.pairs.every(p => itemKey(p).startsWith('p3'))) e1CurrentWins++;
+  r0 && r0.pairs.forEach(p => u.add(itemKey(p)));
+  const r1 = getStudySentencePairsSubRoundSR('test', 'u0', 'p3', u, true);  // E2
+  if (r1 && r1.pairs.every(p => !itemKey(p).startsWith('p3'))) e2NeverCurrent++;
+}
+ok('Rule3: E1 leans current page (>=75% of drives)', e1CurrentWins >= drives * 0.75, { e1CurrentWins, drives });
+ok('Rule3: E2/E3 always avoid current page', e2NeverCurrent === drives, { e2NeverCurrent, drives });
 
 // ---------------------------------------------------------------------------
 // Rule 4 (explicit first-page guarantee): a student on the FIRST page has no

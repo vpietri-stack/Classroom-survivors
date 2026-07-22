@@ -32,7 +32,18 @@ app.http('saveAnalytics', {
 
             const user = items[0];
             if (!user.analytics) user.analytics = [];
-            events.forEach(event => user.analytics.push(event));
+            let added = 0;
+            events.forEach(event => {
+                // Idempotent de-dup: the client stamps each event with a stable
+                // eventId so a retried flush (tab-close re-send + next-launch
+                // retry) cannot double-count a session or exercise.
+                if (event && event.eventId) {
+                    const seen = user.analytics.some(a => a && a.eventId === event.eventId);
+                    if (seen) return;
+                }
+                user.analytics.push(event);
+                added++;
+            });
             if (srState && typeof srState === 'object') user.srState = srState;
             if (incrementSession) user.sessionCount = (user.sessionCount || 0) + 1;
 
@@ -42,7 +53,7 @@ app.http('saveAnalytics', {
                 status: 200,
                 jsonBody: {
                     success: true,
-                    message: `${events.length} event(s) saved.`,
+                    message: `${added} event(s) saved (${events.length - added} duplicate(s) skipped).`,
                     sessionCount: user.sessionCount || 0
                 }
             };

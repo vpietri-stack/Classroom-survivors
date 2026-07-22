@@ -36,7 +36,11 @@ function isOwnOrigin(request) {
 
 function validateApiKey(request) {
     const expectedKey = process.env.APP_API_KEY;
-    const sentKey = request.headers.get('X-App-Key') || '';
+    // Header (normal fetch path) or query param (sendBeacon path — sendBeacon
+    // cannot set custom headers, so the client sends the key as ?appKey=).
+    const sentKey = request.headers.get('X-App-Key')
+        || (request.query && request.query.get ? request.query.get('appKey') : '')
+        || '';
 
     // Correct key from the deployed client config → always allow.
     if (expectedKey && sentKey === expectedKey) return true;

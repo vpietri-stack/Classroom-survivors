@@ -634,7 +634,7 @@ function claimReward(success) {
     }
 
     if (rewardContext === 'towerdefense' || activeGameMode === 'TowerDefense') {
-        if (success && typeof tdCreditCoins === 'function') tdCreditCoins(50);
+        if (typeof tdCreditCoins === 'function') tdCreditCoins(success ? 50 : 0);
         return;
     }
 

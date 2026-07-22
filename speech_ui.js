@@ -146,10 +146,13 @@
 
   // Build a self-contained "say the sentence aloud" gate (used after a correct
   // unscramble). Returns a DOM node with: prompt, hold-to-talk record button,
-  // heard-feedback line, and a Skip button that appears after the first attempt.
+  // heard-feedback line, and a Skip button that appears only after 3 failed
+  // attempts (so students genuinely try before they can bypass).
+  // On a pass it plays the success sound, shows the score, and swaps in a
+  // Continue button so the student controls when to advance.
   // Callers should only build this when SpeechStatus.isReady() is already true.
   //   opts: { target, level = 2, onDone }
-  //   onDone() is the single "advance" callback — fired on a pass OR on Skip.
+  //   onDone() is the single "advance" callback — fired on Continue (pass) OR Skip.
   function makeSentenceGate(opts) {
     opts = opts || {};
     injectAssets();
@@ -169,6 +172,8 @@
     const btns = wrap.querySelector('.speech-gate-btns');
     const feedback = wrap.querySelector('.heard-feedback');
     let done = false;
+    let failCount = 0;
+    const SKIP_AFTER_FAILS = 3; // let the student try 3 times before offering Skip
 
     const skip = document.createElement('button');
     skip.className = 'game-btn bg-slate-600 hover:bg-slate-500 text-base px-5 py-3 rounded-2xl';
@@ -180,27 +185,44 @@
       idleText: '\uD83C\uDF99\uFE0F Hold to speak',
       label: '\uD83D\uDD34 Listening\u2026 release to send',
       onResult: function (text) {
-        // Reveal Skip after the first genuine attempt so a student is never stuck.
-        skip.style.display = '';
         feedback.className = 'heard-feedback';
         feedback.innerText = 'Heard: \u201C' + (text || '(silence)') + '\u201D';
         const res = global.Scorer.score(target, text, level);
         if (res.pass) {
+          // Passed: play the success sound, show the score, and replace the
+          // record/skip buttons with a single Continue button so the student
+          // decides when to advance.
+          const pct = Math.round((res.accuracy || 0) * 100);
           feedback.className = 'heard-feedback ok';
-          feedback.innerText += '  \u2713';
-          if (!done) { done = true; onDone(); }
+          feedback.innerText += '  \u2713 Score: ' + pct + '%';
+          // playHappySound is a global fn (study_mode.js) — reuse the existing
+          // success sound rather than inventing a new one.
+          if (typeof playHappySound === 'function') playHappySound();
+          recBtn.style.display = 'none';
+          skip.style.display = 'none';
+          const cont = document.createElement('button');
+          cont.className = 'game-btn bg-emerald-600 hover:bg-emerald-500 text-lg px-8 py-4 rounded-2xl shadow-lg';
+          cont.innerText = 'Continue \u25B6';
+          cont.onclick = function () { if (!done) { done = true; onDone(); } };
+          btns.appendChild(cont);
         } else {
+          failCount++;
           feedback.className = 'heard-feedback no';
           feedback.innerText += '  \u2014 try again (' + res.details + ')';
           // synthError is a global lexical fn (defined in game.js); call it the
           // same defensive way the rest of the codebase does.
           if (typeof synthError === 'function') synthError();
+          // Reveal Skip only after several failed attempts so no student is
+          // permanently stuck on a wonky recognition.
+          if (failCount >= SKIP_AFTER_FAILS) skip.style.display = '';
         }
       },
       onError: function (err) {
-        skip.style.display = '';
         feedback.className = 'heard-feedback no';
         feedback.innerText = 'Error: ' + ((err && err.message) || err);
+        // A hard mic/engine error also counts toward revealing Skip.
+        failCount++;
+        if (failCount >= SKIP_AFTER_FAILS) skip.style.display = '';
       }
     });
 

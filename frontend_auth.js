@@ -882,42 +882,94 @@ function goBackToProfiles() {
 }
 
 /**
- * Returns a formatted string if there is an active target, else null.
+ * Picks the target a student should see, mirroring teacher_dashboard.js
+ * getStudentTargetInfo: active first, then most-recent past, then nearest
+ * upcoming. This guarantees the student's meter never silently disappears
+ * (e.g. Lucas's window had ended on his device, so the old active-only check
+ * returned null while the dashboard still showed 14/70).
+ * Returns { target, completed, status } or null.
  */
-function getActiveTargetText(studentOverride) {
-    const student = studentOverride || authActiveUser;
+function selectStudentTarget(student) {
     if (!student || !student.targets || student.targets.length === 0) return null;
-
     const now = new Date();
-    // Find an active target (now is between start and end)
-    const activeTarget = student.targets.find(t => {
+
+    // 1. Active target (now within range)
+    for (const t of student.targets) {
         const start = new Date(t.startTime);
         const end = new Date(t.endTime);
-        return now >= start && now <= end;
-    });
+        if (now >= start && now <= end) {
+            return {
+                target: t,
+                completed: countCompletedSessionsForTarget(student, t.startTime, t.endTime),
+                status: 'active'
+            };
+        }
+    }
 
-    if (!activeTarget) return null;
+    // 2. Most recent past target
+    const past = student.targets
+        .filter(t => new Date(t.endTime) < now)
+        .sort((a, b) => new Date(b.endTime) - new Date(a.endTime));
+    if (past.length > 0) {
+        const t = past[0];
+        return {
+            target: t,
+            completed: countCompletedSessionsForTarget(student, t.startTime, t.endTime),
+            status: 'past'
+        };
+    }
 
-    const completed = countCompletedSessionsForTarget(student, activeTarget.startTime, activeTarget.endTime);
-    
-    // Format dates for display (e.g., 2026/05/14)
-    const startStr = new Date(activeTarget.startTime).toLocaleString('en-GB', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' });
-    const endStr = new Date(activeTarget.endTime).toLocaleString('en-GB', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' });
-    
-    return `${startStr} - ${endStr} 打卡记录: ${completed}/${activeTarget.targetSessions}`;
+    // 3. Nearest upcoming target
+    const upcoming = student.targets
+        .filter(t => new Date(t.startTime) > now)
+        .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+    if (upcoming.length > 0) {
+        return { target: upcoming[0], completed: 0, status: 'upcoming' };
+    }
+
+    return null;
 }
 
 /**
- * Helper to count completed sessions in a time range for a student.
+ * Returns a formatted string for the greeting-screen meter, or null.
+ * Now mirrors the teacher dashboard: shows active, most-recent-past, or
+ * nearest-upcoming target so the student's meter always matches what the
+ * teacher sees.
+ */
+function getActiveTargetText(studentOverride) {
+    const student = studentOverride || authActiveUser;
+    const sel = selectStudentTarget(student);
+    if (!sel) return null;
+
+    const { target, completed, status } = sel;
+
+    // Format dates for display (e.g., 2026/05/14)
+    const startStr = new Date(target.startTime).toLocaleString('en-GB', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' });
+    const endStr = new Date(target.endTime).toLocaleString('en-GB', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' });
+
+    const prefix = status === 'active' ? '打卡记录'
+                 : status === 'past'   ? '上阶段'
+                 : '未开始';
+
+    return `${startStr} - ${endStr} ${prefix}: ${completed}/${target.targetSessions}`;
+}
+
+/**
+ * Counts completed sessions in a time range for a student. MUST match the
+ * teacher dashboard's countTargetSessions (teacher_dashboard.js) exactly: it
+ * counts every `session` event in the window, including short (<60s) sessions
+ * that the game flags `ignored`. Dropping them here made the app undercount
+ * vs the dashboard (Test1: app 32/40 vs dashboard 37/40).
  */
 function countCompletedSessionsForTarget(student, startTimeStr, endTimeStr) {
     if (!student.analytics || !Array.isArray(student.analytics)) return 0;
     const start = new Date(startTimeStr).getTime();
     const end = new Date(endTimeStr).getTime();
-    
+
     return student.analytics.filter(e => {
         if (e.type !== 'session') return false;
-        if (e.data && e.data.ignored) return false;
+        // NOTE: deliberately NOT filtering e.data.ignored — the dashboard counts
+        // those too, so the student meter stays consistent with the teacher view.
         const ts = new Date(e.timestamp).getTime();
         return ts >= start && ts <= end;
     }).length;

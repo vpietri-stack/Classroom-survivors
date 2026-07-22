@@ -71,21 +71,74 @@
   //   config.json (probed by pickSource, small), quantized ONNX files (the big ones).
   const MODEL_FILES = ['config.json', 'encoder_model_quantized.onnx', 'decoder_model_merged_quantized.onnx'];
 
-  // Intercept fetch() for model files: serve from IndexedDB if cached.
-  function patchFetchForModel(baseURL) {
+  // Intercept fetch() for model files: serve from IndexedDB if cached, otherwise
+  // download with a per-attempt timeout and automatic mirror fallback.
+  //
+  // Why this matters (GFW): pickSource() only probes the tiny config.json, so a
+  // mirror can "win" the probe yet STALL on the ~41 MB of weights. Without a
+  // timeout the download hangs forever and SpeechStatus stays 'loading' (speech
+  // silently never appears). Here each attempt is bounded by MIRROR_TIMEOUT_MS;
+  // on timeout/error we rewrite the URL to the next mirror and retry, cycling
+  // through all of MODEL_SOURCES once before giving up.
+  const MIRROR_TIMEOUT_MS = 90000; // per-file, per-mirror; tolerates slow GFW links but aborts true stalls
+  let mirrorIdx = 0;               // index into MODEL_SOURCES; seeded by pickSource(), advanced on fallback
+
+  // Portion of a model-file URL starting at 'models/<MODEL_ID>/...' (mirror-independent).
+  function modelRelPath(urlStr) {
+    const marker = 'models/' + MODEL_ID + '/';
+    const i = urlStr.indexOf(marker);
+    return i >= 0 ? urlStr.slice(i) : null;
+  }
+
+  // fetch with a hard timeout (aborts a stalled body download, not just the headers).
+  function fetchWithTimeout(url, init, ms) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), ms);
+    const merged = Object.assign({}, init || {}, { signal: ctrl.signal });
+    return globalThis.__origFetch(url, merged).finally(() => clearTimeout(timer));
+  }
+
+  // Download a model file, falling back across mirrors (starting at mirrorIdx).
+  // On success, mirrorIdx is left pointing at the working mirror so subsequent
+  // files prefer it. Throws only if EVERY mirror fails.
+  async function fetchModelFileWithFallback(relPath) {
+    let lastErr;
+    for (let attempt = 0; attempt < MODEL_SOURCES.length; attempt++) {
+      const idx = (mirrorIdx + attempt) % MODEL_SOURCES.length;
+      const src = MODEL_SOURCES[idx];
+      const url = src.base + relPath;
+      const file = relPath.split('/').pop();
+      log(`Engine: fetching ${file} via ${src.name} …`);
+      try {
+        const resp = await fetchWithTimeout(url, {}, MIRROR_TIMEOUT_MS);
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        mirrorIdx = idx; // this mirror works — prefer it for the remaining files
+        return resp;
+      } catch (e) {
+        lastErr = e;
+        const next = MODEL_SOURCES[(idx + 1) % MODEL_SOURCES.length];
+        log(`Engine: ${file} failed on ${src.name} (${(e && e.message) || e}) → trying ${next.name}`);
+      }
+    }
+    throw new Error('all mirrors failed for ' + relPath + ': ' + ((lastErr && lastErr.message) || lastErr));
+  }
+
+  function patchFetchForModel() {
     const origFetch = globalThis.fetch.bind(globalThis);
     globalThis.fetch = async function patchedFetch(url, init) {
       const urlStr = (typeof url === 'string' ? url : url.url || url.toString());
-      // Only intercept model-file requests (matching the base URL + model dir).
-      if (urlStr.includes('models/' + MODEL_ID + '/')) {
+      // Only intercept model-file requests.
+      const rel = modelRelPath(urlStr);
+      if (rel) {
         const name = urlStr.split('/').pop(); // basename
         const cached = await cacheGet(name);
         if (cached) {
+          log(`Engine: ${name} served from IndexedDB cache`);
           // Return a Response with the cached ArrayBuffer (no network trip).
           return new Response(cached, { status: 200, headers: { 'Content-Type': 'application/octet-stream' } });
         }
-        // First-time download: fetch from network and cache it.
-        const resp = await origFetch(url, init);
+        // First-time download: fetch with timeout + mirror fallback, then cache.
+        const resp = await fetchModelFileWithFallback(rel);
         if (resp.ok) {
           const blob = await resp.clone().arrayBuffer();
           // Fire-and-forget cache write (don't block the pipeline load).
@@ -134,6 +187,15 @@
   let loading = null;          // in-flight promise
   let chosen = null;           // winning weight source {name, base} after probe
 
+  // Reset all in-flight load state so SpeechStatus.retry() can start fresh
+  // (re-probes mirrors, re-downloads). Called only on a manual retry.
+  function resetLoad() {
+    transcriber = null;
+    loading = null;
+    chosen = null;
+    mirrorIdx = 0;
+  }
+
   function log(msg) { if (global.__speechLog) global.__speechLog(msg); }
 
   // Probe weight sources in order; first whose config.json answers within timeout wins.
@@ -146,7 +208,7 @@
         const timer = setTimeout(() => ctrl.abort(), 6000);
         const r = await fetch(url, { signal: ctrl.signal, cache: 'no-store' });
         clearTimeout(timer);
-        if (r.ok) { chosen = src; log(`Engine: model host → ${src.name}`); return src; }
+        if (r.ok) { chosen = src; mirrorIdx = MODEL_SOURCES.indexOf(src); log(`Engine: model host → ${src.name}`); return src; }
         log(`Engine: ${src.name} returned ${r.status}, trying next…`);
       } catch (_) {
         log(`Engine: ${src.name} unreachable, trying next…`);
@@ -165,10 +227,12 @@
       const src = await pickSource();
       const MODEL_DIR = src.base + 'models/';       // …/models/  (parent of the model folder)
 
-      // Patch global fetch to serve model files from IndexedDB cache if available.
-      // This eliminates the 41 MB download on repeat visits (critical for WeChat
-      // which aggressively evicts the browser HTTP cache).
-      patchFetchForModel(MODEL_DIR);
+      // Patch global fetch so model files are served from IndexedDB when cached,
+      // and otherwise downloaded with a timeout + mirror fallback. The cache
+      // eliminates the 41 MB download on repeat visits (critical for WeChat, which
+      // aggressively evicts the browser HTTP cache); the fallback stops a stalling
+      // mirror from hanging the load forever on first download (GFW).
+      patchFetchForModel();
 
       log('Engine: importing transformers.js (same-origin) …');
       const { pipeline, env } = await import(LIB_URL);
@@ -330,6 +394,7 @@
     MODEL_SOURCES,
     load,
     transcribe,
+    resetLoad,
     isLoaded: () => !!transcriber,
     chosenSource: () => chosen
   };

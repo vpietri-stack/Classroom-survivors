@@ -49,6 +49,21 @@
         this.state = 'error';
         this.message = (e && e.message) || 'preload failed';
       }
+    },
+
+    // Manual retry (wired to the debug panel's Retry button). Clears the engine's
+    // in-flight load state and re-runs start(), so a student can recover from a
+    // transient download failure without a full page reload.
+    retry: function () {
+      if (global.LocalEngine && typeof global.LocalEngine.resetLoad === 'function') {
+        global.LocalEngine.resetLoad();
+      }
+      this._started = false;
+      this.state = 'loading';
+      this.pct = 0;
+      this.file = '';
+      this.message = '';
+      this.start();
     }
   };
 

@@ -856,16 +856,26 @@ function checkRoundE() {
         // yet, so it never blocks progression or shows a spinner.
         if (window.SpeechStatus && window.SpeechStatus.isReady() && window.SpeechUI && window.SpeechUI.makeSentenceGate) {
             const sentenceText = targetWords.join(' ');
-            // The CHECK/CLEAR controls are the last child of the round container
-            // (selecting by class is unsafe: the drop-zone also uses justify-center).
+            // Hide the CHECK/CLEAR controls and the now-empty word bank;
+            // place the speech gate INTO the bank's space so the user doesn't scroll.
             const controls = dropZone.parentElement.lastElementChild;
             if (controls) controls.style.display = 'none';
+            const bank = document.getElementById('sentence-word-bank');
+            if (bank) {
+                bank.innerHTML = '';  // clear any residual tiles
+                bank.classList.remove('bg-gray-700/50');
+                bank.classList.add('bg-transparent');
+            }
             const gate = window.SpeechUI.makeSentenceGate({
                 target: sentenceText,
                 level: 2,
                 onDone: advance
             });
-            dropZone.parentElement.appendChild(gate);
+            if (bank) {
+                bank.appendChild(gate);
+            } else {
+                dropZone.parentElement.appendChild(gate);
+            }
         } else {
             setTimeout(advance, 1000);
         }

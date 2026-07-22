@@ -1369,7 +1369,8 @@ function checkGrammar() {
         if (window.SpeechStatus && window.SpeechStatus.isReady() && window.SpeechUI && window.SpeechUI.makeSentenceGate) {
             const actions = document.getElementById('grammar-actions');
             if (actions) actions.classList.add('hidden');
-            const container = grammarGameEl().querySelector('.minigame-container') || grammarGameEl();
+            // Place the speech gate INTO the now-empty word-dock so the user doesn't scroll.
+            const dock = document.getElementById('word-dock');
             const gate = window.SpeechUI.makeSentenceGate({
                 target: targetSentence,
                 level: 2,
@@ -1380,7 +1381,15 @@ function checkGrammar() {
                 }
             });
             gate.id = 'grammar-speech-gate';
-            container.appendChild(gate);
+            if (dock) {
+                dock.innerHTML = '';  // clear any residual tiles
+                dock.classList.remove('bg-gray-100');
+                dock.classList.add('bg-transparent');
+                dock.appendChild(gate);
+            } else {
+                const container = grammarGameEl().querySelector('.minigame-container') || grammarGameEl();
+                container.appendChild(gate);
+            }
         } else {
             handleMinigameSuccess('grammar');
         }

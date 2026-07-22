@@ -160,15 +160,19 @@
   // Resolve WHICH GitHub Pages repo we are running on, so the proxies point at
   // the SAME repo that's serving the page (promotion-safe: the same code works
   // on the preview site AND the live site without editing at deploy time).
-  // If the host isn't a known *.github.io (local dev / custom domain), we skip
-  // the proxies and rely on the same-origin fallback below.
+  // The site is served from https://vpietri-stack.github.io/<repo>/ (a user/org
+  // Pages host + project path), so we derive the repo from the pathname. If the
+  // host isn't *.github.io (local dev / custom domain), we skip the proxies and
+  // rely on the same-origin fallback below.
   function rawRepoBase() {
     const h = (location.hostname || '').toLowerCase();
-    if (h === 'classroom-survivors-preview.github.io')
-      return 'raw.githubusercontent.com/vpietri-stack/Classroom-survivors-preview/main/';
-    if (h === 'classroom-survivors.github.io')
-      return 'raw.githubusercontent.com/vpietri-stack/Classroom-survivors/main/';
-    return null; // local dev / unknown host → proxies would be wrong, use same-origin
+    if (!h.endsWith('.github.io')) return null; // local dev / unknown host → same-origin only
+    const owner = h.slice(0, -'.github.io'.length); // e.g. 'vpietri-stack'
+    if (!owner) return null;
+    // First pathname segment is the repo, e.g. '/Classroom-survivors-preview/' → 'Classroom-survivors-preview'.
+    const repo = (location.pathname || '').split('/').filter(Boolean)[0];
+    if (!repo) return null;
+    return `raw.githubusercontent.com/${owner}/${repo}/main/`;
   }
   const RAW = rawRepoBase();
   const MODEL_SOURCES = [

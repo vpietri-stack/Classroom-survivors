@@ -26,8 +26,40 @@ var selectedClassContent = null;
 
 // --- AUTH & ANALYTICS STATE ---
 var authActiveUser = null;
-var analyticsQueue = [];
+// NOTE: analyticsQueue is intentionally NOT reset to [] on script load. It is
+// hydrated from localStorage (see loadPersistedAnalyticsQueue) so events that
+// could not be delivered before the app was killed/closed are retried on the
+// next launch instead of being lost.
+var analyticsQueue = loadPersistedAnalyticsQueue();
 var analyticsFlushTimer = null;
+
+// --- PERSISTENT ANALYTICS QUEUE (survives killed app / closed tab) ---
+// The unsent queue is mirrored to localStorage after every enqueue and every
+// failed flush, so a crash, tab-close, or dead battery mid-session doesn't drop
+// student data. It is cleared only after the server confirms a successful write.
+const PERSISTED_QUEUE_KEY = 'csAnalyticsQueue';
+
+function loadPersistedAnalyticsQueue() {
+    try {
+        const raw = localStorage.getItem(PERSISTED_QUEUE_KEY);
+        if (!raw) return [];
+        const arr = JSON.parse(raw);
+        return Array.isArray(arr) ? arr : [];
+    } catch {
+        return [];
+    }
+}
+
+function persistAnalyticsQueue() {
+    try {
+        // Only persist when there is genuinely unsent work.
+        if (!analyticsQueue || analyticsQueue.length === 0) {
+            localStorage.removeItem(PERSISTED_QUEUE_KEY);
+        } else {
+            localStorage.setItem(PERSISTED_QUEUE_KEY, JSON.stringify(analyticsQueue));
+        }
+    } catch { /* storage full / unavailable — non-fatal */ }
+}
 var exerciseStartTime = 0;
 var exerciseAttempts = 0;
 

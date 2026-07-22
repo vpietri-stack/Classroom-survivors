@@ -119,7 +119,10 @@ function queueExerciseEvent(exerciseType, mode, itemDetails = null, customAttemp
         mode: mode,
         attempts: customAttempts !== null ? customAttempts : exerciseAttempts,
         durationMs: durationMs,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        // Stable id so the server can de-duplicate if this event is flushed
+        // again after a retry (tab-close + next-launch re-send).
+        eventId: 'ex_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10)
     };
     
     if (itemDetails) {
@@ -127,6 +130,7 @@ function queueExerciseEvent(exerciseType, mode, itemDetails = null, customAttemp
     }
     
     analyticsQueue.push(event);
+    persistAnalyticsQueue();
     if (authActiveUser) {
         if (!authActiveUser.analytics) authActiveUser.analytics = [];
         authActiveUser.analytics.push(event);
@@ -141,9 +145,13 @@ function queueSessionEvent(sessionType, data) {
         type: 'session',
         sessionType: sessionType,
         data: data,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        // Stable id so the server can de-duplicate if this event is flushed
+        // again after a retry (tab-close + next-launch re-send).
+        eventId: 'se_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10)
     };
     analyticsQueue.push(event);
+    persistAnalyticsQueue();
     if (authActiveUser) {
         if (!authActiveUser.analytics) authActiveUser.analytics = [];
         authActiveUser.analytics.push(event);
@@ -157,10 +165,102 @@ function scheduleAnalyticsFlush() {
     analyticsFlushTimer = setTimeout(flushAnalytics, 2000);
 }
 
-async function flushAnalytics() {
+/**
+ * FIX #2: fire-and-forget flush on page hide / tab close.
+ *
+ * Mobile Safari (iOS) and most browsers do NOT run async `fetch` started in
+ * `beforeunload`/`pagehide` to completion — the request is abandoned when the
+ * page unloads, which is exactly when a kid closes the app after game-over. The
+ * reliable mechanism is `navigator.sendBeacon`, which is guaranteed to be
+ * delivered even as the page goes away. We also try `fetch(..., {keepalive:true})`
+ * as a synchronous-enough fallback.
+ *
+ * This is the PRIMARY writer on unload. The persisted localStorage queue (fix #3)
+ * is the SECONDARY safety net: if even sendBeacon fails (e.g. offline at the
+ * moment of closing), the events remain in localStorage and are retried on the
+ * next launch.
+ */
+let _unloadFlushBound = false;
+function bindUnloadAnalyticsFlush() {
+    if (_unloadFlushBound) return;
+    _unloadFlushBound = true;
+
+    const sendNow = () => flushAnalyticsViaBeacon();
+    // `pagehide` is the modern, reliable unload signal (covers mobile Safari).
+    // `visibilitychange` -> hidden catches tab switches / app backgrounding on
+    // iOS where pagehide may not fire promptly.
+    window.addEventListener('pagehide', sendNow);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') sendNow();
+    });
+}
+
+async function flushAnalyticsViaBeacon() {
     if (!authActiveUser || analyticsQueue.length === 0) return;
+
     const events = [...analyticsQueue];
-    analyticsQueue = [];
+    // Capture pending SR state for this final send.
+    const srPayload = srPendingState;
+    const incrementSession = srIncrementSession;
+
+    const body = { studentId: authActiveUser.id, events };
+    if (srPayload)        body.srState          = srPayload;
+    if (incrementSession) body.incrementSession = true;
+
+    const payload = JSON.stringify(body);
+    const token = getSessionToken();
+    const appKey = await getAppKey();
+
+    // sendBeacon cannot set arbitrary headers, only Content-Type. The server
+    // reads our identity from the body-less cases... so we instead append the
+    // token + app key as query params (the SWA proxy does not strip those) and
+    // send as text/plain (sendBeacon's only settable type). Server-side we read
+    // X-Auth-Token from the query string as a fallback.
+    const qs = new URLSearchParams();
+    if (token)  qs.set('authToken', token);
+    if (appKey) qs.set('appKey', appKey);
+
+    const url = `${API_BASE}/saveAnalytics?${qs.toString()}`;
+    let sent = false;
+    try {
+        if (navigator.sendBeacon) {
+            // text/plain is the only content type sendBeacon reliably delivers.
+            const blob = new Blob([payload], { type: 'text/plain;charset=UTF-8' });
+            sent = navigator.sendBeacon(url, blob);
+        }
+    } catch { sent = false; }
+
+    // Fallback for browsers without sendBeacon: keepalive fetch is accepted by
+    // the browser even during unload.
+    if (!sent && typeof fetch === 'function') {
+        try {
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: payload,
+                keepalive: true
+            });
+            sent = true;
+        } catch { sent = false; }
+    }
+
+    // NOTE: we deliberately do NOT clear the queue here. `sendBeacon` returns
+    // true the moment the browser accepts the payload for *buffering* — which
+    // can happen even when the device is offline (the request is then lost if
+    // connectivity never returns before the app is killed). By leaving the
+    // queue persisted in localStorage, the next app launch will re-send these
+    // same events; the server's eventId de-dup makes that re-send idempotent,
+    // so we never double-count even on a successful beacon + retry. This trades
+    // a little redundant traffic for guaranteed delivery.
+    if (sent) {
+        persistAnalyticsQueue(); // no-op if empty; ensures on-disk state matches
+    }
+}
+
+async function flushAnalytics(opts = {}) {
+    if (!authActiveUser || analyticsQueue.length === 0) return;
+
+    const events = [...analyticsQueue];
 
     // Capture and clear pending SR update
     const srPayload = srPendingState;
@@ -173,17 +273,76 @@ async function flushAnalytics() {
     if (incrementSession) body.incrementSession = true;
 
     try {
-        await apiFetch(`${API_BASE}/saveAnalytics`, {
+        const response = await apiFetch(`${API_BASE}/saveAnalytics`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         });
+
+        // FIX #1: a non-2xx (e.g. 401 from an expired/invalid session token)
+        // resolves fine as fetch never throws. Treat it as a hard failure so we
+        // re-queue instead of silently dropping the student's data.
+        if (!response.ok) {
+            // FIX #4: if the server rejected our session token, try ONE silent
+            // re-login with the cached credentials, then retry the flush once.
+            // If that also fails, re-queue and surface a recoverable error.
+            if (response.status === 401 && !opts._retried) {
+                const relogged = await trySilentRelogin();
+                if (relogged) {
+                    // Restore pending SR state for the retry, then re-flush.
+                    if (srPayload && !srPendingState) srPendingState = srPayload;
+                    if (incrementSession) srIncrementSession = true;
+                    return await flushAnalytics({ ...opts, _retried: true });
+                }
+            }
+            throw new Error('saveAnalytics responded ' + response.status);
+        }
+
+        // Success: these events are now safely persisted server-side.
+        // Remove only the events we just sent from the persisted queue (they may
+        // have been joined by newer events during the await above).
+        const sentSet = new Set(events);
+        analyticsQueue = analyticsQueue.filter(e => !sentSet.has(e));
+        persistAnalyticsQueue();
     } catch (e) {
         console.warn('Failed to flush analytics:', e);
-        // Re-queue failed events and restore SR pending state
+        // Re-queue failed events and restore SR pending state.
         analyticsQueue = events.concat(analyticsQueue);
         if (srPayload && !srPendingState) srPendingState = srPayload;
         if (incrementSession) srIncrementSession = true;
+        persistAnalyticsQueue();
+    }
+}
+
+/**
+ * FIX #4: attempt a silent re-login using the cached profile credentials so an
+ * expired session token doesn't lose queued analytics. Returns true only when a
+ * fresh token was actually obtained and stored. Never blocks the UI or shows an
+ * error — on failure the caller falls back to re-queueing.
+ */
+async function trySilentRelogin() {
+    try {
+        const savedUsers = JSON.parse(localStorage.getItem('savedUsers') || '[]');
+        const me = savedUsers.find(u => authActiveUser && u.id === authActiveUser.id);
+        if (!me || !me.login || !me.password) return false;
+
+        const response = await apiFetch(`${API_BASE}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ login: me.login, password: me.password })
+        });
+        if (!response.ok) return false;
+        const data = await response.json();
+        if (!data || !data.token) return false;
+
+        setSessionToken(data.token);
+        // Update the in-memory user with anything the fresh login returned.
+        authActiveUser.login = me.login;
+        authActiveUser.password = me.password;
+        if (data.fullName) authActiveUser.fullName = data.fullName;
+        return true;
+    } catch {
+        return false;
     }
 }
 
@@ -621,6 +780,15 @@ function finishLogin() {
         window.location.href = 'teacher_dashboard.html';
         return;
     }
+
+    // FIX #2: arm the pagehide/visibilitychange flush now that a student is
+    // logged in, so a tab-close / app-background right after game-over still
+    // ships the queued analytics.
+    bindUnloadAnalyticsFlush();
+
+    // FIX #3: flush any events carried over in localStorage from a previous
+    // session that was killed/closed before it could deliver them.
+    if (analyticsQueue.length > 0) scheduleAnalyticsFlush();
 
     // Auto-resolve the student's class content
     if (authActiveUser) {

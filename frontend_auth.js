@@ -9,6 +9,10 @@ const API_BASE = API_BASE_URL;
 // whenever you ship a fix that frontend clients must pick up immediately
 // (e.g. the July-2026 stale-token / cache freeze fix).
 // ---------------------------------------------------------------------------
+// 🔴 DEPLOY STAMP — MUST match "version" in version.json on EVERY deploy.
+// The version watchdog (startVersionWatchdog) compares this to the live
+// version.json; a mismatch means stale WeChat builds never self-heal or
+// permanently nag. See DEPLOY_VERSION_STAMP.md. Bump BOTH together.
 const APP_VERSION = '2026-07-23c';
 
 // --- SESSION TOKEN (c) design) ---

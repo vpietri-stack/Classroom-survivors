@@ -1,6 +1,16 @@
 // API_BASE_URL is defined in config.js (loaded before this script)
 const API_BASE = API_BASE_URL;
 
+// ---------------------------------------------------------------------------
+// APP_VERSION — single source of truth for the deployment stamp. The deploy
+// script (or a manual edit) bumps this on every release; index.html appends it
+// as ?v=... to every <script> so a fresh deploy breaks the browser cache, and
+// the service worker uses it to know when an update is available. Bump this
+// whenever you ship a fix that frontend clients must pick up immediately
+// (e.g. the July-2026 stale-token / cache freeze fix).
+// ---------------------------------------------------------------------------
+const APP_VERSION = '2026-07-23c';
+
 // --- SESSION TOKEN (c) design) ---
 // The server mints a signed token on login. We store it in localStorage
 // (parity with the prior savedUsers approach) and send it as a Bearer header.
@@ -294,6 +304,10 @@ async function flushAnalytics(opts = {}) {
                     if (incrementSession) srIncrementSession = true;
                     return await flushAnalytics({ ...opts, _retried: true });
                 }
+                // Even after a silent re-login we're still 401 — the running
+                // client build is stale (e.g. pinned by an iOS home-screen PWA).
+                // Show the reload banner so the student/teacher can self-heal.
+                registerUpdateBanner('save-401');
             }
             throw new Error('saveAnalytics responded ' + response.status);
         }
@@ -348,7 +362,50 @@ async function trySilentRelogin() {
 
 document.addEventListener('DOMContentLoaded', () => {
     initAuth();
+    registerAppUpdateServiceWorker();
 });
+
+// ---------------------------------------------------------------------------
+// APP-UPDATE BANNER + SERVICE WORKER
+// ---------------------------------------------------------------------------
+// If the live API rejects our save with 401 (stale client / rotated creds), the
+// student's progress is saved locally but NOT synced. Rather than silently
+// re-queue forever, surface a visible, tappable banner so the user (or teacher)
+// knows to reload — which pulls the current build and self-heals.
+let _updateBannerShown = false;
+function registerUpdateBanner(reason) {
+    if (_updateBannerShown) return;
+    _updateBannerShown = true;
+    let banner = document.getElementById('appUpdateBanner');
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'appUpdateBanner';
+        banner.style.cssText = [
+            'position:fixed', 'left:0', 'right:0', 'bottom:0', 'z-index:999998',
+            'background:#b91c1c', 'color:#fff', 'font-family:system-ui,sans-serif',
+            'font-size:14px', 'padding:12px 16px', 'text-align:center', 'cursor:pointer',
+            'box-shadow:0 -4px 12px rgba(0,0,0,.3)'
+        ].join(';');
+        banner.setAttribute('role', 'alert');
+        document.body.appendChild(banner);
+    }
+    banner.innerHTML = '⚠️ App needs an update to save progress — tap here to reload';
+    banner.onclick = () => window.location.reload();
+    banner.style.display = 'block';
+}
+
+// Register a service worker that force-updates the whole app (including
+// index.html) on every load. This is what actually rescues iOS/Android
+// home-screen "PWA" shortcuts that pin the old HTML/JS and ignore Cache-Control
+// max-age. Without it, a stale build can persist indefinitely on those devices.
+function registerAppUpdateServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') return;
+    try {
+        navigator.serviceWorker.register('sw.js?v=' + APP_VERSION)
+            .catch(e => console.warn('SW registration failed:', e));
+    } catch (e) { /* SW unsupported — normal cache-busting still applies */ }
+}
 
 function initAuth() {
     // Only run on pages that have the student UI (not teacher_dashboard.html)

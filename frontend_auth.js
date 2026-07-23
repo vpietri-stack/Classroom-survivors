@@ -13,7 +13,7 @@ const API_BASE = API_BASE_URL;
 // The version watchdog (startVersionWatchdog) compares this to the live
 // version.json; a mismatch means stale WeChat builds never self-heal or
 // permanently nag. See DEPLOY_VERSION_STAMP.md. Bump BOTH together.
-const APP_VERSION = '2026-07-23c';
+const APP_VERSION = '2026-07-24a';
 
 // --- SESSION TOKEN (c) design) ---
 // The server mints a signed token on login. We store it in localStorage
@@ -406,9 +406,88 @@ function registerUpdateBanner(reason) {
         banner.setAttribute('role', 'alert');
         document.body.appendChild(banner);
     }
-    banner.innerHTML = '⚠️ App needs an update to save progress — tap here to reload';
-    banner.onclick = () => window.location.reload();
+    banner.innerHTML = '⚠️ 无法保存进度 — 点击重新输入密码';
+    banner.onclick = () => showReloginOverlay();
     banner.style.display = 'block';
+}
+
+function showReloginOverlay() {
+    if (document.getElementById('reloginOverlay')) return;
+    const overlay = document.createElement('div');
+    overlay.id = 'reloginOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif';
+    overlay.innerHTML = `
+      <div style="background:#1e293b;border-radius:16px;padding:28px 24px;max-width:340px;width:90%;text-align:center;color:#f1f5f9">
+        <div style="font-size:36px;margin-bottom:12px">🔐</div>
+        <h3 style="margin:0 0 8px;font-size:18px">需要重新登录</h3>
+        <p style="margin:0 0 16px;font-size:13px;color:#94a3b8">密码可能已被老师修改，请输入当前密码</p>
+        <input id="reloginPwd" type="password" placeholder="输入密码" style="width:100%;box-sizing:border-box;padding:12px;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#f1f5f9;font-size:16px;margin-bottom:12px" />
+        <div id="reloginError" style="color:#f87171;font-size:13px;min-height:20px;margin-bottom:8px"></div>
+        <button id="reloginSubmit" style="width:100%;padding:12px;border:none;border-radius:8px;background:#3b82f6;color:#fff;font-size:16px;font-weight:600;cursor:pointer">确认登录</button>
+        <button id="reloginForce" style="width:100%;padding:10px;border:none;border-radius:8px;background:transparent;color:#64748b;font-size:13px;cursor:pointer;margin-top:8px">强制刷新页面</button>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    const input = document.getElementById('reloginPwd');
+    const errDiv = document.getElementById('reloginError');
+    const submitBtn = document.getElementById('reloginSubmit');
+    const forceBtn = document.getElementById('reloginForce');
+    setTimeout(() => input.focus(), 100);
+
+    submitBtn.onclick = async () => {
+        const pwd = input.value.trim();
+        if (!pwd) { errDiv.innerText = '请输入密码'; return; }
+        submitBtn.disabled = true;
+        submitBtn.innerText = '登录中...';
+        errDiv.innerText = '';
+        try {
+            const user = authActiveUser || {};
+            const resp = await apiFetch(`${API_BASE}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: user.id, login: user.login, password: pwd })
+            });
+            if (resp.ok) {
+                const data = await resp.json();
+                setSessionToken(data.token);
+                // Update cached password
+                if (user.id) {
+                    let savedUsers = JSON.parse(localStorage.getItem('savedUsers') || '[]');
+                    const idx = savedUsers.findIndex(u => u.id === user.id);
+                    if (idx >= 0) { savedUsers[idx].password = pwd; localStorage.setItem('savedUsers', JSON.stringify(savedUsers)); }
+                }
+                if (authActiveUser) authActiveUser.password = pwd;
+                // Hide overlay + banner, retry the flush
+                overlay.remove();
+                const banner = document.getElementById('appUpdateBanner');
+                if (banner) banner.style.display = 'none';
+                _updateBannerShown = false;
+                _versionWatchdogSuppressed = true; // auth is fixed; stop nagging about code version
+                flushAnalytics();
+            } else {
+                errDiv.innerText = '密码不正确，请重试或联系老师';
+                submitBtn.disabled = false;
+                submitBtn.innerText = '确认登录';
+            }
+        } catch (e) {
+            errDiv.innerText = '网络错误，请检查网络后重试';
+            submitBtn.disabled = false;
+            submitBtn.innerText = '确认登录';
+        }
+    };
+
+    forceBtn.onclick = async () => {
+        // Unregister all service workers then hard-reload with cache bust
+        try {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map(r => r.unregister()));
+        } catch {}
+        if ('caches' in window) {
+            const keys = await caches.keys();
+            await Promise.all(keys.map(k => caches.delete(k)));
+        }
+        location.replace(location.origin + location.pathname + '?_cb=' + Date.now());
+    };
 }
 
 // Register a service worker that force-updates the whole app (including
@@ -439,6 +518,7 @@ function registerAppUpdateServiceWorker() {
 // stale cache. This is the only self-heal that reaches WeChat users.
 // ---------------------------------------------------------------------------
 let _versionWatchdogStarted = false;
+let _versionWatchdogSuppressed = false; // set after successful re-login (auth fixed, code version irrelevant)
 function _parseVersion(v) {
     // "2026-07-23c" -> [2026,7,23,99] (letters become a trailing minor so
     // "a"<"b"); allows simple greater-than comparison.
@@ -461,7 +541,7 @@ async function startVersionWatchdog() {
             const res = await fetch('version.json?v=' + Date.now(), { cache: 'no-store' });
             if (res.ok) {
                 const data = await res.json();
-                if (data && data.version && _versionGreater(data.version, APP_VERSION)) {
+                if (data && data.version && _versionGreater(data.version, APP_VERSION) && !_versionWatchdogSuppressed) {
                     registerUpdateBanner('version-watchdog');
                 }
             }
@@ -624,6 +704,17 @@ async function loginWithProfile(user, clickedBtn) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: user.id, login: user.login, password: user.password })
         });
+        if (response.status === 401) {
+            // Cached password is stale — show login form instead of silent fallback
+            window.authLoading = false;
+            restoreProfileUI();
+            showLoginScreen(false);
+            const errorDiv = document.getElementById('login-error');
+            errorDiv.innerText = `"${user.name}"的密码可能已被修改，请重新输入密码。`;
+            errorDiv.classList.remove('hidden');
+            document.getElementById('login-username').value = user.login || '';
+            return;
+        }
         if (response.ok) {
             const data = await response.json();
             setSessionToken(data.token); // (c) persist session token

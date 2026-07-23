@@ -290,10 +290,15 @@ async function flushAnalytics(opts = {}) {
     if (incrementSession) body.incrementSession = true;
 
     try {
+        // keepalive:true lets the browser complete the request even if the page
+        // is being torn down (WeChat/iOS WebView killing the tab right after
+        // game-over). This is our primary in-session delivery path; the
+        // unload beacon is the backstop for events queued after the flush.
         const response = await apiFetch(`${API_BASE}/saveAnalytics`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
+            body: JSON.stringify(body),
+            keepalive: true
         });
 
         // FIX #1: a non-2xx (e.g. 401 from an expired/invalid session token)
@@ -370,6 +375,7 @@ async function trySilentRelogin() {
 document.addEventListener('DOMContentLoaded', () => {
     initAuth();
     registerAppUpdateServiceWorker();
+    startVersionWatchdog();
 });
 
 // ---------------------------------------------------------------------------
@@ -412,6 +418,54 @@ function registerAppUpdateServiceWorker() {
         navigator.serviceWorker.register('sw.js?v=' + APP_VERSION)
             .catch(e => console.warn('SW registration failed:', e));
     } catch (e) { /* SW unsupported — normal cache-busting still applies */ }
+}
+
+// ---------------------------------------------------------------------------
+// VERSION WATCHDOG  (SW-independent self-heal for browsers WITHOUT service
+// workers — most importantly WeChat's iOS in-app WebView, which is a WKWebView
+// and has NO navigator.serviceWorker, AND aggressively caches index.html/JS
+// while ignoring Cache-Control. Those clients never install our SW and can be
+// pinned to a pre-July-2026 build forever, silently 401-ing to the server.)
+//
+// This polls a tiny version.json (fetched with cache:'no-store' so WeChat can't
+// serve a cached copy) every 60s. When the live version is newer than the
+// running APP_VERSION, we surface the same reload banner the SW/bad-token paths
+// use. A single tap reloads index.html — and because THIS build stamps every
+// <script> with ?v=APP_VERSION, the reload actually pulls fresh JS, breaking the
+// stale cache. This is the only self-heal that reaches WeChat users.
+// ---------------------------------------------------------------------------
+let _versionWatchdogStarted = false;
+function _parseVersion(v) {
+    // "2026-07-23c" -> [2026,7,23,99] (letters become a trailing minor so
+    // "a"<"b"); allows simple greater-than comparison.
+    const m = String(v || '').match(/^(\d{4})-(\d{2})-(\d{2})([a-z]?)$/);
+    if (!m) return null;
+    const letter = m[4] ? m[4].charCodeAt(0) - 96 : 0;
+    return [parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10), letter];
+}
+function _versionGreater(live, running) {
+    const a = _parseVersion(live), b = _parseVersion(running);
+    if (!a || !b) return false;
+    for (let i = 0; i < 4; i++) { if (a[i] !== b[i]) return a[i] > b[i]; }
+    return false;
+}
+async function startVersionWatchdog() {
+    if (_versionWatchdogStarted) return;
+    _versionWatchdogStarted = true;
+    const tick = async () => {
+        try {
+            const res = await fetch('version.json?v=' + Date.now(), { cache: 'no-store' });
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.version && _versionGreater(data.version, APP_VERSION)) {
+                    registerUpdateBanner('version-watchdog');
+                }
+            }
+        } catch { /* offline / blocked — try again next tick */ }
+    };
+    // Check once shortly after load (catches a stale build immediately) + every 60s.
+    setTimeout(tick, 5000);
+    setInterval(tick, 60000);
 }
 
 function initAuth() {

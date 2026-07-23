@@ -1,0 +1,5 @@
+{
+  "version": "2026-07-23c",
+  "deployedAt": "2026-07-23",
+  "notes": "Bump `version` on EVERY deploy. frontend_auth.js `startVersionWatchdog()` polls this file and shows the update banner when the live version is newer than the running build. This is the SW-independent self-heal for browsers that don't support service workers (notably WeChat's iOS in-app WebView / WKWebView), which also aggressively caches index.html/JS and ignores Cache-Control. Keep this value in sync with APP_VERSION in frontend_auth.js."
+}

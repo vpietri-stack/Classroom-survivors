@@ -2,6 +2,17 @@
 <html lang="en">
 
 <head>
+    <!--
+      Anti-cache hints. WeChat's iOS in-app WebView (WKWebView) aggressively
+      caches index.html/JS and ignores the server's Cache-Control, which can
+      pin students to a stale, 401-ing build. These meta tags ask it to
+      revalidate. Combined with the ?v=<APP_VERSION> stamp on every <script>
+      (and the version.json watchdog banner), a reload now reliably pulls the
+      current build.
+    -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <script>
         window.onerror = function(message, source, lineno, colno, error) {
             // Ignore generic script errors with no details (often caused by CORS or browser extensions)

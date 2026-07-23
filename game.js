@@ -634,7 +634,7 @@ function claimReward(success) {
     }
 
     if (rewardContext === 'towerdefense' || activeGameMode === 'TowerDefense') {
-        if (success && typeof tdCreditCoins === 'function') tdCreditCoins(50);
+        if (typeof tdCreditCoins === 'function') tdCreditCoins(success ? 50 : 0);
         return;
     }
 
@@ -1105,6 +1105,8 @@ function startWordRecGame() {
 function checkWordRec(selected, target, btn) {
     clearInterval(recTimer);
     if (selected === target) {
+        // Correct word clicked → win immediately. (Word-level speech was removed;
+        // speech now happens on full sentences after a correct unscramble.)
         handleMinigameSuccess('rec');
     } else {
         synthError();
@@ -1151,6 +1153,10 @@ function startGrammarGame() {
 
     document.getElementById('grammar-result-action').classList.add('hidden');
     document.getElementById('grammar-actions').classList.remove('hidden');
+    // Clear any speech-gate left over from a previous sentence-scramble round
+    // so it doesn't linger into the next one.
+    const prevGrammarGate = document.getElementById('grammar-speech-gate');
+    if (prevGrammarGate) prevGrammarGate.remove();
 
     const rawChunks = primarySentence.split(' ');
     const tokens = rawChunks.map(chunk => {
@@ -1356,7 +1362,37 @@ function checkGrammar() {
 
     if (allCorrect) {
         grammarGameEl().dataset.frozen = "true";
-        handleMinigameSuccess('grammar');
+        // Speech step: now that the sentence is built correctly, ask the student
+        // to say it aloud (Whisper). Skipped silently if the model isn't ready
+        // yet, so it never blocks the reward or shows a spinner.
+        const targetSentence = document.getElementById('grammarGame').dataset.targetSentence || '';
+        if (window.SpeechStatus && window.SpeechStatus.isReady() && window.SpeechUI && window.SpeechUI.makeSentenceGate) {
+            const actions = document.getElementById('grammar-actions');
+            if (actions) actions.classList.add('hidden');
+            // Place the speech gate INTO the now-empty word-dock so the user doesn't scroll.
+            const dock = document.getElementById('word-dock');
+            const gate = window.SpeechUI.makeSentenceGate({
+                target: targetSentence,
+                level: 2,
+                onDone: function () {
+                    const g = document.getElementById('grammar-speech-gate');
+                    if (g) g.remove();
+                    handleMinigameSuccess('grammar');
+                }
+            });
+            gate.id = 'grammar-speech-gate';
+            if (dock) {
+                dock.innerHTML = '';  // clear any residual tiles
+                dock.classList.remove('bg-gray-100');
+                dock.classList.add('bg-transparent');
+                dock.appendChild(gate);
+            } else {
+                const container = grammarGameEl().querySelector('.minigame-container') || grammarGameEl();
+                container.appendChild(gate);
+            }
+        } else {
+            handleMinigameSuccess('grammar');
+        }
     } else {
         // Wrong: reveal for ~5s (frozen), then return all placed words to the
         // dock so the player can retry. (This widget depletes on placement, so

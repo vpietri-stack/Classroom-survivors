@@ -6,7 +6,7 @@
 //   (2) clicking a placed letter/word DELETES it (nothing returns to the source),
 //   (3) editing is FROZEN during the ~5s CHECK reveal.
 // The test body is appended to the same eval blob so it can see the scripts'
-// top-level const/let bindings (STUDY_STATE, startRoundB, etc.).
+// top-level const/let bindings (STUDY_STATE, startRoundC, etc.).
 const fs = require('fs');
 const path = require('path');
 const { JSDOM } = require('jsdom');
@@ -59,7 +59,7 @@ const stub = `
   window.localStorage = { getItem:function(k){ return _ls[k]||null; }, setItem:function(k,v){ _ls[k]=v; } };
 `;
 
-// Test body appended into the same scope so it sees STUDY_STATE / startRoundB etc.
+// Test body appended into the same scope so it sees STUDY_STATE / startRoundC etc.
 const testBody = `
 (function(){
   var pass=0, fail=0;
@@ -68,7 +68,7 @@ const testBody = `
   // ===== STUDY ROUND B (depleting bank, delete-on-click, gap stays) =====
   STUDY_STATE.words = ['wed'];
   STUDY_STATE.currentWordIndex = 0;
-  startRoundB(); nextRoundBWord();
+  startRoundC(); nextRoundCWord();
 
   var bSlots = document.getElementById('scramble-slots');
   var bSlotEls = function(){ return Array.prototype.slice.call(bSlots.querySelectorAll('.study-slot')); };
@@ -96,7 +96,7 @@ const testBody = `
   // must NEVER move to the bank or get blanked.
   STUDY_STATE.words = ['drop-ed'];
   STUDY_STATE.currentWordIndex = 0;
-  startRoundB(); nextRoundBWord();
+  startRoundC(); nextRoundCWord();
   var fSlots = document.getElementById('scramble-slots');
   var fSlotEls = function(){ return Array.prototype.slice.call(fSlots.querySelectorAll('.study-slot')); };
   var fBank = document.getElementById('scramble-bank');
@@ -107,19 +107,19 @@ const testBody = `
   // Fill ALL letter slots, then CLEAR.
   Array.prototype.slice.call(fBank.querySelectorAll('button')).forEach(function(b){ b.click(); });
   ok('B(fixed): all letters placed, bank empty', fBank.querySelectorAll('button').length === 0);
-  clearRoundB();
+  clearRoundC();
   ok('B(fixed): CLEAR keeps the "-" in its original slot', fSlotEls()[dashSlotIdx].innerText === '-' && fSlotEls()[dashSlotIdx].dataset.fixed === 'true');
   ok('B(fixed): CLEAR returns only letters to the bank (no dash added)', fBank.querySelectorAll('button').length === fInitialBank);
   // Wrong CHECK (re-place letters wrong) must also keep the '-' put.
   Array.prototype.slice.call(fBank.querySelectorAll('button')).forEach(function(b){ b.click(); });
-  checkRoundB();
+  checkRoundC();
   ok('B(fixed): wrong CHECK keeps "-" fixed (not banked/blanked)', fSlotEls()[dashSlotIdx].innerText === '-' && fSlotEls()[dashSlotIdx].dataset.fixed === 'true');
 
   // ===== STUDY ROUND B: apostrophe is NOT fixed (user must place it) =====
   // 'doesn't' / 'don't' etc. -> the "'" is a draggable letter tile now, not pinned.
   STUDY_STATE.words = ["doesn't"];
   STUDY_STATE.currentWordIndex = 0;
-  startRoundB(); nextRoundBWord();
+  startRoundC(); nextRoundCWord();
   var aSlots = document.getElementById('scramble-slots');
   var aSlotEls = function(){ return Array.prototype.slice.call(aSlots.querySelectorAll('.study-slot')); };
   var aBank = document.getElementById('scramble-bank');
@@ -133,12 +133,12 @@ const testBody = `
   ok('B(apos): bank has 7 tiles (6 letters + apostrophe)', aBtns.length === 7);
 
   // ===== STUDY ROUND D (depleting bank — mirrors game-mode word scramble) =====
-  if (STUDY_STATE._roundDResetTimer) { clearTimeout(STUDY_STATE._roundDResetTimer); STUDY_STATE._roundDResetTimer = null; }
-  if (STUDY_STATE._roundBResetTimer) { clearTimeout(STUDY_STATE._roundBResetTimer); STUDY_STATE._roundBResetTimer = null; }
-  STUDY_STATE._roundDFrozen = false; STUDY_STATE._roundBFrozen = false; STUDY_STATE.isTransitioning = false;
+  if (STUDY_STATE._roundEResetTimer) { clearTimeout(STUDY_STATE._roundEResetTimer); STUDY_STATE._roundEResetTimer = null; }
+  if (STUDY_STATE._roundCResetTimer) { clearTimeout(STUDY_STATE._roundCResetTimer); STUDY_STATE._roundCResetTimer = null; }
+  STUDY_STATE._roundEFrozen = false; STUDY_STATE._roundCFrozen = false; STUDY_STATE.isTransitioning = false;
   STUDY_STATE.sentences = ['The cat sat'];
   STUDY_STATE.currentSentenceIndex = 0;
-  startRoundD(); nextRoundDSentence();
+  startRoundE(); nextRoundESentence();
 
   var dZone = document.getElementById('sentence-drop-zone');
   var dBank = document.getElementById('sentence-word-bank');
@@ -157,17 +157,17 @@ const testBody = `
   // Place all three, then CLEAR restores the full bank.
   dBank.querySelectorAll('button').forEach(function(b){ b.click(); });
   ok('D: placing all words empties the bank', dBank.querySelectorAll('button').length === 0);
-  clearRoundD();
+  clearRoundE();
   ok('D: CLEAR restores all tiles to the bank', dBank.querySelectorAll('button').length === 3 && !dZone.children[0].firstChild);
 
   // ===== STUDY ROUND D: CLEAR works during wrong-answer freeze =====
   // Reset any leaked frozen state from prior sections.
-  if (STUDY_STATE._roundDResetTimer) { clearTimeout(STUDY_STATE._roundDResetTimer); STUDY_STATE._roundDResetTimer = null; }
-  if (STUDY_STATE._roundBResetTimer) { clearTimeout(STUDY_STATE._roundBResetTimer); STUDY_STATE._roundBResetTimer = null; }
-  STUDY_STATE._roundDFrozen = false; STUDY_STATE._roundBFrozen = false; STUDY_STATE.isTransitioning = false;
+  if (STUDY_STATE._roundEResetTimer) { clearTimeout(STUDY_STATE._roundEResetTimer); STUDY_STATE._roundEResetTimer = null; }
+  if (STUDY_STATE._roundCResetTimer) { clearTimeout(STUDY_STATE._roundCResetTimer); STUDY_STATE._roundCResetTimer = null; }
+  STUDY_STATE._roundEFrozen = false; STUDY_STATE._roundCFrozen = false; STUDY_STATE.isTransitioning = false;
   STUDY_STATE.sentences = ['The cat sat'];
   STUDY_STATE.currentSentenceIndex = 0;
-  startRoundD(); nextRoundDSentence();
+  startRoundE(); nextRoundESentence();
   dBank = document.getElementById('sentence-word-bank');
   dZone = document.getElementById('sentence-drop-zone');
   // Place all 3 but force a WRONG order (sat, cat, The) so check REVEALS + FREEZES
@@ -178,10 +178,10 @@ const testBody = `
     var b = dAll.find(function(x){ return x.innerText === w; });
     if (b) b.click();
   });
-  checkRoundD();
-  ok('D(freeze): frozen after wrong CHECK', STUDY_STATE._roundDFrozen === true);
-  clearRoundD();
-  ok('D(freeze): CLEAR works while frozen (unfreezes, bank restored)', STUDY_STATE._roundDFrozen === false && dBank.querySelectorAll('button').length === 3);
+  checkRoundE();
+  ok('D(freeze): frozen after wrong CHECK', STUDY_STATE._roundEFrozen === true);
+  clearRoundE();
+  ok('D(freeze): CLEAR works while frozen (unfreezes, bank restored)', STUDY_STATE._roundEFrozen === false && dBank.querySelectorAll('button').length === 3);
 
   // ===== WORD GROUPING (no mid-word break; wrap only at separators) =====
   // A word with no separator (e.g. "danced") must be ONE unbreakable group,
@@ -190,7 +190,7 @@ const testBody = `
   // at the hyphen) while each word stays intact.
   STUDY_STATE.words = ['danced'];
   STUDY_STATE.currentWordIndex = 0;
-  startRoundB(); nextRoundBWord();
+  startRoundC(); nextRoundCWord();
   var dGroups = document.getElementById('scramble-slots').querySelectorAll('.word-group');
   var dSlots = document.getElementById('scramble-slots').querySelectorAll('.study-slot');
   ok('B(group): no-separator word is a single word-group', dGroups.length === 1);
@@ -198,32 +198,32 @@ const testBody = `
 
   STUDY_STATE.words = ['drop-ed'];
   STUDY_STATE.currentWordIndex = 0;
-  startRoundB(); nextRoundBWord();
+  startRoundC(); nextRoundCWord();
   var peGroups = document.getElementById('scramble-slots').querySelectorAll('.word-group');
   var peFixed = document.getElementById('scramble-slots').querySelectorAll('.study-slot[data-fixed="true"]');
   ok('B(group): hyphenated word yields 2 word-groups (drop | ed)', peGroups.length === 2);
   ok('B(group): the separator stays a fixed, non-grouped slot', peFixed.length === 1 && peFixed[0].innerText === '-');
   // Reset any leaked frozen/transition state from prior sections.
-  if (STUDY_STATE._roundBResetTimer) { clearTimeout(STUDY_STATE._roundBResetTimer); STUDY_STATE._roundBResetTimer = null; }
-  STUDY_STATE._roundBFrozen = false; STUDY_STATE.isTransitioning = false;
+  if (STUDY_STATE._roundCResetTimer) { clearTimeout(STUDY_STATE._roundCResetTimer); STUDY_STATE._roundCResetTimer = null; }
+  STUDY_STATE._roundCFrozen = false; STUDY_STATE.isTransitioning = false;
   STUDY_STATE.words = ['abc'];
   STUDY_STATE.currentWordIndex = 0;
-  startRoundB(); nextRoundBWord();
+  startRoundC(); nextRoundCWord();
   var freeSlots = document.getElementById('scramble-slots');
   var freeSlotEls = function(){ return Array.prototype.slice.call(freeSlots.querySelectorAll('.study-slot')); };
   var fb = Array.prototype.slice.call(document.getElementById('scramble-bank').querySelectorAll('button'));
   fb.find(function(b){ return b.innerText==='a'; }).click();
   fb.find(function(b){ return b.innerText==='b'; }).click();
   freeSlotEls()[2].innerText = 'x'; // force wrong-but-full
-  checkRoundB();
-  ok('B: frozen flag set after wrong CHECK', STUDY_STATE._roundBFrozen === true);
+  checkRoundC();
+  ok('B: frozen flag set after wrong CHECK', STUDY_STATE._roundCFrozen === true);
   var before = freeSlotEls()[0].innerText;
   document.getElementById('scramble-bank').querySelector('button').click();
   ok('B: editing blocked while frozen', freeSlotEls()[0].innerText === before);
   // CLEAR must work DURING the frozen reveal (skip the 5s wait) and unfreeze.
-  clearRoundB();
+  clearRoundC();
   ok('B: CLEAR works while frozen (slots emptied)', freeSlotEls().every(function(s){ return !s.innerText; }));
-  ok('B: CLEAR during freeze unfreezes', STUDY_STATE._roundBFrozen === false);
+  ok('B: CLEAR during freeze unfreezes', STUDY_STATE._roundCFrozen === false);
 
   // ===== GAME-MODE WORD SCRAMBLE (desync fix: palette index vs slot position) =====
   // Word 'opposite' (8 letters). Simulate the user's report: type o, then p, then
@@ -282,7 +282,7 @@ const testBody = `
     var p = JSON.parse(spEl.dataset.placement); return p.every(function(v){ return v === undefined || v === null; });
   })());
 
-  // ===== GAME-MODE SPELLING: comma is a draggable tile (matches study Round B) =====
+  // ===== GAME-MODE SPELLING: comma is a draggable tile (matches study Round C) =====
   // 'yes, it is' -> the "," must NOT be a pinned fixed slot; it is a draggable letter tile.
   SPELLING_WORDS = [{ en: 'yes, it is', zh: '是的，它是' }];
   getGameItemSR = function(){ return 'yes, it is'; };
@@ -301,29 +301,29 @@ const testBody = `
   // ===== STUDY ROUND C (spelling desync fix — same class as game-mode word scramble) =====
   // Reproduces the user's report: word "danced" (5 letters d-a-n-c-e), board of
   // 10 tiles. Typing the two 'd's first must NOT block the 'a' tiles. Old bug
-  // used roundCInput (typing order) as if it were keyed by tile index, so the
+  // used roundDInput (typing order) as if it were keyed by tile index, so the
   // 'd's at typing positions 0,1 blocked every tile at index 0,1 (both 'a' tiles).
   STUDY_STATE.words = ['danced'];
   STUDY_STATE.currentWordIndex = 0;
   STUDY_STATE.isTransitioning = false;
-  STUDY_STATE._roundCFrozen = false;
-  startRoundC(); nextRoundCWord();
+  STUDY_STATE._roundDFrozen = false;
+  startRoundD(); nextRoundDWord();
   // Force a deterministic board: sorted letters a,a,c,d,d,e + 4 fillers, so the
   // two 'a' tiles are at indices 0,1 and a 'd' tile is later. Bypasses shuffle.
   var kb = document.getElementById('virtual-keyboard');
   var kbBtns = Array.prototype.slice.call(kb.children);
   // Build deterministic keys by overwriting the dataset + re-rendering keyboard.
-  roundCBaseKeys = ['a','a','c','d','d','e','b','f','o','t'];
-  roundCInput = ''; roundCPlacement = []; roundCUsedKeys = [];
+  roundDBaseKeys = ['a','a','c','d','d','e','b','f','o','t'];
+  roundDInput = ''; roundDPlacement = []; roundDUsedKeys = [];
   // Clear and re-add buttons in deterministic order.
   kb.innerHTML = '';
-  roundCBaseKeys.forEach(function(ch, i){
+  roundDBaseKeys.forEach(function(ch, i){
     var b = document.createElement('button');
     b.className = 'study-key'; b.innerText = ch; b.dataset.keyIndex = i;
-    b.onclick = (function(ki){ return function(){ typeRoundC(ki); }; })(i);
+    b.onclick = (function(ki){ return function(){ typeRoundD(ki); }; })(i);
     kb.appendChild(b);
   });
-  // Round C groups letter slots into .word-group wrappers (so a word never
+  // Round D groups letter slots into .word-group wrappers (so a word never
   // breaks mid-word); flatten to the .study-slot descendants for assertions.
   function cSlots() {
     return Array.prototype.slice.call(document.querySelectorAll('#spelling-display .study-slot'));
@@ -348,7 +348,7 @@ const testBody = `
   kbBtns.find(function(b){ return b.dataset.keyIndex === '1'; }).click(); // a
   kbBtns.find(function(b){ return b.dataset.keyIndex === '2'; }).click(); // c
   // remaining two letter slots get the two d tiles already used; need 'n' and 'e'
-  // but board has no 'n' (filler only). Use handleRoundCKeyDown to type 'n'/'e' if allowed.
+  // but board has no 'n' (filler only). Use handleRoundDKeyDown to type 'n'/'e' if allowed.
   // Instead, verify the full word can be completed by clicking available keys:
   // we already used d(3),d(4),a(0),a(1),c(2); remaining slots need n,e -> not on board,
   // so just assert the desync fix: a-tile selectable. (Full correct spelled by real board.)
@@ -364,11 +364,11 @@ const testBody = `
   // ===== STUDY ROUND C back-key (delete last placed letter) =====
   STUDY_STATE.words = ['tap'];
   STUDY_STATE.currentWordIndex = 0;
-  startRoundC(); nextRoundCWord();
+  startRoundD(); nextRoundDWord();
   var kbC = Array.prototype.slice.call(document.getElementById('virtual-keyboard').querySelectorAll('button'));
   // Force a deterministic board: a,a,t,p...
-  roundCBaseKeys = ['a','a','t','p','b','f','o','x','w','z'];
-  roundCPlacement = []; roundCUsedKeys = []; updateRoundCDisplay();
+  roundDBaseKeys = ['a','a','t','p','b','f','o','x','w','z'];
+  roundDPlacement = []; roundDUsedKeys = []; updateRoundDDisplay();
   // Place 't' then 'a' (slots 0,1).
   var tBtn = kbC.find(function(b){ return b.dataset.keyIndex === '2'; }); // 't'
   var aBtn = kbC.find(function(b){ return b.dataset.keyIndex === '0'; }); // 'a'
@@ -378,29 +378,29 @@ const testBody = `
     return dis.indexOf('t') === 0 && dis[1] === 'a';
   })());
   // Press Backspace via the keyboard handler -> removes the LAST placed ('a').
-  handleRoundCKeyDown('Backspace');
+  handleRoundDKeyDown('Backspace');
   ok('C(back): Backspace removes last placed letter', (function(){
     var slots = cSlots();
     return slots[0].textContent === 't' && slots[1].textContent === '';
   })());
-  ok('C(back): freed tile is selectable again', roundCUsedKeys[0] === false);
+  ok('C(back): freed tile is selectable again', roundDUsedKeys[0] === false);
 
   // ===== STUDY ROUND C: CLEAR works during wrong-answer freeze =====
   STUDY_STATE.words = ['tap'];
   STUDY_STATE.currentWordIndex = 0;
-  startRoundC(); nextRoundCWord();
+  startRoundD(); nextRoundDWord();
   // Force deterministic board and place a WRONG-but-full word 'aatp' (wrong order) to freeze.
-  roundCBaseKeys = ['a','a','t','p','b','f','o','x','w','z'];
-  roundCPlacement = []; roundCUsedKeys = []; updateRoundCDisplay();
+  roundDBaseKeys = ['a','a','t','p','b','f','o','x','w','z'];
+  roundDPlacement = []; roundDUsedKeys = []; updateRoundDDisplay();
   var kbC2 = Array.prototype.slice.call(document.getElementById('virtual-keyboard').querySelectorAll('button'));
   // Fill all 3 letter slots with 'a','a','t' (wrong word) so a check reveals+wfreezes.
   kbC2.find(function(b){ return b.dataset.keyIndex==='0'; }).click();
   kbC2.find(function(b){ return b.dataset.keyIndex==='1'; }).click();
   kbC2.find(function(b){ return b.dataset.keyIndex==='2'; }).click();
-  checkRoundC();
-  ok('C(freeze): frozen after wrong CHECK', STUDY_STATE._roundCFrozen === true);
-  clearRoundC();
-  ok('C(freeze): CLEAR works while frozen (unfreezes)', STUDY_STATE._roundCFrozen === false && roundCPlacement.length === 0);
+  checkRoundD();
+  ok('C(freeze): frozen after wrong CHECK', STUDY_STATE._roundDFrozen === true);
+  clearRoundD();
+  ok('C(freeze): CLEAR works while frozen (unfreezes)', STUDY_STATE._roundDFrozen === false && roundDPlacement.length === 0);
   // ===== GRAMMAR (sentence scramble) must NOT throw on empty SR result =====
   // Reproduces the freeze: getGameItemSR can return [] (empty spaced-rep pool).
   // Old code did primarySentence = rawEntry[0] (=undefined) -> .split(' ') -> throw,
@@ -491,8 +491,8 @@ const testBody = `
   // mode must reset active=false.
   STUDY_STATE.words = ['wed'];
   STUDY_STATE.currentWordIndex = 0;
-  startRoundB(); nextRoundBWord();
-  STUDY_STATE.active = true; // simulate "in study mode" (initStudyMode sets this; not called by direct startRoundB in test)
+  startRoundC(); nextRoundCWord();
+  STUDY_STATE.active = true; // simulate "in study mode" (initStudyMode sets this; not called by direct startRoundC in test)
   ok('KBD: entering study sets STUDY_STATE.active=true', STUDY_STATE.active === true);
   exitStudyMode();
   ok('KBD: exiting study resets STUDY_STATE.active=false', STUDY_STATE.active === false);

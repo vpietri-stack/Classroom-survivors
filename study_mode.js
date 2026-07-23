@@ -5,7 +5,7 @@ const STUDY_STATE = {
     sentences: [],  // The 5 selected sentences
     remainingWordsRoundA: [], // Words left to find in Round A
     currentWordIndex: 0, // For Rounds B and C (0 to 4)
-    currentSentenceIndex: 0, // For Round D (0 to 4)
+    currentSentenceIndex: 0, // For Round E (0 to 4)
     round: 'A',     // 'A', 'B', 'C', 'D'
     startTime: 0,
     timerInterval: null,
@@ -14,7 +14,7 @@ const STUDY_STATE = {
 
 // SR result tracking for this study session
 var srStudyResults = [];  // [{ type, key, firstAttempt }, ...]
-var srUsedPairKeys = new Set();    // sentence-pair keys already shown in Round E this session
+var srUsedPairKeys = new Set();    // sentence-pair keys already shown in Round F this session
 
 // Entry point
 function initStudyMode() {
@@ -142,23 +142,24 @@ function checkRoundA(word, btnElement) {
 }
 
 function finishRoundA() {
-    // Round completed
-    startRoundB();
+    // Round A (word recognition) completed → straight into Word Scramble.
+    // (Word-level pronunciation was removed; speech now happens on sentences.)
+    startRoundC();
 }
 
 
 // --- ROUND B: Word Scramble ---
-function startRoundB() {
-    STUDY_STATE.round = 'B';
+function startRoundC() {
+    STUDY_STATE.round = 'C';
     STUDY_STATE.currentWordIndex = 0;
     updateStudyUI("Round B: Word Scramble", "Unscramble the letters.");
     startExerciseTracking();
-    nextRoundBWord();
+    nextRoundCWord();
 }
 
-function nextRoundBWord() {
+function nextRoundCWord() {
     if (STUDY_STATE.currentWordIndex >= STUDY_STATE.words.length) {
-        finishRoundB();
+        finishRoundC();
         return;
     }
 
@@ -169,21 +170,21 @@ function nextRoundBWord() {
     container.innerHTML = `
         <div class="flex flex-col items-center gap-[var(--gap-md)] w-full">
             <button onclick="playTTS()" aria-label="Play Audio" class="w-16 h-16 rounded-full bg-blue-500 text-white text-2xl shadow-lg transform active:scale-95 transition-transform"><i class="fas fa-volume-up"></i></button>
-            <div id="roundB-translation" class="translation-hint hidden"></div>
-            <img id="roundB-image" class="w-32 h-32 object-contain mx-auto my-2 hidden border-2 border-slate-300 rounded-xl bg-white/10" alt="Vocabulary Image">
+            <div id="roundC-translation" class="translation-hint hidden"></div>
+            <img id="roundC-image" class="w-32 h-32 object-contain mx-auto my-2 hidden border-2 border-slate-300 rounded-xl bg-white/10" alt="Vocabulary Image">
             
             <div id="scramble-slots" class="flex flex-wrap justify-center gap-[var(--gap-sm)] min-h-[60px] w-full px-4"></div>
             
             <div id="scramble-bank" class="flex flex-wrap justify-center gap-[var(--gap-sm)] w-full px-4"></div>
 
             <div class="flex gap-[var(--gap-md)]">
-                <button onclick="checkRoundB()" class="game-btn bg-green-500 py-3 px-6">CHECK</button>
-                <button onclick="clearRoundB()" class="game-btn bg-gray-500 py-3 px-6">CLEAR</button>
+                <button onclick="checkRoundC()" class="game-btn bg-green-500 py-3 px-6">CHECK</button>
+                <button onclick="clearRoundC()" class="game-btn bg-gray-500 py-3 px-6">CLEAR</button>
             </div>
         </div>
     `;
-    showTranslation('roundB-translation', word);
-    showVocabImage('roundB-image', word);
+    showTranslation('roundC-translation', word);
+    showVocabImage('roundC-image', word);
 
     // Setup Slots — group consecutive LETTER slots into one .word-group so a word
     // (e.g. "danced") never breaks across lines; separators stay individual flex
@@ -229,7 +230,7 @@ function nextRoundBWord() {
 
     // Setup Bank (Scrambled letters, excluding spaces). This bank DEPLETES:
     // clicking a bank letter moves it into the earliest empty slot and removes it
-    // from the bank, so it's clear which letters remain (mirrors Round D / game-mode).
+    // from the bank, so it's clear which letters remain (mirrors Round E / game-mode).
     const bankDiv = document.getElementById('scramble-bank');
     const punctuation = [' ', "-", ".", "?", "!"];
     const letters = word.split('').filter(c => !punctuation.includes(c)).sort(() => 0.5 - Math.random());
@@ -244,24 +245,24 @@ function nextRoundBWord() {
         bankDiv.appendChild(btn);
     });
 
-    STUDY_STATE._roundBFrozen = false;
+    STUDY_STATE._roundCFrozen = false;
     playTTS();
 }
 
-// Round B State
-let roundBInput = []; // Array of chars
+// Round C State
+let roundCInput = []; // Array of chars
 
 // Slots are grouped into .word-group wrappers (so a word like "danced" never
 // breaks across lines), so the live slot elements are .study-slot descendants —
 // in the same document order as the original flat layout. Use this everywhere
 // instead of scramble-slots.children (whose direct children are now groups).
-function roundBSlots() {
+function roundCSlots() {
     return Array.from(document.querySelectorAll('#scramble-slots .study-slot'));
 }
 
 function addLetterToSlot(char, btnElement, targetWord) {
-    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundBFrozen) return;
-    const slots = roundBSlots();
+    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundCFrozen) return;
+    const slots = roundCSlots();
     // Place into the earliest EMPTY letter-slot (fixed slots skipped). The gap
     // stays (no reflow) so positions remain stable for the learner.
     let placedSlot = null;
@@ -280,8 +281,8 @@ function addLetterToSlot(char, btnElement, targetWord) {
 }
 
 function removeLetterFromSlot(index, targetWord) {
-    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundBFrozen) return;
-    const slots = roundBSlots();
+    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundCFrozen) return;
+    const slots = roundCSlots();
     const slot = slots[index];
     if (slot.innerText) {
         const char = slot.innerText;
@@ -301,7 +302,7 @@ function removeLetterFromSlot(index, targetWord) {
 }
 
 function resetSlotColors() {
-    const slots = roundBSlots();
+    const slots = roundCSlots();
     for (let s of slots) {
         s.classList.remove('bg-green-500', 'bg-red-500');
         s.classList.add('bg-gray-800');
@@ -309,9 +310,9 @@ function resetSlotColors() {
 }
 
 // CHECK button: reveal correct (green) / wrong (red) for ~5s, then reset all to bank.
-function checkRoundB() {
+function checkRoundC() {
     if (STUDY_STATE.isTransitioning) return;
-    const slots = roundBSlots();
+    const slots = roundCSlots();
     const targetWord = currentTTSWord;
 
     // Fill state: every non-fixed slot must have a letter.
@@ -343,7 +344,7 @@ function checkRoundB() {
 
     if (allCorrect) {
         STUDY_STATE.isTransitioning = true;
-        STUDY_STATE._roundBFrozen = true;
+        STUDY_STATE._roundCFrozen = true;
         playHappySound();
         srStudyResults.push({ type: 'vocab', key: itemKey(targetWord), firstAttempt: exerciseAttempts === 1 });
         queueExerciseEvent('wordScramble', 'study', targetWord);
@@ -351,15 +352,15 @@ function checkRoundB() {
             STUDY_STATE.currentWordIndex++;
             startExerciseTracking();
             STUDY_STATE.isTransitioning = false;
-            STUDY_STATE._roundBFrozen = false;
-            nextRoundBWord();
+            STUDY_STATE._roundCFrozen = false;
+            nextRoundCWord();
         }, 1000);
         return;
     }
 
     // Wrong: reveal for ~5s (frozen), then clear all slots AND return every letter
     // to the bank (it depletes on placement, so a wrong check must restore them).
-    STUDY_STATE._roundBFrozen = true;
+    STUDY_STATE._roundCFrozen = true;
     synthError();
     incrementExerciseAttempts();
     const slotsArr = Array.from(slots);
@@ -381,16 +382,16 @@ function checkRoundB() {
                 }
                 resetSlotColors();
             }
-            STUDY_STATE._roundBFrozen = false;
+            STUDY_STATE._roundCFrozen = false;
         }, 5000);
     });
 }
 
-function clearRoundB() {
+function clearRoundC() {
     // Allow CLEAR during the wrong-answer reveal (so the player can skip the 5s
     // wait), but not during the 1s success transition to the next word.
     if (STUDY_STATE.isTransitioning) return;
-    const slots = roundBSlots();
+    const slots = roundCSlots();
     const bank = document.getElementById('scramble-bank');
     for (let slot of slots) {
         if (slot._resetTimer) { clearTimeout(slot._resetTimer); slot._resetTimer = null; }
@@ -409,26 +410,26 @@ function clearRoundB() {
         resetSlotColors();
     }
     // Cancel any pending reveal reset and unfreeze so editing resumes immediately.
-    STUDY_STATE._roundBFrozen = false;
+    STUDY_STATE._roundCFrozen = false;
 }
 
-function finishRoundB() {
-    startRoundC();
+function finishRoundC() {
+    startRoundD();
 }
 
 
 // --- ROUND C: Spelling (type from a 10-key board) ---
-function startRoundC() {
-    STUDY_STATE.round = 'C';
+function startRoundD() {
+    STUDY_STATE.round = 'D';
     STUDY_STATE.currentWordIndex = 0;
     updateStudyUI("Round C: Spelling", "Type the word.");
     startExerciseTracking();
-    nextRoundCWord();
+    nextRoundDWord();
 }
 
-function nextRoundCWord() {
+function nextRoundDWord() {
     if (STUDY_STATE.currentWordIndex >= STUDY_STATE.words.length) {
-        finishRoundC();
+        finishRoundD();
         return;
     }
 
@@ -439,21 +440,21 @@ function nextRoundCWord() {
     container.innerHTML = `
         <div class="flex flex-col items-center gap-[var(--gap-md)] w-full">
             <button onclick="playTTS()" aria-label="Play Audio" class="w-16 h-16 rounded-full bg-blue-500 text-white text-2xl shadow-lg transform active:scale-95 transition-transform"><i class="fas fa-volume-up"></i></button>
-            <div id="roundC-translation" class="translation-hint hidden"></div>
-            <img id="roundC-image" class="w-32 h-32 object-contain mx-auto my-2 hidden border-2 border-slate-300 rounded-xl bg-white/10" alt="Vocabulary Image">
+            <div id="roundD-translation" class="translation-hint hidden"></div>
+            <img id="roundD-image" class="w-32 h-32 object-contain mx-auto my-2 hidden border-2 border-slate-300 rounded-xl bg-white/10" alt="Vocabulary Image">
 
             <div id="spelling-display" class="flex flex-wrap justify-center gap-[var(--gap-xs)] min-h-[60px] w-full px-4 text-white"></div>
 
             <div id="virtual-keyboard" class="flex flex-wrap justify-center gap-[var(--gap-sm)] max-w-lg px-4"></div>
 
             <div class="flex gap-[var(--gap-md)]">
-                <button onclick="checkRoundC()" class="game-btn bg-green-500 py-3 px-6">CHECK</button>
-                <button onclick="clearRoundC()" class="game-btn bg-gray-500 py-3 px-6">CLEAR</button>
+                <button onclick="checkRoundD()" class="game-btn bg-green-500 py-3 px-6">CHECK</button>
+                <button onclick="clearRoundD()" class="game-btn bg-gray-500 py-3 px-6">CLEAR</button>
             </div>
         </div>
     `;
-    showTranslation('roundC-translation', word);
-    showVocabImage('roundC-image', word);
+    showTranslation('roundD-translation', word);
+    showVocabImage('roundD-image', word);
 
     // Board = the word's own letters (shuffled) + enough random fillers to reach 10 keys.
     const punct = [' ', "'", "-", ".", "?", "!", ","];
@@ -480,96 +481,96 @@ function nextRoundCWord() {
         btn.className = "study-key";
         btn.innerText = char;
         btn.dataset.keyIndex = i;
-        btn.onclick = () => typeRoundC(i);
+        btn.onclick = () => typeRoundD(i);
         kbDiv.appendChild(btn);
     });
 
-    roundCInput = "";
-    roundCSlots = slots;
-    roundCBaseKeys = [...keys];
-    roundCPlacement = [];
-    roundCUsedKeys = [];
-    updateRoundCDisplay();
+    roundDInput = "";
+    roundDSlots = slots;
+    roundDBaseKeys = [...keys];
+    roundDPlacement = [];
+    roundDUsedKeys = [];
+    updateRoundDDisplay();
     playTTS();
 }
 
-let roundCInput = "";
-let roundCSlots = [];
-let roundCBaseKeys = [];
+let roundDInput = "";
+let roundDSlots = [];
+let roundDBaseKeys = [];
 // Per-letter-slot -> tile index (which keyboard tile filled this slot), and
 // per-tile used flag. These decouple "which tile is placed" from typing order,
 // so a used tile is blocked by its OWN placement, not by which typing position
 // it landed in (the old bug blocked an 'a' tile just because two 'd's were
 // typed first).
-let roundCPlacement = [];
-let roundCUsedKeys = [];
+let roundDPlacement = [];
+let roundDUsedKeys = [];
 
 // Rebuild the typed string from the per-slot placement (slot order), so display
 // and validation read a coherent left-to-right string regardless of which tile
 // was used for each slot.
-function roundCRebuild() {
-    roundCInput = roundCPlacement.map(ki => ki === undefined ? '' : roundCBaseKeys[ki]).join('');
+function roundDRebuild() {
+    roundDInput = roundDPlacement.map(ki => ki === undefined ? '' : roundDBaseKeys[ki]).join('');
 }
 
-function typeRoundC(keyIndex) {
-    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundCFrozen) return;
-    const letterSlotCount = roundCSlots.filter(s => s.type === 'letter').length;
+function typeRoundD(keyIndex) {
+    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundDFrozen) return;
+    const letterSlotCount = roundDSlots.filter(s => s.type === 'letter').length;
     // Find the first empty letter-slot to fill (L-to-R slot order, not typing order).
     let slotFullIdx = -1;
-    for (let i = 0; i < roundCSlots.length; i++) {
-        if (roundCSlots[i].type === 'letter' && roundCPlacement[i] === undefined) { slotFullIdx = i; break; }
+    for (let i = 0; i < roundDSlots.length; i++) {
+        if (roundDSlots[i].type === 'letter' && roundDPlacement[i] === undefined) { slotFullIdx = i; break; }
     }
     if (slotFullIdx === -1) return; // all slots filled
-    if (roundCUsedKeys[keyIndex]) return; // this tile already placed
-    roundCUsedKeys[keyIndex] = true;
-    roundCPlacement[slotFullIdx] = keyIndex;
-    updateRoundCDisplay();
+    if (roundDUsedKeys[keyIndex]) return; // this tile already placed
+    roundDUsedKeys[keyIndex] = true;
+    roundDPlacement[slotFullIdx] = keyIndex;
+    updateRoundDDisplay();
 }
 
-function deleteRoundCLast() {
-    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundCFrozen) return;
+function deleteRoundDLast() {
+    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundDFrozen) return;
     // Remove the rightmost placed letter-slot (L-to-R), freeing its tile.
-    for (let i = roundCSlots.length - 1; i >= 0; i--) {
-        if (roundCSlots[i].type === 'letter' && roundCPlacement[i] !== undefined) {
-            removeRoundCLetter(i);
+    for (let i = roundDSlots.length - 1; i >= 0; i--) {
+        if (roundDSlots[i].type === 'letter' && roundDPlacement[i] !== undefined) {
+            removeRoundDLetter(i);
             return;
         }
     }
 }
 
-function removeRoundCLetter(slotFullIdx) {
-    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundCFrozen) return;
-    if (roundCSlots[slotFullIdx].type !== 'letter') return;
-    const placedKey = roundCPlacement[slotFullIdx];
+function removeRoundDLetter(slotFullIdx) {
+    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundDFrozen) return;
+    if (roundDSlots[slotFullIdx].type !== 'letter') return;
+    const placedKey = roundDPlacement[slotFullIdx];
     if (placedKey === undefined) return; // already empty
-    roundCUsedKeys[placedKey] = false;
-    roundCPlacement[slotFullIdx] = undefined;
-    roundCRebuild();
-    updateRoundCDisplay();
+    roundDUsedKeys[placedKey] = false;
+    roundDPlacement[slotFullIdx] = undefined;
+    roundDRebuild();
+    updateRoundDDisplay();
 }
 
-function clearRoundC() {
+function clearRoundD() {
     // Allow CLEAR during the wrong-answer reveal (skip the 5s wait), but not the
     // 1s success transition to the next word.
     if (STUDY_STATE.isTransitioning) return;
-    if (STUDY_STATE._roundCResetTimer) { clearTimeout(STUDY_STATE._roundCResetTimer); STUDY_STATE._roundCResetTimer = null; }
-    STUDY_STATE._roundCFeedback = false;
-    STUDY_STATE._roundCFrozen = false;
-    roundCInput = "";
-    roundCPlacement = [];
-    roundCUsedKeys = [];
-    updateRoundCDisplay();
+    if (STUDY_STATE._roundDResetTimer) { clearTimeout(STUDY_STATE._roundDResetTimer); STUDY_STATE._roundDResetTimer = null; }
+    STUDY_STATE._roundDFeedback = false;
+    STUDY_STATE._roundDFrozen = false;
+    roundDInput = "";
+    roundDPlacement = [];
+    roundDUsedKeys = [];
+    updateRoundDDisplay();
 }
 
-function updateRoundCDisplay() {
+function updateRoundDDisplay() {
     const disp = document.getElementById('spelling-display');
     const targetWord = currentTTSWord;
-    const isFeedback = STUDY_STATE._roundCFeedback === true;
-    const isSuccess = STUDY_STATE._roundCSuccess === true;
-    const isFrozen = STUDY_STATE._roundCFrozen === true;
+    const isFeedback = STUDY_STATE._roundDFeedback === true;
+    const isSuccess = STUDY_STATE._roundDSuccess === true;
+    const isFrozen = STUDY_STATE._roundDFrozen === true;
 
-    // Keep roundCInput coherent with per-slot placement (slot order).
-    roundCRebuild();
+    // Keep roundDInput coherent with per-slot placement (slot order).
+    roundDRebuild();
 
     // Build the row, grouping consecutive LETTER slots into a .word-group so the
     // word never breaks mid-word (fixed chars like space/'/- stay as their own
@@ -579,21 +580,21 @@ function updateRoundCDisplay() {
     const flushGroup = () => {
         if (groupBuf) { html += `<span class="word-group">${groupBuf}</span>`; groupBuf = ""; }
     };
-    roundCSlots.forEach((slot, fullIdx) => {
+    roundDSlots.forEach((slot, fullIdx) => {
         if (slot.type === 'fixed') {
             flushGroup(); // a separator always ends the current word-run
             const c = slot.char === ' ' ? ' ' : slot.char;
             html += `<div class="study-slot border-transparent bg-transparent select-none" style="color:#94a3b8">${c}</div>`;
         } else {
-            const placedKey = roundCPlacement[fullIdx];
-            const filledChar = (placedKey !== undefined) ? roundCBaseKeys[placedKey] : "";
+            const placedKey = roundDPlacement[fullIdx];
+            const filledChar = (placedKey !== undefined) ? roundDBaseKeys[placedKey] : "";
             let bg = "bg-gray-800";
             if (isSuccess) bg = "bg-green-500";
             else if (isFeedback && filledChar) {
                 bg = (filledChar === targetWord[slot.index]) ? "bg-green-500" : "bg-red-500";
             }
             // Click a filled slot to DELETE it (frozen during reveal).
-            const onclick = (filledChar && !isFrozen) ? ` onclick="removeRoundCLetter(${fullIdx})"` : "";
+            const onclick = (filledChar && !isFrozen) ? ` onclick="removeRoundDLetter(${fullIdx})"` : "";
             groupBuf += `<div class="study-slot ${bg}"${onclick}>${filledChar}</div>`;
         }
     });
@@ -611,78 +612,78 @@ function updateRoundCDisplay() {
         Array.from(kbDiv.children).forEach((btn) => {
             const ki = Number(btn.dataset.keyIndex);
             btn.style.visibility = 'visible';
-            if (roundCUsedKeys[ki]) btn.classList.add('used');
+            if (roundDUsedKeys[ki]) btn.classList.add('used');
             else btn.classList.remove('used');
         });
     }
 }
 
-function checkRoundC() {
-    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundCFrozen) return;
+function checkRoundD() {
+    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundDFrozen) return;
     const targetWord = currentTTSWord;
     const punct = [' ', "'", "-", ".", "?", "!", ","];
     const targetLetters = targetWord.split('').filter(c => !punct.includes(c)).join('');
-    const allCorrect = (roundCInput === targetLetters);
+    const allCorrect = (roundDInput === targetLetters);
 
     // Full? input length must equal number of letter slots.
-    let letterSlotCount = roundCSlots.filter(s => s.type === 'letter').length;
-    if (roundCInput.length < letterSlotCount) { synthError(); return; }
+    let letterSlotCount = roundDSlots.filter(s => s.type === 'letter').length;
+    if (roundDInput.length < letterSlotCount) { synthError(); return; }
 
     if (allCorrect) {
-        STUDY_STATE._roundCSuccess = true;
-        STUDY_STATE._roundCFeedback = true;
-        STUDY_STATE._roundCFrozen = true;
-        updateRoundCDisplay();
+        STUDY_STATE._roundDSuccess = true;
+        STUDY_STATE._roundDFeedback = true;
+        STUDY_STATE._roundDFrozen = true;
+        updateRoundDDisplay();
         STUDY_STATE.isTransitioning = true;
         playHappySound();
         queueExerciseEvent('spelling', 'study', targetWord);
         setTimeout(() => {
-            roundCInput = "";
-            roundCPlacement = [];
-            roundCUsedKeys = [];
-            STUDY_STATE._roundCSuccess = false;
-            STUDY_STATE._roundCFeedback = false;
-            STUDY_STATE._roundCFrozen = false;
+            roundDInput = "";
+            roundDPlacement = [];
+            roundDUsedKeys = [];
+            STUDY_STATE._roundDSuccess = false;
+            STUDY_STATE._roundDFeedback = false;
+            STUDY_STATE._roundDFrozen = false;
             STUDY_STATE.currentWordIndex++;
             startExerciseTracking();
             STUDY_STATE.isTransitioning = false;
-            nextRoundCWord();
+            nextRoundDWord();
         }, 1000);
     } else {
-        STUDY_STATE._roundCFeedback = true;
-        STUDY_STATE._roundCFrozen = true; // freeze: no editing during reveal
-        updateRoundCDisplay();
+        STUDY_STATE._roundDFeedback = true;
+        STUDY_STATE._roundDFrozen = true; // freeze: no editing during reveal
+        updateRoundDDisplay();
         synthError();
         incrementExerciseAttempts();
-        if (STUDY_STATE._roundCResetTimer) clearTimeout(STUDY_STATE._roundCResetTimer);
-        STUDY_STATE._roundCResetTimer = setTimeout(() => {
-            STUDY_STATE._roundCFeedback = false;
-            STUDY_STATE._roundCFrozen = false;
-            roundCInput = "";
-            roundCPlacement = [];
-            roundCUsedKeys = [];
-            updateRoundCDisplay();
+        if (STUDY_STATE._roundDResetTimer) clearTimeout(STUDY_STATE._roundDResetTimer);
+        STUDY_STATE._roundDResetTimer = setTimeout(() => {
+            STUDY_STATE._roundDFeedback = false;
+            STUDY_STATE._roundDFrozen = false;
+            roundDInput = "";
+            roundDPlacement = [];
+            roundDUsedKeys = [];
+            updateRoundDDisplay();
         }, 5000);
     }
 }
 
-function finishRoundC() {
-    startRoundD();
+function finishRoundD() {
+    startRoundE();
 }
 
 
 // --- ROUND D: Sentence Scramble ---
-function startRoundD() {
-    STUDY_STATE.round = 'D';
+function startRoundE() {
+    STUDY_STATE.round = 'E';
     STUDY_STATE.currentSentenceIndex = 0;
     updateStudyUI("Round D: Sentence Scramble", "Order the words.");
     startExerciseTracking();
-    nextRoundDSentence();
+    nextRoundESentence();
 }
 
-function nextRoundDSentence() {
+function nextRoundESentence() {
     if (STUDY_STATE.currentSentenceIndex >= STUDY_STATE.sentences.length) {
-        startRoundE();
+        startRoundF();
         return;
     }
 
@@ -692,7 +693,7 @@ function nextRoundDSentence() {
     const container = document.getElementById('study-game-area');
     container.innerHTML = `
         <div class="flex flex-col gap-[var(--gap-md)] w-full max-w-2xl mx-auto px-4">
-             <div id="roundD-translation" class="translation-hint hidden"></div>
+             <div id="roundE-translation" class="translation-hint hidden"></div>
              <div id="sentence-drop-zone" class="bg-gray-800/50 p-6 rounded-xl min-h-[120px] flex flex-wrap gap-[var(--gap-sm)] items-center justify-center border-2 border-dashed border-gray-600">
                 <!-- Word slots -->
              </div>
@@ -702,12 +703,12 @@ function nextRoundDSentence() {
              </div>
              
              <div class="flex justify-center gap-4">
-                <button onclick="checkRoundD()" class="game-btn bg-green-500 py-3 px-8 text-xl">CHECK</button>
-                <button onclick="clearRoundD()" class="game-btn bg-gray-500 py-3 px-8 text-xl">CLEAR</button>
+                <button onclick="checkRoundE()" class="game-btn bg-green-500 py-3 px-8 text-xl">CHECK</button>
+                <button onclick="clearRoundE()" class="game-btn bg-gray-500 py-3 px-8 text-xl">CLEAR</button>
              </div>
         </div>
     `;
-    showTranslation('roundD-translation', sentence);
+    showTranslation('roundE-translation', sentence);
 
     // Build fixed word-slots (one per token, in order).
     const tokens = sentence.split(' ');
@@ -743,7 +744,7 @@ function nextRoundDSentence() {
         if (placed) deleteWordTile(placed);
     };
 
-    STUDY_STATE._roundDFrozen = false;
+    STUDY_STATE._roundEFrozen = false;
 }
 
 function createWordTile(word, id) {
@@ -761,7 +762,7 @@ function createWordTile(word, id) {
 // and remove it from the bank so it's clear which words remain. Clicking a placed
 // tile (via the delegated drop-zone listener) returns it to the bank.
 function placeWordTile(sourceEl) {
-    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundDFrozen) return;
+    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundEFrozen) return;
     const dropZone = document.getElementById('sentence-drop-zone');
     const empty = Array.from(dropZone.children).find(s => !s.firstChild);
     if (!empty) return; // no empty slot
@@ -778,7 +779,7 @@ function placeWordTile(sourceEl) {
 
 // Remove a placed word and RETURN its tile to the bank so it can be reused.
 function deleteWordTile(item) {
-    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundDFrozen) return;
+    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundEFrozen) return;
     const word = item.dataset.word;
     if (item.parentElement) item.remove();
     const bank = document.getElementById('sentence-word-bank');
@@ -789,12 +790,12 @@ function deleteWordTile(item) {
     bank.appendChild(tile);
 }
 
-function clearRoundD() {
+function clearRoundE() {
     // Allow CLEAR during the wrong-answer reveal (skip the 5s wait). BLOCKED only
     // during the 1s success transition to the next sentence (handled by isTransitioning).
     if (STUDY_STATE.isTransitioning) return;
     const dropZone = document.getElementById('sentence-drop-zone');
-    if (STUDY_STATE._roundDResetTimer) { clearTimeout(STUDY_STATE._roundDResetTimer); STUDY_STATE._roundDResetTimer = null; }
+    if (STUDY_STATE._roundEResetTimer) { clearTimeout(STUDY_STATE._roundEResetTimer); STUDY_STATE._roundEResetTimer = null; }
     // Remove all placed tiles and RETURN every tile to the bank (this widget
     // depletes on placement, so "clear" must restore the full set).
     const bank = document.getElementById('sentence-word-bank');
@@ -811,11 +812,11 @@ function clearRoundD() {
     });
     // Cancel the reveal reset and unfreeze so editing resumes immediately.
     dropZone.classList.remove('border-red-500');
-    STUDY_STATE._roundDFrozen = false;
+    STUDY_STATE._roundEFrozen = false;
 }
 
-function checkRoundD() {
-    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundDFrozen) return;
+function checkRoundE() {
+    if (STUDY_STATE.isTransitioning || STUDY_STATE._roundEFrozen) return;
     const dropZone = document.getElementById('sentence-drop-zone');
     const slots = Array.from(dropZone.children);
     const targetWords = slots.map(s => s.dataset.expected);
@@ -837,27 +838,57 @@ function checkRoundD() {
 
     if (allCorrect) {
         STUDY_STATE.isTransitioning = true;
-        STUDY_STATE._roundDFrozen = true;
+        STUDY_STATE._roundEFrozen = true;
         playHappySound();
         srStudyResults.push({ type: 'sentences', key: itemKey(STUDY_STATE.sentences[STUDY_STATE.currentSentenceIndex]), firstAttempt: exerciseAttempts === 1 });
         queueExerciseEvent('sentenceScramble', 'study', STUDY_STATE.sentences[STUDY_STATE.currentSentenceIndex]);
-        setTimeout(() => {
+
+        const advance = () => {
             STUDY_STATE.currentSentenceIndex++;
             startExerciseTracking();
             STUDY_STATE.isTransitioning = false;
-            STUDY_STATE._roundDFrozen = false;
-            nextRoundDSentence();
-        }, 1000);
+            STUDY_STATE._roundEFrozen = false;
+            nextRoundESentence();
+        };
+
+        // Speech step: now that the sentence is built correctly, ask the student
+        // to say it aloud (Whisper). Skipped silently if the model isn't ready
+        // yet, so it never blocks progression or shows a spinner.
+        if (window.SpeechStatus && window.SpeechStatus.isReady() && window.SpeechUI && window.SpeechUI.makeSentenceGate) {
+            const sentenceText = targetWords.join(' ');
+            // Hide the CHECK/CLEAR controls and the now-empty word bank;
+            // place the speech gate INTO the bank's space so the user doesn't scroll.
+            const controls = dropZone.parentElement.lastElementChild;
+            if (controls) controls.style.display = 'none';
+            const bank = document.getElementById('sentence-word-bank');
+            if (bank) {
+                bank.innerHTML = '';  // clear any residual tiles
+                bank.classList.remove('bg-gray-700/50');
+                bank.classList.add('bg-transparent');
+            }
+            const gate = window.SpeechUI.makeSentenceGate({
+                target: sentenceText,
+                level: 2,
+                onDone: advance
+            });
+            if (bank) {
+                bank.appendChild(gate);
+            } else {
+                dropZone.parentElement.appendChild(gate);
+            }
+        } else {
+            setTimeout(advance, 1000);
+        }
     } else {
-        STUDY_STATE._roundDFrozen = true; // freeze during reveal (not a transition, so CLEAR still works)
+        STUDY_STATE._roundEFrozen = true; // freeze during reveal (not a transition, so CLEAR still works)
         synthError();
         incrementExerciseAttempts();
         dropZone.classList.add('border-red-500');
-        if (STUDY_STATE._roundDResetTimer) clearTimeout(STUDY_STATE._roundDResetTimer);
-        STUDY_STATE._roundDResetTimer = setTimeout(() => {
+        if (STUDY_STATE._roundEResetTimer) clearTimeout(STUDY_STATE._roundEResetTimer);
+        STUDY_STATE._roundEResetTimer = setTimeout(() => {
             dropZone.classList.remove('border-red-500');
             STUDY_STATE.isTransitioning = false;
-            STUDY_STATE._roundDFrozen = false;
+            STUDY_STATE._roundEFrozen = false;
             // Return all placed tiles to the bank (it depletes on placement).
             const bank = document.getElementById('sentence-word-bank');
             Array.from(dropZone.children).forEach(slot => {
@@ -877,14 +908,14 @@ function checkRoundD() {
 
 
 // --- ROUND E: Sentence Matching ---
-function startRoundE() {
-    STUDY_STATE.round = 'E';
+function startRoundF() {
+    STUDY_STATE.round = 'F';
     STUDY_STATE.subRound = 1; // Initialize sub-round counter
     startExerciseTracking();
-    nextRoundESubRound();
+    nextRoundFSubRound();
 }
 
-function nextRoundESubRound() {
+function nextRoundFSubRound() {
     if (STUDY_STATE.subRound > 3) {
         finishStudySession();
         return;
@@ -893,7 +924,7 @@ function nextRoundESubRound() {
     updateStudyUI(`Round E${STUDY_STATE.subRound}: Sentence Matching`, "Match each question with its answer.");
 
     // Get sentence pairs using SR-aware same-page selection, excluding pairs
-    // already shown in an earlier Round E sub-round this session.
+    // already shown in an earlier Round F sub-round this session.
     const { book, unit, page } = selectedClassContent;
 
     // E1 favors today's page; E2/E3 review previous pages when only new material
@@ -906,7 +937,7 @@ function nextRoundESubRound() {
         pairs = result.pairs;
     } else {
         // No unseen pairs left anywhere up to the current page (rare: a first page
-        // with only 3 pairs). Don't repeat already-seen pairs — end Round E cleanly.
+        // with only 3 pairs). Don't repeat already-seen pairs — end Round F cleanly.
         STUDY_STATE.subRound = 4;
         finishStudySession();
         return;
@@ -918,10 +949,10 @@ function nextRoundESubRound() {
     STUDY_STATE.sentencePairs = pairs;
     STUDY_STATE.pairAttempts = pairs.map(() => 1);
     STUDY_STATE.pairQueued = pairs.map(() => false);
-    renderRoundE();
+    renderRoundF();
 }
 
-function renderRoundE() {
+function renderRoundF() {
     const pairs = STUDY_STATE.sentencePairs;
 
     // Create shuffled array of B sentences for the dock
@@ -957,7 +988,7 @@ function renderRoundE() {
             </div>
             
             <div class="flex justify-center gap-4 mt-4">
-                <button onclick="checkRoundE()" class="game-btn bg-green-500 py-3 px-8 text-xl">CHECK</button>
+                <button onclick="checkRoundF()" class="game-btn bg-green-500 py-3 px-8 text-xl">CHECK</button>
             </div>
         </div>
     `;
@@ -1003,7 +1034,7 @@ function returnTileToDock(tile) {
     dock.appendChild(tile);
 }
 
-function checkRoundE() {
+function checkRoundF() {
     if (STUDY_STATE.isTransitioning) return;
     const pairs = STUDY_STATE.sentencePairs;
     const slots = document.querySelectorAll('.sentence-b-slot');
@@ -1060,7 +1091,7 @@ function checkRoundE() {
             STUDY_STATE.subRound++;
             startExerciseTracking();
             STUDY_STATE.isTransitioning = false;
-            nextRoundESubRound();
+            nextRoundFSubRound();
         }, 1500);
     } else {
         STUDY_STATE.isTransitioning = true;
@@ -1076,13 +1107,13 @@ function checkRoundE() {
 
         // Reset after 2 seconds
         setTimeout(() => {
-            resetRoundE();
+            resetRoundF();
             STUDY_STATE.isTransitioning = false;
         }, 2000);
     }
 }
 
-function resetRoundE() {
+function resetRoundF() {
     // Return all tiles to dock
     const tiles = document.querySelectorAll('.sentence-b-tile');
     tiles.forEach(tile => {
@@ -1163,16 +1194,16 @@ function playHappySound() {
 window.addEventListener('keydown', (e) => {
     if (!STUDY_STATE.active) return;
 
-    if (STUDY_STATE.round === 'B') {
-        handleRoundBKeyDown(e.key);
-    } else if (STUDY_STATE.round === 'C') {
+    if (STUDY_STATE.round === 'C') {
         handleRoundCKeyDown(e.key);
+    } else if (STUDY_STATE.round === 'D') {
+        handleRoundDKeyDown(e.key);
     }
 });
 
-function handleRoundBKeyDown(key) {
+function handleRoundCKeyDown(key) {
     if (key === 'Backspace') {
-        const slots = roundBSlots();
+        const slots = roundCSlots();
         // Find last filled letter-slot and remove it.
         for (let i = slots.length - 1; i >= 0; i--) {
             if (slots[i].innerText && slots[i].dataset.fixed !== "true") {
@@ -1189,22 +1220,22 @@ function handleRoundBKeyDown(key) {
             }
         }
     } else if (key === 'Enter') {
-        checkRoundB();
+        checkRoundC();
     }
 }
 
-function handleRoundCKeyDown(key) {
+function handleRoundDKeyDown(key) {
     if (key === 'Enter') {
-        checkRoundC();
+        checkRoundD();
     } else if (key === 'Backspace') {
-        deleteRoundCLast();
+        deleteRoundDLast();
     } else if (key.length === 1 && key.match(/[a-z0-9]/i)) {
         // Only allow typing if the key is in the visible virtual keyboard.
         const kb = document.getElementById('virtual-keyboard').children;
         for (let btn of kb) {
             const ki = Number(btn.dataset.keyIndex);
-            if (btn.innerText.toLowerCase() === key.toLowerCase() && !roundCUsedKeys[ki]) {
-                typeRoundC(ki);
+            if (btn.innerText.toLowerCase() === key.toLowerCase() && !roundDUsedKeys[ki]) {
+                typeRoundD(ki);
                 break;
             }
         }

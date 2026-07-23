@@ -662,40 +662,127 @@
     <script src="vampire_survivors.js?v=2026-07-23c"></script>
     <script src="gomoku.js?v=2026-07-23c"></script>
     <script src="uno.js?v=2026-07-23c"></script>
-    <!-- Tower Defense HUD -->
-    <div id="tdHUD" class="hidden fixed top-0 left-0 right-0 z-40 flex justify-between items-center px-4 py-2 bg-black/50 text-white pointer-events-none">
-        <div class="text-xl font-bold">🪙 Coins: <span id="tdCoins">0</span></div>
-        <div class="text-xl font-bold">🏫 Base HP: <span id="tdBaseHp">0</span></div>
-        <button class="td-menu-btn close pointer-events-auto" onclick="tdReturnToMenu()">Exit</button>
+
+    <!-- ===== Speech-recognition engine (self-contained, global: LocalEngine / Recorder / Scorer) ===== -->
+    <script src="speech_scorer.js?v=1"></script>
+    <script src="speech_recorder.js?v=1"></script>
+    <script src="speech_engine.js?v=5"></script>
+    <script src="speech_ui.js?v=4"></script>
+    <!-- TEMPORARY (debugging phase): on-screen speech-load diagnostics + defines
+         window.__speechLog. Must load BEFORE speech_preload.js so the log hook
+         exists when the model load starts. Remove once loading is reliable. -->
+    <script src="speech_debug.js?v=2"></script>
+    <!-- Invisible preload: start fetching + compiling the Whisper model on first page load,
+         BEFORE login, so it's ready by the time the student reaches a speech round. -->
+    <script src="speech_preload.js?v=2"></script>
+    <!-- Tower Defense HUD (top bar) -->
+    <div id="tdHUD" class="hidden fixed top-0 left-0 right-0 z-40 flex justify-between items-center px-3 py-1 td-hud-bar">
+        <div class="td-hud-item">🪙 <span id="tdCoins">0</span></div>
+        <div class="td-hud-item">🌊 <span id="tdWave">0</span></div>
+        <div class="td-hud-item">🏫 <span id="tdBaseHp">0</span></div>
+        <button id="tdESLBtn" class="td-esl-btn" onclick="tdStartESL()">📖 ANSWER</button>
+        <button class="td-exit-btn" onclick="tdReturnToMenu()">✕</button>
     </div>
 
-    <!-- Tower Defense Build/Upgrade Menu -->
-    <div id="tdTowerMenu" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-        <div class="bg-gray-900 border-2 border-green-500 rounded-2xl p-6 w-80 text-center text-white">
-            <h3 id="tdMenuTitle" class="text-xl font-bold mb-4">Build</h3>
-            <div id="tdMenuButtons" class="flex flex-col gap-3"></div>
-        </div>
+    <!-- Tower Defense Tower Selection Bar (bottom) -->
+    <div id="tdTowerBar" class="hidden fixed bottom-0 left-0 right-0 z-40 td-tower-bar">
+        <div id="tdTowerBarItems" class="td-tower-bar-items"></div>
+    </div>
+
+    <!-- Tower Defense Slow Overlay -->
+    <div id="tdSlowOverlay" class="hidden fixed inset-0 z-30 td-slow-overlay pointer-events-none">
+        <div class="td-slow-text">⏳ SLOW MOTION ⏳</div>
     </div>
 
     <!-- Tower Defense Game Over -->
-    <div id="tdGameOverScreen" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-        <div class="bg-gray-900 border-2 border-red-500 rounded-2xl p-8 w-96 text-center text-white">
-            <h2 id="tdGameOverText" class="text-3xl font-bold mb-4">Base Overrun!</h2>
-            <p id="tdFinalScore" class="text-lg mb-6">Score: 0</p>
-            <button class="td-menu-btn" onclick="tdReturnToMenu()">Back to Menu</button>
+    <div id="tdGameOverScreen" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+        <div class="td-gameover-box">
+            <h2 id="tdGameOverText" class="td-gameover-title">School Overrun!</h2>
+            <p id="tdFinalScore" class="td-gameover-score">Score: 0</p>
+            <p id="tdStats" class="td-gameover-stats"></p>
+            <button class="td-play-again-btn" onclick="tdReturnToMenu()">Back to Menu</button>
         </div>
     </div>
 
     <style>
-        .td-menu-btn {
-            background: #16a34a; color: #fff; font-size: 1rem; font-weight: 600;
-            padding: 10px 14px; border-radius: 10px; border: none; cursor: pointer;
-            transition: transform .08s, background .15s;
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        .td-hud-bar {
+            background: linear-gradient(180deg, rgba(10,10,30,0.95) 0%, rgba(10,10,30,0.8) 100%);
+            border-bottom: 2px solid #4caf50;
+            font-family: 'Press Start 2P', monospace;
+            pointer-events: auto;
         }
-        .td-menu-btn:hover { transform: scale(1.03); }
-        .td-menu-btn.disabled { background: #4b5563; opacity: .6; cursor: not-allowed; }
-        .td-menu-btn.earn { background: #2563eb; }
-        .td-menu-btn.close { background: #6b7280; }
+        .td-hud-item {
+            color: #fff; font-size: 11px; text-shadow: 1px 1px 0 #000;
+        }
+        .td-esl-btn {
+            font-family: 'Press Start 2P', monospace;
+            background: linear-gradient(180deg, #4caf50, #2e7d32);
+            color: #fff; font-size: 9px; padding: 6px 10px;
+            border: 2px solid #81c784; border-radius: 6px; cursor: pointer;
+            animation: tdPulse 1.5s ease-in-out infinite;
+            text-shadow: 1px 1px 0 #000;
+        }
+        .td-esl-btn:active { transform: scale(0.92); }
+        @keyframes tdPulse {
+            0%, 100% { box-shadow: 0 0 4px #4caf50; }
+            50% { box-shadow: 0 0 14px #4caf50, 0 0 24px #2e7d32; }
+        }
+        .td-exit-btn {
+            background: #c62828; color: #fff; border: none; border-radius: 4px;
+            font-size: 14px; padding: 4px 8px; cursor: pointer; font-weight: bold;
+        }
+        .td-tower-bar {
+            background: linear-gradient(0deg, rgba(10,10,30,0.95) 0%, rgba(10,10,30,0.8) 100%);
+            border-top: 2px solid #4caf50;
+            padding: 6px 4px;
+            pointer-events: auto;
+        }
+        .td-tower-bar-items {
+            display: flex; gap: 6px; overflow-x: auto; justify-content: center;
+            padding: 2px; -webkit-overflow-scrolling: touch;
+        }
+        .td-tower-btn {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-width: 52px; height: 54px; padding: 4px;
+            background: rgba(40,60,40,0.9); border: 2px solid #555;
+            border-radius: 8px; cursor: pointer; transition: all 0.1s;
+            user-select: none; -webkit-user-select: none;
+        }
+        .td-tower-btn:active { transform: scale(0.9); }
+        .td-tower-btn.selected { border-color: #4caf50; background: rgba(76,175,80,0.3); box-shadow: 0 0 8px #4caf50; }
+        .td-tower-btn.unaffordable { opacity: 0.4; }
+        .td-tower-icon { font-size: 20px; line-height: 1; }
+        .td-tower-cost { font-family: 'Press Start 2P', monospace; font-size: 8px; color: #ffd700; margin-top: 2px; }
+        .td-slow-overlay {
+            background: rgba(30, 80, 180, 0.15);
+            backdrop-filter: blur(1px);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .td-slow-text {
+            font-family: 'Press Start 2P', monospace;
+            color: rgba(100, 180, 255, 0.7); font-size: 14px;
+            animation: tdSlowPulse 1s ease-in-out infinite;
+            text-shadow: 0 0 10px rgba(100,180,255,0.5);
+        }
+        @keyframes tdSlowPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        .td-gameover-box {
+            background: #111; border: 3px solid #f44336; border-radius: 12px;
+            padding: 32px; text-align: center; max-width: 340px; width: 90%;
+            font-family: 'Press Start 2P', monospace;
+        }
+        .td-gameover-title { color: #f44336; font-size: 16px; margin-bottom: 12px; }
+        .td-gameover-score { color: #ffd700; font-size: 12px; margin-bottom: 8px; }
+        .td-gameover-stats { color: #aaa; font-size: 8px; margin-bottom: 16px; line-height: 1.6; }
+        .td-play-again-btn {
+            font-family: 'Press Start 2P', monospace;
+            background: #4caf50; color: #fff; border: none; border-radius: 8px;
+            padding: 12px 20px; font-size: 10px; cursor: pointer;
+        }
+        .td-play-again-btn:hover { background: #66bb6a; }
     </style>
 
     <script src="game.js?v=2026-07-23c"></script>

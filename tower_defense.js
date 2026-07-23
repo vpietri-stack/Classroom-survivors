@@ -1,345 +1,655 @@
 // ============================================================
-// TOWER DEFENSE GAME MODE (Classroom Survivors)
-// Plant-vs-Zombies-style LANE layout, school-themed, placeholders only.
-// Self-registers via registerScene() (boot.js). Full-screen, body-parented.
-// ESL integration UNCHANGED: tdEarnCoins() -> startMiniGame('spelling','towerdefense')
-// -> claimReward success -> tdCreditCoins(50). Gold also from kills.
+// SCHOOL vs ZOMBIES — Tower Defense (PvZ-style, vertical)
+// Full rewrite: pixel-art sprites, 9 towers, 5 enemies,
+// ESL slow-down mechanic, portrait-optimized.
+// Self-registers via registerScene() (boot.js).
+// ESL integration: tdStartESL() -> startMiniGame('spelling','towerdefense')
+//   -> claimReward success -> tdCreditCoins(50)
 // ============================================================
 
-const TD_CELL = 64;                 // nominal cell size (grid auto-fits screen)
-const TD_LANES_MAX = 6;             // cap on horizontal lanes
-const TD_START_COINS = 60;
+// --- GRID CONSTANTS ---
+const TD_COLS = 5;
+const TD_ROWS = 7;
+const TD_START_COINS = 75;
 const TD_START_BASE_HP = 20;
-const TD_TOWER_TYPES = {
-    shooter: { name: 'Pencil', emoji: '🖊️', cost: 20, range: 240, fireRate: 600, damage: 8, color: 0xffe14d, proj: 'dot', slow: 0, splash: 0 },
-    slow:    { name: 'Eraser', emoji: '🧽', cost: 25, range: 200, fireRate: 1000, damage: 2, color: 0xff8ad0, proj: 'bubble', slow: 0.5, splash: 0 },
-    splash:  { name: 'Book',   emoji: '📚', cost: 40, range: 260, fireRate: 1200, damage: 12, color: 0x8d6e3c, proj: 'mortar', slow: 0, splash: 70 }
+const TD_ESL_SLOW_FACTOR = 0.4;   // zombies move at 40% speed during ESL
+const TD_ESL_LINGER_MS = 2000;    // slow lingers 2s after correct answer
+
+// --- TOWER DEFINITIONS ---
+const TD_TOWERS = {
+    pencil:   { name: 'Pencil',       icon: '✏️', cost: 20, type: 'shooter', damage: 12, fireRate: 800,  projSpeed: 350, slow: 0, pierce: false, splash: 0, oneTime: false, hp: 40,  coinGen: 0 },
+    star:     { name: 'Star Student',  icon: '⭐', cost: 25, type: 'generator', damage: 0, fireRate: 0,    projSpeed: 0,   slow: 0, pierce: false, splash: 0, oneTime: false, hp: 30,  coinGen: 5, coinInterval: 8000 },
+    desk:     { name: 'Desk',         icon: '🪑', cost: 15, type: 'blocker', damage: 0, fireRate: 0,    projSpeed: 0,   slow: 0, pierce: false, splash: 0, oneTime: false, hp: 200, coinGen: 0 },
+    eraser:   { name: 'Eraser',       icon: '🧽', cost: 30, type: 'shooter', damage: 8,  fireRate: 1000, projSpeed: 300, slow: 0.4, pierce: false, splash: 0, oneTime: false, hp: 40,  coinGen: 0 },
+    popquiz:  { name: 'Pop Quiz',     icon: '💥', cost: 40, type: 'bomb',    damage: 150, fireRate: 0,   projSpeed: 0,   slow: 0, pierce: false, splash: 1, oneTime: true,  hp: 25,  coinGen: 0, armTime: 2000 },
+    ruler:    { name: 'Ruler',        icon: '📏', cost: 45, type: 'shooter', damage: 9,  fireRate: 650,  projSpeed: 380, slow: 0, pierce: false, splash: 0, oneTime: false, hp: 45,  coinGen: 0, doubleShot: true },
+    textbook: { name: 'Textbook',     icon: '📚', cost: 50, type: 'shooter', damage: 6,  fireRate: 1300, projSpeed: 250, slow: 0, pierce: true,  splash: 0, oneTime: false, hp: 45,  coinGen: 0 },
+    trap:     { name: 'Homework Trap', icon: '📝', cost: 10, type: 'mine',   damage: 200, fireRate: 0,   projSpeed: 0,   slow: 0, pierce: false, splash: 0, oneTime: true,  hp: 15,  coinGen: 0, armTime: 5000 },
+    firedrill:{ name: 'Fire Drill',   icon: '🔔', cost: 60, type: 'lanebomb',damage: 9999, fireRate: 0,  projSpeed: 0,   slow: 0, pierce: false, splash: 0, oneTime: true,  hp: 25,  coinGen: 0, armTime: 1500 }
 };
-const TD_UPGRADE_MULT = { dmg: 1.6, range: 1.15, rate: 0.85 };
-const TD_ENEMY_TYPES = {
-    basic: { hp: 30, speed: 55, color: 0xffffff, coins: 3, dmg: 1, emoji: '📄' },
-    fast:  { hp: 18, speed: 115, color: 0xffa500, coins: 2, dmg: 1, emoji: '⏱️' },
-    tank:  { hp: 120, speed: 33, color: 0x9c27b0, coins: 8, dmg: 3, emoji: '📝' }
+const TD_TOWER_ORDER = ['pencil','star','desk','eraser','popquiz','ruler','textbook','trap','firedrill'];
+const TD_UPGRADE_DMG = 1.4;
+const TD_UPGRADE_RATE = 0.85;
+const TD_UPGRADE_HP = 1.4;
+const TD_MAX_LEVEL = 3;
+
+// --- ENEMY DEFINITIONS ---
+const TD_ENEMIES = {
+    dropout:  { name: 'Dropout',   hp: 40,  speed: 26, coins: 4, dmg: 1, armor: 0,   armorHp: 0,  jump: false, enrage: false },
+    backpack: { name: 'Backpack',  hp: 80,  speed: 24, coins: 6, dmg: 1, armor: 0.5, armorHp: 40, jump: false, enrage: false },
+    nerd:     { name: 'Nerd',      hp: 150, speed: 18, coins: 10, dmg: 2, armor: 0.3, armorHp: 0, jump: false, enrage: false },
+    bully:    { name: 'Bully',     hp: 50,  speed: 48, coins: 7, dmg: 1, armor: 0,   armorHp: 0,  jump: true,  enrage: false },
+    librarian:{ name: 'Librarian', hp: 60,  speed: 22, coins: 8, dmg: 1, armor: 0,   armorHp: 0,  jump: false, enrage: true }
 };
 
+// --- DIFFICULTY PHASES ---
+const TD_PHASES = [
+    { until: 30000,  interval: 5000, types: ['dropout'],              count: 1, hpMult: 1.0 },
+    { until: 60000,  interval: 4000, types: ['dropout','backpack'],   count: 1, hpMult: 1.0 },
+    { until: 120000, interval: 3000, types: ['dropout','backpack','nerd'], count: 2, hpMult: 1.15 },
+    { until: 180000, interval: 2400, types: ['dropout','backpack','nerd','bully'], count: 2, hpMult: 1.3 },
+    { until: 300000, interval: 1800, types: ['dropout','backpack','nerd','bully','librarian'], count: 3, hpMult: 1.5 },
+    { until: Infinity, interval: 1200, types: ['dropout','backpack','nerd','bully','librarian'], count: 3, hpMult: 2.0 }
+];
+
+// ============================================================
+// PIXEL-ART DRAWING UTILITIES
+// ============================================================
+function tdDrawPixelRect(gfx, x, y, w, h, color) {
+    gfx.fillStyle(color, 1);
+    gfx.fillRect(x, y, w, h);
+}
+
+function tdDrawTowerSprite(gfx, type, level, cellW, cellH) {
+    gfx.clear();
+    const s = Math.min(cellW, cellH);
+    const u = s / 16; // pixel unit
+    const cx = 0, cy = 0;
+    const lvScale = 1 + (level - 1) * 0.12;
+
+    gfx.setScale(lvScale);
+
+    switch (type) {
+        case 'pencil': // Yellow pencil pointing up
+            tdDrawPixelRect(gfx, cx-2*u, cy-6*u, 4*u, 10*u, 0xf5c542); // body
+            tdDrawPixelRect(gfx, cx-2*u, cy-6*u, 4*u, 2*u, 0xffe08a);  // highlight
+            tdDrawPixelRect(gfx, cx-1*u, cy-8*u, 2*u, 2*u, 0x333333);  // tip
+            tdDrawPixelRect(gfx, cx-2*u, cy+4*u, 4*u, 2*u, 0xff9999);  // eraser end
+            break;
+        case 'star': // Golden star student
+            tdDrawPixelRect(gfx, cx-1*u, cy-6*u, 2*u, 2*u, 0xffd700);
+            tdDrawPixelRect(gfx, cx-4*u, cy-3*u, 8*u, 2*u, 0xffd700);
+            tdDrawPixelRect(gfx, cx-3*u, cy-1*u, 6*u, 2*u, 0xffec80);
+            tdDrawPixelRect(gfx, cx-2*u, cy+1*u, 4*u, 2*u, 0xffd700);
+            tdDrawPixelRect(gfx, cx-3*u, cy+3*u, 2*u, 2*u, 0xffd700);
+            tdDrawPixelRect(gfx, cx+1*u, cy+3*u, 2*u, 2*u, 0xffd700);
+            // face
+            tdDrawPixelRect(gfx, cx-1*u, cy-2*u, 1*u, 1*u, 0x333333);
+            tdDrawPixelRect(gfx, cx+1*u, cy-2*u, 1*u, 1*u, 0x333333);
+            break;
+        case 'desk': // Brown desk/blocker
+            tdDrawPixelRect(gfx, cx-5*u, cy-3*u, 10*u, 2*u, 0x8B4513); // top
+            tdDrawPixelRect(gfx, cx-5*u, cy-1*u, 10*u, 4*u, 0xA0522D); // body
+            tdDrawPixelRect(gfx, cx-4*u, cy+3*u, 2*u, 3*u, 0x654321);  // leg L
+            tdDrawPixelRect(gfx, cx+2*u, cy+3*u, 2*u, 3*u, 0x654321);  // leg R
+            tdDrawPixelRect(gfx, cx-3*u, cy-1*u, 6*u, 1*u, 0xCD853F);  // highlight
+            break;
+        case 'eraser': // Pink eraser
+            tdDrawPixelRect(gfx, cx-4*u, cy-3*u, 8*u, 6*u, 0xff8ad0);  // body
+            tdDrawPixelRect(gfx, cx-4*u, cy-3*u, 8*u, 2*u, 0x4488ff);  // blue stripe
+            tdDrawPixelRect(gfx, cx-3*u, cy-1*u, 6*u, 1*u, 0xffc0e0);  // highlight
+            tdDrawPixelRect(gfx, cx-2*u, cy+3*u, 4*u, 1*u, 0xcc6699);  // bottom
+            break;
+        case 'popquiz': // Red bomb / exclamation
+            tdDrawPixelRect(gfx, cx-4*u, cy-4*u, 8*u, 8*u, 0xff3333);  // body
+            tdDrawPixelRect(gfx, cx-1*u, cy-6*u, 2*u, 2*u, 0xffaa00);  // fuse
+            tdDrawPixelRect(gfx, cx-1*u, cy-2*u, 2*u, 3*u, 0xffffff);  // ! mark
+            tdDrawPixelRect(gfx, cx-1*u, cy+2*u, 2*u, 1*u, 0xffffff);  // ! dot
+            break;
+        case 'ruler': // Long ruler, double shot
+            tdDrawPixelRect(gfx, cx-1*u, cy-7*u, 3*u, 14*u, 0xdeb887); // body
+            tdDrawPixelRect(gfx, cx-1*u, cy-7*u, 1*u, 14*u, 0xf5deb3); // highlight
+            tdDrawPixelRect(gfx, cx+1*u, cy-5*u, 1*u, 1*u, 0x333333);  // marks
+            tdDrawPixelRect(gfx, cx+1*u, cy-2*u, 1*u, 1*u, 0x333333);
+            tdDrawPixelRect(gfx, cx+1*u, cy+1*u, 1*u, 1*u, 0x333333);
+            tdDrawPixelRect(gfx, cx+1*u, cy+4*u, 1*u, 1*u, 0x333333);
+            break;
+        case 'textbook': // Thick book, piercing
+            tdDrawPixelRect(gfx, cx-4*u, cy-4*u, 8*u, 8*u, 0x2255aa);  // cover
+            tdDrawPixelRect(gfx, cx-4*u, cy-4*u, 2*u, 8*u, 0x1a3d7a);  // spine
+            tdDrawPixelRect(gfx, cx-2*u, cy-2*u, 5*u, 1*u, 0xffffff);  // title line
+            tdDrawPixelRect(gfx, cx-2*u, cy, 4*u, 1*u, 0xcccccc);     // line 2
+            tdDrawPixelRect(gfx, cx-4*u, cy+4*u, 8*u, 1*u, 0xffeedd);  // pages
+            break;
+        case 'trap': // Homework paper mine
+            tdDrawPixelRect(gfx, cx-3*u, cy-4*u, 6*u, 8*u, 0xfffff0);  // paper
+            tdDrawPixelRect(gfx, cx-2*u, cy-2*u, 4*u, 1*u, 0x666666);  // lines
+            tdDrawPixelRect(gfx, cx-2*u, cy, 4*u, 1*u, 0x666666);
+            tdDrawPixelRect(gfx, cx-2*u, cy+2*u, 3*u, 1*u, 0x666666);
+            tdDrawPixelRect(gfx, cx+1*u, cy-4*u, 2*u, 2*u, 0xff4444);  // red mark
+            break;
+        case 'firedrill': // Bell
+            tdDrawPixelRect(gfx, cx-4*u, cy-2*u, 8*u, 5*u, 0xff6600);  // bell body
+            tdDrawPixelRect(gfx, cx-3*u, cy-4*u, 6*u, 2*u, 0xff8833);  // top
+            tdDrawPixelRect(gfx, cx-1*u, cy-5*u, 2*u, 1*u, 0x333333);  // handle
+            tdDrawPixelRect(gfx, cx-1*u, cy+3*u, 2*u, 2*u, 0xffcc00);  // clapper
+            break;
+    }
+}
+
+function tdDrawEnemySprite(gfx, type, frame, hp, maxHp, cellW, cellH) {
+    gfx.clear();
+    const s = Math.min(cellW, cellH);
+    const u = s / 16;
+    const cx = 0, cy = 0;
+    const legOffset = frame === 0 ? 1 : -1;
+
+    // Base zombie body colors by type
+    const skinColors = { dropout: 0x7ab648, backpack: 0x5a9e3a, nerd: 0x4a8e6a, bully: 0x9e5a3a, librarian: 0x6a7ab6 };
+    const skin = skinColors[type] || 0x7ab648;
+    const dark = Phaser.Display.Color.IntegerToColor(skin);
+    const darkHex = Phaser.Display.Color.GetColor(Math.max(0,dark.red-40), Math.max(0,dark.green-40), Math.max(0,dark.blue-40)).color;
+
+    // Head
+    tdDrawPixelRect(gfx, cx-3*u, cy-7*u, 6*u, 5*u, skin);
+    // Eyes
+    tdDrawPixelRect(gfx, cx-2*u, cy-6*u, 2*u, 2*u, 0xff0000);
+    tdDrawPixelRect(gfx, cx+1*u, cy-6*u, 2*u, 2*u, 0xff0000);
+    // Body
+    tdDrawPixelRect(gfx, cx-3*u, cy-2*u, 6*u, 6*u, darkHex);
+    // Arms
+    tdDrawPixelRect(gfx, cx-5*u, cy-1*u, 2*u, 4*u, skin);
+    tdDrawPixelRect(gfx, cx+3*u, cy-1*u, 2*u, 4*u, skin);
+    // Legs (animated)
+    tdDrawPixelRect(gfx, cx-2*u, cy+4*u, 2*u, 3*u + legOffset*u, darkHex);
+    tdDrawPixelRect(gfx, cx+1*u, cy+4*u, 2*u, 3*u - legOffset*u, darkHex);
+
+    // Type-specific accessories
+    switch (type) {
+        case 'backpack': // Backpack on back
+            tdDrawPixelRect(gfx, cx-4*u, cy-2*u, 2*u, 5*u, 0xcc4444);
+            tdDrawPixelRect(gfx, cx-4*u, cy-2*u, 2*u, 1*u, 0x992222);
+            break;
+        case 'nerd': // Helmet/bucket
+            tdDrawPixelRect(gfx, cx-4*u, cy-8*u, 8*u, 2*u, 0x888888);
+            tdDrawPixelRect(gfx, cx-3*u, cy-9*u, 6*u, 1*u, 0xaaaaaa);
+            break;
+        case 'bully': // Spiky hair
+            tdDrawPixelRect(gfx, cx-3*u, cy-9*u, 2*u, 2*u, 0x333333);
+            tdDrawPixelRect(gfx, cx, cy-9*u, 2*u, 2*u, 0x333333);
+            tdDrawPixelRect(gfx, cx+2*u, cy-9*u, 2*u, 2*u, 0x333333);
+            break;
+        case 'librarian': // Book in hand
+            tdDrawPixelRect(gfx, cx+4*u, cy-1*u, 3*u, 4*u, 0x8B4513);
+            tdDrawPixelRect(gfx, cx+4*u, cy-1*u, 3*u, 1*u, 0xffffff);
+            break;
+    }
+}
+
+// ============================================================
+// SPRITE FRAME MAPPINGS
+// ============================================================
+const TD_ENEMY_FRAMES = { dropout: 0, backpack: 1, nerd: 2, bully: 3, librarian: 4 };
+const TD_TOWER_FRAMES = { pencil: 0, star: 1, desk: 2, eraser: 3, popquiz: 4, ruler: 5, textbook: 6, trap: 7, firedrill: 8 };
+
+// ============================================================
+// MAIN SCENE
+// ============================================================
 class TowerDefenseScene extends Phaser.Scene {
-    constructor() {
-        super({ key: 'TowerDefenseScene' });
+    constructor() { super({ key: 'TowerDefenseScene' }); }
+
+    preload() {
+        // Load sprite sheets
+        this.load.spritesheet('td_enemies', 'sprites/td/enemies.png', {
+            frameWidth: 275, frameHeight: 768
+        });
+        this.load.spritesheet('td_towers', 'sprites/td/towers.png', {
+            frameWidth: 341, frameHeight: 341
+        });
     }
 
     create() {
         const W = this.scale.width, H = this.scale.height;
-        this.cols = Math.max(8, Math.floor(W / TD_CELL));
-        this.lanes = Math.min(TD_LANES_MAX, Math.max(4, Math.floor(H / TD_CELL)));
-        this.colW = W / this.cols;
-        this.laneH = H / this.lanes;
-        this.schoolLineX = this.colW * 0.5;   // enemies reaching here hit the school
 
-        // --- core state ---
+        // --- Layout calculation (portrait-optimized) ---
+        const hudH = 48;
+        const towerBarH = 72;
+        const schoolH = 40;
+        const playAreaH = H - hudH - towerBarH - schoolH;
+        const playAreaW = Math.min(W, playAreaH * (TD_COLS / TD_ROWS)); // keep aspect
+        const offsetX = (W - playAreaW) / 2;
+
+        this.layout = { W, H, hudH, towerBarH, schoolH, playAreaH, playAreaW, offsetX };
+        this.cellW = playAreaW / TD_COLS;
+        this.cellH = playAreaH / TD_ROWS;
+        this.gridTop = hudH;
+        this.gridLeft = offsetX;
+        this.schoolY = hudH + playAreaH; // top of school strip
+
+        // --- Core state ---
         this.coins = TD_START_COINS;
         this.baseHp = TD_START_BASE_HP;
+        this.maxBaseHp = TD_START_BASE_HP;
         this.score = 0;
+        this.wave = 0;
+        this.zombiesKilled = 0;
+        this.eslAnswered = 0;
         this.towers = [];
         this.enemies = [];
         this.projectiles = [];
-        this.occupied = {};       // "col,lane" -> tower
-        this.defenders = new Array(this.lanes).fill(true); // 🧹 hall-monitor per lane
-        this.defenderMarks = new Array(this.lanes).fill(null);
+        this.particles = [];
+        this.occupied = {};  // "col,row" -> tower
         this.elapsed = 0;
         this.gameOver = false;
-        this.selected = null;
+        this.selectedTower = null;  // tower type key selected from bar
+        this.eslSlowActive = false;
+        this.eslSlowUntil = 0;
+        this.spawnAccum = 0;
+        this.waveTimer = 0;
 
-        this.generateGridVisuals();
+        // --- Layers ---
+        this.bgLayer = this.add.container(0, 0).setDepth(0);
+        this.towerLayer = this.add.container(0, 0).setDepth(2);
+        this.enemyLayer = this.add.container(0, 0).setDepth(3);
+        this.projLayer = this.add.container(0, 0).setDepth(4);
+        this.fxLayer = this.add.container(0, 0).setDepth(5);
 
-        // --- layers ---
-        this.towerLayer = this.add.container(0, 0);
-        this.enemyLayer = this.add.container(0, 0);
-        this.projLayer = this.add.container(0, 0);
+        this.drawBackground();
+        this.drawSchool();
 
-        this.input.on('pointerdown', (pointer) => this.onPointerDown(pointer));
+        // --- Input ---
+        this.input.on('pointerdown', (ptr) => this.onPointerDown(ptr));
 
-        // --- spawn loop ---
-        this.spawnTimer = this.time.addEvent({
-            delay: 1500, loop: true, callback: () => this.spawnEnemy()
-        });
-        this.spawnTimer.paused = true;
-
+        // --- HUD & Tower Bar (DOM) ---
         this.ensureHud();
         this.refreshHud();
-        this.startLoop();
+        this.showTowerBar();
+
+        // --- Spawn timer ---
+        this.spawnTimer = this.time.addEvent({ delay: 500, loop: true, callback: () => this.trySpawn() });
     }
 
     // ---------------------------------------------------------
-    // GRID / VISUALS (PvZ-style lanes + school wall + defenders)
+    // BACKGROUND & SCHOOL DRAWING
     // ---------------------------------------------------------
-    cellCenter(col, lane) {
-        return { x: col * this.colW + this.colW / 2, y: lane * this.laneH + this.laneH / 2 };
-    }
-    laneCenterY(lane) { return lane * this.laneH + this.laneH / 2; }
+    drawBackground() {
+        const { W, H, hudH, playAreaH, playAreaW, offsetX } = this.layout;
+        const gfx = this.add.graphics();
+        this.bgLayer.add(gfx);
 
-    generateGridVisuals() {
-        const W = this.scale.width, H = this.scale.height;
-        this.mapGfx = this.add.graphics();
-        this.mapGfx.setDepth(-10);
-        for (let lane = 0; lane < this.lanes; lane++) {
-            for (let col = 0; col < this.cols; col++) {
-                const x = col * this.colW, y = lane * this.laneH;
-                if (col === 0) {
-                    this.mapGfx.fillStyle(0x6d4c41, 1);                 // school brick wall
-                } else {
-                    this.mapGfx.fillStyle((col + lane) % 2 ? 0x3c8c34 : 0x47a03d, 1); // school field
-                }
-                this.mapGfx.fillRect(x, y, this.colW + 1, this.laneH + 1);
+        // Dark background
+        gfx.fillStyle(0x1a1a2e, 1);
+        gfx.fillRect(0, 0, W, H);
+
+        // Grid tiles (school courtyard)
+        for (let row = 0; row < TD_ROWS; row++) {
+            for (let col = 0; col < TD_COLS; col++) {
+                const x = offsetX + col * this.cellW;
+                const y = hudH + row * this.cellH;
+                const color = (col + row) % 2 === 0 ? 0x2d5a27 : 0x347a2c;
+                gfx.fillStyle(color, 1);
+                gfx.fillRect(x, y, this.cellW - 1, this.cellH - 1);
             }
-            // lane divider
-            this.mapGfx.lineStyle(1, 0x000000, 0.15);
-            this.mapGfx.lineBetween(0, lane * this.laneH, W, lane * this.laneH);
         }
-        // school building 🏫 (also flashes on hit)
-        const sc = this.cellCenter(0, Math.floor(this.lanes / 2));
-        const school = this.add.text(sc.x, sc.y, '🏫', { fontSize: Math.floor(this.laneH * 0.7) + 'px' })
-            .setOrigin(0.5).setDepth(-9);
-        school.name = 'tdBase';
-        // defender (🧹 hall monitor) per lane
-        for (let lane = 0; lane < this.lanes; lane++) {
-            const y = this.laneCenterY(lane);
-            const mark = this.add.text(this.schoolLineX, y, '🧹', { fontSize: '26px' })
-                .setOrigin(0.5).setDepth(-8);
-            this.defenderMarks[lane] = mark;
+
+        // Grid lines
+        gfx.lineStyle(1, 0x000000, 0.2);
+        for (let col = 0; col <= TD_COLS; col++) {
+            const x = offsetX + col * this.cellW;
+            gfx.lineBetween(x, hudH, x, hudH + playAreaH);
+        }
+        for (let row = 0; row <= TD_ROWS; row++) {
+            const y = hudH + row * this.cellH;
+            gfx.lineBetween(offsetX, y, offsetX + playAreaW, y);
         }
     }
 
-    isSchoolCol(col) { return col === 0; }
-    isPath() { return false; } // kept for backward-compat with any external refs
+    drawSchool() {
+        const { W, schoolH, playAreaW, offsetX } = this.layout;
+        const y = this.schoolY;
+        const gfx = this.add.graphics();
+        this.bgLayer.add(gfx);
+
+        // School building strip
+        gfx.fillStyle(0x8B4513, 1);
+        gfx.fillRect(offsetX, y, playAreaW, schoolH);
+        gfx.fillStyle(0xA0522D, 1);
+        gfx.fillRect(offsetX, y, playAreaW, 6);
+        // Windows
+        const winW = playAreaW / (TD_COLS * 2);
+        for (let i = 0; i < TD_COLS; i++) {
+            const wx = offsetX + i * this.cellW + this.cellW * 0.3;
+            gfx.fillStyle(0x87CEEB, 1);
+            gfx.fillRect(wx, y + 12, winW, schoolH - 20);
+            gfx.fillStyle(0x5a3010, 1);
+            gfx.fillRect(wx + winW/2 - 1, y + 12, 2, schoolH - 20);
+        }
+        // Door in center
+        const doorX = offsetX + playAreaW / 2 - 10;
+        gfx.fillStyle(0x654321, 1);
+        gfx.fillRect(doorX, y + 10, 20, schoolH - 10);
+
+        // School HP bar
+        this.schoolHpGfx = this.add.graphics();
+        this.bgLayer.add(this.schoolHpGfx);
+        this.drawSchoolHp();
+
+        // Flag
+        const flagX = offsetX + playAreaW / 2;
+        gfx.fillStyle(0x666666, 1);
+        gfx.fillRect(flagX - 1, y - 16, 2, 16);
+        gfx.fillStyle(0xff4444, 1);
+        gfx.fillRect(flagX + 1, y - 16, 12, 8);
+    }
+
+    drawSchoolHp() {
+        const { playAreaW, offsetX, schoolH } = this.layout;
+        const g = this.schoolHpGfx;
+        g.clear();
+        const barW = playAreaW * 0.8;
+        const barX = offsetX + (playAreaW - barW) / 2;
+        const barY = this.schoolY + schoolH - 6;
+        const pct = Phaser.Math.Clamp(this.baseHp / this.maxBaseHp, 0, 1);
+        g.fillStyle(0x000000, 0.6); g.fillRect(barX, barY, barW, 5);
+        const col = pct > 0.5 ? 0x4caf50 : pct > 0.25 ? 0xff9800 : 0xf44336;
+        g.fillStyle(col, 1); g.fillRect(barX, barY, barW * pct, 5);
+    }
+
+    // ---------------------------------------------------------
+    // COORDINATE HELPERS
+    // ---------------------------------------------------------
+    cellCenter(col, row) {
+        return {
+            x: this.gridLeft + col * this.cellW + this.cellW / 2,
+            y: this.gridTop + row * this.cellH + this.cellH / 2
+        };
+    }
+    colCenterX(col) { return this.gridLeft + col * this.cellW + this.cellW / 2; }
 
     // ---------------------------------------------------------
     // INPUT
     // ---------------------------------------------------------
-    onPointerDown(pointer) {
+    onPointerDown(ptr) {
         if (this.gameOver) return;
-        const col = Math.floor(pointer.x / this.colW);
-        const lane = Math.floor(pointer.y / this.laneH);
-        if (col < 0 || lane < 0 || col >= this.cols || lane >= this.lanes) return;
-        const key = col + ',' + lane;
+        const col = Math.floor((ptr.x - this.gridLeft) / this.cellW);
+        const row = Math.floor((ptr.y - this.gridTop) / this.cellH);
+        if (col < 0 || col >= TD_COLS || row < 0 || row >= TD_ROWS) {
+            this.deselectTower();
+            return;
+        }
+        const key = col + ',' + row;
         if (this.occupied[key]) {
-            this.openUpgradeMenu(this.occupied[key]);
-        } else if (!this.isSchoolCol(col)) {
-            this.openBuildMenu(col, lane);
+            // Tap existing tower -> upgrade
+            this.tryUpgrade(this.occupied[key]);
+        } else if (this.selectedTower) {
+            this.placeTower(this.selectedTower, col, row);
         }
     }
 
+    deselectTower() {
+        this.selectedTower = null;
+        this.updateTowerBarSelection();
+    }
+
     // ---------------------------------------------------------
-    // TOWER PLACEMENT / MENU (DOM overlay #tdTowerMenu)
+    // TOWER PLACEMENT & UPGRADE
     // ---------------------------------------------------------
-    openBuildMenu(col, lane) {
-        this.selected = null;
-        this.menuCell = { col, lane };
-        const el = document.getElementById('tdTowerMenu');
-        if (!el) return;
-        el.dataset.gx = col;
-        el.dataset.gy = lane;
-        el.querySelector('#tdMenuTitle').textContent = `Build in lane ${lane + 1}, col ${col}`;
-        this.renderMenuButtons(el);
-        el.classList.remove('hidden');
+    selectTowerType(type) {
+        if (this.selectedTower === type) { this.deselectTower(); return; }
+        this.selectedTower = type;
+        this.updateTowerBarSelection();
     }
 
-    openUpgradeMenu(tower) {
-        this.selected = tower;
-        const el = document.getElementById('tdTowerMenu');
-        if (!el) return;
-        el.dataset.gx = tower.col;
-        el.dataset.gy = tower.lane;
-        el.querySelector('#tdMenuTitle').textContent = `${TD_TOWER_TYPES[tower.type].name} Lv.${tower.level}`;
-        this.renderMenuButtons(el);
-        el.classList.remove('hidden');
-    }
-
-    renderMenuButtons(el) {
-        const wrap = el.querySelector('#tdMenuButtons');
-        wrap.innerHTML = '';
-        if (!this.selected) {
-            ['shooter', 'slow', 'splash'].forEach(type => {
-                const t = TD_TOWER_TYPES[type];
-                const affordable = this.coins >= t.cost;
-                const btn = document.createElement('button');
-                btn.className = 'td-menu-btn' + (affordable ? '' : ' disabled');
-                btn.textContent = `Build ${t.emoji} ${t.name} (${t.cost}c)`;
-                btn.disabled = !affordable;
-                btn.onclick = () => tdBuild(type);
-                wrap.appendChild(btn);
-            });
-        } else {
-            const tower = this.selected;
-            const upCost = this.upgradeCost(tower);
-            const affordable = this.coins >= upCost;
-            const upBtn = document.createElement('button');
-            upBtn.className = 'td-menu-btn' + (affordable ? '' : ' disabled');
-            upBtn.textContent = `Upgrade → Lv.${tower.level + 1} (${upCost}c)`;
-            upBtn.disabled = !affordable || tower.level >= 3;
-            upBtn.onclick = () => tdUpgrade();
-            wrap.appendChild(upBtn);
-        }
-        const earn = document.createElement('button');
-        earn.className = 'td-menu-btn earn';
-        earn.textContent = 'Need coins? Earn 50 via ESL Minigame';
-        earn.onclick = () => tdEarnCoins();
-        wrap.appendChild(earn);
-
-        const close = document.createElement('button');
-        close.className = 'td-menu-btn close';
-        close.textContent = 'Close';
-        close.onclick = () => this.closeMenu();
-        wrap.appendChild(close);
-    }
-
-    closeMenu() {
-        const el = document.getElementById('tdTowerMenu');
-        if (el) el.classList.add('hidden');
-        this.selected = null;
-    }
-
-    upgradeCost(tower) {
-        return Math.round(TD_TOWER_TYPES[tower.type].cost * Math.pow(1.6, tower.level));
-    }
-
-    buildTower(type) {
-        const col = +document.getElementById('tdTowerMenu').dataset.gx;
-        const lane = +document.getElementById('tdTowerMenu').dataset.gy;
-        const t = TD_TOWER_TYPES[type];
-        if (this.coins < t.cost) { this.tdBeep('error'); return; }
-        if (this.isSchoolCol(col)) return;
-        const key = col + ',' + lane;
+    placeTower(type, col, row) {
+        const def = TD_TOWERS[type];
+        if (this.coins < def.cost) { this.tdBeep('error'); return; }
+        const key = col + ',' + row;
         if (this.occupied[key]) return;
-        this.coins -= t.cost;
-        const c = this.cellCenter(col, lane);
-        const tower = { col, lane, type, level: 1, lastFire: 0, x: c.x, y: c.y };
-        const gfx = this.add.graphics();
-        this.drawTower(gfx, tower);
+
+        this.coins -= def.cost;
+        const c = this.cellCenter(col, row);
+        const tower = {
+            col, row, type, level: 1, x: c.x, y: c.y,
+            lastFire: 0, lastCoin: 0, placedAt: this.time.now,
+            armed: false, hp: def.hp, maxHp: def.hp, triggered: false
+        };
+
+        const gfx = this.add.image(c.x, c.y, 'td_towers', TD_TOWER_FRAMES[type]);
+        const tSize = this.cellW * 0.75;
+        gfx.setDisplaySize(tSize, tSize);
+        gfx.setTint(0xffffff);
         tower.gfx = gfx;
         this.towerLayer.add(gfx);
         this.towers.push(tower);
         this.occupied[key] = tower;
-        this.closeMenu();
+
+        // Placement effect
+        this.spawnPlaceEffect(c.x, c.y);
+        this.tdBeep('shoot');
         this.refreshHud();
+        this.deselectTower();
     }
 
-    upgradeTower() {
-        const tower = this.selected;
-        if (!tower || tower.level >= 3) return;
-        const cost = this.upgradeCost(tower);
+    tryUpgrade(tower) {
+        const def = TD_TOWERS[tower.type];
+        if (def.oneTime) return; // can't upgrade one-time towers
+        if (tower.level >= TD_MAX_LEVEL) { this.tdBeep('error'); return; }
+        const cost = Math.round(def.cost * Math.pow(1.5, tower.level));
         if (this.coins < cost) { this.tdBeep('error'); return; }
+
         this.coins -= cost;
-        tower.level += 1;
-        this.drawTower(tower.gfx, tower);
-        this.tweens.add({ targets: tower.gfx, scale: { from: 1.3, to: 1 }, duration: 250, ease: 'Back.out' });
-        this.closeMenu();
+        tower.level++;
+        if (def.hp > 0) {
+            tower.maxHp = Math.round(def.hp * Math.pow(TD_UPGRADE_HP, tower.level - 1));
+            tower.hp = tower.maxHp;
+            this.drawTowerHp(tower);
+        }
+        // Scale up slightly and add glow tint for higher levels
+        const tSize = this.cellW * 0.75 * (1 + (tower.level - 1) * 0.1);
+        tower.gfx.setDisplaySize(tSize, tSize);
+        if (tower.level === 2) tower.gfx.setTint(0xaaffaa);
+        if (tower.level === 3) tower.gfx.setTint(0xffdd44);
+        this.tweens.add({ targets: tower.gfx, scaleX: { from: tower.gfx.scaleX * 1.3, to: tower.gfx.scaleX }, scaleY: { from: tower.gfx.scaleY * 1.3, to: tower.gfx.scaleY }, duration: 200, ease: 'Back.out' });
+        this.spawnCoinPopup(tower.x, tower.y - 20, 'Lv' + tower.level + '!', 0x00ff88);
         this.refreshHud();
     }
 
-    drawTower(gfx, tower) {
-        gfx.clear();
-        const t = TD_TOWER_TYPES[tower.type];
-        const size = 16 + (tower.level - 1) * 4;
-        gfx.fillStyle(t.color, 1);
-        if (tower.type === 'splash') gfx.fillTriangle(0, -size, -size, size, size, size);
-        else gfx.fillCircle(0, 0, size);
-        gfx.setPosition(tower.x, tower.y);
-        gfx.fillStyle(0x000000, 0.6);
-        for (let i = 0; i < tower.level; i++) gfx.fillCircle(-8 + i * 8, size + 6, 2.5);
+    removeTower(tower) {
+        const key = tower.col + ',' + tower.row;
+        delete this.occupied[key];
+        const idx = this.towers.indexOf(tower);
+        if (idx >= 0) this.towers.splice(idx, 1);
+        if (tower.gfx) tower.gfx.destroy();
+        if (tower.hpBar) tower.hpBar.destroy();
+    }
+
+    drawTowerHp(tower) {
+        if (tower.maxHp === undefined || tower.hp >= tower.maxHp) {
+            if (tower.hpBar) tower.hpBar.clear();
+            return;
+        }
+        if (!tower.hpBar) {
+            tower.hpBar = this.add.graphics();
+            if (this.towerLayer) this.towerLayer.add(tower.hpBar);
+        }
+        const g = tower.hpBar; g.clear();
+        const w = this.cellW * 0.6;
+        const pct = Phaser.Math.Clamp(tower.hp / tower.maxHp, 0, 1);
+        const bx = tower.x - w / 2, by = tower.y + this.cellH * 0.34;
+        g.fillStyle(0x000000, 0.6); g.fillRect(bx, by, w, 3);
+        g.fillStyle(pct > 0.5 ? 0x66bb6a : pct > 0.25 ? 0xff9800 : 0xf44336, 1);
+        g.fillRect(bx, by, w * pct, 3);
     }
 
     // ---------------------------------------------------------
-    // ENEMIES (straight along a lane, leftward)
+    // ENEMY SPAWNING
     // ---------------------------------------------------------
-    getDifficulty() {
-        const mins = this.elapsed / 60000;
-        if (mins < 5) return 1 + mins * 0.3;
-        const over = mins - 5;
-        return 2.5 * Math.pow(1.35, over);
+    getPhase() {
+        for (const p of TD_PHASES) {
+            if (this.elapsed < p.until) return p;
+        }
+        return TD_PHASES[TD_PHASES.length - 1];
     }
 
-    spawnEnemy() {
+    trySpawn() {
         if (this.gameOver) return;
-        const diff = this.getDifficulty();
-        let type = 'basic';
-        const r = Math.random();
-        if (diff > 2 && r < 0.25) type = 'tank';
-        else if (diff > 1.2 && r < 0.5) type = 'fast';
+        const phase = this.getPhase();
+        this.spawnAccum += 500; // timer fires every 500ms
+        if (this.spawnAccum < phase.interval) return;
+        this.spawnAccum = 0;
+        this.wave++;
 
-        const base = TD_ENEMY_TYPES[type];
-        const hp = Math.round(base.hp * (0.6 + diff * 0.4));
-        const lane = Phaser.Math.Between(0, this.lanes - 1);
-        const y = this.laneCenterY(lane);
-        const gfx = this.add.graphics();
-        gfx.fillStyle(base.color, 1);
-        const s = type === 'tank' ? 16 : (type === 'fast' ? 10 : 13);
-        if (type === 'tank') gfx.fillRect(-s, -s, s * 2, s * 2);
-        else gfx.fillCircle(0, 0, s);
-        const enemy = {
-            type, hp, maxHp: hp, speed: base.speed, coins: base.coins, dmg: base.dmg,
-            lane, x: this.scale.width + 20, y, gfx, dead: false, slowUntil: 0
-        };
-        gfx.setPosition(enemy.x, enemy.y);
-        enemy.hpBar = this.add.graphics();
-        this.enemyLayer.add(gfx); this.enemyLayer.add(enemy.hpBar);
-        this.enemies.push(enemy);
-
-        const newDelay = Math.max(350, 1500 - diff * 90);
-        this.spawnTimer.delay = newDelay;
+        const count = phase.count;
+        for (let i = 0; i < count; i++) {
+            this.time.delayedCall(i * 300, () => this.spawnOneEnemy(phase));
+        }
     }
 
+    spawnOneEnemy(phase) {
+        if (this.gameOver) return;
+        const typeKey = Phaser.Utils.Array.GetRandom(phase.types);
+        const def = TD_ENEMIES[typeKey];
+
+        // HP scaling with time
+        const mins = this.elapsed / 60000;
+        let hpScale = phase.hpMult;
+        if (mins > 5) hpScale *= Math.pow(1.2, mins - 5);
+        else if (mins > 2) hpScale *= 1 + (mins - 2) * 0.15;
+
+        const hp = Math.round(def.hp * hpScale);
+        const col = Phaser.Math.Between(0, TD_COLS - 1);
+        const x = this.colCenterX(col);
+        const y = this.gridTop - 20; // spawn above grid
+
+        const gfx = this.add.image(x, y, 'td_enemies', TD_ENEMY_FRAMES[typeKey]);
+        const eH = this.cellH * 0.85;
+        const eW = eH * (275 / 768); // maintain aspect ratio
+        gfx.setDisplaySize(eW, eH);
+
+        const enemy = {
+            type: typeKey, col, x, y, hp, maxHp: hp,
+            speed: def.speed, coins: def.coins, dmg: def.dmg,
+            armor: def.armor, armorHp: def.armorHp, currentArmorHp: def.armorHp,
+            jump: def.jump, enrage: def.enrage, enraged: false,
+            hasJumped: false, dead: false, frame: 0, frameTimer: 0, lastDrawnFrame: -1,
+            slowUntil: 0, gfx, attacking: null
+        };
+
+        // HP bar
+        enemy.hpBar = this.add.graphics();
+        this.enemyLayer.add(gfx);
+        this.enemyLayer.add(enemy.hpBar);
+        this.enemies.push(enemy);
+    }
+
+    // ---------------------------------------------------------
+    // ENEMY UPDATE (top-to-bottom movement)
+    // ---------------------------------------------------------
     updateEnemies(dt) {
+        const now = this.time.now;
         for (let i = this.enemies.length - 1; i >= 0; i--) {
             const e = this.enemies[i];
             if (e.dead) { this.removeEnemy(i); continue; }
+
+            // Animation frame
+            e.frameTimer += dt;
+            if (e.frameTimer > 300) { e.frameTimer = 0; e.frame = e.frame === 0 ? 1 : 0; }
+
+            // Speed calculation
             let speed = e.speed;
-            if (this.time.now < e.slowUntil) speed *= 0.5;
-            const laneY = this.laneCenterY(e.lane);
-            e.x -= speed * (dt / 1000);
-            e.gfx.setPosition(e.x, laneY + Math.sin(this.time.now / 120 + i) * 1.5);
-            this.drawHpBar(e, laneY);
-            if (e.x <= this.schoolLineX) this.enemyReachSchool(e, i);
+            // ESL slow
+            if (this.eslSlowActive || now < this.eslSlowUntil) speed *= TD_ESL_SLOW_FACTOR;
+            // Individual slow (from eraser)
+            if (now < e.slowUntil) speed *= 0.6;
+            // Enrage (librarian)
+            if (e.enrage && !e.enraged && e.hp < e.maxHp * 0.3) {
+                e.enraged = true;
+                speed *= 2;
+                this.spawnCoinPopup(e.x, e.y - 15, '!', 0xff0000);
+            }
+            if (e.enraged) speed *= 2;
+
+            // Check for a tower (any type) in the current cell
+            const row = Math.floor((e.y - this.gridTop) / this.cellH);
+            const col = e.col;
+            const key = col + ',' + row;
+            const towerHere = this.occupied[key];
+
+            // Zombies chomp ANY tower in their path (the trap is a mine — it triggers instead)
+            if (towerHere && towerHere.type !== 'trap' && towerHere.hp > 0 && !e.attacking) {
+                // Bully vaults over the FIRST tower it meets
+                if (e.jump && !e.hasJumped) {
+                    e.hasJumped = true;
+                    e.y += this.cellH; // vault over
+                    this.spawnCoinPopup(e.x, e.y, 'Vault!', 0xffaa00);
+                } else {
+                    e.attacking = towerHere;
+                }
+            }
+
+            if (e.attacking) {
+                // Deal damage to the tower being eaten
+                if (e.attacking.hp !== undefined && e.attacking.hp > 0) {
+                    e.attacking.hp -= e.dmg * (dt / 1000) * 3;
+                    this.drawTowerHp(e.attacking);
+                    if (e.attacking.hp <= 0) {
+                        this.spawnExplosion(e.attacking.x, e.attacking.y, 0x8B4513);
+                        this.tdBeep('hit');
+                        this.removeTower(e.attacking);
+                        e.attacking = null;
+                    }
+                } else {
+                    e.attacking = null;
+                }
+            } else {
+                // Move downward
+                e.y += speed * (dt / 1000);
+            }
+
+            // Check homework trap
+            if (row >= 0 && row < TD_ROWS) {
+                const trapKey = col + ',' + row;
+                const trap = this.occupied[trapKey];
+                if (trap && trap.type === 'trap' && trap.armed && !trap.triggered) {
+                    trap.triggered = true;
+                    this.damageEnemy(e, TD_TOWERS.trap.damage, 0);
+                    this.spawnExplosion(trap.x, trap.y, 0xffff00);
+                    this.tdBeep('hit');
+                    this.removeTower(trap);
+                }
+            }
+
+            // Update position
+            e.gfx.setPosition(e.x, e.y);
+            // Simple walk sway animation
+            e.gfx.rotation = Math.sin(this.time.now / 200 + e.col * 2) * 0.05;
+            this.drawEnemyHpBar(e);
+
+            // Reached school?
+            if (e.y >= this.schoolY) {
+                this.enemyReachSchool(e, i);
+            }
         }
     }
 
-    drawHpBar(e, laneY) {
+    drawEnemyHpBar(e) {
         const g = e.hpBar; g.clear();
-        const w = 26, pct = Phaser.Math.Clamp(e.hp / e.maxHp, 0, 1);
-        g.fillStyle(0x000000, 0.5); g.fillRect(e.x - w / 2, laneY - 22, w, 4);
-        g.fillStyle(0x4caf50, 1); g.fillRect(e.x - w / 2, laneY - 22, w * pct, 4);
+        const w = this.cellW * 0.6;
+        const pct = Phaser.Math.Clamp(e.hp / e.maxHp, 0, 1);
+        const bx = e.x - w / 2, by = e.y - this.cellH * 0.45;
+        g.fillStyle(0x000000, 0.6); g.fillRect(bx, by, w, 3);
+        g.fillStyle(pct > 0.5 ? 0x4caf50 : pct > 0.25 ? 0xff9800 : 0xf44336, 1);
+        g.fillRect(bx, by, w * pct, 3);
     }
 
     enemyReachSchool(e, i) {
-        const lane = e.lane;
-        if (this.defenders[lane]) {
-            this.triggerDefender(lane);
-            this.removeEnemy(i);
-        } else {
-            this.baseHp -= e.dmg;
-            this.tdBeep('error');
-            this.flashBase();
-            this.removeEnemy(i);
-            this.refreshHud();
-            if (this.baseHp <= 0) this.endGame(false);
-        }
-    }
-
-    triggerDefender(lane) {
-        this.defenders[lane] = false;
-        if (this.defenderMarks[lane]) { this.defenderMarks[lane].destroy(); this.defenderMarks[lane] = null; }
-        // sweep: defeat every enemy currently in this lane, awarding coins
-        for (let k = this.enemies.length - 1; k >= 0; k--) {
-            const e = this.enemies[k];
-            if (e.lane === lane && !e.dead) {
-                this.coins += e.coins; this.score += e.coins * 10; this.removeEnemy(k);
-            }
-        }
-        // sweep effect
-        const y = this.laneCenterY(lane);
-        const g = this.add.graphics(); g.setDepth(5);
-        g.fillStyle(0xffff00, 0.5); g.fillRect(0, y - this.laneH / 2, this.scale.width, this.laneH);
-        this.tweens.add({ targets: g, alpha: 0, duration: 350, onComplete: () => g.destroy() });
+        this.baseHp -= e.dmg;
+        this.tdBeep('error');
+        this.cameras.main.shake(150, 0.005);
+        this.removeEnemy(i);
+        this.drawSchoolHp();
         this.refreshHud();
+        if (this.baseHp <= 0) this.endGame(false);
     }
 
     removeEnemy(i) {
@@ -350,114 +660,358 @@ class TowerDefenseScene extends Phaser.Scene {
     }
 
     damageEnemy(e, dmg, slowFactor) {
-        e.hp -= dmg;
-        if (slowFactor) e.slowUntil = this.time.now + 1500;
+        // Armor handling
+        let actualDmg = dmg;
+        if (e.currentArmorHp > 0) {
+            actualDmg = dmg * (1 - e.armor);
+            e.currentArmorHp -= dmg;
+            if (e.currentArmorHp < 0) e.currentArmorHp = 0;
+        }
+        e.hp -= actualDmg;
+        if (slowFactor > 0) e.slowUntil = this.time.now + 2000;
+
         if (e.hp <= 0 && !e.dead) {
             e.dead = true;
             this.coins += e.coins;
             this.score += e.coins * 10;
+            this.zombiesKilled++;
             this.tdBeep('hit');
+            this.spawnDeathParticles(e.x, e.y, e.type);
+            this.spawnCoinPopup(e.x, e.y - 10, '+' + e.coins, 0xffd700);
             this.refreshHud();
         }
     }
 
     // ---------------------------------------------------------
-    // TOWERS FIRE (same lane, to the right)
+    // TOWER COMBAT (fires upward in column)
     // ---------------------------------------------------------
     updateTowers(now) {
-        this.towers.forEach(t => {
-            const tdef = TD_TOWER_TYPES[t.type];
-            const rate = tdef.fireRate * Math.pow(TD_UPGRADE_MULT.rate, t.level - 1);
-            if (now - t.lastFire < rate) return;
-            const range = tdef.range * Math.pow(TD_UPGRADE_MULT.range, t.level - 1);
-            const dmg = tdef.damage * Math.pow(TD_UPGRADE_MULT.dmg, t.level - 1);
-            let best = null, bestDist = range;
-            this.enemies.forEach(e => {
-                if (e.lane !== t.lane) return;
-                if (e.x <= t.x) return;                 // only enemies to the right
-                const d = e.x - t.x;
-                if (d < bestDist) { bestDist = d; best = e; }
-            });
-            if (best) {
+        for (const t of this.towers) {
+            const def = TD_TOWERS[t.type];
+
+            // Arm one-time towers
+            if (def.oneTime && def.armTime && !t.armed) {
+                if (now - t.placedAt >= def.armTime) {
+                    t.armed = true;
+                    if (t.type === 'firedrill') this.triggerFireDrill(t);
+                    if (t.type === 'popquiz') this.triggerPopQuiz(t);
+                }
+                continue;
+            }
+
+            // Coin generator
+            if (def.type === 'generator') {
+                if (now - t.lastCoin >= (def.coinInterval || 8000)) {
+                    t.lastCoin = now;
+                    const gen = def.coinGen * t.level;
+                    this.coins += gen;
+                    this.spawnCoinPopup(t.x, t.y - 15, '+' + gen, 0xffd700);
+                    this.refreshHud();
+                }
+                continue;
+            }
+
+            // Blockers and mines don't shoot
+            if (def.type === 'blocker' || def.type === 'mine' || def.type === 'bomb' || def.type === 'lanebomb') continue;
+
+            // Shooter logic
+            const rate = def.fireRate * Math.pow(TD_UPGRADE_RATE, t.level - 1);
+            if (now - t.lastFire < rate) continue;
+
+            const dmg = def.damage * Math.pow(TD_UPGRADE_DMG, t.level - 1);
+
+            // Find target: nearest enemy in same column, above the tower
+            let target = null, bestDist = Infinity;
+            for (const e of this.enemies) {
+                if (e.dead || e.col !== t.col) continue;
+                if (e.y >= t.y) continue; // must be above
+                const d = t.y - e.y;
+                if (d < bestDist) { bestDist = d; target = e; }
+            }
+
+            if (target) {
                 t.lastFire = now;
-                this.fireProjectile(t, best, dmg, tdef);
+                this.fireProjectile(t, target, dmg, def);
+                if (def.doubleShot) {
+                    this.time.delayedCall(120, () => {
+                        if (!target.dead) this.fireProjectile(t, target, dmg, def);
+                    });
+                }
                 this.tdBeep('shoot');
             }
-        });
+        }
     }
 
-    fireProjectile(tower, target, dmg, tdef) {
+    fireProjectile(tower, target, dmg, def) {
         const gfx = this.add.graphics();
-        if (tdef.proj === 'bubble') { gfx.fillStyle(0xffffff, 0.4); gfx.fillCircle(0, 0, 10); }
-        else if (tdef.proj === 'mortar') { gfx.fillStyle(0x555555, 1); gfx.fillCircle(0, 0, 6); }
-        else { gfx.fillStyle(0xffff00, 1); gfx.fillCircle(0, 0, 4); }
-        gfx.setPosition(tower.x, tower.y);
+        // Projectile appearance by type
+        if (tower.type === 'eraser') {
+            gfx.fillStyle(0x88ccff, 0.8); gfx.fillCircle(0, 0, 5);
+        } else if (tower.type === 'textbook') {
+            gfx.fillStyle(0x4488ff, 1); gfx.fillRect(-4, -2, 8, 4);
+        } else if (tower.type === 'ruler') {
+            gfx.fillStyle(0xdeb887, 1); gfx.fillRect(-2, -5, 4, 10);
+        } else {
+            gfx.fillStyle(0xffdd00, 1); gfx.fillCircle(0, 0, 3);
+            gfx.fillStyle(0x333333, 1); gfx.fillCircle(0, -3, 1.5); // pencil tip
+        }
+        gfx.setPosition(tower.x, tower.y - this.cellH * 0.3);
         this.projLayer.add(gfx);
         this.projectiles.push({
-            gfx, x: tower.x, y: tower.y, target, speed: 480,
-            damage: dmg, slow: tdef.slow, splash: tdef.splash, scene: this
+            gfx, x: tower.x, y: tower.y - this.cellH * 0.3,
+            target, speed: def.projSpeed, damage: dmg,
+            slow: def.slow, pierce: def.pierce, col: tower.col,
+            hitList: []
         });
     }
 
     updateProjectiles(dt) {
         for (let i = this.projectiles.length - 1; i >= 0; i--) {
             const p = this.projectiles[i];
-            if (!p.target || p.target.dead) { p.gfx.destroy(); this.projectiles.splice(i, 1); continue; }
-            const ang = Math.atan2(p.target.y - p.y, p.target.x - p.x);
-            p.x += Math.cos(ang) * p.speed * (dt / 1000);
-            p.y += Math.sin(ang) * p.speed * (dt / 1000);
+            if (!p.target || p.target.dead) {
+                if (!p.pierce) { p.gfx.destroy(); this.projectiles.splice(i, 1); continue; }
+            }
+
+            // Move upward
+            p.y -= p.speed * (dt / 1000);
             p.gfx.setPosition(p.x, p.y);
-            if (Phaser.Math.Distance.Between(p.x, p.y, p.target.x, p.target.y) < 8) {
-                if (p.splash > 0) {
-                    this.enemies.forEach(e => {
-                        if (Phaser.Math.Distance.Between(p.x, p.y, e.x, e.y) <= p.splash) {
-                            this.damageEnemy(e, p.damage, p.slow);
-                        }
-                    });
-                    this.drawSplash(p.x, p.y, p.splash);
-                } else {
-                    this.damageEnemy(p.target, p.damage, p.slow);
+
+            // Off screen
+            if (p.y < this.gridTop - 30) { p.gfx.destroy(); this.projectiles.splice(i, 1); continue; }
+
+            // Collision check
+            if (p.pierce) {
+                // Piercing: hit all enemies in column
+                for (const e of this.enemies) {
+                    if (e.dead || e.col !== p.col) continue;
+                    if (p.hitList.includes(e)) continue;
+                    if (Math.abs(e.y - p.y) < this.cellH * 0.5) {
+                        p.hitList.push(e);
+                        this.damageEnemy(e, p.damage, p.slow);
+                        this.spawnHitSpark(e.x, e.y);
+                    }
                 }
-                p.gfx.destroy();
-                this.projectiles.splice(i, 1);
+            } else {
+                // Single target
+                if (p.target && !p.target.dead) {
+                    if (Math.abs(p.target.y - p.y) < this.cellH * 0.5 && p.target.col === p.col) {
+                        this.damageEnemy(p.target, p.damage, p.slow);
+                        this.spawnHitSpark(p.target.x, p.target.y);
+                        p.gfx.destroy();
+                        this.projectiles.splice(i, 1);
+                    }
+                }
             }
         }
     }
 
-    drawSplash(x, y, r) {
-        const g = this.add.graphics(); g.setDepth(5);
-        g.fillStyle(0xffa500, 0.4); g.fillCircle(x, y, r);
-        this.tweens.add({ targets: g, alpha: 0, duration: 300, onComplete: () => g.destroy() });
+    // ---------------------------------------------------------
+    // ONE-TIME TOWER EFFECTS
+    // ---------------------------------------------------------
+    triggerPopQuiz(tower) {
+        // 3x3 AOE around tower position
+        const range = this.cellW * 1.5;
+        for (const e of this.enemies) {
+            if (e.dead) continue;
+            const dist = Phaser.Math.Distance.Between(tower.x, tower.y, e.x, e.y);
+            if (dist <= range) {
+                this.damageEnemy(e, TD_TOWERS.popquiz.damage, 0);
+            }
+        }
+        this.spawnExplosion(tower.x, tower.y, 0xff3333);
+        this.cameras.main.shake(200, 0.008);
+        this.tdBeep('hit');
+        this.removeTower(tower);
+    }
+
+    triggerFireDrill(tower) {
+        // Destroy all enemies in the column
+        for (const e of this.enemies) {
+            if (e.dead || e.col !== tower.col) continue;
+            this.damageEnemy(e, 9999, 0);
+        }
+        // Visual: fire column
+        const gfx = this.add.graphics();
+        gfx.setDepth(6);
+        const x = this.colCenterX(tower.col);
+        gfx.fillStyle(0xff6600, 0.6);
+        gfx.fillRect(x - this.cellW / 2, this.gridTop, this.cellW, this.layout.playAreaH);
+        this.fxLayer.add(gfx);
+        this.tweens.add({ targets: gfx, alpha: 0, duration: 600, onComplete: () => gfx.destroy() });
+        this.cameras.main.shake(250, 0.01);
+        this.tdBeep('hit');
+        this.removeTower(tower);
     }
 
     // ---------------------------------------------------------
-    // HUD (DOM, self-managed)
+    // ESL INTEGRATION
+    // ---------------------------------------------------------
+    startESL() {
+        if (this.gameOver) return;
+        this.eslSlowActive = true;
+        this.showSlowOverlay(true);
+        this.closeTowerUpgrade();
+        if (typeof startMiniGame === 'function') startMiniGame('spelling', 'towerdefense');
+    }
+
+    onESLComplete(success) {
+        this.eslSlowActive = false;
+        if (success) {
+            this.coins += 50;
+            this.eslAnswered++;
+            this.eslSlowUntil = this.time.now + TD_ESL_LINGER_MS;
+            this.spawnCoinPopup(this.layout.W / 2, this.layout.H / 2, '+50 coins!', 0x00ff88);
+            this.refreshHud();
+            // Hide overlay after linger
+            this.time.delayedCall(TD_ESL_LINGER_MS, () => this.showSlowOverlay(false));
+        } else {
+            this.showSlowOverlay(false);
+        }
+    }
+
+    showSlowOverlay(show) {
+        const el = document.getElementById('tdSlowOverlay');
+        if (el) el.classList.toggle('hidden', !show);
+    }
+
+    // ---------------------------------------------------------
+    // VISUAL EFFECTS
+    // ---------------------------------------------------------
+    spawnPlaceEffect(x, y) {
+        const g = this.add.graphics(); g.setDepth(5);
+        g.lineStyle(2, 0x00ff88, 0.8);
+        g.strokeCircle(x, y, 5);
+        this.fxLayer.add(g);
+        this.tweens.add({ targets: g, scaleX: 2.5, scaleY: 2.5, alpha: 0, duration: 300, onComplete: () => g.destroy() });
+    }
+
+    spawnHitSpark(x, y) {
+        const g = this.add.graphics(); g.setDepth(5);
+        g.fillStyle(0xffffff, 1);
+        for (let i = 0; i < 3; i++) {
+            const ox = Phaser.Math.Between(-6, 6), oy = Phaser.Math.Between(-6, 6);
+            g.fillRect(x + ox, y + oy, 2, 2);
+        }
+        this.fxLayer.add(g);
+        this.tweens.add({ targets: g, alpha: 0, duration: 150, onComplete: () => g.destroy() });
+    }
+
+    spawnExplosion(x, y, color) {
+        const g = this.add.graphics(); g.setDepth(6);
+        g.fillStyle(color, 0.7);
+        g.fillCircle(x, y, 8);
+        this.fxLayer.add(g);
+        this.tweens.add({ targets: g, scaleX: 3, scaleY: 3, alpha: 0, duration: 400, ease: 'Quad.out', onComplete: () => g.destroy() });
+    }
+
+    spawnDeathParticles(x, y, type) {
+        const colors = { dropout: 0x7ab648, backpack: 0x5a9e3a, nerd: 0x4a8e6a, bully: 0x9e5a3a, librarian: 0x6a7ab6 };
+        const color = colors[type] || 0x7ab648;
+        for (let i = 0; i < 6; i++) {
+            const g = this.add.graphics(); g.setDepth(5);
+            g.fillStyle(color, 1);
+            g.fillRect(x, y, 3, 3);
+            this.fxLayer.add(g);
+            const tx = x + Phaser.Math.Between(-30, 30);
+            const ty = y + Phaser.Math.Between(-30, 30);
+            this.tweens.add({ targets: g, x: tx, y: ty, alpha: 0, duration: 400, ease: 'Quad.out', onComplete: () => g.destroy() });
+        }
+    }
+
+    spawnCoinPopup(x, y, text, color) {
+        const txt = this.add.text(x, y, text, {
+            fontSize: '12px', fontFamily: 'monospace', fontStyle: 'bold',
+            color: '#' + color.toString(16).padStart(6, '0'), stroke: '#000', strokeThickness: 2
+        }).setOrigin(0.5).setDepth(7);
+        this.fxLayer.add(txt);
+        this.tweens.add({ targets: txt, y: y - 25, alpha: 0, duration: 800, ease: 'Quad.out', onComplete: () => txt.destroy() });
+    }
+
+    // ---------------------------------------------------------
+    // HUD (DOM)
     // ---------------------------------------------------------
     ensureHud() {
         const hud = document.getElementById('tdHUD');
         if (hud) hud.classList.remove('hidden');
         const go = document.getElementById('tdGameOverScreen');
         if (go) go.classList.add('hidden');
+        const bar = document.getElementById('tdTowerBar');
+        if (bar) bar.classList.remove('hidden');
     }
 
     refreshHud() {
         const c = document.getElementById('tdCoins');
         const hp = document.getElementById('tdBaseHp');
+        const w = document.getElementById('tdWave');
         if (c) c.textContent = this.coins;
-        if (hp) hp.textContent = this.baseHp;
+        if (hp) hp.textContent = Math.max(0, this.baseHp);
+        if (w) w.textContent = this.wave;
+        // Update tower bar affordability
+        this.updateTowerBarAffordability();
     }
 
-    // ---------------------------------------------------------
-    // LOOP
-    // ---------------------------------------------------------
-    startLoop() { this.spawnTimer.paused = false; }
+    showTowerBar() {
+        const bar = document.getElementById('tdTowerBar');
+        if (!bar) return;
+        const wrap = bar.querySelector('#tdTowerBarItems');
+        if (!wrap) return;
+        wrap.innerHTML = '';
+        TD_TOWER_ORDER.forEach(key => {
+            const def = TD_TOWERS[key];
+            const btn = document.createElement('button');
+            btn.className = 'td-tower-btn';
+            btn.dataset.type = key;
+            btn.innerHTML = `<span class="td-tower-icon">${def.icon}</span><span class="td-tower-cost">${def.cost}</span>`;
+            btn.title = def.name;
+            btn.onclick = (e) => { e.stopPropagation(); this.selectTowerType(key); };
+            wrap.appendChild(btn);
+        });
+    }
 
+    updateTowerBarSelection() {
+        const btns = document.querySelectorAll('.td-tower-btn');
+        btns.forEach(btn => {
+            btn.classList.toggle('selected', btn.dataset.type === this.selectedTower);
+        });
+    }
+
+    updateTowerBarAffordability() {
+        const btns = document.querySelectorAll('.td-tower-btn');
+        btns.forEach(btn => {
+            const def = TD_TOWERS[btn.dataset.type];
+            btn.classList.toggle('unaffordable', this.coins < def.cost);
+        });
+    }
+
+    closeTowerUpgrade() { /* placeholder for any open upgrade popup */ }
+
+    // ---------------------------------------------------------
+    // GAME LOOP
+    // ---------------------------------------------------------
     update(time, dt) {
         if (this.gameOver) return;
         this.elapsed += dt;
+
+        // Arm mines
+        for (const t of this.towers) {
+            const def = TD_TOWERS[t.type];
+            if (t.type === 'trap' && !t.armed && time - t.placedAt >= (def.armTime || 5000)) {
+                t.armed = true;
+                // Visual: show armed state
+                t.gfx.setAlpha(1);
+            }
+        }
+
         this.updateEnemies(dt);
         this.updateTowers(time);
         this.updateProjectiles(dt);
+
+        // Tower idle bob animation
+        for (const t of this.towers) {
+            if (t.gfx && !TD_TOWERS[t.type].oneTime) {
+                t.gfx.y = t.y + Math.sin(time / 600 + t.col + t.row) * 1.5;
+            }
+        }
     }
 
     // ---------------------------------------------------------
@@ -467,42 +1021,31 @@ class TowerDefenseScene extends Phaser.Scene {
         if (this.gameOver) return;
         this.gameOver = true;
         this.spawnTimer.paused = true;
+        this.showSlowOverlay(false);
+
         const go = document.getElementById('tdGameOverScreen');
         if (go) {
             go.querySelector('#tdGameOverText').textContent = won ? 'School Defended!' : 'School Overrun!';
             go.querySelector('#tdFinalScore').textContent = 'Score: ' + this.score;
+            const stats = go.querySelector('#tdStats');
+            if (stats) stats.textContent = `Waves: ${this.wave} | Kills: ${this.zombiesKilled} | ESL: ${this.eslAnswered} | Time: ${Math.floor(this.elapsed/1000)}s`;
             go.classList.remove('hidden');
         }
         const hud = document.getElementById('tdHUD'); if (hud) hud.classList.add('hidden');
-        const menu = document.getElementById('tdTowerMenu'); if (menu) menu.classList.add('hidden');
+        const bar = document.getElementById('tdTowerBar'); if (bar) bar.classList.add('hidden');
     }
 
     // ---------------------------------------------------------
-    // AUDIO (guarded)
+    // AUDIO
     // ---------------------------------------------------------
     tdBeep(kind) {
         if (kind === 'shoot' && typeof synthShoot === 'function') synthShoot();
         else if (kind === 'hit' && typeof synthHit === 'function') synthHit();
         else if (kind === 'error' && typeof synthError === 'function') synthError();
     }
-
-    flashBase() {
-        const base = this.children.getByName('tdBase');
-        if (base) this.tweens.add({ targets: base, scale: { from: 1.4, to: 1 }, duration: 200 });
-    }
-
-    // ---------------------------------------------------------
-    // ESL CREDIT (called from game.js claimReward) — UNCHANGED
-    // ---------------------------------------------------------
-    creditCoins(n) {
-        this.coins += n;
-        this.refreshHud();
-        const menu = document.getElementById('tdTowerMenu');
-        if (menu && !menu.classList.contains('hidden')) this.renderMenuButtons(menu);
-    }
 }
 
-// Self-register (mirrors uno.js). config/scene exist because boot.js loads first.
+// Self-register
 if (typeof config !== 'undefined' && config.scene) {
     registerScene(TowerDefenseScene);
 }
@@ -511,9 +1054,6 @@ if (typeof config !== 'undefined' && config.scene) {
 // GLOBAL HOOKS (wired into DOM buttons in index.html)
 // ============================================================
 function triggerTowerDefense() {
-    // GATE: when TD is disabled (live site), never actually launch the game.
-    // If reached anyway (e.g. direct call), bounce back to the game picker and
-    // ensure the menu button shows its "Coming soon" disabled state.
     if (typeof TD_ENABLED !== 'undefined' && !TD_ENABLED) {
         applyTowerDefenseGate();
         const picker = document.getElementById('gameSelectionOverlay');
@@ -528,7 +1068,7 @@ function triggerTowerDefense() {
     ['startScreen', 'gameSelectionOverlay', 'gomokuScreen', 'gomokuGameOverScreen',
         'gomokuModeSelectionOverlay', 'gomokuDifficultySelectionOverlay',
         'gameOverScreen', 'gameIntroOverlay', 'studyModeOverlay', 'unoScreen',
-        'unoGameOverScreen', 'tdGameOverScreen'
+        'unoGameOverScreen', 'tdGameOverScreen', 'hud'
     ].forEach(id => { const e = document.getElementById(id); if (e) e.classList.add('hidden'); });
 
     if (typeof initAudio === 'function') initAudio();
@@ -570,40 +1110,29 @@ function triggerTowerDefense() {
     }
 }
 
-function tdBuild(type) {
+function tdStartESL() {
     const scene = game && game.scene.getScene('TowerDefenseScene');
-    if (scene) scene.buildTower(type);
+    if (scene) scene.startESL();
 }
-function tdUpgrade() {
-    const scene = game && game.scene.getScene('TowerDefenseScene');
-    if (scene) scene.upgradeTower();
-}
-function tdEarnCoins() {
-    const scene = game && game.scene.getScene('TowerDefenseScene');
-    if (scene) scene.closeMenu();
-    // no-pause ESL minigame; success credits 50 via claimReward -> tdCreditCoins
-    if (typeof startMiniGame === 'function') startMiniGame('spelling', 'towerdefense');
-}
+
 function tdCreditCoins(n) {
     const scene = game && game.scene.getScene('TowerDefenseScene');
-    if (scene) scene.creditCoins(n);
+    if (scene) scene.onESLComplete(n > 0);
 }
-function tdCloseMenu() {
-    const scene = game && game.scene.getScene('TowerDefenseScene');
-    if (scene) scene.closeMenu();
-}
+
 function tdReturnToMenu() {
     const hud = document.getElementById('tdHUD'); if (hud) hud.classList.add('hidden');
     const go = document.getElementById('tdGameOverScreen'); if (go) go.classList.add('hidden');
+    const bar = document.getElementById('tdTowerBar'); if (bar) bar.classList.add('hidden');
+    const overlay = document.getElementById('tdSlowOverlay'); if (overlay) overlay.classList.add('hidden');
     if (game && game.scene.isActive('TowerDefenseScene')) game.scene.stop('TowerDefenseScene');
     activeGameMode = null;
     if (typeof showGameSelection === 'function') showGameSelection();
     else { const e = document.getElementById('gameSelectionOverlay'); if (e) e.classList.remove('hidden'); }
+    // Restore main game HUD visibility for other modes
+    const mainHud = document.getElementById('hud'); if (mainHud) mainHud.classList.remove('hidden');
 }
 
-// Show the Tower Defense menu entry as a disabled, greyed "Coming soon" tile on
-// sites where it isn't ready yet (live). Safe to call defensively even when
-// TD_ENABLED is true — it only modifies the button when the gate is active.
 function applyTowerDefenseGate() {
     if (typeof TD_ENABLED !== 'undefined' && TD_ENABLED) return;
     const btn = document.getElementById('towerDefenseBtn');
@@ -619,3 +1148,9 @@ function applyTowerDefenseGate() {
     }
     sub.textContent = 'Coming soon — not ready yet';
 }
+
+// Legacy compat stubs
+function tdBuild() {}
+function tdUpgrade() {}
+function tdEarnCoins() { tdStartESL(); }
+function tdCloseMenu() {}

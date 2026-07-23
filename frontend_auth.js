@@ -1113,7 +1113,7 @@ function selectStudentTarget(student) {
         if (now >= start && now <= end) {
             return {
                 target: t,
-                completed: countCompletedSessionsForTarget(student, t.startTime, t.endTime),
+                completed: countCompletedSessionsForTarget(student, t.startTime, t.endTime) + (t.manualOffset || 0),
                 status: 'active'
             };
         }
@@ -1127,7 +1127,7 @@ function selectStudentTarget(student) {
         const t = past[0];
         return {
             target: t,
-            completed: countCompletedSessionsForTarget(student, t.startTime, t.endTime),
+            completed: countCompletedSessionsForTarget(student, t.startTime, t.endTime) + (t.manualOffset || 0),
             status: 'past'
         };
     }

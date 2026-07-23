@@ -330,7 +330,7 @@ function getStudentTargetInfo(student) {
         const start = new Date(t.startTime);
         const end = new Date(t.endTime);
         if (now >= start && now <= end) {
-            const completed = countTargetSessions(student, start, end);
+            const completed = countTargetSessions(student, start, end) + (t.manualOffset || 0);
             return { target: t, completed, status: 'active' };
         }
     }
@@ -343,7 +343,7 @@ function getStudentTargetInfo(student) {
         const t = past[0];
         const start = new Date(t.startTime);
         const end = new Date(t.endTime);
-        const completed = countTargetSessions(student, start, end);
+        const completed = countTargetSessions(student, start, end) + (t.manualOffset || 0);
         return { target: t, completed, status: completed >= t.targetSessions ? 'completed' : 'missed' };
     }
 

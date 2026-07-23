@@ -221,7 +221,9 @@ function renderTargetsTab() {
         const start = new Date(t.startTime);
         const end = new Date(t.endTime);
         const now = new Date();
-        const completed = countSessionsInRange(currentStudent, start, end);
+        const recorded = countSessionsInRange(currentStudent, start, end);
+        const offset = t.manualOffset || 0;
+        const completed = recorded + offset;
         const pct = Math.min(100, Math.round(completed / t.targetSessions * 100));
         let status, statusClass;
         if (now < start) { status = 'Upcoming'; statusClass = 'badge-upcoming'; }
@@ -230,12 +232,16 @@ function renderTargetsTab() {
 
         const startStr = formatBeijingDT(start);
         const endStr = formatBeijingDT(end);
+        const offsetNote = offset > 0 ? ` <span style="color:#f59e0b;font-size:0.75rem" title="Includes ${offset} manually added session(s)">(+${offset} manual)</span>` : '';
         return `<tr>
             <td style="font-size:0.8rem">${startStr}<br>→ ${endStr}</td>
             <td>${t.targetSessions}</td>
-            <td><strong>${completed}</strong> / ${t.targetSessions} (${pct}%)</td>
+            <td><strong>${completed}</strong> / ${t.targetSessions} (${pct}%)${offsetNote}</td>
             <td><span class="badge ${statusClass}">${status}</span></td>
-            <td><button onclick="deleteTarget(${i}, this)" class="row-action-btn" title="Delete"><i class="fas fa-trash"></i></button></td>
+            <td style="white-space:nowrap">
+                <button onclick="adjustTargetOffset(${i})" class="row-action-btn" title="Manually adjust completed count"><i class="fas fa-pen"></i></button>
+                <button onclick="deleteTarget(${i}, this)" class="row-action-btn" title="Delete"><i class="fas fa-trash"></i></button>
+            </td>
         </tr>`;
     }).join('');
 }
@@ -318,6 +324,46 @@ async function deleteTarget(idx, clickedBtn) {
             clickedBtn.innerHTML = originalHtml;
         }
         alert('Failed to delete target: ' + e.message);
+    }
+}
+
+async function adjustTargetOffset(idx) {
+    if (!currentStudent || !currentStudent.targets || !currentStudent.targets[idx]) return;
+    const target = currentStudent.targets[idx];
+    const recorded = countSessionsInRange(currentStudent, new Date(target.startTime), new Date(target.endTime));
+    const currentOffset = target.manualOffset || 0;
+    const currentTotal = recorded + currentOffset;
+
+    const input = prompt(
+        `Target: ${target.targetSessions} sessions\n` +
+        `Recorded from DB: ${recorded}\n` +
+        `Current manual offset: +${currentOffset}\n` +
+        `Displayed total: ${currentTotal}/${target.targetSessions}\n\n` +
+        `Enter the TOTAL completed sessions (recorded + manual):`,
+        String(currentTotal)
+    );
+    if (input === null) return; // cancelled
+
+    const newTotal = parseInt(input, 10);
+    if (isNaN(newTotal) || newTotal < 0) { alert('Please enter a valid number.'); return; }
+    if (newTotal < recorded) {
+        alert(`Cannot set total below the ${recorded} recorded sessions. To remove recorded sessions, delete them from the Sessions tab.`);
+        return;
+    }
+
+    const newOffset = newTotal - recorded;
+    target.manualOffset = newOffset;
+
+    try {
+        const res = await apiFetch(`${API_BASE}/updateStudent`, {
+            method: 'POST', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ studentId: currentStudent.id, fields: { targets: currentStudent.targets } })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        renderTargetsTab();
+    } catch(e) {
+        target.manualOffset = currentOffset; // revert on failure
+        alert('Failed to save: ' + e.message);
     }
 }
 

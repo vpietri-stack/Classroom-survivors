@@ -1147,7 +1147,7 @@ function finishStudySession() {
         durationMs: durationMs,
         durationFormatted: timeStr
     });
-    flushAnalytics(); // Flush immediately on session end
+    flushAnalyticsOnGameOver(); // Reliable flush with retry on session end
 
     const targetText = typeof getActiveTargetText === 'function' ? getActiveTargetText() : null;
     const messageHtml = targetText 

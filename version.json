@@ -1,5 +1,5 @@
 {
-  "version": "2026-07-23c",
-  "deployedAt": "2026-07-23",
+  "version": "2026-07-25a",
+  "deployedAt": "2026-07-25",
   "notes": "🔴 DEPLOY STAMP — MUST match APP_VERSION in frontend_auth.js on EVERY deploy. See DEPLOY_VERSION_STAMP.md. The version watchdog (startVersionWatchdog) polls this file; if 'version' is newer than APP_VERSION it shows the update banner. Bump BOTH together or stale WeChat builds never self-heal (or permanently nag)."
 }

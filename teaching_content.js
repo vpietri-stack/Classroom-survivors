@@ -60,6 +60,40 @@ function persistAnalyticsQueue() {
         }
     } catch { /* storage full / unavailable — non-fatal */ }
 }
+
+// --- PERSISTENT SR STATE (survives app-kill between finalizeSession and flush) ---
+const PERSISTED_SR_KEY = 'csPendingSRState';
+const PERSISTED_SR_INCR_KEY = 'csPendingSRIncrement';
+
+function persistPendingSR() {
+    try {
+        if (srPendingState) {
+            localStorage.setItem(PERSISTED_SR_KEY, JSON.stringify(srPendingState));
+        } else {
+            localStorage.removeItem(PERSISTED_SR_KEY);
+        }
+        if (srIncrementSession) {
+            localStorage.setItem(PERSISTED_SR_INCR_KEY, '1');
+        } else {
+            localStorage.removeItem(PERSISTED_SR_INCR_KEY);
+        }
+    } catch { /* non-fatal */ }
+}
+
+function loadPersistedSR() {
+    try {
+        const raw = localStorage.getItem(PERSISTED_SR_KEY);
+        if (raw) srPendingState = JSON.parse(raw);
+        if (localStorage.getItem(PERSISTED_SR_INCR_KEY) === '1') srIncrementSession = true;
+    } catch { /* non-fatal */ }
+}
+
+function clearPersistedSR() {
+    try {
+        localStorage.removeItem(PERSISTED_SR_KEY);
+        localStorage.removeItem(PERSISTED_SR_INCR_KEY);
+    } catch { /* non-fatal */ }
+}
 var exerciseStartTime = 0;
 var exerciseAttempts = 0;
 

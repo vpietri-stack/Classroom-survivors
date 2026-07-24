@@ -1844,7 +1844,7 @@ class MainScene extends Phaser.Scene {
                         kills: this.killCount,
                         ignored: isSessionIgnored
                     });
-                    flushAnalytics();
+                    flushAnalyticsOnGameOver();
 
                     const targetText = typeof getActiveTargetText === 'function' ? getActiveTargetText() : null;
                     const banner = document.getElementById('vs-target-banner');

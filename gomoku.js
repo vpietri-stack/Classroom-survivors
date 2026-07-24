@@ -715,7 +715,7 @@ function endGomokuGame(result) {
         totalTimeSec: totalTimeSec,
         ignored: isSessionIgnored
     });
-    flushAnalytics();
+    if (typeof flushAnalyticsOnGameOver === 'function') flushAnalyticsOnGameOver(); else flushAnalytics();
 
     const targetText = typeof getActiveTargetText === 'function' ? getActiveTargetText() : null;
     const banner = document.getElementById('gomoku-target-banner');

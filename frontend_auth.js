@@ -13,7 +13,7 @@ const API_BASE = API_BASE_URL;
 // The version watchdog (startVersionWatchdog) compares this to the live
 // version.json; a mismatch means stale WeChat builds never self-heal or
 // permanently nag. See DEPLOY_VERSION_STAMP.md. Bump BOTH together.
-const APP_VERSION = '2026-07-24a';
+const APP_VERSION = '2026-07-25a';
 
 // --- SESSION TOKEN (c) design) ---
 // The server mints a signed token on login. We store it in localStorage
@@ -109,6 +109,7 @@ function finalizeSession(sessionResults, shouldIncrementSession = true) {
 
     // Queue for next flush
     srPendingState = newSRState;
+    if (typeof persistPendingSR === 'function') persistPendingSR(); // survive app-kill between here and successful flush
 
     // Check if we need to auto-advance the page
     checkAndAdvancePageIfAllOnCooldown();
@@ -334,6 +335,7 @@ async function flushAnalytics(opts = {}) {
         const sentSet = new Set(events);
         analyticsQueue = analyticsQueue.filter(e => !sentSet.has(e));
         persistAnalyticsQueue();
+        if (typeof clearPersistedSR === 'function') clearPersistedSR(); // SR state delivered — remove from localStorage
     } catch (e) {
         console.warn('Failed to flush analytics:', e);
         // Re-queue failed events and restore SR pending state.
@@ -341,6 +343,25 @@ async function flushAnalytics(opts = {}) {
         if (srPayload && !srPendingState) srPendingState = srPayload;
         if (incrementSession) srIncrementSession = true;
         persistAnalyticsQueue();
+    }
+}
+
+/**
+ * Reliable flush for game-over / session-complete screens. Retries up to 3
+ * times with short delays so transient network blips don't lose the session
+ * record + SR state. Returns a promise that resolves when the flush succeeds
+ * or all retries are exhausted (data remains in localStorage either way).
+ */
+async function flushAnalyticsOnGameOver() {
+    const MAX_RETRIES = 3;
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        const queueLen = analyticsQueue.length;
+        if (!authActiveUser || queueLen === 0) return; // nothing to send
+        await flushAnalytics();
+        // If queue drained, the flush succeeded.
+        if (analyticsQueue.length < queueLen || analyticsQueue.length === 0) return;
+        // Still queued — wait briefly then retry.
+        if (attempt < MAX_RETRIES) await new Promise(r => setTimeout(r, 800 * attempt));
     }
 }
 
@@ -769,12 +790,70 @@ async function loginWithProfile(user, clickedBtn) {
         }
     } catch(e) {
         console.warn("Failed to refresh profile from server, falling back to local cache", e);
+        // Network failure — mark offline so we can warn the student and retry.
+        _offlineFallback = true;
     }
 
     // Fallback to cached user if offline or server error
     authActiveUser = user;
     window.authLoading = false;
     finishLogin();
+    if (_offlineFallback) showOfflineBanner();
+}
+
+// --- OFFLINE FALLBACK BANNER (total connectivity failure) ---
+let _offlineFallback = false;
+let _offlineRetryTimer = null;
+
+function showOfflineBanner() {
+    let banner = document.getElementById('appUpdateBanner');
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'appUpdateBanner';
+        banner.style.cssText = [
+            'position:fixed', 'left:0', 'right:0', 'bottom:0', 'z-index:999998',
+            'background:#b45309', 'color:#fff', 'font-family:system-ui,sans-serif',
+            'font-size:14px', 'padding:12px 16px', 'text-align:center',
+            'box-shadow:0 -4px 12px rgba(0,0,0,.3)'
+        ].join(';');
+        banner.setAttribute('role', 'alert');
+        document.body.appendChild(banner);
+    }
+    banner.innerHTML = '⚠️ 无法连接服务器 — 进度暂时无法保存，请检查网络';
+    banner.onclick = () => retryOfflineLogin();
+    banner.style.display = 'block';
+    // Auto-retry every 30 seconds
+    if (!_offlineRetryTimer) {
+        _offlineRetryTimer = setInterval(retryOfflineLogin, 30000);
+    }
+}
+
+async function retryOfflineLogin() {
+    if (!_offlineFallback || !authActiveUser) return;
+    try {
+        const res = await apiFetch(`${API_BASE}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: authActiveUser.id, login: authActiveUser.login, password: authActiveUser.password })
+        });
+        if (res.ok) {
+            const data = await res.json();
+            setSessionToken(data.token);
+            // Merge fresh DB data into the active user
+            authActiveUser.srState = data.srState || authActiveUser.srState;
+            authActiveUser.sessionCount = data.sessionCount ?? authActiveUser.sessionCount;
+            authActiveUser.targets = data.targets || authActiveUser.targets;
+            authActiveUser.analytics = data.analytics || authActiveUser.analytics;
+            _offlineFallback = false;
+            clearInterval(_offlineRetryTimer);
+            _offlineRetryTimer = null;
+            const banner = document.getElementById('appUpdateBanner');
+            if (banner) banner.style.display = 'none';
+            console.log('Connection restored — re-logged in successfully');
+            // Flush any events that queued up while offline
+            if (analyticsQueue.length > 0) flushAnalytics();
+        }
+    } catch { /* still offline — keep retrying */ }
 }
 
 function showLoginScreen(isFirstTime = false) {
@@ -1001,6 +1080,7 @@ function finishLogin() {
 
     // FIX #3: flush any events carried over in localStorage from a previous
     // session that was killed/closed before it could deliver them.
+    if (typeof loadPersistedSR === 'function') loadPersistedSR(); // restore SR state that survived app-kill
     if (analyticsQueue.length > 0) scheduleAnalyticsFlush();
 
     // Auto-resolve the student's class content

@@ -1661,7 +1661,7 @@ class UnoScene extends Phaser.Scene {
                 ignored: isSessionIgnored
             });
         }
-        if (typeof flushAnalytics === 'function') flushAnalytics();
+        if (typeof flushAnalyticsOnGameOver === 'function') flushAnalyticsOnGameOver(); else if (typeof flushAnalytics === 'function') flushAnalytics();
 
         const warning = document.getElementById('unoTargetWarning');
         if (warning) {

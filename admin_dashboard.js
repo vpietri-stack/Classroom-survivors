@@ -40,6 +40,15 @@ function togglePwVis(inputId, iconId) {
     else { inp.type = 'password'; icon.className = 'fas fa-eye'; }
 }
 
+function copyLogin() {
+    const inp = document.getElementById('settingsLogin');
+    if (!inp || !inp.value) return;
+    navigator.clipboard?.writeText(inp.value).then(
+        () => showStatus('settingsSaveStatus', '✓ Login copied!', false),
+        () => showStatus('settingsSaveStatus', 'Copy failed — select & copy manually.', true)
+    );
+}
+
 function toggleRowPw(btn, pw) {
     const span = btn.previousElementSibling;
     if (span.dataset.visible === 'true') {
@@ -141,6 +150,7 @@ function showStatus(elId, msg, isError) {
 function populateSettingsTab() {
     if (!currentStudent) return;
     document.getElementById('settingsFullName').value = currentStudent.fullName || '';
+    document.getElementById('settingsLogin').value = currentStudent.login || '';
     populateTeacherSelect('settingsTeacher', currentStudent.teacher || '');
     document.getElementById('settingsTeacherCustom').classList.add('hidden');
     document.getElementById('settingsTeacherCustom').value = '';

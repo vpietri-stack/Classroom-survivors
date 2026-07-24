@@ -197,6 +197,12 @@
                 <h3 class="panel-title"><i class="fas fa-cog"></i> Student Settings</h3>
                 <div class="admin-form-grid">
                     <div class="form-field"><label>Full Name</label><input type="text" id="settingsFullName" class="form-input"></div>
+                    <div class="form-field"><label>Login</label>
+                        <div class="pw-field-row">
+                            <input type="text" id="settingsLogin" class="form-input" readonly>
+                            <button type="button" onclick="copyLogin()" class="pw-toggle-btn" title="Copy login"><i class="fas fa-copy"></i></button>
+                        </div>
+                    </div>
                     <div class="form-field"><label>Teacher</label>
                         <select id="settingsTeacher" class="form-input" onchange="onSettingsTeacherChange()"></select>
                         <input type="text" id="settingsTeacherCustom" class="form-input hidden" placeholder="New teacher name..." style="margin-top:6px;">

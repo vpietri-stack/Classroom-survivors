@@ -113,6 +113,10 @@
 
     <!-- HUD -->
     <div id="hud">
+        <button id="vsExitBtn" onclick="exitVampireSurvivors()"
+            class="pointer-events-auto hidden" style="position:absolute;top:12px;right:12px;z-index:20;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.3);color:#ccc;font-size:12px;font-weight:bold;padding:6px 12px;border-radius:6px;cursor:pointer;">
+            <i class="fas fa-arrow-left" style="margin-right:4px;"></i>返回 (Exit)
+        </button>
         <div class="xp-bar-container">
             <div class="xp-bar-fill" id="xpBar"></div>
         </div>
@@ -428,7 +432,11 @@
                 </div>
             </div>
         </div>
-        <button class="game-btn py-3 px-10 text-xl" onclick="location.reload()">TRY AGAIN</button>
+        <div class="flex flex-col gap-4">
+            <button class="game-btn bg-green-600 hover:bg-green-500 text-xl py-3 rounded-lg" onclick="replayVampireSurvivors()">再玩一次</button>
+            <button class="game-btn bg-blue-600 hover:bg-blue-500 text-xl py-3 rounded-lg" onclick="showGameSelection()">我想玩别的</button>
+            <button class="game-btn bg-orange-600 hover:bg-orange-500 text-xl py-3 rounded-lg" onclick="initStudyMode()">直接练习模式</button>
+        </div>
     </div>
 
     <!-- Game Selection Overlay -->

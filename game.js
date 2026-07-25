@@ -331,7 +331,7 @@ function updateDOMHUD(stats, time, kills) {
 
 function showGameSelection() {
     // Reset all screens
-    const screens = ['startScreen', 'gomokuScreen', 'gomokuGameOverScreen', 'gameOverScreen', 'gameIntroOverlay', 'studentManagerOverlay', 'studyModeOverlay', 'unoScreen', 'unoGameOverScreen'];
+    const screens = ['startScreen', 'gomokuScreen', 'gomokuGameOverScreen', 'gameOverScreen', 'gameIntroOverlay', 'studentManagerOverlay', 'studyModeOverlay', 'unoScreen', 'unoGameOverScreen', 'spellingGame', 'wordRecGame', 'sentenceMatchGame', 'levelUpMenu'];
     screens.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
@@ -344,6 +344,22 @@ function showGameSelection() {
     if (typeof game !== 'undefined' && game && game.scene && game.scene.isActive('UnoScene')) {
         game.scene.stop('UnoScene');
     }
+
+    // Stop Vampire Survivors scene and hide canvas
+    if (typeof game !== 'undefined' && game && game.scene && game.scene.isActive('MainScene')) {
+        game.scene.stop('MainScene');
+    }
+    if (typeof game !== 'undefined' && game && game.canvas) {
+        game.canvas.style.display = 'none';
+    }
+    if (typeof minigameCountdownInterval !== 'undefined' && minigameCountdownInterval) {
+        clearInterval(minigameCountdownInterval);
+        minigameCountdownInterval = null;
+    }
+    // Hide VS exit button
+    const vsExitBtn = document.getElementById('vsExitBtn');
+    if (vsExitBtn) vsExitBtn.classList.add('hidden');
+    activeGameMode = null;
 
     document.getElementById('gameSelectionOverlay').classList.remove('hidden');
 

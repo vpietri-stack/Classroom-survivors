@@ -1663,6 +1663,15 @@ class UnoScene extends Phaser.Scene {
         }
         if (typeof flushAnalyticsOnGameOver === 'function') flushAnalyticsOnGameOver(); else if (typeof flushAnalytics === 'function') flushAnalytics();
 
+        const targetText = typeof getActiveTargetText === 'function' ? getActiveTargetText() : null;
+        const targetBanner = document.getElementById('uno-target-banner');
+        if (targetText && targetBanner) {
+            targetBanner.innerText = targetText;
+            targetBanner.classList.remove('hidden');
+        } else if (targetBanner) {
+            targetBanner.classList.add('hidden');
+        }
+
         const warning = document.getElementById('unoTargetWarning');
         if (warning) {
             if (isSessionIgnored) {

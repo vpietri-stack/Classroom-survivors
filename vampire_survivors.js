@@ -1939,8 +1939,16 @@ function triggerVampireSurvivors() {
     document.getElementById('startScreen').classList.add('hidden');
     document.getElementById('gameIntroOverlay').classList.add('hidden');
     document.getElementById('gameSelectionOverlay').classList.add('hidden');
+    document.getElementById('gameOverScreen').classList.add('hidden');
+    // Show VS exit button
+    const vsExitBtn = document.getElementById('vsExitBtn');
+    if (vsExitBtn) vsExitBtn.classList.remove('hidden');
     initAudio();
     totalMinigameTimeMs = 0;
+    // Ensure canvas is visible (may have been hidden by exitVampireSurvivors)
+    if (game && game.canvas) {
+        game.canvas.style.display = '';
+    }
     if (!game) {
         config.parent = document.body;
         game = new Phaser.Game(config);
@@ -2036,4 +2044,39 @@ function showPowerUpSelection(context) {
                            <p class="text-sm text-gray-500">${description}</p>`;
         container.appendChild(card);
     });
+}
+
+// --- VS EXIT & REPLAY FUNCTIONS ---
+function exitVampireSurvivors() {
+    // Stop the VS game and return to game selection
+    if (minigameCountdownInterval) {
+        clearInterval(minigameCountdownInterval);
+        minigameCountdownInterval = null;
+    }
+    if (game && game.scene && game.scene.isActive('MainScene')) {
+        game.scene.stop('MainScene');
+    }
+    // Hide game over screen and HUD if visible
+    document.getElementById('gameOverScreen').classList.add('hidden');
+    document.getElementById('levelUpMenu').classList.add('hidden');
+    // Hide any active mini-game overlays
+    ['spellingGame', 'wordRecGame', 'sentenceMatchGame'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+    });
+    // Hide the Phaser canvas (move off-screen or hide)
+    if (game && game.canvas) {
+        game.canvas.style.display = 'none';
+    }
+    // Hide VS exit button
+    const vsExitBtn = document.getElementById('vsExitBtn');
+    if (vsExitBtn) vsExitBtn.classList.add('hidden');
+    activeGameMode = null;
+    document.getElementById('gameSelectionOverlay').classList.remove('hidden');
+}
+
+function replayVampireSurvivors() {
+    // Hide game over screen, restart the game
+    document.getElementById('gameOverScreen').classList.add('hidden');
+    triggerVampireSurvivors();
 }

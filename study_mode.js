@@ -51,6 +51,27 @@ function initStudyMode() {
     // Hide Start Screen
     document.getElementById('startScreen').classList.add('hidden');
 
+    // Hide game-over screens and stop active game scenes when entering study mode
+    ['gameOverScreen', 'gameSelectionOverlay', 'gomokuGameOverScreen', 'unoGameOverScreen', 'gameIntroOverlay'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+    });
+    if (typeof game !== 'undefined' && game && game.scene) {
+        if (game.scene.isActive('MainScene')) game.scene.stop('MainScene');
+        if (game.scene.isActive('UnoScene')) game.scene.stop('UnoScene');
+    }
+    if (typeof game !== 'undefined' && game && game.canvas) {
+        game.canvas.style.display = 'none';
+    }
+    if (typeof minigameCountdownInterval !== 'undefined' && minigameCountdownInterval) {
+        clearInterval(minigameCountdownInterval);
+        minigameCountdownInterval = null;
+    }
+    // Hide VS exit button
+    const vsExitBtn = document.getElementById('vsExitBtn');
+    if (vsExitBtn) vsExitBtn.classList.add('hidden');
+    activeGameMode = null;
+
     // Show Study Overlay
     const overlay = document.getElementById('studyModeOverlay');
     overlay.classList.remove('hidden');

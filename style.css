@@ -234,6 +234,56 @@ body {
     touch-action: manipulation;
 }
 
+/* Color variants for .game-btn — Tailwind bg-* classes are overridden by
+   the base gradient, so we use explicit color modifiers */
+.game-btn.bg-blue-600, .game-btn[class*="bg-blue-6"] {
+    background: linear-gradient(180deg, #60a5fa 0%, #2563eb 100%) !important;
+    border-bottom-color: #1d4ed8 !important;
+}
+.game-btn.bg-blue-600:hover, .game-btn[class*="bg-blue-5"]:hover {
+    background: linear-gradient(180deg, #93c5fd 0%, #3b82f6 100%) !important;
+}
+.game-btn.bg-green-600, .game-btn[class*="bg-green-6"],
+.game-btn.bg-green-500, .game-btn[class*="bg-green-5"] {
+    background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%) !important;
+    border-bottom-color: #15803d !important;
+}
+.game-btn.bg-green-500:hover, .game-btn.bg-green-600:hover {
+    background: linear-gradient(180deg, #86efac 0%, #22c55e 100%) !important;
+}
+.game-btn.bg-indigo-600, .game-btn[class*="bg-indigo-6"],
+.game-btn.bg-indigo-500, .game-btn[class*="bg-indigo-5"] {
+    background: linear-gradient(180deg, #818cf8 0%, #4f46e5 100%) !important;
+    border-bottom-color: #3730a3 !important;
+}
+.game-btn.bg-indigo-600:hover, .game-btn.bg-indigo-500:hover {
+    background: linear-gradient(180deg, #a5b4fc 0%, #6366f1 100%) !important;
+}
+.game-btn.bg-rose-600, .game-btn[class*="bg-rose-6"] {
+    background: linear-gradient(180deg, #fb7185 0%, #e11d48 100%) !important;
+    border-bottom-color: #9f1239 !important;
+}
+.game-btn.bg-rose-600:hover {
+    background: linear-gradient(180deg, #fda4af 0%, #f43f5e 100%) !important;
+}
+.game-btn.bg-orange-600, .game-btn[class*="bg-orange-6"],
+.game-btn.bg-orange-500, .game-btn[class*="bg-orange-5"] {
+    background: linear-gradient(180deg, #FF8A65 0%, #F4511E 100%) !important;
+    border-bottom-color: #BF360C !important;
+}
+.game-btn.bg-orange-600:hover, .game-btn.bg-orange-500:hover {
+    background: linear-gradient(180deg, #FFAB91 0%, #FF7043 100%) !important;
+}
+/* Gray / slate variant for CLEAR buttons */
+.game-btn.bg-gray-500, .game-btn[class*="bg-gray-5"],
+.game-btn.bg-slate-600 {
+    background: linear-gradient(180deg, #94a3b8 0%, #475569 100%) !important;
+    border-bottom-color: #334155 !important;
+}
+.game-btn.bg-gray-500:hover, .game-btn.bg-slate-600:hover {
+    background: linear-gradient(180deg, #cbd5e1 0%, #64748b 100%) !important;
+}
+
 .game-btn:active {
     transform: translateY(3px);
     border-bottom-width: 1px;
@@ -428,6 +478,34 @@ body {
     background: linear-gradient(180deg, #818cf8 0%, #6366f1 100%);
     color: white;
     box-shadow: 0 3px 0 #4338ca, 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Feedback states for tiles after CHECK — must override .placed gradient */
+.study-word-tile.\!bg-green-500,
+.study-word-tile.placed.\!bg-green-500,
+.draggable.correct {
+    background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%) !important;
+    border-bottom-color: #15803d !important;
+    box-shadow: 0 3px 0 #15803d, 0 0 12px rgba(34, 197, 94, 0.4) !important;
+}
+.study-word-tile.\!bg-red-500,
+.study-word-tile.placed.\!bg-red-500,
+.draggable.wrong {
+    background: linear-gradient(180deg, #f87171 0%, #dc2626 100%) !important;
+    border-bottom-color: #991b1b !important;
+    box-shadow: 0 3px 0 #991b1b, 0 0 12px rgba(239, 68, 68, 0.4) !important;
+    animation: shake 0.3s ease-in-out;
+}
+/* Spelling slot feedback colors */
+.study-slot.bg-green-500 {
+    background: #16a34a !important;
+    border-color: #15803d !important;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+}
+.study-slot.bg-red-500 {
+    background: #dc2626 !important;
+    border-color: #991b1b !important;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
 }
 
 .study-text-sm {
@@ -1234,10 +1312,10 @@ body.kid-friendly .translation-hint {
     }
 }
 
-/* Landscape orientation — reduce vertical space usage */
+/* Landscape orientation — reduce vertical space, spread horizontally */
 @media (orientation: landscape) and (max-height: 500px) {
     #studyModeOverlay {
-        padding: 6px 12px;
+        padding: 4px 16px;
     }
     
     #studyModeOverlay #study-title {
@@ -1247,23 +1325,67 @@ body.kid-friendly .translation-hint {
     
     #studyModeOverlay #study-instruction {
         font-size: 0.85rem;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
+    }
+    
+    #study-game-area {
+        max-width: 90vw;
     }
     
     .minigame-container {
         max-height: 94vh;
+        max-width: 90vw;
     }
     
     .audio-play-btn {
-        width: 48px;
-        height: 48px;
-        min-width: 48px;
-        min-height: 48px;
-        font-size: 1.2rem;
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+        font-size: 1.1rem;
     }
     
     .game-btn {
-        padding: 10px 20px;
+        padding: 8px 18px;
+        min-height: 40px;
+    }
+    
+    /* In landscape, use horizontal layout for scramble rounds */
+    #study-game-area > div {
+        gap: 4px !important;
+    }
+    
+    .match-pair-row {
+        flex-direction: row !important;
+    }
+    
+    #study-progress-indicator {
+        margin-bottom: 4px;
+    }
+    
+    .translation-hint {
+        padding: 4px 12px;
+        margin: 2px auto 4px;
+    }
+}
+
+/* Widescreen (large landscape/desktop) — use available horizontal space */
+@media (min-width: 900px) and (min-height: 500px) {
+    #study-game-area {
+        max-width: 800px;
+    }
+    
+    .minigame-container {
+        width: min(90vw, 800px);
+    }
+    
+    #sentence-drop-zone,
+    #sentence-word-bank,
+    #scramble-slots,
+    #scramble-bank,
+    #spelling-display,
+    #virtual-keyboard {
+        max-width: 700px;
     }
 }
 

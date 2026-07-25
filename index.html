@@ -257,17 +257,19 @@
 
     <!-- Study Mode Overlay -->
     <div id="studyModeOverlay"
-        class="overlay hidden bg-gradient-to-br from-slate-900 to-slate-800 z-50 flex flex-col items-center p-4 sm:p-8 overflow-y-auto">
-        <h2 id="study-title" class="text-2xl sm:text-4xl text-yellow-400 font-bold mb-2">Study Mode</h2>
-        <p id="study-instruction" class="text-lg sm:text-xl text-gray-300 mb-8 text-center">Instruction</p>
+        class="overlay hidden bg-gradient-to-br from-slate-900 to-slate-800 z-50 flex flex-col items-center overflow-y-auto">
+        <div class="w-full max-w-4xl flex flex-col items-center px-2 sm:px-4 py-2">
+            <h2 id="study-title" class="text-xl sm:text-3xl text-yellow-400 font-bold mb-1">Study Mode</h2>
+            <p id="study-instruction" class="text-base sm:text-lg text-gray-300 mb-3 text-center">Instruction</p>
 
-        <div id="study-game-area" class="w-full max-w-4xl flex-grow flex flex-col items-center">
-            <!-- Game content injected here -->
+            <div id="study-game-area" class="w-full flex-grow flex flex-col items-center">
+                <!-- Game content injected here -->
+            </div>
         </div>
 
         <button
             onclick="exitStudyMode()"
-            aria-label="Close" class="absolute top-4 right-4 text-gray-500 hover:text-white text-2xl"><i
+            aria-label="Close" class="fixed top-3 right-3 w-10 h-10 flex items-center justify-center rounded-full bg-gray-800/80 text-gray-400 hover:text-white hover:bg-gray-700 text-xl z-50 transition-colors"><i
                 class="fas fa-times"></i></button>
     </div>
 
@@ -281,114 +283,114 @@
     <!-- ESL Minigames -->
 
     <!-- Spelling Game -->
-    <div id="spellingGame" class="overlay hidden p-4" style="z-index: 50;">
-        <div class="minigame-container text-center">
-            <div class="text-yellow-400 font-bold text-xl sm:text-2xl mb-4 animate-pulse"><span
+    <div id="spellingGame" class="overlay hidden p-2 sm:p-4" style="z-index: 50;">
+        <div class="minigame-container text-center flex flex-col items-center gap-2">
+            <div class="text-yellow-500 font-bold text-lg sm:text-xl mb-1 animate-pulse"><span
                     id="spelling-timer">00:00</span></div>
-            <h3 class="text-xl sm:text-2xl font-bold mb-4 text-purple-700">Word Scramble!</h3>
+            <h3 class="text-lg sm:text-2xl font-bold mb-1 text-indigo-700">Word Scramble!</h3>
             <button onclick="playTTS()" aria-label="Play Audio"
-                class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-500 text-white text-2xl mb-2 shadow-lg transform active:scale-95 transition-transform">
+                class="audio-play-btn">
                 <i class="fas fa-volume-up"></i>
             </button>
             <div id="spelling-translation" class="translation-hint hidden"></div>
-            <img id="spelling-image" class="w-32 h-32 object-contain mx-auto my-2 hidden border-2 border-slate-300 rounded-xl bg-white/10" alt="Vocabulary Image">
+            <img id="spelling-image" class="vocab-image hidden" alt="Vocabulary Image">
             <div id="spelling-input-display"
-                class="bg-white rounded-lg p-3 sm:p-4 mb-6 study-text-xl font-bold min-h-[50px] sm:min-h-[60px] tracking-widest text-gray-700 border-2 border-dashed border-gray-300 flex flex-wrap justify-center items-center gap-[var(--gap-xs)]">
+                class="bg-white/90 rounded-xl p-3 w-full min-h-[54px] tracking-widest text-gray-800 border-2 border-dashed border-slate-300 flex flex-wrap justify-center items-center gap-[var(--gap-xs)]">
             </div>
-            <div id="spelling-keyboard" class="flex flex-wrap justify-center gap-3 mb-6"></div>
+            <div id="spelling-keyboard" class="flex flex-wrap justify-center gap-[var(--gap-sm)] w-full"></div>
 
-            <div id="spelling-actions" class="flex justify-center gap-4">
-                <button onclick="checkSpelling()" class="game-btn bg-green-500 py-2 px-6">CHECK</button>
-                <button onclick="clearSpelling()" class="game-btn bg-gray-500 py-2 px-6">CLEAR</button>
+            <div id="spelling-actions" class="flex justify-center gap-3 w-full">
+                <button onclick="checkSpelling()" class="game-btn bg-green-500 py-2 px-6 flex-1 max-w-[160px]">CHECK</button>
+                <button onclick="clearSpelling()" class="game-btn bg-gray-500 py-2 px-6 flex-1 max-w-[160px]">CLEAR</button>
             </div>
 
             <!-- Result Action (Dynamically Shown) -->
-            <div id="spelling-result-action" class="hidden mt-4">
+            <div id="spelling-result-action" class="hidden mt-2">
                 <!-- Injected button -->
             </div>
         </div>
     </div>
 
     <!-- Word Rec Game -->
-    <div id="wordRecGame" class="overlay hidden p-4 overflow-y-auto" style="z-index: 50;">
-        <div class="minigame-container text-center max-h-[88vh]">
-            <div class="text-yellow-400 font-bold text-xl sm:text-2xl mb-4 animate-pulse"><span
+    <div id="wordRecGame" class="overlay hidden p-2 sm:p-4 overflow-y-auto" style="z-index: 50;">
+        <div class="minigame-container text-center flex flex-col items-center gap-2">
+            <div class="text-yellow-500 font-bold text-lg sm:text-xl mb-1 animate-pulse"><span
                     id="rec-timer">00:00</span></div>
-            <h3 class="text-xl sm:text-2xl font-bold mb-2 text-purple-700">Quick Listen!</h3>
-            <div class="w-full bg-gray-300 h-3 sm:h-4 mb-6 rounded-full overflow-hidden">
-                <div id="rec-timer-bar" class="h-full bg-red-500 w-full transition-all duration-[100ms] linear"></div>
+            <h3 class="text-lg sm:text-2xl font-bold mb-1 text-indigo-700">Quick Listen!</h3>
+            <div class="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                <div id="rec-timer-bar" class="h-full bg-red-500 w-full transition-all duration-[100ms] linear rounded-full"></div>
             </div>
             <button onclick="playTTS()" aria-label="Play Audio"
-                class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-500 text-white text-2xl mb-2 shadow-lg transform active:scale-95 transition-transform">
+                class="audio-play-btn">
                 <i class="fas fa-volume-up"></i>
             </button>
             <div id="rec-translation" class="translation-hint hidden"></div>
-            <img id="rec-image" class="w-32 h-32 object-contain mx-auto my-2 hidden border-2 border-slate-300 rounded-xl bg-white/10" alt="Vocabulary Image">
+            <img id="rec-image" class="vocab-image hidden" alt="Vocabulary Image">
 
-            <div class="flex flex-wrap justify-center gap-3 sm:gap-6" id="rec-options">
+            <div class="flex flex-wrap justify-center gap-[var(--gap-sm)] w-full" id="rec-options">
                 <!-- Buttons injected dynamically -->
             </div>
 
             <!-- Result Action (Dynamically Shown) -->
-            <div id="rec-result-action" class="hidden mt-4">
+            <div id="rec-result-action" class="hidden mt-2">
                 <!-- Injected button -->
             </div>
         </div>
     </div>
 
     <!-- Grammar Game -->
-    <div id="grammarGame" class="overlay hidden p-4" style="z-index: 50;">
-        <div class="minigame-container max-h-[90vh] overflow-y-auto">
-            <div class="text-yellow-400 font-bold text-xl sm:text-2xl mb-4 text-center animate-pulse">
+    <div id="grammarGame" class="overlay hidden p-2 sm:p-4" style="z-index: 50;">
+        <div class="minigame-container flex flex-col gap-2">
+            <div class="text-yellow-500 font-bold text-lg sm:text-xl text-center animate-pulse">
                 <span id="grammar-timer">00:00</span>
             </div>
-            <h3 class="text-xl sm:text-2xl font-bold mb-1 text-purple-700 text-center">Complete the Sentences!</h3>
+            <h3 class="text-lg sm:text-2xl font-bold mb-0 text-indigo-700 text-center">Complete the Sentence!</h3>
             <div id="grammar-translation" class="translation-hint hidden"></div>
 
-            <div id="sentence-container" class="mb-6 flex flex-col gap-3 sm:gap-4">
+            <div id="sentence-container" class="flex flex-col gap-2">
                 <!-- Sentences injected here -->
             </div>
 
             <div id="word-dock"
-                class="bg-gray-100 p-4 sm:p-6 rounded-xl flex flex-wrap gap-2 sm:gap-4 justify-center min-h-[80px] sm:min-h-[100px]">
+                class="bg-slate-100/90 p-3 rounded-xl flex flex-wrap gap-[var(--gap-sm)] justify-center min-h-[60px] border-2 border-dashed border-slate-300">
                 <!-- Options injected here -->
             </div>
 
-            <div id="grammar-actions" class="mt-6 flex justify-center gap-4">
-                <button onclick="checkGrammar()" class="game-btn bg-green-500 py-2 px-6">CHECK</button>
-                <button onclick="clearGrammar()" class="game-btn bg-gray-500 py-2 px-6">CLEAR</button>
+            <div id="grammar-actions" class="flex justify-center gap-3">
+                <button onclick="checkGrammar()" class="game-btn bg-green-500 py-2 px-6 flex-1 max-w-[160px]">CHECK</button>
+                <button onclick="clearGrammar()" class="game-btn bg-gray-500 py-2 px-6 flex-1 max-w-[160px]">CLEAR</button>
             </div>
 
             <!-- Result Action (Dynamically Shown) -->
-            <div id="grammar-result-action" class="hidden mt-4 text-center">
+            <div id="grammar-result-action" class="hidden mt-2 text-center">
                 <!-- Injected button -->
             </div>
         </div>
     </div>
 
     <!-- Sentence Match Game -->
-    <div id="sentenceMatchGame" class="overlay hidden p-4" style="z-index: 50;">
-        <div class="minigame-container max-h-[90vh] overflow-y-auto">
-            <div class="text-yellow-400 font-bold text-xl sm:text-2xl mb-4 text-center animate-pulse">
+    <div id="sentenceMatchGame" class="overlay hidden p-2 sm:p-4" style="z-index: 50;">
+        <div class="minigame-container flex flex-col gap-2">
+            <div class="text-yellow-500 font-bold text-lg sm:text-xl text-center animate-pulse">
                 <span id="sentencematch-timer">00:00</span>
             </div>
-            <h3 class="text-xl sm:text-2xl font-bold mb-4 text-purple-700 text-center">Match the Sentences!</h3>
+            <h3 class="text-lg sm:text-2xl font-bold mb-1 text-indigo-700 text-center">Match the Sentences!</h3>
 
-            <div id="sentencematch-pairs" class="mb-4 flex flex-col gap-3">
+            <div id="sentencematch-pairs" class="flex flex-col gap-2">
                 <!-- Pairs injected here -->
             </div>
 
             <div id="sentencematch-dock"
-                class="bg-gray-100 p-4 rounded-xl flex flex-wrap gap-2 justify-center min-h-[80px]">
+                class="bg-slate-100/90 p-3 rounded-xl flex flex-wrap gap-2 justify-center min-h-[60px] border-2 border-dashed border-slate-300">
                 <!-- B sentences injected here -->
             </div>
 
-            <div id="sentencematch-actions" class="mt-6 flex justify-center gap-4">
+            <div id="sentencematch-actions" class="flex justify-center gap-3">
                 <button onclick="checkSentenceMatch()" class="game-btn bg-green-500 py-2 px-6">CHECK</button>
             </div>
 
             <!-- Result Action (Dynamically Shown) -->
-            <div id="sentencematch-result-action" class="hidden mt-4 text-center">
+            <div id="sentencematch-result-action" class="hidden mt-2 text-center">
                 <!-- Injected button -->
             </div>
         </div>

@@ -1078,7 +1078,7 @@ function startWordRecGame() {
 
     choices.forEach(word => {
         const btn = document.createElement('button');
-        btn.className = "game-btn text-2xl py-6 min-w-[140px]";
+        btn.className = "game-btn text-lg sm:text-xl py-4 min-w-[120px] w-full sm:w-auto";
         btn.innerText = word;
         btn.onclick = () => checkWordRec(word, target, btn);
         container.appendChild(btn);
@@ -1458,13 +1458,13 @@ function startSentenceMatchGame() {
     const pairsContainer = document.getElementById('sentencematch-pairs');
     pairsContainer.innerHTML = shuffledPairs.map((pair, index) => `
         <div class="match-pair-row flex flex-col sm:flex-row gap-2 items-stretch">
-            <div class="sentence-a flex-1 bg-indigo-600 p-3 rounded-lg text-white font-medium text-sm" data-index="${index}">
+            <div class="sentence-a flex-1 bg-indigo-600 p-3 rounded-lg text-white font-medium text-sm sm:text-base" data-index="${index}">
                 ${pair.a}
             </div>
-            <div class="gm-sentence-b-slot flex-1 bg-gray-200 p-3 rounded-lg min-h-[45px] border-2 border-dashed border-gray-400 flex items-center justify-center cursor-pointer text-gray-700" 
+            <div class="gm-sentence-b-slot flex-1 bg-gray-200 p-3 rounded-lg min-h-[48px] border-2 border-dashed border-gray-400 flex items-center justify-center cursor-pointer text-gray-700" 
                  data-target-index="${index}" 
                  onclick="handleGameModeSlotClick(${index})">
-                <span class="text-gray-400 text-sm">Click to place</span>
+                <span class="text-gray-400 text-sm">Tap to place</span>
             </div>
         </div>
     `).join('');
@@ -1472,7 +1472,7 @@ function startSentenceMatchGame() {
     // Build dock UI
     const dock = document.getElementById('sentencematch-dock');
     dock.innerHTML = bSentences.map(item => `
-        <button class="gm-sentence-b-tile bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer"
+        <button class="gm-sentence-b-tile bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer min-h-[44px]"
                 data-correct-index="${item.correctIndex}"
                 onclick="selectGameModeBTile(this)">
             ${item.text}
@@ -1498,7 +1498,7 @@ function handleGameModeSlotClick(slotIndex) {
     const existingTile = slot.querySelector('.gm-sentence-b-tile');
     if (existingTile) {
         returnGameModeTileToDock(existingTile);
-        slot.innerHTML = '<span class="text-gray-400 text-sm">Click to place</span>';
+        slot.innerHTML = '<span class="text-gray-400 text-sm">Tap to place</span>';
         return;
     }
 
@@ -1606,7 +1606,7 @@ function checkSentenceMatch() {
             });
             const slots = document.querySelectorAll('.gm-sentence-b-slot');
             slots.forEach(slot => {
-                slot.innerHTML = '<span class="text-gray-400 text-sm">Click to place</span>';
+                slot.innerHTML = '<span class="text-gray-400 text-sm">Tap to place</span>';
             });
         }, 2000);
     }

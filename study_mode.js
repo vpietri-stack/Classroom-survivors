@@ -67,10 +67,13 @@ function startRoundA() {
 
     const container = document.getElementById('study-game-area');
     container.innerHTML = `
-        <div id="roundA-translation" class="translation-hint hidden"></div>
-        <img id="roundA-image" class="w-32 h-32 object-contain mx-auto my-2 hidden border-2 border-slate-300 rounded-xl bg-white/10" alt="Vocabulary Image">
-        <div id="roundA-container" class="flex flex-wrap justify-center gap-6 mt-8 p-4">
-            <!-- Words injected here -->
+        <div class="flex flex-col items-center gap-3 w-full">
+            <button onclick="playTTS()" aria-label="Play Audio" class="audio-play-btn"><i class="fas fa-volume-up"></i></button>
+            <div id="roundA-translation" class="translation-hint hidden"></div>
+            <img id="roundA-image" class="vocab-image hidden" alt="Vocabulary Image">
+            <div id="roundA-container" class="flex flex-wrap justify-center gap-3 w-full px-2">
+                <!-- Words injected here -->
+            </div>
         </div>
     `;
 
@@ -96,7 +99,7 @@ function renderRoundAWords() {
 
     STUDY_STATE.remainingWordsRoundA.sort(() => 0.5 - Math.random()).forEach(word => {
         const btn = document.createElement('button');
-        btn.className = "game-btn bg-indigo-500 hover:bg-indigo-400 text-2xl px-8 py-5 rounded-2xl shadow-lg transform transition-all hover:scale-105";
+        btn.className = "game-btn bg-indigo-500 hover:bg-indigo-400 text-xl sm:text-2xl px-6 py-4 rounded-xl shadow-lg transform transition-all active:scale-95 w-full sm:w-auto";
         btn.innerText = word;
         btn.onclick = () => checkRoundA(word, btn);
         container.appendChild(btn);
@@ -168,18 +171,18 @@ function nextRoundCWord() {
 
     const container = document.getElementById('study-game-area');
     container.innerHTML = `
-        <div class="flex flex-col items-center gap-[var(--gap-md)] w-full">
-            <button onclick="playTTS()" aria-label="Play Audio" class="w-16 h-16 rounded-full bg-blue-500 text-white text-2xl shadow-lg transform active:scale-95 transition-transform"><i class="fas fa-volume-up"></i></button>
+        <div class="flex flex-col items-center gap-3 w-full">
+            <button onclick="playTTS()" aria-label="Play Audio" class="audio-play-btn"><i class="fas fa-volume-up"></i></button>
             <div id="roundC-translation" class="translation-hint hidden"></div>
-            <img id="roundC-image" class="w-32 h-32 object-contain mx-auto my-2 hidden border-2 border-slate-300 rounded-xl bg-white/10" alt="Vocabulary Image">
+            <img id="roundC-image" class="vocab-image hidden" alt="Vocabulary Image">
             
-            <div id="scramble-slots" class="flex flex-wrap justify-center gap-[var(--gap-sm)] min-h-[60px] w-full px-4"></div>
+            <div id="scramble-slots" class="flex flex-wrap justify-center gap-[var(--gap-sm)] min-h-[54px] w-full px-2"></div>
             
-            <div id="scramble-bank" class="flex flex-wrap justify-center gap-[var(--gap-sm)] w-full px-4"></div>
+            <div id="scramble-bank" class="flex flex-wrap justify-center gap-[var(--gap-sm)] w-full px-2"></div>
 
-            <div class="flex gap-[var(--gap-md)]">
-                <button onclick="checkRoundC()" class="game-btn bg-green-500 py-3 px-6">CHECK</button>
-                <button onclick="clearRoundC()" class="game-btn bg-gray-500 py-3 px-6">CLEAR</button>
+            <div class="flex gap-3 w-full justify-center">
+                <button onclick="checkRoundC()" class="game-btn bg-green-500 py-3 px-6 flex-1 max-w-[160px]">CHECK</button>
+                <button onclick="clearRoundC()" class="game-btn bg-gray-500 py-3 px-6 flex-1 max-w-[160px]">CLEAR</button>
             </div>
         </div>
     `;
@@ -438,18 +441,18 @@ function nextRoundDWord() {
 
     const container = document.getElementById('study-game-area');
     container.innerHTML = `
-        <div class="flex flex-col items-center gap-[var(--gap-md)] w-full">
-            <button onclick="playTTS()" aria-label="Play Audio" class="w-16 h-16 rounded-full bg-blue-500 text-white text-2xl shadow-lg transform active:scale-95 transition-transform"><i class="fas fa-volume-up"></i></button>
+        <div class="flex flex-col items-center gap-3 w-full">
+            <button onclick="playTTS()" aria-label="Play Audio" class="audio-play-btn"><i class="fas fa-volume-up"></i></button>
             <div id="roundD-translation" class="translation-hint hidden"></div>
-            <img id="roundD-image" class="w-32 h-32 object-contain mx-auto my-2 hidden border-2 border-slate-300 rounded-xl bg-white/10" alt="Vocabulary Image">
+            <img id="roundD-image" class="vocab-image hidden" alt="Vocabulary Image">
 
-            <div id="spelling-display" class="flex flex-wrap justify-center gap-[var(--gap-xs)] min-h-[60px] w-full px-4 text-white"></div>
+            <div id="spelling-display" class="flex flex-wrap justify-center gap-[var(--gap-xs)] min-h-[54px] w-full px-2 text-white"></div>
 
-            <div id="virtual-keyboard" class="flex flex-wrap justify-center gap-[var(--gap-sm)] max-w-lg px-4"></div>
+            <div id="virtual-keyboard" class="flex flex-wrap justify-center gap-[var(--gap-sm)] w-full max-w-lg px-2"></div>
 
-            <div class="flex gap-[var(--gap-md)]">
-                <button onclick="checkRoundD()" class="game-btn bg-green-500 py-3 px-6">CHECK</button>
-                <button onclick="clearRoundD()" class="game-btn bg-gray-500 py-3 px-6">CLEAR</button>
+            <div class="flex gap-3 w-full justify-center">
+                <button onclick="checkRoundD()" class="game-btn bg-green-500 py-3 px-6 flex-1 max-w-[160px]">CHECK</button>
+                <button onclick="clearRoundD()" class="game-btn bg-gray-500 py-3 px-6 flex-1 max-w-[160px]">CLEAR</button>
             </div>
         </div>
     `;
@@ -692,19 +695,19 @@ function nextRoundESentence() {
 
     const container = document.getElementById('study-game-area');
     container.innerHTML = `
-        <div class="flex flex-col gap-[var(--gap-md)] w-full max-w-2xl mx-auto px-4">
+        <div class="flex flex-col gap-3 w-full max-w-2xl mx-auto px-2">
              <div id="roundE-translation" class="translation-hint hidden"></div>
-             <div id="sentence-drop-zone" class="bg-gray-800/50 p-6 rounded-xl min-h-[120px] flex flex-wrap gap-[var(--gap-sm)] items-center justify-center border-2 border-dashed border-gray-600">
+             <div id="sentence-drop-zone" class="bg-gray-800/50 p-4 rounded-xl min-h-[80px] flex flex-wrap gap-[var(--gap-sm)] items-center justify-center border-2 border-dashed border-gray-500">
                 <!-- Word slots -->
              </div>
              
-             <div id="sentence-word-bank" class="bg-gray-700/50 p-4 rounded-xl flex flex-wrap gap-[var(--gap-sm)] justify-center min-h-[100px]">
+             <div id="sentence-word-bank" class="bg-gray-700/50 p-3 rounded-xl flex flex-wrap gap-[var(--gap-sm)] justify-center min-h-[70px]">
                 <!-- Source words -->
              </div>
              
-             <div class="flex justify-center gap-4">
-                <button onclick="checkRoundE()" class="game-btn bg-green-500 py-3 px-8 text-xl">CHECK</button>
-                <button onclick="clearRoundE()" class="game-btn bg-gray-500 py-3 px-8 text-xl">CLEAR</button>
+             <div class="flex justify-center gap-3">
+                <button onclick="checkRoundE()" class="game-btn bg-green-500 py-3 px-8 flex-1 max-w-[160px]">CHECK</button>
+                <button onclick="clearRoundE()" class="game-btn bg-gray-500 py-3 px-8 flex-1 max-w-[160px]">CLEAR</button>
              </div>
         </div>
     `;
@@ -961,25 +964,25 @@ function renderRoundF() {
 
     const container = document.getElementById('study-game-area');
     container.innerHTML = `
-        <div class="flex flex-col gap-4 w-full max-w-3xl mx-auto px-4">
-            <div id="match-pairs-container" class="flex flex-col gap-3">
+        <div class="flex flex-col gap-3 w-full max-w-3xl mx-auto px-2">
+            <div id="match-pairs-container" class="flex flex-col gap-2">
                 ${pairs.map((pair, index) => `
                     <div class="match-pair-row flex flex-col sm:flex-row gap-2 items-stretch">
                         <div class="sentence-a flex-1 bg-indigo-900/60 p-3 rounded-lg text-white font-medium text-sm sm:text-base" data-index="${index}">
                             ${pair.a}
                         </div>
-                        <div class="sentence-b-slot flex-1 bg-gray-700/50 p-3 rounded-lg min-h-[50px] border-2 border-dashed border-gray-500 flex items-center justify-center cursor-pointer" 
+                        <div class="sentence-b-slot flex-1 bg-gray-700/50 p-3 rounded-lg min-h-[48px] border-2 border-dashed border-gray-500 flex items-center justify-center cursor-pointer" 
                              data-target-index="${index}" 
                              onclick="handleSlotClick(${index})">
-                            <span class="text-gray-400 text-sm">Click to place answer</span>
+                            <span class="text-gray-400 text-sm">Tap to place</span>
                         </div>
                     </div>
                 `).join('')}
             </div>
             
-            <div id="sentence-b-dock" class="bg-gray-800/50 p-4 rounded-xl flex flex-wrap gap-2 justify-center min-h-[80px] mt-4">
+            <div id="sentence-b-dock" class="bg-gray-800/50 p-3 rounded-xl flex flex-wrap gap-2 justify-center min-h-[60px]">
                 ${bSentences.map(item => `
-                    <button class="sentence-b-tile bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer"
+                    <button class="sentence-b-tile bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer min-h-[44px]"
                             data-correct-index="${item.correctIndex}"
                             onclick="selectBTile(this)">
                         ${item.text}
@@ -987,8 +990,8 @@ function renderRoundF() {
                 `).join('')}
             </div>
             
-            <div class="flex justify-center gap-4 mt-4">
-                <button onclick="checkRoundF()" class="game-btn bg-green-500 py-3 px-8 text-xl">CHECK</button>
+            <div class="flex justify-center gap-3">
+                <button onclick="checkRoundF()" class="game-btn bg-green-500 py-3 px-8">CHECK</button>
             </div>
         </div>
     `;
@@ -1014,7 +1017,7 @@ function handleSlotClick(slotIndex) {
     const existingTile = slot.querySelector('.sentence-b-tile');
     if (existingTile) {
         returnTileToDock(existingTile);
-        slot.innerHTML = '<span class="text-gray-400 text-sm">Click to place answer</span>';
+        slot.innerHTML = '<span class="text-gray-400 text-sm">Tap to place</span>';
         return;
     }
 
@@ -1123,7 +1126,7 @@ function resetRoundF() {
     // Reset all slots
     const slots = document.querySelectorAll('.sentence-b-slot');
     slots.forEach(slot => {
-        slot.innerHTML = '<span class="text-gray-400 text-sm">Click to place answer</span>';
+        slot.innerHTML = '<span class="text-gray-400 text-sm">Tap to place</span>';
     });
 
     selectedBTile = null;
@@ -1156,14 +1159,15 @@ function finishStudySession() {
 
     const container = document.getElementById('study-game-area');
     container.innerHTML = `
-        <div class="text-center px-4">
-            <h2 class="study-text-2xl text-green-400 font-bold mb-4">Great job ${player}!</h2>
-            <p class="study-text-xl text-white mb-2">You completed this session in ${timeStr}</p>
+        <div class="text-center px-4 w-full max-w-md mx-auto">
+            <div class="text-6xl mb-4">🎉</div>
+            <h2 class="study-text-2xl text-green-400 font-bold mb-3">Great job ${player}!</h2>
+            <p class="study-text-lg text-white mb-2">You completed this session in <span class="text-yellow-400 font-bold">${timeStr}</span></p>
             ${messageHtml}
             
-            <div class="flex flex-col gap-4 items-center">
-                <button onclick="initStudyMode()" class="game-btn bg-blue-600 text-xl sm:text-2xl w-full max-w-[280px]">再学习一下</button>
-                <button onclick="showGameSelection()" class="game-btn bg-orange-500 text-xl sm:text-2xl w-full max-w-[280px]">边玩边学</button>
+            <div class="flex flex-col gap-3 items-center w-full">
+                <button onclick="initStudyMode()" class="game-btn bg-blue-600 text-lg sm:text-xl w-full">再学习一下</button>
+                <button onclick="showGameSelection()" class="game-btn bg-orange-500 text-lg sm:text-xl w-full">边玩边学</button>
             </div>
         </div>
     `;
@@ -1178,9 +1182,38 @@ function exitStudyMode() {
 
 
 // --- Helper UI ---
+const STUDY_ROUNDS = ['A', 'C', 'D', 'E', 'F'];
+const STUDY_ROUND_LABELS = { A: 'Listen', C: 'Scramble', D: 'Spell', E: 'Sentence', F: 'Match' };
+
 function updateStudyUI(title, subtitle) {
     document.getElementById('study-title').innerText = title;
     document.getElementById('study-instruction').innerText = subtitle;
+    updateStudyProgress();
+}
+
+function updateStudyProgress() {
+    const currentRound = STUDY_STATE.round;
+    const currentIdx = STUDY_ROUNDS.indexOf(currentRound);
+    let bar = document.getElementById('study-progress-indicator');
+    if (!bar) {
+        bar = document.createElement('div');
+        bar.id = 'study-progress-indicator';
+        bar.className = 'w-full flex items-center justify-center gap-1 mb-2 px-4';
+        const titleEl = document.getElementById('study-title');
+        if (titleEl && titleEl.parentElement) {
+            titleEl.parentElement.insertBefore(bar, titleEl);
+        }
+    }
+    bar.innerHTML = STUDY_ROUNDS.map((r, i) => {
+        const isActive = i === currentIdx;
+        const isDone = i < currentIdx;
+        const label = STUDY_ROUND_LABELS[r] || r;
+        let classes = 'flex-1 h-2 rounded-full transition-all duration-300';
+        if (isDone) classes += ' bg-green-400';
+        else if (isActive) classes += ' bg-yellow-400 animate-pulse';
+        else classes += ' bg-gray-600';
+        return `<div class="${classes}" title="${label}"></div>`;
+    }).join('');
 }
 
 function playHappySound() {

@@ -1,26 +1,30 @@
-/* Core Styles */
+/* Core Styles — Mobile-First, Child-Friendly */
 :root {
-    /* Responsive sizing variables */
-    /* Slot/letter-tile box size. Bumped so short words fill the screen; fitAnswerArea
-       shrinks this down for long words. */
-    --slot-size: clamp(38px, 11vw, 54px);
-    --tile-size: clamp(40px, 12vw, 56px);
-    --key-size: clamp(36px, 11vw, 48px);
-    --font-sm: clamp(0.75rem, 2.5vw, 0.875rem);
-    --font-md: clamp(0.875rem, 3vw, 1.1rem);
-    --font-lg: clamp(1rem, 3.5vw, 1.25rem);
-    --font-xl: clamp(1.25rem, 4vw, 1.5rem);
-    --font-2xl: clamp(1.5rem, 5vw, 2rem);
-    --gap-xs: clamp(2px, 0.5vw, 4px);
-    --gap-sm: clamp(4px, 1vw, 8px);
-    --gap-md: clamp(8px, 2vw, 16px);
+    /* Responsive sizing variables — optimized for phone-first (portrait) */
+    --slot-size: clamp(40px, 12vw, 56px);
+    --tile-size: clamp(44px, 13vw, 58px);
+    --key-size: clamp(40px, 12vw, 52px);
+    --font-sm: clamp(0.85rem, 3vw, 1rem);
+    --font-md: clamp(1rem, 3.5vw, 1.2rem);
+    --font-lg: clamp(1.1rem, 4vw, 1.4rem);
+    --font-xl: clamp(1.3rem, 4.5vw, 1.6rem);
+    --font-2xl: clamp(1.6rem, 5.5vw, 2.2rem);
+    --gap-xs: clamp(3px, 0.8vw, 5px);
+    --gap-sm: clamp(6px, 1.5vw, 10px);
+    --gap-md: clamp(10px, 2.5vw, 18px);
     --container-padding: clamp(12px, 3vw, 24px);
-    /* Answer-area letter size. Caps low (so a long no-separator word can shrink
-       to fit instead of forcing a horizontal scroll) and high (so short words
-       stay big and readable). Driven by viewport width via clamp(). fitAnswerArea
-       shrinks BOTH --answer-font and --slot-size together (a slot is a fixed-width
-       box, so shrinking the font alone never relieves the row width). */
-    --answer-font: clamp(1rem, 5vw, 1.7rem);
+    --answer-font: clamp(1.1rem, 5.5vw, 1.8rem);
+    /* Child-friendly color palette */
+    --color-primary: #4f46e5;
+    --color-success: #10b981;
+    --color-danger: #ef4444;
+    --color-warning: #f59e0b;
+    --color-accent: #8b5cf6;
+    --color-surface: rgba(255, 255, 255, 0.95);
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.15);
+    --touch-min: 48px; /* Minimum touch target for children */
 }
 
 /* A run of letters that must stay on ONE line (e.g. "danced"). Separators such
@@ -40,6 +44,7 @@ body {
     padding: 0;
     width: 100vw;
     height: 100vh;
+    height: 100dvh; /* Dynamic viewport for mobile browsers */
     overflow: hidden;
     background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
     font-family: 'Fredoka', sans-serif;
@@ -47,6 +52,8 @@ body {
     -webkit-user-select: none;
     user-select: none;
     color: white;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
 }
 
 #gameCanvas {
@@ -70,6 +77,9 @@ body {
     z-index: 20;
     -webkit-backdrop-filter: blur(5px);
     backdrop-filter: blur(5px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
 .hidden {
@@ -204,21 +214,29 @@ body {
 
 /* Components */
 .game-btn {
-    background: #FF8A65;
-    border-bottom: 4px solid #D84315;
+    background: linear-gradient(180deg, #FF8A65 0%, #F4511E 100%);
+    border-bottom: 4px solid #BF360C;
     color: white;
-    border-radius: 12px;
-    padding: 12px 24px;
-    font-weight: bold;
+    border-radius: 14px;
+    padding: 14px 26px;
+    font-weight: 700;
     font-size: 1.2rem;
     cursor: pointer;
     transition: transform 0.1s;
     pointer-events: auto;
+    min-height: var(--touch-min);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    touch-action: manipulation;
 }
 
 .game-btn:active {
-    transform: translateY(4px);
-    border-bottom-width: 0;
+    transform: translateY(3px);
+    border-bottom-width: 1px;
 }
 
 .card {
@@ -269,22 +287,26 @@ body {
 
 /* Minigames */
 .minigame-container {
-    background: linear-gradient(135deg, #E0F7FA 0%, #E1BEE7 100%);
-    width: min(95vw, 800px);
-    border-radius: 20px;
+    background: linear-gradient(135deg, #E8F5E9 0%, #E3F2FD 50%, #F3E5F5 100%);
+    width: min(96vw, 800px);
+    max-height: 96vh;
+    max-height: 96dvh;
+    border-radius: var(--radius-xl);
     padding: var(--container-padding);
-    color: #475569;
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+    color: #1e293b;
+    box-shadow: var(--shadow-card), 0 0 40px rgba(99, 102, 241, 0.15);
     position: relative;
     pointer-events: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Study Mode Utility Classes */
 .study-slot {
     width: var(--slot-size);
     height: var(--slot-size);
-    border: 2px solid white;
-    border-radius: 8px;
+    border: 2.5px solid rgba(255, 255, 255, 0.6);
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -294,43 +316,73 @@ body {
     color: white;
     -webkit-user-select: none;
     user-select: none;
-    transition: all 0.2s;
+    transition: all 0.15s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.study-slot:active {
+    transform: scale(0.95);
 }
 
 .study-letter-btn {
     width: var(--tile-size);
     height: var(--tile-size);
-    background: #fbbf24;
+    min-width: var(--touch-min);
+    min-height: var(--touch-min);
+    background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
     border-radius: 12px;
-    color: black;
-    font-weight: bold;
+    color: #1a1a2e;
+    font-weight: 700;
     font-size: var(--font-lg);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.1s, background-color 0.2s;
+    box-shadow: 0 4px 0 #d97706, 0 6px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.1s, box-shadow 0.15s;
     display: flex;
     align-items: center;
     justify-content: center;
+    border: none;
+    cursor: pointer;
 }
 
 .study-letter-btn:hover {
-    background: #f59e0b;
-    transform: scale(1.05);
+    background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #b45309, 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.study-letter-btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #d97706, 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .study-key {
     width: var(--key-size);
-    height: clamp(40px, 12vw, 56px);
-    background: #334155;
-    border-radius: 8px;
+    height: clamp(44px, 13vw, 58px);
+    min-width: var(--touch-min);
+    min-height: var(--touch-min);
+    background: linear-gradient(180deg, #475569 0%, #334155 100%);
+    border-radius: 10px;
     color: white;
-    font-weight: bold;
+    font-weight: 700;
     font-size: var(--font-md);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.2s;
+    box-shadow: 0 3px 0 #1e293b, 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.1s, background-color 0.15s;
+    border: none;
+    cursor: pointer;
 }
 
 .study-key:hover {
-    background: #475569;
+    background: linear-gradient(180deg, #64748b 0%, #475569 100%);
+}
+
+.study-key:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #1e293b;
+}
+
+.study-key.used {
+    opacity: 0.3;
+    pointer-events: none;
+    box-shadow: none;
 }
 
 .sentence-slot {
@@ -338,23 +390,44 @@ body {
     align-items: center;
     justify-content: center;
     min-width: 70px;
-    min-height: 44px;
-    border: 2px dashed #94a3b8;
-    border-radius: 8px;
-    padding: 0 10px;
-    background-color: rgba(255, 255, 255, 0.06);
+    min-height: var(--touch-min);
+    border: 2.5px dashed #94a3b8;
+    border-radius: 10px;
+    padding: 4px 10px;
+    background-color: rgba(255, 255, 255, 0.08);
     transition: all 0.2s;
 }
 
+.sentence-slot:empty {
+    background-color: rgba(99, 102, 241, 0.08);
+}
+
 .study-word-tile {
-    background: #fbbf24;
-    color: black;
-    padding: clamp(6px, 1.5vw, 10px) clamp(12px, 3vw, 20px);
-    border-radius: 8px;
-    font-weight: bold;
+    background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+    color: #1a1a2e;
+    padding: clamp(8px, 2vw, 12px) clamp(14px, 3.5vw, 22px);
+    border-radius: 10px;
+    font-weight: 700;
     font-size: var(--font-md);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 3px 0 #d97706, 0 4px 10px rgba(0, 0, 0, 0.12);
     transition: transform 0.1s;
+    min-height: var(--touch-min);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+}
+
+.study-word-tile:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #d97706;
+}
+
+.study-word-tile.placed {
+    background: linear-gradient(180deg, #818cf8 0%, #6366f1 100%);
+    color: white;
+    box-shadow: 0 3px 0 #4338ca, 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .study-text-sm {
@@ -380,6 +453,8 @@ body {
 .letter-bubble {
     width: var(--tile-size);
     height: var(--tile-size);
+    min-width: var(--touch-min);
+    min-height: var(--touch-min);
     background: white;
     border-radius: 50%;
     display: flex;
@@ -387,15 +462,15 @@ body {
     align-items: center;
     font-size: var(--font-lg);
     font-weight: bold;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 0 #cbd5e1, 0 6px 12px rgba(0, 0, 0, 0.1);
     cursor: pointer;
-    border-bottom: 3px solid #ccc;
-    transition: transform 0.1s, opacity 0.1s;
+    border-bottom: none;
+    transition: transform 0.1s, opacity 0.15s;
 }
 
 .letter-bubble:active {
-    transform: translateY(2px);
-    border-bottom-width: 1px;
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #cbd5e1;
 }
 
 /* Once a palette bubble has been placed, dim & disable it (it stays visible
@@ -410,24 +485,27 @@ body {
 
 /* Improved Draggable Styles */
 .draggable {
-    background: #FF8A65;
+    background: linear-gradient(180deg, #FF8A65 0%, #F4511E 100%);
     color: white;
-    padding: 10px 20px;
+    padding: 10px 18px;
     border-radius: 12px;
     cursor: pointer;
     font-weight: bold;
-    font-size: 1.1rem;
-    border-bottom: 4px solid #D84315;
-    display: inline-block;
-    margin: 6px;
+    font-size: var(--font-md);
+    border-bottom: 4px solid #BF360C;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--touch-min);
+    margin: 4px;
     touch-action: manipulation;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     transition: transform 0.1s;
 }
 
 .draggable:active {
-    transform: translateY(2px);
-    border-bottom-width: 2px;
+    transform: translateY(3px);
+    border-bottom-width: 1px;
 }
 
 .draggable.correct {
@@ -448,14 +526,16 @@ body {
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    min-width: 90px;
-    height: 50px;
+    min-width: 80px;
+    min-height: var(--touch-min);
+    height: auto;
     border-bottom: 3px dashed #94a3b8;
-    margin: 0 5px;
+    margin: 0 4px;
     vertical-align: middle;
     transition: all 0.2s;
-    background-color: rgba(255, 255, 255, 0.5);
-    border-radius: 8px;
+    background-color: rgba(99, 102, 241, 0.08);
+    border-radius: 10px;
+    padding: 4px 6px;
 }
 
 .drop-zone.filled {
@@ -469,12 +549,14 @@ body {
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
-    margin-bottom: 15px;
-    font-size: 1.4rem;
-    line-height: 1.8;
-    background: rgba(255, 255, 255, 0.6);
-    padding: 10px;
-    border-radius: 10px;
+    margin-bottom: 12px;
+    font-size: var(--font-lg);
+    line-height: 1.6;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 12px;
+    border-radius: 12px;
+    gap: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .floating {
@@ -553,19 +635,7 @@ body {
     color: #22c55e;
 }
 
-/* Translation Hints */
-.translation-hint {
-    font-size: clamp(1rem, 3.5vw, 1.4rem);
-    color: #a78bfa;
-    background: rgba(139, 92, 246, 0.1);
-    border: 1px solid rgba(139, 92, 246, 0.25);
-    border-radius: 8px;
-    padding: 6px 16px;
-    margin: 4px auto 8px;
-    text-align: center;
-    max-width: 90%;
-    animation: fadeIn 0.3s ease-in;
-}
+/* Translation Hints - base styles defined in responsive section below */
 
 .minigame-container .translation-hint {
     color: #7c3aed;
@@ -958,4 +1028,374 @@ body.kid-friendly .drop-zone {
 body.kid-friendly .sentence-row {
     background: rgba(255, 255, 255, 0.8) !important;
     border: 2px solid #ffe0b2 !important;
+}
+
+body.kid-friendly .audio-play-btn {
+    background: linear-gradient(180deg, #ff7043 0%, #d84315 100%) !important;
+    box-shadow: 0 4px 0 #bf360c, 0 6px 16px rgba(216, 67, 21, 0.3) !important;
+}
+
+body.kid-friendly .study-word-tile.placed {
+    background: linear-gradient(180deg, #ff7043 0%, #e64a19 100%) !important;
+    color: white !important;
+    box-shadow: 0 3px 0 #bf360c !important;
+}
+
+body.kid-friendly .translation-hint {
+    color: #e65100 !important;
+    background: rgba(255, 152, 0, 0.1) !important;
+    border-color: rgba(255, 152, 0, 0.3) !important;
+}
+
+/* ========== STUDY MODE LAYOUT ENHANCEMENTS ========== */
+#studyModeOverlay {
+    padding: 12px 8px;
+    justify-content: flex-start;
+    padding-top: env(safe-area-inset-top, 12px);
+}
+
+#studyModeOverlay #study-title {
+    font-size: var(--font-xl);
+    margin-bottom: 2px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+#studyModeOverlay #study-instruction {
+    font-size: var(--font-md);
+    margin-bottom: 12px;
+    opacity: 0.85;
+}
+
+#study-game-area {
+    padding: 0 4px;
+    max-width: 100%;
+}
+
+/* Progress indicator for study rounds */
+.study-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+
+.study-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #34d399);
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+
+/* Audio play button — larger for small hands */
+.audio-play-btn {
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+    min-height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    font-size: 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    box-shadow: 0 4px 0 #1d4ed8, 0 6px 16px rgba(37, 99, 235, 0.3);
+    cursor: pointer;
+    transition: transform 0.1s;
+    touch-action: manipulation;
+}
+
+.audio-play-btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #1d4ed8;
+}
+
+/* Match pair rows — study mode Round F & game mode */
+.match-pair-row {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 12px;
+    padding: 6px;
+    transition: all 0.2s;
+}
+
+.match-pair-row .sentence-a {
+    font-size: var(--font-md);
+    line-height: 1.4;
+    padding: 10px 12px;
+    border-radius: 10px;
+}
+
+.match-pair-row .sentence-b-slot,
+.match-pair-row .gm-sentence-b-slot {
+    font-size: var(--font-md);
+    min-height: var(--touch-min);
+    padding: 10px 12px;
+    border-radius: 10px;
+}
+
+/* Sentence B tiles — larger tap targets */
+.sentence-b-tile,
+.gm-sentence-b-tile {
+    min-height: var(--touch-min);
+    padding: 10px 14px;
+    font-size: var(--font-sm);
+    border-radius: 10px;
+    transition: all 0.15s;
+}
+
+.sentence-b-tile:active,
+.gm-sentence-b-tile:active {
+    transform: scale(0.95);
+}
+
+/* ========== MOBILE-FIRST RESPONSIVE RULES ========== */
+
+/* Small phones (up to 380px) */
+@media (max-width: 380px) {
+    :root {
+        --slot-size: clamp(34px, 10vw, 42px);
+        --tile-size: clamp(38px, 11vw, 44px);
+        --key-size: clamp(34px, 10vw, 42px);
+        --font-sm: 0.8rem;
+        --font-md: 0.9rem;
+        --gap-sm: 4px;
+        --gap-md: 8px;
+    }
+    
+    .game-btn {
+        padding: 12px 18px;
+        font-size: 1rem;
+    }
+    
+    .minigame-container {
+        padding: 10px;
+        border-radius: 14px;
+    }
+    
+    .sentence-row {
+        font-size: 1rem;
+        padding: 8px;
+    }
+}
+
+/* Standard phones (381px-480px) — PRIMARY TARGET */
+@media (max-width: 480px) {
+    #studyModeOverlay {
+        padding: 10px 6px;
+        padding-top: max(10px, env(safe-area-inset-top));
+    }
+    
+    #studyModeOverlay #study-title {
+        font-size: 1.2rem;
+    }
+    
+    .minigame-container {
+        width: 98vw;
+        padding: 12px 10px;
+        border-radius: 16px;
+    }
+    
+    .match-pair-row {
+        flex-direction: column !important;
+    }
+    
+    .sentence-row {
+        padding: 10px 8px;
+        gap: 3px;
+    }
+    
+    .drop-zone {
+        min-width: 60px;
+        margin: 0 2px;
+    }
+}
+
+/* Tablets and larger phones in landscape */
+@media (min-width: 768px) {
+    :root {
+        --slot-size: clamp(44px, 5vw, 56px);
+        --tile-size: clamp(48px, 5.5vw, 60px);
+        --key-size: clamp(44px, 5vw, 54px);
+    }
+    
+    #studyModeOverlay {
+        padding: 20px 24px;
+    }
+    
+    .minigame-container {
+        padding: 24px;
+    }
+    
+    .match-pair-row {
+        flex-direction: row !important;
+    }
+}
+
+/* Landscape orientation — reduce vertical space usage */
+@media (orientation: landscape) and (max-height: 500px) {
+    #studyModeOverlay {
+        padding: 6px 12px;
+    }
+    
+    #studyModeOverlay #study-title {
+        font-size: 1rem;
+        margin-bottom: 0;
+    }
+    
+    #studyModeOverlay #study-instruction {
+        font-size: 0.85rem;
+        margin-bottom: 6px;
+    }
+    
+    .minigame-container {
+        max-height: 94vh;
+    }
+    
+    .audio-play-btn {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        min-height: 48px;
+        font-size: 1.2rem;
+    }
+    
+    .game-btn {
+        padding: 10px 20px;
+    }
+}
+
+/* ========== GAME MODE MINIGAME LAYOUT IMPROVEMENTS ========== */
+
+/* Spelling Game (Word Scramble in game mode) */
+#spellingGame .minigame-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+#spelling-input-display {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2.5px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 10px 8px;
+    min-height: 56px;
+}
+
+#spelling-keyboard {
+    gap: var(--gap-sm) !important;
+}
+
+/* Word Rec Game */
+#wordRecGame .minigame-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+#rec-options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--gap-sm);
+    width: 100%;
+}
+
+#rec-options .game-btn {
+    flex: 1 1 calc(50% - var(--gap-sm));
+    max-width: calc(50% - var(--gap-sm));
+    min-height: 56px;
+    font-size: var(--font-lg);
+    padding: 14px 12px;
+    text-align: center;
+    word-break: break-word;
+}
+
+@media (max-width: 480px) {
+    #rec-options .game-btn {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+}
+
+/* Grammar Game (Sentence Scramble in game mode) */
+#grammarGame .minigame-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#word-dock {
+    background: rgba(241, 245, 249, 0.9);
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 10px;
+    min-height: 60px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap-sm);
+    justify-content: center;
+    align-items: center;
+}
+
+/* Sentence Match Game */
+#sentenceMatchGame .minigame-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#sentencematch-pairs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#sentencematch-dock {
+    background: rgba(241, 245, 249, 0.9);
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 10px;
+    min-height: 60px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap-sm);
+    justify-content: center;
+    align-items: center;
+}
+
+/* Timer bars — more visible */
+#wordRecGame .bg-gray-300,
+#spellingGame .bg-gray-300 {
+    height: 8px !important;
+    border-radius: 4px;
+}
+
+/* Vocab image in rounds */
+.vocab-image {
+    width: clamp(80px, 25vw, 140px);
+    height: clamp(80px, 25vw, 140px);
+    object-fit: contain;
+    border-radius: 12px;
+    border: 2px solid rgba(148, 163, 184, 0.4);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Translation hint improvements */
+.translation-hint {
+    font-size: var(--font-md);
+    color: #a78bfa;
+    background: rgba(139, 92, 246, 0.12);
+    border: 1.5px solid rgba(139, 92, 246, 0.3);
+    border-radius: 10px;
+    padding: 8px 16px;
+    margin: 4px auto 8px;
+    text-align: center;
+    max-width: 95%;
+    animation: fadeIn 0.3s ease-in;
+    font-weight: 500;
 }

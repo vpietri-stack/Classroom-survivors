@@ -1,15 +1,22 @@
-// One-off tool: strip baked-in checkerboard backgrounds from AI-generated
-// sprite sheets and save true-alpha PNGs. Uses headless Chrome canvas.
+// Tool: strip baked-in checkerboard backgrounds from AI-generated sprite
+// sheets and save true-alpha PNGs. Uses headless Chrome canvas.
+// v2: robust predicate flood fill (low-saturation + bright) instead of exact
+// tone matching — kills noisy/off-tone checker squares. Bold dark character
+// outlines stop the flood, protecting interior grays/whites (eyes, buckets).
 const { chromium } = require('playwright-core');
 const fs = require('fs');
 const path = require('path');
 const EXE = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 
+const CACHE = 'C:/Users/vpiet/AppData/Roaming/Qoder/SharedClientCache/cache/images/task-f36/';
 const JOBS = [
-    { in: 'sprites/td/anim/dropout.png', out: 'sprites/td/anim/dropout.png' },
-    { in: 'sprites/td/anim/backpack.png', out: 'sprites/td/anim/backpack.png' },
-    { in: 'sprites/td/anim/nerd.png', out: 'sprites/td/anim/nerd.png' },
-    { in: 'C:/Users/vpiet/AppData/Roaming/Qoder/SharedClientCache/cache/images/task-f36/Gemini_Generated_Image_2ltrox2ltrox2ltr-cb075e56.png', out: 'sprites/td/anim/pencil.png' }
+    { in: CACHE + 'dropout-9e8b6c8f.png', out: 'sprites/td/anim/dropout.png', mode: 'light' },
+    { in: CACHE + 'backpack-39c9bb25.png', out: 'sprites/td/anim/backpack.png', mode: 'light' },
+    { in: CACHE + 'bucket-e370896b.png', out: 'sprites/td/anim/nerd.png', mode: 'light' },
+    { in: CACHE + 'Gemini_Generated_Image_2ltrox2ltrox2ltr-cb075e56.png', out: 'sprites/td/anim/pencil.png', mode: 'light' },
+    // Old static sheets: generated on BLACK backgrounds
+    { in: 'sprites/td/towers.png', out: 'sprites/td/towers.png', mode: 'dark' },
+    { in: 'sprites/td/enemies.png', out: 'sprites/td/enemies.png', mode: 'dark' }
 ];
 
 (async () => {
@@ -20,7 +27,7 @@ const JOBS = [
         const buf = fs.readFileSync(job.in);
         const dataUrl = 'data:image/png;base64,' + buf.toString('base64');
 
-        const result = await page.evaluate(async (src) => {
+        const result = await page.evaluate(async ({ src, mode }) => {
             const img = new Image();
             await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = src; });
             const W = img.width, H = img.height;
@@ -31,65 +38,53 @@ const JOBS = [
             const id = ctx.getImageData(0, 0, W, H);
             const d = id.data;
 
-            // Sample checkerboard tones from corners + scan for second tone
-            const px = (x, y) => { const i = (y * W + x) * 4; return [d[i], d[i + 1], d[i + 2]]; };
-            const tones = [];
-            const addTone = (c) => {
-                for (const t of tones) if (Math.abs(t[0] - c[0]) + Math.abs(t[1] - c[1]) + Math.abs(t[2] - c[2]) < 30) return;
-                tones.push(c);
-            };
-            // Sample along all 4 borders every 3px to catch both checker tones
-            for (let x = 0; x < W; x += 3) { addTone(px(x, 0)); addTone(px(x, H - 1)); }
-            for (let y = 0; y < H; y += 3) { addTone(px(0, y)); addTone(px(W - 1, y)); }
-            // Keep only light-gray-ish tones (checkerboard is light gray/white)
-            const bgTones = tones.filter(c => c[0] > 150 && c[1] > 150 && c[2] > 150 &&
-                Math.abs(c[0] - c[1]) < 18 && Math.abs(c[1] - c[2]) < 18 && Math.abs(c[0] - c[2]) < 18);
-
-            const TOL = 14;
-            const isBg = (i) => {
-                const r = d[i], g = d[i + 1], b = d[i + 2];
-                for (const t of bgTones) {
-                    if (Math.abs(r - t[0]) <= TOL && Math.abs(g - t[1]) <= TOL && Math.abs(b - t[2]) <= TOL) return true;
-                }
-                return false;
-            };
+            // Background predicate:
+            // 'light' = checkerboard (near-gray, bright) — Nano Banana sheets
+            // 'dark'  = solid black bg — old static ImageGen sheets (character
+            //           outlines are ~#333 = 51, so cutoff below that)
+            const isBg = mode === 'dark'
+                ? (i) => { const mx = Math.max(d[i], d[i + 1], d[i + 2]); return mx <= 40; }
+                : (i) => {
+                    const r = d[i], g = d[i + 1], b = d[i + 2];
+                    const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+                    return (mx - mn) <= 26 && mn >= 95;
+                };
 
             // BFS flood fill from all border pixels
             const visited = new Uint8Array(W * H);
-            const stack = [];
-            for (let x = 0; x < W; x++) { stack.push(x, 0, x, H - 1); }
-            for (let y = 0; y < H; y++) { stack.push(0, y, W - 1, y); }
             const queue = [];
-            for (let k = 0; k < stack.length; k += 2) {
-                const x = stack[k], y = stack[k + 1];
+            const trySeed = (x, y) => {
                 const p = y * W + x;
                 if (!visited[p] && isBg(p * 4)) { visited[p] = 1; queue.push(p); }
-            }
+            };
+            for (let x = 0; x < W; x++) { trySeed(x, 0); trySeed(x, H - 1); }
+            for (let y = 0; y < H; y++) { trySeed(0, y); trySeed(W - 1, y); }
             let head = 0;
             while (head < queue.length) {
                 const p = queue[head++];
                 const x = p % W, y = (p / W) | 0;
-                const neigh = [];
-                if (x > 0) neigh.push(p - 1);
-                if (x < W - 1) neigh.push(p + 1);
-                if (y > 0) neigh.push(p - W);
-                if (y < H - 1) neigh.push(p + W);
-                for (const q of neigh) {
-                    if (!visited[q] && isBg(q * 4)) { visited[q] = 1; queue.push(q); }
-                }
+                if (x > 0) { const q = p - 1; if (!visited[q] && isBg(q * 4)) { visited[q] = 1; queue.push(q); } }
+                if (x < W - 1) { const q = p + 1; if (!visited[q] && isBg(q * 4)) { visited[q] = 1; queue.push(q); } }
+                if (y > 0) { const q = p - W; if (!visited[q] && isBg(q * 4)) { visited[q] = 1; queue.push(q); } }
+                if (y < H - 1) { const q = p + W; if (!visited[q] && isBg(q * 4)) { visited[q] = 1; queue.push(q); } }
             }
             // Apply transparency
             let removed = 0;
             for (let p = 0; p < W * H; p++) {
                 if (visited[p]) { d[p * 4 + 3] = 0; removed++; }
             }
+            // Residual check: count remaining opaque "checker-like" pixels
+            let residual = 0;
+            for (let p = 0; p < W * H; p++) {
+                if (!visited[p] && isBg(p * 4)) residual++;
+            }
             ctx.putImageData(id, 0, 0);
-            return { W, H, tones: bgTones, removedPct: Math.round(removed / (W * H) * 100), url: cv.toDataURL('image/png') };
-        }, dataUrl);
+            return { W, H, removedPct: Math.round(removed / (W * H) * 100), residualPct: (residual / (W * H) * 100).toFixed(2), url: cv.toDataURL('image/png') };
+        }, { src: dataUrl, mode: job.mode });
 
         const outBuf = Buffer.from(result.url.split(',')[1], 'base64');
         fs.writeFileSync(job.out, outBuf);
-        console.log(path.basename(job.out), `${result.W}x${result.H}`, `bgTones=${result.tones.length}`, `removed=${result.removedPct}%`, `-> ${job.out}`);
+        console.log(path.basename(job.out), `${result.W}x${result.H}`, `removed=${result.removedPct}%`, `residualGrayish=${result.residualPct}% (incl. legit character pixels)`, `-> ${job.out}`);
     }
 
     await browser.close();

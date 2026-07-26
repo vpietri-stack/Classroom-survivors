@@ -285,6 +285,7 @@ class TowerDefenseScene extends Phaser.Scene {
         this.selectedTower = null;  // tower type key selected from bar
         this.eslSlowActive = false;
         this.eslSlowUntil = 0;
+        this.hitstopUntil = 0;
         this.spawnAccum = 0;
         this.waveTimer = 0;
 
@@ -615,7 +616,8 @@ class TowerDefenseScene extends Phaser.Scene {
             jump: def.jump, enrage: def.enrage, enraged: false,
             hasJumped: false, dead: false, frame: 0, frameTimer: 0, lastDrawnFrame: -1,
             slowUntil: 0, gfx, attacking: null,
-            hasAnim, animState: 'walk', dying: false // track current animation state for state-driven switching
+            hasAnim, animState: 'walk', dying: false, // track current animation state for state-driven switching
+            baseScaleX: gfx.scaleX, baseScaleY: gfx.scaleY, hitKickAt: 0 // procedural motion baseline
         };
 
         // HP bar
@@ -635,8 +637,8 @@ class TowerDefenseScene extends Phaser.Scene {
             if (e.dead) { this.removeEnemy(i); continue; }
             if (e.dying) continue; // death animation playing, skip logic
             // School chompers are pinned at the wall; bite timer handles damage,
-            // attack anim is already playing — skip movement/anim/tower logic entirely
-            if (e.attackingSchool) { this.drawEnemyHpBar(e); continue; }
+            // attack anim is already playing — apply motion + hp bar only
+            if (e.attackingSchool) { this.applyEnemyMotion(e); this.drawEnemyHpBar(e); continue; }
 
             // Animation state machine (for animated sprites)
             if (e.hasAnim) {
@@ -660,7 +662,6 @@ class TowerDefenseScene extends Phaser.Scene {
             // Enrage (librarian)
             if (e.enrage && !e.enraged && e.hp < e.maxHp * 0.3) {
                 e.enraged = true;
-                speed *= 2;
                 this.spawnCoinPopup(e.x, e.y - 15, '!', 0xff0000);
             }
             if (e.enraged) speed *= 2;
@@ -684,6 +685,15 @@ class TowerDefenseScene extends Phaser.Scene {
             }
 
             if (e.attacking) {
+                // Bite VFX + tower flinch, synced roughly with the chomp cycle
+                if (!e.lastBiteFx || now - e.lastBiteFx > 550) {
+                    e.lastBiteFx = now;
+                    const tw = e.attacking;
+                    this.spawnBiteVFX(tw.x, tw.y - this.cellH * 0.15);
+                    if (tw.gfx && tw.gfx.scene) {
+                        this.tweens.add({ targets: tw.gfx, angle: { from: -4, to: 4 }, duration: 60, yoyo: true, repeat: 1, onComplete: () => { if (tw.gfx && tw.gfx.scene) tw.gfx.setAngle(0); } });
+                    }
+                }
                 // Deal damage to the tower being eaten
                 if (e.attacking.hp !== undefined && e.attacking.hp > 0) {
                     e.attacking.hp -= e.dmg * (dt / 1000) * 3;
@@ -700,6 +710,11 @@ class TowerDefenseScene extends Phaser.Scene {
             } else {
                 // Move downward
                 e.y += speed * (dt / 1000);
+                // Afterimage trail for fast movers (Bully sprint, enraged Librarian)
+                if (speed >= 40 && (!e.lastGhostAt || now - e.lastGhostAt > 90)) {
+                    e.lastGhostAt = now;
+                    this.spawnAfterimage(e);
+                }
             }
 
             // Check homework trap
@@ -715,12 +730,8 @@ class TowerDefenseScene extends Phaser.Scene {
                 }
             }
 
-            // Update position
-            e.gfx.setPosition(e.x, e.y);
-            // Walk sway (only for non-animated static sprites)
-            if (!e.hasAnim) {
-                e.gfx.rotation = Math.sin(this.time.now / 200 + e.col * 2) * 0.05;
-            }
+            // Update position + procedural secondary motion
+            this.applyEnemyMotion(e);
             this.drawEnemyHpBar(e);
 
             // Reached school? (skip if already attacking school)
@@ -728,6 +739,55 @@ class TowerDefenseScene extends Phaser.Scene {
                 this.enemyReachSchool(e, i);
             }
         }
+    }
+
+    // Procedural "fake skeletal" secondary motion applied every tick on top
+    // of the frame animation: walk bob + squash/stretch, attack lunge, hit
+    // knockback pop. Cheap sine math — no perf cost on low-end devices.
+    applyEnemyMotion(e) {
+        const t = this.time.now;
+        if (!e.hasAnim) {
+            // Legacy sway for static sprites
+            e.gfx.setPosition(e.x, e.y);
+            e.gfx.rotation = Math.sin(t / 200 + e.col * 2) * 0.05;
+            return;
+        }
+        let oy = 0, rot = 0, sx = 1, sy = 1;
+        if (e.animState === 'walk') {
+            const phase = t / 260 + e.col * 1.7;
+            rot = Math.sin(phase) * 0.045;              // shamble sway
+            const step = Math.abs(Math.sin(phase));     // foot-step rhythm
+            oy = -step * this.cellH * 0.035;            // bounce on each step
+            sy = 0.985 + step * 0.045;                  // stretch mid-step
+            sx = 2 - sy;                                // preserve volume
+            // Dust puff at each foot contact (half sway cycle = one step)
+            const cyc = Math.floor(phase / Math.PI);
+            if (e.lastStepCycle === undefined) e.lastStepCycle = cyc;
+            else if (cyc !== e.lastStepCycle) {
+                e.lastStepCycle = cyc;
+                this.spawnDustPuff(e.x + Phaser.Math.Between(-4, 4), e.y + this.cellH * 0.38);
+            }
+        } else if (e.animState === 'attack') {
+            const lunge = Math.max(0, Math.sin(t / 100 + e.col)); // chomp rhythm
+            oy = lunge * this.cellH * 0.055;            // push into the bite
+            rot = lunge * 0.07;                         // lean forward
+            sx = 1 + lunge * 0.06;                      // squash on impact
+            sy = 1 - lunge * 0.05;
+        }
+        // Hit knockback: quick upward pop + squash, decays over 150ms
+        if (e.hitKickAt) {
+            const k = 1 - (t - e.hitKickAt) / 150;
+            if (k > 0) {
+                oy -= k * this.cellH * 0.06;
+                sx += k * 0.07;
+                sy -= k * 0.05;
+            } else {
+                e.hitKickAt = 0;
+            }
+        }
+        e.gfx.setPosition(e.x, e.y + oy);
+        e.gfx.rotation = rot;
+        e.gfx.setScale(e.baseScaleX * sx, e.baseScaleY * sy);
     }
 
     drawEnemyHpBar(e) {
@@ -755,6 +815,7 @@ class TowerDefenseScene extends Phaser.Scene {
                 callback: () => {
                     if (e.dead || e.dying) { e.schoolChompTimer.remove(); return; }
                     e.schoolBites++;
+                    this.spawnBiteVFX(e.x, this.schoolY + 4);
                     this.baseHp -= e.dmg;
                     this.cameras.main.shake(100, 0.003);
                     this.drawSchoolHp();
@@ -813,12 +874,14 @@ class TowerDefenseScene extends Phaser.Scene {
             this.score += e.coins * 10;
             this.zombiesKilled++;
             this.tdBeep('hit');
+            this.hitstop(60); // impact freeze on kill
             this.spawnCoinPopup(e.x, e.y - 10, '+' + e.coins, 0xffd700);
             this.refreshHud();
             // Play death animation if animated, else particles + immediate dead
             if (e.hasAnim) {
                 e.dying = true;
                 e.animState = 'death';
+                e.gfx.clearTint();
                 e.gfx.play('td_anim_' + e.type + '_death');
                 // Death effect: scale down + fade for polished feel
                 this.tweens.add({
@@ -833,13 +896,30 @@ class TowerDefenseScene extends Phaser.Scene {
                 e.dead = true;
                 this.spawnDeathParticles(e.x, e.y, e.type);
             }
-        } else if (e.hp > 0 && e.hasAnim && !e.dying && e.animState !== 'hit') {
-            // Flash hit animation on animated enemies (brief interrupt)
-            e.animState = 'hit';
-            e.gfx.play('td_anim_' + e.type + '_hit');
-            this.time.delayedCall(250, () => {
-                if (!e.dead && !e.dying) e.animState = 'walk'; // will trigger state switch on next frame
+        } else if (e.hp > 0 && e.hasAnim && !e.dying) {
+            // White flash on every hit (PvZ-style feedback, never interrupts walk)
+            e.gfx.setTintFill(0xffffff);
+            e.hitKickAt = this.time.now; // knockback pop (applyEnemyMotion)
+            // Directional shove: pellet comes from below, push the zombie back up
+            if (!e.attackingSchool) e.y = Math.max(this.gridTop - 20, e.y - this.cellH * 0.05);
+            this.time.delayedCall(60, () => {
+                if (e.gfx && e.gfx.scene && !e.dying) e.gfx.clearTint();
             });
+            // Full hit-frame reaction at most once per 700ms so rapid fire
+            // doesn't freeze the walk cycle
+            const hitNow = this.time.now;
+            if (e.animState !== 'hit' && (!e.lastHitReact || hitNow - e.lastHitReact > 700)) {
+                e.lastHitReact = hitNow;
+                e.animState = 'hit';
+                e.gfx.play('td_anim_' + e.type + '_hit');
+                this.time.delayedCall(200, () => {
+                    if (e.dead || e.dying || !e.gfx || !e.gfx.scene) return;
+                    // Resume the correct animation explicitly (fixes freeze-on-hit)
+                    const next = (e.attacking || e.attackingSchool) ? 'attack' : 'walk';
+                    e.animState = next;
+                    e.gfx.play('td_anim_' + e.type + '_' + next);
+                });
+            }
         }
     }
 
@@ -994,6 +1074,7 @@ class TowerDefenseScene extends Phaser.Scene {
         }
         this.spawnExplosion(tower.x, tower.y, 0xff3333);
         this.cameras.main.shake(200, 0.008);
+        this.hitstop(90);
         this.tdBeep('hit');
         this.removeTower(tower);
     }
@@ -1004,6 +1085,7 @@ class TowerDefenseScene extends Phaser.Scene {
             if (e.dead || e.col !== tower.col) continue;
             this.damageEnemy(e, 9999, 0);
         }
+        this.hitstop(90);
         // Visual: fire column
         const gfx = this.add.graphics();
         gfx.setDepth(6);
@@ -1078,6 +1160,54 @@ class TowerDefenseScene extends Phaser.Scene {
         g.fillCircle(x, y, 8);
         this.fxLayer.add(g);
         this.tweens.add({ targets: g, scaleX: 3, scaleY: 3, alpha: 0, duration: 400, ease: 'Quad.out', onComplete: () => g.destroy() });
+    }
+
+    // ---------------------------------------------------------
+    // GAME-FEEL ("juice") HELPERS
+    // ---------------------------------------------------------
+    // Freeze the world briefly on meaty impacts (see update())
+    hitstop(ms) {
+        this.hitstopUntil = Math.max(this.hitstopUntil || 0, this.time.now + ms);
+    }
+
+    // Small dust cloud at a zombie's feet on each step
+    spawnDustPuff(x, y) {
+        const g = this.add.graphics(); g.setDepth(4);
+        g.fillStyle(0xcccccc, 0.3);
+        g.fillCircle(0, 0, 4); g.fillCircle(6, 2, 3); g.fillCircle(-6, 2, 3);
+        g.setPosition(x, y);
+        this.fxLayer.add(g);
+        this.tweens.add({ targets: g, y: y - 6, scaleX: 1.8, scaleY: 1.4, alpha: 0, duration: 350, ease: 'Quad.out', onComplete: () => g.destroy() });
+    }
+
+    // Bite flash + crumbs when a zombie chomps a tower or the school
+    spawnBiteVFX(x, y) {
+        const arc = this.add.graphics(); arc.setDepth(6);
+        arc.lineStyle(3, 0xffffff, 0.9);
+        arc.beginPath(); arc.arc(0, 0, 10, Math.PI * 0.15, Math.PI * 0.85); arc.strokePath();
+        arc.setPosition(x, y);
+        this.fxLayer.add(arc);
+        this.tweens.add({ targets: arc, scaleX: 1.6, scaleY: 1.6, alpha: 0, duration: 180, ease: 'Quad.out', onComplete: () => arc.destroy() });
+        for (let i = 0; i < 4; i++) {
+            const g = this.add.graphics(); g.setDepth(5);
+            g.fillStyle(0xb08050, 1); g.fillRect(-1.5, -1.5, 3, 3);
+            g.setPosition(x + Phaser.Math.Between(-8, 8), y);
+            this.fxLayer.add(g);
+            this.tweens.add({ targets: g, y: y + Phaser.Math.Between(10, 22), x: g.x + Phaser.Math.Between(-6, 6), alpha: 0, angle: Phaser.Math.Between(-90, 90), duration: 320, ease: 'Quad.in', onComplete: () => g.destroy() });
+        }
+    }
+
+    // Ghost copy trailing behind fast movers
+    spawnAfterimage(e) {
+        const src = e.gfx;
+        if (!src || !src.scene) return;
+        const ghost = this.add.image(src.x, src.y, src.texture.key, src.frame.name);
+        ghost.setDisplaySize(src.displayWidth, src.displayHeight);
+        ghost.rotation = src.rotation;
+        ghost.setAlpha(0.3);
+        ghost.setTint(0xaaddff);
+        this.enemyLayer.addAt(ghost, 0); // render behind live enemies
+        this.tweens.add({ targets: ghost, alpha: 0, duration: 220, onComplete: () => ghost.destroy() });
     }
 
     spawnDeathParticles(x, y, type) {
@@ -1166,6 +1296,10 @@ class TowerDefenseScene extends Phaser.Scene {
     // ---------------------------------------------------------
     update(time, dt) {
         if (this.gameOver) return;
+        // Hitstop: briefly slow the whole world on meaty impacts (game feel)
+        const inHitstop = this.hitstopUntil && time < this.hitstopUntil;
+        this.anims.globalTimeScale = inHitstop ? 0.06 : 1;
+        if (inHitstop) dt *= 0.06;
         this.elapsed += dt;
 
         // Arm mines
@@ -1197,6 +1331,7 @@ class TowerDefenseScene extends Phaser.Scene {
     endGame(won) {
         if (this.gameOver) return;
         this.gameOver = true;
+        this.anims.globalTimeScale = 1; // never leave hitstop stuck across scenes
         this.spawnTimer.paused = true;
         this.showSlowOverlay(false);
 

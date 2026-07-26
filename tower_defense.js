@@ -203,6 +203,105 @@ const TD_TOWER_ANIM_W = 400;
 const TD_TOWER_ANIM_H = 400;
 
 // ============================================================
+// BLOCK-PUPPET PROTOTYPE (Minecraft-style code-animated rig)
+// Evaluation build: every other dropout spawns as a block puppet
+// so puppet motion can be compared to frame-based sprites in the
+// same match. If approved, AI-drawn part images replace the blocks.
+// ============================================================
+const TD_PUPPET_TEST = true;
+
+class TDBlockPuppet {
+    constructor(scene, x, y, size) {
+        this.scene = scene;
+        const s = size / 32; this.s = s; // Minecraft-ish 32-unit body
+        this.container = scene.add.container(x, y);
+        const SKIN = 0x7ab648, SHIRT = 0x666a70, PANTS = 0x3b5a82, DARK = 0x22201d;
+        const stroke = Math.max(1, s * 0.8);
+        const R = (px, py, w, h, c) => {
+            const r = scene.add.rectangle(px, py, w, h, c).setOrigin(0.5, 0);
+            r.setStrokeStyle(stroke, DARK);
+            this.container.add(r);
+            return r;
+        };
+        // Order matters for overlap: legs under torso, arms over torso
+        this.legL = R(-2 * s, 4 * s, 4 * s, 12 * s, PANTS);
+        this.legR = R(2 * s, 4 * s, 4 * s, 12 * s, PANTS);
+        this.torso = R(0, -8 * s, 8 * s, 12.5 * s, SHIRT);
+        this.armL = R(-5.6 * s, -8 * s, 3.5 * s, 12 * s, SKIN);
+        this.armR = R(5.6 * s, -8 * s, 3.5 * s, 12 * s, SKIN);
+        // Head group pivots at the neck
+        this.head = scene.add.container(0, -8 * s);
+        const skull = scene.add.rectangle(0, -4.5 * s, 9 * s, 8.5 * s, SKIN).setOrigin(0.5, 0.5);
+        skull.setStrokeStyle(stroke, DARK);
+        const eyeL = scene.add.rectangle(-2 * s, -5.5 * s, 1.8 * s, 1.8 * s, 0x111111);
+        const eyeR = scene.add.rectangle(2 * s, -5.5 * s, 1.8 * s, 1.8 * s, 0x111111);
+        const mouth = scene.add.rectangle(0, -2.4 * s, 3.2 * s, 1.3 * s, 0x111111);
+        this.head.add([skull, eyeL, eyeR, mouth]);
+        this.container.add(this.head);
+        this.parts = [this.legL, this.legR, this.torso, this.armL, this.armR];
+        this.fills = this.parts.map(p => p.fillColor);
+        this.dead = false;
+    }
+
+    // Code-driven animation — pure sine waves, Minecraft style
+    update(t, state) {
+        if (this.dead) return;
+        if (state === 'attack') {
+            // Arms raised overhead, chopping down in a bite rhythm
+            const chop = Math.sin(t / 80);
+            this.armL.rotation = -(2.3 + chop * 0.4);
+            this.armR.rotation = 2.3 + chop * 0.4;
+            this.legL.rotation = 0.08;
+            this.legR.rotation = -0.08;
+            this.head.rotation = chop * 0.14;           // aggressive nodding
+            this.torso.rotation = chop * 0.05;
+        } else {
+            // Walk: opposite-phase limb swing + head/torso wobble
+            const sw = Math.sin(t / 170);
+            this.armL.rotation = sw * 0.7;
+            this.armR.rotation = -sw * 0.7;
+            this.legL.rotation = -sw * 0.55;
+            this.legR.rotation = sw * 0.55;
+            this.head.rotation = Math.sin(t / 340) * 0.08;
+            this.torso.rotation = Math.sin(t / 340) * 0.03;
+        }
+    }
+
+    // White hit flash (shapes use fillStyle, not tint)
+    flash() {
+        this.parts.forEach(p => p.setFillStyle(0xffffff));
+        this.scene.time.delayedCall(70, () => {
+            if (this.dead) return;
+            this.parts.forEach((p, i) => p.setFillStyle(this.fills[i]));
+        });
+    }
+
+    // Death: the puppet falls apart — pieces scatter and fade
+    die(onDone) {
+        this.dead = true;
+        const scene = this.scene;
+        // Head pops UP first, then everything tumbles
+        scene.tweens.add({
+            targets: this.head,
+            y: this.head.y - 26, x: this.head.x + Phaser.Math.Between(-14, 14),
+            rotation: Phaser.Math.FloatBetween(-2.5, 2.5), alpha: 0,
+            duration: 620, ease: 'Quad.in'
+        });
+        this.parts.forEach((p, i) => {
+            scene.tweens.add({
+                targets: p,
+                x: p.x + Phaser.Math.Between(-26, 26),
+                y: p.y + Phaser.Math.Between(6, 34),
+                rotation: Phaser.Math.FloatBetween(-3, 3),
+                alpha: 0,
+                duration: 550, ease: 'Quad.in', delay: 40 + i * 35
+            });
+        });
+        scene.time.delayedCall(780, onDone);
+    }
+}
+
+// ============================================================
 // MAIN SCENE
 // ============================================================
 class TowerDefenseScene extends Phaser.Scene {
@@ -595,14 +694,24 @@ class TowerDefenseScene extends Phaser.Scene {
 
         // Use animated sprite if available, else static fallback
         let gfx;
-        const hasAnim = TD_ANIM_ENEMIES.includes(typeKey);
-        if (hasAnim) {
+        let puppet = null;
+        let hasAnim = TD_ANIM_ENEMIES.includes(typeKey);
+        // PROTOTYPE: alternate dropouts spawn as block puppets for evaluation
+        if (TD_PUPPET_TEST && typeKey === 'dropout') {
+            this._puppetAlt = !this._puppetAlt;
+            if (this._puppetAlt) {
+                puppet = new TDBlockPuppet(this, x, y, this.cellH * 0.85);
+                gfx = puppet.container;
+                hasAnim = false;
+            }
+        }
+        if (!puppet && hasAnim) {
             gfx = this.add.sprite(x, y, 'td_anim_' + typeKey, 0);
             const eH = this.cellH * 0.9;
             const eW = eH * (TD_ANIM_FRAME_W / TD_ANIM_FRAME_H);
             gfx.setDisplaySize(eW, eH);
             gfx.play('td_anim_' + typeKey + '_walk');
-        } else {
+        } else if (!puppet) {
             gfx = this.add.image(x, y, 'td_enemies', TD_ENEMY_FRAMES[typeKey]);
             const eH = this.cellH * 0.85;
             const eW = eH * (275 / 768);
@@ -617,7 +726,8 @@ class TowerDefenseScene extends Phaser.Scene {
             hasJumped: false, dead: false, frame: 0, frameTimer: 0, lastDrawnFrame: -1,
             slowUntil: 0, gfx, attacking: null,
             hasAnim, animState: 'walk', dying: false, // track current animation state for state-driven switching
-            baseScaleX: gfx.scaleX, baseScaleY: gfx.scaleY, hitKickAt: 0 // procedural motion baseline
+            baseScaleX: gfx.scaleX, baseScaleY: gfx.scaleY, hitKickAt: 0, // procedural motion baseline
+            puppet // block-puppet prototype (null for sprite enemies)
         };
 
         // HP bar
@@ -746,6 +856,12 @@ class TowerDefenseScene extends Phaser.Scene {
     // knockback pop. Cheap sine math — no perf cost on low-end devices.
     applyEnemyMotion(e) {
         const t = this.time.now;
+        if (e.puppet) {
+            // Puppet animates itself — position the rig, drive limb state
+            e.gfx.setPosition(e.x, e.y);
+            e.puppet.update(t, (e.attacking || e.attackingSchool) ? 'attack' : 'walk');
+            return;
+        }
         if (!e.hasAnim) {
             // Legacy sway for static sprites
             e.gfx.setPosition(e.x, e.y);
@@ -878,7 +994,12 @@ class TowerDefenseScene extends Phaser.Scene {
             this.spawnCoinPopup(e.x, e.y - 10, '+' + e.coins, 0xffd700);
             this.refreshHud();
             // Play death animation if animated, else particles + immediate dead
-            if (e.hasAnim) {
+            if (e.puppet) {
+                // Puppet falls apart — head pops off, limbs scatter
+                e.dying = true;
+                if (e.schoolChompTimer) e.schoolChompTimer.remove();
+                e.puppet.die(() => { e.dead = true; });
+            } else if (e.hasAnim) {
                 e.dying = true;
                 e.animState = 'death';
                 e.gfx.clearTint();
@@ -896,6 +1017,11 @@ class TowerDefenseScene extends Phaser.Scene {
                 e.dead = true;
                 this.spawnDeathParticles(e.x, e.y, e.type);
             }
+        } else if (e.hp > 0 && e.puppet && !e.dying) {
+            // Puppet hit feedback: white flash + shove
+            e.puppet.flash();
+            e.hitKickAt = this.time.now;
+            if (!e.attackingSchool) e.y = Math.max(this.gridTop - 20, e.y - this.cellH * 0.05);
         } else if (e.hp > 0 && e.hasAnim && !e.dying) {
             // White flash on every hit (PvZ-style feedback, never interrupts walk)
             e.gfx.setTintFill(0xffffff);
@@ -1200,7 +1326,7 @@ class TowerDefenseScene extends Phaser.Scene {
     // Ghost copy trailing behind fast movers
     spawnAfterimage(e) {
         const src = e.gfx;
-        if (!src || !src.scene) return;
+        if (e.puppet || !src || !src.scene) return; // puppets have no texture to clone
         const ghost = this.add.image(src.x, src.y, src.texture.key, src.frame.name);
         ghost.setDisplaySize(src.displayWidth, src.displayHeight);
         ghost.rotation = src.rotation;

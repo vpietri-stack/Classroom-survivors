@@ -301,6 +301,110 @@ class TDBlockPuppet {
     }
 }
 
+// Paper-doll puppet: same rig/motion as TDBlockPuppet but with AI-drawn
+// part images (head/torso/arm/leg; limbs mirrored for the far side).
+class TDArtPuppet {
+    constructor(scene, x, y, size, key) {
+        this.scene = scene;
+        this.container = scene.add.container(x, y);
+        const S = size;
+        const P = 'td_part_' + key + '_';
+        // mk(texture, originX, originY[=pivot], displayH, posX, posY, mirror)
+        const mk = (tex, ox, oy, h, px, py, flip) => {
+            const img = scene.add.image(px, py, tex).setOrigin(ox, oy);
+            const sc = h / img.height;
+            img.setScale(flip ? -sc : sc, sc);
+            this.container.add(img);
+            return img;
+        };
+        // Render order: legs, then arms BEHIND torso (hides shoulder caps),
+        // torso, head. Arms are brought to the front during attacks.
+        this.legL = mk(P + 'leg', 0.5, 0.06, S * 0.36, -S * 0.06, S * 0.12, false);
+        this.legR = mk(P + 'leg', 0.5, 0.06, S * 0.36, S * 0.06, S * 0.12, true);
+        this.armL = mk(P + 'arm', 0.5, 0.07, S * 0.38, -S * 0.155, -S * 0.06, false);
+        this.armR = mk(P + 'arm', 0.5, 0.07, S * 0.38, S * 0.155, -S * 0.06, true);
+        this.torso = mk(P + 'torso', 0.5, 0.08, S * 0.40, 0, -S * 0.10, false);
+        this.head = mk(P + 'head', 0.5, 0.90, S * 0.46, 0, -S * 0.08, false);
+        this.parts = [this.legL, this.legR, this.armL, this.armR, this.torso, this.head];
+        this.legBaseScale = this.legL.scaleY; // for step foreshortening
+        this._mode = 'walk';
+        this.dead = false;
+    }
+
+    // Front-facing puppet motion: subtle screen-plane rotations + leg
+    // foreshortening for the "stepping toward the camera" illusion.
+    update(t, state) {
+        if (this.dead) return;
+        // Re-layer arms on state change: front for attacks, behind torso otherwise
+        if (state !== this._mode) {
+            this._mode = state;
+            if (state === 'attack') {
+                this.container.bringToTop(this.armL);
+                this.container.bringToTop(this.armR);
+            } else {
+                this.container.sendToBack(this.armR);
+                this.container.sendToBack(this.armL);
+            }
+        }
+        if (state === 'attack') {
+            const chop = Math.sin(t / 80);
+            // Arms raised up-OUTWARD beside the head (zombie "raaah"), chopping
+            this.armL.rotation = 2.55 + chop * 0.3;
+            this.armR.rotation = -(2.55 + chop * 0.3);
+            this.legL.rotation = 0.06;
+            this.legR.rotation = -0.06;
+            this.legL.scaleY = this.legBaseScale;
+            this.legR.scaleY = this.legBaseScale;
+            this.head.rotation = chop * 0.12;
+            this.torso.rotation = chop * 0.04;
+        } else {
+            const sw = Math.sin(t / 170);
+            // Subtle arm sway (big angles read as jumping jacks in front view)
+            this.armL.rotation = sw * 0.18;
+            this.armR.rotation = -sw * 0.18;
+            this.legL.rotation = -sw * 0.10;
+            this.legR.rotation = sw * 0.10;
+            // Step illusion: each leg alternately shortens as its knee lifts
+            this.legL.scaleY = this.legBaseScale * (1 - Math.max(0, sw) * 0.18);
+            this.legR.scaleY = this.legBaseScale * (1 - Math.max(0, -sw) * 0.18);
+            this.head.rotation = Math.sin(t / 340) * 0.06;
+            this.torso.rotation = Math.sin(t / 340) * 0.025;
+        }
+    }
+
+    flash() {
+        this.parts.forEach(p => p.setTintFill(0xffffff));
+        this.scene.time.delayedCall(70, () => {
+            if (this.dead) return;
+            this.parts.forEach(p => p.clearTint());
+        });
+    }
+
+    die(onDone) {
+        this.dead = true;
+        const scene = this.scene;
+        // Head pops up and away first — then the rest tumbles down
+        scene.tweens.add({
+            targets: this.head,
+            y: this.head.y - 30, x: this.head.x + Phaser.Math.Between(-16, 16),
+            rotation: Phaser.Math.FloatBetween(-2.5, 2.5), alpha: 0,
+            duration: 620, ease: 'Quad.in'
+        });
+        this.parts.forEach((p, i) => {
+            if (p === this.head) return;
+            scene.tweens.add({
+                targets: p,
+                x: p.x + Phaser.Math.Between(-26, 26),
+                y: p.y + Phaser.Math.Between(6, 34),
+                rotation: Phaser.Math.FloatBetween(-3, 3),
+                alpha: 0,
+                duration: 550, ease: 'Quad.in', delay: 40 + i * 35
+            });
+        });
+        scene.time.delayedCall(780, onDone);
+    }
+}
+
 // ============================================================
 // MAIN SCENE
 // ============================================================
@@ -326,6 +430,10 @@ class TowerDefenseScene extends Phaser.Scene {
             this.load.spritesheet('td_animt_' + type, 'sprites/td/anim/' + type + '.png', {
                 frameWidth: TD_TOWER_ANIM_W, frameHeight: TD_TOWER_ANIM_H
             });
+        }
+        // Paper-doll puppet parts (art-puppet prototype)
+        for (const part of ['head', 'torso', 'arm', 'leg']) {
+            this.load.image('td_part_dropout_' + part, 'sprites/td/anim/parts/dropout/' + part + '.png');
         }
     }
 
@@ -696,11 +804,16 @@ class TowerDefenseScene extends Phaser.Scene {
         let gfx;
         let puppet = null;
         let hasAnim = TD_ANIM_ENEMIES.includes(typeKey);
-        // PROTOTYPE: alternate dropouts spawn as block puppets for evaluation
+        // PROTOTYPE: alternate dropouts spawn as puppets for evaluation
+        // (art-puppet if part textures are loaded, block-puppet fallback)
         if (TD_PUPPET_TEST && typeKey === 'dropout') {
             this._puppetAlt = !this._puppetAlt;
             if (this._puppetAlt) {
-                puppet = new TDBlockPuppet(this, x, y, this.cellH * 0.85);
+                if (this.textures.exists('td_part_dropout_head')) {
+                    puppet = new TDArtPuppet(this, x, y, this.cellH * 0.95, 'dropout');
+                } else {
+                    puppet = new TDBlockPuppet(this, x, y, this.cellH * 0.85);
+                }
                 gfx = puppet.container;
                 hasAnim = false;
             }

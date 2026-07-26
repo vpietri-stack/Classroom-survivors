@@ -38,6 +38,7 @@ class MainScene extends Phaser.Scene {
 
         // --- Game-feel ("juice") state ---
         this.hitstopUntil = 0;          // world-freeze on meaty impacts
+        this.lastHitstopAt = 0;         // cooldown so hitstop stays a rare accent
         this.recentKills = [];          // timestamps for multi-kill detection
         this.combo = 0;                 // kill combo counter
         this.comboExpire = 0;
@@ -1521,8 +1522,8 @@ class MainScene extends Phaser.Scene {
             const nowK = this.time.now;
             this.recentKills.push(nowK);
             this.recentKills = this.recentKills.filter(t => nowK - t < 300);
-            if (enemy.isBoss) this.hitstop(120);
-            else if (this.recentKills.length >= 3) this.hitstop(60);
+            if (enemy.isBoss) this.hitstop(120, true);
+            else if (this.recentKills.length >= 4) this.hitstop(50); // cooldown-gated inside
 
             // Death Ring Explosion Particles
             const explosionColor = enemy.isBoss ? 0xff00ff : 0x00ff88;
@@ -1716,9 +1717,14 @@ class MainScene extends Phaser.Scene {
         }
     }
 
-    // Freeze the world briefly on meaty impacts (see update())
-    hitstop(ms) {
-        this.hitstopUntil = Math.max(this.hitstopUntil, this.time.now + ms);
+    // Freeze the world briefly on meaty impacts (see update()).
+    // Cooldown-gated: continuous multi-kills during swarm clears must NOT
+    // strobe the timescale (reads as jitter). force = boss kills only.
+    hitstop(ms, force = false) {
+        const now = this.time.now;
+        if (!force && now - this.lastHitstopAt < 1200) return;
+        this.lastHitstopAt = now;
+        this.hitstopUntil = Math.max(this.hitstopUntil, now + ms);
     }
 
     // Kill-combo bookkeeping: chained kills within 1.5s build the counter
@@ -1731,6 +1737,9 @@ class MainScene extends Phaser.Scene {
             this.comboText.setText('x' + this.combo + ' COMBO!');
             this.comboText.setVisible(true).setAlpha(1);
             const baseScale = 1 + Math.min(this.combo, 40) * 0.012;
+            // Kill the previous pop tween first — stacking tweens on the same
+            // target makes the text (and frame time) flicker at high combos
+            this.tweens.killTweensOf(this.comboText);
             this.tweens.add({ targets: this.comboText, scale: { from: baseScale * 1.35, to: baseScale }, duration: 130, ease: 'Back.out' });
         }
     }

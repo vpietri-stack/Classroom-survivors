@@ -191,6 +191,16 @@ function tdDrawEnemySprite(gfx, type, frame, hp, maxHp, cellW, cellH) {
 // ============================================================
 const TD_ENEMY_FRAMES = { dropout: 0, backpack: 1, nerd: 2, bully: 3, librarian: 4 };
 const TD_TOWER_FRAMES = { pencil: 0, star: 1, desk: 2, eraser: 3, popquiz: 4, ruler: 5, textbook: 6, trap: 7, firedrill: 8 };
+// Animated sprites (per-character files, 6 frames each: walk×2, attack×2, hit, death)
+// Add 'bully' and 'librarian' here once their .png files exist in sprites/td/anim/
+const TD_ANIM_ENEMIES = ['dropout', 'backpack', 'nerd']; // types with individual animated sheets
+const TD_ANIM_FRAME_W = 333;
+const TD_ANIM_FRAME_H = 327;
+// Animated tower sheets (5 frames: idle A, idle B, fire/action, damaged, destroyed)
+// Add tower types here as their .png files land in sprites/td/anim/
+const TD_ANIM_TOWERS = ['pencil'];
+const TD_TOWER_ANIM_W = 400;
+const TD_TOWER_ANIM_H = 400;
 
 // ============================================================
 // MAIN SCENE
@@ -199,17 +209,48 @@ class TowerDefenseScene extends Phaser.Scene {
     constructor() { super({ key: 'TowerDefenseScene' }); }
 
     preload() {
-        // Load sprite sheets
+        // Load sprite sheets (static fallback for non-animated enemies)
         this.load.spritesheet('td_enemies', 'sprites/td/enemies.png', {
             frameWidth: 275, frameHeight: 768
         });
         this.load.spritesheet('td_towers', 'sprites/td/towers.png', {
             frameWidth: 341, frameHeight: 341
         });
+        // Load per-character animated sprite sheets (6 frames each)
+        for (const type of TD_ANIM_ENEMIES) {
+            this.load.spritesheet('td_anim_' + type, 'sprites/td/anim/' + type + '.png', {
+                frameWidth: TD_ANIM_FRAME_W, frameHeight: TD_ANIM_FRAME_H
+            });
+        }
+        // Load per-tower animated sprite sheets (5 frames each)
+        for (const type of TD_ANIM_TOWERS) {
+            this.load.spritesheet('td_animt_' + type, 'sprites/td/anim/' + type + '.png', {
+                frameWidth: TD_TOWER_ANIM_W, frameHeight: TD_TOWER_ANIM_H
+            });
+        }
     }
 
     create() {
         const W = this.scale.width, H = this.scale.height;
+
+        // --- Create animations for animated enemy types ---
+        for (const type of TD_ANIM_ENEMIES) {
+            const key = 'td_anim_' + type;
+            if (!this.anims.exists(key + '_walk')) {
+                this.anims.create({ key: key + '_walk', frames: this.anims.generateFrameNumbers(key, { start: 0, end: 1 }), frameRate: 5, repeat: -1 });
+                this.anims.create({ key: key + '_attack', frames: this.anims.generateFrameNumbers(key, { start: 2, end: 3 }), frameRate: 6, repeat: -1 });
+                this.anims.create({ key: key + '_hit', frames: [{ key: key, frame: 4 }], frameRate: 1, repeat: 0 });
+                this.anims.create({ key: key + '_death', frames: [{ key: key, frame: 5 }], frameRate: 1, repeat: 0 });
+            }
+        }
+
+        // --- Create animations for animated tower types ---
+        for (const type of TD_ANIM_TOWERS) {
+            const key = 'td_animt_' + type;
+            if (!this.anims.exists(key + '_idle')) {
+                this.anims.create({ key: key + '_idle', frames: this.anims.generateFrameNumbers(key, { start: 0, end: 1 }), frameRate: 2, repeat: -1 });
+            }
+        }
 
         // --- Layout calculation (portrait-optimized) ---
         const hudH = 48;
@@ -414,11 +455,20 @@ class TowerDefenseScene extends Phaser.Scene {
             armed: false, hp: def.hp, maxHp: def.hp, triggered: false
         };
 
-        const gfx = this.add.image(c.x, c.y, 'td_towers', TD_TOWER_FRAMES[type]);
+        const hasAnim = TD_ANIM_TOWERS.includes(type);
+        let gfx;
+        if (hasAnim) {
+            gfx = this.add.sprite(c.x, c.y, 'td_animt_' + type, 0);
+            gfx.play('td_animt_' + type + '_idle');
+        } else {
+            gfx = this.add.image(c.x, c.y, 'td_towers', TD_TOWER_FRAMES[type]);
+        }
         const tSize = this.cellW * 0.75;
         gfx.setDisplaySize(tSize, tSize);
         gfx.setTint(0xffffff);
         tower.gfx = gfx;
+        tower.hasAnim = hasAnim;
+        tower.damagedShown = false;
         this.towerLayer.add(gfx);
         this.towers.push(tower);
         this.occupied[key] = tower;
@@ -443,6 +493,11 @@ class TowerDefenseScene extends Phaser.Scene {
             tower.maxHp = Math.round(def.hp * Math.pow(TD_UPGRADE_HP, tower.level - 1));
             tower.hp = tower.maxHp;
             this.drawTowerHp(tower);
+            // Full heal: restore idle animation if it was showing damaged frame
+            if (tower.hasAnim && tower.damagedShown) {
+                tower.damagedShown = false;
+                tower.gfx.play('td_animt_' + tower.type + '_idle');
+            }
         }
         // Scale up slightly and add glow tint for higher levels
         const tSize = this.cellW * 0.75 * (1 + (tower.level - 1) * 0.1);
@@ -459,7 +514,17 @@ class TowerDefenseScene extends Phaser.Scene {
         delete this.occupied[key];
         const idx = this.towers.indexOf(tower);
         if (idx >= 0) this.towers.splice(idx, 1);
-        if (tower.gfx) tower.gfx.destroy();
+        if (tower.gfx) {
+            if (tower.hasAnim && tower.gfx.scene) {
+                // Flash the destroyed frame, then fade out
+                const g = tower.gfx;
+                g.stop();
+                g.setFrame(4);
+                this.tweens.add({ targets: g, alpha: 0, duration: 400, ease: 'Quad.in', onComplete: () => g.destroy() });
+            } else {
+                tower.gfx.destroy();
+            }
+        }
         if (tower.hpBar) tower.hpBar.destroy();
     }
 
@@ -473,6 +538,12 @@ class TowerDefenseScene extends Phaser.Scene {
             if (this.towerLayer) this.towerLayer.add(tower.hpBar);
         }
         const g = tower.hpBar; g.clear();
+        // Animated towers: swap to damaged frame below 50% HP
+        if (tower.hasAnim && !tower.damagedShown && tower.hp < tower.maxHp * 0.5) {
+            tower.damagedShown = true;
+            tower.gfx.stop();
+            tower.gfx.setFrame(3);
+        }
         const w = this.cellW * 0.6;
         const pct = Phaser.Math.Clamp(tower.hp / tower.maxHp, 0, 1);
         const bx = tower.x - w / 2, by = tower.y + this.cellH * 0.34;
@@ -521,10 +592,21 @@ class TowerDefenseScene extends Phaser.Scene {
         const x = this.colCenterX(col);
         const y = this.gridTop - 20; // spawn above grid
 
-        const gfx = this.add.image(x, y, 'td_enemies', TD_ENEMY_FRAMES[typeKey]);
-        const eH = this.cellH * 0.85;
-        const eW = eH * (275 / 768); // maintain aspect ratio
-        gfx.setDisplaySize(eW, eH);
+        // Use animated sprite if available, else static fallback
+        let gfx;
+        const hasAnim = TD_ANIM_ENEMIES.includes(typeKey);
+        if (hasAnim) {
+            gfx = this.add.sprite(x, y, 'td_anim_' + typeKey, 0);
+            const eH = this.cellH * 0.9;
+            const eW = eH * (TD_ANIM_FRAME_W / TD_ANIM_FRAME_H);
+            gfx.setDisplaySize(eW, eH);
+            gfx.play('td_anim_' + typeKey + '_walk');
+        } else {
+            gfx = this.add.image(x, y, 'td_enemies', TD_ENEMY_FRAMES[typeKey]);
+            const eH = this.cellH * 0.85;
+            const eW = eH * (275 / 768);
+            gfx.setDisplaySize(eW, eH);
+        }
 
         const enemy = {
             type: typeKey, col, x, y, hp, maxHp: hp,
@@ -532,7 +614,8 @@ class TowerDefenseScene extends Phaser.Scene {
             armor: def.armor, armorHp: def.armorHp, currentArmorHp: def.armorHp,
             jump: def.jump, enrage: def.enrage, enraged: false,
             hasJumped: false, dead: false, frame: 0, frameTimer: 0, lastDrawnFrame: -1,
-            slowUntil: 0, gfx, attacking: null
+            slowUntil: 0, gfx, attacking: null,
+            hasAnim, animState: 'walk', dying: false // track current animation state for state-driven switching
         };
 
         // HP bar
@@ -550,10 +633,23 @@ class TowerDefenseScene extends Phaser.Scene {
         for (let i = this.enemies.length - 1; i >= 0; i--) {
             const e = this.enemies[i];
             if (e.dead) { this.removeEnemy(i); continue; }
+            if (e.dying) continue; // death animation playing, skip logic
+            // School chompers are pinned at the wall; bite timer handles damage,
+            // attack anim is already playing — skip movement/anim/tower logic entirely
+            if (e.attackingSchool) { this.drawEnemyHpBar(e); continue; }
 
-            // Animation frame
-            e.frameTimer += dt;
-            if (e.frameTimer > 300) { e.frameTimer = 0; e.frame = e.frame === 0 ? 1 : 0; }
+            // Animation state machine (for animated sprites)
+            if (e.hasAnim) {
+                const wantState = e.attacking ? 'attack' : 'walk';
+                if (e.animState !== wantState && e.animState !== 'hit') {
+                    e.animState = wantState;
+                    e.gfx.play('td_anim_' + e.type + '_' + wantState);
+                }
+            } else {
+                // Legacy 2-frame sway for static sprites
+                e.frameTimer += dt;
+                if (e.frameTimer > 300) { e.frameTimer = 0; e.frame = e.frame === 0 ? 1 : 0; }
+            }
 
             // Speed calculation
             let speed = e.speed;
@@ -621,12 +717,14 @@ class TowerDefenseScene extends Phaser.Scene {
 
             // Update position
             e.gfx.setPosition(e.x, e.y);
-            // Simple walk sway animation
-            e.gfx.rotation = Math.sin(this.time.now / 200 + e.col * 2) * 0.05;
+            // Walk sway (only for non-animated static sprites)
+            if (!e.hasAnim) {
+                e.gfx.rotation = Math.sin(this.time.now / 200 + e.col * 2) * 0.05;
+            }
             this.drawEnemyHpBar(e);
 
-            // Reached school?
-            if (e.y >= this.schoolY) {
+            // Reached school? (skip if already attacking school)
+            if (e.y >= this.schoolY && !e.attackingSchool) {
                 this.enemyReachSchool(e, i);
             }
         }
@@ -643,6 +741,45 @@ class TowerDefenseScene extends Phaser.Scene {
     }
 
     enemyReachSchool(e, i) {
+        // Animated enemies: stop and chomp the school wall (max 3 bites, then collapse)
+        if (e.hasAnim && !e.attackingSchool) {
+            e.attackingSchool = true;
+            e.schoolBites = 0;
+            e.y = this.schoolY; // pin at school edge
+            e.gfx.setPosition(e.x, e.y);
+            e.animState = 'attack';
+            e.gfx.play('td_anim_' + e.type + '_attack');
+            // Deal damage over time (bite every 800ms)
+            e.schoolChompTimer = this.time.addEvent({
+                delay: 800,
+                callback: () => {
+                    if (e.dead || e.dying) { e.schoolChompTimer.remove(); return; }
+                    e.schoolBites++;
+                    this.baseHp -= e.dmg;
+                    this.cameras.main.shake(100, 0.003);
+                    this.drawSchoolHp();
+                    this.refreshHud();
+                    if (this.baseHp <= 0) {
+                        e.schoolChompTimer.remove();
+                        this.endGame(false);
+                    } else if (e.schoolBites >= 3) {
+                        // Zombie exhausted after 3 bites — collapses at the wall (no coins)
+                        e.schoolChompTimer.remove();
+                        e.dying = true;
+                        e.animState = 'death';
+                        e.gfx.play('td_anim_' + e.type + '_death');
+                        this.tweens.add({
+                            targets: e.gfx, alpha: 0, duration: 600, ease: 'Quad.in',
+                            onComplete: () => { e.dead = true; }
+                        });
+                    }
+                },
+                loop: true
+            });
+            this.tdBeep('error');
+            return; // don't remove yet
+        }
+        // Non-animated or fallback: instant damage and remove
         this.baseHp -= e.dmg;
         this.tdBeep('error');
         this.cameras.main.shake(150, 0.005);
@@ -654,6 +791,7 @@ class TowerDefenseScene extends Phaser.Scene {
 
     removeEnemy(i) {
         const e = this.enemies[i];
+        if (e.schoolChompTimer) e.schoolChompTimer.remove();
         if (e.gfx) e.gfx.destroy();
         if (e.hpBar) e.hpBar.destroy();
         this.enemies.splice(i, 1);
@@ -670,15 +808,38 @@ class TowerDefenseScene extends Phaser.Scene {
         e.hp -= actualDmg;
         if (slowFactor > 0) e.slowUntil = this.time.now + 2000;
 
-        if (e.hp <= 0 && !e.dead) {
-            e.dead = true;
+        if (e.hp <= 0 && !e.dead && !e.dying) {
             this.coins += e.coins;
             this.score += e.coins * 10;
             this.zombiesKilled++;
             this.tdBeep('hit');
-            this.spawnDeathParticles(e.x, e.y, e.type);
             this.spawnCoinPopup(e.x, e.y - 10, '+' + e.coins, 0xffd700);
             this.refreshHud();
+            // Play death animation if animated, else particles + immediate dead
+            if (e.hasAnim) {
+                e.dying = true;
+                e.animState = 'death';
+                e.gfx.play('td_anim_' + e.type + '_death');
+                // Death effect: scale down + fade for polished feel
+                this.tweens.add({
+                    targets: e.gfx,
+                    alpha: 0.3, scaleX: e.gfx.scaleX * 0.7, scaleY: e.gfx.scaleY * 0.7,
+                    duration: 500, ease: 'Quad.in',
+                    onComplete: () => { e.dead = true; }
+                });
+                // Clean up school chomp timer if present
+                if (e.schoolChompTimer) e.schoolChompTimer.remove();
+            } else {
+                e.dead = true;
+                this.spawnDeathParticles(e.x, e.y, e.type);
+            }
+        } else if (e.hp > 0 && e.hasAnim && !e.dying && e.animState !== 'hit') {
+            // Flash hit animation on animated enemies (brief interrupt)
+            e.animState = 'hit';
+            e.gfx.play('td_anim_' + e.type + '_hit');
+            this.time.delayedCall(250, () => {
+                if (!e.dead && !e.dying) e.animState = 'walk'; // will trigger state switch on next frame
+            });
         }
     }
 
@@ -723,7 +884,7 @@ class TowerDefenseScene extends Phaser.Scene {
             // Find target: nearest enemy in same column, above the tower
             let target = null, bestDist = Infinity;
             for (const e of this.enemies) {
-                if (e.dead || e.col !== t.col) continue;
+                if (e.dead || e.dying || e.col !== t.col) continue;
                 if (e.y >= t.y) continue; // must be above
                 const d = t.y - e.y;
                 if (d < bestDist) { bestDist = d; target = e; }
@@ -734,10 +895,23 @@ class TowerDefenseScene extends Phaser.Scene {
                 this.fireProjectile(t, target, dmg, def);
                 if (def.doubleShot) {
                     this.time.delayedCall(120, () => {
-                        if (!target.dead) this.fireProjectile(t, target, dmg, def);
+                        if (!target.dead && !target.dying) this.fireProjectile(t, target, dmg, def);
                     });
                 }
                 this.tdBeep('shoot');
+                // Tower fire animation + recoil (quick scale punch for juice)
+                if (t.gfx) {
+                    if (t.hasAnim) {
+                        t.gfx.stop();
+                        t.gfx.setFrame(2); // fire frame
+                        this.time.delayedCall(180, () => {
+                            if (!t.gfx || !t.gfx.scene) return;
+                            if (t.damagedShown) t.gfx.setFrame(3); // stay damaged
+                            else t.gfx.play('td_animt_' + t.type + '_idle');
+                        });
+                    }
+                    this.tweens.add({ targets: t.gfx, scaleX: t.gfx.scaleX * 1.15, scaleY: t.gfx.scaleY * 0.9, duration: 60, yoyo: true, ease: 'Quad.out' });
+                }
             }
         }
     }
@@ -887,13 +1061,15 @@ class TowerDefenseScene extends Phaser.Scene {
 
     spawnHitSpark(x, y) {
         const g = this.add.graphics(); g.setDepth(5);
-        g.fillStyle(0xffffff, 1);
-        for (let i = 0; i < 3; i++) {
-            const ox = Phaser.Math.Between(-6, 6), oy = Phaser.Math.Between(-6, 6);
-            g.fillRect(x + ox, y + oy, 2, 2);
+        // Multi-particle spark burst
+        const colors = [0xffffff, 0xffdd44, 0xff8844];
+        for (let i = 0; i < 5; i++) {
+            const ox = Phaser.Math.Between(-8, 8), oy = Phaser.Math.Between(-8, 8);
+            g.fillStyle(Phaser.Utils.Array.GetRandom(colors), 1);
+            g.fillCircle(x + ox, y + oy, Phaser.Math.Between(1, 3));
         }
         this.fxLayer.add(g);
-        this.tweens.add({ targets: g, alpha: 0, duration: 150, onComplete: () => g.destroy() });
+        this.tweens.add({ targets: g, alpha: 0, scaleX: 1.5, scaleY: 1.5, duration: 200, ease: 'Quad.out', onComplete: () => g.destroy() });
     }
 
     spawnExplosion(x, y, color) {
@@ -1006,9 +1182,10 @@ class TowerDefenseScene extends Phaser.Scene {
         this.updateTowers(time);
         this.updateProjectiles(dt);
 
-        // Tower idle bob animation
+        // Tower idle bob animation (manual bob only for static-sprite towers;
+        // animated towers have their own idle animation)
         for (const t of this.towers) {
-            if (t.gfx && !TD_TOWERS[t.type].oneTime) {
+            if (t.gfx && !TD_TOWERS[t.type].oneTime && !t.hasAnim) {
                 t.gfx.y = t.y + Math.sin(time / 600 + t.col + t.row) * 1.5;
             }
         }

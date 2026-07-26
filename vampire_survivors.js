@@ -36,6 +36,15 @@ class MainScene extends Phaser.Scene {
         this.knockbackVelocity = { x: 0, y: 0 };
         this.invulnTimer = 0;
 
+        // --- Game-feel ("juice") state ---
+        this.hitstopUntil = 0;          // world-freeze on meaty impacts
+        this.recentKills = [];          // timestamps for multi-kill detection
+        this.combo = 0;                 // kill combo counter
+        this.comboExpire = 0;
+        this.particlePool = [];         // shared pooled particles (perf)
+        this.popPool = [];              // pooled damage-pop texts (perf)
+        this.physics.world.timeScale = 1; // reset after death slow-mo restarts
+
         this.physics.world.setBounds(-4000, -4000, 8000, 8000);
 
         if (!this.textures.exists('grass')) {
@@ -52,6 +61,10 @@ class MainScene extends Phaser.Scene {
 
         this.bg = this.add.tileSprite(this.scale.width / 2, this.scale.height / 2, this.scale.width, this.scale.height, 'grass').setOrigin(0.5);
         this.bg.setScrollFactor(0);
+
+        // Blob shadows layer: created right after bg so it renders under all
+        // characters (creation order), redrawn each frame in updateJuice()
+        this.shadowGfx = this.add.graphics();
 
         this.game.canvas.style.touchAction = 'none';
         document.body.style.touchAction = 'none';
@@ -178,6 +191,30 @@ class MainScene extends Phaser.Scene {
         });
         this.joyGraphics = this.add.graphics().setScrollFactor(0);
 
+        // Shared particle layer (perf: one graphics for ALL burst particles)
+        this.particleGfx = this.add.graphics().setDepth(50);
+
+        // Kill combo counter (top-center, screen-space)
+        this.comboText = this.add.text(this.scale.width / 2, 110, '', {
+            fontSize: '30px', fontFamily: 'Fredoka', color: '#ffdd33',
+            stroke: '#000000', strokeThickness: 5, fontStyle: 'bold'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(100).setVisible(false);
+
+        // Low-HP danger vignette (radial gradient texture, edges only)
+        if (!this.textures.exists('vs_vignette')) {
+            const cv = this.textures.createCanvas('vs_vignette', 256, 256);
+            const cx = cv.getContext();
+            const grd = cx.createRadialGradient(128, 128, 70, 128, 128, 128);
+            grd.addColorStop(0, 'rgba(255,0,0,0)');
+            grd.addColorStop(1, 'rgba(255,0,0,0.55)');
+            cx.fillStyle = grd;
+            cx.fillRect(0, 0, 256, 256);
+            cv.refresh();
+        }
+        this.vignette = this.add.image(this.scale.width / 2, this.scale.height / 2, 'vs_vignette')
+            .setDisplaySize(this.scale.width, this.scale.height)
+            .setScrollFactor(0).setDepth(90).setAlpha(0);
+
         this.physics.add.overlap(this.bullets, this.enemies, (b, e) => {
             if (b.type === 'axe' || b.type === 'cross') {
                 if (b.hitList && b.hitList.includes(e)) return;
@@ -223,9 +260,13 @@ class MainScene extends Phaser.Scene {
     update(time, delta) {
         if (this.gameState === 'GAMEOVER') {
             this.player.body.setVelocity(0, 0);
+            this.updateJuice(); // keep particles/shadows alive during death slow-mo
             return;
         }
         if (this.gameState !== 'PLAYING') return;
+
+        // Hitstop: world briefly slowed to ~12% on meaty impacts (game feel)
+        this.physics.world.timeScale = this.time.now < this.hitstopUntil ? 8 : 1;
 
         let dx = 0, dy = 0;
         const speed = 160 * this.playerStats.speed; // Doubled base speed (from 80 to 160)
@@ -291,6 +332,7 @@ class MainScene extends Phaser.Scene {
         this.updateWeapons();
         this.updateBullets();
         this.updateGems();
+        this.updateJuice();
         this.gameTime++;
         this.accumulatedTime += delta;
         updateDOMHUD(this.playerStats, Math.floor(this.accumulatedTime / 1000), this.killCount);
@@ -342,6 +384,8 @@ class MainScene extends Phaser.Scene {
             this.killCount = 0;
             return;
         }
+        // Perf cap: don't exceed ~160 live enemies (WeChat/older iPads)
+        if (this.enemies.getChildren().length >= 160) return;
         const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
 
         let dist = distance;
@@ -1423,6 +1467,10 @@ class MainScene extends Phaser.Scene {
         this.playerStats.hp -= dmg;
         synthHurt();
         this.invulnTimer = 60;
+
+        // Taking a hit breaks the kill combo
+        this.combo = 0;
+        this.comboText.setVisible(false);
         
         // Visual Hit Juice
         this.cameras.main.shake(150, 0.012);
@@ -1467,6 +1515,14 @@ class MainScene extends Phaser.Scene {
             enemy.body.setVelocity(enemy.body.velocity.x * 1.5, enemy.body.velocity.y * 1.5);
             enemy.body.setDrag(1000);
             synthHit();
+
+            // Kill juice: combo + hitstop on boss kills and multi-kills
+            this.registerCombo();
+            const nowK = this.time.now;
+            this.recentKills.push(nowK);
+            this.recentKills = this.recentKills.filter(t => nowK - t < 300);
+            if (enemy.isBoss) this.hitstop(120);
+            else if (this.recentKills.length >= 3) this.hitstop(60);
 
             // Death Ring Explosion Particles
             const explosionColor = enemy.isBoss ? 0xff00ff : 0x00ff88;
@@ -1594,75 +1650,107 @@ class MainScene extends Phaser.Scene {
     }
 
     spawnBurstParticles(x, y, color = 0xffffff, count = 10, size = 4) {
-        const container = this.add.graphics();
-        const particles = [];
-        
+        // Pooled: pushes into a shared array drawn by ONE graphics object in
+        // updateJuice(). Replaces the old per-burst Graphics + 16ms timer
+        // approach that caused GC pressure on low-end devices.
+        if (this.particlePool.length > 400) return; // hard cap under heavy load
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
             const speed = Phaser.Math.FloatBetween(2, 6);
-            particles.push({
-                x: 0,
-                y: 0,
+            this.particlePool.push({
+                x, y,
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed,
-                size: Phaser.Math.FloatBetween(size * 0.5, size * 1.5)
+                size: Phaser.Math.FloatBetween(size * 0.5, size * 1.5),
+                color
             });
         }
-        
-        container.setPosition(x, y);
-        
-        const updateEvent = this.time.addEvent({
-            delay: 16,
-            loop: true,
-            callback: () => {
-                if (!container.active) {
-                    updateEvent.remove();
-                    return;
-                }
-                container.clear();
-                container.fillStyle(color, 0.8);
-                let allDead = true;
-                
-                particles.forEach(p => {
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.vx *= 0.95; // drag
-                    p.vy *= 0.95;
-                    p.size *= 0.95; // fade size
-                    
-                    if (p.size > 0.5) {
-                        container.fillCircle(p.x, p.y, p.size);
-                        allDead = false;
-                    }
-                });
-                
-                if (allDead) {
-                    updateEvent.remove();
-                    container.destroy();
-                }
+    }
+
+    // Per-frame pass: particles, blob shadows, combo expiry, low-HP vignette
+    updateJuice() {
+        // --- Pooled particles (single clear + redraw) ---
+        const g = this.particleGfx;
+        g.clear();
+        let write = 0;
+        for (let i = 0; i < this.particlePool.length; i++) {
+            const p = this.particlePool[i];
+            p.x += p.vx; p.y += p.vy;
+            p.vx *= 0.95; p.vy *= 0.95;
+            p.size *= 0.95;
+            if (p.size > 0.5) {
+                g.fillStyle(p.color, 0.8);
+                g.fillCircle(p.x, p.y, p.size);
+                this.particlePool[write++] = p;
             }
-        });
-        
-        // Safety destroy after 1s
-        this.time.delayedCall(1000, () => {
-            updateEvent.remove();
-            if (container && container.active) container.destroy();
-        });
+        }
+        this.particlePool.length = write;
+
+        // --- Blob shadows (grounds characters in the world) ---
+        const s = this.shadowGfx;
+        s.clear();
+        s.fillStyle(0x000000, 0.22);
+        s.fillEllipse(this.player.x, this.player.y + 26, 34, 12);
+        const list = this.enemies.getChildren();
+        for (let i = 0; i < list.length; i++) {
+            const e = list[i];
+            if (!e.active) continue;
+            if (e.isBoss) s.fillEllipse(e.x, e.y + 42, 60, 20);
+            else s.fillEllipse(e.x, e.y + 14, 22, 8);
+        }
+
+        // --- Combo expiry ---
+        if (this.combo > 0 && this.time.now > this.comboExpire) {
+            this.combo = 0;
+            this.tweens.add({ targets: this.comboText, alpha: 0, duration: 300, onComplete: () => this.comboText.setVisible(false) });
+        }
+
+        // --- Low-HP danger vignette (pulsing) ---
+        const hpPct = this.playerStats.hp / this.playerStats.maxHp;
+        if (hpPct < 0.3) {
+            this.vignette.setPosition(this.scale.width / 2, this.scale.height / 2);
+            this.vignette.setDisplaySize(this.scale.width, this.scale.height);
+            this.vignette.setAlpha(0.45 + Math.sin(this.time.now / 180) * 0.25);
+        } else if (this.vignette.alpha > 0) {
+            this.vignette.setAlpha(0);
+        }
+    }
+
+    // Freeze the world briefly on meaty impacts (see update())
+    hitstop(ms) {
+        this.hitstopUntil = Math.max(this.hitstopUntil, this.time.now + ms);
+    }
+
+    // Kill-combo bookkeeping: chained kills within 1.5s build the counter
+    registerCombo() {
+        const now = this.time.now;
+        if (now > this.comboExpire) this.combo = 0;
+        this.combo++;
+        this.comboExpire = now + 1500;
+        if (this.combo >= 5) {
+            this.comboText.setText('x' + this.combo + ' COMBO!');
+            this.comboText.setVisible(true).setAlpha(1);
+            const baseScale = 1 + Math.min(this.combo, 40) * 0.012;
+            this.tweens.add({ targets: this.comboText, scale: { from: baseScale * 1.35, to: baseScale }, duration: 130, ease: 'Back.out' });
+        }
     }
 
     spawnDamagePop(x, y, amount, isCrit = false) {
         const color = isCrit ? '#ffcc00' : (amount > 15 ? '#ff4444' : '#ffffff');
         const size = isCrit ? '26px' : (amount > 15 ? '22px' : '16px');
         const driftX = (Math.random() - 0.5) * 60;
-        
-        const txt = this.add.text(x, y, amount, {
-            fontSize: size,
-            fontFamily: 'Fredoka',
-            color: color,
-            stroke: '#000000',
-            strokeThickness: isCrit ? 4 : 3,
-            fontStyle: 'bold'
-        }).setOrigin(0.5);
+
+        // Pooled text objects (perf: avoids constant create/destroy churn)
+        let txt = this.popPool.pop();
+        if (!txt) {
+            txt = this.add.text(0, 0, '', {
+                fontSize: '16px', fontFamily: 'Fredoka', color: '#ffffff',
+                stroke: '#000000', strokeThickness: 3, fontStyle: 'bold'
+            }).setOrigin(0.5).setDepth(60);
+        }
+        txt.setText(String(amount));
+        txt.setStyle({ fontSize: size, color: color, strokeThickness: isCrit ? 4 : 3 });
+        txt.setPosition(x, y).setAlpha(1).setScale(1).setVisible(true);
 
         this.tweens.add({
             targets: txt,
@@ -1672,7 +1760,11 @@ class MainScene extends Phaser.Scene {
             scale: isCrit ? 1.8 : 1.4,
             duration: 800,
             ease: 'Cubic.easeOut',
-            onComplete: () => txt.destroy()
+            onComplete: () => {
+                txt.setVisible(false);
+                if (this.popPool.length < 40) this.popPool.push(txt);
+                else txt.destroy();
+            }
         });
     }
 
@@ -1775,6 +1867,14 @@ class MainScene extends Phaser.Scene {
     }
 
     gameOver() {
+        if (this.gameState === 'GAMEOVER') return; // guard against re-entry
+        this.gameState = 'GAMEOVER';
+
+        // Death slow-mo: world crawls while the death animation plays
+        this.physics.world.timeScale = 4;
+        const camZoom = this.cameras.main.zoom;
+        this.cameras.main.zoomTo(Math.min(camZoom * 1.4, 1.6), 1400, 'Sine.easeOut');
+
         this.player.body.setVelocity(0, 0);
         this.player.body.setImmovable(true);
 

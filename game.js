@@ -36,38 +36,29 @@ function showVocabImage(elementId, word) {
     const filename = word.trim().toLowerCase().replace(/ /g, '-');
     const imagePath = `images/vocab/${filename}.png`;
 
-    // Use an off-DOM image to preload and check existence
-    const img = new Image();
-    img.onload = () => {
-        el.src = imagePath;
-        el.classList.remove('hidden');
-    };
-    img.onerror = () => {
-        el.classList.add('hidden');
-    };
-    img.src = imagePath;
-}
-
-function showVocabImage(elementId, word) {
-    const el = document.getElementById(elementId);
-    if (!el) return;
-
-    el.classList.add('hidden');
-    if (!word) return;
-
-    const filename = word.trim().toLowerCase().replace(/ /g, '-');
-    const imagePath = `images/vocab/${filename}.png`;
-
-    // Use an off-DOM image to preload and check existence
-    const img = new Image();
-    img.onload = () => {
-        el.src = imagePath;
-        el.classList.remove('hidden');
-    };
-    img.onerror = () => {
-        el.classList.add('hidden');
-    };
-    img.src = imagePath;
+    // Resolve through AssetCache (gh-proxy mirror + IndexedDB): instant blob:
+    // URL when cached, downloads-and-caches otherwise (fast in CN, survives
+    // WeChat cache eviction). Falls back to the plain same-origin path.
+    // dataset guard: a later call for a different word wins the async race.
+    el.dataset.pendingVocab = imagePath;
+    const resolved = (window.AssetCache && AssetCache.getBlobUrl)
+        ? AssetCache.getBlobUrl(imagePath).then(u => u || imagePath)
+        : Promise.resolve(imagePath);
+    resolved.then(src => {
+        if (el.dataset.pendingVocab !== imagePath) return; // superseded
+        // Use an off-DOM image to preload and check existence
+        const img = new Image();
+        img.onload = () => {
+            if (el.dataset.pendingVocab !== imagePath) return;
+            el.src = src;
+            el.classList.remove('hidden');
+        };
+        img.onerror = () => {
+            if (el.dataset.pendingVocab !== imagePath) return;
+            el.classList.add('hidden');
+        };
+        img.src = src;
+    });
 }
 
 // --- AUDIO SYSTEM ---
@@ -269,14 +260,44 @@ const playTTS = () => {
         const timer = setTimeout(() => fail("timeout"), timeoutMs);
     };
 
+    // Preferred order (field feedback 2026-07-28): the hand-recorded MP3s are
+    // the best voice for long phrases / word pairs that Youdao mangles, but
+    // they used to load so slowly from GitHub Pages that the chain fell
+    // through to the robotic Baidu TTS. Now:
+    //   cached MP3 (IndexedDB, instant, nicest voice)
+    //   → Youdao TTS (mainland CDN, good for single words)
+    //   → MP3 via gh-proxy mirror (fast + seeds the cache for next time)
+    //   → Baidu TTS (robotic, last network resort)
+    //   → browser speechSynthesis
+    const mp3Path = `audio_mp3/${text}.mp3`;
+
+    const playCachedMP3 = () => {
+        if (window.AssetCache && AssetCache.getCached) {
+            AssetCache.getCached(mp3Path).then(u => {
+                if (u) tryAudioWithTimeout(u, "Cached MP3", playYoudao, 3000);
+                else playYoudao();
+            }).catch(playYoudao);
+        } else {
+            playYoudao();
+        }
+    };
+
     const playYoudao = () => {
         const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=1`;
         tryAudioWithTimeout(url, "Youdao TTS", playLocalMP3, 1000);
     };
 
     const playLocalMP3 = () => {
-        const url = `audio_mp3/${encodeURIComponent(text)}.mp3`;
-        tryAudioWithTimeout(url, "Local MP3", playBaidu, 10000);
+        const plainUrl = `audio_mp3/${encodeURIComponent(text)}.mp3`;
+        if (window.AssetCache && AssetCache.getBlobUrl) {
+            // Mirror-aware download; also persists to IndexedDB so the NEXT
+            // play of this phrase hits the instant cached branch above.
+            AssetCache.getBlobUrl(mp3Path).then(u => {
+                tryAudioWithTimeout(u || plainUrl, "Local MP3", playBaidu, 10000);
+            });
+        } else {
+            tryAudioWithTimeout(plainUrl, "Local MP3", playBaidu, 10000);
+        }
     };
 
     const playBaidu = () => {
@@ -297,7 +318,7 @@ const playTTS = () => {
         }
     };
 
-    playYoudao();
+    playCachedMP3();
 };
 
 // --- PHASER STATE (game declared in boot.js) ---

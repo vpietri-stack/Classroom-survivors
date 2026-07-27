@@ -809,11 +809,12 @@
         .td-play-again-btn:hover { background: #66bb6a; }
     </style>
 
-    <script src="game.js?v=2026-07-28a"></script>
-    <!-- TD sprite prefetch + IndexedDB cache (fast first load in CN; survives
-         WeChat cache eviction). Must load BEFORE tower_defense.js reads TDAssets. -->
-    <script src="td_asset_cache.js?v=1"></script>
-    <script src="tower_defense.js?v=2026-07-28b"></script>
+    <script src="game.js?v=2026-07-28b"></script>
+    <!-- Mirror-aware asset cache: prefetch + IndexedDB for TD sprites, vocab
+         images and hand-recorded MP3s (fast first load in CN; survives WeChat
+         cache eviction). Must load BEFORE tower_defense.js reads AssetCache. -->
+    <script src="asset_cache.js?v=1"></script>
+    <script src="tower_defense.js?v=2026-07-28c"></script>
     <script src="study_mode.js?v=2026-07-27a"></script>
 </body>
 

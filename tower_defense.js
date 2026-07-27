@@ -462,10 +462,12 @@ class TowerDefenseScene extends Phaser.Scene {
     constructor() { super({ key: 'TowerDefenseScene' }); }
 
     preload() {
-        // Resolve every sprite through the TD asset cache (td_asset_cache.js):
+        // Resolve every sprite through the asset cache (asset_cache.js):
         // returns an instant blob: URL when prefetched/IndexedDB-cached (fast in
         // CN, survives WeChat cache eviction), or the plain path as fallback.
-        const u = (p) => (window.TDAssets ? window.TDAssets.url(p) : p);
+        // NOTE: test_asset_manifest.js keeps AssetCache.TD_SPRITES in sync with
+        // the files on disk — add new sprites there too.
+        const u = (p) => (window.AssetCache ? window.AssetCache.url(p) : p);
         // Load sprite sheets (static fallback for non-animated enemies)
         this.load.spritesheet('td_enemies', u('sprites/td/enemies.png'), {
             frameWidth: 275, frameHeight: 768

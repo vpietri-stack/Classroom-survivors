@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>School Defense 3D (POC)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100%; height: 100%; overflow: hidden; background: #1a2632;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            touch-action: none; user-select: none; -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #gameCanvas { position: fixed; inset: 0; display: block; }
+
+        /* ---------- TOP HUD BAR ---------- */
+        #hudTop {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+            display: flex; justify-content: center; gap: 10px; padding: 8px;
+            pointer-events: none; font-weight: 700; font-size: 14px; color: #fff;
+        }
+        .hud-chip {
+            background: rgba(10, 20, 30, 0.75); border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 10px; padding: 4px 10px; text-shadow: 0 1px 2px #000;
+            white-space: nowrap;
+        }
+        #hudSchool.danger { color: #ff6b6b; animation: pulse 0.8s infinite; }
+        @keyframes pulse { 50% { opacity: 0.5; } }
+
+        /* ---------- WAVE BANNER ---------- */
+        #waveBanner {
+            position: fixed; top: 20%; left: 0; right: 0; z-index: 20; text-align: center;
+            font-size: clamp(26px, 6vw, 48px); font-weight: 900; color: #ffd75e;
+            text-shadow: 0 2px 8px #000, 0 0 30px rgba(255, 200, 60, 0.5);
+            pointer-events: none; opacity: 0; transition: opacity 0.4s;
+        }
+        #waveBanner.show { opacity: 1; }
+        #waveBanner .sub { font-size: 0.45em; color: #fff; font-weight: 600; }
+
+        /* ---------- BUILD GAP / SKIP ---------- */
+        #skipWaveBtn {
+            position: fixed; top: 52px; left: 50%; transform: translateX(-50%); z-index: 15;
+            background: rgba(30, 90, 40, 0.9); color: #fff; border: 2px solid #6dcf7a;
+            border-radius: 12px; padding: 8px 18px; font-size: 14px; font-weight: 700;
+            display: none; cursor: pointer;
+        }
+
+        /* ---------- JOYSTICK ---------- */
+        #joyZone {
+            position: fixed; left: 0; bottom: 0; width: 45%; height: 55%; z-index: 12;
+        }
+        #joyBase {
+            position: absolute; width: 110px; height: 110px; border-radius: 50%;
+            background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.25);
+            display: none; pointer-events: none;
+        }
+        #joyKnob {
+            position: absolute; width: 48px; height: 48px; border-radius: 50%;
+            background: rgba(255,255,255,0.35); border: 2px solid rgba(255,255,255,0.6);
+            display: none; pointer-events: none;
+        }
+
+        /* ---------- ACTION BUTTONS ---------- */
+        #actionPad {
+            position: fixed; right: 10px; bottom: 18px; z-index: 12;
+            display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+        }
+        .act-btn {
+            width: 62px; height: 62px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.4);
+            background: rgba(20, 40, 60, 0.8); color: #fff; font-size: 26px;
+            display: flex; align-items: center; justify-content: center;
+            position: relative; cursor: pointer; touch-action: none;
+        }
+        .act-btn:active { transform: scale(0.92); background: rgba(60, 100, 140, 0.9); }
+        .act-btn .cnt {
+            position: absolute; bottom: -2px; right: -2px; background: #ffd75e; color: #222;
+            font-size: 11px; font-weight: 800; border-radius: 8px; padding: 1px 5px;
+        }
+        .act-btn.disabled { opacity: 0.4; }
+        #btnSpecial .cd-ring {
+            position: absolute; inset: -2px; border-radius: 50%;
+            background: conic-gradient(rgba(0,0,0,0.65) var(--cd, 0%), transparent 0);
+            pointer-events: none;
+        }
+        #btnRotate {
+            width: 46px; height: 46px; font-size: 20px;
+        }
+
+        /* ---------- BUILD BAR ---------- */
+        #buildBar {
+            position: fixed; bottom: 8px; left: 50%; transform: translateX(-50%); z-index: 13;
+            display: none; gap: 8px; padding: 6px;
+            background: rgba(10, 20, 30, 0.85); border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 14px;
+        }
+        #buildBar.open { display: flex; }
+        .build-btn {
+            width: 64px; height: 66px; border-radius: 10px; border: 2px solid #555;
+            background: rgba(40, 60, 50, 0.9); color: #fff; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-size: 22px; gap: 2px; touch-action: none;
+        }
+        .build-btn .cost { font-size: 11px; font-weight: 800; color: #ffd75e; }
+        .build-btn.selected { border-color: #6dcf7a; background: rgba(60, 130, 80, 0.6); box-shadow: 0 0 10px #4caf50; }
+        .build-btn.unaffordable { opacity: 0.4; }
+
+        /* ---------- OVERLAYS (start / end) ---------- */
+        .overlay3d {
+            position: fixed; inset: 0; z-index: 30; background: rgba(8, 14, 22, 0.88);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 16px; color: #fff; text-align: center; padding: 20px;
+        }
+        .overlay3d.hidden { display: none; }
+        .overlay3d h1 { font-size: clamp(28px, 7vw, 52px); color: #ffd75e; text-shadow: 0 3px 10px #000; }
+        .overlay3d p { color: #cbd5e1; max-width: 460px; line-height: 1.6; font-size: 15px; }
+        .overlay3d .big-btn {
+            background: linear-gradient(180deg, #4caf50, #2e7d32); color: #fff;
+            border: none; border-radius: 14px; padding: 14px 42px;
+            font-size: 20px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+        }
+        .overlay3d .big-btn:active { transform: scale(0.95); }
+        .overlay3d .stats { font-size: 15px; color: #e2e8f0; line-height: 1.9; }
+        #respawnMsg {
+            position: fixed; top: 40%; left: 0; right: 0; z-index: 18; text-align: center;
+            font-size: 24px; font-weight: 900; color: #ff8080; text-shadow: 0 2px 6px #000;
+            display: none; pointer-events: none;
+        }
+        #loadingMsg { position: fixed; inset: 0; z-index: 40; background: #1a2632; color: #9fb3c8;
+            display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    </style>
+    <script type="importmap">
+    { "imports": { "three": "./three_td/vendor/three.module.js" } }
+    </script>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="loadingMsg">Loading 3D engine…</div>
+
+    <!-- TOP HUD -->
+    <div id="hudTop">
+        <div class="hud-chip">🪙 <span id="hudCoins">0</span></div>
+        <div class="hud-chip">🌊 <span id="hudWave">0</span>/5</div>
+        <div class="hud-chip" id="hudSchool">🏫 <span id="hudSchoolHp">30</span></div>
+        <div class="hud-chip">❤️ <span id="hudPlayerHp">50</span></div>
+    </div>
+
+    <div id="waveBanner"></div>
+    <button id="skipWaveBtn">▶ Start next wave (<span id="skipCount">15</span>s)</button>
+    <div id="respawnMsg">💀 Respawning…</div>
+
+    <!-- JOYSTICK -->
+    <div id="joyZone">
+        <div id="joyBase"></div>
+        <div id="joyKnob"></div>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div id="actionPad">
+        <button class="act-btn" id="btnRotate">🔄</button>
+        <button class="act-btn" id="btnSpecial">💥<div class="cd-ring"></div></button>
+        <button class="act-btn" id="btnBow">🏹<span class="cnt" id="arrowCnt">30</span></button>
+        <button class="act-btn" id="btnSword">⚔️</button>
+        <button class="act-btn" id="btnBuild">🔨</button>
+    </div>
+
+    <!-- BUILD BAR -->
+    <div id="buildBar">
+        <button class="build-btn" data-build="wall">🧱<span class="cost">10</span></button>
+        <button class="build-btn" data-build="arrow">🗼<span class="cost">30</span></button>
+        <button class="build-btn" data-build="frost">❄️<span class="cost">40</span></button>
+        <button class="build-btn" data-build="cannon">💣<span class="cost">60</span></button>
+    </div>
+
+    <!-- START SCREEN -->
+    <div id="startOverlay" class="overlay3d">
+        <h1>🏫 School Defense 3D</h1>
+        <p>Defend the school on the hill from 5 waves of enemies!<br>
+           Move with the <b>joystick</b> (or WASD). Attack with <b>⚔️ sword</b> (J),
+           <b>🏹 bow</b> (K, limited arrows) and your <b>💥 special</b> (L, recharges).<br>
+           Collect 🪙 from fallen enemies, then press <b>🔨</b> (B) to build
+           walls and towers on the grid. 🔄 (Q/E) rotates the camera.</p>
+        <button class="big-btn" id="startBtn">▶ PLAY</button>
+        <p style="font-size:12px;color:#64748b">three.js POC — models are placeholder low-poly primitives</p>
+    </div>
+
+    <!-- END SCREEN -->
+    <div id="endOverlay" class="overlay3d hidden">
+        <h1 id="endTitle">Victory!</h1>
+        <div class="stats" id="endStats"></div>
+        <button class="big-btn" id="replayBtn">↻ Play again</button>
+    </div>
+
+    <script type="module" src="three_td/main.js"></script>
+</body>
+</html>

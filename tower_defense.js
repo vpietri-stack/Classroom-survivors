@@ -317,14 +317,14 @@ class TDArtPuppet {
             this.container.add(img);
             return img;
         };
-        // Render order: legs, then arms BEHIND torso (hides shoulder caps),
-        // torso, head. Arms are brought to the front during attacks.
+        // Render order: legs, torso, then arms IN FRONT (sleeve tops overlap
+        // the hoodie shoulders so arm+torso read as one body), head on top.
         this.legL = mk(P + 'leg', 0.5, 0.06, S * 0.36, -S * 0.06, S * 0.12, false);
         this.legR = mk(P + 'leg', 0.5, 0.06, S * 0.36, S * 0.06, S * 0.12, true);
-        // Arm pivots tucked at the sweater's shoulder line so sleeves read attached
-        this.armL = mk(P + 'arm', 0.5, 0.07, S * 0.38, -S * 0.135, -S * 0.105, false);
-        this.armR = mk(P + 'arm', 0.5, 0.07, S * 0.38, S * 0.135, -S * 0.105, true);
         this.torso = mk(P + 'torso', 0.5, 0.08, S * 0.40, 0, -S * 0.10, false);
+        // Arms: shorter, pivots tucked INSIDE the shoulder silhouette
+        this.armL = mk(P + 'arm', 0.5, 0.10, S * 0.30, -S * 0.115, -S * 0.075, false);
+        this.armR = mk(P + 'arm', 0.5, 0.10, S * 0.30, S * 0.115, -S * 0.075, true);
         this.head = mk(P + 'head', 0.5, 0.90, S * 0.46, 0, -S * 0.08, false);
         this.parts = [this.legL, this.legR, this.armL, this.armR, this.torso, this.head];
         this.legBaseScale = this.legL.scaleY; // for step foreshortening
@@ -346,7 +346,7 @@ class TDArtPuppet {
         if (this.face === name) return;
         this.face = name;
         const key = this.faceKeys[name];
-        if (this.head.texture.key !== key) {
+        if (this.head.scene && this.head.texture.key !== key) {
             this.head.setTexture(key);
             this.head.setScale(this.headH / this.head.height);
         }
@@ -355,18 +355,8 @@ class TDArtPuppet {
     // Front-facing puppet motion. States: walk / attack. A recent hit()
     // overrides the pose with a recoil reaction for ~260ms.
     update(t, state) {
-        if (this.dead) return;
-        // Re-layer arms on state change: front for attacks, behind torso otherwise
-        if (state !== this._mode) {
-            this._mode = state;
-            if (state === 'attack') {
-                this.container.bringToTop(this.armL);
-                this.container.bringToTop(this.armR);
-            } else {
-                this.container.sendToBack(this.armR);
-                this.container.sendToBack(this.armL);
-            }
-        }
+        if (this.dead || !this.container.scene) return; // destroyed or dying
+        this._mode = state; // arms stay front-layered in all states now
         const S = this.S;
         const hitK = this.hitAt ? Math.max(0, 1 - (t - this.hitAt) / 260) : 0;
         let bodyDy = 0;
@@ -495,9 +485,13 @@ class TowerDefenseScene extends Phaser.Scene {
         for (const part of ['head', 'torso', 'arm', 'leg']) {
             this.load.image('td_part_dropout_' + part, 'sprites/td/anim/parts/dropout/' + part + '.png');
         }
-        // Face variants for expressions — uncomment when the files exist:
-        // this.load.image('td_part_dropout_head_attack', 'sprites/td/anim/parts/dropout/head_attack.png');
-        // this.load.image('td_part_dropout_head_hit', 'sprites/td/anim/parts/dropout/head_hit.png');
+        // Face variants for puppet expressions (attack / hit)
+        this.load.image('td_part_dropout_head_attack', 'sprites/td/anim/parts/dropout/head_attack.png');
+        this.load.image('td_part_dropout_head_hit', 'sprites/td/anim/parts/dropout/head_hit.png');
+        // v2 frame-sprite dropout: two-file sheets (walk 4f, action 6f:
+        // attack windup/smear/strike, hit, death collapse/settled)
+        this.load.spritesheet('td2_dropout_w', 'sprites/td/anim/dropout_walk.png', { frameWidth: 516, frameHeight: 512 });
+        this.load.spritesheet('td2_dropout_a', 'sprites/td/anim/dropout_action.png', { frameWidth: 424, frameHeight: 416 });
     }
 
     create() {
@@ -520,6 +514,14 @@ class TowerDefenseScene extends Phaser.Scene {
             if (!this.anims.exists(key + '_idle')) {
                 this.anims.create({ key: key + '_idle', frames: this.anims.generateFrameNumbers(key, { start: 0, end: 1 }), frameRate: 2, repeat: -1 });
             }
+        }
+
+        // --- v2 frame-sprite animations (two-file sheets) ---
+        if (this.textures.exists('td2_dropout_w') && !this.anims.exists('td2_dropout_walk')) {
+            this.anims.create({ key: 'td2_dropout_walk', frames: this.anims.generateFrameNumbers('td2_dropout_w', { start: 0, end: 3 }), frameRate: 8, repeat: -1 });
+            this.anims.create({ key: 'td2_dropout_attack', frames: this.anims.generateFrameNumbers('td2_dropout_a', { start: 0, end: 2 }), frameRate: 12, repeat: -1 });
+            this.anims.create({ key: 'td2_dropout_hit', frames: [{ key: 'td2_dropout_a', frame: 3 }], frameRate: 1, repeat: 0 });
+            this.anims.create({ key: 'td2_dropout_death', frames: this.anims.generateFrameNumbers('td2_dropout_a', { start: 4, end: 5 }), frameRate: 5, repeat: 0 });
         }
 
         // --- Layout calculation (portrait-optimized) ---
@@ -867,6 +869,7 @@ class TowerDefenseScene extends Phaser.Scene {
         let gfx;
         let puppet = null;
         let hasAnim = TD_ANIM_ENEMIES.includes(typeKey);
+        let animPrefix = 'td_anim_' + typeKey;
         // PROTOTYPE: alternate dropouts spawn as puppets for evaluation
         // (art-puppet if part textures are loaded, block-puppet fallback)
         if (TD_PUPPET_TEST && typeKey === 'dropout') {
@@ -881,7 +884,25 @@ class TowerDefenseScene extends Phaser.Scene {
                 hasAnim = false;
             }
         }
-        if (!puppet && hasAnim) {
+        if (!puppet && typeKey === 'dropout' && this.textures.exists('td2_dropout_w')) {
+            // v2 frame-sprite dropout (evaluation: puppet vs frames)
+            gfx = this.add.sprite(x, y, 'td2_dropout_w', 0);
+            hasAnim = true;
+            animPrefix = 'td2_dropout';
+            // Sheets have different cell sizes — refit display size whenever
+            // an animation switches the underlying texture
+            const eH = this.cellH * 0.95;
+            const fit = () => {
+                gfx.setDisplaySize(eH * (gfx.frame.width / gfx.frame.height), eH);
+            };
+            gfx.on(Phaser.Animations.Events.ANIMATION_START, () => {
+                fit();
+                const en = this.enemies.find(en2 => en2.gfx === gfx);
+                if (en) { en.baseScaleX = gfx.scaleX; en.baseScaleY = gfx.scaleY; }
+            });
+            gfx.play('td2_dropout_walk');
+            fit();
+        } else if (!puppet && hasAnim) {
             gfx = this.add.sprite(x, y, 'td_anim_' + typeKey, 0);
             const eH = this.cellH * 0.9;
             const eW = eH * (TD_ANIM_FRAME_W / TD_ANIM_FRAME_H);
@@ -902,6 +923,7 @@ class TowerDefenseScene extends Phaser.Scene {
             hasJumped: false, dead: false, frame: 0, frameTimer: 0, lastDrawnFrame: -1,
             slowUntil: 0, gfx, attacking: null,
             hasAnim, animState: 'walk', dying: false, // track current animation state for state-driven switching
+            animPrefix, // anim key prefix ('td_anim_<type>' legacy / 'td2_<type>' two-file sheets)
             baseScaleX: gfx.scaleX, baseScaleY: gfx.scaleY, hitKickAt: 0, // procedural motion baseline
             puppet // block-puppet prototype (null for sprite enemies)
         };
@@ -931,7 +953,7 @@ class TowerDefenseScene extends Phaser.Scene {
                 const wantState = e.attacking ? 'attack' : 'walk';
                 if (e.animState !== wantState && e.animState !== 'hit') {
                     e.animState = wantState;
-                    e.gfx.play('td_anim_' + e.type + '_' + wantState);
+                    e.gfx.play(e.animPrefix + '_' + wantState);
                 }
             } else {
                 // Legacy 2-frame sway for static sprites
@@ -1100,7 +1122,7 @@ class TowerDefenseScene extends Phaser.Scene {
             e.y = this.schoolY; // pin at school edge
             e.gfx.setPosition(e.x, e.y);
             e.animState = 'attack';
-            e.gfx.play('td_anim_' + e.type + '_attack');
+            e.gfx.play(e.animPrefix + '_attack');
             // Deal damage over time (bite every 800ms)
             e.schoolChompTimer = this.time.addEvent({
                 delay: 800,
@@ -1120,7 +1142,7 @@ class TowerDefenseScene extends Phaser.Scene {
                         e.schoolChompTimer.remove();
                         e.dying = true;
                         e.animState = 'death';
-                        e.gfx.play('td_anim_' + e.type + '_death');
+                        e.gfx.play(e.animPrefix + '_death');
                         this.tweens.add({
                             targets: e.gfx, alpha: 0, duration: 600, ease: 'Quad.in',
                             onComplete: () => { e.dead = true; }
@@ -1179,7 +1201,7 @@ class TowerDefenseScene extends Phaser.Scene {
                 e.dying = true;
                 e.animState = 'death';
                 e.gfx.clearTint();
-                e.gfx.play('td_anim_' + e.type + '_death');
+                e.gfx.play(e.animPrefix + '_death');
                 // Death effect: scale down + fade for polished feel
                 this.tweens.add({
                     targets: e.gfx,
@@ -1212,13 +1234,13 @@ class TowerDefenseScene extends Phaser.Scene {
             if (e.animState !== 'hit' && (!e.lastHitReact || hitNow - e.lastHitReact > 700)) {
                 e.lastHitReact = hitNow;
                 e.animState = 'hit';
-                e.gfx.play('td_anim_' + e.type + '_hit');
+                e.gfx.play(e.animPrefix + '_hit');
                 this.time.delayedCall(200, () => {
                     if (e.dead || e.dying || !e.gfx || !e.gfx.scene) return;
                     // Resume the correct animation explicitly (fixes freeze-on-hit)
                     const next = (e.attacking || e.attackingSchool) ? 'attack' : 'walk';
                     e.animState = next;
-                    e.gfx.play('td_anim_' + e.type + '_' + next);
+                    e.gfx.play(e.animPrefix + '_' + next);
                 });
             }
         }

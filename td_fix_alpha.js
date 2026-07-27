@@ -8,15 +8,11 @@ const fs = require('fs');
 const path = require('path');
 const EXE = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 
-const CACHE = 'C:/Users/vpiet/AppData/Roaming/Qoder/SharedClientCache/cache/images/task-f36/';
+const CACHE = 'C:/Users/vpiet/AppData/Roaming/Qoder/SharedClientCache/cache/images/task-d19/';
 const JOBS = [
-    { in: CACHE + 'dropout-9e8b6c8f.png', out: 'sprites/td/anim/dropout.png', mode: 'light' },
-    { in: CACHE + 'backpack-39c9bb25.png', out: 'sprites/td/anim/backpack.png', mode: 'light' },
-    { in: CACHE + 'bucket-e370896b.png', out: 'sprites/td/anim/nerd.png', mode: 'light' },
-    { in: CACHE + 'Gemini_Generated_Image_2ltrox2ltrox2ltr-cb075e56.png', out: 'sprites/td/anim/pencil.png', mode: 'light' },
-    // Old static sheets: generated on BLACK backgrounds
-    { in: 'sprites/td/towers.png', out: 'sprites/td/towers.png', mode: 'dark' },
-    { in: 'sprites/td/enemies.png', out: 'sprites/td/enemies.png', mode: 'dark' }
+    // v2 dropout frame-sprite strips (light checkerboard bg)
+    { in: CACHE + 'dropout_walk-01c85ee3.png', out: 'sprites/td/anim/dropout_walk.png', mode: 'light' },
+    { in: CACHE + 'dropout_action-bd98912c.png', out: 'sprites/td/anim/dropout_action.png', mode: 'light' }
 ];
 
 (async () => {

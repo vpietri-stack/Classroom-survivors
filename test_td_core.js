@@ -24,7 +24,12 @@ function ok(c, m) { if (c) { pass++; console.log('PASS: ' + m); } else { fail++;
   await page.goto(fileUrl, { waitUntil: 'load' });
   await page.waitForTimeout(500);
   await page.evaluate(() => triggerTowerDefense());
-  await page.waitForTimeout(800); // scene boots after 80ms + Phaser ready
+  // Poll for scene readiness instead of a fixed 800ms sleep — boot time varies
+  // with page weight (e.g. the always-on speech debug panel) and machine load.
+  await page.waitForFunction(() => {
+    const s = (typeof game !== 'undefined') && game && game.scene.getScene('TowerDefenseScene');
+    return !!(s && s.layout);
+  }, { timeout: 15000 }).catch(() => {});
 
   // ---- 1) BOOT: scene exists with correct initial state ----
   const boot = await page.evaluate(() => {

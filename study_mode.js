@@ -921,6 +921,16 @@ function checkRoundE() {
                 dropZone.parentElement.appendChild(gate);
             }
         } else {
+            // Log WHY the gate was skipped — without this the skip is invisible
+            // in the field ("speech isn't being prompted") and undebuggable.
+            if (window.__speechLog) {
+                const st = window.SpeechStatus;
+                window.__speechLog('Gate skipped: ' + (
+                    !st ? 'SpeechStatus missing'
+                    : !st.isReady() ? 'state=' + st.state + (st.message ? ' (' + st.message + ')' : '')
+                    : !window.SpeechUI ? 'SpeechUI missing'
+                    : 'makeSentenceGate missing'));
+            }
             setTimeout(advance, 1000);
         }
     } else {

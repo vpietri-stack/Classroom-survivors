@@ -7,12 +7,15 @@
  *  2. Render a debug panel showing the live model-load state
  *     (state / % / current file / chosen mirror / message) plus a rolling log.
  *
- * The panel is HIDDEN by default. A small toggle button (🐞) appears ONLY for
- * students whose name contains "test" (case-insensitive). This keeps the UI
- * clean for real students while allowing test accounts to debug.
+ * The panel is HIDDEN by default behind a small 🐞 toggle button (bottom-left)
+ * that is ALWAYS present, with a state-colored dot so load status is visible
+ * at a glance without opening the panel. Tapping toggles the panel so it never
+ * blocks navigation. (Was previously gated on the logged-in student's name
+ * containing "test" — but the check ran at DOMContentLoaded, BEFORE any login,
+ * so the toggle never appeared for anyone. Field debugging needs it always.)
  *
  * Depends on: window.SpeechStatus (speech_preload.js), window.LocalEngine
- * (speech_engine.js), window.selectedStudent (frontend_auth.js).
+ * (speech_engine.js).
  * ========================================================================= */
 (function (global) {
   'use strict';
@@ -27,12 +30,6 @@
     return p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
   }
 
-  // Check if current student is a test account (name contains "test").
-  function isTestStudent() {
-    var name = global.selectedStudent || '';
-    return name.toLowerCase().indexOf('test') !== -1;
-  }
-
   // The missing diagnostic hook. Engine + preload call this; we keep a rolling
   // buffer and push it into the panel.
   global.__speechLog = function (msg) {
@@ -42,20 +39,19 @@
   };
 
   // --- Panel construction ---------------------------------------------------
-  var panel, toggleBtn, stateEl, pctEl, fileEl, mirrorEl, msgEl, logEl, retryEl;
+  var panel, toggleBtn, dotEl, stateEl, pctEl, fileEl, mirrorEl, msgEl, logEl, retryEl;
 
   function buildPanel() {
     if (document.getElementById('speechDebugPanel')) return;
-
-    // Only show toggle button for test students
-    if (!isTestStudent()) return;
 
     var st = document.createElement('style');
     st.textContent =
       '#speechDebugToggle{position:fixed;left:8px;bottom:8px;z-index:2147483647;' +
       'width:36px;height:36px;border-radius:50%;background:rgba(15,23,42,.85);' +
       'border:1px solid #334155;color:#fbbf24;font-size:18px;cursor:pointer;' +
-      'display:flex;align-items:center;justify-content:center;}' +
+      'display:flex;align-items:center;justify-content:center;opacity:.75;}' +
+      '#speechDebugToggle .sdg-dot{position:absolute;right:-1px;top:-1px;width:11px;height:11px;' +
+      'border-radius:50%;border:2px solid rgba(15,23,42,.9);background:#94a3b8;}' +
       '#speechDebugPanel{position:fixed;left:8px;bottom:52px;z-index:2147483647;' +
       'width:290px;max-width:44vw;max-height:42vh;display:none;flex-direction:column;' +
       'background:rgba(15,23,42,.92);color:#e2e8f0;border:1px solid #334155;' +
@@ -73,15 +69,17 @@
       'border:0;border-radius:6px;padding:5px 10px;font:inherit;font-weight:700;cursor:pointer;}';
     document.head.appendChild(st);
 
-    // Toggle button
+    // Toggle button (always present; dot mirrors SpeechStatus.state color)
     toggleBtn = document.createElement('button');
     toggleBtn.id = 'speechDebugToggle';
-    toggleBtn.innerHTML = '\uD83D\uDC1E';
+    toggleBtn.type = 'button';
+    toggleBtn.innerHTML = '\uD83D\uDC1E<span class="sdg-dot"></span>';
     toggleBtn.onclick = function () {
       panelVisible = !panelVisible;
       if (panel) panel.classList.toggle('show', panelVisible);
     };
     document.body.appendChild(toggleBtn);
+    dotEl = toggleBtn.querySelector('.sdg-dot');
 
     // Panel (hidden by default)
     panel = document.createElement('div');
@@ -128,6 +126,7 @@
     if (!panel) return;
     var s = global.SpeechStatus || {};
     var state = s.state || 'idle';
+    if (dotEl) dotEl.style.background = STATE_COLOR[state] || '#94a3b8';
     if (stateEl) {
       stateEl.textContent = state;
       stateEl.style.color = STATE_COLOR[state] || '#e2e8f0';

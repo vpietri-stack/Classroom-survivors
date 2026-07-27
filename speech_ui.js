@@ -109,6 +109,7 @@
     global._activeRecorder = rec; // so the overlay loop can read .level
     let state = 'idle'; // 'idle' | 'recording' | 'busy'
     let safetyTimer = null;
+    let recStartTs = 0; // for telemetry: how long the student actually spoke
 
     function updateUI() {
       if (state === 'recording') {
@@ -144,6 +145,7 @@
       // there is no gesture to lose — we simply continue once permission resolves.
       rec.start().then(function () {
         state = 'recording';
+        recStartTs = Date.now();
         showInline(btn);  // inline indicator, no overlay — sentence stays visible
         updateUI();
         clearSafety();
@@ -162,11 +164,17 @@
       clearSafety();
       hideInline();
       updateUI();
+      const audioMs = recStartTs ? Date.now() - recStartTs : null;
       rec.stop().then(function (blob) {
         if (!blob || !blob.size) { toIdle(); return; }
+        const t0 = Date.now();
         return global.LocalEngine.transcribe(blob).then(function (r) {
           toIdle();
-          if (opts.onResult) opts.onResult(r.text || '');
+          if (opts.onResult) opts.onResult(r.text || '', {
+            audioMs: audioMs,
+            transcribeMs: Date.now() - t0,
+            blobBytes: blob.size
+          });
         });
       }).catch(function (err) {
         toIdle();
@@ -191,6 +199,22 @@
     return btn;
   }
 
+  // --- Speech telemetry ----------------------------------------------------
+  // Every sentence-gate attempt is logged through the existing analytics
+  // pipeline (queueExerciseEvent → saveAnalytics → Cosmos DB) so we can
+  // diagnose WHY students fail: the raw transcript-vs-target pair separates
+  // ASR failure (garbage transcript) from scorer strictness (near-miss).
+  // Defensive no-op when analytics is unavailable (logged out / test mode) —
+  // telemetry must never break the exercise.
+  const UA = (navigator.userAgent || '').slice(0, 160);
+  function logSpeechEvent(kind, mode, data, attempts) {
+    try {
+      if (typeof queueExerciseEvent === 'function') {
+        queueExerciseEvent('speech_' + kind, mode || 'study', data, attempts || null);
+      }
+    } catch (_) { /* never let telemetry break the exercise */ }
+  }
+
   // Build a self-contained "say the sentence aloud" gate (used after a correct
   // unscramble). Returns a DOM node with: prompt, hold-to-talk record button,
   // heard-feedback line, and a Skip button that appears only after 3 failed
@@ -198,13 +222,15 @@
   // On a pass it plays the success sound, shows the score, and swaps in a
   // Continue button so the student controls when to advance.
   // Callers should only build this when SpeechStatus.isReady() is already true.
-  //   opts: { target, level = 2, onDone }
+  //   opts: { target, level = 2, mode = 'study', onDone }
+  //   mode tags telemetry events ('study' | 'game').
   //   onDone() is the single "advance" callback — fired on Continue (pass) OR Skip.
   function makeSentenceGate(opts) {
     opts = opts || {};
     injectAssets();
     const target = opts.target || '';
     const level = opts.level || 2;
+    const mode = opts.mode || 'study';
     const onDone = typeof opts.onDone === 'function' ? opts.onDone : function () {};
 
     const wrap = document.createElement('div');
@@ -226,14 +252,38 @@
     skip.className = 'game-btn bg-slate-600 hover:bg-slate-500 text-base px-5 py-3 rounded-2xl';
     skip.innerText = '跳过 \u25B6';
     skip.style.display = 'none';
-    skip.onclick = function () { if (!done) { done = true; onDone(); } };
-
+    skip.onclick = function () {
+      if (!done) {
+        done = true;
+        // A skip after repeated fails is the strongest "recognition is broken
+        // for this student" signal — record it with the fail count.
+        logSpeechEvent('skip', mode, { target: target, level: level, failsBeforeSkip: failCount, ua: UA }, failCount);
+        onDone();
+      }
+    };
+    
     const recBtn = makeRecordButton({
-      idleText: '\uD83C\uDF99\uFE0F 点击说话',
-      onResult: function (text) {
+      idleText: '\uD83C\uDF99\uFE0F \u70b9\u51fb\u8bf4\u8bdd',
+      onResult: function (text, meta) {
         feedback.className = 'heard-feedback';
-        feedback.innerText = '听到: \u201C' + (text || '(静音)') + '\u201D';
+        feedback.innerText = '\u542c\u5230: \u201C' + (text || '(\u9759\u97f3)') + '\u201D';
         const res = global.Scorer.score(target, text, level);
+        // Log EVERY attempt (pass or fail) with the full score breakdown — the
+        // transcript is the diagnostic gold for the children's-voices problem.
+        logSpeechEvent('attempt', mode, {
+          target: target,
+          transcript: text || '',
+          pass: !!res.pass,
+          accuracy: Math.round((res.accuracy || 0) * 1000) / 1000,
+          phoneticRatio: Math.round((res.phoneticRatio || 0) * 1000) / 1000,
+          edits: typeof res.edits === 'number' ? res.edits : null,
+          level: level,
+          details: res.details || '',
+          audioMs: meta && typeof meta.audioMs === 'number' ? meta.audioMs : null,
+          transcribeMs: meta && typeof meta.transcribeMs === 'number' ? meta.transcribeMs : null,
+          blobBytes: meta && typeof meta.blobBytes === 'number' ? meta.blobBytes : null,
+          ua: UA
+        }, failCount + 1);
         if (res.pass) {
           // Passed: play the success sound, show the score, and replace the
           // record/skip buttons with a single Continue button so the student
@@ -265,7 +315,10 @@
       },
       onError: function (err) {
         feedback.className = 'heard-feedback no';
-        feedback.innerText = '错误: ' + ((err && err.message) || err);
+        feedback.innerText = '\u9519\u8bef: ' + ((err && err.message) || err);
+        // Mic/engine errors are logged too — they can masquerade as "the model
+        // doesn't understand me" from the student's point of view.
+        logSpeechEvent('error', mode, { target: target, level: level, message: String((err && err.message) || err).slice(0, 200), ua: UA }, failCount + 1);
         // A hard mic/engine error also counts toward revealing Skip.
         failCount++;
         if (failCount >= SKIP_AFTER_FAILS) skip.style.display = '';

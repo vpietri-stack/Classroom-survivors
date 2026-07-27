@@ -1399,6 +1399,7 @@ function checkGrammar() {
             const gate = window.SpeechUI.makeSentenceGate({
                 target: targetSentence,
                 level: 2,
+                mode: 'game', // tags speech telemetry events with the game context
                 onDone: function () {
                     const g = document.getElementById('grammar-speech-gate');
                     if (g) g.remove();

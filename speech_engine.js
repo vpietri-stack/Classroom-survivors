@@ -8,14 +8,17 @@
 (function (global) {
   'use strict';
 
-  // ---- Model-weight hosting: probe China-reachable GitHub proxies, then same-origin.
+  // ---- Model-weight hosting: ModelScope (mainland CDN), then GitHub proxy, then same-origin.
   // Constraint map (all verified empirically):
+  //   • ModelScope (modelscope.cn, Alibaba) mirrors Xenova/whisper-tiny.en on a
+  //     mainland CDN: CORS:*, no auth, no size cap, ~2.4 MB/s measured from CN
+  //     (2026-07-27) → the fastest source for students without a VPN.
   //   • Gitee Pages は discontinued.
   //   • hf-mirror redirects big files back to the blocked huggingface.co.
   //   • jsDelivr caps /gh/ files at 20 MB → 403 on our ~30 MB decoder.
-  //   • raw.githubusercontent proxies (gh-proxy / ghproxy) serve the FULL 30 MB file
-  //     with CORS:* and no size cap — great for weights, which are FETCHED.
-  // MIME caveat: those proxies serve .js/.mjs as text/plain, which the browser
+  //   • gh-proxy.com serves the FULL 30 MB file with CORS:* and no size cap.
+  //   • ghproxy.net measured at ~0.01 MB/s (2026-07-27) — dead, removed.
+  // MIME caveat: proxies serve .js/.mjs as text/plain, which the browser
   // REFUSES to `import()`. So the ESM lib + ORT wasm glue (which ARE imported) stay
   // same-origin (GitHub Pages, correct MIME, already confirmed working in WeChat).
   // Only the model weights — the 41 MB bottleneck, fetched not imported — get proxied.
@@ -121,6 +124,13 @@
     return globalThis.__origFetch(url, merged).finally(() => clearTimeout(timer));
   }
 
+  // Build the download URL for a model file on a given source. Sources that
+  // don't mirror our repo layout (e.g. ModelScope) provide a url() rewriter;
+  // the rest simply prepend their base to the repo-relative path.
+  function srcUrl(src, relPath) {
+    return src.url ? src.url(relPath) : src.base + relPath;
+  }
+
   // Download a model file, falling back across mirrors (starting at mirrorIdx).
   // On success, mirrorIdx is left pointing at the working mirror so subsequent
   // files prefer it. Throws only if EVERY mirror fails.
@@ -129,7 +139,7 @@
     for (let attempt = 0; attempt < MODEL_SOURCES.length; attempt++) {
       const idx = (mirrorIdx + attempt) % MODEL_SOURCES.length;
       const src = MODEL_SOURCES[idx];
-      const url = src.base + relPath;
+      const url = srcUrl(src, relPath);
       const file = relPath.split('/').pop();
       log(`Engine: fetching ${file} via ${src.name} …`);
       try {
@@ -198,13 +208,27 @@
     return `raw.githubusercontent.com/${owner}/${repo}/main/`;
   }
   const RAW = rawRepoBase();
-  const MODEL_SOURCES = [
-    ...(RAW ? [
-      { name: 'gh-proxy',    base: `https://gh-proxy.com/https://${RAW}` },   // CN GitHub proxy
-      { name: 'ghproxy.net', base: `https://ghproxy.net/https://${RAW}` },    // CN GitHub proxy
-    ] : []),
-    { name: 'same-origin', base: new URL('./', location.href).href },         // GitHub Pages fallback
-  ];
+
+  // ModelScope mirrors the upstream HF repo (Xenova/whisper-tiny.en) with the
+  // same file layout our models/ folder uses, just without the models/<id>/
+  // prefix — so rewrite 'models/whisper-tiny.en/onnx/x.onnx' → '<base>/onnx/x.onnx'.
+  const MS_BASE = 'https://modelscope.cn/models/Xenova/' + MODEL_ID + '/resolve/master/';
+  const MS_SOURCE = {
+    name: 'modelscope',
+    url: (relPath) => MS_BASE + relPath.slice(('models/' + MODEL_ID + '/').length),
+  };
+  const SAME_ORIGIN = { name: 'same-origin', base: new URL('./', location.href).href };
+
+  const MODEL_SOURCES = RAW
+    // GitHub Pages host: same-origin is unreliable in CN, so remote mirrors first.
+    ? [
+        MS_SOURCE,                                                          // CN mainland CDN (fastest)
+        { name: 'gh-proxy', base: `https://gh-proxy.com/https://${RAW}` },  // CN GitHub proxy
+        SAME_ORIGIN,                                                        // GitHub Pages fallback
+      ]
+    // Local dev / other hosts: serve from disk/origin first, ModelScope as backstop
+    // (also covers future hosts that cap file size below our 30 MB decoder).
+    : [SAME_ORIGIN, MS_SOURCE];
 
   // MIME-sensitive assets always same-origin (imported, need real JS MIME).
   const LIB_URL   = new URL('lib/transformers.min.js?v=4', location.href).href;
@@ -229,7 +253,7 @@
   async function pickSource() {
     if (chosen) return chosen;
     for (const src of MODEL_SOURCES) {
-      const url = `${src.base}models/${MODEL_ID}/config.json`;
+      const url = srcUrl(src, `models/${MODEL_ID}/config.json`);
       try {
         const ctrl = new AbortController();
         const timer = setTimeout(() => ctrl.abort(), 6000);
@@ -252,7 +276,11 @@
 
     loading = (async () => {
       const src = await pickSource();
-      const MODEL_DIR = src.base + 'models/';       // …/models/  (parent of the model folder)
+      // localModelPath only shapes the URLs transformers.js *requests*; the
+      // patched fetch intercepts anything containing models/<MODEL_ID>/ and
+      // reroutes it through the mirror system, so a same-origin-shaped base
+      // works for every source (including base-less ones like ModelScope).
+      const MODEL_DIR = (src.base || SAME_ORIGIN.base) + 'models/';
 
       // Patch global fetch so model files are served from IndexedDB when cached,
       // and otherwise downloaded with a timeout + mirror fallback. The cache

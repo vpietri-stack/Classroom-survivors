@@ -1647,7 +1647,7 @@ class UnoScene extends Phaser.Scene {
         document.getElementById('unoQuestTime').innerText = f(qs);
         document.getElementById('unoTotalTime').innerText = f(gs + qs);
 
-        const isSessionIgnored = (winner !== 0 && (gs + qs) < 60);
+        const isSessionIgnored = (winner !== 0 && (gs + qs) < 120);
         if (typeof srGameResults !== 'undefined' && typeof finalizeSession === 'function') {
             finalizeSession(srGameResults, !isSessionIgnored);
         }
@@ -1675,7 +1675,7 @@ class UnoScene extends Phaser.Scene {
         const warning = document.getElementById('unoTargetWarning');
         if (warning) {
             if (isSessionIgnored) {
-                warning.innerText = "用时不到1分钟且挑战失败，本次练习不计入每周目标。";
+                warning.innerText = "用时不到2分钟且挑战失败，本次练习不计入每周目标。";
                 warning.classList.remove('hidden');
             } else {
                 warning.classList.add('hidden');
@@ -1729,6 +1729,7 @@ function triggerUno() {
     if (typeof srGameResults !== 'undefined') srGameResults = [];
     if (typeof srInSessionFailures !== 'undefined') srInSessionFailures = new Set();
     if (typeof srInSessionSuccesses !== 'undefined') srInSessionSuccesses = new Set();
+    if (typeof srLastServedKey !== 'undefined') srLastServedKey = { vocab: null, sentences: null };
     
     ['startScreen', 'gameSelectionOverlay', 'gomokuScreen', 'gomokuGameOverScreen',
         'gomokuModeSelectionOverlay', 'gomokuDifficultySelectionOverlay',

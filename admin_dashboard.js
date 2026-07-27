@@ -260,6 +260,10 @@ function countSessionsInRange(student, start, end) {
     if (!student.analytics || !Array.isArray(student.analytics)) return 0;
     return student.analytics.filter(e => {
         if (e.type !== 'session') return false;
+        // Game-mode losses under 2 minutes don't count toward targets
+        // (anti-cheat, from 27 Jul 2026 on — not retroactive). Shared helper
+        // from frontend_auth.js.
+        if (isUncountedShortLoss(e)) return false;
         const ts = new Date(e.timestamp);
         return ts >= start && ts <= end;
     }).length;

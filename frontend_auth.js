@@ -60,6 +60,24 @@ function getCurrentSession() {
     return (authActiveUser && authActiveUser.sessionCount) || 0;
 }
 
+// --- ONCE-PER-DAY SESSION ADVANCE ---
+// SR intervals are counted in sessions, so several game runs in one afternoon
+// used to burn through cooldowns (an interval-2 item could return the same
+// day). The session counter now advances at most once per calendar day per
+// student; extra same-day runs still record results (in-session sets give
+// within-day reinforcement) but don't move the clock, making cooldowns real
+// time gaps. Guard lives in localStorage — same-day runs on another device may
+// still double-advance, which is acceptable.
+function srSessionDayKey() {
+    return 'csSRSessionDay_' + ((authActiveUser && authActiveUser.id) || 'anon');
+}
+function hasAdvancedSRSessionToday() {
+    try { return localStorage.getItem(srSessionDayKey()) === new Date().toDateString(); } catch { return false; }
+}
+function markSRSessionAdvancedToday() {
+    try { localStorage.setItem(srSessionDayKey(), new Date().toDateString()); } catch { /* non-fatal */ }
+}
+
 /**
  * Called by study_mode.js / game.js at the end of every session (in game mode
  * the whole run's accumulated results are finalised once at game-over).
@@ -102,9 +120,10 @@ function finalizeSession(sessionResults, shouldIncrementSession = true) {
 
     // Eagerly update in-memory user so the next session in the same page-load gets fresh data
     authActiveUser.srState = newSRState;
-    if (shouldIncrementSession) {
+    if (shouldIncrementSession && !hasAdvancedSRSessionToday()) {
         authActiveUser.sessionCount = currentSession + 1;
         srIncrementSession = true;
+        markSRSessionAdvancedToday();
     }
 
     // Queue for next flush
@@ -1249,10 +1268,11 @@ function getActiveTargetText(studentOverride) {
 
 /**
  * Counts completed sessions in a time range for a student. MUST match the
- * teacher dashboard's countTargetSessions (teacher_dashboard.js) exactly: it
- * counts every `session` event in the window, including short (<60s) sessions
- * that the game flags `ignored`. Dropping them here made the app undercount
- * vs the dashboard (Test1: app 32/40 vs dashboard 37/40).
+ * teacher dashboard's countTargetSessions (teacher_dashboard.js) exactly.
+ * Both sides now EXCLUDE short game-mode losses (see isUncountedShortLoss):
+ * from 27 Jul 2026 on, a loss under 2 minutes never counts toward the weekly
+ * target, matching the in-game "用时不到2分钟且挑战失败，本次练习不计入每周目标"
+ * warning.
  */
 function countCompletedSessionsForTarget(student, startTimeStr, endTimeStr) {
     if (!student.analytics || !Array.isArray(student.analytics)) return 0;
@@ -1261,11 +1281,41 @@ function countCompletedSessionsForTarget(student, startTimeStr, endTimeStr) {
 
     return student.analytics.filter(e => {
         if (e.type !== 'session') return false;
-        // NOTE: deliberately NOT filtering e.data.ignored — the dashboard counts
-        // those too, so the student meter stays consistent with the teacher view.
+        if (isUncountedShortLoss(e)) return false;
         const ts = new Date(e.timestamp).getTime();
         return ts >= start && ts <= end;
     }).length;
+}
+
+// A game-mode loss shorter than 2 minutes does not count toward targets
+// (anti-cheat: stops students losing on purpose to farm sessions).
+// NOT retroactive: sessions played before TWO_MIN_RULE_START were recorded
+// under the old "1分钟" warning, so for those we only honor the `ignored`
+// flag the game wrote at play time (the student WAS told it wouldn't count).
+// From the start date on, we also judge by duration + result so stale cached
+// clients (still flagging only <60s) can't sneak 1-2 minute losses through.
+// Shared with teacher_dashboard.js / admin_dashboard.js (which load this
+// file first) so all meters always agree.
+const TARGET_MIN_LOSS_SEC = 120;
+const TWO_MIN_RULE_START = new Date('2026-07-27T00:00:00+08:00').getTime();
+function isUncountedShortLoss(e) {
+    if (e.type !== 'session' || !e.data) return false;
+    if (e.sessionType === 'study') return false; // study sessions always count
+    if (e.data.ignored === true) return true;    // flagged by the game itself
+    if (new Date(e.timestamp).getTime() < TWO_MIN_RULE_START) return false;
+    let sec = null, loss = false;
+    if (e.sessionType === 'gomoku') {
+        sec = e.data.totalTimeSec;
+        loss = e.data.result !== 'win';
+    } else if (e.sessionType === 'uno') {
+        sec = e.data.totalTimeSec;
+        loss = e.data.winner !== 0;
+    } else if (e.sessionType === 'vampireSurvivors' || e.sessionType === 'vampire') {
+        // Survival mode always ends in death; only played time matters.
+        sec = (e.data.survivalTimeSec || 0) + (e.data.minigameTimeSec || 0);
+        loss = true;
+    }
+    return loss && typeof sec === 'number' && sec < TARGET_MIN_LOSS_SEC;
 }
 
 /**

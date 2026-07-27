@@ -80,6 +80,7 @@ function triggerGomoku(mode = gomokuMode) {
     if (typeof srGameResults !== 'undefined') srGameResults = [];
     if (typeof srInSessionFailures !== 'undefined') srInSessionFailures = new Set();
     if (typeof srInSessionSuccesses !== 'undefined') srInSessionSuccesses = new Set();
+    if (typeof srLastServedKey !== 'undefined') srLastServedKey = { vocab: null, sentences: null };
     
     document.getElementById('startScreen').classList.add('hidden');
     document.getElementById('gameSelectionOverlay').classList.add('hidden');
@@ -702,7 +703,7 @@ function endGomokuGame(result) {
     document.getElementById('gomokuTotalTime').innerText = format(totalTimeSec);
 
     // Track session analytics and finalize SR
-    const isSessionIgnored = (result !== 'win' && totalTimeSec < 60);
+    const isSessionIgnored = (result !== 'win' && totalTimeSec < 120);
     if (typeof srGameResults !== 'undefined') {
         finalizeSession(srGameResults, !isSessionIgnored);
     }
@@ -729,7 +730,7 @@ function endGomokuGame(result) {
     const warning = document.getElementById('gomokuTargetWarning');
     if (warning) {
         if (isSessionIgnored) {
-            warning.innerText = "用时不到1分钟且挑战失败，本次练习不计入每周目标。";
+            warning.innerText = "用时不到2分钟且挑战失败，本次练习不计入每周目标。";
             warning.classList.remove('hidden');
         } else {
             warning.classList.add('hidden');

@@ -362,6 +362,12 @@ function countTargetSessions(student, start, end) {
     if (!student.analytics || !Array.isArray(student.analytics)) return 0;
     return student.analytics.filter(e => {
         if (e.type !== 'session') return false;
+        // Game-mode losses under 2 minutes don't count toward targets
+        // (anti-cheat, from 27 Jul 2026 on — not retroactive). Shared helper
+        // from frontend_auth.js (loaded before this file in
+        // teacher_dashboard.html) so the teacher meter and the student meter
+        // always agree.
+        if (isUncountedShortLoss(e)) return false;
         const ts = new Date(e.timestamp);
         return ts >= start && ts <= end;
     }).length;
@@ -526,12 +532,15 @@ function renderSessions() {
     noMsg.classList.add('hidden');
 
     tbody.innerHTML = sessions.map((s, idx) => {
+        const uncounted = isUncountedShortLoss(s)
+            ? ' <span class="badge badge-not-counted" title="Loss under 2 minutes — not counted toward target">Not counted</span>'
+            : '';
         return `<tr class="clickable" onclick="openSessionDetail(${idx})">
             <td>${formatTimestamp(s.timestamp)}</td>
             <td>${sessionModeBadge(s.sessionType)}</td>
             <td>${getSessionGameType(s)}</td>
             <td>${getSessionDifficulty(s)}</td>
-            <td>${getSessionResult(s)}</td>
+            <td>${getSessionResult(s)}${uncounted}</td>
             <td>${formatDuration(getSessionDuration(s))}</td>
         </tr>`;
     }).join('');

@@ -423,6 +423,12 @@ body {
     color: #ef4444;
 }
 
+.badge-not-counted {
+    background: rgba(148, 163, 184, 0.12);
+    color: var(--dash-text-dim);
+    border: 1px dashed rgba(148, 163, 184, 0.35);
+}
+
 .item-detail-text {
     max-width: 300px;
     white-space: nowrap;
@@ -1129,4 +1135,4 @@ body {
 @media (max-width: 600px) {
     .sr-popup-grid { grid-template-columns: 1fr; }
     .sr-state-toolbar { flex-direction: column; }
-}
+}

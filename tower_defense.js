@@ -462,36 +462,40 @@ class TowerDefenseScene extends Phaser.Scene {
     constructor() { super({ key: 'TowerDefenseScene' }); }
 
     preload() {
+        // Resolve every sprite through the TD asset cache (td_asset_cache.js):
+        // returns an instant blob: URL when prefetched/IndexedDB-cached (fast in
+        // CN, survives WeChat cache eviction), or the plain path as fallback.
+        const u = (p) => (window.TDAssets ? window.TDAssets.url(p) : p);
         // Load sprite sheets (static fallback for non-animated enemies)
-        this.load.spritesheet('td_enemies', 'sprites/td/enemies.png', {
+        this.load.spritesheet('td_enemies', u('sprites/td/enemies.png'), {
             frameWidth: 275, frameHeight: 768
         });
-        this.load.spritesheet('td_towers', 'sprites/td/towers.png', {
+        this.load.spritesheet('td_towers', u('sprites/td/towers.png'), {
             frameWidth: 341, frameHeight: 341
         });
         // Load per-character animated sprite sheets (6 frames each)
         for (const type of TD_ANIM_ENEMIES) {
-            this.load.spritesheet('td_anim_' + type, 'sprites/td/anim/' + type + '.png', {
+            this.load.spritesheet('td_anim_' + type, u('sprites/td/anim/' + type + '.png'), {
                 frameWidth: TD_ANIM_FRAME_W, frameHeight: TD_ANIM_FRAME_H
             });
         }
         // Load per-tower animated sprite sheets (5 frames each)
         for (const type of TD_ANIM_TOWERS) {
-            this.load.spritesheet('td_animt_' + type, 'sprites/td/anim/' + type + '.png', {
+            this.load.spritesheet('td_animt_' + type, u('sprites/td/anim/' + type + '.png'), {
                 frameWidth: TD_TOWER_ANIM_W, frameHeight: TD_TOWER_ANIM_H
             });
         }
         // Paper-doll puppet parts (art-puppet prototype)
         for (const part of ['head', 'torso', 'arm', 'leg']) {
-            this.load.image('td_part_dropout_' + part, 'sprites/td/anim/parts/dropout/' + part + '.png');
+            this.load.image('td_part_dropout_' + part, u('sprites/td/anim/parts/dropout/' + part + '.png'));
         }
         // Face variants for puppet expressions (attack / hit)
-        this.load.image('td_part_dropout_head_attack', 'sprites/td/anim/parts/dropout/head_attack.png');
-        this.load.image('td_part_dropout_head_hit', 'sprites/td/anim/parts/dropout/head_hit.png');
+        this.load.image('td_part_dropout_head_attack', u('sprites/td/anim/parts/dropout/head_attack.png'));
+        this.load.image('td_part_dropout_head_hit', u('sprites/td/anim/parts/dropout/head_hit.png'));
         // v2 frame-sprite dropout: two-file sheets (walk 4f, action 6f:
         // attack windup/smear/strike, hit, death collapse/settled)
-        this.load.spritesheet('td2_dropout_w', 'sprites/td/anim/dropout_walk.png', { frameWidth: 516, frameHeight: 512 });
-        this.load.spritesheet('td2_dropout_a', 'sprites/td/anim/dropout_action.png', { frameWidth: 424, frameHeight: 416 });
+        this.load.spritesheet('td2_dropout_w', u('sprites/td/anim/dropout_walk.png'), { frameWidth: 516, frameHeight: 512 });
+        this.load.spritesheet('td2_dropout_a', u('sprites/td/anim/dropout_action.png'), { frameWidth: 424, frameHeight: 416 });
     }
 
     create() {

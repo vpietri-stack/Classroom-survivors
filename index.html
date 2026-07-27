@@ -661,7 +661,7 @@
     <script src="translations.js?v=2026-07-25a"></script>
     <script src="config.js?v=2026-07-25a"></script>
     <script src="sr_engine.js?v=2026-07-25a"></script>
-    <script src="frontend_auth.js?v=2026-07-25a"></script>
+    <script src="frontend_auth.js?v=2026-07-27a"></script>
     <script src="teaching_content.js?v=2026-07-25a"></script>
     <script src="content_pu1.js?v=2026-07-25a"></script>
     <script src="content_pu2.js?v=2026-07-25a"></script>
@@ -672,9 +672,9 @@
     <script src="content_test.js?v=2026-07-25a"></script>
     <script src="class_config.js?v=2026-07-25a"></script>
     <script src="boot.js?v=2026-07-25a"></script>
-    <script src="vampire_survivors.js?v=2026-07-25a"></script>
-    <script src="gomoku.js?v=2026-07-25a"></script>
-    <script src="uno.js?v=2026-07-25a"></script>
+    <script src="vampire_survivors.js?v=2026-07-27a"></script>
+    <script src="gomoku.js?v=2026-07-27a"></script>
+    <script src="uno.js?v=2026-07-27a"></script>
 
     <!-- ===== Speech-recognition engine (self-contained, global: LocalEngine / Recorder / Scorer) ===== -->
     <script src="speech_scorer.js?v=1"></script>
@@ -752,9 +752,13 @@
             pointer-events: auto;
         }
         .td-tower-bar-items {
-            display: flex; gap: 6px; overflow-x: auto; justify-content: center;
+            display: flex; gap: 6px; overflow-x: auto;
             padding: 2px; -webkit-overflow-scrolling: touch;
         }
+        /* Center when it fits, scroll from the true start when it overflows
+           (justify-content:center clips both edges of overflowing flex rows) */
+        .td-tower-bar-items > :first-child { margin-left: auto; }
+        .td-tower-bar-items > :last-child { margin-right: auto; }
         .td-tower-btn {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             min-width: 52px; height: 54px; padding: 4px;
@@ -767,6 +771,13 @@
         .td-tower-btn.unaffordable { opacity: 0.4; }
         .td-tower-icon { font-size: 20px; line-height: 1; }
         .td-tower-cost { font-family: 'Press Start 2P', monospace; font-size: 8px; color: #ffd700; margin-top: 2px; }
+        /* Compact buttons on narrow phones so more towers fit before scrolling */
+        @media (max-width: 430px) {
+            .td-tower-btn { min-width: 44px; height: 48px; padding: 3px; }
+            .td-tower-icon { font-size: 17px; }
+            .td-tower-cost { font-size: 7px; }
+            .td-tower-bar-items { gap: 4px; }
+        }
         .td-slow-overlay {
             background: rgba(30, 80, 180, 0.15);
             backdrop-filter: blur(1px);

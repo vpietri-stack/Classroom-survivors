@@ -307,7 +307,7 @@ class TDArtPuppet {
     constructor(scene, x, y, size, key) {
         this.scene = scene;
         this.container = scene.add.container(x, y);
-        const S = size;
+        const S = size; this.S = S;
         const P = 'td_part_' + key + '_';
         // mk(texture, originX, originY[=pivot], displayH, posX, posY, mirror)
         const mk = (tex, ox, oy, h, px, py, flip) => {
@@ -321,18 +321,39 @@ class TDArtPuppet {
         // torso, head. Arms are brought to the front during attacks.
         this.legL = mk(P + 'leg', 0.5, 0.06, S * 0.36, -S * 0.06, S * 0.12, false);
         this.legR = mk(P + 'leg', 0.5, 0.06, S * 0.36, S * 0.06, S * 0.12, true);
-        this.armL = mk(P + 'arm', 0.5, 0.07, S * 0.38, -S * 0.155, -S * 0.06, false);
-        this.armR = mk(P + 'arm', 0.5, 0.07, S * 0.38, S * 0.155, -S * 0.06, true);
+        // Arm pivots tucked at the sweater's shoulder line so sleeves read attached
+        this.armL = mk(P + 'arm', 0.5, 0.07, S * 0.38, -S * 0.135, -S * 0.105, false);
+        this.armR = mk(P + 'arm', 0.5, 0.07, S * 0.38, S * 0.135, -S * 0.105, true);
         this.torso = mk(P + 'torso', 0.5, 0.08, S * 0.40, 0, -S * 0.10, false);
         this.head = mk(P + 'head', 0.5, 0.90, S * 0.46, 0, -S * 0.08, false);
         this.parts = [this.legL, this.legR, this.armL, this.armR, this.torso, this.head];
         this.legBaseScale = this.legL.scaleY; // for step foreshortening
+        this.headH = S * 0.46;
+        // Face variants: auto-used when the textures exist (head_attack/head_hit)
+        this.faceKeys = {
+            normal: P + 'head',
+            attack: scene.textures.exists(P + 'head_attack') ? P + 'head_attack' : P + 'head',
+            hit: scene.textures.exists(P + 'head_hit') ? P + 'head_hit' : P + 'head'
+        };
+        this.face = 'normal';
+        this.bodyDy = 0;   // vertical body offset (lunge/bob), applied by applyEnemyMotion
+        this.hitAt = 0;    // hit-reaction timestamp
         this._mode = 'walk';
         this.dead = false;
     }
 
-    // Front-facing puppet motion: subtle screen-plane rotations + leg
-    // foreshortening for the "stepping toward the camera" illusion.
+    setFace(name) {
+        if (this.face === name) return;
+        this.face = name;
+        const key = this.faceKeys[name];
+        if (this.head.texture.key !== key) {
+            this.head.setTexture(key);
+            this.head.setScale(this.headH / this.head.height);
+        }
+    }
+
+    // Front-facing puppet motion. States: walk / attack. A recent hit()
+    // overrides the pose with a recoil reaction for ~260ms.
     update(t, state) {
         if (this.dead) return;
         // Re-layer arms on state change: front for attacks, behind torso otherwise
@@ -346,30 +367,69 @@ class TDArtPuppet {
                 this.container.sendToBack(this.armL);
             }
         }
-        if (state === 'attack') {
-            const chop = Math.sin(t / 80);
-            // Arms raised up-OUTWARD beside the head (zombie "raaah"), chopping
-            this.armL.rotation = 2.55 + chop * 0.3;
-            this.armR.rotation = -(2.55 + chop * 0.3);
+        const S = this.S;
+        const hitK = this.hitAt ? Math.max(0, 1 - (t - this.hitAt) / 260) : 0;
+        let bodyDy = 0;
+
+        if (hitK > 0) {
+            // HIT REACTION: head snapped back, arms flung up-outward, torso recoil
+            this.setFace('hit');
+            this.head.rotation = -0.55 * hitK;
+            this.torso.rotation = -0.16 * hitK;
+            this.armL.rotation = 0.12 + 1.7 * hitK;
+            this.armR.rotation = -(0.12 + 1.7 * hitK);
+            this.legL.rotation = 0.10 * hitK;
+            this.legR.rotation = -0.10 * hitK;
+            this.legL.scaleY = this.legBaseScale;
+            this.legR.scaleY = this.legBaseScale;
+            bodyDy = -hitK * S * 0.02;
+        } else if (state === 'attack') {
+            // ATTACK: anticipation (raise) -> fast SLAM-bite with body lunge
+            this.setFace('attack');
+            const ph = (t % 650) / 650;
+            if (ph < 0.55) {
+                const k = ph / 0.55;                    // wind-up
+                const a = 0.9 + k * 1.7;                // arms rise 0.9 -> 2.6
+                this.armL.rotation = a;
+                this.armR.rotation = -a;
+                this.head.rotation = -0.10 * k;         // rear back
+                this.torso.rotation = -0.05 * k;
+                bodyDy = -k * S * 0.015;
+            } else {
+                const k = (ph - 0.55) / 0.45;           // slam
+                const e2 = k * k;                       // ease-in = impact snap
+                const a = 2.6 - e2 * 1.9;               // arms crash down 2.6 -> 0.7
+                this.armL.rotation = a;
+                this.armR.rotation = -a;
+                this.head.rotation = 0.22 * e2;         // bite nod forward
+                this.torso.rotation = 0.08 * e2;
+                bodyDy = e2 * S * 0.05;                 // lunge INTO the bite
+            }
             this.legL.rotation = 0.06;
             this.legR.rotation = -0.06;
             this.legL.scaleY = this.legBaseScale;
             this.legR.scaleY = this.legBaseScale;
-            this.head.rotation = chop * 0.12;
-            this.torso.rotation = chop * 0.04;
         } else {
+            // WALK: subtle sway + step foreshortening + body bob
+            this.setFace('normal');
             const sw = Math.sin(t / 170);
-            // Subtle arm sway (big angles read as jumping jacks in front view)
-            this.armL.rotation = sw * 0.18;
-            this.armR.rotation = -sw * 0.18;
+            this.armL.rotation = 0.10 + sw * 0.18;
+            this.armR.rotation = -(0.10 + sw * 0.18);
             this.legL.rotation = -sw * 0.10;
             this.legR.rotation = sw * 0.10;
-            // Step illusion: each leg alternately shortens as its knee lifts
             this.legL.scaleY = this.legBaseScale * (1 - Math.max(0, sw) * 0.18);
             this.legR.scaleY = this.legBaseScale * (1 - Math.max(0, -sw) * 0.18);
             this.head.rotation = Math.sin(t / 340) * 0.06;
             this.torso.rotation = Math.sin(t / 340) * 0.025;
+            bodyDy = -Math.abs(sw) * S * 0.012;         // step bounce
         }
+        this.bodyDy = bodyDy;
+    }
+
+    // Hit feedback: white flash + pose reaction (see update)
+    hit() {
+        this.hitAt = this.scene.time.now;
+        this.flash();
     }
 
     flash() {
@@ -435,6 +495,9 @@ class TowerDefenseScene extends Phaser.Scene {
         for (const part of ['head', 'torso', 'arm', 'leg']) {
             this.load.image('td_part_dropout_' + part, 'sprites/td/anim/parts/dropout/' + part + '.png');
         }
+        // Face variants for expressions — uncomment when the files exist:
+        // this.load.image('td_part_dropout_head_attack', 'sprites/td/anim/parts/dropout/head_attack.png');
+        // this.load.image('td_part_dropout_head_hit', 'sprites/td/anim/parts/dropout/head_hit.png');
     }
 
     create() {
@@ -970,9 +1033,9 @@ class TowerDefenseScene extends Phaser.Scene {
     applyEnemyMotion(e) {
         const t = this.time.now;
         if (e.puppet) {
-            // Puppet animates itself — position the rig, drive limb state
-            e.gfx.setPosition(e.x, e.y);
+            // Puppet animates itself — drive limb state, then apply body offset
             e.puppet.update(t, (e.attacking || e.attackingSchool) ? 'attack' : 'walk');
+            e.gfx.setPosition(e.x, e.y + (e.puppet.bodyDy || 0));
             return;
         }
         if (!e.hasAnim) {
@@ -1131,9 +1194,8 @@ class TowerDefenseScene extends Phaser.Scene {
                 this.spawnDeathParticles(e.x, e.y, e.type);
             }
         } else if (e.hp > 0 && e.puppet && !e.dying) {
-            // Puppet hit feedback: white flash + shove
-            e.puppet.flash();
-            e.hitKickAt = this.time.now;
+            // Puppet hit feedback: white flash + recoil pose (head snap, arm fling)
+            e.puppet.hit();
             if (!e.attackingSchool) e.y = Math.max(this.gridTop - 20, e.y - this.cellH * 0.05);
         } else if (e.hp > 0 && e.hasAnim && !e.dying) {
             // White flash on every hit (PvZ-style feedback, never interrupts walk)
@@ -1621,6 +1683,10 @@ function triggerTowerDefense() {
         'gameOverScreen', 'gameIntroOverlay', 'studyModeOverlay', 'unoScreen',
         'unoGameOverScreen', 'tdGameOverScreen', 'hud'
     ].forEach(id => { const e = document.getElementById(id); if (e) e.classList.add('hidden'); });
+    // Floating utility buttons overlap the tower bar on phones — hide during TD
+    ['themeToggleBtn', 'speechDebugToggle'].forEach(id => {
+        const e = document.getElementById(id); if (e) e.style.display = 'none';
+    });
 
     if (typeof initAudio === 'function') initAudio();
 
@@ -1644,6 +1710,9 @@ function triggerTowerDefense() {
         if (game.scene.isActive('MainScene')) game.scene.stop('MainScene');
         if (game.scene.isActive('UnoScene')) game.scene.stop('UnoScene');
         if (game.scene.isActive('TowerDefenseScene')) game.scene.stop('TowerDefenseScene');
+        // Menu-return path (game.js) hides the canvas with display:none — restore it,
+        // otherwise the scene runs invisibly on replay (purple-screen bug)
+        if (game.canvas) game.canvas.style.display = '';
         if (game.scale && typeof game.scale.setParent === 'function') {
             game.scale.setParent(document.body);
         } else {
@@ -1676,6 +1745,10 @@ function tdReturnToMenu() {
     const go = document.getElementById('tdGameOverScreen'); if (go) go.classList.add('hidden');
     const bar = document.getElementById('tdTowerBar'); if (bar) bar.classList.add('hidden');
     const overlay = document.getElementById('tdSlowOverlay'); if (overlay) overlay.classList.add('hidden');
+    // Restore floating utility buttons hidden during TD
+    ['themeToggleBtn', 'speechDebugToggle'].forEach(id => {
+        const e = document.getElementById(id); if (e) e.style.display = '';
+    });
     if (game && game.scene.isActive('TowerDefenseScene')) game.scene.stop('TowerDefenseScene');
     activeGameMode = null;
     if (typeof showGameSelection === 'function') showGameSelection();

@@ -37,9 +37,6 @@ class MainScene extends Phaser.Scene {
         this.invulnTimer = 0;
 
         // --- Game-feel ("juice") state ---
-        this.hitstopUntil = 0;          // world-freeze on meaty impacts
-        this.lastHitstopAt = 0;         // cooldown so hitstop stays a rare accent
-        this.recentKills = [];          // timestamps for multi-kill detection
         this.combo = 0;                 // kill combo counter
         this.comboExpire = 0;
         this.particlePool = [];         // shared pooled particles (perf)
@@ -265,9 +262,6 @@ class MainScene extends Phaser.Scene {
             return;
         }
         if (this.gameState !== 'PLAYING') return;
-
-        // Hitstop: world briefly slowed to ~12% on meaty impacts (game feel)
-        this.physics.world.timeScale = this.time.now < this.hitstopUntil ? 8 : 1;
 
         let dx = 0, dy = 0;
         const speed = 160 * this.playerStats.speed; // Doubled base speed (from 80 to 160)
@@ -1517,13 +1511,8 @@ class MainScene extends Phaser.Scene {
             enemy.body.setDrag(1000);
             synthHit();
 
-            // Kill juice: combo + hitstop on boss kills and multi-kills
+            // Kill juice: combo counter
             this.registerCombo();
-            const nowK = this.time.now;
-            this.recentKills.push(nowK);
-            this.recentKills = this.recentKills.filter(t => nowK - t < 300);
-            if (enemy.isBoss) this.hitstop(120, true);
-            else if (this.recentKills.length >= 4) this.hitstop(50); // cooldown-gated inside
 
             // Death Ring Explosion Particles
             const explosionColor = enemy.isBoss ? 0xff00ff : 0x00ff88;
@@ -1715,16 +1704,6 @@ class MainScene extends Phaser.Scene {
         } else if (this.vignette.alpha > 0) {
             this.vignette.setAlpha(0);
         }
-    }
-
-    // Freeze the world briefly on meaty impacts (see update()).
-    // Cooldown-gated: continuous multi-kills during swarm clears must NOT
-    // strobe the timescale (reads as jitter). force = boss kills only.
-    hitstop(ms, force = false) {
-        const now = this.time.now;
-        if (!force && now - this.lastHitstopAt < 1200) return;
-        this.lastHitstopAt = now;
-        this.hitstopUntil = Math.max(this.hitstopUntil, now + ms);
     }
 
     // Kill-combo bookkeeping: chained kills within 1.5s build the counter

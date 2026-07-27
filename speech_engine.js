@@ -230,9 +230,53 @@
     // (also covers future hosts that cap file size below our 30 MB decoder).
     : [SAME_ORIGIN, MS_SOURCE];
 
-  // MIME-sensitive assets always same-origin (imported, need real JS MIME).
-  const LIB_URL   = new URL('lib/transformers.min.js?v=4', location.href).href;
-  const WASM_PATH = new URL('lib/wasm/', location.href).href;
+  // ---- Speech runtime (Transformers.js bundle + matched ORT wasm) ----------
+  // These files are IMPORTED (ES modules), so they need a real JS/wasm MIME
+  // type — the CN proxies serve text/plain, so unlike the fetched model
+  // weights they can NEVER go through gh-proxy/ModelScope.
+  //
+  // WHY TWO LOCATIONS (compile-cache stability — read before changing):
+  // Browsers cache the COMPILED machine code of the 23MB ORT wasm alongside
+  // its HTTP cache entry. GitHub Pages ETags are hex(deploy-mtime)-hex(size),
+  // so EVERY app deploy re-stamps every file → the browser sees "changed",
+  // discards the compiled code, and each device pays a ~160s recompile
+  // (field-measured 2026-07). The separate Classroom-survivors-lib repo is
+  // deployed ONCE and then never pushed again → stable ETags → the compile
+  // cache survives app deploys. GitHub project sites share the
+  // vpietri-stack.github.io origin, so those URLs are still same-origin here.
+  //
+  // RULES (mirrored in that repo's README — keep both in sync):
+  //   • NEVER edit files in Classroom-survivors-lib in place.
+  //   • Upgrading Transformers.js/onnxruntime: the JS bundle and the wasm are
+  //     a version-locked PAIR — put the complete new pair in a NEW tjs-vN/
+  //     folder there, push once, then bump STABLE_LIB_BASE below.
+  //   • KEEP the local lib/ copies in this repo — pickLibBase() probes the
+  //     stable repo and falls back to them automatically, so a broken/deleted
+  //     lib repo degrades to today's behavior instead of breaking speech.
+  const STABLE_LIB_BASE = 'https://vpietri-stack.github.io/Classroom-survivors-lib/tjs-v3/';
+  const LOCAL_LIB_URL   = new URL('lib/transformers.min.js?v=4', location.href).href;
+  const LOCAL_WASM_PATH = new URL('lib/wasm/', location.href).href;
+
+  // Decide where to import the runtime from: the stable lib repo when we're on
+  // GitHub Pages AND it answers quickly; this repo's own lib/ otherwise (local
+  // dev, other hosts, or lib repo unreachable). The probe hits the small .mjs
+  // (48KB) so a missing lib repo can never stall the speech load.
+  async function pickLibBase() {
+    const h = (location.hostname || '').toLowerCase();
+    if (!h.endsWith('.github.io')) return null; // non-Pages host → local copy
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 6000);
+      const r = await fetch(STABLE_LIB_BASE + 'wasm/ort-wasm-simd-threaded.jsep.mjs',
+        { method: 'HEAD', signal: ctrl.signal });
+      clearTimeout(timer);
+      if (r.ok) return STABLE_LIB_BASE;
+      log('Engine: stable lib repo returned ' + r.status + ' → same-origin lib');
+    } catch (_) {
+      log('Engine: stable lib repo unreachable → same-origin lib');
+    }
+    return null;
+  }
 
   let transcriber = null;     // cached pipeline
   let loading = null;          // in-flight promise
@@ -289,8 +333,23 @@
       // mirror from hanging the load forever on first download (GFW).
       patchFetchForModel();
 
-      log('Engine: importing transformers.js (same-origin) …');
-      const { pipeline, env } = await import(LIB_URL);
+      log('Engine: importing transformers.js …');
+      // Prefer the never-redeployed lib repo (stable ETags keep the browser's
+      // compiled-wasm cache valid across app deploys → no ~160s recompile).
+      const libBase = await pickLibBase();
+      let wasmPath = libBase ? libBase + 'wasm/' : LOCAL_WASM_PATH;
+      let pipeline, env;
+      try {
+        ({ pipeline, env } = await import(libBase ? libBase + 'transformers.min.js' : LOCAL_LIB_URL));
+        log('Engine: runtime lib → ' + (libBase ? 'stable lib repo' : 'same-origin'));
+      } catch (e) {
+        if (!libBase) throw e; // local import failing is fatal (nothing else to try)
+        // Stable repo answered the probe but the import still failed — fall
+        // back to the matched local pair (lib + wasm must switch TOGETHER).
+        log('Engine: stable lib import failed (' + ((e && e.message) || e) + ') → same-origin lib');
+        ({ pipeline, env } = await import(LOCAL_LIB_URL));
+        wasmPath = LOCAL_WASM_PATH;
+      }
 
       // Weights from the chosen (fast, CN-reachable) mirror; lib+wasm same-origin.
       // allowRemoteModels stays OFF so the blocked huggingface.co is NEVER contacted.
@@ -298,7 +357,7 @@
       env.allowRemoteModels = false;
       env.localModelPath = MODEL_DIR;
       env.backends.onnx.wasm.proxy = false;
-      env.backends.onnx.wasm.wasmPaths = WASM_PATH;
+      env.backends.onnx.wasm.wasmPaths = wasmPath;
 
       log('Engine: loading ' + MODEL_ID + ' from ' + src.name + ' (quantized, wasm) — first load ~41 MB …');
       const pipelineOpts = {

@@ -17,6 +17,15 @@ function itemKey(item) {
     return JSON.stringify(item).toLowerCase();
 }
 
+// 1 in 5 selected items should introduce NEW (never-seen) material, so review
+// backlogs can never fully starve forward progress through the book.
+const SR_NEW_CONTENT_RATIO = 0.2;
+// After this many lifetime lapses an item is treated as a "leech": pure
+// repetition isn't working, so it comes back every 2 sessions instead of every
+// session (burnout guard). The lapse count is kept in the item state so the
+// teacher dashboard can surface these items later.
+const SR_LEECH_LAPSES = 4;
+
 /**
  * Priority groups (lower = higher priority):
  *   0  failed during THIS game session (in-memory inSessionFailures set)
@@ -24,7 +33,8 @@ function itemKey(item) {
  *   2  succeeded before, now due/overdue (lastResult='success', dueAfterSession <= currentSession)
  *   3  never seen (no SR state)
  *   4  in cooldown — EXCLUDED from selection (dueAfterSession > currentSession)
- *   5  succeeded THIS session — used only as absolute fallback
+ *   5  succeeded THIS session — sorts LAST, served only when nothing else remains
+ *      (absolute fallback so game-mode pickers never return an empty result)
  *
  * @param {string} key            normalised item key
  * @param {Object} srTypeState    the per-type sub-object (e.g. srState.vocab)
@@ -72,12 +82,15 @@ function shuffleArray(arr) {
  * Annotates a pool of { item, key, pageAbsIndex } entries with priority,
  * filters out cooldown items (group 4), and returns a sorted copy.
  *
- * Within group 2: sorted by dueAfterSession DESC ("closeness" = most recently due first).
+ * Within group 2: sorted by dueAfterSession DESC ("closeness" = most recently due
+ *                 first), with random tie-breaking so equally-due items rotate
+ *                 between sessions instead of the same subset always winning.
  * Within group 3: sorted by ascending page distance from activePageIndex.
  * Groups 0 and 1: randomly shuffled within the group.
  *
- * Items already succeeded THIS session (inSessionSuccesses) are excluded entirely:
- * a first-attempt success should never be re-prompted again this session (bug B).
+ * Items already succeeded THIS session (inSessionSuccesses, group 5) sort LAST:
+ * a first-attempt success is never re-prompted while any other material exists,
+ * but remains available as an absolute fallback (empty pools crash minigames).
  */
 function sortPoolBySR(pool, srTypeState, currentSession, activePageIndex, inSessionFailures, inSessionSuccesses) {
     const annotated = pool.map(entry => ({
@@ -89,10 +102,16 @@ function sortPoolBySR(pool, srTypeState, currentSession, activePageIndex, inSess
     const g1 = annotated.filter(e => e.priority.group === 1);
     const g2 = annotated.filter(e => e.priority.group === 2);
     const g3 = annotated.filter(e => e.priority.group === 3);
+    const g5 = annotated.filter(e => e.priority.group === 5);
 
     shuffleArray(g0);
     shuffleArray(g1);
-    g2.sort((a, b) => (b.priority.dueAfterSession || 0) - (a.priority.dueAfterSession || 0));
+    shuffleArray(g5);
+    g2.forEach(e => { e._tieBreak = Math.random(); });
+    g2.sort((a, b) =>
+        ((b.priority.dueAfterSession || 0) - (a.priority.dueAfterSession || 0)) ||
+        (b._tieBreak - a._tieBreak)
+    );
     
     // Group 3: Weighted random based on page distance
     g3.forEach(e => {
@@ -103,7 +122,56 @@ function sortPoolBySR(pool, srTypeState, currentSession, activePageIndex, inSess
     });
     g3.sort((a, b) => b._randomScore - a._randomScore);
 
-    return [...g0, ...g1, ...g2, ...g3];
+    return [...g0, ...g1, ...g2, ...g3, ...g5];
+}
+
+/**
+ * Picks `count` entries from a sortPoolBySR() result while reserving ~1 in 5
+ * slots (SR_NEW_CONTENT_RATIO) for NEW items (group 3), so heavy review
+ * backlogs can't fully starve new content.
+ *
+ *   - Group 0 (failed this session) always claims its slots first.
+ *   - Remaining slots split review (groups 1-2) vs new (group 3); a fractional
+ *     new-slot becomes a probability (a single game-mode pick is new 20% of
+ *     the time when both pools are non-empty).
+ *   - Either side backfills the other when short; group 5 is the last resort.
+ *
+ * @param {Array}  sorted  annotated entries from sortPoolBySR()
+ * @param {number} count
+ * @returns {Array} picked entries (still annotated)
+ */
+function pickWithNewQuota(sorted, count) {
+    if (sorted.length <= count) return sorted.slice(0, count);
+
+    const g0 = [], review = [], fresh = [], fallback = [];
+    sorted.forEach(e => {
+        const g = e.priority.group;
+        if (g === 0) g0.push(e);
+        else if (g === 1 || g === 2) review.push(e);
+        else if (g === 3) fresh.push(e);
+        else fallback.push(e);   // group 5
+    });
+
+    const picked = g0.slice(0, count);
+    const remaining = count - picked.length;
+    if (remaining <= 0) return picked;
+
+    const exactNew = remaining * SR_NEW_CONTENT_RATIO;
+    let newSlots = Math.floor(exactNew);
+    if (Math.random() < exactNew - newSlots) newSlots++;
+    newSlots = Math.min(newSlots, fresh.length);
+
+    const reviewSlots = remaining - newSlots;
+    picked.push(...review.slice(0, reviewSlots));
+    picked.push(...fresh.slice(0, newSlots));
+
+    // Backfill when either pool ran short (then group-5 absolute fallback).
+    const backfill = [...review.slice(reviewSlots), ...fresh.slice(newSlots), ...fallback];
+    for (const e of backfill) {
+        if (picked.length >= count) break;
+        picked.push(e);
+    }
+    return picked;
 }
 
 /**
@@ -116,12 +184,18 @@ function sortPoolBySR(pool, srTypeState, currentSession, activePageIndex, inSess
  * @param {number} activePageIndex for page-proximity tie-breaking among unseen items
  * @param {Set}   [inSessionFailures]
  * @param {Set}   [inSessionSuccesses]
+ * @param {string} [avoidKey]       last-served key — skipped for this pick when an
+ *                                  alternative exists (1-selection repeat delay)
  * @returns {Array} raw item values (strings or pair objects)
  */
-function selectItemsSR(pool, count, srTypeState, currentSession, activePageIndex, inSessionFailures, inSessionSuccesses) {
+function selectItemsSR(pool, count, srTypeState, currentSession, activePageIndex, inSessionFailures, inSessionSuccesses, avoidKey) {
     if (!pool || pool.length === 0) return [];
-    const sorted = sortPoolBySR(pool, srTypeState, currentSession, activePageIndex, inSessionFailures, inSessionSuccesses);
-    return sorted.slice(0, count).map(e => e.item);
+    let sorted = sortPoolBySR(pool, srTypeState, currentSession, activePageIndex, inSessionFailures, inSessionSuccesses);
+    if (avoidKey && sorted.length > 1) {
+        const filtered = sorted.filter(e => e.key !== avoidKey);
+        if (filtered.length > 0) sorted = filtered;
+    }
+    return pickWithNewQuota(sorted, count).map(e => e.item);
 }
 
 /**
@@ -173,7 +247,7 @@ function selectSamePageSR(pagesWithItems, count, srTypeState, currentSession, ac
     const winner = scored[0];
     return {
         pageAbsIndex: winner.page.pageAbsIndex,
-        items: winner.sorted.slice(0, count).map(e => e.item)
+        items: pickWithNewQuota(winner.sorted, count).map(e => e.item)
     };
 }
 
@@ -181,10 +255,15 @@ function selectSamePageSR(pagesWithItems, count, srTypeState, currentSession, ac
  * Computes the updated srState after a session ends.
  *
  * Rules:
- *   first attempt success → interval = prev_interval * 2 (or 2 if never seen / after failure)
- *                           dueAfterSession = currentSession + newInterval
- *   failure               → interval = 1 (due next session, no matter what)
- *                           dueAfterSession = currentSession + 1
+ *   first attempt success → consecutive success doubles the interval; recovering
+ *                           from a failure resumes at max(2, priorInterval / 2)
+ *                           (soft reset — one lapse doesn't erase months of
+ *                           history); otherwise interval = 2.
+ *   failure               → interval = 1 (due next session); the pre-failure
+ *                           interval is preserved as priorInterval and the
+ *                           lifetime lapse counter increments. Items with
+ *                           SR_LEECH_LAPSES+ lapses get interval 2 instead
+ *                           (leech guard — see constant above).
  *
  * @param {Object} srState        full SR state { vocab:{}, sentences:{}, sentencePairs:{} }
  * @param {Array}  sessionResults [{ type:'vocab'|'sentences'|'sentencePairs', key, firstAttempt:bool }, ...]
@@ -206,24 +285,42 @@ function updateSRStateForSession(srState, sessionResults, currentSession) {
         if (firstAttempt) {
             const prevResult = existing && existing.lastResult;
             const prevInterval = existing && existing.interval || 0;
-            // Consecutive successes double the interval; failure or first-time resets to 2
-            const newInterval = (prevResult === 'success' && prevInterval >= 2)
-                ? prevInterval * 2
-                : 2;
+            let newInterval;
+            if (prevResult === 'success' && prevInterval >= 2) {
+                // Consecutive successes double the interval
+                newInterval = prevInterval * 2;
+            } else if (prevResult === 'failure' && existing && existing.priorInterval) {
+                // Soft reset: recovering from a lapse resumes at half the
+                // pre-failure interval instead of restarting from scratch.
+                newInterval = Math.max(2, Math.floor(existing.priorInterval / 2));
+            } else {
+                newInterval = 2;
+            }
             newState[type][key] = {
                 interval: newInterval,
                 dueAfterSession: currentSession + newInterval,
                 lastSession: currentSession,
-                lastResult: 'success'
+                lastResult: 'success',
+                lapses: (existing && existing.lapses) || 0
             };
         } else {
-            // Failure: interval resets to 1 so the item is due next session,
-            // regardless of whether the session later ends or the item is retried.
+            const lapses = ((existing && existing.lapses) || 0) + 1;
+            // Remember the best interval held before this failure chain so a
+            // later success can resume at half of it (soft reset).
+            const priorInterval = Math.max(
+                (existing && existing.lastResult === 'success' && existing.interval) || 0,
+                (existing && existing.priorInterval) || 0
+            );
+            // Failure: due next session — except leeches (see SR_LEECH_LAPSES),
+            // which come back every 2 sessions to avoid burnout.
+            const interval = lapses >= SR_LEECH_LAPSES ? 2 : 1;
             newState[type][key] = {
-                interval: 1,
-                dueAfterSession: currentSession + 1,
+                interval: interval,
+                dueAfterSession: currentSession + interval,
                 lastSession: currentSession,
-                lastResult: 'failure'
+                lastResult: 'failure',
+                lapses: lapses,
+                priorInterval: priorInterval
             };
         }
     });

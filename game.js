@@ -749,6 +749,10 @@ function loadContent() {
 var srGameResults = [];  // [{ type, key, firstAttempt }, ...]
 var srInSessionFailures = new Set();  // Set of keys failed at least once this session
 var srInSessionSuccesses = new Set(); // Set of keys succeeded on first attempt this session
+// Last item served per type: passed to the SR picker so the same word/sentence
+// is never served twice back-to-back (a failed item returns after ONE other
+// item, forcing real retrieval instead of a short-term-memory echo).
+var srLastServedKey = { vocab: null, sentences: null };
 
 // --- MINIGAMES ---
 
@@ -758,7 +762,11 @@ function startSpellingGame() {
 
     // SR-aware selection
     const { book, unit, page } = selectedClassContent;
-    const word = getGameItemSR(book, unit, page, 'vocab', srInSessionFailures, srInSessionSuccesses);
+    let word = getGameItemSR(book, unit, page, 'vocab', srInSessionFailures, srInSessionSuccesses, srLastServedKey.vocab);
+    // SR can return undefined when everything is on cooldown or already
+    // succeeded this session — fall back to any loaded word, never crash.
+    if (!word) word = SPELLING_WORDS[Math.floor(Math.random() * SPELLING_WORDS.length)];
+    srLastServedKey.vocab = itemKey(word);
     currentTTSWord = word;
     showTranslation('spelling-translation', word);
     showVocabImage('spelling-image', word);
@@ -1141,7 +1149,7 @@ function startGrammarGame() {
     startExerciseTracking();
 
     const { book, unit, page } = selectedClassContent;
-    let rawEntry = getGameItemSR(book, unit, page, 'sentences', srInSessionFailures, srInSessionSuccesses);
+    let rawEntry = getGameItemSR(book, unit, page, 'sentences', srInSessionFailures, srInSessionSuccesses, srLastServedKey.sentences);
 
     // SR lookup can return undefined or [] (empty spaced-repetition pool).
     // Normalize to a list of usable sentence strings, falling back to any
@@ -1155,6 +1163,7 @@ function startGrammarGame() {
     }
     if (possibilities.length === 0) { handleMinigameSuccess('grammar'); return; }
     const primarySentence = possibilities[0];
+    srLastServedKey.sentences = itemKey(primarySentence);
 
     // Store valid possibilities for validation
     const grammarGameEl = document.getElementById('grammarGame');
@@ -1570,7 +1579,11 @@ function checkSentenceMatch() {
                         srInSessionSuccesses.add(pairKey);
                     } else {
                         // Fail-then-success: never re-prompt again this session (spec A).
+                        // Must ALSO join the success set — deleting from the failure
+                        // set alone drops the pair back to its persisted (still-due)
+                        // group and it would be re-selected immediately.
                         srInSessionFailures.delete(pairKey);
+                        srInSessionSuccesses.add(pairKey);
                     }
 
                     queueExerciseEvent('sentenceMatch', 'game', itemDetails, pairAttempts[targetIndex]);
@@ -1661,7 +1674,11 @@ function handleMinigameSuccess(gameType) {
                 srInSessionSuccesses.add(key);
             } else {
                 // Fail-then-success: never re-prompt again this session (spec A).
+                // Must ALSO join the success set — deleting from the failure set
+                // alone drops the key back to its persisted (still-due) group and
+                // it would be re-selected immediately.
                 srInSessionFailures.delete(key);
+                srInSessionSuccesses.add(key);
             }
         }
 

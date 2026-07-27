@@ -16,6 +16,15 @@ const STUDY_STATE = {
 var srStudyResults = [];  // [{ type, key, firstAttempt }, ...]
 var srUsedPairKeys = new Set();    // sentence-pair keys already shown in Round F this session
 
+// Non-blocking notice (replaces alert(): kids shouldn't hit a modal on start).
+function showStudyNotice(msg) {
+    const n = document.createElement('div');
+    n.className = 'fixed top-4 left-1/2 -translate-x-1/2 z-[9999] bg-amber-500 text-white px-4 py-2 rounded-lg shadow-lg text-sm font-bold';
+    n.innerText = msg;
+    document.body.appendChild(n);
+    setTimeout(() => n.remove(), 4000);
+}
+
 // Entry point
 function initStudyMode() {
     // Determine book/unit/page from current selection
@@ -31,14 +40,18 @@ function initStudyMode() {
     const SR_SENTENCES = getStudyContentSR(book, unit, page, 'sentences', 5);
 
     if (SR_WORDS.length < 5 || SR_SENTENCES.length < 5) {
-        alert("Not enough content for Study Mode! Need at least 5 words and 5 sentences from current and previous pages.");
-        if (SR_WORDS.length === 0 || SR_SENTENCES.length === 0) return;
+        if (SR_WORDS.length === 0 || SR_SENTENCES.length === 0) {
+            showStudyNotice("Not enough content for Study Mode on this page yet.");
+            return;
+        }
+        showStudyNotice("Fewer than 5 words/sentences available — running a shorter session.");
     }
 
     STUDY_STATE.active = true;
     STUDY_STATE.startTime = Date.now();
     STUDY_STATE.round = 'A';
     STUDY_STATE.isTransitioning = false;
+    STUDY_STATE.srFinalized = false;
 
     // Reset SR tracking for this session
     srStudyResults = [];
@@ -386,6 +399,13 @@ function checkRoundC() {
     // to the bank (it depletes on placement, so a wrong check must restore them).
     STUDY_STATE._roundCFrozen = true;
     synthError();
+    // Record SR failure at the FIRST wrong check (parity with game mode): the
+    // item is due next session even if the student quits before succeeding.
+    // The canonical collapse in finalizeSession keeps this first record even
+    // after the later success push.
+    if (exerciseAttempts === 1) {
+        srStudyResults.push({ type: 'vocab', key: itemKey(targetWord), firstAttempt: false });
+    }
     incrementExerciseAttempts();
     const slotsArr = Array.from(slots);
     slotsArr.forEach(s => {
@@ -906,6 +926,10 @@ function checkRoundE() {
     } else {
         STUDY_STATE._roundEFrozen = true; // freeze during reveal (not a transition, so CLEAR still works)
         synthError();
+        // Record SR failure at the FIRST wrong check (parity with game mode).
+        if (exerciseAttempts === 1) {
+            srStudyResults.push({ type: 'sentences', key: itemKey(STUDY_STATE.sentences[STUDY_STATE.currentSentenceIndex]), firstAttempt: false });
+        }
         incrementExerciseAttempts();
         dropZone.classList.add('border-red-500');
         if (STUDY_STATE._roundEResetTimer) clearTimeout(STUDY_STATE._roundEResetTimer);
@@ -1096,6 +1120,11 @@ function checkRoundF() {
                 tile.classList.add('wrong-match');
                 tile.style.backgroundColor = '#ef4444'; // red
                 allCorrect = false;
+                // Record SR failure at the FIRST wrong check for this pair
+                // (parity with game mode; collapse keeps it over a later success).
+                if (STUDY_STATE.pairAttempts[targetIndex] === 1 && !STUDY_STATE.pairQueued[targetIndex]) {
+                    srStudyResults.push({ type: 'sentencePairs', key: itemKey(pairs[targetIndex]), firstAttempt: false });
+                }
             }
         } else {
             allCorrect = false;
@@ -1165,6 +1194,7 @@ function finishStudySession() {
 
     // Track session completion
     // Finalize SR state for this session before flushing
+    STUDY_STATE.srFinalized = true;
     finalizeSession(srStudyResults);
 
     queueSessionEvent('study', {
@@ -1196,6 +1226,13 @@ function finishStudySession() {
 }
 
 function exitStudyMode() {
+    // Abandoning mid-session must not lose observed results (failures are
+    // recorded at the first wrong check). Partial sessions don't advance the
+    // session counter; the completed case is handled by finishStudySession.
+    if (STUDY_STATE.active && !STUDY_STATE.srFinalized && srStudyResults.length > 0) {
+        finalizeSession(srStudyResults, false);
+        srStudyResults = [];
+    }
     STUDY_STATE.active = false; // so the game-mode keydown listener resumes
     document.getElementById('studyModeOverlay').classList.add('hidden');
     goBackFromGameSelection(); // back to the main dashboard (also shows startScreen)

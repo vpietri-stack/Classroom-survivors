@@ -475,7 +475,7 @@ function getStudySentencePairsSubRoundSR(book, unit, page, usedPairKeys, preferP
     const winner = pool[0];
     return {
         pageAbsIndex: winner.page.pageAbsIndex,
-        pairs: winner.sorted.slice(0, 3).map(e => e.item)
+        pairs: pickWithNewQuota(winner.sorted, 3).map(e => e.item)
     };
 }
 
@@ -488,9 +488,10 @@ function getStudySentencePairsSubRoundSR(book, unit, page, usedPairKeys, preferP
  * @param {'vocab'|'sentences'} type
  * @param {Set<string>} inSessionFailures  keys failed earlier this game session
  * @param {Set<string>} inSessionSuccesses keys succeeded earlier this game session
+ * @param {string} [avoidKey]  last-served key, delayed one pick (no back-to-back repeats)
  * @returns {*} a single item value (string)
  */
-function getGameItemSR(book, unit, page, type, inSessionFailures, inSessionSuccesses) {
+function getGameItemSR(book, unit, page, type, inSessionFailures, inSessionSuccesses, avoidKey) {
     if (!authActiveUser || !authActiveUser.srState) {
         return getWeightedItemForGame(book, unit, page, type);
     }
@@ -507,7 +508,7 @@ function getGameItemSR(book, unit, page, type, inSessionFailures, inSessionSucce
     const srTypeState = authActiveUser.srState[srKey] || {};
 
     const selected = selectItemsSR(
-        flatPool, 1, srTypeState, getCurrentSession(), activePageIndex, inSessionFailures, inSessionSuccesses
+        flatPool, 1, srTypeState, getCurrentSession(), activePageIndex, inSessionFailures, inSessionSuccesses, avoidKey
     );
     return selected[0];
 }

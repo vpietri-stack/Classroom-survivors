@@ -269,7 +269,12 @@ const playTTS = () => {
     //   → MP3 via gh-proxy mirror (fast + seeds the cache for next time)
     //   → Baidu TTS (robotic, last network resort)
     //   → browser speechSynthesis
-    const mp3Path = `audio_mp3/${text}.mp3`;
+    // Filename convention shared with AssetCache.audioPath: recordings are
+    // named after the exact phrase text minus Windows-illegal characters
+    // ("Does he want?" → "Does he want.mp3").
+    const mp3Path = (window.AssetCache && AssetCache.audioPath)
+        ? AssetCache.audioPath(text)
+        : 'audio_mp3/' + text.replace(/[\\/:*?"<>|]/g, '').trim() + '.mp3';
 
     const playCachedMP3 = () => {
         if (window.AssetCache && AssetCache.getCached) {
@@ -288,7 +293,7 @@ const playTTS = () => {
     };
 
     const playLocalMP3 = () => {
-        const plainUrl = `audio_mp3/${encodeURIComponent(text)}.mp3`;
+        const plainUrl = mp3Path.split('/').map(encodeURIComponent).join('/');
         if (window.AssetCache && AssetCache.getBlobUrl) {
             // Mirror-aware download; also persists to IndexedDB so the NEXT
             // play of this phrase hits the instant cached branch above.

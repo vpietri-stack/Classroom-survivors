@@ -1168,7 +1168,7 @@ TEACHING_CONTENT["PU1"] = {
         },
         "61": {
             vocab: [
-                "Does he want?", "Does she want?", "yes, he does", "no, he doesn't", "yes, she does", "no, she doesn't",
+                "Does he want?", "Does she want?", "Yes, he does", "No, he doesn't", "Yes, she does", "No, she doesn't",
                 "he wants", "he doesn't want", "she wants", "she doesn't want"
             ],
             sentences: [

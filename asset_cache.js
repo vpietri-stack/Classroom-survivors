@@ -203,7 +203,9 @@
     return 'images/vocab/' + word.trim().toLowerCase().replace(/ /g, '-') + '.png';
   }
   function audioPath(text) {
-    return 'audio_mp3/' + text + '.mp3';
+    // Strip characters that cannot appear in Windows filenames (the recordings
+    // live in the repo): \ / : * ? " < > |  — e.g. "Does he want?" → "Does he want.mp3"
+    return 'audio_mp3/' + text.replace(/[\\/:*?"<>|]/g, '').trim() + '.mp3';
   }
 
   // Prefetch the CURRENT teaching page's vocab images + recordings as soon as

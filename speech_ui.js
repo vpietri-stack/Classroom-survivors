@@ -421,10 +421,11 @@
         // A hard mic/engine error also counts toward revealing Skip.
         failCount++;
         if (failCount >= SKIP_AFTER_FAILS) skip.style.display = '';
+        // No microphone at all (unsupported browser/hardware): reveal Skip
+        // right away — like permission-denied, the student can't do anything.
+        if (/Microphone unavailable/i.test(String((err && err.message) || err))) skip.style.display = '';
       },
       // Junk audio caught BEFORE transcription: instant, specific coaching.
-      // Counts toward revealing Skip so a student whose mic never captures
-      // audio (e.g. broken/covered mic) still has a way out.
       onGated: function (reason, meta) {
         logSpeechEvent('gated', mode, {
           target: target, level: level, reason: reason,
@@ -436,8 +437,14 @@
         feedback.innerText = reason === 'too_short'
           ? '\u23F1 \u592a\u77ed\u5566\uff01\u70b9\u51fb\u540e\u8bf7\u8bfb\u5b8c\u6574\u4e2a\u53e5\u5b50\u518d\u70b9\u505c\u6b62'
           : '\uD83D\uDD07 \u6ca1\u542c\u5230\u58f0\u97f3 \u2014 \u8bf7\u5927\u58f0\u4e00\u70b9\uff0c\u79bb\u9ea6\u514b\u98ce\u8fd1\u4e00\u70b9';
-        failCount++;
-        if (failCount >= SKIP_AFTER_FAILS) skip.style.display = '';
+        // too_short does NOT count toward Skip — otherwise spam-tapping the
+        // button three times becomes a fast bypass of the exercise. too_quiet/
+        // empty DO count: that's the faulty/muted-mic path (a mic that captures
+        // nothing) and those students genuinely need the Skip escape hatch.
+        if (reason !== 'too_short') {
+          failCount++;
+          if (failCount >= SKIP_AFTER_FAILS) skip.style.display = '';
+        }
       },
       onPermissionDenied: function () { showMicHelp('getUserMedia'); }
     });

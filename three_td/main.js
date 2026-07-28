@@ -10,6 +10,8 @@ import { Player } from './player.js';
 import { WaveDirector, WAVES } from './enemies.js';
 import { BuildManager } from './build.js';
 import { updateHUD, showWaveBanner, showSkipButton, showEnd } from './hud.js';
+import { loadAssets } from './assets.js';
+import { initFx, updateFx } from './fx.js';
 
 // ---------------- RENDERER ----------------
 const canvas = document.getElementById('gameCanvas');
@@ -56,7 +58,9 @@ function updateCamera(dt) {
     while (diff < -Math.PI) diff += Math.PI * 2;
     camAngle += diff * Math.min(1, dt * 6);
 
-    followPoint.lerp(new THREE.Vector3(game.player.pos.x, 0, game.player.pos.z), Math.min(1, dt * 5));
+    if (game.player) {
+        followPoint.lerp(new THREE.Vector3(game.player.pos.x, 0, game.player.pos.z), Math.min(1, dt * 5));
+    }
     const fx = followPoint.x, fz = followPoint.z;
     const cx = fx + Math.sin(camAngle) * Math.cos(ELEV) * CAM_DIST;
     const cz = fz + Math.cos(camAngle) * Math.cos(ELEV) * CAM_DIST;
@@ -75,7 +79,7 @@ function updateCamera(dt) {
 
 // ---------------- GAME CONTEXT ----------------
 const nav = new NavGrid();
-const worldRefs = buildWorld(scene);
+let worldRefs = null;                    // built after assets load
 const input = new Input();
 
 const game = {
@@ -105,17 +109,26 @@ const game = {
     }
 };
 
-game.player = new Player(scene);
-game.build = new BuildManager(scene, worldRefs, nav);
 game.waves = new WaveDirector();
-Object.defineProperty(game, 'structures', { get: () => game.build.structures });
+Object.defineProperty(game, 'structures', { get: () => (game.build ? game.build.structures : []) });
+
+// Build the world + entities once GLB assets are loaded (or failed → procedural).
+let _initDone = false;
+function initGame() {
+    if (_initDone) return;
+    _initDone = true;
+    worldRefs = buildWorld(scene);
+    game.player = new Player(scene);
+    game.build = new BuildManager(scene, worldRefs, nav);
+    initFx(scene, camera);
+}
 
 // ---------------- INPUT WIRING ----------------
-input.on('sword', () => game.player.trySword(game));
-input.on('bow', () => game.player.tryBow(game));
-input.on('special', () => game.player.trySpecial(game));
-input.on('buildToggle', () => game.build.toggle());
-input.on('buildSelect', t => game.build.select(t));
+input.on('sword', () => game.player && game.player.trySword(game));
+input.on('bow', () => game.player && game.player.tryBow(game));
+input.on('special', () => game.player && game.player.trySpecial(game));
+input.on('buildToggle', () => game.build && game.build.toggle());
+input.on('buildSelect', t => game.build && game.build.select(t));
 input.on('rotate', dir => {
     azimuthIdx = (azimuthIdx + (dir > 0 ? 1 : 3)) % 4;
     camTargetAngle = THREE.MathUtils.degToRad(45 + 90 * azimuthIdx);
@@ -125,7 +138,7 @@ input.on('rotate', dir => {
 const raycaster = new THREE.Raycaster();
 const ndc = new THREE.Vector2();
 function tryPlaceFromScreen(clientX, clientY) {
-    if (!game.build.open || !game.build.selected) return;
+    if (!worldRefs || !game.build || !game.build.open || !game.build.selected) return;
     ndc.set((clientX / window.innerWidth) * 2 - 1, -(clientY / window.innerHeight) * 2 + 1);
     raycaster.setFromCamera(ndc, camera);
     const hits = raycaster.intersectObject(worldRefs.terrain);
@@ -136,7 +149,7 @@ function tryPlaceFromScreen(clientX, clientY) {
 }
 canvas.addEventListener('mousedown', e => tryPlaceFromScreen(e.clientX, e.clientY));
 canvas.addEventListener('touchstart', e => {
-    if (!game.build.open) return;
+    if (!game.build || !game.build.open) return;
     const t = e.changedTouches[0];
     tryPlaceFromScreen(t.clientX, t.clientY);
     e.preventDefault();
@@ -144,7 +157,7 @@ canvas.addEventListener('touchstart', e => {
 
 // ---------------- WAVE FLOW ----------------
 let gapTimer = 0;
-const FIRST_GAP = 6, BETWEEN_GAP = 15;
+const FIRST_GAP = 8, BETWEEN_GAP = 15;
 
 function startGap(seconds) {
     game.state = 'gap';
@@ -176,6 +189,7 @@ function endGame(won) {
 }
 
 document.getElementById('startBtn').addEventListener('click', () => {
+    if (!_initDone) return;
     document.getElementById('startOverlay').classList.add('hidden');
     game.startedAt = performance.now();
     showWaveBanner('🏫 Defend the School!', 'Build up before the first wave hits');
@@ -258,54 +272,73 @@ function updateEffects(dt) {
 
 // ---------------- MAIN LOOP ----------------
 let last = performance.now();
-let firstFrame = true;
+
+// Advance the simulation by dt seconds (no render). Factored out so the rAF
+// loop and the headless debug stepper (window.__step) share identical logic.
+function stepSim(dt) {
+    game.time += dt;
+    if (game.state === 'menu') return;
+
+    game.player.update(dt, game);
+
+    if (game.state === 'gap') {
+        gapTimer -= dt;
+        showSkipButton(true, gapTimer);
+        if (gapTimer <= 0) startWave();
+    } else if (game.state === 'wave') {
+        game.waves.update(dt, game);
+        if (game.waves.waveCleared(game)) {
+            game.player.onWaveClear();
+            game.enemies = game.enemies.filter(e => !e.dead);
+            if (game.waves.hasMoreWaves) {
+                showWaveBanner('✅ Wave cleared!', '+10 arrows · +10 HP');
+                startGap(BETWEEN_GAP);
+            } else {
+                endGame(true);
+            }
+        }
+    }
+
+    for (const e of game.enemies) e.update(dt, game);
+    game.build.updateTowers(dt, game);
+    game.build.updateDrops(dt, game);
+    game.build.updateHighlights(dt, game);
+    updateProjectiles(dt);
+    updateEffects(dt);
+    updateFx(dt);
+    updateHUD(game);
+}
 
 function loop(now) {
     requestAnimationFrame(loop);
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
-    game.time += dt;
-
-    if (game.state !== 'menu') {
-        game.player.update(dt, game);
-
-        if (game.state === 'gap') {
-            gapTimer -= dt;
-            showSkipButton(true, gapTimer);
-            if (gapTimer <= 0) startWave();
-        } else if (game.state === 'wave') {
-            game.waves.update(dt, game);
-            if (game.waves.waveCleared(game)) {
-                game.player.onWaveClear();
-                // purge dead enemy records
-                game.enemies = game.enemies.filter(e => !e.dead);
-                if (game.waves.hasMoreWaves) {
-                    showWaveBanner('✅ Wave cleared!', '+10 arrows · +10 HP');
-                    startGap(BETWEEN_GAP);
-                } else {
-                    endGame(true);
-                }
-            }
-        }
-
-        for (const e of game.enemies) e.update(dt, game);
-        game.build.updateTowers(dt, game);
-        game.build.updateDrops(dt, game);
-        game.build.updateHighlights(dt, game);
-        updateProjectiles(dt);
-        updateEffects(dt);
-        updateHUD(game);
-    }
-
+    stepSim(dt);
     updateCamera(dt);
     renderer.render(scene, camera);
-
-    if (firstFrame) {
-        firstFrame = false;
-        document.getElementById('loadingMsg').style.display = 'none';
-    }
 }
 requestAnimationFrame(loop);
 
+// ---------------- BOOTSTRAP ----------------
+// Load GLB assets (with visible progress), then build the world. If any
+// asset fails (offline/older browser), models.js falls back to procedural
+// primitives — the game always becomes playable.
+const loadingMsg = document.getElementById('loadingMsg');
+const startBtn = document.getElementById('startBtn');
+startBtn.disabled = true;
+startBtn.style.opacity = '0.5';
+loadAssets((done, total) => {
+    loadingMsg.textContent = `Loading models… ${done}/${total}`;
+}).catch(e => {
+    console.warn('[assets] load error — using procedural models', e);
+}).finally(() => {
+    initGame();
+    loadingMsg.style.display = 'none';
+    startBtn.disabled = false;
+    startBtn.style.opacity = '1';
+});
+
 // Expose for headless testing / debugging
 window.__game = game;
+// Deterministic stepper for headless tests (rAF pauses when the tab is hidden).
+window.__step = (dt = 1 / 60, n = 1) => { for (let i = 0; i < n; i++) stepSim(dt); renderer.render(scene, camera); };

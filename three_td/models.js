@@ -6,6 +6,7 @@
 // later without touching game logic.
 // ============================================================
 import * as THREE from 'three';
+import { hasAsset, cloneModel } from './assets.js';
 
 const _mats = new Map();
 export function mat(color) {
@@ -117,7 +118,38 @@ export function makeEnemy(type) {
 }
 
 // ---------------- STRUCTURES ----------------
+// Build a GLB tower: base model + a "head" model on top that aims/spins.
+function glbTower(baseKey, topKey, opts = {}) {
+    const g = new THREE.Group();
+    const baseScale = opts.baseScale || 1.7;
+    const base = cloneModel(baseKey, baseScale);
+    g.add(base);
+    const baseTopY = (opts.baseTop != null ? opts.baseTop : 0.6) * baseScale;
+    const pivot = new THREE.Group();
+    pivot.position.y = baseTopY;
+    const top = cloneModel(topKey, opts.topScale || 1.8);
+    pivot.add(top);
+    g.add(pivot);
+    g.userData.head = pivot;
+    return g;
+}
+
 export function makeStructure(type, level = 1) {
+    // Prefer GLB models when the asset pack loaded; else procedural.
+    // Walls stay procedural: the crenellated stone block reads as a
+    // defensive wall far better than the kit's wooden scaffold.
+    if (hasAsset('towerRound')) {
+        if (type === 'arrow') return glbTower('towerRound', 'ballista', { topScale: 1.9 });
+        if (type === 'cannon') return glbTower('towerSquare', 'cannon', { baseTop: 0.5, topScale: 2.0 });
+        if (type === 'frost') {
+            const g = glbTower('towerRound', 'crystals', { topScale: 1.4 });
+            return g;
+        }
+    }
+    return makeStructureProcedural(type, level);
+}
+
+function makeStructureProcedural(type, level = 1) {
     const g = new THREE.Group();
     if (type === 'wall') {
         const c = level >= 2 ? 0x8d9aa8 : 0xa8a29a;
@@ -182,6 +214,13 @@ export function makeSchool() {
 
 // ---------------- SCENERY ----------------
 export function makeTree(scale = 1) {
+    if (hasAsset('tree')) {
+        const key = Math.random() < 0.5 ? 'tree' : 'treeSmall';
+        const m = cloneModel(key, (key === 'tree' ? 4.2 : 5.5) * scale);
+        m.rotation.y = Math.random() * Math.PI * 2;
+        m.position.y = -0.15; // sink slightly into sloped terrain
+        return m;
+    }
     const g = new THREE.Group();
     g.add(cyl(0.18, 0.24, 1.0, 0x6b4a2b, 0, 0.5, 0, 6));
     g.add(cone(1.0, 1.6, 0x2e7d46, 0, 1.7, 0, 7));
@@ -190,6 +229,13 @@ export function makeTree(scale = 1) {
     return g;
 }
 export function makeRock(scale = 1) {
+    if (hasAsset('rock')) {
+        const key = Math.random() < 0.5 ? 'rock' : 'rockSmall';
+        const m = cloneModel(key, (key === 'rock' ? 2.6 : 3.2) * scale);
+        m.rotation.y = Math.random() * Math.PI * 2;
+        m.position.y = -0.1; // sink slightly into sloped terrain
+        return m;
+    }
     const m = new THREE.Mesh(new THREE.DodecahedronGeometry(0.6, 0), mat(0x8f9498));
     m.position.y = 0.3 * scale;
     m.scale.set(scale, scale * 0.7, scale);

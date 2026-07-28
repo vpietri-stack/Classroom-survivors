@@ -7,9 +7,10 @@
 import * as THREE from 'three';
 import { makeEnemy, makeMagicBolt } from './models.js';
 import { terrainHeight, worldToCell, SCHOOL_R, GATES } from './world.js';
+import { spawnBurst, showFloatText } from './fx.js';
 
 export const ENEMY_STATS = {
-    runner: { hp: 25, speed: 5.5, coins: 3, schoolDmg: 1, schoolRate: 2.2, playerDmg: 6, structDmg: 6, attackRate: 1.0, radius: 0.55, wallMult: 1.0 },
+    runner: { hp: 25, speed: 5.5, coins: 4, schoolDmg: 1, schoolRate: 2.2, playerDmg: 6, structDmg: 6, attackRate: 1.0, radius: 0.55, wallMult: 1.0 },
     ranged: { hp: 40, speed: 3.5, coins: 5, schoolDmg: 1, schoolRate: 2.2, playerDmg: 6, structDmg: 6, attackRate: 1.5, radius: 0.6, wallMult: 1.0, shootRange: 8.5, projDmg: 6, projSpeed: 12 },
     tank: { hp: 120, speed: 2.2, coins: 8, schoolDmg: 3, schoolRate: 2.8, playerDmg: 10, structDmg: 20, attackRate: 1.4, radius: 0.85, wallMult: 0.2 },
     boss: { hp: 600, speed: 1.8, coins: 40, schoolDmg: 5, schoolRate: 3.0, playerDmg: 15, structDmg: 40, attackRate: 1.6, radius: 1.5, wallMult: 0.2 }
@@ -48,6 +49,12 @@ export class Enemy {
         const bob = this.type === 'runner' ? Math.abs(Math.sin(this.bobT * 9)) * 0.25 : 0;
         this.pos.y = terrainHeight(this.pos.x, this.pos.z);
         this.mesh.position.set(this.pos.x, this.pos.y + bob, this.pos.z);
+        // tanks/boss sway heavily side to side; ranged glide with a gentle roll
+        if (this.type === 'tank' || this.type === 'boss') {
+            this.mesh.rotation.z = Math.sin(this.bobT * 3.2) * 0.07;
+        } else if (this.type === 'ranged') {
+            this.mesh.rotation.z = Math.sin(this.bobT * 2.1) * 0.05;
+        }
     }
 
     _ensurePath(game) {
@@ -194,12 +201,15 @@ export class Enemy {
         if (this.dead) return;
         this.hp -= n;
         this.flashT = 0.25;
+        spawnBurst(this.pos, 0xffe08a, 4, 4);
+        showFloatText(this.pos, String(Math.round(n)), '#ffd75e', 15);
         if (this.hp <= 0) this._die(game);
     }
 
     _die(game) {
         this.dead = true;
         game.kills++;
+        spawnBurst(this.pos, 0xff6b6b, 10, 7);
         game.build.dropCoins(this.pos, this.st.coins);
         if ((this.type === 'tank' || this.type === 'boss') && Math.random() < 0.8) {
             game.build.dropAmmo(this.pos);
@@ -217,7 +227,7 @@ export const WAVES = [
     { runner: 10, tank: 2, ranged: 0, boss: 0, hpMult: 1.0, interval: 1.1, gates: 1 },
     { runner: 12, tank: 3, ranged: 3, boss: 0, hpMult: 1.1, interval: 1.0, gates: 2 },
     { runner: 16, tank: 5, ranged: 5, boss: 0, hpMult: 1.2, interval: 0.85, gates: 3 },
-    { runner: 22, tank: 8, ranged: 8, boss: 1, hpMult: 1.3, interval: 0.7, gates: 3 }
+    { runner: 18, tank: 6, ranged: 6, boss: 1, hpMult: 1.25, interval: 0.75, gates: 3 }
 ];
 
 export class WaveDirector {

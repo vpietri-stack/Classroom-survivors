@@ -4,6 +4,7 @@
 // ============================================================
 
 const el = id => document.getElementById(id);
+import { PLAYER } from './player.js';
 const cache = {};
 function setText(id, v) {
     if (cache[id] === v) return;
@@ -21,7 +22,7 @@ export function updateHUD(game) {
     el('hudSchool').classList.toggle('danger', game.schoolHp <= 9);
 
     // special cooldown radial (conic-gradient percentage)
-    const pct = Math.round(game.player.specialCd / 45 * 100);
+    const pct = Math.round(game.player.specialCd / PLAYER.SPECIAL_CD * 100);
     el('btnSpecial').style.setProperty('--cd', pct + '%');
     el('btnSpecial').classList.toggle('disabled', pct > 0);
     el('btnBow').classList.toggle('disabled', game.player.arrows <= 0);

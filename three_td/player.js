@@ -6,12 +6,13 @@
 import * as THREE from 'three';
 import { makePlayer, makeArrowProjectile, makeShockwave } from './models.js';
 import { terrainHeight, worldToCell, MAP_HALF, SCHOOL_R } from './world.js';
+import { spawnBurst, showFloatText } from './fx.js';
 
 export const PLAYER = {
     MAX_HP: 50, SPEED: 8,
     SWORD_DMG: 15, SWORD_RANGE: 2.8, SWORD_ARC: Math.PI * 2 / 3, SWORD_CD: 0.45,
     BOW_DMG: 12, BOW_CD: 0.5, ARROW_SPEED: 24, START_ARROWS: 30,
-    SPECIAL_DMG: 60, SPECIAL_RADIUS: 7, SPECIAL_CD: 45,
+    SPECIAL_DMG: 60, SPECIAL_RADIUS: 7, SPECIAL_CD: 30,
     RESPAWN_TIME: 5
 };
 
@@ -30,14 +31,18 @@ export class Player {
         this.respawnTimer = 0;
         this.swingT = -1;                 // sword swing anim progress
         this.hurtFlash = 0;
+        this.walkT = 0;                   // walk-cycle phase
+        this.moving = false;
         scene.add(this.mesh);
         this._syncMesh();
     }
 
     _syncMesh() {
         this.pos.y = terrainHeight(this.pos.x, this.pos.z);
-        this.mesh.position.copy(this.pos);
+        const bob = this.moving ? Math.abs(Math.sin(this.walkT)) * 0.14 : 0;
+        this.mesh.position.set(this.pos.x, this.pos.y + bob, this.pos.z);
         this.mesh.rotation.y = this.facing;
+        this.mesh.rotation.z = this.moving ? Math.sin(this.walkT) * 0.05 : 0;
     }
 
     update(dt, game) {
@@ -53,6 +58,7 @@ export class Player {
 
         // --- camera-relative movement ---
         const mv = game.input.move;
+        this.moving = false;
         if (mv.x !== 0 || mv.y !== 0) {
             const fwd = game.cameraForward;   // XZ-projected unit vector (set by main)
             const right = { x: -fwd.z, z: fwd.x };
@@ -65,6 +71,8 @@ export class Player {
             if (this._canStand(nx, this.pos.z, game)) this.pos.x = nx;
             if (this._canStand(this.pos.x, nz, game)) this.pos.z = nz;
             if (m > 0.05) this.facing = Math.atan2(dx, dz);
+            this.moving = true;
+            this.walkT += dt * 11;
         }
 
         // --- sword swing animation ---
@@ -169,6 +177,9 @@ export class Player {
         if (this.dead || this.hurtFlash > 0) return;
         this.hp -= n;
         this.hurtFlash = 0.6;
+        spawnBurst(this.pos, 0xff4444, 6, 5);
+        showFloatText(this.pos, '-' + n, '#ff6b6b', 16);
+        game.shakeCamera(0.25);
         if (this.hp <= 0) {
             this.hp = 0;
             this.dead = true;

@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 import { makeStructure, makeCoin, makeAmmoPack, makeArrowProjectile, makeCannonBall } from './models.js';
 import { terrainHeight, worldToCell, cellCenter, isBuildableCell } from './world.js';
+import { spawnBurst, showFloatText } from './fx.js';
 
 export const STRUCT_DEFS = {
     wall: { cost: 10, hp: 200, reinforceCost: 10, reinforceHp: 150 },
@@ -19,7 +20,7 @@ export class BuildManager {
         this.scene = scene;
         this.nav = nav;
         this.worldRefs = worldRefs;      // { gridGroup, cellGeo, cellMatOk, cellMatSel }
-        this.coins = 40;
+        this.coins = 60;
         this.open = false;
         this.selected = null;
         this.structures = [];
@@ -121,6 +122,7 @@ export class BuildManager {
     damage(struct, n, game) {
         struct.hp -= n;
         struct.flashT = 0.2;
+        spawnBurst(struct.pos, 0xb0a494, 4, 4);
         const ratio = Math.max(0, struct.hp / struct.maxHp);
         struct.hpBar.bg.visible = true;
         struct.hpBar.fg.visible = true;
@@ -252,8 +254,13 @@ export class BuildManager {
                     d.mesh.position.z += dz / (dist || 1) * 8 * dt;
                 }
                 if (dist < 0.9) {
-                    if (d.kind === 'coin') this.coins += d.value;
-                    else p.arrows += d.value;
+                    if (d.kind === 'coin') {
+                        this.coins += d.value;
+                        showFloatText(p.pos, '+' + d.value + ' 🪙', '#ffd75e', 14);
+                    } else {
+                        p.arrows += d.value;
+                        showFloatText(p.pos, '+' + d.value + ' 🏹', '#9fd6ff', 14);
+                    }
                     this.scene.remove(d.mesh);
                     this.drops.splice(i, 1);
                     this._refreshBarUI();

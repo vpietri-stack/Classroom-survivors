@@ -15,6 +15,15 @@ class MainScene extends Phaser.Scene {
         super({ key: 'MainScene' });
     }
 
+    preload() {
+        // Paper-doll puppet parts for the chibi student hero (sliced from the
+        // Nano Banana parts sheet by vs_slice_parts.js)
+        this.load.image('p_body', 'sprites/vs/player_body.png');
+        this.load.image('p_arm', 'sprites/vs/player_arm.png');
+        this.load.image('p_foot_l', 'sprites/vs/player_foot_l.png');
+        this.load.image('p_foot_r', 'sprites/vs/player_foot_r.png');
+    }
+
     create() {
         this.startTime = Date.now();
         this.frameTime = 0;
@@ -140,16 +149,36 @@ class MainScene extends Phaser.Scene {
         this.powerUps = this.physics.add.group();
         this.tornados = this.physics.add.group();
 
-        this.player = this.add.image(0, 0, 'player').setOrigin(0.5);
-        this.player.setScale(1.5);
+        // --- PLAYER: paper-doll puppet (chibi student) with emoji fallback ---
+        if (this.textures.exists('p_body')) {
+            const PS = 0.18; // part scale
+            const footBaseY = 30;
+            const footL = this.add.image(-9, footBaseY, 'p_foot_l').setScale(PS);
+            const footR = this.add.image(9, footBaseY, 'p_foot_r').setScale(PS);
+            // Ruler arm pivots at its shoulder cap (top-left of the part)
+            const arm = this.add.image(15, -20, 'p_arm').setOrigin(0.12, 0.18).setScale(PS);
+            const body = this.add.image(0, -10, 'p_body').setScale(PS);
+            this.playerParts = { body, arm, footL, footR, footBaseY, armBaseAngle: 15, armSwinging: false };
+            arm.setAngle(this.playerParts.armBaseAngle);
+            this.player = this.add.container(0, 0, [footL, footR, arm, body]);
+            this.player.setSize(44, 44);
+        } else {
+            this.playerParts = null;
+            this.player = this.add.image(0, 0, 'player').setOrigin(0.5);
+            this.player.setScale(1.5);
+        }
         this.physics.add.existing(this.player);
-        // Tight hitbox: was radius 30 (x1.5 scale = 45px effective, whole sprite
-        // incl. transparent margin) — big cause of "hit out of nowhere"
-        this.player.body.setCircle(16);
-        this.player.body.setOffset(
-            (this.player.width - 16 * 2) / 2,
-            (this.player.height - 16 * 2) / 2
-        );
+        // Tight hitbox (was effectively 45px radius incl. transparent margin —
+        // a big cause of "hit out of nowhere")
+        if (this.playerParts) {
+            this.player.body.setCircle(22);
+        } else {
+            this.player.body.setCircle(16);
+            this.player.body.setOffset(
+                (this.player.width - 16 * 2) / 2,
+                (this.player.height - 16 * 2) / 2
+            );
+        }
         this.player.body.setCollideWorldBounds(false);
 
         this.cameras.main.startFollow(this.player);
@@ -292,19 +321,34 @@ class MainScene extends Phaser.Scene {
             this.invulnTimer--;
             const isFlashing = this.invulnTimer % 10 < 5;
             this.player.alpha = isFlashing ? 0.6 : 1;
-            this.player.setTint(isFlashing ? 0xff0000 : 0xffffff);
+            this.tintPlayer(isFlashing ? 0xff0000 : null);
         } else {
             this.player.alpha = 1;
-            this.player.clearTint();
+            this.tintPlayer(null);
         }
         const wobble = Math.sin(this.gameTime * 0.25) * 0.08;
-        if (dx !== 0 || dy !== 0) {
-            const facingX = dx < 0 ? -1.5 : (dx > 0 ? 1.5 : (this.player.scaleX > 0 ? 1.5 : -1.5));
-            this.player.setScale(facingX * (1 + wobble), 1.5 * (1 - wobble));
+        const baseS = this.playerParts ? 1 : 1.5;
+        const moving = (dx !== 0 || dy !== 0);
+        if (moving) {
+            const facingX = dx < 0 ? -baseS : (dx > 0 ? baseS : (this.player.scaleX > 0 ? baseS : -baseS));
+            this.player.setScale(facingX * (1 + wobble), baseS * (1 - wobble));
         } else {
             const idleWobble = Math.sin(this.gameTime * 0.08) * 0.04;
-            const facingX = this.player.scaleX > 0 ? 1.5 : -1.5;
-            this.player.setScale(facingX * (1 + idleWobble), 1.5 * (1 - idleWobble));
+            const facingX = this.player.scaleX > 0 ? baseS : -baseS;
+            this.player.setScale(facingX * (1 + idleWobble), baseS * (1 - idleWobble));
+        }
+        // Puppet life: feet shuffle while moving, ruler-arm sways at rest
+        if (this.playerParts) {
+            const pp = this.playerParts;
+            if (moving) {
+                const step = Math.sin(this.gameTime * 0.4);
+                pp.footL.y = pp.footBaseY - Math.max(0, step) * 7;
+                pp.footR.y = pp.footBaseY - Math.max(0, -step) * 7;
+            } else {
+                pp.footL.y = pp.footBaseY;
+                pp.footR.y = pp.footBaseY;
+            }
+            if (!pp.armSwinging) pp.arm.angle = pp.armBaseAngle + Math.sin(this.gameTime * 0.1) * 6;
         }
 
         this.bg.tilePositionX = this.cameras.main.scrollX;
@@ -762,6 +806,7 @@ class MainScene extends Phaser.Scene {
 
     performWhipStrike(direction, damage, range, duration, whipLevel = 1) {
         synthShoot('whip');
+        this.swingRulerArm(duration);
         const whip = this.add.graphics();
         const cpx = this.player.x;
         const cpy = this.player.y;
@@ -1442,6 +1487,36 @@ class MainScene extends Phaser.Scene {
         });
     }
 
+    // Tint all puppet parts (Containers have no setTint); null clears
+    tintPlayer(color) {
+        const pp = this.playerParts;
+        if (pp) {
+            [pp.body, pp.arm, pp.footL, pp.footR].forEach(img => {
+                if (color === null) img.clearTint(); else img.setTint(color);
+            });
+        } else if (this.player.setTint) {
+            if (color === null) this.player.clearTint(); else this.player.setTint(color);
+        }
+    }
+
+    // The hero's ruler arm snaps through a swing in rhythm with the whip attack
+    swingRulerArm(strikeMs) {
+        const pp = this.playerParts;
+        if (!pp) return;
+        pp.armSwinging = true;
+        this.tweens.killTweensOf(pp.arm);
+        pp.arm.angle = -60; // wind up high
+        this.tweens.add({
+            targets: pp.arm, angle: 80, duration: Math.max(100, (strikeMs || 150) * 0.9), ease: 'Quad.out',
+            onComplete: () => {
+                this.tweens.add({
+                    targets: pp.arm, angle: pp.armBaseAngle, duration: 260, ease: 'Sine.out',
+                    onComplete: () => { pp.armSwinging = false; }
+                });
+            }
+        });
+    }
+
     handlePlayerHit(player, enemy) {
         if (this.invulnTimer > 0) return;
         // Touch no longer hurts: only a connecting LUNGE deals damage.
@@ -1967,7 +2042,7 @@ class MainScene extends Phaser.Scene {
         const s = this.shadowGfx;
         s.clear();
         s.fillStyle(0x000000, 0.22);
-        s.fillEllipse(this.player.x, this.player.y + 26, 34, 12);
+        s.fillEllipse(this.player.x, this.player.y + (this.playerParts ? 40 : 26), 36, 13);
         const list = this.enemies.getChildren();
         for (let i = 0; i < list.length; i++) {
             const e = list[i];
@@ -2175,7 +2250,7 @@ class MainScene extends Phaser.Scene {
             duration: 2000,
             onUpdate: (tween) => {
                 const value = Math.floor(tween.getValue());
-                this.player.setTint(Phaser.Display.Color.GetColor(255, value, value));
+                this.tintPlayer(Phaser.Display.Color.GetColor(255, value, value));
             },
             onComplete: () => {
                 this.cameras.main.flash(500, 255, 255, 255);

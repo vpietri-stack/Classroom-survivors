@@ -228,7 +228,9 @@
   // The recorder emits standard 44-byte-header 16-bit mono WAV, so duration
   // and peak amplitude can be read directly from the blob (post VAD-trim,
   // i.e. this measures actual speech content, not wall-clock hold time).
-  const MIN_SPEECH_MS = 1500;   // shortest plausible sentence reading
+  const MIN_SPEECH_MS = 1000;   // shortest plausible sentence reading (NB: measured
+                                // post VAD-trim — field-tested 2026-07-29: 1.5s false-
+                                // rejected a normal-pace "He's my brother")
   const MIN_PEAK_AMP  = 0.02;   // below this the recording is essentially silence
   function wavStats(blob) {
     return blob.arrayBuffer().then(function (buf) {

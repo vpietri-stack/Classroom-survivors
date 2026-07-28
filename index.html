@@ -464,6 +464,10 @@
                     id="towerDefenseBtn"
                     class="game-btn text-2xl w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all"
                     onclick="triggerTowerDefense()">🏫 Tower Defense (Defend the Base)</button>
+                <button
+                    id="threeTdBtn"
+                    class="game-btn text-2xl bg-emerald-600 hover:bg-emerald-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all hidden"
+                    onclick="window.location.href='three_td.html'">⚔️ School Defense 3D (beta)</button>
             </div>
             <button
                 onclick="goBackFromGameSelection()"
@@ -659,7 +663,7 @@
     </div>
 
     <script src="translations.js?v=2026-07-25a"></script>
-    <script src="config.js?v=2026-07-25a"></script>
+    <script src="config.js?v=2026-07-28a"></script>
     <script src="sr_engine.js?v=2026-07-25a"></script>
     <script src="frontend_auth.js?v=2026-07-27b"></script>
     <script src="teaching_content.js?v=2026-07-25a"></script>
@@ -816,6 +820,18 @@
     <script src="asset_cache.js?v=1"></script>
     <script src="tower_defense.js?v=2026-07-28c"></script>
     <script src="study_mode.js?v=2026-07-27a"></script>
+    <script>
+        // School Defense 3D (three.js POC) menu entry: revealed ONLY where
+        // THREE_TD_ENABLED (config.js) is true — preview deploy, localhost,
+        // file://, or ?3d=1. On the live site the button simply doesn't exist
+        // (deliberately NOT the greyed-out treatment used for Tower Defense).
+        (function () {
+            if (typeof THREE_TD_ENABLED !== 'undefined' && THREE_TD_ENABLED) {
+                var b = document.getElementById('threeTdBtn');
+                if (b) b.classList.remove('hidden');
+            }
+        })();
+    </script>
 </body>
 
 </html>

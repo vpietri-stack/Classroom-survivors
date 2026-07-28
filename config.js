@@ -51,3 +51,19 @@ const TD_ENABLED = (function () {
     // Preview deploy path -> enabled. Everything else (incl. live) -> disabled.
     return path.indexOf('/classroom-survivors-preview') === 0;
 })();
+
+// ============================================================
+// SCHOOL DEFENSE 3D (three.js POC) GATING — same runtime detection as
+// TD_ENABLED above, but stricter UX: when disabled the menu button is
+// NOT rendered at all (no greyed-out placeholder on the live site).
+// ?3d=1 forces it on anywhere for quick manual checks, ?3d=0 forces off.
+// ============================================================
+const THREE_TD_ENABLED = (function () {
+    const path = window.location.pathname.toLowerCase();
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('3d')) return params.get('3d') !== '0';
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return true;
+    if (window.location.protocol === 'file:') return true;
+    // Preview deploy path -> visible. Everything else (incl. live) -> absent.
+    return path.indexOf('/classroom-survivors-preview') === 0;
+})();

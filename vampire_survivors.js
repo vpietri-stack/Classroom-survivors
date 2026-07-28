@@ -53,6 +53,7 @@ class MainScene extends Phaser.Scene {
         // --- Walking word-puzzle state ---
         this.puzzle = null;            // active ground puzzle (null = none)
         this.puzzleDone = new Set();   // in-session dedup of completed items
+        this.puzzleWantSentence = Math.random() < 0.5; // alternates word/sentence
 
         // Background music (gapless loop via bgm.js); stops on scene shutdown
         if (window.BGM) BGM.start();
@@ -64,20 +65,12 @@ class MainScene extends Phaser.Scene {
 
         this.physics.world.setBounds(-4000, -4000, 8000, 8000);
 
-        if (!this.textures.exists('grass')) {
-            const gr = this.make.graphics({ x: 0, y: 0, add: false });
-            gr.fillStyle(0x2d5016);
-            gr.fillRect(0, 0, 512, 512);
-            for (let i = 0; i < 50; i++) {
-                gr.fillStyle(0x3d6b1e, 0.5);
-                gr.fillCircle(Phaser.Math.Between(0, 512), Phaser.Math.Between(0, 512), Phaser.Math.Between(2, 10));
-            }
-            gr.generateTexture('grass', 512, 512);
-            gr.destroy();
-        }
+        this.buildLawnTexture();
+        this.buildChalkDecalTextures();
 
-        this.bg = this.add.tileSprite(this.scale.width / 2, this.scale.height / 2, this.scale.width, this.scale.height, 'grass').setOrigin(0.5);
+        this.bg = this.add.tileSprite(this.scale.width / 2, this.scale.height / 2, this.scale.width, this.scale.height, 'lawn2').setOrigin(0.5);
         this.bg.setScrollFactor(0);
+        this.bg.setDepth(-10); // world decals (-5) render above the lawn
 
         // Blob shadows layer: created right after bg so it renders under all
         // characters (creation order), redrawn each frame in updateJuice()
@@ -155,8 +148,9 @@ class MainScene extends Phaser.Scene {
             const footBaseY = 30;
             const footL = this.add.image(-9, footBaseY, 'p_foot_l').setScale(PS);
             const footR = this.add.image(9, footBaseY, 'p_foot_r').setScale(PS);
-            // Ruler arm pivots at its shoulder cap (top-left of the part)
-            const arm = this.add.image(15, -20, 'p_arm').setOrigin(0.12, 0.18).setScale(PS);
+            // Ruler arm pivots at its shoulder cap — mounted at the body's
+            // shoulder line (was -20: sprouted from the head)
+            const arm = this.add.image(16, -1, 'p_arm').setOrigin(0.12, 0.18).setScale(PS);
             const body = this.add.image(0, -10, 'p_body').setScale(PS);
             this.playerParts = { body, arm, footL, footR, footBaseY, armBaseAngle: 15, armSwinging: false };
             arm.setAngle(this.playerParts.armBaseAngle);
@@ -182,6 +176,26 @@ class MainScene extends Phaser.Scene {
         this.player.body.setCollideWorldBounds(false);
 
         this.cameras.main.startFollow(this.player);
+
+        // Chalk playground doodles scattered across the world (schoolyard feel)
+        this.bgDecals = new Map();
+        this.updateBgDecals();
+
+        // Soft ambient vignette (constant, subtle depth; separate from the
+        // red low-HP warning vignette)
+        if (!this.textures.exists('vs_ambient')) {
+            const c = this.textures.createCanvas('vs_ambient', 256, 256);
+            const cx2 = c.getContext();
+            const grd = cx2.createRadialGradient(128, 128, 60, 128, 128, 132);
+            grd.addColorStop(0, 'rgba(8,22,16,0)');
+            grd.addColorStop(1, 'rgba(8,22,16,0.34)');
+            cx2.fillStyle = grd;
+            cx2.fillRect(0, 0, 256, 256);
+            c.refresh();
+        }
+        this.ambient = this.add.image(this.scale.width / 2, this.scale.height / 2, 'vs_ambient')
+            .setDisplaySize(this.scale.width, this.scale.height)
+            .setScrollFactor(0).setDepth(85);
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.wasd = this.input.keyboard.addKeys({ w: 'W', a: 'A', s: 'S', d: 'D' });
@@ -276,7 +290,6 @@ class MainScene extends Phaser.Scene {
         });
         this.physics.add.collider(this.enemies, this.enemies, null, (e1, e2) => !e1.isBat && !e2.isBat, this);
         this.physics.add.overlap(this.player, this.enemies, this.handlePlayerHit, null, this);
-        this.physics.add.overlap(this.player, this.powerUps, this.handlePowerUpPickup, null, this);
         this.physics.add.overlap(this.tornados, this.enemies, (t, e) => this.damageEnemy(e, 999), null, this);
 
         this.applyReward({ id: 'whip', name: 'Magic Whip', type: 'weapon' });
@@ -376,9 +389,20 @@ class MainScene extends Phaser.Scene {
         this.updateGems();
         this.updateJuice();
         if (this.puzzle) this.updatePuzzle();
+        // Instant, generous power-up pickup (same feel as the puzzle boxes;
+        // the old physics-overlap body was misaligned and felt unresponsive)
+        this.powerUps.getChildren().forEach(icon => {
+            if (icon.collected) return;
+            if (Phaser.Math.Distance.Between(this.player.x, this.player.y, icon.x, icon.y) < 52) {
+                this.handlePowerUpPickup(this.player, icon);
+            }
+        });
         this.gameTime++;
         this.accumulatedTime += delta;
         updateDOMHUD(this.playerStats, Math.floor(this.accumulatedTime / 1000), this.killCount);
+
+        // Refresh chalk decals as the camera roams (cheap, twice a second)
+        if (this.gameTime % 30 === 0) this.updateBgDecals();
 
         this.nextSwarmTime--;
         if (this.nextSwarmTime <= 0) {
@@ -513,6 +537,154 @@ class MainScene extends Phaser.Scene {
             enemy.stunTimer = 0;
             this.enemies.add(enemy);
         }
+    }
+
+    // ---------------------------------------------------------
+    // BACKGROUND: polished procedural schoolyard lawn + chalk doodles
+    // ---------------------------------------------------------
+    buildLawnTexture() {
+        if (this.textures.exists('lawn2')) return;
+        const S = 768, STRIPE = 96;
+        const gr = this.make.graphics({ x: 0, y: 0, add: false });
+        // base green + soft vertical mowing stripes (classic lawn look)
+        gr.fillStyle(0x477d3c, 1); gr.fillRect(0, 0, S, S);
+        gr.fillStyle(0x4f8743, 1);
+        for (let x = 0; x < S; x += STRIPE * 2) gr.fillRect(x, 0, STRIPE, S);
+        // fine speckle for organic texture (kept low-contrast for readability)
+        for (let i = 0; i < 260; i++) {
+            gr.fillStyle(i % 2 ? 0x578f4a : 0x3f6d35, 0.5);
+            gr.fillRect(12 + Math.random() * (S - 24), 12 + Math.random() * (S - 24), 2, 2);
+        }
+        // short grass blades
+        gr.fillStyle(0x549047, 0.55);
+        for (let i = 0; i < 90; i++) {
+            gr.fillRect(12 + Math.random() * (S - 24), 12 + Math.random() * (S - 24), 1.5, 5);
+        }
+        // clover patches
+        for (let i = 0; i < 14; i++) {
+            const px = 20 + Math.random() * (S - 40), py = 20 + Math.random() * (S - 40);
+            gr.fillStyle(0x3a6a31, 0.6);
+            gr.fillCircle(px, py, 2.4); gr.fillCircle(px + 4, py + 2, 2.2); gr.fillCircle(px - 3, py + 3, 2.0);
+        }
+        // tiny daisies (white + a couple pink) — cute without being busy
+        for (let i = 0; i < 11; i++) {
+            const px = 20 + Math.random() * (S - 40), py = 20 + Math.random() * (S - 40);
+            const col = i % 4 === 0 ? 0xffc9de : 0xf5f5ef;
+            gr.fillStyle(col, 0.85);
+            for (let a = 0; a < 5; a++) {
+                gr.fillCircle(px + Math.cos(a * 1.256) * 3.2, py + Math.sin(a * 1.256) * 3.2, 1.9);
+            }
+            gr.fillStyle(0xffd94a, 1); gr.fillCircle(px, py, 1.7);
+        }
+        gr.generateTexture('lawn2', S, S);
+        gr.destroy();
+    }
+
+    buildChalkDecalTextures() {
+        if (this.textures.exists('chalk_0')) return;
+        const mk = (key, w, h, draw) => {
+            const g = this.make.graphics({ x: 0, y: 0, add: false });
+            g.lineStyle(5, 0xffffff, 0.9);
+            draw(g);
+            g.generateTexture(key, w, h);
+            g.destroy();
+        };
+        // 0: hopscotch
+        mk('chalk_0', 130, 300, g => {
+            g.strokeRoundedRect(35, 240, 60, 58, 8);
+            g.strokeRoundedRect(35, 180, 60, 58, 8);
+            g.strokeRoundedRect(4, 120, 60, 58, 8);
+            g.strokeRoundedRect(66, 120, 60, 58, 8);
+            g.strokeRoundedRect(35, 60, 60, 58, 8);
+            g.strokeRoundedRect(35, 2, 60, 56, 8);
+        });
+        // 1: four-square court
+        mk('chalk_1', 170, 170, g => {
+            g.strokeRoundedRect(4, 4, 162, 162, 6);
+            g.lineBetween(85, 4, 85, 166);
+            g.lineBetween(4, 85, 166, 85);
+        });
+        // 2: star
+        mk('chalk_2', 160, 160, g => {
+            const pts = [];
+            for (let i = 0; i < 10; i++) {
+                const r = i % 2 === 0 ? 74 : 30;
+                const a = -Math.PI / 2 + i * Math.PI / 5;
+                pts.push({ x: 80 + Math.cos(a) * r, y: 80 + Math.sin(a) * r });
+            }
+            g.beginPath(); g.moveTo(pts[0].x, pts[0].y);
+            for (let i = 1; i < pts.length; i++) g.lineTo(pts[i].x, pts[i].y);
+            g.closePath(); g.strokePath();
+        });
+        // 3: spiral
+        mk('chalk_3', 150, 150, g => {
+            g.beginPath();
+            for (let a = 0; a < Math.PI * 5; a += 0.15) {
+                const r = 6 + a * 4.2;
+                const x = 75 + Math.cos(a) * r, y = 75 + Math.sin(a) * r;
+                if (a === 0) g.moveTo(x, y); else g.lineTo(x, y);
+            }
+            g.strokePath();
+        });
+        // 4: smiley
+        mk('chalk_4', 130, 130, g => {
+            g.strokeCircle(65, 65, 55);
+            g.fillStyle(0xffffff, 0.9);
+            g.fillCircle(45, 50, 7); g.fillCircle(85, 50, 7);
+            g.beginPath(); g.arc(65, 68, 28, 0.3, Math.PI - 0.3); g.strokePath();
+        });
+        // 5: heart
+        mk('chalk_5', 130, 120, g => {
+            g.beginPath();
+            g.arc(43, 42, 25, Math.PI, 0);
+            g.arc(87, 42, 25, Math.PI, 0);
+            g.lineTo(65, 105);
+            g.closePath(); g.strokePath();
+        });
+        // 6: "ABC" chalk letters (rendered from a text object)
+        const t = this.make.text({ x: 0, y: 0, text: 'A B C', style: { fontSize: '52px', fontFamily: 'Fredoka, sans-serif', color: '#ffffff', fontStyle: 'bold' }, add: false });
+        const rt = this.make.renderTexture({ width: Math.ceil(t.width) + 8, height: Math.ceil(t.height) + 8, add: false });
+        rt.draw(t, 4, 4);
+        rt.saveTexture('chalk_6');
+        t.destroy(); rt.destroy();
+    }
+
+    // Deterministic chalk doodles per world cell; spawned around the camera,
+    // culled when far. Purely decorative (depth -5: above lawn, below play).
+    updateBgDecals() {
+        const CELL = 720;
+        const cam = this.cameras.main.worldView;
+        const margin = 320;
+        const hash = (cx, cy, salt) => {
+            const v = Math.sin(cx * 127.1 + cy * 311.7 + salt * 74.7) * 43758.5453;
+            return v - Math.floor(v);
+        };
+        const x0 = Math.floor((cam.left - margin) / CELL), x1 = Math.floor((cam.right + margin) / CELL);
+        const y0 = Math.floor((cam.top - margin) / CELL), y1 = Math.floor((cam.bottom + margin) / CELL);
+        for (let cy = y0; cy <= y1; cy++) {
+            for (let cx = x0; cx <= x1; cx++) {
+                const key = cx + ',' + cy;
+                if (this.bgDecals.has(key)) continue;
+                if (hash(cx, cy, 1) < 0.45) { this.bgDecals.set(key, null); continue; }
+                const type = Math.floor(hash(cx, cy, 2) * 7);
+                const ox = (hash(cx, cy, 3) - 0.5) * CELL * 0.6;
+                const oy = (hash(cx, cy, 4) - 0.5) * CELL * 0.6;
+                const img = this.add.image(cx * CELL + CELL / 2 + ox, cy * CELL + CELL / 2 + oy, 'chalk_' + type);
+                img.setDepth(-5).setAlpha(0.4);
+                img.setRotation((hash(cx, cy, 5) - 0.5) * 0.5);
+                this.bgDecals.set(key, img);
+            }
+        }
+        // cull cells far from the player
+        this.bgDecals.forEach((img, key) => {
+            const parts = key.split(',');
+            const dx = parts[0] * CELL + CELL / 2 - this.player.x;
+            const dy = parts[1] * CELL + CELL / 2 - this.player.y;
+            if (dx * dx + dy * dy > 2800 * 2800) {
+                if (img) img.destroy();
+                this.bgDecals.delete(key);
+            }
+        });
     }
 
     spawnBatSwarm() {
@@ -1755,13 +1927,16 @@ class MainScene extends Phaser.Scene {
     // ---------------------------------------------------------
     pickPuzzleContent() {
         const punct = [' ', '-', '.', '?', '!', ',', "'"];
-        const wantSentence = Math.random() < 0.5;
+        // Strict alternation — random 50/50 could serve long word-streaks and
+        // students never saw a sentence puzzle
+        this.puzzleWantSentence = !this.puzzleWantSentence;
+        const wantSentence = this.puzzleWantSentence;
 
         const srPick = (kind) => {
             try {
                 const { book, unit, page } = selectedClassContent;
                 const raw = getGameItemSR(book, unit, page, kind, srInSessionFailures, srInSessionSuccesses, null);
-                const list = Array.isArray(raw) ? raw : (raw ? [raw] : []);
+                const list = (Array.isArray(raw) ? raw : [raw]).flat(2);
                 return list.find(t => typeof t === 'string' && t.trim().length > 0) || null;
             } catch (e) { return null; }
         };
@@ -1796,7 +1971,7 @@ class MainScene extends Phaser.Scene {
                 return { text, mode: 'word', tokens: toks };
             } else {
                 const words = text.split(' ').filter(w => w.length > 0);
-                if (words.length < 2 || words.length > 10) continue;
+                if (words.length < 2 || words.length > 12) continue;
                 return { text, mode: 'sentence', tokens: words };
             }
         }
@@ -1880,6 +2055,7 @@ class MainScene extends Phaser.Scene {
         });
         this.updatePuzzleTracker();
         if (this.puzzle.attempt.length === this.puzzle.item.tokens.length) {
+            this.puzzle.checking = true; // lock the tracker button during feedback
             this.time.delayedCall(320, () => this.checkPuzzle());
         }
     }
@@ -1914,7 +2090,9 @@ class MainScene extends Phaser.Scene {
         const p = this.puzzle;
         if (!p) return;
         p.attempt = [];
+        p.checking = false;
         p.boxes.forEach(b => {
+            if (!b.used) return; // untouched boxes stay put (no blink)
             b.used = false;
             b.x = b.homeX; b.y = b.homeY;
             b.setVisible(true).setAlpha(0).setScale(0.4);
@@ -1937,14 +2115,28 @@ class MainScene extends Phaser.Scene {
         div.id = 'vsPuzzleTracker';
         div.style.cssText = 'position:fixed;top:58px;left:50%;transform:translateX(-50%);z-index:40;' +
             'background:rgba(10,16,40,0.9);border:2px solid #ffd166;border-radius:14px;padding:7px 14px;' +
-            'color:#fff;font-family:Fredoka,sans-serif;text-align:center;max-width:94vw;pointer-events:none;' +
+            'color:#fff;font-family:Fredoka,sans-serif;text-align:center;max-width:94vw;cursor:pointer;' +
+            'pointer-events:auto;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;' +
             'transition:border-color 0.25s, background 0.25s;';
         div.innerHTML =
             '<div id="vsPuzzleZh" style="font-size:14px;opacity:0.85;margin-bottom:3px;"></div>' +
-            '<div id="vsPuzzleSlots" style="font-size:21px;font-weight:bold;letter-spacing:1px;line-height:1.5;"></div>';
+            '<div id="vsPuzzleSlots" style="font-size:21px;font-weight:bold;letter-spacing:1px;line-height:1.5;"></div>' +
+            '<div style="font-size:11px;opacity:0.6;margin-top:2px;">🔊 点击：重听 + 退回字母</div>';
+        div.onclick = () => this.onTrackerTap();
         document.body.appendChild(div);
         this._puzzleDom = div;
         return div;
+    }
+
+    // Tracker tap = send collected letters back + replay the prompt audio
+    onTrackerTap() {
+        const p = this.puzzle;
+        if (!p || p.checking) return;
+        if (p.attempt.length > 0) {
+            synthError();
+            this.resetPuzzleBoxes();
+        }
+        this.playPuzzleAudio();
     }
 
     setTrackerState(state) {
@@ -2057,11 +2249,20 @@ class MainScene extends Phaser.Scene {
             this.tweens.add({ targets: this.comboText, alpha: 0, duration: 300, onComplete: () => this.comboText.setVisible(false) });
         }
 
+        // --- Screen overlays: scrollFactor(0) images are still scaled by
+        // camera zoom, so compensate or they shrink into a centered box ---
+        const camZ = this.cameras.main.zoom || 1;
+        const ovW = this.scale.width / camZ, ovH = this.scale.height / camZ;
+        if (this.ambient) {
+            this.ambient.setPosition(this.scale.width / 2, this.scale.height / 2);
+            this.ambient.setDisplaySize(ovW, ovH);
+        }
+
         // --- Low-HP danger vignette (pulsing) ---
         const hpPct = this.playerStats.hp / this.playerStats.maxHp;
         if (hpPct < 0.3) {
             this.vignette.setPosition(this.scale.width / 2, this.scale.height / 2);
-            this.vignette.setDisplaySize(this.scale.width, this.scale.height);
+            this.vignette.setDisplaySize(ovW, ovH);
             this.vignette.setAlpha(0.45 + Math.sin(this.time.now / 180) * 0.25);
         } else if (this.vignette.alpha > 0) {
             this.vignette.setAlpha(0);

@@ -11,16 +11,26 @@
   'use strict';
 
   // --- per-level tolerance -------------------------------------------------
-  //  wordEdits   : max token-level edits allowed on the whole utterance
-  //  minAccuracy : char-similarity floor before any phonetic leniency
-  //  allowPhonetic: permit fuzzy single-word matches (L1 accent tolerance)
+  // Field data (2026-07-27, 272 real classroom attempts) showed the old rule
+  // (charAcc AND fixed edit cap) punished LONG sentences: a 12-word sentence
+  // said 85% right failed on the edit cap while short clean sentences passed.
+  // New rule is OR-based with a length-proportional word-error-rate (WER):
+  //   pass if  charAcc >= minAccuracy  OR  WER <= maxWER  OR  phonetic >= phonPass
+  //  minAccuracy : char-similarity floor of the whole utterance
+  //  maxWER      : word edits / target words (scales with sentence length)
+  //  phonPass    : fraction of target words fuzzy-matched (L1 accent tolerance)
   //  exact       : if true, requires exact (case/punct-insensitive) match
+  // Thresholds tuned by replaying the 272 field attempts (api/tune_scorer.js)
+  // against must-pass / must-fail regression pairs: minAccuracy 0.75 is the
+  // lowest floor that still rejects template swaps like "The kite is a
+  // triangle" → "The guide is a rectangle" (acc 0.71 — sentence frames share
+  // most characters, so 0.65 was too forgiving).
   const LEVELS = {
-    1: { label: 'Level 1 (beginner)',      wordEdits: 3, minAccuracy: 0.50, allowPhonetic: true,  exact: false },
-    2: { label: 'Level 2 (elementary)',    wordEdits: 2, minAccuracy: 0.65, allowPhonetic: true,  exact: false },
-    3: { label: 'Level 3 (intermediate)',  wordEdits: 1, minAccuracy: 0.80, allowPhonetic: true,  exact: false },
-    4: { label: 'Level 4 (upper-inter)',   wordEdits: 1, minAccuracy: 0.92, allowPhonetic: false, exact: false },
-    5: { label: 'Level 5 (advanced)',      wordEdits: 0, minAccuracy: 1.00, allowPhonetic: false, exact: true  }
+    1: { label: 'Level 1 (beginner)',      minAccuracy: 0.65, maxWER: 0.45, phonPass: 0.60, allowPhonetic: true,  exact: false },
+    2: { label: 'Level 2 (elementary)',    minAccuracy: 0.75, maxWER: 0.30, phonPass: 0.70, allowPhonetic: true,  exact: false },
+    3: { label: 'Level 3 (intermediate)',  minAccuracy: 0.85, maxWER: 0.20, phonPass: 0.85, allowPhonetic: true,  exact: false },
+    4: { label: 'Level 4 (upper-inter)',   minAccuracy: 0.92, maxWER: 0.10, phonPass: 1.00, allowPhonetic: false, exact: false },
+    5: { label: 'Level 5 (advanced)',      minAccuracy: 1.00, maxWER: 0.00, phonPass: 1.00, allowPhonetic: false, exact: true  }
   };
 
   function normalize(s) {
@@ -32,6 +42,8 @@
   }
 
   function levenshtein(a, b) {
+    // Generic edit distance: works on strings (char-level) AND arrays of
+    // tokens (word-level), since only ===-comparison of elements is used.
     const m = a.length, n = b.length;
     if (!m) return n; if (!n) return m;
     const dp = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]);
@@ -77,6 +89,8 @@
     const cfg = LEVELS[level] || LEVELS[3];
     const tgt = normalize(target);
     const got = normalize(transcript);
+    // No target = nothing to grade; never auto-pass (accuracyOf('','') is 1).
+    if (!tgt) return { pass: false, accuracy: 0, details: 'no target', cfg };
     const tTok = tgt ? tgt.split(' ') : [];
     const gTok = got ? got.split(' ') : [];
 
@@ -104,28 +118,37 @@
     }
     const phoneticRatio = tTok.length ? phoneticHits / tTok.length : 0;
 
-    // decide — accuracy path OR phonetic path (whichever passes)
-    const edits = levenshtein(tTok.join(' '), gTok.join(' '));
+    // decide — ANY of the three paths passes (field-tuned "variant D"):
+    //   1. char accuracy (whole-utterance similarity)
+    //   2. WER — word edits proportional to sentence length (replaces the old
+    //      fixed edit cap that made long sentences nearly unpassable)
+    //   3. phonetic coverage (accent-tolerant word matching)
+    const edits = levenshtein(tTok, gTok); // token-level (array) edit distance
+    const wer = tTok.length ? edits / tTok.length : 1;
     let pass = false, details = '';
 
-    const accuracyOk = accuracy >= cfg.minAccuracy && edits <= cfg.wordEdits;
-    const phoneticOk = cfg.allowPhonetic && phoneticRatio >= 0.8;
+    const accuracyOk = accuracy >= cfg.minAccuracy;
+    const werOk = wer <= cfg.maxWER;
+    const phoneticOk = cfg.allowPhonetic && phoneticRatio >= cfg.phonPass;
 
     if (accuracyOk) {
       pass = true;
-      details = `accuracy ${(accuracy * 100).toFixed(0)}% (≤${cfg.wordEdits} edits allowed)`;
+      details = `accuracy ${(accuracy * 100).toFixed(0)}%`;
+    } else if (werOk) {
+      pass = true;
+      details = `word errors ${(wer * 100).toFixed(0)}% (≤${(cfg.maxWER * 100).toFixed(0)}% allowed)`;
     } else if (phoneticOk) {
       pass = true;
       details = `phonetic match ${(phoneticRatio * 100).toFixed(0)}% (accent tolerant)`;
     } else {
       const reasons = [];
-      if (accuracy < cfg.minAccuracy) reasons.push(`accuracy ${(accuracy * 100).toFixed(0)}% < ${(cfg.minAccuracy * 100).toFixed(0)}%`);
-      if (edits > cfg.wordEdits) reasons.push(`${edits} edits > ${cfg.wordEdits}`);
-      if (cfg.allowPhonetic && phoneticRatio < 0.8) reasons.push(`phonetic ${(phoneticRatio * 100).toFixed(0)}% < 80%`);
+      reasons.push(`accuracy ${(accuracy * 100).toFixed(0)}% < ${(cfg.minAccuracy * 100).toFixed(0)}%`);
+      reasons.push(`WER ${(wer * 100).toFixed(0)}% > ${(cfg.maxWER * 100).toFixed(0)}%`);
+      if (cfg.allowPhonetic) reasons.push(`phonetic ${(phoneticRatio * 100).toFixed(0)}% < ${(cfg.phonPass * 100).toFixed(0)}%`);
       details = reasons.join('; ');
     }
 
-    return { pass, accuracy, details, phoneticRatio, edits, cfg };
+    return { pass, accuracy, details, phoneticRatio, edits, wer, cfg };
   }
 
   global.Scorer = { score, LEVELS, normalize, phoneticMatch, levenshtein };

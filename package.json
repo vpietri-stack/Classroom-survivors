@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/vpietri-stack/Classroom-survivors#readme",
   "dependencies": {
+    "jsdom": "^29.1.1",
     "playwright-core": "^1.61.1"
   }
 }

@@ -153,7 +153,8 @@
       }).catch(function (err) {
         // Permission denied / mic error -> clean, retryable reset (no stuck state).
         toIdle();
-        if (opts.onError) opts.onError(err);
+        if (isPermissionError(err) && opts.onPermissionDenied) opts.onPermissionDenied(err);
+        else if (opts.onError) opts.onError(err);
         else alert('Mic error: ' + ((err && err.message) || err));
       });
     }
@@ -166,14 +167,34 @@
       updateUI();
       const audioMs = recStartTs ? Date.now() - recStartTs : null;
       rec.stop().then(function (blob) {
-        if (!blob || !blob.size) { toIdle(); return; }
-        const t0 = Date.now();
-        return global.LocalEngine.transcribe(blob).then(function (r) {
+        if (!blob || !blob.size) {
           toIdle();
-          if (opts.onResult) opts.onResult(r.text || '', {
-            audioMs: audioMs,
-            transcribeMs: Date.now() - t0,
-            blobBytes: blob.size
+          if (opts.onGated) opts.onGated('empty', { audioMs: audioMs, durMs: 0, peak: 0 });
+          return;
+        }
+        // Pre-transcription gate: junk audio gets instant coaching feedback
+        // instead of a doomed transcription round-trip.
+        return wavStats(blob).then(function (stats) {
+          if (stats && stats.durMs < MIN_SPEECH_MS) {
+            toIdle();
+            if (opts.onGated) opts.onGated('too_short', { audioMs: audioMs, durMs: Math.round(stats.durMs), peak: stats.peak });
+            return;
+          }
+          if (stats && stats.peak < MIN_PEAK_AMP) {
+            toIdle();
+            if (opts.onGated) opts.onGated('too_quiet', { audioMs: audioMs, durMs: Math.round(stats.durMs), peak: stats.peak });
+            return;
+          }
+          const t0 = Date.now();
+          return global.LocalEngine.transcribe(blob).then(function (r) {
+            toIdle();
+            if (opts.onResult) opts.onResult(r.text || '', {
+              audioMs: audioMs,
+              durMs: stats ? Math.round(stats.durMs) : null,
+              peak: stats ? stats.peak : null,
+              transcribeMs: Date.now() - t0,
+              blobBytes: blob.size
+            });
           });
         });
       }).catch(function (err) {
@@ -197,6 +218,68 @@
     });
     updateUI();
     return btn;
+  }
+
+  // --- pre-transcription audio gate ---------------------------------------
+  // Field data (2026-07-27): 46 recordings <1.2s were 100% Whisper
+  // hallucinations ([BLANK_AUDIO]/[Music]) and 0% passes — kids double-tap the
+  // button or the mic captures nothing. Rejecting junk BEFORE transcription
+  // gives instant, actionable feedback instead of a doomed 2.5s wait.
+  // The recorder emits standard 44-byte-header 16-bit mono WAV, so duration
+  // and peak amplitude can be read directly from the blob (post VAD-trim,
+  // i.e. this measures actual speech content, not wall-clock hold time).
+  const MIN_SPEECH_MS = 1500;   // shortest plausible sentence reading
+  const MIN_PEAK_AMP  = 0.02;   // below this the recording is essentially silence
+  function wavStats(blob) {
+    return blob.arrayBuffer().then(function (buf) {
+      const dv = new DataView(buf);
+      if (buf.byteLength < 44) return { durMs: 0, peak: 0 };
+      const sampleRate = dv.getUint32(24, true) || 16000;
+      const n = Math.floor((buf.byteLength - 44) / 2);
+      let peak = 0;
+      // Stride through samples (every 4th) — plenty for a peak estimate and
+      // keeps worst-case (15s × 48kHz) scans fast on low-end tablets.
+      for (let i = 0; i < n; i += 4) {
+        const a = Math.abs(dv.getInt16(44 + i * 2, true)) / 32768;
+        if (a > peak) peak = a;
+      }
+      return { durMs: (n / sampleRate) * 1000, peak: peak };
+    }).catch(function () { return null; }); // unreadable → don't gate, let Whisper try
+  }
+
+  // --- microphone permission helpers ---------------------------------------
+  // Field data: 3 students generated 142 'Permission denied' errors and ZERO
+  // attempts — Chrome remembers a single "Block" click forever, so every tap
+  // fails instantly with no explanation. Detect that state and teach the fix.
+  function isPermissionError(err) {
+    const n = (err && err.name) || '';
+    return n === 'NotAllowedError' || n === 'PermissionDeniedError' || n === 'SecurityError';
+  }
+  // Resolves 'denied' | 'granted' | 'prompt' | null (API unavailable, e.g. Safari).
+  function queryMicPermission() {
+    try {
+      if (navigator.permissions && navigator.permissions.query) {
+        return navigator.permissions.query({ name: 'microphone' })
+          .then(function (st) { return st.state; })
+          .catch(function () { return null; });
+      }
+    } catch (_) {}
+    return Promise.resolve(null);
+  }
+  // Per-browser "how to re-enable the mic" instructions (student/parent-facing).
+  function micHelpHTML() {
+    const ua = navigator.userAgent || '';
+    let steps;
+    if (/MicroMessenger/i.test(ua)) {
+      steps = '点右上角 “…” → 设置 → 允许麦克风；如果没有这个选项，请到手机系统设置里允许微信使用麦克风，然后重新打开本页。';
+    } else if (/iPad|iPhone/.test(ua)) {
+      steps = '打开 设置 → Safari → 麦克风 → 允许，然后刷新本页；或点地址栏左侧的 “大小”(AA) 图标 → 网站设置 → 麦克风 → 允许。';
+    } else {
+      steps = '点地址栏左侧的 🔒 或 ⚙️ 图标 → 网站设置 → 麦克风 → 允许，然后刷新页面。';
+    }
+    return '<div class="mic-help bg-amber-900/40 border border-amber-500/50 rounded-xl px-4 py-3 mt-3 text-left text-sm text-amber-100">' +
+      '<b>🎙️ 麦克风被禁用了！</b><br>' + steps +
+      '</div>';
   }
 
   // --- Speech telemetry ----------------------------------------------------
@@ -247,6 +330,20 @@
     let done = false;
     let failCount = 0;
     const SKIP_AFTER_FAILS = 3; // let the student try 3 times before offering Skip
+
+    // Permission-denied state: show the per-browser fix instructions ONCE and
+    // reveal Skip immediately — a blocked student can do nothing else.
+    let helpShown = false;
+    function showMicHelp(source) {
+      logSpeechEvent('error', mode, { target: target, level: level, message: 'Permission denied (' + source + ')', ua: UA }, failCount + 1);
+      if (!helpShown) {
+        helpShown = true;
+        wrap.insertAdjacentHTML('beforeend', micHelpHTML());
+      }
+      feedback.className = 'heard-feedback no';
+      feedback.innerText = '\u9ea6\u514b\u98ce\u672a\u6388\u6743 \u2014 \u770b\u4e0b\u65b9\u63d0\u793a\uff0c\u6216\u70b9\u201c\u8df3\u8fc7\u201d\u7ee7\u7eed';
+      skip.style.display = '';
+    }
 
     const skip = document.createElement('button');
     skip.className = 'game-btn bg-slate-600 hover:bg-slate-500 text-base px-5 py-3 rounded-2xl';
@@ -322,7 +419,31 @@
         // A hard mic/engine error also counts toward revealing Skip.
         failCount++;
         if (failCount >= SKIP_AFTER_FAILS) skip.style.display = '';
-      }
+      },
+      // Junk audio caught BEFORE transcription: instant, specific coaching.
+      // Counts toward revealing Skip so a student whose mic never captures
+      // audio (e.g. broken/covered mic) still has a way out.
+      onGated: function (reason, meta) {
+        logSpeechEvent('gated', mode, {
+          target: target, level: level, reason: reason,
+          audioMs: meta && meta.audioMs, durMs: meta && meta.durMs,
+          peak: meta && typeof meta.peak === 'number' ? Math.round(meta.peak * 1000) / 1000 : null,
+          ua: UA
+        }, failCount + 1);
+        feedback.className = 'heard-feedback no';
+        feedback.innerText = reason === 'too_short'
+          ? '\u23F1 \u592a\u77ed\u5566\uff01\u70b9\u51fb\u540e\u8bf7\u8bfb\u5b8c\u6574\u4e2a\u53e5\u5b50\u518d\u70b9\u505c\u6b62'
+          : '\uD83D\uDD07 \u6ca1\u542c\u5230\u58f0\u97f3 \u2014 \u8bf7\u5927\u58f0\u4e00\u70b9\uff0c\u79bb\u9ea6\u514b\u98ce\u8fd1\u4e00\u70b9';
+        failCount++;
+        if (failCount >= SKIP_AFTER_FAILS) skip.style.display = '';
+      },
+      onPermissionDenied: function () { showMicHelp('getUserMedia'); }
+    });
+
+    // Proactive check (Chrome/Android; Safari lacks the API): if the mic is
+    // ALREADY blocked, teach the fix now instead of after a confusing failure.
+    queryMicPermission().then(function (state) {
+      if (state === 'denied') showMicHelp('proactive');
     });
 
     btns.appendChild(recBtn);

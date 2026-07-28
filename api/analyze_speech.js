@@ -32,10 +32,12 @@ const SINCE = Date.now() - HOURS * 3600 * 1000;
 
 // ---- scorer (mirror of speech_scorer.js, so we can replay attempts under
 //      alternative levels/thresholds without touching the client code) ----
+// Variant D (deployed 2026-07-28): OR of charAcc / length-proportional WER /
+// phonetic coverage. Mirrors the restructured client scorer.
 const LEVELS = {
-    1: { wordEdits: 3, minAccuracy: 0.50, allowPhonetic: true },
-    2: { wordEdits: 2, minAccuracy: 0.65, allowPhonetic: true },
-    3: { wordEdits: 1, minAccuracy: 0.80, allowPhonetic: true }
+    1: { minAccuracy: 0.65, maxWER: 0.45, phonPass: 0.60, allowPhonetic: true },
+    2: { minAccuracy: 0.75, maxWER: 0.30, phonPass: 0.70, allowPhonetic: true },
+    3: { minAccuracy: 0.85, maxWER: 0.20, phonPass: 0.85, allowPhonetic: true }
 };
 function normalize(s) {
     return (s || '').toLowerCase().replace(/[.,!?;:'"()\-]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -67,13 +69,13 @@ function rescore(target, transcript, level) {
     if (tgt && tgt === got) return true;
     const acc = accuracyOf(tgt, got);
     const tTok = tgt ? tgt.split(' ') : [], gTok = got ? got.split(' ') : [];
-    const edits = levenshtein(tTok.join(' '), gTok.join(' '));
+    const wer = tTok.length ? levenshtein(tTok, gTok) / tTok.length : 1;
     let hits = 0;
     if (cfg.allowPhonetic && tTok.length && gTok.length) {
         for (const tw of tTok) if (gTok.some(gw => phoneticMatch(tw, gw))) hits++;
     }
     const phRatio = tTok.length ? hits / tTok.length : 0;
-    return (acc >= cfg.minAccuracy && edits <= cfg.wordEdits) || (cfg.allowPhonetic && phRatio >= 0.8);
+    return acc >= cfg.minAccuracy || wer <= cfg.maxWER || (cfg.allowPhonetic && phRatio >= cfg.phonPass);
 }
 
 // ---- failure-mode classifier: the heart of the diagnosis ----
@@ -113,7 +115,7 @@ async function main() {
         query: 'SELECT c.id, c.fullName, c.analytics FROM c'
     }).fetchAll();
 
-    const attempts = [], skips = [], errors = [];
+    const attempts = [], skips = [], errors = [], gated = [];
     for (const s of students) {
         for (const ev of (s.analytics || [])) {
             if (!ev || typeof ev.exerciseType !== 'string' || !ev.exerciseType.startsWith('speech_')) continue;
@@ -123,16 +125,22 @@ async function main() {
             if (ev.exerciseType === 'speech_attempt') attempts.push(row);
             else if (ev.exerciseType === 'speech_skip') skips.push(row);
             else if (ev.exerciseType === 'speech_error') errors.push(row);
+            else if (ev.exerciseType === 'speech_gated') gated.push(row);
         }
     }
 
     if (JSON_OUT) {
-        require('fs').writeFileSync(JSON_OUT, JSON.stringify({ attempts, skips, errors }, null, 2));
+        require('fs').writeFileSync(JSON_OUT, JSON.stringify({ attempts, skips, errors, gated }, null, 2));
         console.log(`Raw events dumped to ${JSON_OUT}`);
     }
 
     console.log('\n================ SPEECH TELEMETRY REPORT ================');
-    console.log(`Window: last ${HOURS}h   attempts: ${attempts.length}   skips: ${skips.length}   errors: ${errors.length}`);
+    console.log(`Window: last ${HOURS}h   attempts: ${attempts.length}   skips: ${skips.length}   errors: ${errors.length}   gated(junk audio): ${gated.length}`);
+    if (gated.length) {
+        const gr = new Map();
+        for (const g of gated) gr.set(g.reason, (gr.get(g.reason) || 0) + 1);
+        console.log('Gated breakdown         : ' + [...gr.entries()].map(([k, v]) => `${k}: ${v}`).join('   '));
+    }
     if (!attempts.length) { console.log('\nNo attempts recorded in window. Nothing to analyze yet.'); return; }
 
     // ---- 1. headline pass rates ----

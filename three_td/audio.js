@@ -84,6 +84,7 @@ export const SFX = {
     build() { tone({ freq: 180, freq2: 360, type: 'square', dur: 0.12, vol: 0.25 }); noise({ dur: 0.08, vol: 0.15, freq: 600 }); },
     reinforce() { tone({ freq: 200, freq2: 500, type: 'square', dur: 0.16, vol: 0.28 }); },
     place() { tone({ freq: 300, freq2: 500, type: 'triangle', dur: 0.1, vol: 0.2 }); },
+    deny() { tone({ freq: 200, freq2: 120, type: 'square', dur: 0.14, vol: 0.22 }); },
     frost() { tone({ freq: 900, freq2: 1600, type: 'sine', dur: 0.25, vol: 0.16 }); },
     hurt() { tone({ freq: 260, freq2: 90, type: 'sawtooth', dur: 0.25, vol: 0.35 }); },
     schoolHit() { tone({ freq: 150, freq2: 70, type: 'square', dur: 0.18, vol: 0.3 }); },

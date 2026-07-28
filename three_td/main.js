@@ -129,7 +129,7 @@ function initGame() {
 input.on('sword', () => game.player && game.player.trySword(game));
 input.on('bow', () => game.player && game.player.tryBow(game));
 input.on('special', () => game.player && game.player.trySpecial(game));
-input.on('buildToggle', () => game.build && game.build.toggle());
+input.on('buildToggle', () => { game.build && game.build.toggle(); hideCoach(); });
 input.on('buildSelect', t => game.build && game.build.select(t));
 input.on('rotate', dir => {
     azimuthIdx = (azimuthIdx + (dir > 0 ? 1 : 3)) % 4;
@@ -168,6 +168,7 @@ function startGap(seconds) {
 }
 function startWave() {
     showSkipButton(false);
+    hideCoach();
     const n = game.waves.waveNumber + 1;
     game.waves.startNextWave();
     game.state = 'wave';
@@ -192,6 +193,17 @@ function endGame(won) {
     );
 }
 
+// First-time coaching hint (shown during the first build gap only).
+let _coachShown = false;
+function showCoach(msg) {
+    const el = document.getElementById('coachHint');
+    el.innerHTML = msg;
+    el.classList.add('show');
+}
+function hideCoach() {
+    document.getElementById('coachHint').classList.remove('show');
+}
+
 document.getElementById('startBtn').addEventListener('click', () => {
     if (!_initDone) return;
     initAudio();
@@ -200,6 +212,10 @@ document.getElementById('startBtn').addEventListener('click', () => {
     game.startedAt = performance.now();
     showWaveBanner('🏫 Defend the School!', 'Build up before the first wave hits');
     startGap(FIRST_GAP);
+    if (!_coachShown) {
+        _coachShown = true;
+        showCoach('🔨 Tap <b>Build</b>, pick a tower, then tap a glowing tile near you. Beat enemies to earn 🪙!');
+    }
 });
 document.getElementById('replayBtn').addEventListener('click', () => location.reload());
 

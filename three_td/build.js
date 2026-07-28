@@ -68,6 +68,16 @@ export class BuildManager {
         const existing = this.nav.getStructure(c.i, c.j);
         const def = STRUCT_DEFS[this.selected];
 
+        // Not enough coins? give clear feedback instead of a silent no-op.
+        const needed = (existing && this.selected === 'wall') ? def.reinforceCost : def.cost;
+        if (!existing || (this.selected === 'wall' && existing.type === 'wall' && existing.level === 1)) {
+            if (this.coins < needed) {
+                showFloatText(center, 'Need ' + needed + ' 🪙', '#ff6b6b', 15);
+                SFX.deny();
+                return false;
+            }
+        }
+
         // Reinforce: wall selected on an existing level-1 wall
         if (existing) {
             if (this.selected === 'wall' && existing.type === 'wall' && existing.level === 1) {

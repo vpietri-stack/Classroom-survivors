@@ -136,6 +136,16 @@
             color: #fff; font-size: 18px; cursor: pointer; line-height: 1;
         }
         #muteBtn.muted { opacity: 0.5; }
+        #coachHint {
+            position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%);
+            z-index: 17; max-width: 88%; text-align: center;
+            background: rgba(10, 20, 30, 0.82); border: 1px solid rgba(109,207,122,0.6);
+            color: #eafff0; font-size: 14px; font-weight: 600; line-height: 1.4;
+            padding: 10px 16px; border-radius: 12px; display: none;
+            pointer-events: none; box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+        }
+        #coachHint.show { display: block; animation: coachPop 0.3s ease-out; }
+        @keyframes coachPop { 0% { transform: translate(-50%, 10px); opacity: 0; } 100% { transform: translate(-50%, 0); opacity: 1; } }
     </style>
     <script type="importmap">
     { "imports": { "three": "./three_td/vendor/three.module.js" } }
@@ -155,6 +165,7 @@
     </div>
 
     <div id="waveBanner"></div>
+    <div id="coachHint"></div>
     <button id="skipWaveBtn">▶ Start next wave (<span id="skipCount">15</span>s)</button>
     <div id="respawnMsg">💀 Respawning…</div>
 

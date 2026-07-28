@@ -6,9 +6,7 @@ const POWER_UPS = [
     { id: 'axe', name: "Axe", icon: "🪓", type: "weapon", desc: "Add one more axe" },
     { id: 'cross', name: "Cross", icon: "✝️", type: "weapon", desc: "Boomerang effect" },
     { id: 'water', name: "Santa Water", icon: "💧", type: "weapon", desc: "Drops damaging puddle" },
-    { id: 'knife', name: "Knife", icon: "🔪", type: "weapon", desc: "Fires in facing direction" },
-    { id: 'speed', name: "Swiftness", icon: "👟", type: "stat", desc: "+10% Move Speed" },
-    { id: 'might', name: "Spinach", icon: "🥬", type: "stat", desc: "+10% Damage" }
+    { id: 'knife', name: "Knife", icon: "🔪", type: "weapon", desc: "Fires in facing direction" }
 ];
 
 // --- MAIN SCENE ---
@@ -42,6 +40,18 @@ class MainScene extends Phaser.Scene {
         this.particlePool = [];         // shared pooled particles (perf)
         this.popPool = [];              // pooled damage-pop texts (perf)
         this.physics.world.timeScale = 1; // reset after death slow-mo restarts
+
+        // --- Walking word-puzzle state ---
+        this.puzzle = null;            // active ground puzzle (null = none)
+        this.puzzleDone = new Set();   // in-session dedup of completed items
+
+        // Background music (gapless loop via bgm.js); stops on scene shutdown
+        if (window.BGM) BGM.start();
+        this.events.once('shutdown', () => {
+            if (window.BGM) BGM.stop();
+            this.teardownPuzzle(false);
+            if (this._puzzleDom) { this._puzzleDom.remove(); this._puzzleDom = null; }
+        });
 
         this.physics.world.setBounds(-4000, -4000, 8000, 8000);
 
@@ -115,11 +125,6 @@ class MainScene extends Phaser.Scene {
         makeEmoji('bottle', '🧪', 30, 0);
         makeEmoji('fire_large', '🔥', 40, 0);
         makeEmoji('fire_small', '🔥', 20, 0);
-        makeEmoji('obs_🌲', '🌲', 100, 40);
-        makeEmoji('obs_🌳', '🌳', 100, 40);
-        makeEmoji('obs_🪨', '🪨', 50, 40);
-        makeEmoji('obs_🌿', '🌿', 50, 40);
-        makeEmoji('obs_🛖', '🛖', 150, 40);
 
         const allPowerUps = [...POWER_UPS,
         { id: 'heart', icon: '❤️' },
@@ -134,20 +139,20 @@ class MainScene extends Phaser.Scene {
         this.gems = this.physics.add.group();
         this.powerUps = this.physics.add.group();
         this.tornados = this.physics.add.group();
-        this.obstacles = this.physics.add.staticGroup();
 
         this.player = this.add.image(0, 0, 'player').setOrigin(0.5);
         this.player.setScale(1.5);
         this.physics.add.existing(this.player);
-        this.player.body.setCircle(20 * 1.5);
+        // Tight hitbox: was radius 30 (x1.5 scale = 45px effective, whole sprite
+        // incl. transparent margin) — big cause of "hit out of nowhere"
+        this.player.body.setCircle(16);
         this.player.body.setOffset(
-            (this.player.width - 20 * 1.5 * 2) / 2,
-            (this.player.height - 20 * 1.5 * 2) / 2
+            (this.player.width - 16 * 2) / 2,
+            (this.player.height - 16 * 2) / 2
         );
         this.player.body.setCollideWorldBounds(false);
 
         this.cameras.main.startFollow(this.player);
-        this.spawnObstacles();
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.wasd = this.input.keyboard.addKeys({ w: 'W', a: 'A', s: 'S', d: 'D' });
@@ -242,8 +247,6 @@ class MainScene extends Phaser.Scene {
         });
         this.physics.add.collider(this.enemies, this.enemies, null, (e1, e2) => !e1.isBat && !e2.isBat, this);
         this.physics.add.overlap(this.player, this.enemies, this.handlePlayerHit, null, this);
-        this.physics.add.collider(this.player, this.obstacles);
-        this.physics.add.collider(this.enemies, this.obstacles, null, (e, o) => !e.isBat, this);
         this.physics.add.overlap(this.player, this.powerUps, this.handlePowerUpPickup, null, this);
         this.physics.add.overlap(this.tornados, this.enemies, (t, e) => this.damageEnemy(e, 999), null, this);
 
@@ -328,18 +331,10 @@ class MainScene extends Phaser.Scene {
         this.updateBullets();
         this.updateGems();
         this.updateJuice();
+        if (this.puzzle) this.updatePuzzle();
         this.gameTime++;
         this.accumulatedTime += delta;
         updateDOMHUD(this.playerStats, Math.floor(this.accumulatedTime / 1000), this.killCount);
-
-        this.obstacleTimer = (this.obstacleTimer || 0) + 1;
-        if (this.obstacleTimer > 30 && this.obstacles.getChildren().length < 150) {
-            this.spawnSingleObstacle();
-            this.obstacleTimer = 0;
-        }
-        if (this.gameTime % 120 === 0) {
-            this.cleanupDistantObstacles();
-        }
 
         this.nextSwarmTime--;
         if (this.nextSwarmTime <= 0) {
@@ -476,55 +471,6 @@ class MainScene extends Phaser.Scene {
         }
     }
 
-    spawnObstacles() {
-        for (let i = 0; i < 30; i++) {
-            this.spawnSingleObstacle(Phaser.Math.Between(400, 1500));
-        }
-    }
-
-    spawnSingleObstacle(distance = null) {
-        const obstacleTypes = [
-            { emoji: '🌲', fontSize: '100px', bodyRad: 10, isTree: true },
-            { emoji: '🌳', fontSize: '100px', bodyRad: 10, isTree: true },
-            { emoji: '🪨', fontSize: '50px', bodyRad: 20 },
-            { emoji: '🌿', fontSize: '50px', bodyRad: 20 },
-            { emoji: '🛖', fontSize: '150px', bodyRad: 65 }
-        ];
-
-        const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
-
-        let dist = distance;
-        if (dist === null) {
-            const cam = this.cameras.main;
-            dist = Math.sqrt(Math.pow(cam.width, 2) + Math.pow(cam.height, 2)) / 2 + 300;
-        }
-
-        const x = this.player.x + Math.cos(angle) * dist;
-        const y = this.player.y + Math.sin(angle) * dist;
-
-        if (Math.random() < 0.15) {
-            const pond = this.add.graphics();
-            pond.fillStyle(0x355e3b, 0.8);
-            pond.fillEllipse(x, y, 80, 50);
-
-            const pondCollider = this.add.zone(x, y, 70, 40);
-            this.physics.add.existing(pondCollider, true);
-            this.obstacles.add(pondCollider);
-            pondCollider.linkedGraphics = pond;
-        } else {
-            const type = Phaser.Math.RND.pick(obstacleTypes);
-            const obs = this.add.image(x, y, 'obs_' + type.emoji).setOrigin(0.5);
-
-            this.obstacles.add(obs);
-            obs.body.setCircle(type.bodyRad);
-            if (type.isTree) {
-                obs.body.setOffset((obs.width - type.bodyRad * 2) / 2, obs.height - type.bodyRad * 2 - 10);
-            } else {
-                obs.body.setOffset((obs.width - type.bodyRad * 2) / 2, (obs.height - type.bodyRad * 2) / 2);
-            }
-        }
-    }
-
     spawnBatSwarm() {
         const side = Phaser.Math.Between(0, 3);
         const difficulty = this.getDifficulty();
@@ -584,16 +530,6 @@ class MainScene extends Phaser.Scene {
         }
     }
 
-    cleanupDistantObstacles() {
-        this.obstacles.getChildren().forEach(obs => {
-            const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, obs.x, obs.y);
-            if (dist > 2500) {
-                if (obs.linkedGraphics) obs.linkedGraphics.destroy();
-                obs.destroy();
-            }
-        });
-    }
-
     getDifficulty() {
         const secondsSinceStart = (Date.now() - this.startTime) / 1000;
 
@@ -610,84 +546,138 @@ class MainScene extends Phaser.Scene {
         this.enemies.getChildren().forEach(e => {
             if (e.stunTimer > 0) {
                 e.stunTimer--;
-            } else if (!e.isSwarm) {
-                // Calculate direct vector towards the player
-                let tx = this.player.x - e.x;
-                let ty = this.player.y - e.y;
-                let tDist = Math.hypot(tx, ty);
-                let vx = 0;
-                let vy = 0;
-                if (tDist > 0) {
-                    vx = (tx / tDist) * e.speed;
-                    vy = (ty / tDist) * e.speed;
+                // Getting knocked around interrupts any attack attempt (counterplay!)
+                if (e.attackState === 'windup' || e.attackState === 'lunge') {
+                    e.attackState = 'chase';
+                    e.clearTint();
                 }
+            } else if (!e.isSwarm) {
+                const nowT = this.time.now;
+                if (!e.attackState) e.attackState = 'chase';
 
-                // Add separation repulsion force from neighboring enemies
-                let sepX = 0;
-                let sepY = 0;
-                let neighborsCount = 0;
-                const separationRadius = 35; // optimal radius to match enemy graphic boundaries
-                const children = this.enemies.getChildren();
-                const count = children.length;
+                if (e.attackState === 'windup') {
+                    // Telegraph: frozen in place, crouching (pose in wobble block)
+                    e.body.setVelocity(0, 0);
+                    if (nowT >= e.windupUntil) {
+                        // Lock lunge direction at the player's position NOW — dodgeable
+                        const ang = Phaser.Math.Angle.Between(e.x, e.y, this.player.x, this.player.y);
+                        const lungeSpeed = e.isBoss ? 300 : 340;
+                        e.body.setVelocity(Math.cos(ang) * lungeSpeed, Math.sin(ang) * lungeSpeed);
+                        e.attackState = 'lunge';
+                        e.lungeUntil = nowT + (e.isBoss ? 420 : 300);
+                        e.clearTint();
+                    }
+                } else if (e.attackState === 'lunge') {
+                    if (nowT >= e.lungeUntil) {
+                        e.attackState = 'recover';
+                        e.recoverUntil = nowT + 900;
+                        e.body.setVelocity(e.body.velocity.x * 0.15, e.body.velocity.y * 0.15);
+                    }
+                } else if (e.attackState === 'recover') {
+                    if (nowT >= e.recoverUntil) e.attackState = 'chase';
+                } else {
+                    // CHASE: seek player; if close enough, start the attack telegraph
+                    const distToPlayer = Phaser.Math.Distance.Between(e.x, e.y, this.player.x, this.player.y);
+                    const attackRange = e.isBoss ? 110 : 55;
+                    if (distToPlayer < attackRange) {
+                        const difficulty = this.getDifficulty();
+                        // Telegraph shrinks as difficulty rises (stays dodgeable)
+                        const telegraphMs = Phaser.Math.Clamp(520 - difficulty * 25, 260, 520);
+                        e.attackState = 'windup';
+                        e.windupUntil = nowT + (e.isBoss ? telegraphMs + 150 : telegraphMs);
+                        e.body.setVelocity(0, 0);
+                        e.setTint(0xdd6666); // "about to pounce" warning color
+                    } else {
+                        // Calculate direct vector towards the player
+                        let tx = this.player.x - e.x;
+                        let ty = this.player.y - e.y;
+                        let tDist = Math.hypot(tx, ty);
+                        let vx = 0;
+                        let vy = 0;
+                        if (tDist > 0) {
+                            vx = (tx / tDist) * e.speed;
+                            vy = (ty / tDist) * e.speed;
+                        }
 
-                for (let j = 0; j < count; j++) {
-                    const other = children[j];
-                    if (other === e || !other.active || other.isSwarm) continue;
+                        // Add separation repulsion force from neighboring enemies
+                        let sepX = 0;
+                        let sepY = 0;
+                        let neighborsCount = 0;
+                        const separationRadius = 35; // optimal radius to match enemy graphic boundaries
+                        const children = this.enemies.getChildren();
+                        const count = children.length;
 
-                    // Quick bounding box check for high performance
-                    const dx = e.x - other.x;
-                    if (Math.abs(dx) < separationRadius) {
-                        const dy = e.y - other.y;
-                        if (Math.abs(dy) < separationRadius) {
-                            const dist = Math.hypot(dx, dy);
-                            if (dist > 0 && dist < separationRadius) {
-                                // Stronger repulsion force the closer they are
-                                const force = (separationRadius - dist) / separationRadius;
-                                sepX += (dx / dist) * force;
-                                sepY += (dy / dist) * force;
-                                neighborsCount++;
+                        for (let j = 0; j < count; j++) {
+                            const other = children[j];
+                            if (other === e || !other.active || other.isSwarm) continue;
+
+                            // Quick bounding box check for high performance
+                            const dx = e.x - other.x;
+                            if (Math.abs(dx) < separationRadius) {
+                                const dy = e.y - other.y;
+                                if (Math.abs(dy) < separationRadius) {
+                                    const dist = Math.hypot(dx, dy);
+                                    if (dist > 0 && dist < separationRadius) {
+                                        // Stronger repulsion force the closer they are
+                                        const force = (separationRadius - dist) / separationRadius;
+                                        sepX += (dx / dist) * force;
+                                        sepY += (dy / dist) * force;
+                                        neighborsCount++;
+                                    }
+                                }
                             }
+                        }
+
+                        if (neighborsCount > 0) {
+                            sepX /= neighborsCount;
+                            sepY /= neighborsCount;
+
+                            // Blend player attraction and neighbor separation vectors
+                            vx += sepX * e.speed * 1.5;
+                            vy += sepY * e.speed * 1.5;
+
+                            // Smooth speed control
+                            const currentSpeed = Math.hypot(vx, vy);
+                            const maxAllowedSpeed = e.speed * 1.3;
+                            if (currentSpeed > maxAllowedSpeed) {
+                                vx = (vx / currentSpeed) * maxAllowedSpeed;
+                                vy = (vy / currentSpeed) * maxAllowedSpeed;
+                            }
+                        }
+
+                        if (e.body) {
+                            e.body.setVelocity(vx, vy);
                         }
                     }
                 }
-
-                if (neighborsCount > 0) {
-                    sepX /= neighborsCount;
-                    sepY /= neighborsCount;
-
-                    // Blend player attraction and neighbor separation vectors
-                    vx += sepX * e.speed * 1.5;
-                    vy += sepY * e.speed * 1.5;
-
-                    // Smooth speed control
-                    const currentSpeed = Math.hypot(vx, vy);
-                    const maxAllowedSpeed = e.speed * 1.3;
-                    if (currentSpeed > maxAllowedSpeed) {
-                        vx = (vx / currentSpeed) * maxAllowedSpeed;
-                        vy = (vy / currentSpeed) * maxAllowedSpeed;
-                    }
-                }
-
-                if (e.body) {
-                    e.body.setVelocity(vx, vy);
-                }
             }
 
-            // Squash and stretch wobble based on whether they are moving
+            // Squash and stretch wobble + attack poses
             if (e.active && e.body) {
-                const isMoving = e.body.velocity.x !== 0 || e.body.velocity.y !== 0;
-                const wobbleSpeed = e.isBoss ? 0.08 : 0.2;
-                const wobbleAmp = e.isBoss ? 0.04 : 0.08;
-                const seed = e.x + e.y; // unique phase offset per enemy
-                const wobbleVal = Math.sin(this.gameTime * wobbleSpeed + seed) * wobbleAmp;
-                
                 const baseScale = e.isBoss ? 1.0 : (e.isSwarm ? 0.8 : 1.0);
-                const facingX = e.body.velocity.x < 0 ? -baseScale : baseScale;
-                
-                if (isMoving) {
-                    e.setScale(facingX * (1 + wobbleVal), baseScale * (1 - wobbleVal));
+
+                if (e.attackState === 'windup') {
+                    // Crouch pose: wide + low, quivering, facing the player
+                    const facingX = this.player.x < e.x ? -baseScale : baseScale;
+                    const quiver = Math.sin(this.gameTime * 0.9) * 0.03;
+                    e.setScale(facingX * (1.15 + quiver), baseScale * (0.78 - quiver));
+                } else if (e.attackState === 'lunge') {
+                    // Stretch along the pounce
+                    const facingX = e.body.velocity.x < 0 ? -baseScale : baseScale;
+                    e.setScale(facingX * 0.85, baseScale * 1.18);
                 } else {
-                    e.setScale(facingX, baseScale);
+                    const isMoving = e.body.velocity.x !== 0 || e.body.velocity.y !== 0;
+                    const wobbleSpeed = e.isBoss ? 0.08 : 0.2;
+                    const wobbleAmp = e.isBoss ? 0.04 : 0.08;
+                    const seed = e.x + e.y; // unique phase offset per enemy
+                    const wobbleVal = Math.sin(this.gameTime * wobbleSpeed + seed) * wobbleAmp;
+                    const facingX = e.body.velocity.x < 0 ? -baseScale : baseScale;
+
+                    if (isMoving) {
+                        e.setScale(facingX * (1 + wobbleVal), baseScale * (1 - wobbleVal));
+                    } else {
+                        e.setScale(facingX, baseScale);
+                    }
                 }
             }
         });
@@ -1454,6 +1444,16 @@ class MainScene extends Phaser.Scene {
 
     handlePlayerHit(player, enemy) {
         if (this.invulnTimer > 0) return;
+        // Touch no longer hurts: only a connecting LUNGE deals damage.
+        // Exception: swarm bats keep classic fly-through contact damage.
+        if (!enemy.isSwarm && enemy.attackState !== 'lunge') return;
+
+        // A successful bite ends the lunge immediately (no double-dipping)
+        if (!enemy.isSwarm) {
+            enemy.attackState = 'recover';
+            enemy.recoverUntil = this.time.now + 900;
+            if (enemy.body) enemy.body.setVelocity(0, 0);
+        }
 
         const difficulty = this.getDifficulty();
         // Damage scales with difficulty: 1 at start, grows with difficulty, cap at 25
@@ -1466,7 +1466,10 @@ class MainScene extends Phaser.Scene {
         // Taking a hit breaks the kill combo
         this.combo = 0;
         this.comboText.setVisible(false);
-        
+
+        // "WHO hit me" feedback — deliberately NO player knockback (pinball problem)
+        this.flashAttacker(enemy);
+
         // Visual Hit Juice
         this.cameras.main.shake(150, 0.012);
         this.cameras.main.flash(100, 255, 0, 0, 0.2); // slight red flash
@@ -1474,6 +1477,26 @@ class MainScene extends Phaser.Scene {
 
         if (this.playerStats.hp <= 0) this.gameOver();
         updateDOMHUD(this.playerStats, Math.floor(this.accumulatedTime / 1000), this.killCount);
+    }
+
+    // Make it unmistakable WHICH enemy landed the hit: white flash -> red
+    // afterglow on the attacker, expanding ring, and a red impact streak
+    // between attacker and player.
+    flashAttacker(enemy) {
+        enemy.setTintFill(0xffffff);
+        this.time.delayedCall(90, () => { if (enemy.active) enemy.setTint(0xff4444); });
+        this.time.delayedCall(600, () => { if (enemy.active) enemy.clearTint(); });
+
+        const ring = this.add.graphics().setDepth(55);
+        ring.lineStyle(4, 0xff3333, 1);
+        ring.strokeCircle(0, 0, 18);
+        ring.setPosition(enemy.x, enemy.y);
+        this.tweens.add({ targets: ring, scaleX: 2.4, scaleY: 2.4, alpha: 0, duration: 350, ease: 'Quad.out', onComplete: () => ring.destroy() });
+
+        const streak = this.add.graphics().setDepth(55);
+        streak.lineStyle(5, 0xff3333, 0.9);
+        streak.lineBetween(enemy.x, enemy.y, this.player.x, this.player.y);
+        this.tweens.add({ targets: streak, alpha: 0, duration: 280, onComplete: () => streak.destroy() });
     }
 
     damageEnemy(enemy, amount, knockback = 0) {
@@ -1554,6 +1577,8 @@ class MainScene extends Phaser.Scene {
     }
 
     spawnPowerUp(x, y) {
+        // One ESL puzzle at a time: no new bonuses drop while one is active
+        if (this.puzzle) return;
         const weapons = POWER_UPS.filter(p => p.type === 'weapon');
         const specials = [
             { id: 'heart', icon: '❤️', type: 'special' },
@@ -1585,16 +1610,23 @@ class MainScene extends Phaser.Scene {
 
     handlePowerUpPickup(player, powerup) {
         if (powerup.collected) return;
+        if (this.puzzle) return; // one puzzle at a time — leave other bonuses on the ground
         powerup.collected = true;
 
         const reward = powerup.reward;
-        const iconStr = reward.icon || reward.emoji;
-
-        synthGem(); // Powerup pickup sound
-
-        // Visual orbit animation before activation
-        const flyingIcon = this.add.image(powerup.x, powerup.y, 'pu_' + reward.id).setOrigin(0.5);
+        const px = powerup.x, py = powerup.y;
         powerup.destroy();
+        synthLootbox();
+
+        // Walking on a bonus starts a ground word/sentence puzzle;
+        // the reward is granted only when the puzzle is solved.
+        this.startWalkingPuzzle(reward, px, py);
+    }
+
+    // Reward pickup celebration + activation (runs after a solved puzzle)
+    grantPuzzleReward(reward) {
+        synthGem();
+        const flyingIcon = this.add.image(this.player.x, this.player.y - 40, 'pu_' + reward.id).setOrigin(0.5).setDepth(56);
 
         let orbitAngle = 0;
         this.tweens.addCounter({
@@ -1637,6 +1669,261 @@ class MainScene extends Phaser.Scene {
                 synthGem();
             }
         });
+    }
+
+    // ---------------------------------------------------------
+    // WALKING WORD/SENTENCE PUZZLES (extra ESL on the battlefield)
+    // Word mode  : boxes are LETTERS; spaces/punctuation pre-filled in tracker
+    // Sentence   : boxes are WORDS with punctuation attached ("bananas?")
+    // Duplicates : interchangeable — validation compares VALUES, not boxes
+    // Check-on-complete: mistakes revealed only when everything is collected
+    // ---------------------------------------------------------
+    pickPuzzleContent() {
+        const punct = [' ', '-', '.', '?', '!', ',', "'"];
+        const wantSentence = Math.random() < 0.5;
+
+        const srPick = (kind) => {
+            try {
+                const { book, unit, page } = selectedClassContent;
+                const raw = getGameItemSR(book, unit, page, kind, srInSessionFailures, srInSessionSuccesses, null);
+                const list = Array.isArray(raw) ? raw : (raw ? [raw] : []);
+                return list.find(t => typeof t === 'string' && t.trim().length > 0) || null;
+            } catch (e) { return null; }
+        };
+        const poolPick = (pool) => {
+            const clean = pool.filter(t => typeof t === 'string' && t.trim().length > 0);
+            const fresh = clean.filter(t => !this.puzzleDone.has(t));
+            const from = fresh.length ? fresh : clean;
+            return from.length ? from[Math.floor(Math.random() * from.length)] : null;
+        };
+
+        const kinds = wantSentence ? ['sentences', 'vocab'] : ['vocab', 'sentences'];
+        for (const kind of kinds) {
+            const pool = kind === 'vocab'
+                ? (typeof SPELLING_WORDS !== 'undefined' ? SPELLING_WORDS : [])
+                : (typeof GRAMMAR_SENTENCES !== 'undefined' ? GRAMMAR_SENTENCES : []);
+            let text = srPick(kind);
+            if (!text || this.puzzleDone.has(text)) text = poolPick(pool);
+            if (!text) continue;
+
+            if (kind === 'vocab') {
+                const letters = text.split('').filter(ch => !punct.includes(ch));
+                if (letters.length < 2 || letters.length > 14) {
+                    // too long to walk — try a shorter pool word instead
+                    const alt = poolPick(pool.filter(t => {
+                        const ls = String(t).split('').filter(ch => !punct.includes(ch));
+                        return ls.length >= 2 && ls.length <= 14;
+                    }));
+                    if (!alt) continue;
+                    text = alt;
+                }
+                const toks = text.split('').filter(ch => !punct.includes(ch));
+                return { text, mode: 'word', tokens: toks };
+            } else {
+                const words = text.split(' ').filter(w => w.length > 0);
+                if (words.length < 2 || words.length > 10) continue;
+                return { text, mode: 'sentence', tokens: words };
+            }
+        }
+        return null;
+    }
+
+    startWalkingPuzzle(reward, cx, cy) {
+        const item = this.pickPuzzleContent();
+        if (!item) { this.grantPuzzleReward(reward); return; } // no content loaded -> just grant
+
+        this.puzzle = { reward, item, attempt: [], boxes: [] };
+
+        // Boxes in a loose two-radius ring around the bonus spot
+        const n = item.tokens.length;
+        const angle0 = Math.random() * Math.PI * 2;
+        item.tokens.forEach((tok, i) => {
+            const ang = angle0 + (i / n) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+            const rad = 150 + (i % 2) * 75 + Math.random() * 30;
+            const bx = cx + Math.cos(ang) * rad;
+            const by = cy + Math.sin(ang) * rad;
+            this.puzzle.boxes.push(this.createPuzzleBox(tok, bx, by));
+        });
+
+        this.updatePuzzleTracker();
+        this.playPuzzleAudio();
+    }
+
+    playPuzzleAudio() {
+        if (!this.puzzle) return;
+        if (typeof playTTS === 'function' && typeof currentTTSWord !== 'undefined') {
+            currentTTSWord = this.puzzle.item.text;
+            playTTS();
+        }
+        if (window.BGM) {
+            BGM.duck('prompt');
+            const holdMs = this.puzzle.item.mode === 'sentence' ? 4000 : 2500;
+            setTimeout(() => { if (window.BGM) BGM.unduck('prompt'); }, holdMs);
+        }
+    }
+
+    createPuzzleBox(tok, x, y) {
+        const w = Math.max(46, tok.length * 15 + 24);
+        const h = 46;
+        const g = this.add.graphics();
+        g.fillStyle(0x14213d, 0.92);
+        g.fillRoundedRect(-w / 2, -h / 2, w, h, 10);
+        g.lineStyle(3, 0xffd166, 1);
+        g.strokeRoundedRect(-w / 2, -h / 2, w, h, 10);
+        const t = this.add.text(0, 1, tok, {
+            fontSize: '24px', fontFamily: 'Fredoka', color: '#ffffff', fontStyle: 'bold'
+        }).setOrigin(0.5);
+        const box = this.add.container(x, y, [g, t]);
+        box.setDepth(45); // above the horde: letters must stay readable
+        box.tokenValue = tok;
+        box.used = false;
+        box.homeX = x; box.homeY = y;
+        box.hitR = w / 2 + 14; // generous walk-on radius = instant feedback
+        box.setScale(0);
+        this.tweens.add({ targets: box, scale: 1, duration: 320, ease: 'Back.out', delay: Math.random() * 250 });
+        return box;
+    }
+
+    updatePuzzle() {
+        const p = this.puzzle;
+        if (!p) return;
+        for (const box of p.boxes) {
+            if (box.used) continue;
+            const d = Phaser.Math.Distance.Between(this.player.x, this.player.y, box.x, box.y);
+            if (d < box.hitR + 18) this.collectPuzzleBox(box);
+        }
+    }
+
+    collectPuzzleBox(box) {
+        box.used = true;
+        this.puzzle.attempt.push(box);
+        synthGem();
+        this.spawnBurstParticles(box.x, box.y, 0xffd166, 6, 3);
+        this.tweens.add({
+            targets: box, y: box.y - 44, alpha: 0, scale: 0.5, duration: 260, ease: 'Quad.in',
+            onComplete: () => { box.setVisible(false); }
+        });
+        this.updatePuzzleTracker();
+        if (this.puzzle.attempt.length === this.puzzle.item.tokens.length) {
+            this.time.delayedCall(320, () => this.checkPuzzle());
+        }
+    }
+
+    checkPuzzle() {
+        const p = this.puzzle;
+        if (!p) return;
+        const got = p.attempt.map(b => b.tokenValue);
+        const want = p.item.tokens;
+        // Compare VALUES — duplicate letters/words are interchangeable
+        const ok = got.length === want.length && got.every((v, i) => v === want[i]);
+        if (ok) {
+            this.puzzleDone.add(p.item.text);
+            synthLevelUp();
+            this.setTrackerState('success');
+            this.spawnBurstParticles(this.player.x, this.player.y, 0x00ff88, 20, 5);
+            const reward = p.reward;
+            this.time.delayedCall(750, () => {
+                this.teardownPuzzle(true);
+                this.grantPuzzleReward(reward);
+            });
+        } else {
+            synthError();
+            this.setTrackerState('fail');
+            this.cameras.main.shake(120, 0.006);
+            // Check-on-complete: everything goes back to the ground, start over
+            this.time.delayedCall(700, () => this.resetPuzzleBoxes());
+        }
+    }
+
+    resetPuzzleBoxes() {
+        const p = this.puzzle;
+        if (!p) return;
+        p.attempt = [];
+        p.boxes.forEach(b => {
+            b.used = false;
+            b.x = b.homeX; b.y = b.homeY;
+            b.setVisible(true).setAlpha(0).setScale(0.4);
+            this.tweens.add({ targets: b, alpha: 1, scale: 1, duration: 300, ease: 'Back.out' });
+        });
+        this.setTrackerState('normal');
+        this.updatePuzzleTracker();
+    }
+
+    teardownPuzzle(success) {
+        const p = this.puzzle;
+        this.puzzle = null;
+        if (p) p.boxes.forEach(b => { try { b.destroy(); } catch (e) { } });
+        if (this._puzzleDom) this._puzzleDom.style.display = 'none';
+    }
+
+    ensurePuzzleDom() {
+        if (this._puzzleDom) { this._puzzleDom.style.display = ''; return this._puzzleDom; }
+        const div = document.createElement('div');
+        div.id = 'vsPuzzleTracker';
+        div.style.cssText = 'position:fixed;top:58px;left:50%;transform:translateX(-50%);z-index:40;' +
+            'background:rgba(10,16,40,0.9);border:2px solid #ffd166;border-radius:14px;padding:7px 14px;' +
+            'color:#fff;font-family:Fredoka,sans-serif;text-align:center;max-width:94vw;pointer-events:none;' +
+            'transition:border-color 0.25s, background 0.25s;';
+        div.innerHTML =
+            '<div id="vsPuzzleZh" style="font-size:14px;opacity:0.85;margin-bottom:3px;"></div>' +
+            '<div id="vsPuzzleSlots" style="font-size:21px;font-weight:bold;letter-spacing:1px;line-height:1.5;"></div>';
+        document.body.appendChild(div);
+        this._puzzleDom = div;
+        return div;
+    }
+
+    setTrackerState(state) {
+        if (!this._puzzleDom) return;
+        if (state === 'success') {
+            this._puzzleDom.style.borderColor = '#22c55e';
+            this._puzzleDom.style.background = 'rgba(6,60,30,0.92)';
+        } else if (state === 'fail') {
+            this._puzzleDom.style.borderColor = '#ef4444';
+            this._puzzleDom.style.background = 'rgba(70,10,10,0.92)';
+        } else {
+            this._puzzleDom.style.borderColor = '#ffd166';
+            this._puzzleDom.style.background = 'rgba(10,16,40,0.9)';
+        }
+    }
+
+    updatePuzzleTracker() {
+        const p = this.puzzle;
+        if (!p) return;
+        const div = this.ensurePuzzleDom();
+        const zhEl = div.querySelector('#vsPuzzleZh');
+        const slotsEl = div.querySelector('#vsPuzzleSlots');
+
+        const zh = (typeof getLocalTranslation === 'function') ? getLocalTranslation(p.item.text) : '';
+        zhEl.textContent = zh || '✨ 拼出它！Walk the boxes in order!';
+
+        const punct = [' ', '-', '.', '?', '!', ',', "'"];
+        const filled = p.attempt.map(b => b.tokenValue);
+        let html = '';
+        if (p.item.mode === 'word') {
+            // Full template: punctuation pre-filled (dim), letters fill as walked
+            let li = 0;
+            for (const ch of p.item.text) {
+                if (punct.includes(ch)) {
+                    html += ch === ' '
+                        ? '<span style="display:inline-block;width:0.6em;"></span>'
+                        : '<span style="opacity:0.65;">' + ch + '</span>';
+                } else {
+                    if (li < filled.length) {
+                        html += '<span style="color:#ffd166;">' + filled[li] + '</span>';
+                    } else {
+                        html += '<span style="opacity:0.4;">_</span>';
+                    }
+                    li++;
+                }
+            }
+        } else {
+            html = p.item.tokens.map((tok, i) =>
+                i < filled.length
+                    ? '<span style="color:#ffd166;">' + filled[i] + '</span>'
+                    : '<span style="opacity:0.4;">' + '▁'.repeat(Math.min(tok.length, 6)) + '</span>'
+            ).join(' ');
+        }
+        slotsEl.innerHTML = html;
     }
 
     spawnBurstParticles(x, y, color = 0xffffff, count = 10, size = 4) {
@@ -1857,6 +2144,8 @@ class MainScene extends Phaser.Scene {
     gameOver() {
         if (this.gameState === 'GAMEOVER') return; // guard against re-entry
         this.gameState = 'GAMEOVER';
+        if (window.BGM) BGM.stop();
+        this.teardownPuzzle(false);
 
         // Death slow-mo: world crawls while the death animation plays
         this.physics.world.timeScale = 4;

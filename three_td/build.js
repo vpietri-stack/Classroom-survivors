@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import { makeStructure, makeCoin, makeAmmoPack, makeArrowProjectile, makeCannonBall } from './models.js';
 import { terrainHeight, worldToCell, cellCenter, isBuildableCell } from './world.js';
 import { spawnBurst, showFloatText } from './fx.js';
+import { SFX } from './audio.js';
 
 export const STRUCT_DEFS = {
     wall: { cost: 10, hp: 200, reinforceCost: 10, reinforceHp: 150 },
@@ -27,6 +28,7 @@ export class BuildManager {
         this.drops = [];                 // coins & ammo packs
         this._highlightPool = [];
         this._highlightTimer = 0;
+        this._rangeRing = null;      // shows selected tower's reach at the player
     }
 
     // ---------------- UI STATE ----------------
@@ -76,6 +78,7 @@ export class BuildManager {
                 existing.hp += def.reinforceHp;
                 this._swapMesh(existing);
                 this._refreshBarUI();
+                SFX.reinforce();
                 return true;
             }
             return false;
@@ -94,6 +97,7 @@ export class BuildManager {
         this.structures.push(struct);
         this.nav.setStructure(c.i, c.j, struct, 50);
         this._refreshBarUI();
+        SFX.build();
         return true;
     }
 
@@ -161,7 +165,7 @@ export class BuildManager {
                         }
                     }
                     s.cd = def.rate;
-                    if (hit) game.spawnFrostRing(s.pos, def.radius);
+                    if (hit) { game.spawnFrostRing(s.pos, def.radius); SFX.frost(); }
                 }
                 continue;
             }
@@ -179,6 +183,7 @@ export class BuildManager {
             }
             if (s.cd > 0) continue;
             s.cd = def.rate;
+            if (s.type === 'cannon') SFX.cannon(); else SFX.towerShoot();
             const dir = new THREE.Vector3(best.pos.x - s.pos.x, 0, best.pos.z - s.pos.z).normalize();
             const mesh = s.type === 'cannon' ? makeCannonBall() : makeArrowProjectile(0xc8b88a);
             mesh.position.set(s.pos.x, s.pos.y + 2.2, s.pos.z);
@@ -194,7 +199,9 @@ export class BuildManager {
 
     // ---------------- HIGHLIGHT GRID ----------------
     updateHighlights(dt, game) {
-        if (!this.open) return;
+        if (!this.open) { if (this._rangeRing) this._rangeRing.visible = false; return; }
+        // range preview ring for the selected shooter/frost tower
+        this._updateRangeRing(game);
         this._highlightTimer -= dt;
         if (this._highlightTimer > 0) return;
         this._highlightTimer = 0.15;
@@ -222,6 +229,25 @@ export class BuildManager {
             used++;
         }
         for (let k = used; k < this._highlightPool.length; k++) this._highlightPool[k].visible = false;
+    }
+
+    _updateRangeRing(game) {
+        const def = this.selected ? STRUCT_DEFS[this.selected] : null;
+        const reach = def ? (def.range || def.radius || 0) : 0;
+        if (!reach) { if (this._rangeRing) this._rangeRing.visible = false; return; }
+        if (!this._rangeRing) {
+            this._rangeRing = new THREE.Mesh(
+                new THREE.RingGeometry(0.94, 1.0, 48),
+                new THREE.MeshBasicMaterial({ color: 0x6dcf7a, transparent: true, opacity: 0.5, side: THREE.DoubleSide, depthWrite: false })
+            );
+            this._rangeRing.rotation.x = -Math.PI / 2;
+            this.scene.add(this._rangeRing);
+        }
+        const p = game.player.pos;
+        this._rangeRing.visible = true;
+        this._rangeRing.position.set(p.x, terrainHeight(p.x, p.z) + 0.08, p.z);
+        this._rangeRing.scale.setScalar(reach);
+        this._rangeRing.material.color.setHex(this.selected === 'frost' ? 0xaee6ff : 0x6dcf7a);
     }
 
     // ---------------- DROPS ----------------
@@ -257,9 +283,11 @@ export class BuildManager {
                     if (d.kind === 'coin') {
                         this.coins += d.value;
                         showFloatText(p.pos, '+' + d.value + ' 🪙', '#ffd75e', 14);
+                        SFX.coin();
                     } else {
                         p.arrows += d.value;
                         showFloatText(p.pos, '+' + d.value + ' 🏹', '#9fd6ff', 14);
+                        SFX.ammo();
                     }
                     this.scene.remove(d.mesh);
                     this.drops.splice(i, 1);

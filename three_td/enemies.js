@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import { makeEnemy, makeMagicBolt } from './models.js';
 import { terrainHeight, worldToCell, SCHOOL_R, GATES } from './world.js';
 import { spawnBurst, showFloatText } from './fx.js';
+import { SFX } from './audio.js';
 
 export const ENEMY_STATS = {
     runner: { hp: 25, speed: 5.5, coins: 4, schoolDmg: 1, schoolRate: 2.2, playerDmg: 6, structDmg: 6, attackRate: 1.0, radius: 0.55, wallMult: 1.0 },
@@ -203,6 +204,7 @@ export class Enemy {
         this.flashT = 0.25;
         spawnBurst(this.pos, 0xffe08a, 4, 4);
         showFloatText(this.pos, String(Math.round(n)), '#ffd75e', 15);
+        SFX.hit();
         if (this.hp <= 0) this._die(game);
     }
 
@@ -210,6 +212,7 @@ export class Enemy {
         this.dead = true;
         game.kills++;
         spawnBurst(this.pos, 0xff6b6b, 10, 7);
+        SFX.enemyDie();
         game.build.dropCoins(this.pos, this.st.coins);
         if ((this.type === 'tank' || this.type === 'boss') && Math.random() < 0.8) {
             game.build.dropAmmo(this.pos);

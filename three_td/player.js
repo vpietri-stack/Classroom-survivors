@@ -4,9 +4,10 @@
 // death & respawn at the school.
 // ============================================================
 import * as THREE from 'three';
-import { makePlayer, makeArrowProjectile, makeShockwave } from './models.js';
+import { makePlayer, makeArrowProjectile, makeShockwave, makeSlashArc } from './models.js';
 import { terrainHeight, worldToCell, MAP_HALF, SCHOOL_R } from './world.js';
 import { spawnBurst, showFloatText } from './fx.js';
+import { SFX } from './audio.js';
 
 export const PLAYER = {
     MAX_HP: 50, SPEED: 8,
@@ -109,6 +110,12 @@ export class Player {
         if (this.dead || this.swordCd > 0) return;
         this.swordCd = PLAYER.SWORD_CD;
         this.swingT = 0;
+        SFX.sword();
+        // white slash-ring flash in front of the hero
+        const slash = makeSlashArc(PLAYER.SWORD_RANGE);
+        slash.position.set(this.pos.x, this.pos.y + 0.6, this.pos.z);
+        this.scene.add(slash);
+        game.effects.push({ mesh: slash, t: 0, dur: 0.2, type: 'shockwave', maxR: 1.4 });
         const fx = Math.sin(this.facing), fz = Math.cos(this.facing);
         for (const e of game.enemies) {
             if (e.dead) continue;
@@ -126,6 +133,7 @@ export class Player {
         if (this.dead || this.bowCd > 0 || this.arrows <= 0) return;
         this.bowCd = PLAYER.BOW_CD;
         this.arrows--;
+        SFX.bow();
         // auto-aim: nearest living enemy within 60° facing cone, else straight ahead
         const fx = Math.sin(this.facing), fz = Math.cos(this.facing);
         let best = null, bestD = Infinity;
@@ -158,6 +166,7 @@ export class Player {
     trySpecial(game) {
         if (this.dead || this.specialCd > 0) return;
         this.specialCd = PLAYER.SPECIAL_CD;
+        SFX.special();
         const wave = makeShockwave();
         wave.position.set(this.pos.x, this.pos.y + 0.15, this.pos.z);
         this.scene.add(wave);
@@ -180,6 +189,7 @@ export class Player {
         spawnBurst(this.pos, 0xff4444, 6, 5);
         showFloatText(this.pos, '-' + n, '#ff6b6b', 16);
         game.shakeCamera(0.25);
+        SFX.hurt();
         if (this.hp <= 0) {
             this.hp = 0;
             this.dead = true;

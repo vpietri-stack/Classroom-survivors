@@ -12,6 +12,7 @@ import { BuildManager } from './build.js';
 import { updateHUD, showWaveBanner, showSkipButton, showEnd } from './hud.js';
 import { loadAssets } from './assets.js';
 import { initFx, updateFx } from './fx.js';
+import { initAudio, resumeAudio, SFX, setAudioEnabled, isAudioEnabled } from './audio.js';
 
 // ---------------- RENDERER ----------------
 const canvas = document.getElementById('gameCanvas');
@@ -94,6 +95,7 @@ const game = {
         if (game.state === 'won' || game.state === 'lost') return;
         game.schoolHp -= n;
         game.shakeCamera(0.35);
+        SFX.schoolHit();
         if (game.schoolHp <= 0) { game.schoolHp = 0; endGame(false); }
     },
     damageStructure(struct, n) { game.build.damage(struct, n, game); },
@@ -169,6 +171,7 @@ function startWave() {
     const n = game.waves.waveNumber + 1;
     game.waves.startNextWave();
     game.state = 'wave';
+    SFX.waveStart();
     showWaveBanner(`🌊 Wave ${n}`, n === WAVES.length ? 'FINAL WAVE — the boss is coming!' : '');
 }
 document.getElementById('skipWaveBtn').addEventListener('click', () => {
@@ -177,6 +180,7 @@ document.getElementById('skipWaveBtn').addEventListener('click', () => {
 
 function endGame(won) {
     game.state = won ? 'won' : 'lost';
+    if (won) SFX.victory(); else SFX.defeat();
     const t = Math.round((performance.now() - game.startedAt) / 1000);
     const mm = String(Math.floor(t / 60)).padStart(2, '0');
     const ss = String(t % 60).padStart(2, '0');
@@ -190,12 +194,23 @@ function endGame(won) {
 
 document.getElementById('startBtn').addEventListener('click', () => {
     if (!_initDone) return;
+    initAudio();
+    resumeAudio();
     document.getElementById('startOverlay').classList.add('hidden');
     game.startedAt = performance.now();
     showWaveBanner('🏫 Defend the School!', 'Build up before the first wave hits');
     startGap(FIRST_GAP);
 });
 document.getElementById('replayBtn').addEventListener('click', () => location.reload());
+
+// Sound mute toggle
+document.getElementById('muteBtn').addEventListener('click', () => {
+    const on = !isAudioEnabled();
+    setAudioEnabled(on);
+    const btn = document.getElementById('muteBtn');
+    btn.textContent = on ? '🔊' : '🔇';
+    btn.classList.toggle('muted', !on);
+});
 
 // ---------------- PROJECTILES & EFFECTS ----------------
 function updateProjectiles(dt) {
@@ -292,6 +307,7 @@ function stepSim(dt) {
             game.enemies = game.enemies.filter(e => !e.dead);
             if (game.waves.hasMoreWaves) {
                 showWaveBanner('✅ Wave cleared!', '+10 arrows · +10 HP');
+                SFX.waveClear();
                 startGap(BETWEEN_GAP);
             } else {
                 endGame(true);

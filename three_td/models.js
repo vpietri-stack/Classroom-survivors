@@ -294,3 +294,16 @@ export function makeShockwave() {
     m.position.y = 0.15;
     return m;
 }
+
+// White ring flash for sword swings — a quick expanding ring around the
+// player. Full ring so it needs no facing orientation (robust + reads as a
+// slash impact). Spawned as a short 'shockwave' effect.
+export function makeSlashArc(range = 2.8) {
+    const m = new THREE.Mesh(
+        new THREE.RingGeometry(range * 0.55, range * 0.72, 24),
+        new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7, side: THREE.DoubleSide, depthWrite: false })
+    );
+    m.rotation.x = -Math.PI / 2;
+    m.position.y = 0.6;
+    return m;
+}

@@ -13,7 +13,7 @@ const API_BASE = API_BASE_URL;
 // The version watchdog (startVersionWatchdog) compares this to the live
 // version.json; a mismatch means stale WeChat builds never self-heal or
 // permanently nag. See DEPLOY_VERSION_STAMP.md. Bump BOTH together.
-const APP_VERSION = '2026-07-25a';
+const APP_VERSION = '2026-07-29a';
 
 // --- SESSION TOKEN (c) design) ---
 // The server mints a signed token on login. We store it in localStorage
@@ -192,6 +192,42 @@ function queueSessionEvent(sessionType, data) {
         saveActiveUserToCache();
     }
     scheduleAnalyticsFlush();
+}
+
+// --- DEVICE TELEMETRY (2026-07-29, one-month OS census) --------------------
+// Logs one `type:'device'` event per student per device per calendar day at
+// login, so we can count which OS the class actually plays on (APK/EXE
+// decision). Deliberately NOT type:'exercise' (would pollute the dashboard
+// exercise tables) and NOT type:'session' (would count toward weekly targets);
+// both dashboards filter by type, so 'device' events are invisible to them.
+// iPadOS Safari masquerades as "Macintosh" — maxTouchPoints > 1 disambiguates.
+function queueDeviceInfoEvent() {
+    if (!authActiveUser || isTestMode) return;
+    const dayKey = 'csDeviceLogDay_' + authActiveUser.id;
+    try { if (localStorage.getItem(dayKey) === new Date().toDateString()) return; } catch { /* log anyway */ }
+    let uaData = null;
+    try {
+        const d = navigator.userAgentData;
+        if (d) uaData = { platform: d.platform || '', mobile: !!d.mobile, brands: (d.brands || []).map(b => b.brand + ' ' + b.version).join(', ') };
+    } catch { /* non-fatal */ }
+    const event = {
+        type: 'device',
+        ua: (navigator.userAgent || '').slice(0, 300),
+        platform: navigator.platform || '',
+        maxTouchPoints: navigator.maxTouchPoints || 0,
+        uaData: uaData,
+        screen: (window.screen && window.screen.width) ? window.screen.width + 'x' + window.screen.height : '',
+        appVersion: APP_VERSION,
+        timestamp: new Date().toISOString(),
+        eventId: 'dv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10)
+    };
+    analyticsQueue.push(event);
+    persistAnalyticsQueue();
+    if (!authActiveUser.analytics) authActiveUser.analytics = [];
+    authActiveUser.analytics.push(event);
+    saveActiveUserToCache();
+    scheduleAnalyticsFlush();
+    try { localStorage.setItem(dayKey, new Date().toDateString()); } catch { /* non-fatal */ }
 }
 
 function scheduleAnalyticsFlush() {
@@ -1096,6 +1132,10 @@ function finishLogin() {
     // logged in, so a tab-close / app-background right after game-over still
     // ships the queued analytics.
     bindUnloadAnalyticsFlush();
+
+    // OS census: record what device/OS this student logs in from (once per
+    // device per day). Runs after the teacher redirect so only students count.
+    queueDeviceInfoEvent();
 
     // FIX #3: flush any events carried over in localStorage from a previous
     // session that was killed/closed before it could deliver them.

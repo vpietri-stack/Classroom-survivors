@@ -29,12 +29,12 @@ const ITEM_SPRITES = {
 // updateBullets + the bullet overlap handler). Shown on the level-up card
 // so students can see WHAT the next level unlocks (whip has its own text).
 const WEAPON_MILESTONES = {
-    wand: { 3: 'Golden Dart (+Size)', 5: 'Flaming Dart (Pierces enemies!)' },
-    knife: { 3: 'Whirling Blades (+Spin)', 4: 'Golden Shears (+Size)', 6: 'Red-Hot Blades' },
-    axe: { 4: 'Knowledge Blast (Area hit!)', 5: 'Golden Edition (+Size)' },
-    cross: { 4: 'Glowing Edge', 5: 'Twin Boomerang (Fires both ways!)' },
-    water: { 3: 'Bigger Balloons', 5: 'Double Splash (2 balloons!)' },
-    orb: { 4: 'Rubber-Dust Sparkles', 6: 'Turbo Orbit' }
+    wand: { 2: 'Piercing Dart (Goes through 2!)', 3: 'Golden Dart', 5: 'Flaming Dart (Pierces 3!)', 8: 'Inferno Dart (Pierces 4!)' },
+    knife: { 2: 'Splitting Scissors (Split on hit!)', 3: 'Whirling Blades', 4: 'Golden Shears', 5: 'Double Split!', 6: 'Red-Hot Blades', 8: 'Triple Split!' },
+    axe: { 2: 'Knowledge Blast (Area hit!)', 5: 'Golden Edition (Bigger Blast)', 8: 'Encyclopedia (Huge Blast)' },
+    cross: { 2: 'Ricochet (Bounces to 3!)', 4: 'Glowing Edge', 5: 'Twin Boomerang (Both ways!)', 8: 'Super Ricochet (5 bounces!)' },
+    water: { 2: 'Poison Splash (Lingers!)', 3: 'Bigger Balloons', 5: 'Double Splash (2 balloons!)', 8: 'Toxic Flood (Longer poison)' },
+    orb: { 2: 'Frost Erasers (Slows enemies!)', 4: 'Rubber-Dust Sparkles', 6: 'Turbo Orbit', 8: 'Deep Freeze' }
 };
 
 // --- MAIN SCENE ---
@@ -77,6 +77,47 @@ class MainScene extends Phaser.Scene {
     unitScale(key, base = 29) {
         const src = this.textures.get(key).getSourceImage();
         return base / Math.max(src.width, src.height, 1);
+    }
+
+    // Evolution milestone tier (only meaningful at level >= 2):
+    // 0 = L2-4 (first evolution), 1 = L5-7, 2 = L8+. Powers step up per tier.
+    evoTier(level) { return level < 5 ? 0 : level < 8 ? 1 : 2; }
+
+    // Nearest active enemy to (x,y) not already in the exclude list (ricochet)
+    nearestEnemyExcluding(x, y, exclude) {
+        let best = null, bd = 1e9;
+        this.enemies.getChildren().forEach(e => {
+            if (!e.active || (exclude && exclude.includes(e))) return;
+            const d = Phaser.Math.Distance.Between(x, y, e.x, e.y);
+            if (d < bd) { bd = d; best = e; }
+        });
+        return best;
+    }
+
+    // Scissors "Splitting" evolution: a scissor that strikes an enemy is
+    // replaced by two child scissors fanning outward from its heading. Each
+    // child inherits splitsLeft-1 so higher tiers keep splitting (capped).
+    spawnKnifeSplit(parent, hitEnemy) {
+        if (this.bullets.getChildren().length > 200) return; // perf guard
+        const key = this.itemTex('knife', 'knife');
+        const u = this.unitScale(key);
+        const baseAng = Math.atan2(parent.body.velocity.y, parent.body.velocity.x);
+        const scale = (parent.childScale || 1) * 0.85;
+        [-1, 1].forEach(side => {
+            const ang = baseAng + side * 0.44; // ~25° fan
+            const k = this.add.image(parent.x, parent.y, key).setOrigin(0.5).setScale(1.5 * u * scale);
+            k.rotation = ang;
+            if (parent.tintTopLeft !== 0xffffff) k.setTint(parent.tintTopLeft);
+            this.bullets.add(k);
+            this.physics.add.existing(k);
+            k.body.setCircle(12 * scale);
+            const sp = 500;
+            k.body.setVelocity(Math.cos(ang) * sp, Math.sin(ang) * sp);
+            k.dmg = parent.dmg * 0.85; k.type = 'knife'; k.wlevel = parent.wlevel;
+            k.splitsLeft = (parent.splitsLeft || 0) - 1;
+            k.childScale = scale;
+            k.hitList = [hitEnemy]; // don't instantly re-hit the enemy we split on
+        });
     }
 
     create() {
@@ -346,23 +387,44 @@ class MainScene extends Phaser.Scene {
                 if (!b.hitList) b.hitList = [];
                 b.hitList.push(e);
                 this.damageEnemy(e, b.dmg, 200);
-                // Book evolution (L4+): Knowledge Blast — one AoE burst per book
-                if (b.type === 'axe' && b.wlevel >= 4 && !b.aoeDone) {
+                // Book evolution (L2+): Knowledge Blast — AoE burst per book,
+                // radius + damage step up at L5 / L8
+                if (b.type === 'axe' && b.wlevel >= 2 && !b.aoeDone) {
                     b.aoeDone = true;
-                    this.spawnBurstParticles(b.x, b.y, 0xffe08a, 12, 4);
+                    const t = b.wlevel < 5 ? 0 : b.wlevel < 8 ? 1 : 2;
+                    const rad = [75, 100, 130][t];
+                    const frac = [0.5, 0.65, 0.8][t];
+                    this.spawnBurstParticles(b.x, b.y, 0xffe08a, 12 + t * 6, 4);
                     this.enemies.getChildren().forEach(o => {
-                        if (o !== e && o.active && Phaser.Math.Distance.Between(b.x, b.y, o.x, o.y) < 75) {
-                            this.damageEnemy(o, b.dmg * 0.5, 80);
+                        if (o !== e && o.active && Phaser.Math.Distance.Between(b.x, b.y, o.x, o.y) < rad) {
+                            this.damageEnemy(o, b.dmg * frac, 80);
                         }
                     });
                 }
+                // Triangle evolution (L2+): Ricochet — redirect toward the next
+                // nearest enemy, up to bounces times (3 / 4 / 5 by tier)
+                if (b.type === 'cross' && b.bounces > 0) {
+                    const next = this.nearestEnemyExcluding(b.x, b.y, b.hitList);
+                    if (next) {
+                        const ang = Phaser.Math.Angle.Between(b.x, b.y, next.x, next.y);
+                        b.body.setVelocity(Math.cos(ang) * 340, Math.sin(ang) * 340);
+                        b.bounces--;
+                        this.spawnBurstParticles(b.x, b.y, 0x66e0ff, 5, 3);
+                    }
+                }
             } else if (b.type === 'wand' && b.pierce > 0) {
-                // Plane evolution (L5+): Flaming Dart punches through enemies
+                // Plane evolution (L2+): Piercing Dart punches through enemies
                 if (b.hitList && b.hitList.includes(e)) return;
                 if (!b.hitList) b.hitList = [];
                 b.hitList.push(e);
                 b.pierce--;
                 this.damageEnemy(e, b.dmg, 100);
+            } else if (b.type === 'knife') {
+                // Scissors evolution (L2+): split into two on hit
+                if (b.hitList && b.hitList.includes(e)) return;
+                this.damageEnemy(e, b.dmg, 100);
+                if (b.splitsLeft > 0) this.spawnKnifeSplit(b, e);
+                b.destroy();
             } else {
                 this.damageEnemy(e, b.dmg, 100);
                 b.destroy();
@@ -960,6 +1022,19 @@ class MainScene extends Phaser.Scene {
 
     updateWeapons() {
         this.enemies.getChildren().forEach(e => {
+            const nowMs = this.time.now;
+            // Poison DoT (Water Balloon evolution): keeps ticking after the pool
+            if (e.poisonUntil && e.poisonUntil > nowMs && e.active) {
+                if (!e.poisonNextTick || nowMs >= e.poisonNextTick) {
+                    e.poisonNextTick = nowMs + 500;
+                    this.spawnBurstParticles(e.x, e.y, 0x77dd44, 3, 2.5);
+                    this.damageEnemy(e, e.poisonDmg);
+                }
+            }
+            // Chill (Frost Erasers evolution): slows movement + lengthens attacks
+            const chilled = e.chillUntil && e.chillUntil > nowMs;
+            const moveMult = chilled ? (1 - e.chillPow) : 1;
+            const durMult = chilled ? 1 / (1 - e.chillPow) : 1;
             if (e.stunTimer > 0) {
                 e.stunTimer--;
                 // Note: knockback no longer cancels attacks — only death does.
@@ -975,15 +1050,15 @@ class MainScene extends Phaser.Scene {
                         // Lock lunge direction at the player's position NOW — dodgeable
                         const ang = Phaser.Math.Angle.Between(e.x, e.y, this.player.x, this.player.y);
                         const lungeSpeed = e.isBoss ? 300 : 340;
-                        e.body.setVelocity(Math.cos(ang) * lungeSpeed, Math.sin(ang) * lungeSpeed);
+                        e.body.setVelocity(Math.cos(ang) * lungeSpeed * moveMult, Math.sin(ang) * lungeSpeed * moveMult);
                         e.attackState = 'lunge';
-                        e.lungeUntil = nowT + (e.isBoss ? 420 : 300);
+                        e.lungeUntil = nowT + (e.isBoss ? 420 : 300) * durMult;
                         e.clearTint();
                     }
                 } else if (e.attackState === 'lunge') {
                     if (nowT >= e.lungeUntil) {
                         e.attackState = 'recover';
-                        e.recoverUntil = nowT + 650;
+                        e.recoverUntil = nowT + 650 * durMult;
                         e.body.setVelocity(e.body.velocity.x * 0.15, e.body.velocity.y * 0.15);
                     }
                 } else if (e.attackState === 'recover') {
@@ -997,7 +1072,7 @@ class MainScene extends Phaser.Scene {
                         // Near-instant strike: short flash of warning tint, then pounce
                         const telegraphMs = Phaser.Math.Clamp(200 - difficulty * 6, 110, 200);
                         e.attackState = 'windup';
-                        e.windupUntil = nowT + (e.isBoss ? telegraphMs + 100 : telegraphMs);
+                        e.windupUntil = nowT + (e.isBoss ? telegraphMs + 100 : telegraphMs) * durMult;
                         e.body.setVelocity(0, 0);
                         e.setTint(0xdd6666); // "about to pounce" warning color
                     } else {
@@ -1059,7 +1134,7 @@ class MainScene extends Phaser.Scene {
                         }
 
                         if (e.body) {
-                            e.body.setVelocity(vx, vy);
+                            e.body.setVelocity(vx * moveMult, vy * moveMult);
                         }
                     }
                 }
@@ -1092,6 +1167,14 @@ class MainScene extends Phaser.Scene {
                         e.setScale(facingX, baseScale);
                     }
                 }
+                // Chill visual: icy-blue tint while frozen (skip windup so the
+                // red pounce warning stays readable); cleared when it wears off
+                if (chilled) {
+                    if (e.attackState !== 'windup') e.setTint(0x9fd8ff);
+                    e._chillTinted = true;
+                } else if (e._chillTinted) {
+                    e.clearTint(); e._chillTinted = false;
+                }
             }
         });
 
@@ -1122,6 +1205,11 @@ class MainScene extends Phaser.Scene {
                     s.x = this.player.x + Math.cos(theta) * w.range;
                     s.y = this.player.y + Math.sin(theta) * w.range;
                     s.rotation += 0.12; // tumbling erasers
+                    // Frost Erasers (L2+): faint icy tint + cold sparkle trail
+                    if (w.level >= 2) {
+                        s.setTint(0xbfe9ff);
+                        if (Math.random() < 0.05) this.spawnBurstParticles(s.x, s.y, 0xafe6ff, 2, 2);
+                    }
                     // High-level polish: pink rubber-dust sparkle trail
                     if (w.level >= 4 && Math.random() < 0.06) {
                         this.spawnBurstParticles(s.x, s.y, 0xff9ecb, 2, 2);
@@ -1130,6 +1218,13 @@ class MainScene extends Phaser.Scene {
                         if (Phaser.Math.Distance.Between(s.x, s.y, e.x, e.y) < 30 && (!w.hitCooldowns.has(e) || w.hitCooldowns.get(e) <= 0)) {
                             this.damageEnemy(e, w.dmg * this.playerStats.might, 200);
                             w.hitCooldowns.set(e, 20); // 20-frame cooldown per enemy
+                            // Frost Erasers (L2+): chill slows movement + attack;
+                            // strength & duration step up at L5 / L8
+                            if (w.level >= 2) {
+                                const t = this.evoTier(w.level);
+                                e.chillPow = [0.4, 0.55, 0.7][t];
+                                e.chillUntil = this.time.now + [1200, 1600, 2000][t];
+                            }
                         }
                     });
                 });
@@ -1174,7 +1269,8 @@ class MainScene extends Phaser.Scene {
             b.body.setVelocity(Math.cos(angle) * 300, Math.sin(angle) * 300);
             b.dmg = 12 * (1 + w.level * 0.2) * this.playerStats.might; b.type = 'wand'; b.life = 60;
             b.wlevel = w.level;
-            b.pierce = w.level >= 5 ? 2 : 0; // Flaming Dart: punches through 2 extra enemies
+            // Piercing Dart evolution (L2+): punches through 2 / 3 / 4 enemies
+            b.pierce = w.level >= 2 ? [2, 3, 4][this.evoTier(w.level)] : 0;
         }
     }
 
@@ -1690,28 +1786,29 @@ class MainScene extends Phaser.Scene {
         // Legacy scale numbers below assume ~29px textures; u adapts them
         const u = this.unitScale(key);
         const grow = 1 + Math.min(w.level, 6) * 0.06; // heavier tomes at high level
+        const BOOK = 1.75; // the book is a big, heavy hitter from the start
         for (let i = 0; i < count; i++) {
             const spread = (i - (count - 1) / 2) * 50;
-            const axe = this.add.image(this.player.x, this.player.y, key).setOrigin(0.5).setScale(0.5 * u);
+            const axe = this.add.image(this.player.x, this.player.y, key).setOrigin(0.5).setScale(0.5 * u * BOOK);
             if (w.level >= 5) axe.setTint(0xffe08a); // gilded spellbook
             this.bullets.add(axe);
             this.physics.add.existing(axe);
-            axe.body.setCircle(15 * grow); // hitbox grows with the art
+            axe.body.setCircle(15 * grow * BOOK); // hitbox grows with the art
             axe.body.setVelocity(this.player.scaleX * 150 + spread, -400);
             axe.body.gravity.y = 800;
-            axe.dmg = 12 * this.playerStats.might; axe.type = 'axe';
+            axe.dmg = 26 * this.playerStats.might; axe.type = 'axe';
             axe.wlevel = w.level;
 
             // Squash & stretch heave throw
             this.tweens.add({
                 targets: axe,
-                scaleX: 1.8 * u * grow,
-                scaleY: 1.3 * u * grow,
+                scaleX: 1.8 * u * grow * BOOK,
+                scaleY: 1.3 * u * grow * BOOK,
                 duration: 200,
                 ease: 'Back.easeOut',
                 onComplete: () => {
                     if (axe.active) {
-                        axe.setScale(1.5 * u * grow);
+                        axe.setScale(1.5 * u * grow * BOOK);
                     }
                 }
             });
@@ -1732,8 +1829,12 @@ class MainScene extends Phaser.Scene {
             this.physics.add.existing(cross);
             cross.body.setCircle(15 * grow); // hitbox grows with the art
             cross.body.setVelocity(this.player.scaleX * 300 * dir, 0);
-            cross.dmg = 6 * this.playerStats.might; cross.type = 'cross'; cross.returnTimer = 40;
+            cross.dmg = 6 * this.playerStats.might; cross.type = 'cross';
             cross.wlevel = w.level;
+            // Ricochet evolution (L2+): bounces to 3 / 4 / 5 nearest enemies
+            // instead of returning; L1 stays a classic boomerang
+            cross.bounces = w.level >= 2 ? [3, 4, 5][this.evoTier(w.level)] : 0;
+            cross.returnTimer = cross.bounces > 0 ? 99999 : 40;
 
             // Bouncy expanding pop-out
             this.tweens.add({
@@ -1770,6 +1871,9 @@ class MainScene extends Phaser.Scene {
             knife.body.setVelocity(Math.cos(finalAngle) * speed, Math.sin(finalAngle) * speed);
             knife.dmg = 8 * this.playerStats.might; knife.type = 'knife';
             knife.wlevel = w.level;
+            // Splitting Scissors evolution (L2+): split depth 1 / 2 / 3 by tier
+            knife.splitsLeft = w.level >= 2 ? [1, 2, 3][this.evoTier(w.level)] : 0;
+            knife.childScale = 1;
 
             // Elastic thrust scaling
             this.tweens.add({
@@ -1856,6 +1960,14 @@ class MainScene extends Phaser.Scene {
                         this.enemies.getChildren().forEach(e => {
                             if (Phaser.Math.Distance.Between(tx, ty, e.x, e.y) < size / 2) {
                                 this.damageEnemy(e, dmg);
+                                // Poison Splash evolution (L2+): mark enemies so
+                                // they keep taking damage after leaving the pool;
+                                // duration + potency step up at L5 / L8
+                                if (w.level >= 2) {
+                                    const t = this.evoTier(w.level);
+                                    e.poisonUntil = this.time.now + [3000, 4500, 6000][t];
+                                    e.poisonDmg = dmg * [0.3, 0.4, 0.5][t];
+                                }
                             }
                         });
                     }

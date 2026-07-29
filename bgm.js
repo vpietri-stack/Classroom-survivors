@@ -17,6 +17,8 @@
 
     let ctx = null, gainNode = null, srcNode = null, buffer = null;
     let playing = false, loading = false;
+    let muted = false;
+    try { muted = localStorage.getItem('bgmMuted') === '1'; } catch (e) { }
     const ducks = new Set();
 
     function ensureCtx() {
@@ -44,6 +46,7 @@
     }
 
     function currentTarget() {
+        if (muted) return 0;
         let mult = 1;
         ducks.forEach(d => { mult = Math.min(mult, DUCK_LEVELS[d] !== undefined ? DUCK_LEVELS[d] : 1); });
         return BASE_VOL * mult;
@@ -57,8 +60,15 @@
         gainNode.gain.linearRampToValueAtTime(playing ? currentTarget() : 0, t + (fadeSec || 0.4));
     }
 
+    // Keep the HUD mute icon in sync with state (index.html #vsMuteIcon)
+    function syncMuteIcon() {
+        const icon = document.getElementById('vsMuteIcon');
+        if (icon) icon.className = muted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+    }
+
     const BGM = {
         start() {
+            syncMuteIcon();
             try { ensureCtx(); } catch (e) { return; }
             if (playing) { applyVolume(0.5); return; }
             playing = true;
@@ -91,11 +101,20 @@
         },
         duck(reason) { ducks.add(reason); applyVolume(0.25); },
         unduck(reason) { ducks.delete(reason); applyVolume(0.6); },
+        // Mute keeps the loop running at zero gain so unmute is instant
+        toggleMute() {
+            muted = !muted;
+            try { localStorage.setItem('bgmMuted', muted ? '1' : '0'); } catch (e) { }
+            syncMuteIcon();
+            applyVolume(0.15);
+            return muted;
+        },
+        isMuted() { return muted; },
         isPlaying() { return playing; },
         // introspection for tests/diagnostics
         _debug() {
             return {
-                playing, ducks: Array.from(ducks), target: currentTarget(),
+                playing, muted, ducks: Array.from(ducks), target: currentTarget(),
                 gain: gainNode ? gainNode.gain.value : null,
                 duration: buffer ? buffer.duration : null,
                 loopEnd: srcNode ? srcNode.loopEnd : null

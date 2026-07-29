@@ -382,9 +382,11 @@ function showGameSelection() {
         clearInterval(minigameCountdownInterval);
         minigameCountdownInterval = null;
     }
-    // Hide VS exit button
+    // Hide VS exit button + mute toggle
     const vsExitBtn = document.getElementById('vsExitBtn');
     if (vsExitBtn) vsExitBtn.classList.add('hidden');
+    const vsMuteBtn = document.getElementById('vsMuteBtn');
+    if (vsMuteBtn) vsMuteBtn.classList.add('hidden');
     activeGameMode = null;
 
     document.getElementById('gameSelectionOverlay').classList.remove('hidden');

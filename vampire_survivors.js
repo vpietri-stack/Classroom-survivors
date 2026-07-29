@@ -2140,7 +2140,9 @@ class MainScene extends Phaser.Scene {
         if (ok) {
             this.puzzleDone.add(p.item.text);
             synthLevelUp();
+            p.feedback = true; // ESL-style reveal: every slot colors green
             this.setTrackerState('success');
+            this.updatePuzzleTracker();
             this.spawnBurstParticles(this.player.x, this.player.y, 0x00ff88, 20, 5);
             const reward = p.reward;
             this.time.delayedCall(750, () => {
@@ -2149,10 +2151,14 @@ class MainScene extends Phaser.Scene {
             });
         } else {
             synthError();
+            p.feedback = true; // ESL-style reveal: green = right slot, red = wrong
             this.setTrackerState('fail');
+            this.updatePuzzleTracker();
             this.cameras.main.shake(120, 0.006);
-            // Check-on-complete: everything goes back to the ground, start over
-            this.time.delayedCall(700, () => this.resetPuzzleBoxes());
+            // Check-on-complete: hold the reveal so students can SEE which
+            // slots were wrong (same principle as the spelling minigame),
+            // then everything goes back to the ground and they start over
+            this.time.delayedCall(1600, () => this.resetPuzzleBoxes());
         }
     }
 
@@ -2161,6 +2167,7 @@ class MainScene extends Phaser.Scene {
         if (!p) return;
         p.attempt = [];
         p.checking = false;
+        p.feedback = false;
         p.boxes.forEach(b => {
             if (!b.used) return; // untouched boxes stay put (no blink)
             b.used = false;
@@ -2235,6 +2242,10 @@ class MainScene extends Phaser.Scene {
 
         const punct = [' ', '-', '.', '?', '!', ',', "'"];
         const filled = p.attempt.map(b => b.tokenValue);
+        // ESL minigame reveal colors (Tailwind green-500 / red-500): during
+        // the check, each filled slot shows green (right) or red (wrong)
+        const slotColor = (i) => !p.feedback ? '#ffd166'
+            : (filled[i] === p.item.tokens[i] ? '#22c55e' : '#ef4444');
         let html = '';
         if (p.item.mode === 'word') {
             slotsEl.style.fontSize = '18px';
@@ -2247,7 +2258,7 @@ class MainScene extends Phaser.Scene {
                         : '<span style="opacity:0.65;">' + ch + '</span>';
                 } else {
                     if (li < filled.length) {
-                        html += '<span style="color:#ffd166;">' + filled[li] + '</span>';
+                        html += '<span style="color:' + slotColor(li) + ';">' + filled[li] + '</span>';
                     } else {
                         html += '<span style="opacity:0.4;">_</span>';
                     }
@@ -2266,7 +2277,7 @@ class MainScene extends Phaser.Scene {
                 slotsEl.style.fontSize = '16px';
                 html = p.item.tokens.map((tok, i) =>
                     i < filled.length
-                        ? '<span style="color:#ffd166;">' + filled[i] + '</span>'
+                        ? '<span style="color:' + slotColor(i) + ';">' + filled[i] + '</span>'
                         : '<span style="opacity:0.4;">\u2581</span>'
                 ).join(' ');
             }
@@ -2675,9 +2686,11 @@ function triggerVampireSurvivors() {
     document.getElementById('gameIntroOverlay').classList.add('hidden');
     document.getElementById('gameSelectionOverlay').classList.add('hidden');
     document.getElementById('gameOverScreen').classList.add('hidden');
-    // Show VS exit button
+    // Show VS exit button + music mute toggle
     const vsExitBtn = document.getElementById('vsExitBtn');
     if (vsExitBtn) vsExitBtn.classList.remove('hidden');
+    const vsMuteBtn = document.getElementById('vsMuteBtn');
+    if (vsMuteBtn) vsMuteBtn.classList.remove('hidden');
     initAudio();
     totalMinigameTimeMs = 0;
     // Ensure canvas is visible (may have been hidden by exitVampireSurvivors)
@@ -2803,9 +2816,11 @@ function exitVampireSurvivors() {
     if (game && game.canvas) {
         game.canvas.style.display = 'none';
     }
-    // Hide VS exit button
+    // Hide VS exit button + mute toggle
     const vsExitBtn = document.getElementById('vsExitBtn');
     if (vsExitBtn) vsExitBtn.classList.add('hidden');
+    const vsMuteBtn = document.getElementById('vsMuteBtn');
+    if (vsMuteBtn) vsMuteBtn.classList.add('hidden');
     activeGameMode = null;
     document.getElementById('gameSelectionOverlay').classList.remove('hidden');
 }

@@ -33,6 +33,29 @@
     5: { label: 'Level 5 (advanced)',      minAccuracy: 1.00, maxWER: 0.00, phonPass: 1.00, allowPhonetic: false, exact: true  }
   };
 
+  // --- per-BOOK leniency ladder ---------------------------------------------
+  // Lower-level students get more leeway so early failures don't discourage
+  // them, while hallucination garbage ([Music], "Bye!") still fails at every
+  // tier (it scores <30% on all three paths). Order, most to least lenient:
+  //   PU0 > PU1 > PU2 > Think0 > PU3 = Think1 > PU4 > Think2
+  // PU3/Think1 is the anchor = the field-tuned thresholds above (LEVELS[2]).
+  // PU0/PU4 are pre-seeded for future books. Keys are lower-cased book ids as
+  // stored in the student's DB record (authActiveUser.book).
+  const BOOK_TIERS = {
+    pu0:    { label: 'PU0 (most lenient)', minAccuracy: 0.62, maxWER: 0.50, phonPass: 0.55, allowPhonetic: true, exact: false },
+    pu1:    { label: 'PU1',                minAccuracy: 0.65, maxWER: 0.45, phonPass: 0.60, allowPhonetic: true, exact: false },
+    pu2:    { label: 'PU2',                minAccuracy: 0.70, maxWER: 0.38, phonPass: 0.65, allowPhonetic: true, exact: false },
+    think0: { label: 'Think0',             minAccuracy: 0.72, maxWER: 0.34, phonPass: 0.68, allowPhonetic: true, exact: false },
+    pu3:    { label: 'PU3 (anchor)',       minAccuracy: 0.75, maxWER: 0.30, phonPass: 0.70, allowPhonetic: true, exact: false },
+    think1: { label: 'Think1 (anchor)',    minAccuracy: 0.75, maxWER: 0.30, phonPass: 0.70, allowPhonetic: true, exact: false },
+    pu4:    { label: 'PU4',                minAccuracy: 0.78, maxWER: 0.25, phonPass: 0.75, allowPhonetic: true, exact: false },
+    think2: { label: 'Think2 (strictest)', minAccuracy: 0.80, maxWER: 0.22, phonPass: 0.80, allowPhonetic: true, exact: false }
+  };
+  // Unknown / missing book → anchor tier (today's behavior, safe default).
+  function tierForBook(book) {
+    return BOOK_TIERS[String(book || '').toLowerCase().trim()] || BOOK_TIERS.pu3;
+  }
+
   function normalize(s) {
     return (s || '')
       .toLowerCase()
@@ -80,13 +103,8 @@
     return d / denom <= WORD_FUZZY;
   }
 
-  /**
-   * @param {string} target      e.g. "the weather is nice today"
-   * @param {string} transcript  what the STT heard
-   * @param {number} level       1..5
-   */
-  function score(target, transcript, level) {
-    const cfg = LEVELS[level] || LEVELS[3];
+  // Core decision shared by score() (numeric levels) and scoreForBook().
+  function scoreWithCfg(cfg, target, transcript) {
     const tgt = normalize(target);
     const got = normalize(transcript);
     // No target = nothing to grade; never auto-pass (accuracyOf('','') is 1).
@@ -151,5 +169,23 @@
     return { pass, accuracy, details, phoneticRatio, edits, wer, cfg };
   }
 
-  global.Scorer = { score, LEVELS, normalize, phoneticMatch, levenshtein };
+  /**
+   * @param {string} target      e.g. "the weather is nice today"
+   * @param {string} transcript  what the STT heard
+   * @param {number} level       1..5
+   */
+  function score(target, transcript, level) {
+    return scoreWithCfg(LEVELS[level] || LEVELS[3], target, transcript);
+  }
+
+  /**
+   * Book-aware scoring: same three-path decision, thresholds from the
+   * student's book tier (see BOOK_TIERS). book comes from the student's DB
+   * record (authActiveUser.book), e.g. 'PU1', 'Think2'.
+   */
+  function scoreForBook(target, transcript, book) {
+    return scoreWithCfg(tierForBook(book), target, transcript);
+  }
+
+  global.Scorer = { score, scoreForBook, LEVELS, BOOK_TIERS, tierForBook, normalize, phoneticMatch, levenshtein };
 })(window);

@@ -464,6 +464,71 @@
     return out;
   }
 
+  // --- Child-voice pitch adaptation -----------------------------------------
+  // Whisper tiny.en is trained on adult speech (F0 ~100-200 Hz); children speak
+  // at ~250-400 Hz with shorter vocal tracts, and field data (2026-07-27/28)
+  // shows the model garbling exactly those voices. Fix: estimate each clip's
+  // median F0 and, when it's child-high, resample-DOWN before inference. Plain
+  // resampling shifts pitch + formants together and slows tempo slightly — all
+  // three push the audio toward the model's training distribution. Deep voices
+  // (older students, adults) measure below the threshold and get zero shift,
+  // so every recording carries its own calibration; no stored profiles.
+  const F0_SHIFT_THRESHOLD = 240;  // Hz — below this (adults/deep-voiced kids) never shift
+  const F0_TARGET = 175;           // Hz — centre of Whisper's comfortable adult range
+  const MAX_SHIFT_SEMITONES = 4;   // cap: over-shifting smears consonants
+
+  // Median F0 via normalized autocorrelation over sampled 40 ms frames.
+  // Returns null when fewer than 3 frames yield a confident pitch (silence,
+  // noise, music) — caller must treat null as "do not shift" (fail-safe).
+  function estimateF0(audio, sampleRate) {
+    const F_MIN = 80, F_MAX = 450;
+    const frameLen = Math.round(sampleRate * 0.040);
+    const minLag = Math.ceil(sampleRate / F_MAX);
+    const maxLag = Math.floor(sampleRate / F_MIN);
+    if (audio.length < frameLen + maxLag) return null;
+    const NFRAMES = 12;
+    const usable = audio.length - frameLen - maxLag;
+    const step = Math.max(1, Math.floor(usable / NFRAMES));
+    const f0s = [];
+    const corr = new Float32Array(maxLag + 1);
+    for (let f = 0; f < NFRAMES; f++) {
+      const start = Math.min(usable, f * step);
+      let energy = 0;
+      for (let i = start; i < start + frameLen; i++) energy += audio[i] * audio[i];
+      if (Math.sqrt(energy / frameLen) < 0.01) continue; // silent frame — skip
+      let bestR = 0;
+      for (let lag = minLag; lag <= maxLag; lag++) {
+        let num = 0, den2 = 0;
+        for (let i = start; i < start + frameLen; i++) {
+          num += audio[i] * audio[i + lag];
+          den2 += audio[i + lag] * audio[i + lag];
+        }
+        const r = num / (Math.sqrt(energy * den2) || 1);
+        corr[lag] = r;
+        if (r > bestR) bestR = r;
+      }
+      if (bestR <= 0.5) continue; // no confident periodicity (noise/music)
+      // Octave-error guard: autocorrelation often peaks at DOUBLE the true
+      // period (half the frequency). Prefer the SMALLEST lag whose correlation
+      // is nearly as good as the best — that's the true fundamental.
+      let lagPick = 0;
+      for (let lag = minLag; lag <= maxLag; lag++) {
+        if (corr[lag] >= 0.9 * bestR) { lagPick = lag; break; }
+      }
+      if (lagPick > 0) f0s.push(sampleRate / lagPick);
+    }
+    if (f0s.length < 3) return null;
+    f0s.sort((a, b) => a - b);
+    return f0s[Math.floor(f0s.length / 2)];
+  }
+
+  // How many semitones to shift down for a measured F0 (0 = no shift).
+  function shiftSemitonesFor(f0) {
+    if (!f0 || f0 < F0_SHIFT_THRESHOLD) return 0;
+    const st = Math.round(12 * Math.log2(f0 / F0_TARGET));
+    return Math.max(1, Math.min(MAX_SHIFT_SEMITONES, st));
+  }
+
   // Collapse Tiny Whisper speaker-echo loops (famous 'what what what' / 'the
   // the the the' patterns on Android). We only strip obvious loops — not normal
   // two-repeat intent speech like "Wednesday, Wednesday".
@@ -494,6 +559,21 @@
       throw new Error('transcribe: expected a WAV Blob or Float32Array');
     }
     if (sampleRate !== TARGET_SR) audio = resample(audio, sampleRate, TARGET_SR);
+
+    // --- Child-voice pitch adaptation (see estimateF0 above) ---
+    // Runs BEFORE the short-utterance repeat hack so the duration check sees
+    // the (slightly stretched) shifted audio. Fail-safe: any estimation error
+    // or unconfident pitch → no shift, original audio goes through untouched.
+    let f0 = null, shiftSemitones = 0;
+    try { f0 = estimateF0(audio, TARGET_SR); } catch (_) { f0 = null; }
+    if (f0) {
+      shiftSemitones = shiftSemitonesFor(f0);
+      if (shiftSemitones > 0) {
+        const k = Math.pow(2, shiftSemitones / 12);
+        audio = resample(audio, TARGET_SR, Math.round(TARGET_SR * k));
+        log('Engine: voice F0 ≈' + Math.round(f0) + 'Hz → pitch-shifted down ' + shiftSemitones + ' semitones');
+      }
+    }
 
     // --- Audio repeat hack for isolated words ---
     // Whisper tiny.en struggles on very short utterances (~0.3-0.6s single words)
@@ -531,7 +611,12 @@
     text = collapseRepetition(text);
 
     log(`Transcribed in ${timeSec}s → "${text}"`);
-    return { text, timeSec: parseFloat(timeSec) };
+    return {
+      text,
+      timeSec: parseFloat(timeSec),
+      f0: f0 ? Math.round(f0) : null,
+      shiftSemitones: shiftSemitones
+    };
   }
 
   global.LocalEngine = {
@@ -541,6 +626,10 @@
     transcribe,
     resetLoad,
     isLoaded: () => !!transcriber,
-    chosenSource: () => chosen
+    chosenSource: () => chosen,
+    // Test/diagnostic hooks for the pitch-adaptation path (api/test_pitch_shift.js).
+    _estimateF0: estimateF0,
+    _shiftSemitonesFor: shiftSemitonesFor,
+    _resample: resample
   };
 })(window);

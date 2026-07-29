@@ -209,6 +209,48 @@ async function main() {
         console.log(`  level ${lvl}: ${p}/${attempts.length} (${pct(p, attempts.length)})${lvl === 2 ? '  ← current' : ''}`);
     }
 
+    // ---- 5b. pitch-shift effect (child-voice adaptation) ----
+    // f0/shiftSemis are only present on events recorded after the pitch-
+    // adaptation deploy; older events group as "no data".
+    console.log(`\n--- 5b. PITCH SHIFT (child-voice adaptation) ---`);
+    const shifted = attempts.filter(a => typeof a.shiftSemis === 'number' && a.shiftSemis > 0);
+    const unshifted = attempts.filter(a => typeof a.shiftSemis === 'number' && a.shiftSemis === 0);
+    const noData = attempts.length - shifted.length - unshifted.length;
+    if (shifted.length + unshifted.length === 0) {
+        console.log('  no pitch data yet (all events predate the pitch-adaptation deploy)');
+    } else {
+        const sp = shifted.filter(a => a.pass).length;
+        const up = unshifted.filter(a => a.pass).length;
+        console.log(`  shifted   (child-high F0): ${shifted.length} attempts, pass ${pct(sp, shifted.length)}`);
+        console.log(`  unshifted (adult-range F0/unvoiced): ${unshifted.length} attempts, pass ${pct(up, unshifted.length)}`);
+        if (noData) console.log(`  (no pitch data: ${noData} older attempts)`);
+        // Per-student median F0 — shows WHO triggers the shift.
+        const f0ByStudent = new Map();
+        for (const a of attempts) {
+            if (typeof a.f0 !== 'number' || !a.f0) continue;
+            if (!f0ByStudent.has(a.student)) f0ByStudent.set(a.student, []);
+            f0ByStudent.get(a.student).push(a.f0);
+        }
+        for (const [name, list] of [...f0ByStudent.entries()].sort((x, y) => y[1].length - x[1].length)) {
+            list.sort((x, y) => x - y);
+            const med = list[Math.floor(list.length / 2)];
+            console.log(`  ${pad(name, 14)} median F0 ${med}Hz (${list.length} voiced attempts)${med >= 240 ? '  → shift active' : ''}`);
+        }
+    }
+
+    // ---- 5c. per-book pass rates (leniency-ladder view) ----
+    console.log(`\n--- 5c. PER BOOK (leniency tiers) ---`);
+    const byBook = new Map();
+    for (const a of attempts) {
+        const b = (a.book || 'unknown').toString();
+        if (!byBook.has(b)) byBook.set(b, []);
+        byBook.get(b).push(a);
+    }
+    for (const [b, list] of [...byBook.entries()].sort((x, y) => y[1].length - x[1].length)) {
+        const p = list.filter(a => a.pass).length;
+        console.log(`  ${pad(b, 10)} ${pad(list.length + ' attempts', 14)} pass ${pct(p, list.length)}`);
+    }
+
     // ---- 6. audio sanity ----
     console.log(`\n--- 6. AUDIO SANITY ---`);
     const withAudio = attempts.filter(a => a.audioMs);

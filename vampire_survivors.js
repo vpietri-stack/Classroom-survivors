@@ -389,10 +389,10 @@ class MainScene extends Phaser.Scene {
                 this.damageEnemy(e, b.dmg, 200);
                 if (b.type === 'axe') synthSmash();       // book: heavy smash
                 else synthRicochet();                     // triangle: metallic ping
-                // Book evolution (L2+): Knowledge Blast — AoE burst per book.
-                // Bigger blast at every even level from L4 (4,6,8,10,12...)
-                if (b.type === 'axe' && b.wlevel >= 2 && !b.aoeDone) {
-                    b.aoeDone = true;
+                // Book evolution (L2+): Knowledge Blast — AoE burst on EVERY
+                // enemy the book hits (hitList still prevents re-hitting the
+                // same enemy). Bigger blast at every even level from L4.
+                if (b.type === 'axe' && b.wlevel >= 2) {
                     const aoeBonus = b.wlevel >= 4 ? Math.floor((b.wlevel - 4) / 2) + 1 : 0;
                     const rad = 70 + aoeBonus * 22;
                     const frac = Math.min(0.85, 0.5 + aoeBonus * 0.08);
@@ -604,29 +604,33 @@ class MainScene extends Phaser.Scene {
                     t.spriteImg.x = t.x; t.spriteImg.y = t.y;
                     t.spriteImg.rotation += 0.28;
                     t.spriteImg.setScale(t.spriteBaseScale * (1 + 0.12 * Math.sin(this.gameTime * 0.3)));
+                    if (t.backdrop && t.backdrop.active) { t.backdrop.x = t.x; t.backdrop.y = t.y; }
 
-                    // Whirlwind: paper scraps spiraling tangentially around it
-                    if (this.gameTime % 2 === 0 && this.particlePool.length < 380) {
-                        const ang = Math.random() * Math.PI * 2;
-                        const rad = 45 + Math.random() * 45;
-                        this.particlePool.push({
-                            x: t.x + Math.cos(ang) * rad,
-                            y: t.y + Math.sin(ang) * rad,
-                            vx: -Math.sin(ang) * 5,       // tangential = swirl
-                            vy: Math.cos(ang) * 5 - 1.5,  // slight updraft
-                            size: Phaser.Math.FloatBetween(2, 4.5),
-                            color: Math.random() < 0.7 ? 0xf3efe6 : 0xd8d2c4 // paper tones
-                        });
+                    // Whirlwind: bigger, brighter paper scraps ringing the OUTER
+                    // edge of the funnel (sprite radius ~90) rather than over it
+                    if (this.particlePool.length < 360) {
+                        for (let k = 0; k < 2; k++) {
+                            const ang = Math.random() * Math.PI * 2;
+                            const rad = 88 + Math.random() * 54; // outer ring only
+                            this.particlePool.push({
+                                x: t.x + Math.cos(ang) * rad,
+                                y: t.y + Math.sin(ang) * rad,
+                                vx: -Math.sin(ang) * 7,       // faster tangential swirl
+                                vy: Math.cos(ang) * 7 - 1.5,  // slight updraft
+                                size: Phaser.Math.FloatBetween(3.5, 7),
+                                color: Math.random() < 0.7 ? 0xfbf7ee : 0xe6dfce // bright paper
+                            });
+                        }
                     }
 
-                    // Vortex suction: enemies inside 190px get dragged toward
-                    // the funnel (stronger when closer); runs AFTER the chase
-                    // AI set velocities this frame, so the pull wins up close
+                    // Vortex suction: enemies inside 190px get dragged HARD
+                    // toward the funnel (stronger when closer) and pulled into
+                    // the kill core; radius unchanged, force much stronger
                     this.enemies.getChildren().forEach(e => {
                         if (!e.active || !e.body) return;
                         const d = Phaser.Math.Distance.Between(t.x, t.y, e.x, e.y);
                         if (d < 190 && d > 1) {
-                            const pull = 340 * (1 - d / 190);
+                            const pull = 640 * (1 - d / 190);
                             e.body.velocity.x += ((t.x - e.x) / d) * pull;
                             e.body.velocity.y += ((t.y - e.y) / d) * pull;
                         }
@@ -1239,8 +1243,8 @@ class MainScene extends Phaser.Scene {
                             // strength & duration step up at L5 / L8
                             if (w.level >= 2) {
                                 const t = this.evoTier(w.level);
-                                e.chillPow = [0.4, 0.55, 0.7][t];
-                                e.chillUntil = this.time.now + [1200, 1600, 2000][t];
+                                e.chillPow = [0.5, 0.68, 0.85][t];   // L2 = 50% slower, up to 85%
+                                e.chillUntil = this.time.now + [1600, 2100, 2600][t];
                             }
                         }
                     });
@@ -1805,7 +1809,7 @@ class MainScene extends Phaser.Scene {
         const u = this.unitScale(key);
         // Slight size increase only at odd levels from L9 (L9/L11/L13...)
         const sizeBonus = w.level >= 9 ? Math.floor((w.level - 9) / 2) + 1 : 0;
-        const BOOK = 0.875 * (1 + 0.08 * sizeBonus); // halved base size + late-game growth
+        const BOOK = 0.875 * 1.3 * (1 + 0.08 * sizeBonus); // 1.3x bigger base + late-game growth
         for (let i = 0; i < count; i++) {
             const spread = (i - (count - 1) / 2) * 70; // fan the landing spots
             const axe = this.add.image(this.player.x, this.player.y, key).setOrigin(0.5).setScale(0.5 * u * BOOK);
@@ -1813,9 +1817,9 @@ class MainScene extends Phaser.Scene {
             this.bullets.add(axe);
             this.physics.add.existing(axe);
             axe.body.setCircle(15 * BOOK); // hitbox halved, scales only with size bonus
-            // "Up and down" attack: launch HIGH with only a little sideways drift;
-            // gravity brings it back down (all other weapons fire to the side)
-            axe.body.setVelocity(spread, -640);
+            // "Up and forward" arc: launch high AND forward (same height as
+            // before, travels forward more); gravity brings it back down
+            axe.body.setVelocity(this.player.scaleX * 260 + spread, -640);
             axe.body.gravity.y = 900;
             axe.dmg = 26 * this.playerStats.might; axe.type = 'axe';
             axe.wlevel = w.level;
@@ -2260,6 +2264,7 @@ class MainScene extends Phaser.Scene {
         g.lineStyle(3, 0x7cf5b0, 1);
         g.strokeRoundedRect(-bw / 2, -bh / 2, bw, bh, 12);
         const iconImg = this.setPx(this.add.image(0, 0, this.itemTex(choice.id, 'pu_' + choice.id)), 44);
+        if (choice.id === 'tornado') iconImg.setTint(0xaeb8c6); // pale swirl needs definition to read
         const box = this.add.container(x, y, [g, iconImg]);
         box.setDepth(44);
         box.reward = choice;
@@ -2788,9 +2793,9 @@ class MainScene extends Phaser.Scene {
 
     spawnTornado() {
         // Kill zone rides the wandering spiral; enemies are also sucked in
-        const tornado = this.add.circle(this.player.x, this.player.y, 28, 0xffffff, 0);
+        const tornado = this.add.circle(this.player.x, this.player.y, 60, 0xffffff, 0);
         this.physics.add.existing(tornado);
-        tornado.body.setCircle(28);
+        tornado.body.setCircle(60);
         this.tornados.add(tornado);
 
         tornado.theta = 0;
@@ -2800,10 +2805,13 @@ class MainScene extends Phaser.Scene {
         tornado.b = 8;
 
         if (this.textures.exists('item_tornado')) {
-            // Paper tornado art: big spinning funnel (replaces the old emoji
-            // fireball swarm), pulse + scrap particles handled in update()
+            // Dark backdrop disc so the pale paper swirl reads on the grass
+            tornado.backdrop = this.add.circle(tornado.x, tornado.y, 96, 0x1a2436, 0.42).setDepth(45);
+            // Paper tornado art: big spinning funnel; a defining tint lifts the
+            // wispy near-white swirl out of the background so it's visible
             tornado.spriteImg = this.setPx(
-                this.add.image(tornado.x, tornado.y, 'item_tornado').setDepth(46), 110);
+                this.add.image(tornado.x, tornado.y, 'item_tornado').setDepth(46), 180);
+            tornado.spriteImg.setTint(0xaeb8c6);
             tornado.spriteBaseScale = tornado.spriteImg.scale;
         } else {
             // Emoji fallback: the classic orbiting fireballs
@@ -2827,6 +2835,7 @@ class MainScene extends Phaser.Scene {
         this.time.delayedCall(5000, () => {
             if (tornado.fireballs) tornado.fireballs.forEach(f => { if (f.active) f.destroy(); });
             if (tornado.spriteImg) tornado.spriteImg.destroy();
+            if (tornado.backdrop) tornado.backdrop.destroy();
             tornado.destroy();
         });
     }

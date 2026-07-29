@@ -31,7 +31,7 @@ const ITEM_SPRITES = {
 const WEAPON_MILESTONES = {
     wand: { 2: 'Piercing Dart (Goes through 2!)', 3: 'Golden Dart', 5: 'Flaming Dart (Pierces 3!)', 8: 'Inferno Dart (Pierces 4!)' },
     knife: { 2: 'Splitting Scissors (Split on hit!)', 3: 'Whirling Blades', 4: 'Golden Shears', 5: 'Double Split!', 6: 'Red-Hot Blades', 8: 'Triple Split!' },
-    axe: { 2: 'Knowledge Blast (Area hit!)', 3: 'Second Book', 4: 'Bigger Blast', 5: 'Third Book', 6: 'Golden Edition', 7: 'Fourth Book', 8: 'Bigger Blast', 9: 'Bigger Books', 10: 'Bigger Blast', 11: 'Bigger Books', 12: 'Bigger Blast' },
+    axe: { 2: 'Knowledge Blast (Area hit!)', 3: 'Second Book', 4: 'Bigger Blast', 5: 'Third Book', 6: 'Bigger Blast', 7: 'Fourth Book', 8: 'Bigger Blast', 9: 'Bigger Books', 10: 'Bigger Blast', 11: 'Bigger Books', 12: 'Bigger Blast' },
     cross: { 2: 'Ricochet (Bounces to 3!)', 4: 'Glowing Edge', 5: 'Twin Boomerang (Both ways!)', 8: 'Super Ricochet (5 bounces!)' },
     water: { 2: 'Poison Splash (Lingers!)', 3: 'Bigger Balloons', 5: 'Double Splash (2 balloons!)', 8: 'Toxic Flood (Longer poison)' },
     orb: { 2: 'Frost Erasers (Slows enemies!)', 4: 'Rubber-Dust Sparkles', 6: 'Turbo Orbit', 8: 'Deep Freeze' }
@@ -390,11 +390,10 @@ class MainScene extends Phaser.Scene {
                 if (b.type === 'axe') synthSmash();       // book: heavy smash
                 else synthRicochet();                     // triangle: metallic ping
                 // Book evolution (L2+): Knowledge Blast — AoE burst per book.
-                // Bigger blast at L4, then every even level from L8 (8,10,12...)
+                // Bigger blast at every even level from L4 (4,6,8,10,12...)
                 if (b.type === 'axe' && b.wlevel >= 2 && !b.aoeDone) {
                     b.aoeDone = true;
-                    let aoeBonus = (b.wlevel >= 4 ? 1 : 0);
-                    if (b.wlevel >= 8) aoeBonus += Math.floor((b.wlevel - 8) / 2) + 1;
+                    const aoeBonus = b.wlevel >= 4 ? Math.floor((b.wlevel - 4) / 2) + 1 : 0;
                     const rad = 70 + aoeBonus * 22;
                     const frac = Math.min(0.85, 0.5 + aoeBonus * 0.08);
                     // Visible golden shockwave ring so the blast reads clearly
@@ -1810,7 +1809,7 @@ class MainScene extends Phaser.Scene {
         for (let i = 0; i < count; i++) {
             const spread = (i - (count - 1) / 2) * 70; // fan the landing spots
             const axe = this.add.image(this.player.x, this.player.y, key).setOrigin(0.5).setScale(0.5 * u * BOOK);
-            if (w.level >= 6) axe.setTint(0xffe08a); // Golden Edition (L6)
+            if (w.level >= 2) axe.setTint(0xffe08a); // Golden Edition + trail (first evolution, L2)
             this.bullets.add(axe);
             this.physics.add.existing(axe);
             axe.body.setCircle(15 * BOOK); // hitbox halved, scales only with size bonus
@@ -2030,20 +2029,22 @@ class MainScene extends Phaser.Scene {
                 const lvlBonus = Math.min(lvl, 6) * 0.5;
                 let trailColor = 0xffffff;
                 let trailSize = 3;
+                // Trail color upgrades at each weapon's FIRST evolution (L2);
+                // purely cosmetic — a visual badge that the weapon has evolved
                 if (b.type === 'wand') {
-                    trailColor = lvl >= 5 ? 0xff8844 : (lvl >= 3 ? 0xffd700 : 0x00ffff);
+                    trailColor = lvl >= 2 ? 0xffd700 : 0x00ffff;
                     trailSize = 5 + lvlBonus;
                 }
                 else if (b.type === 'cross') {
-                    trailColor = lvl >= 4 ? 0x66e0ff : 0xffeb3b;
+                    trailColor = lvl >= 2 ? 0x66e0ff : 0xffeb3b;
                     trailSize = 4 + lvlBonus;
                 }
                 else if (b.type === 'axe') {
-                    trailColor = lvl >= 6 ? 0xffd700 : 0xffffff; // fluttering pages
+                    trailColor = lvl >= 2 ? 0xffd700 : 0xffffff; // fluttering pages
                     trailSize = 5 + lvlBonus;
                 }
                 else if (b.type === 'knife') {
-                    trailColor = lvl >= 6 ? 0xff6644 : (lvl >= 4 ? 0xffd700 : 0xe0e0e0);
+                    trailColor = lvl >= 2 ? 0xffd700 : 0xe0e0e0;
                     trailSize = 3 + lvlBonus;
                 }
                 

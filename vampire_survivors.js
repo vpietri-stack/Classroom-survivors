@@ -157,6 +157,14 @@ class MainScene extends Phaser.Scene {
         this.puzzleDone = new Set();   // in-session dedup of completed items
         this.puzzleWantSentence = Math.random() < 0.5; // alternates word/sentence
 
+        // --- Anti-flee arena state ---
+        // MUST reset here: Phaser reuses the scene instance on restart, so a
+        // stale arenaCenter from the previous run kept updateAntiFlee from
+        // re-drawing the fence (its graphics died on shutdown) — invisible
+        // fence on the second playthrough.
+        this.arenaCenter = null;
+        this.fenceGfx = null;
+
         // Background music (gapless loop via bgm.js); stops on scene shutdown
         if (window.BGM) BGM.start();
         this.events.once('shutdown', () => {
@@ -735,7 +743,7 @@ class MainScene extends Phaser.Scene {
     updateAntiFlee(dx, dy) {
         if (!this.arenaCenter) {
             this.arenaCenter = { x: this.player.x, y: this.player.y };
-            this.arenaRadius = 900;
+            this.arenaRadius = 1800;
             this.fleeHeading = { x: 0, y: 0 };
             this.fleeTimer = 0;
             this.wallCooldown = 0;
@@ -2971,7 +2979,7 @@ class MainScene extends Phaser.Scene {
             const d = Phaser.Math.Distance.Between(this.player.x, this.player.y, g.x, g.y);
             // Wide magnet so stars stream in from far (incl. the trail dropped
             // behind a fleeing kid) — teaches "shiny = grab" and tugs attention back
-            if (d < 450 || g.vortexed) this.physics.moveToObject(g, this.player, 720);
+            if (d < 360 || g.vortexed) this.physics.moveToObject(g, this.player, 720);
             if (d < 42) {
                 synthGem();
                 this.spawnBurstParticles(this.player.x, this.player.y, 0x00ffff, 5, 2.5);

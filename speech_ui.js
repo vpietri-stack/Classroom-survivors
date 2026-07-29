@@ -193,7 +193,11 @@
               durMs: stats ? Math.round(stats.durMs) : null,
               peak: stats ? stats.peak : null,
               transcribeMs: Date.now() - t0,
-              blobBytes: blob.size
+              blobBytes: blob.size,
+              // Pitch-adaptation diagnostics (speech_engine): measured voice
+              // pitch + how many semitones the audio was shifted down (0 = none).
+              f0: typeof r.f0 === 'number' ? r.f0 : null,
+              shiftSemitones: typeof r.shiftSemitones === 'number' ? r.shiftSemitones : null
             });
           });
         });
@@ -300,6 +304,19 @@
     } catch (_) { /* never let telemetry break the exercise */ }
   }
 
+  // Resolve the student's current book for scorer leniency. Priority:
+  //   1. authActiveUser.book — the student's DB settings record (source of
+  //      truth; also tracks auto page-advance)
+  //   2. selectedClassContent.book — legacy class_config fallback (only used
+  //      for non-logged-in / test sessions where no DB record exists)
+  function currentBook() {
+    try {
+      if (typeof authActiveUser !== 'undefined' && authActiveUser && authActiveUser.book) return authActiveUser.book;
+      if (typeof selectedClassContent !== 'undefined' && selectedClassContent && selectedClassContent.book) return selectedClassContent.book;
+    } catch (_) {}
+    return null;
+  }
+
   // Build a self-contained "say the sentence aloud" gate (used after a correct
   // unscramble). Returns a DOM node with: prompt, hold-to-talk record button,
   // heard-feedback line, and a Skip button that appears only after 3 failed
@@ -307,8 +324,10 @@
   // On a pass it plays the success sound, shows the score, and swaps in a
   // Continue button so the student controls when to advance.
   // Callers should only build this when SpeechStatus.isReady() is already true.
-  //   opts: { target, level = 2, mode = 'study', onDone }
+  //   opts: { target, level = 2, mode = 'study', book, onDone }
   //   mode tags telemetry events ('study' | 'game').
+  //   book overrides the auto-resolved student book (scorer leniency tier);
+  //   when omitted the gate reads authActiveUser.book itself via currentBook().
   //   onDone() is the single "advance" callback — fired on Continue (pass) OR Skip.
   function makeSentenceGate(opts) {
     opts = opts || {};
@@ -316,6 +335,7 @@
     const target = opts.target || '';
     const level = opts.level || 2;
     const mode = opts.mode || 'study';
+    const book = opts.book || currentBook();
     const onDone = typeof opts.onDone === 'function' ? opts.onDone : function () {};
 
     const wrap = document.createElement('div');
@@ -366,7 +386,12 @@
       onResult: function (text, meta) {
         feedback.className = 'heard-feedback';
         feedback.innerText = '\u542c\u5230: \u201C' + (text || '(\u9759\u97f3)') + '\u201D';
-        const res = global.Scorer.score(target, text, level);
+        // Book-tier leniency: lower-level books (PU1) pass more easily than
+        // advanced ones (Think2); falls back to the numeric level if the
+        // scorer predates scoreForBook (stale cache).
+        const res = global.Scorer.scoreForBook
+          ? global.Scorer.scoreForBook(target, text, book)
+          : global.Scorer.score(target, text, level);
         // Log EVERY attempt (pass or fail) with the full score breakdown — the
         // transcript is the diagnostic gold for the children's-voices problem.
         logSpeechEvent('attempt', mode, {
@@ -377,6 +402,9 @@
           phoneticRatio: Math.round((res.phoneticRatio || 0) * 1000) / 1000,
           edits: typeof res.edits === 'number' ? res.edits : null,
           level: level,
+          book: book,
+          f0: meta && typeof meta.f0 === 'number' ? meta.f0 : null,
+          shiftSemis: meta && typeof meta.shiftSemitones === 'number' ? meta.shiftSemitones : null,
           details: res.details || '',
           audioMs: meta && typeof meta.audioMs === 'number' ? meta.audioMs : null,
           transcribeMs: meta && typeof meta.transcribeMs === 'number' ? meta.transcribeMs : null,

@@ -145,7 +145,10 @@ class MainScene extends Phaser.Scene {
 
         // --- PLAYER: paper-doll puppet (chibi student) with emoji fallback ---
         if (this.textures.exists('p_body')) {
-            const PS = 0.18; // part scale
+            // Parts were pre-shrunk offline to ~2x display size (vs_shrink_parts.js)
+            // so the GPU only minifies ~2:1 instead of ~11:1 — much sharper on
+            // phones where WebGL can't mipmap these NPOT textures.
+            const PS = 0.45; // part scale (textures are 0.4x the originals)
             const footBaseY = 30;
             const footL = this.add.image(-9, footBaseY, 'p_foot_l').setScale(PS);
             const footR = this.add.image(9, footBaseY, 'p_foot_r').setScale(PS);
@@ -296,7 +299,7 @@ class MainScene extends Phaser.Scene {
         this.applyReward({ id: 'whip', name: 'Magic Whip', type: 'weapon' });
         updateDOMHUD(this.playerStats, 0, 0);
 
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < 40; i++) {
             this.spawnEnemy(Phaser.Math.Between(300, 1000));
         }
     }
@@ -378,8 +381,8 @@ class MainScene extends Phaser.Scene {
 
         this.spawnTimer++;
         const difficulty = this.getDifficulty();
-        // Spawn delay: starts at 15 frames, decreases with difficulty, floor at 2 frames
-        const spawnDelay = Math.max(2, 15 / difficulty);
+        // Spawn delay: slightly fewer enemies than before (they hit harder now)
+        const spawnDelay = Math.max(3, 19 / difficulty);
         if (this.spawnTimer > spawnDelay) {
             this.spawnEnemy();
             this.spawnTimer = 0;
@@ -443,8 +446,8 @@ class MainScene extends Phaser.Scene {
             this.killCount = 0;
             return;
         }
-        // Perf cap: don't exceed ~160 live enemies (WeChat/older iPads)
-        if (this.enemies.getChildren().length >= 160) return;
+        // Perf cap: don't exceed ~140 live enemies (WeChat/older iPads)
+        if (this.enemies.getChildren().length >= 140) return;
         const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
 
         let dist = distance;
@@ -821,11 +824,8 @@ class MainScene extends Phaser.Scene {
         this.enemies.getChildren().forEach(e => {
             if (e.stunTimer > 0) {
                 e.stunTimer--;
-                // Getting knocked around interrupts any attack attempt (counterplay!)
-                if (e.attackState === 'windup' || e.attackState === 'lunge') {
-                    e.attackState = 'chase';
-                    e.clearTint();
-                }
+                // Note: knockback no longer cancels attacks — only death does.
+                // (windup/lunge timers keep running through the stun)
             } else if (!e.isSwarm) {
                 const nowT = this.time.now;
                 if (!e.attackState) e.attackState = 'chase';
@@ -845,7 +845,7 @@ class MainScene extends Phaser.Scene {
                 } else if (e.attackState === 'lunge') {
                     if (nowT >= e.lungeUntil) {
                         e.attackState = 'recover';
-                        e.recoverUntil = nowT + 900;
+                        e.recoverUntil = nowT + 650;
                         e.body.setVelocity(e.body.velocity.x * 0.15, e.body.velocity.y * 0.15);
                     }
                 } else if (e.attackState === 'recover') {
@@ -856,10 +856,10 @@ class MainScene extends Phaser.Scene {
                     const attackRange = e.isBoss ? 110 : 55;
                     if (distToPlayer < attackRange) {
                         const difficulty = this.getDifficulty();
-                        // Telegraph shrinks as difficulty rises (stays dodgeable)
-                        const telegraphMs = Phaser.Math.Clamp(520 - difficulty * 25, 260, 520);
+                        // Near-instant strike: short flash of warning tint, then pounce
+                        const telegraphMs = Phaser.Math.Clamp(200 - difficulty * 6, 110, 200);
                         e.attackState = 'windup';
-                        e.windupUntil = nowT + (e.isBoss ? telegraphMs + 150 : telegraphMs);
+                        e.windupUntil = nowT + (e.isBoss ? telegraphMs + 100 : telegraphMs);
                         e.body.setVelocity(0, 0);
                         e.setTint(0xdd6666); // "about to pounce" warning color
                     } else {
@@ -1757,7 +1757,7 @@ class MainScene extends Phaser.Scene {
         // A successful bite ends the lunge immediately (no double-dipping)
         if (!enemy.isSwarm) {
             enemy.attackState = 'recover';
-            enemy.recoverUntil = this.time.now + 900;
+            enemy.recoverUntil = this.time.now + 650;
             if (enemy.body) enemy.body.setVelocity(0, 0);
         }
 
@@ -2082,22 +2082,23 @@ class MainScene extends Phaser.Scene {
     }
 
     createPuzzleBox(tok, x, y) {
-        const w = Math.max(46, tok.length * 15 + 24);
-        const h = 46;
+        // Big boxes: readability on small phone screens comes first
+        const w = Math.max(62, tok.length * 19 + 32);
+        const h = 62;
         const g = this.add.graphics();
         g.fillStyle(0x14213d, 0.92);
-        g.fillRoundedRect(-w / 2, -h / 2, w, h, 10);
-        g.lineStyle(3, 0xffd166, 1);
-        g.strokeRoundedRect(-w / 2, -h / 2, w, h, 10);
+        g.fillRoundedRect(-w / 2, -h / 2, w, h, 12);
+        g.lineStyle(4, 0xffd166, 1);
+        g.strokeRoundedRect(-w / 2, -h / 2, w, h, 12);
         const t = this.add.text(0, 1, tok, {
-            fontSize: '24px', fontFamily: 'Fredoka', color: '#ffffff', fontStyle: 'bold'
+            fontSize: '31px', fontFamily: 'Fredoka', color: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5);
         const box = this.add.container(x, y, [g, t]);
         box.setDepth(45); // above the horde: letters must stay readable
         box.tokenValue = tok;
         box.used = false;
         box.homeX = x; box.homeY = y;
-        box.hitR = w / 2 + 14; // generous walk-on radius = instant feedback
+        box.hitR = w / 2 + 16; // generous walk-on radius = instant feedback
         box.setScale(0);
         this.tweens.add({ targets: box, scale: 1, duration: 320, ease: 'Back.out', delay: Math.random() * 250 });
         return box;
@@ -2236,6 +2237,7 @@ class MainScene extends Phaser.Scene {
         const filled = p.attempt.map(b => b.tokenValue);
         let html = '';
         if (p.item.mode === 'word') {
+            slotsEl.style.fontSize = '21px';
             // Full template: punctuation pre-filled (dim), letters fill as walked
             let li = 0;
             for (const ch of p.item.text) {
@@ -2253,11 +2255,21 @@ class MainScene extends Phaser.Scene {
                 }
             }
         } else {
-            html = p.item.tokens.map((tok, i) =>
-                i < filled.length
-                    ? '<span style="color:#ffd166;">' + filled[i] + '</span>'
-                    : '<span style="opacity:0.4;">' + '▁'.repeat(Math.min(tok.length, 6)) + '</span>'
-            ).join(' ');
+            // Compact while empty (a wall of full-width blanks covered small
+            // phone screens); expands as words are collected
+            if (filled.length === 0) {
+                slotsEl.style.fontSize = '14px';
+                html = '<span style="opacity:0.5;">' +
+                    p.item.tokens.map(tok => '\u2581'.repeat(Math.min(tok.length, 4))).join(' ') +
+                    '</span>';
+            } else {
+                slotsEl.style.fontSize = '20px';
+                html = p.item.tokens.map((tok, i) =>
+                    i < filled.length
+                        ? '<span style="color:#ffd166;">' + filled[i] + '</span>'
+                        : '<span style="opacity:0.4;">' + '\u2581'.repeat(Math.min(tok.length, 4)) + '</span>'
+                ).join(' ');
+            }
         }
         slotsEl.innerHTML = html;
     }

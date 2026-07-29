@@ -23,13 +23,31 @@ const config = {
     },
     scene: [], // scenes register themselves via registerScene()
     scale: {
-        mode: Phaser.Scale.RESIZE,
+        // NONE (not RESIZE): RESIZE pins the canvas backing store to the CSS
+        // parent size, which makes HiDPI rendering impossible (phones with
+        // devicePixelRatio 2-3 got a blurry upscaled canvas). Every game mode
+        // already sizes the canvas manually in its trigger function, and the
+        // window-resize shim below replicates the old auto-resize behavior.
+        mode: Phaser.Scale.NONE,
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
     input: {
         activePointers: 3
     }
 };
+
+// Keep the canvas matched to the viewport on window resizes/rotation
+// (replaces what Scale.RESIZE used to do automatically). VS applies its own
+// HiDPI sizing; every other mode uses plain CSS-pixel sizing.
+window.addEventListener('resize', () => {
+    if (typeof game === 'undefined' || !game || !game.scale) return;
+    if (activeGameMode === 'VS' && typeof applyVSHiDPI === 'function') {
+        applyVSHiDPI(game);
+    } else {
+        game.scale.resize(window.innerWidth, window.innerHeight);
+        game.scale.refresh();
+    }
+});
 
 // --- PHASER STATE ---
 // The running Phaser.Game instance (assigned lazily by the first trigger*() call).

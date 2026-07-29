@@ -2189,9 +2189,9 @@ class MainScene extends Phaser.Scene {
             'pointer-events:auto;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;' +
             'transition:border-color 0.25s, background 0.25s;';
         div.innerHTML =
-            '<div id="vsPuzzleZh" style="font-size:14px;opacity:0.85;margin-bottom:3px;"></div>' +
-            '<div id="vsPuzzleSlots" style="font-size:21px;font-weight:bold;letter-spacing:1px;line-height:1.5;"></div>' +
-            '<div style="font-size:11px;opacity:0.6;margin-top:2px;">🔊 点击：重听 + 退回字母</div>';
+            '<div id="vsPuzzleZh" style="font-size:12px;opacity:0.85;margin-bottom:3px;"></div>' +
+            '<div id="vsPuzzleSlots" style="font-size:18px;font-weight:bold;letter-spacing:1px;line-height:1.4;"></div>' +
+            '<div style="font-size:10px;opacity:0.6;margin-top:2px;">🔊 点击：重听 + 退回字母</div>';
         div.onclick = () => this.onTrackerTap();
         document.body.appendChild(div);
         this._puzzleDom = div;
@@ -2237,7 +2237,7 @@ class MainScene extends Phaser.Scene {
         const filled = p.attempt.map(b => b.tokenValue);
         let html = '';
         if (p.item.mode === 'word') {
-            slotsEl.style.fontSize = '21px';
+            slotsEl.style.fontSize = '18px';
             // Full template: punctuation pre-filled (dim), letters fill as walked
             let li = 0;
             for (const ch of p.item.text) {
@@ -2255,19 +2255,19 @@ class MainScene extends Phaser.Scene {
                 }
             }
         } else {
-            // Compact while empty (a wall of full-width blanks covered small
-            // phone screens); expands as words are collected
+            // One dash per missing word (per-letter dashes covered small
+            // phone screens); collected words replace their dash
             if (filled.length === 0) {
-                slotsEl.style.fontSize = '14px';
+                slotsEl.style.fontSize = '13px';
                 html = '<span style="opacity:0.5;">' +
-                    p.item.tokens.map(tok => '\u2581'.repeat(Math.min(tok.length, 4))).join(' ') +
+                    p.item.tokens.map(() => '\u2581').join(' ') +
                     '</span>';
             } else {
-                slotsEl.style.fontSize = '20px';
+                slotsEl.style.fontSize = '16px';
                 html = p.item.tokens.map((tok, i) =>
                     i < filled.length
                         ? '<span style="color:#ffd166;">' + filled[i] + '</span>'
-                        : '<span style="opacity:0.4;">' + '\u2581'.repeat(Math.min(tok.length, 4)) + '</span>'
+                        : '<span style="opacity:0.4;">\u2581</span>'
                 ).join(' ');
             }
         }

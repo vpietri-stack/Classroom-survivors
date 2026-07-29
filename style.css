@@ -97,10 +97,10 @@ body {
     z-index: 15;
 }
 
-/* Inventory */
+/* Inventory (pushed down: mute + exit buttons live at the very top-left) */
 #inventory {
     position: absolute;
-    top: 20px;
+    top: 56px;
     left: 20px;
     display: flex;
     gap: 8px;

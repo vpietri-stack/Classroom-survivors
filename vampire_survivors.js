@@ -67,6 +67,7 @@ class MainScene extends Phaser.Scene {
 
         this.buildLawnTexture();
         this.buildChalkDecalTextures();
+        this.buildFacilityTextures();
 
         this.bg = this.add.tileSprite(this.scale.width / 2, this.scale.height / 2, this.scale.width, this.scale.height, 'lawn2').setOrigin(0.5);
         this.bg.setScrollFactor(0);
@@ -139,7 +140,7 @@ class MainScene extends Phaser.Scene {
         this.bullets = this.physics.add.group();
         this.fireWakes = this.physics.add.group();
         this.gems = this.physics.add.group();
-        this.powerUps = this.physics.add.group();
+        this.powerUps = this.add.group(); // display group (pickup via distance check, no physics body)
         this.tornados = this.physics.add.group();
 
         // --- PLAYER: paper-doll puppet (chibi student) with emoji fallback ---
@@ -389,11 +390,11 @@ class MainScene extends Phaser.Scene {
         this.updateGems();
         this.updateJuice();
         if (this.puzzle) this.updatePuzzle();
-        // Instant, generous power-up pickup (same feel as the puzzle boxes;
-        // the old physics-overlap body was misaligned and felt unresponsive)
+        // Instant, generous power-up pickup (same box + radius as puzzle letters)
         this.powerUps.getChildren().forEach(icon => {
             if (icon.collected) return;
-            if (Phaser.Math.Distance.Between(this.player.x, this.player.y, icon.x, icon.y) < 52) {
+            const r = (icon.hitR || 40) + 18;
+            if (Phaser.Math.Distance.Between(this.player.x, this.player.y, icon.x, icon.y) < r) {
                 this.handlePowerUpPickup(this.player, icon);
             }
         });
@@ -649,39 +650,97 @@ class MainScene extends Phaser.Scene {
         t.destroy(); rt.destroy();
     }
 
-    // Deterministic chalk doodles per world cell; spawned around the camera,
-    // culled when far. Purely decorative (depth -5: above lawn, below play).
+    // Big painted-on-ground school facilities (walk-on friendly, top-down)
+    buildFacilityTextures() {
+        if (this.textures.exists('fac_tennis')) return;
+        let g;
+        // Tennis court
+        g = this.make.graphics({ x: 0, y: 0, add: false });
+        g.fillStyle(0x2f6f4a, 1); g.fillRoundedRect(0, 0, 260, 400, 14);
+        g.fillStyle(0x2f6fa8, 1); g.fillRect(28, 28, 204, 344);
+        g.lineStyle(4, 0xffffff, 0.95);
+        g.strokeRect(28, 28, 204, 344);
+        g.lineBetween(28, 200, 232, 200);
+        g.strokeRect(60, 92, 140, 216);
+        g.lineBetween(130, 92, 130, 308);
+        g.generateTexture('fac_tennis', 260, 400); g.destroy();
+        // Basketball court
+        g = this.make.graphics({ x: 0, y: 0, add: false });
+        g.fillStyle(0xb5793a, 1); g.fillRoundedRect(0, 0, 300, 360, 14);
+        g.lineStyle(4, 0xffffff, 0.95);
+        g.strokeRect(14, 14, 272, 332);
+        g.strokeCircle(150, 180, 42);
+        g.lineBetween(14, 180, 286, 180);
+        g.strokeRect(112, 14, 76, 96);
+        g.strokeRect(112, 250, 76, 96);
+        g.beginPath(); g.arc(150, 110, 42, 0, Math.PI); g.strokePath();
+        g.beginPath(); g.arc(150, 250, 42, Math.PI, 0); g.strokePath();
+        g.generateTexture('fac_basket', 300, 360); g.destroy();
+        // Running track (oval, red lanes + green infield)
+        g = this.make.graphics({ x: 0, y: 0, add: false });
+        g.fillStyle(0xb5443a, 1); g.fillEllipse(260, 190, 500, 340);
+        g.fillStyle(0x4f8743, 1); g.fillEllipse(260, 190, 356, 214);
+        g.lineStyle(3, 0xffffff, 0.7);
+        for (let r = 0; r < 4; r++) g.strokeEllipse(260, 190, 500 - r * 36, 340 - r * 24);
+        g.generateTexture('fac_track', 520, 380); g.destroy();
+        // Garden / flower bed
+        g = this.make.graphics({ x: 0, y: 0, add: false });
+        g.fillStyle(0x5a3d24, 1); g.fillRoundedRect(0, 0, 220, 150, 18);
+        g.fillStyle(0x6b4a2a, 1); g.fillRoundedRect(8, 8, 204, 134, 14);
+        const cols = [0xff6b6b, 0xffd93b, 0xff8ad0, 0xffffff];
+        for (let i = 0; i < 20; i++) {
+            const fx = 22 + Math.random() * 176, fy = 20 + Math.random() * 110;
+            g.fillStyle(cols[i % 4], 0.95);
+            for (let a = 0; a < 5; a++) g.fillCircle(fx + Math.cos(a * 1.256) * 6, fy + Math.sin(a * 1.256) * 6, 3.6);
+            g.fillStyle(0xffd94a, 1); g.fillCircle(fx, fy, 3);
+        }
+        g.generateTexture('fac_garden', 220, 150); g.destroy();
+    }
+
+    // Deterministic background decals around the camera, culled when far.
+    // Two layers: big painted facilities (depth -8) + small chalk doodles (-5).
     updateBgDecals() {
-        const CELL = 720;
         const cam = this.cameras.main.worldView;
-        const margin = 320;
         const hash = (cx, cy, salt) => {
             const v = Math.sin(cx * 127.1 + cy * 311.7 + salt * 74.7) * 43758.5453;
             return v - Math.floor(v);
         };
-        const x0 = Math.floor((cam.left - margin) / CELL), x1 = Math.floor((cam.right + margin) / CELL);
-        const y0 = Math.floor((cam.top - margin) / CELL), y1 = Math.floor((cam.bottom + margin) / CELL);
-        for (let cy = y0; cy <= y1; cy++) {
-            for (let cx = x0; cx <= x1; cx++) {
-                const key = cx + ',' + cy;
-                if (this.bgDecals.has(key)) continue;
-                if (hash(cx, cy, 1) < 0.45) { this.bgDecals.set(key, null); continue; }
-                const type = Math.floor(hash(cx, cy, 2) * 7);
-                const ox = (hash(cx, cy, 3) - 0.5) * CELL * 0.6;
-                const oy = (hash(cx, cy, 4) - 0.5) * CELL * 0.6;
-                const img = this.add.image(cx * CELL + CELL / 2 + ox, cy * CELL + CELL / 2 + oy, 'chalk_' + type);
-                img.setDepth(-5).setAlpha(0.4);
-                img.setRotation((hash(cx, cy, 5) - 0.5) * 0.5);
-                this.bgDecals.set(key, img);
+        const place = (prefix, CELL, margin, decide) => {
+            const x0 = Math.floor((cam.left - margin) / CELL), x1 = Math.floor((cam.right + margin) / CELL);
+            const y0 = Math.floor((cam.top - margin) / CELL), y1 = Math.floor((cam.bottom + margin) / CELL);
+            for (let cy = y0; cy <= y1; cy++) {
+                for (let cx = x0; cx <= x1; cx++) {
+                    const key = prefix + cx + ',' + cy;
+                    if (this.bgDecals.has(key)) continue;
+                    const wx = cx * CELL + CELL / 2, wy = cy * CELL + CELL / 2;
+                    this.bgDecals.set(key, { img: decide(cx, cy, wx, wy), wx, wy });
+                }
             }
-        }
-        // cull cells far from the player
-        this.bgDecals.forEach((img, key) => {
-            const parts = key.split(',');
-            const dx = parts[0] * CELL + CELL / 2 - this.player.x;
-            const dy = parts[1] * CELL + CELL / 2 - this.player.y;
-            if (dx * dx + dy * dy > 2800 * 2800) {
-                if (img) img.destroy();
+        };
+        // Facilities: big, rarer
+        place('F', 1500, 760, (cx, cy, wx, wy) => {
+            if (hash(cx, cy, 11) < 0.35) return null;
+            const facs = ['fac_tennis', 'fac_basket', 'fac_track', 'fac_garden'];
+            const type = facs[Math.floor(hash(cx, cy, 12) * facs.length)];
+            const ox = (hash(cx, cy, 13) - 0.5) * 1500 * 0.4, oy = (hash(cx, cy, 14) - 0.5) * 1500 * 0.4;
+            const img = this.add.image(wx + ox, wy + oy, type).setDepth(-8).setAlpha(0.82);
+            img.setRotation((hash(cx, cy, 15) - 0.5) * 0.3);
+            return img;
+        });
+        // Chalk doodles: small, common
+        place('C', 720, 340, (cx, cy, wx, wy) => {
+            if (hash(cx, cy, 1) < 0.5) return null;
+            const type = Math.floor(hash(cx, cy, 2) * 7);
+            const ox = (hash(cx, cy, 3) - 0.5) * 720 * 0.6, oy = (hash(cx, cy, 4) - 0.5) * 720 * 0.6;
+            const img = this.add.image(wx + ox, wy + oy, 'chalk_' + type).setDepth(-5).setAlpha(0.4);
+            img.setRotation((hash(cx, cy, 5) - 0.5) * 0.5);
+            return img;
+        });
+        // Cull far cells (uses stored world position, works for both grids)
+        this.bgDecals.forEach((v, key) => {
+            const dx = v.wx - this.player.x, dy = v.wy - this.player.y;
+            if (dx * dx + dy * dy > 3200 * 3200) {
+                if (v.img) v.img.destroy();
                 this.bgDecals.delete(key);
             }
         });
@@ -1835,24 +1894,26 @@ class MainScene extends Phaser.Scene {
         const choices = [...weapons, ...specials];
         const choice = Phaser.Math.RND.pick(choices);
 
-        const icon = this.add.image(x, y, 'pu_' + choice.id).setOrigin(0.5);
+        // Boxed like a puzzle letter (teal border = "bonus"), same walk-on radius
+        const bw = 60, bh = 60;
+        const g = this.add.graphics();
+        g.fillStyle(0x0e2a1e, 0.92);
+        g.fillRoundedRect(-bw / 2, -bh / 2, bw, bh, 12);
+        g.lineStyle(3, 0x7cf5b0, 1);
+        g.strokeRoundedRect(-bw / 2, -bh / 2, bw, bh, 12);
+        const iconImg = this.add.image(0, 0, 'pu_' + choice.id).setScale(0.95);
+        const box = this.add.container(x, y, [g, iconImg]);
+        box.setDepth(44);
+        box.reward = choice;
+        box.collected = false;
+        box.hitR = bw / 2 + 14; // identical generous radius to the letter boxes
+        this.powerUps.add(box);
 
-        this.physics.add.existing(icon);
-        icon.body.setSize(40, 40);
-        icon.body.setOffset(-20, -20);
-        icon.reward = choice;
-        this.powerUps.add(icon);
-
-        // Flashing animation
-        this.tweens.add({
-            targets: icon,
-            alpha: 0.5,
-            scaleX: 1.2,
-            scaleY: 1.2,
-            duration: 400,
-            yoyo: true,
-            repeat: -1
-        });
+        // Gentle bonus pulse
+        box.setScale(0);
+        this.tweens.add({ targets: box, scale: 1, duration: 300, ease: 'Back.out' });
+        this.tweens.add({ targets: iconImg, alpha: 0.55, duration: 500, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+        return box;
     }
 
     handlePowerUpPickup(player, powerup) {
@@ -1984,15 +2045,23 @@ class MainScene extends Phaser.Scene {
 
         this.puzzle = { reward, item, attempt: [], boxes: [] };
 
-        // Boxes in a loose two-radius ring around the bonus spot
+        // Build ring positions, then SHUFFLE which token lands in each slot so
+        // spatial order != spelling order (otherwise students just walk a
+        // clockwise circle without reading). Fisher-Yates on the slots.
         const n = item.tokens.length;
         const angle0 = Math.random() * Math.PI * 2;
+        const positions = [];
+        for (let i = 0; i < n; i++) {
+            const ang = angle0 + (i / n) * Math.PI * 2 + (Math.random() - 0.5) * 0.35;
+            const rad = 150 + (i % 2) * 78 + Math.random() * 40;
+            positions.push({ x: cx + Math.cos(ang) * rad, y: cy + Math.sin(ang) * rad });
+        }
+        for (let i = positions.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const tmp = positions[i]; positions[i] = positions[j]; positions[j] = tmp;
+        }
         item.tokens.forEach((tok, i) => {
-            const ang = angle0 + (i / n) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
-            const rad = 150 + (i % 2) * 75 + Math.random() * 30;
-            const bx = cx + Math.cos(ang) * rad;
-            const by = cy + Math.sin(ang) * rad;
-            this.puzzle.boxes.push(this.createPuzzleBox(tok, bx, by));
+            this.puzzle.boxes.push(this.createPuzzleBox(tok, positions[i].x, positions[i].y));
         });
 
         this.updatePuzzleTracker();

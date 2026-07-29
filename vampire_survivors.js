@@ -387,6 +387,8 @@ class MainScene extends Phaser.Scene {
                 if (!b.hitList) b.hitList = [];
                 b.hitList.push(e);
                 this.damageEnemy(e, b.dmg, 200);
+                if (b.type === 'axe') synthSmash();       // book: heavy smash
+                else synthRicochet();                     // triangle: metallic ping
                 // Book evolution (L2+): Knowledge Blast — AoE burst per book,
                 // radius + damage step up at L5 / L8
                 if (b.type === 'axe' && b.wlevel >= 2 && !b.aoeDone) {
@@ -419,14 +421,17 @@ class MainScene extends Phaser.Scene {
                 b.hitList.push(e);
                 b.pierce--;
                 this.damageEnemy(e, b.dmg, 100);
+                synthPlaneHit();                          // arrow-through-straw
             } else if (b.type === 'knife') {
                 // Scissors evolution (L2+): split into two on hit
                 if (b.hitList && b.hitList.includes(e)) return;
                 this.damageEnemy(e, b.dmg, 100);
+                synthStab();                              // blade-into-flesh
                 if (b.splitsLeft > 0) this.spawnKnifeSplit(b, e);
                 b.destroy();
             } else {
                 this.damageEnemy(e, b.dmg, 100);
+                if (b.type === 'wand') synthPlaneHit();   // L1 dart still thunks
                 b.destroy();
             }
         });
@@ -1205,6 +1210,11 @@ class MainScene extends Phaser.Scene {
                     s.x = this.player.x + Math.cos(theta) * w.range;
                     s.y = this.player.y + Math.sin(theta) * w.range;
                     s.rotation += 0.12; // tumbling erasers
+                    // Doppler pass-by 'bumblebee' as an eraser sweeps over the
+                    // top of its orbit (rising-edge, throttled inside the synth)
+                    const above = Math.sin(theta) < -0.85;
+                    if (above && !s._wasAbove) { s._wasAbove = true; synthEraserPass(); }
+                    if (!above) s._wasAbove = false;
                     // Frost Erasers (L2+): faint icy tint + cold sparkle trail
                     if (w.level >= 2) {
                         s.setTint(0xbfe9ff);
@@ -1218,6 +1228,7 @@ class MainScene extends Phaser.Scene {
                         if (Phaser.Math.Distance.Between(s.x, s.y, e.x, e.y) < 30 && (!w.hitCooldowns.has(e) || w.hitCooldowns.get(e) <= 0)) {
                             this.damageEnemy(e, w.dmg * this.playerStats.might, 200);
                             w.hitCooldowns.set(e, 20); // 20-frame cooldown per enemy
+                            synthSmash();              // heavy eraser bonk
                             // Frost Erasers (L2+): chill slows movement + attack;
                             // strength & duration step up at L5 / L8
                             if (w.level >= 2) {
@@ -1249,7 +1260,7 @@ class MainScene extends Phaser.Scene {
             if (d < minDist) { minDist = d; nearest = e; }
         });
         if (nearest) {
-            synthShoot('wand');
+            synthSwoosh('plane');
             const key = this.itemTex('wand', null);
             const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, nearest.x, nearest.y);
             let b;
@@ -1780,7 +1791,7 @@ class MainScene extends Phaser.Scene {
     }
 
     fireAxe(w) {
-        synthShoot('axe');
+        synthPageFlutter();
         const count = w.level;
         const key = this.itemTex('axe', 'axe');
         // Legacy scale numbers below assume ~29px textures; u adapts them
@@ -1816,7 +1827,7 @@ class MainScene extends Phaser.Scene {
     }
 
     fireCross(w) {
-        synthShoot('cross');
+        synthSwoosh('cross');
         const key = this.itemTex('cross', 'cross');
         const u = this.unitScale(key);
         const grow = 1 + Math.min(w.level, 6) * 0.07; // wider boomerang sweep
@@ -1847,7 +1858,7 @@ class MainScene extends Phaser.Scene {
     }
 
     fireKnife(w) {
-        synthShoot('knife');
+        synthSwoosh('scissors');
         const count = w.level;
         const spreadAngle = 10 * (Math.PI / 180);
         const key = this.itemTex('knife', 'knife');
@@ -1904,6 +1915,7 @@ class MainScene extends Phaser.Scene {
         const bottle = this.setPx(
             this.add.image(tx, ty - 500, bottleKey).setOrigin(0.5),
             34 + Math.min(w.level, 6) * 3); // bigger balloons at higher level
+        synthBombFall(); // descending whistle as it drops from the sky
 
         this.tweens.add({
             targets: bottle,
@@ -1913,7 +1925,7 @@ class MainScene extends Phaser.Scene {
             ease: 'Quad.easeIn',
             onComplete: () => {
                 bottle.destroy();
-                noise(0.1);
+                synthSplash(); // wet splat on impact
                 // Balloon burst: water splash on impact, harder at higher level
                 this.spawnBurstParticles(tx, ty, 0x66aaff, 8 + Math.min(w.level, 6) * 2, 4);
 

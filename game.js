@@ -233,6 +233,196 @@ const synthLootbox = () => {
     o.connect(g); g.connect(audioCtx.destination);
     o.start(); o.stop(now + 0.3);
 };
+
+// ============================================================
+// VS WEAPON SFX (procedural, matches the synth style above)
+// Throttled per key so fast-firing weapons / crowd hits make ONE
+// satisfying sound instead of a wall of noise (user request).
+// ============================================================
+const _sfxLast = {};
+const sfxOK = (key, ms) => {
+    if (!audioCtx) return false;
+    const t = audioCtx.currentTime * 1000;
+    if (_sfxLast[key] && t - _sfxLast[key] < ms) return false;
+    _sfxLast[key] = t;
+    return true;
+};
+// Filtered white-noise burst building block
+const noiseBurst = (start, dur, filterType, freq, Q, vol) => {
+    if (!audioCtx) return;
+    const n = Math.floor(audioCtx.sampleRate * dur);
+    const buf = audioCtx.createBuffer(1, n, audioCtx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    const src = audioCtx.createBufferSource(); src.buffer = buf;
+    const f = audioCtx.createBiquadFilter(); f.type = filterType; f.frequency.value = freq; f.Q.value = Q;
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(vol, start);
+    g.gain.exponentialRampToValueAtTime(0.001, start + dur);
+    src.connect(f); f.connect(g); g.connect(audioCtx.destination);
+    src.start(start); src.stop(start + dur);
+};
+
+// Air whoosh (thrown-blade-through-air). variant tweaks tone per projectile.
+const synthSwoosh = (variant = 'plane') => {
+    if (!audioCtx || !sfxOK('sw_' + variant, 55)) return;
+    const now = audioCtx.currentTime;
+    const cfg = {
+        plane:    { dur: 0.16, f0: 900,  f1: 2800, Q: 1.2, vol: 0.05 }, // light & airy
+        scissors: { dur: 0.12, f0: 1600, f1: 3400, Q: 3.0, vol: 0.05 }, // sharp & metallic
+        cross:    { dur: 0.20, f0: 600,  f1: 1700, Q: 1.0, vol: 0.05 }  // heavy & low
+    }[variant] || { dur: 0.16, f0: 900, f1: 2800, Q: 1.2, vol: 0.05 };
+    const n = Math.floor(audioCtx.sampleRate * cfg.dur);
+    const buf = audioCtx.createBuffer(1, n, audioCtx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    const src = audioCtx.createBufferSource(); src.buffer = buf;
+    const bp = audioCtx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = cfg.Q;
+    bp.frequency.setValueAtTime(cfg.f0, now);
+    bp.frequency.exponentialRampToValueAtTime(cfg.f1, now + cfg.dur * 0.6);
+    bp.frequency.exponentialRampToValueAtTime(cfg.f0, now + cfg.dur);
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.linearRampToValueAtTime(cfg.vol, now + cfg.dur * 0.35);
+    g.gain.exponentialRampToValueAtTime(0.001, now + cfg.dur);
+    src.connect(bp); bp.connect(g); g.connect(audioCtx.destination);
+    src.start(now); src.stop(now + cfg.dur);
+};
+
+// Paper plane hit: arrow punching through a straw target (fwip + thunk)
+const synthPlaneHit = () => {
+    if (!audioCtx || !sfxOK('planehit', 70)) return;
+    const now = audioCtx.currentTime;
+    noiseBurst(now, 0.06, 'highpass', 2600, 6, 0.06); // fwip
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(320, now);
+    o.frequency.exponentialRampToValueAtTime(90, now + 0.12);
+    g.gain.setValueAtTime(0.09, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(now); o.stop(now + 0.13);
+};
+
+// Scissors hit: wet blade-into-flesh stab
+const synthStab = () => {
+    if (!audioCtx || !sfxOK('stab', 70)) return;
+    const now = audioCtx.currentTime;
+    noiseBurst(now, 0.09, 'bandpass', 700, 1.2, 0.09); // wet slice
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(160, now);
+    o.frequency.exponentialRampToValueAtTime(60, now + 0.1);
+    g.gain.setValueAtTime(0.07, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(now); o.stop(now + 0.11);
+};
+
+// Triangle hit: satisfying metallic ricochet ping (downward whistle)
+const synthRicochet = () => {
+    if (!audioCtx || !sfxOK('ricochet', 60)) return;
+    const now = audioCtx.currentTime;
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(1800, now);
+    o.frequency.exponentialRampToValueAtTime(3200, now + 0.04);
+    o.frequency.exponentialRampToValueAtTime(700, now + 0.22);
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.linearRampToValueAtTime(0.06, now + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(now); o.stop(now + 0.25);
+};
+
+// Eraser / book hit: heavy blunt smash into flesh (deep thud + meaty splat)
+const synthSmash = () => {
+    if (!audioCtx || !sfxOK('smash', 80)) return;
+    const now = audioCtx.currentTime;
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(140, now);
+    o.frequency.exponentialRampToValueAtTime(45, now + 0.18);
+    g.gain.setValueAtTime(0.16, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(now); o.stop(now + 0.21);
+    noiseBurst(now, 0.08, 'lowpass', 500, 0.7, 0.09);
+};
+
+// Eraser doppler pass-by: low strobing bumblebee that swells then recedes
+const synthEraserPass = () => {
+    if (!audioCtx || !sfxOK('eraserpass', 180)) return;
+    const now = audioCtx.currentTime, dur = 0.4;
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(70, now);
+    o.frequency.linearRampToValueAtTime(130, now + dur * 0.5); // doppler approach
+    o.frequency.linearRampToValueAtTime(60, now + dur);        // doppler recede
+    const lp = audioCtx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 420;
+    // Strobing tremolo (bumblebee wing-beat) modulating the gain
+    const lfo = audioCtx.createOscillator(), lfoG = audioCtx.createGain();
+    lfo.type = 'sine'; lfo.frequency.value = 22; lfoG.gain.value = 0.045;
+    lfo.connect(lfoG); lfoG.connect(g.gain);
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.linearRampToValueAtTime(0.09, now + dur * 0.5); // swell on approach
+    g.gain.linearRampToValueAtTime(0.001, now + dur);      // fade on recede
+    o.connect(lp); lp.connect(g); g.connect(audioCtx.destination);
+    o.start(now); o.stop(now + dur);
+    lfo.start(now); lfo.stop(now + dur);
+};
+
+// Magic book travelling: fluttering pages (rapid soft paper blips)
+const synthPageFlutter = () => {
+    if (!audioCtx || !sfxOK('flutter', 80)) return;
+    const now = audioCtx.currentTime;
+    for (let i = 0; i < 5; i++) {
+        noiseBurst(now + i * 0.045, 0.03, 'bandpass', 2200 + Math.random() * 800, 2, 0.035);
+    }
+};
+
+// Water balloon falling: descending bomb whistle
+const synthBombFall = () => {
+    if (!audioCtx || !sfxOK('bombfall', 120)) return;
+    const now = audioCtx.currentTime, dur = 0.55;
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(1400, now);
+    o.frequency.exponentialRampToValueAtTime(300, now + dur);
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.linearRampToValueAtTime(0.05, now + 0.1);
+    g.gain.setValueAtTime(0.05, now + dur - 0.1);
+    g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(now); o.stop(now + dur);
+};
+
+// Water balloon impact: splash (noise sweep + a bubble)
+const synthSplash = () => {
+    if (!audioCtx || !sfxOK('splash', 80)) return;
+    const now = audioCtx.currentTime, dur = 0.25;
+    const n = Math.floor(audioCtx.sampleRate * dur);
+    const buf = audioCtx.createBuffer(1, n, audioCtx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+    const src = audioCtx.createBufferSource(); src.buffer = buf;
+    const lp = audioCtx.createBiquadFilter(); lp.type = 'lowpass';
+    lp.frequency.setValueAtTime(3000, now);
+    lp.frequency.exponentialRampToValueAtTime(500, now + dur);
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.12, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+    src.connect(lp); lp.connect(g); g.connect(audioCtx.destination);
+    src.start(now); src.stop(now + dur);
+    const o = audioCtx.createOscillator(), bg = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(500, now + 0.05);
+    o.frequency.exponentialRampToValueAtTime(900, now + 0.2);
+    bg.gain.setValueAtTime(0.04, now + 0.05);
+    bg.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+    o.connect(bg); bg.connect(audioCtx.destination);
+    o.start(now + 0.05); o.stop(now + 0.23);
+};
 let currentTTSWord = "";
 const playTTS = () => {
     if (!currentTTSWord) return;

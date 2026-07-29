@@ -384,11 +384,9 @@
     const recBtn = makeRecordButton({
       idleText: '\uD83C\uDF99\uFE0F \u70b9\u51fb\u8bf4\u8bdd',
       onResult: function (text, meta) {
-        feedback.className = 'heard-feedback';
-        feedback.innerText = '\u542c\u5230: \u201C' + (text || '(\u9759\u97f3)') + '\u201D';
-        // Book-tier leniency: lower-level books (PU1) pass more easily than
-        // advanced ones (Think2); falls back to the numeric level if the
-        // scorer predates scoreForBook (stale cache).
+        // NOTE: feedback text is set INSIDE the pass/fail branches below —
+        // pass hides transcript+score entirely (pure celebration), fail shows
+        // only "heard + score" (no threshold internals).
         const res = global.Scorer.scoreForBook
           ? global.Scorer.scoreForBook(target, text, book)
           : global.Scorer.score(target, text, level);
@@ -412,12 +410,12 @@
           ua: UA
         }, failCount + 1);
         if (res.pass) {
-          // Passed: play the success sound, show the score, and replace the
-          // record/skip buttons with a single Continue button so the student
-          // decides when to advance.
-          const pct = Math.round((res.accuracy || 0) * 100);
+          // Passed: pure celebration — deliberately NO score and NO transcript.
+          // A lower-level student passing at 70% under their book's leniency
+          // should feel like a win, not read "only 70%". (Full breakdown is
+          // still recorded in telemetry above for analysis.)
           feedback.className = 'heard-feedback ok';
-          feedback.innerText += '  \u2713 得分: ' + pct + '%';
+          feedback.innerText = '\u2713 \u592a\u68d2\u4e86\uff01';
           // playHappySound is a global fn (study_mode.js) — reuse the existing
           // success sound rather than inventing a new one.
           if (typeof playHappySound === 'function') playHappySound();
@@ -425,13 +423,16 @@
           skip.style.display = 'none';
           const cont = document.createElement('button');
           cont.className = 'game-btn bg-emerald-600 hover:bg-emerald-500 text-lg px-8 py-4 rounded-2xl shadow-lg';
-          cont.innerText = '继续 \u25B6';
+          cont.innerText = '\u7ee7\u7eed \u25B6';
           cont.onclick = function () { if (!done) { done = true; onDone(); } };
           btns.appendChild(cont);
         } else {
           failCount++;
+          // Failed: show only what was heard + the score — no threshold
+          // internals (WER/phonetic reasons stay in telemetry only).
+          const pct = Math.round((res.accuracy || 0) * 100);
           feedback.className = 'heard-feedback no';
-          feedback.innerText += '  \u2014 再试一次 (' + res.details + ')';
+          feedback.innerText = '\u542c\u5230: \u201C' + (text || '(\u9759\u97f3)') + '\u201D  ' + pct + '%  \u2014 \u518d\u8bd5\u4e00\u6b21';
           // synthError is a global lexical fn (defined in game.js); call it the
           // same defensive way the rest of the codebase does.
           if (typeof synthError === 'function') synthError();

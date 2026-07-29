@@ -268,7 +268,7 @@ const synthSwoosh = (variant = 'plane') => {
     if (!audioCtx || !sfxOK('sw_' + variant, 55)) return;
     const now = audioCtx.currentTime;
     const cfg = {
-        plane:    { dur: 0.16, f0: 900,  f1: 2800, Q: 1.2, vol: 0.05 }, // light & airy
+        plane:    { dur: 0.22, f0: 700,  f1: 2400, Q: 0.9, vol: 0.12 }, // light & airy (boosted to be audible)
         scissors: { dur: 0.12, f0: 1600, f1: 3400, Q: 3.0, vol: 0.05 }, // sharp & metallic
         cross:    { dur: 0.20, f0: 600,  f1: 1700, Q: 1.0, vol: 0.05 }  // heavy & low
     }[variant] || { dur: 0.16, f0: 900, f1: 2800, Q: 1.2, vol: 0.05 };
@@ -308,31 +308,34 @@ const synthPlaneHit = () => {
 const synthStab = () => {
     if (!audioCtx || !sfxOK('stab', 70)) return;
     const now = audioCtx.currentTime;
-    noiseBurst(now, 0.09, 'bandpass', 700, 1.2, 0.09); // wet slice
+    noiseBurst(now, 0.1, 'bandpass', 750, 1.0, 0.16); // wet slice (boosted)
     const o = audioCtx.createOscillator(), g = audioCtx.createGain();
     o.type = 'sine';
-    o.frequency.setValueAtTime(160, now);
-    o.frequency.exponentialRampToValueAtTime(60, now + 0.1);
-    g.gain.setValueAtTime(0.07, now);
-    g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+    o.frequency.setValueAtTime(180, now);
+    o.frequency.exponentialRampToValueAtTime(60, now + 0.11);
+    g.gain.setValueAtTime(0.12, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
     o.connect(g); g.connect(audioCtx.destination);
-    o.start(now); o.stop(now + 0.11);
+    o.start(now); o.stop(now + 0.12);
 };
 
-// Triangle hit: satisfying metallic ricochet ping (downward whistle)
+// Triangle hit: woody block ricocheting off a hard surface (tok-tik, two knocks)
 const synthRicochet = () => {
     if (!audioCtx || !sfxOK('ricochet', 60)) return;
     const now = audioCtx.currentTime;
-    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-    o.type = 'sine';
-    o.frequency.setValueAtTime(1800, now);
-    o.frequency.exponentialRampToValueAtTime(3200, now + 0.04);
-    o.frequency.exponentialRampToValueAtTime(700, now + 0.22);
-    g.gain.setValueAtTime(0.001, now);
-    g.gain.linearRampToValueAtTime(0.06, now + 0.02);
-    g.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(now); o.stop(now + 0.25);
+    const knock = (t, f, vol) => {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = 'triangle';
+        o.frequency.setValueAtTime(f, t);
+        o.frequency.exponentialRampToValueAtTime(f * 0.6, t + 0.05); // woody pitch drop
+        g.gain.setValueAtTime(vol, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.08);        // short hard decay
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(t); o.stop(t + 0.09);
+        noiseBurst(t, 0.02, 'highpass', 3200, 5, vol * 0.5);        // hard-surface click
+    };
+    knock(now, 1150, 0.14);        // first bounce
+    knock(now + 0.07, 1550, 0.07); // lighter second bounce = ricochet
 };
 
 // Eraser / book hit: heavy blunt smash into flesh (deep thud + meaty splat)
@@ -376,8 +379,8 @@ const synthEraserPass = () => {
 const synthPageFlutter = () => {
     if (!audioCtx || !sfxOK('flutter', 80)) return;
     const now = audioCtx.currentTime;
-    for (let i = 0; i < 5; i++) {
-        noiseBurst(now + i * 0.045, 0.03, 'bandpass', 2200 + Math.random() * 800, 2, 0.035);
+    for (let i = 0; i < 6; i++) {
+        noiseBurst(now + i * 0.04, 0.04, 'bandpass', 1500 + Math.random() * 900, 1.4, 0.11);
     }
 };
 

@@ -2194,12 +2194,25 @@ class MainScene extends Phaser.Scene {
             'background:rgba(10,16,40,0.9);border:2px solid #ffd166;border-radius:14px;padding:7px 14px;' +
             'color:#fff;font-family:Fredoka,sans-serif;text-align:center;max-width:94vw;cursor:pointer;' +
             'pointer-events:auto;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;' +
-            'transition:border-color 0.25s, background 0.25s;';
+            'touch-action:none;transition:border-color 0.25s, background 0.25s;';
         div.innerHTML =
             '<div id="vsPuzzleZh" style="font-size:12px;opacity:0.85;margin-bottom:3px;"></div>' +
             '<div id="vsPuzzleSlots" style="font-size:18px;font-weight:bold;letter-spacing:1px;line-height:1.4;"></div>' +
             '<div style="font-size:10px;opacity:0.6;margin-top:2px;">🔊 点击：重听 + 退回字母</div>';
-        div.onclick = () => this.onTrackerTap();
+        // Multi-touch fix: browsers do NOT synthesize 'click' for a second
+        // finger tapped while another is held down (the joystick finger), so
+        // onclick silently ate taps mid-movement. React to the raw pointerup
+        // instead — touch implicit-capture guarantees it fires on the element
+        // where the finger went DOWN, so joystick releases never leak here.
+        if (window.PointerEvent) {
+            div.addEventListener('pointerup', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.onTrackerTap();
+            });
+        } else {
+            div.onclick = () => this.onTrackerTap(); // ancient-browser fallback
+        }
         document.body.appendChild(div);
         this._puzzleDom = div;
         return div;

@@ -75,7 +75,16 @@
             if (buffer) { BGM._play(); return; }
             if (loading) return;
             loading = true;
-            fetch(SRC)
+            // The 2MB MP3 goes through AssetCache (gh-proxy mirror + IndexedDB):
+            // GitHub Pages alone stalls on this file without a VPN, which made
+            // BGM silently never start ("BGM load failed" only hit the console).
+            // Cache hit = instant blob URL; miss = mirror download that also
+            // seeds the cache; AssetCache absent/failed = plain fetch as before.
+            const resolveSrc = (global.AssetCache && global.AssetCache.getBlobUrl)
+                ? global.AssetCache.getBlobUrl(SRC).then(u => u || SRC)
+                : Promise.resolve(SRC);
+            resolveSrc
+                .then(src => fetch(src))
                 .then(r => r.arrayBuffer())
                 .then(ab => new Promise((res, rej) => ctx.decodeAudioData(ab, res, rej)))
                 .then(buf => { buffer = buf; loading = false; if (playing) BGM._play(); })

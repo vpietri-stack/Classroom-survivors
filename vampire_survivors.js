@@ -44,16 +44,22 @@ class MainScene extends Phaser.Scene {
     }
 
     preload() {
+        // Resolve every sprite through the asset cache (asset_cache.js):
+        // instant blob: URL when prefetched/IndexedDB-cached (fast in CN,
+        // survives WeChat cache eviction), plain path as fallback.
+        // NOTE: test_asset_manifest.js keeps AssetCache.VS_SPRITES in sync with
+        // the files on disk — add new sprites there too ('_raw' sheets excluded).
+        const u = (p) => (window.AssetCache ? window.AssetCache.url(p) : p);
         // Paper-doll puppet parts for the chibi student hero (sliced from the
         // Nano Banana parts sheet by vs_slice_parts.js)
-        this.load.image('p_body', 'sprites/vs/player_body.png');
-        this.load.image('p_arm', 'sprites/vs/player_arm.png');
-        this.load.image('p_foot_l', 'sprites/vs/player_foot_l.png');
-        this.load.image('p_foot_r', 'sprites/vs/player_foot_r.png');
+        this.load.image('p_body', u('sprites/vs/player_body.png'));
+        this.load.image('p_arm', u('sprites/vs/player_arm.png'));
+        this.load.image('p_foot_l', u('sprites/vs/player_foot_l.png'));
+        this.load.image('p_foot_r', u('sprites/vs/player_foot_r.png'));
         // School-themed weapon/power-up art (sliced by vs_slice_items.js)
         Object.values(ITEM_SPRITES).forEach(n =>
-            this.load.image('item_' + n, 'sprites/vs/item_' + n + '.png'));
-        this.load.image('item_star', 'sprites/vs/item_star.png'); // XP drops
+            this.load.image('item_' + n, u('sprites/vs/item_' + n + '.png')));
+        this.load.image('item_star', u('sprites/vs/item_star.png')); // XP drops
     }
 
     // --- School-item sprite helpers ---
@@ -3212,10 +3218,14 @@ function showPowerUpSelection(context) {
             document.getElementById('levelUpMenu').classList.add('hidden');
             startMiniGame(gameType, context);
         };
-        // School-item art on the card; emoji fallback if the PNG is missing
+        // School-item art on the card; emoji fallback if the PNG is missing.
+        // Resolved through AssetCache → instant cached blob in CN, plain path otherwise.
         const itemName = (typeof ITEM_SPRITES !== 'undefined') ? ITEM_SPRITES[reward.id] : null;
+        const itemSrc = itemName
+            ? (window.AssetCache ? window.AssetCache.url(`sprites/vs/item_${itemName}.png`) : `sprites/vs/item_${itemName}.png`)
+            : null;
         const iconHtml = itemName
-            ? `<img src="sprites/vs/item_${itemName}.png" alt="" style="height:64px;margin:0 auto 16px;display:block;" onerror="this.outerHTML='<div class=&quot;text-6xl mb-4&quot;>${reward.icon}</div>'">`
+            ? `<img src="${itemSrc}" alt="" style="height:64px;margin:0 auto 16px;display:block;" onerror="this.outerHTML='<div class=&quot;text-6xl mb-4&quot;>${reward.icon}</div>'">`
             : `<div class="text-6xl mb-4">${reward.icon}</div>`;
         card.innerHTML = `${iconHtml}
                            <h3 class="text-xl font-bold mb-2 text-purple-700">${reward.name}</h3>

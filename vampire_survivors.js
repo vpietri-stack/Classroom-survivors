@@ -9,6 +9,22 @@ const POWER_UPS = [
     { id: 'knife', name: "Knife", icon: "🔪", type: "weapon", desc: "Fires in facing direction" }
 ];
 
+// School-item sprite for each weapon/power-up id (sliced from
+// sprites/vs/item_sheet_raw.png by vs_slice_items.js). The emoji textures
+// above stay as fallback if a PNG fails to load (offline/slow-CDN students).
+const ITEM_SPRITES = {
+    whip: 'ruler',      // icon only — the in-game whip animation stays as-is
+    wand: 'plane',      // paper plane dart
+    knife: 'scissors',  // spinning scissors
+    orb: 'eraser',      // orbiting erasers
+    water: 'balloon',   // water balloon -> puddle
+    axe: 'book',        // tumbling book
+    cross: 'triangle',  // set-square boomerang
+    tornado: 'tornado', // paper tornado icon (in-game fire tornado stays)
+    vortex: 'magnet',
+    heart: 'milk'
+};
+
 // --- MAIN SCENE ---
 class MainScene extends Phaser.Scene {
     constructor() {
@@ -22,6 +38,33 @@ class MainScene extends Phaser.Scene {
         this.load.image('p_arm', 'sprites/vs/player_arm.png');
         this.load.image('p_foot_l', 'sprites/vs/player_foot_l.png');
         this.load.image('p_foot_r', 'sprites/vs/player_foot_r.png');
+        // School-themed weapon/power-up art (sliced by vs_slice_items.js)
+        Object.values(ITEM_SPRITES).forEach(n =>
+            this.load.image('item_' + n, 'sprites/vs/item_' + n + '.png'));
+        this.load.image('item_star', 'sprites/vs/item_star.png'); // XP drops
+    }
+
+    // --- School-item sprite helpers ---
+    // Item texture for a weapon/power-up id; emoji texture as fallback
+    itemTex(id, fallback) {
+        const n = ITEM_SPRITES[id];
+        return (n && this.textures.exists('item_' + n)) ? 'item_' + n : fallback;
+    }
+
+    // Scale an image so its longest side displays at px pixels (works for
+    // both the hi-res item PNGs and the small emoji fallback textures)
+    setPx(img, px) {
+        const src = img.texture.getSourceImage();
+        img.setScale(px / Math.max(src.width, src.height, 1));
+        return img;
+    }
+
+    // Legacy scale values assume the old ~29px emoji textures (scale 1 ≈ 29px
+    // on screen). Multiply them by this so every existing setScale/tween
+    // number keeps its on-screen size with the higher-res item art.
+    unitScale(key, base = 29) {
+        const src = this.textures.get(key).getSourceImage();
+        return base / Math.max(src.width, src.height, 1);
     }
 
     create() {
@@ -964,12 +1007,16 @@ class MainScene extends Phaser.Scene {
                 if (!w.hitCooldowns) w.hitCooldowns = new Map();
                 if (w.sprites.length !== w.level) {
                     w.sprites.forEach(s => s.destroy()); w.sprites = [];
+                    const orbKey = this.itemTex('orb', 'orb');
+                    // Erasers grow with level (emoji fallback matched cross at 1.5x ≈ 44px)
+                    const orbPx = 40 + Math.min(w.level, 8) * 3;
                     for (let i = 0; i < w.level; i++) {
-                        const orb = this.add.image(0, 0, 'orb').setOrigin(0.5).setScale(1.5); // Match cross scale (1.5x)
+                        const orb = this.setPx(this.add.image(0, 0, orbKey).setOrigin(0.5), orbPx);
                         this.physics.add.existing(orb); w.sprites.push(orb);
                     }
                 }
-                w.angle = (w.angle || 0) + 0.05;
+                // Orbit speeds up as the weapon levels
+                w.angle = (w.angle || 0) + 0.05 + Math.min(w.level, 8) * 0.005;
                 // Decrement all cooldowns and clean up destroyed enemies
                 w.hitCooldowns.forEach((val, key) => {
                     if (!key.active) { w.hitCooldowns.delete(key); return; }
@@ -979,6 +1026,11 @@ class MainScene extends Phaser.Scene {
                     const theta = w.angle + (i * (Math.PI * 2 / w.level));
                     s.x = this.player.x + Math.cos(theta) * w.range;
                     s.y = this.player.y + Math.sin(theta) * w.range;
+                    s.rotation += 0.12; // tumbling erasers
+                    // High-level polish: pink rubber-dust sparkle trail
+                    if (w.level >= 4 && Math.random() < 0.06) {
+                        this.spawnBurstParticles(s.x, s.y, 0xff9ecb, 2, 2);
+                    }
                     this.enemies.getChildren().forEach(e => {
                         if (Phaser.Math.Distance.Between(s.x, s.y, e.x, e.y) < 30 && (!w.hitCooldowns.has(e) || w.hitCooldowns.get(e) <= 0)) {
                             this.damageEnemy(e, w.dmg * this.playerStats.might, 200);
@@ -1008,13 +1060,25 @@ class MainScene extends Phaser.Scene {
         });
         if (nearest) {
             synthShoot('wand');
-            const b = this.add.circle(this.player.x, this.player.y, 10.5, 0x00ffff); // 7 * 1.5
+            const key = this.itemTex('wand', null);
+            const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, nearest.x, nearest.y);
+            let b;
+            if (key) {
+                // Paper plane dart: keeps its heading, grows + heats up with level
+                b = this.setPx(this.add.image(this.player.x, this.player.y, key),
+                    30 + Math.min(w.level, 6) * 2);
+                b.rotation = angle; // art noses right -> flight angle is direct
+                if (w.level >= 5) b.setTint(0xffb066);      // scorching gold-orange
+                else if (w.level >= 3) b.setTint(0xffe9a3); // golden dart
+            } else {
+                b = this.add.circle(this.player.x, this.player.y, 10.5, 0x00ffff); // 7 * 1.5
+                b.setScale(1.5);
+            }
             this.bullets.add(b);
             this.physics.add.existing(b);
-            const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, nearest.x, nearest.y);
             b.body.setVelocity(Math.cos(angle) * 300, Math.sin(angle) * 300);
             b.dmg = 12 * (1 + w.level * 0.2) * this.playerStats.might; b.type = 'wand'; b.life = 60;
-            b.setScale(1.5);
+            b.wlevel = w.level;
         }
     }
 
@@ -1526,26 +1590,32 @@ class MainScene extends Phaser.Scene {
     fireAxe(w) {
         synthShoot('axe');
         const count = w.level;
+        const key = this.itemTex('axe', 'axe');
+        // Legacy scale numbers below assume ~29px textures; u adapts them
+        const u = this.unitScale(key);
+        const grow = 1 + Math.min(w.level, 6) * 0.06; // heavier tomes at high level
         for (let i = 0; i < count; i++) {
             const spread = (i - (count - 1) / 2) * 50;
-            const axe = this.add.image(this.player.x, this.player.y, 'axe').setOrigin(0.5).setScale(0.5);
+            const axe = this.add.image(this.player.x, this.player.y, key).setOrigin(0.5).setScale(0.5 * u);
+            if (w.level >= 5) axe.setTint(0xffe08a); // gilded spellbook
             this.bullets.add(axe);
             this.physics.add.existing(axe);
             axe.body.setCircle(15);
             axe.body.setVelocity(this.player.scaleX * 150 + spread, -400);
             axe.body.gravity.y = 800;
             axe.dmg = 12 * this.playerStats.might; axe.type = 'axe';
+            axe.wlevel = w.level;
 
             // Squash & stretch heave throw
             this.tweens.add({
                 targets: axe,
-                scaleX: 1.8,
-                scaleY: 1.3,
+                scaleX: 1.8 * u * grow,
+                scaleY: 1.3 * u * grow,
                 duration: 200,
                 ease: 'Back.easeOut',
                 onComplete: () => {
                     if (axe.active) {
-                        axe.setScale(1.5);
+                        axe.setScale(1.5 * u * grow);
                     }
                 }
             });
@@ -1554,17 +1624,22 @@ class MainScene extends Phaser.Scene {
 
     fireCross(w) {
         synthShoot('cross');
-        const cross = this.add.image(this.player.x, this.player.y, 'cross').setOrigin(0.5).setScale(0.5);
+        const key = this.itemTex('cross', 'cross');
+        const u = this.unitScale(key);
+        const grow = 1 + Math.min(w.level, 6) * 0.07; // wider boomerang sweep
+        const cross = this.add.image(this.player.x, this.player.y, key).setOrigin(0.5).setScale(0.5 * u);
+        if (w.level >= 4) cross.setTint(0xaaf5ff); // glowing edge
         this.bullets.add(cross);
         this.physics.add.existing(cross);
         cross.body.setCircle(15);
         cross.body.setVelocity(this.player.scaleX * 300, 0);
         cross.dmg = 6 * this.playerStats.might; cross.type = 'cross'; cross.returnTimer = 40;
+        cross.wlevel = w.level;
 
         // Bouncy expanding pop-out
         this.tweens.add({
             targets: cross,
-            scale: 1.5,
+            scale: 1.5 * u * grow,
             duration: 250,
             ease: 'Bounce.easeOut'
         });
@@ -1574,10 +1649,15 @@ class MainScene extends Phaser.Scene {
         synthShoot('knife');
         const count = w.level;
         const spreadAngle = 10 * (Math.PI / 180);
+        const key = this.itemTex('knife', 'knife');
+        const u = this.unitScale(key);
+        const grow = 1 + Math.min(w.level, 6) * 0.06; // bigger shears
 
         for (let i = 0; i < count; i++) {
             const offset = (i - (count - 1) / 2) * spreadAngle;
-            const knife = this.add.image(this.player.x, this.player.y, 'knife').setOrigin(0.5).setScale(0.4);
+            const knife = this.add.image(this.player.x, this.player.y, key).setOrigin(0.5).setScale(0.4 * u);
+            if (w.level >= 6) knife.setTint(0xffb199);      // red-hot blades
+            else if (w.level >= 4) knife.setTint(0xffe9a3); // golden shears
             this.bullets.add(knife);
             this.physics.add.existing(knife);
             knife.body.setCircle(12);
@@ -1589,18 +1669,19 @@ class MainScene extends Phaser.Scene {
             const speed = 500;
             knife.body.setVelocity(Math.cos(finalAngle) * speed, Math.sin(finalAngle) * speed);
             knife.dmg = 8 * this.playerStats.might; knife.type = 'knife';
+            knife.wlevel = w.level;
 
             // Elastic thrust scaling
             this.tweens.add({
                 targets: knife,
-                scaleX: 2.3,
-                scaleY: 0.9,
+                scaleX: 2.3 * u,
+                scaleY: 0.9 * u,
                 duration: 120,
                 ease: 'Quad.easeOut',
                 yoyo: true,
                 onComplete: () => {
                     if (knife.active) {
-                        knife.setScale(1.5);
+                        knife.setScale(1.5 * u * grow);
                     }
                 }
             });
@@ -1613,7 +1694,10 @@ class MainScene extends Phaser.Scene {
         const tx = this.player.x + Math.cos(angle) * dist;
         const ty = this.player.y + Math.sin(angle) * dist;
 
-        const bottle = this.add.image(tx, ty - 500, 'bottle').setOrigin(0.5);
+        const bottleKey = this.itemTex('water', 'bottle');
+        const bottle = this.setPx(
+            this.add.image(tx, ty - 500, bottleKey).setOrigin(0.5),
+            34 + Math.min(w.level, 6) * 3); // bigger balloons at higher level
 
         this.tweens.add({
             targets: bottle,
@@ -1624,6 +1708,8 @@ class MainScene extends Phaser.Scene {
             onComplete: () => {
                 bottle.destroy();
                 noise(0.1);
+                // Balloon burst: water splash on impact, harder at higher level
+                this.spawnBurstParticles(tx, ty, 0x66aaff, 8 + Math.min(w.level, 6) * 2, 4);
 
                 const size = 90 * (1 + w.level * 0.2); // 60 * 1.5
                 const dmg = ((8 + w.level * 3) / 3) * (1 + w.level * 0.2) * this.playerStats.might;
@@ -1691,17 +1777,35 @@ class MainScene extends Phaser.Scene {
                 b.returnTimer--;
                 if (b.returnTimer === 0) b.body.setVelocity(-b.body.velocity.x, 0);
             }
+            // Spin per projectile: book tumbles, scissors/triangle whirl fast,
+            // the paper plane keeps its nose on the flight heading
             if (b.type === 'axe') b.rotation += 0.2;
-            else b.rotation += 0.1;
-            
-            // Spawn trailing particles
+            else if (b.type === 'knife') b.rotation += 0.35;
+            else if (b.type === 'cross') b.rotation += 0.25;
+            else if (b.type !== 'wand') b.rotation += 0.1;
+
+            // Spawn trailing particles — richer/warmer as the weapon levels up
             if (this.gameTime % 2 === 0) {
+                const lvl = b.wlevel || 1;
+                const lvlBonus = Math.min(lvl, 6) * 0.5;
                 let trailColor = 0xffffff;
                 let trailSize = 3;
-                if (b.type === 'wand') { trailColor = 0x00ffff; trailSize = 5; }
-                else if (b.type === 'cross') { trailColor = 0xffeb3b; trailSize = 4; }
-                else if (b.type === 'axe') { trailColor = 0x9e9e9e; trailSize = 5; }
-                else if (b.type === 'knife') { trailColor = 0xe0e0e0; trailSize = 3; }
+                if (b.type === 'wand') {
+                    trailColor = lvl >= 5 ? 0xff8844 : (lvl >= 3 ? 0xffd700 : 0x00ffff);
+                    trailSize = 5 + lvlBonus;
+                }
+                else if (b.type === 'cross') {
+                    trailColor = lvl >= 4 ? 0x66e0ff : 0xffeb3b;
+                    trailSize = 4 + lvlBonus;
+                }
+                else if (b.type === 'axe') {
+                    trailColor = lvl >= 5 ? 0xffd700 : 0xffffff; // fluttering pages
+                    trailSize = 5 + lvlBonus;
+                }
+                else if (b.type === 'knife') {
+                    trailColor = lvl >= 6 ? 0xff6644 : (lvl >= 4 ? 0xffd700 : 0xe0e0e0);
+                    trailSize = 3 + lvlBonus;
+                }
                 
                 const trail = this.add.circle(b.x, b.y, trailSize, trailColor, 0.6);
                 this.tweens.add({
@@ -1861,14 +1965,10 @@ class MainScene extends Phaser.Scene {
                     if (enemy.isBoss) {
                         if (Math.random() < 0.3) this.spawnPowerUp(enemy.x, enemy.y);
                         for (let i = 0; i < 5; i++) {
-                            const g = this.add.circle(enemy.x + (Math.random() - 0.5) * 40, enemy.y + (Math.random() - 0.5) * 40, 6, 0x00ff88);
-                            this.physics.add.existing(g);
-                            g.val = 15; g.type = 'xp'; this.gems.add(g);
+                            this.spawnXpGem(enemy.x + (Math.random() - 0.5) * 40, enemy.y + (Math.random() - 0.5) * 40, 15);
                         }
                     } else {
-                        const g = this.add.circle(enemy.x, enemy.y, 6, 0x00ff88);
-                        this.physics.add.existing(g);
-                        g.val = 5; g.type = 'xp'; this.gems.add(g);
+                        this.spawnXpGem(enemy.x, enemy.y, 5);
 
                         if (Math.random() < 0.01) {
                             this.spawnPowerUp(enemy.x, enemy.y);
@@ -1880,6 +1980,20 @@ class MainScene extends Phaser.Scene {
                 }
             });
         }
+    }
+
+    // XP drop: gold star from the item sheet (green circle if art missing).
+    // No per-gem tweens — dozens can exist, spin happens in updateGems.
+    spawnXpGem(x, y, val) {
+        let g;
+        if (this.textures.exists('item_star')) {
+            g = this.setPx(this.add.image(x, y, 'item_star'), val >= 15 ? 22 : 15);
+        } else {
+            g = this.add.circle(x, y, 6, 0x00ff88);
+        }
+        this.physics.add.existing(g);
+        g.val = val; g.type = 'xp'; this.gems.add(g);
+        return g;
     }
 
     spawnPowerUp(x, y) {
@@ -1901,7 +2015,7 @@ class MainScene extends Phaser.Scene {
         g.fillRoundedRect(-bw / 2, -bh / 2, bw, bh, 12);
         g.lineStyle(3, 0x7cf5b0, 1);
         g.strokeRoundedRect(-bw / 2, -bh / 2, bw, bh, 12);
-        const iconImg = this.add.image(0, 0, 'pu_' + choice.id).setScale(0.95);
+        const iconImg = this.setPx(this.add.image(0, 0, this.itemTex(choice.id, 'pu_' + choice.id)), 44);
         const box = this.add.container(x, y, [g, iconImg]);
         box.setDepth(44);
         box.reward = choice;
@@ -1934,7 +2048,10 @@ class MainScene extends Phaser.Scene {
     // Reward pickup celebration + activation (runs after a solved puzzle)
     grantPuzzleReward(reward) {
         synthGem();
-        const flyingIcon = this.add.image(this.player.x, this.player.y - 40, 'pu_' + reward.id).setOrigin(0.5).setDepth(56);
+        const flyingIcon = this.setPx(
+            this.add.image(this.player.x, this.player.y - 40, this.itemTex(reward.id, 'pu_' + reward.id)),
+            46).setOrigin(0.5).setDepth(56);
+        const iconBaseScale = flyingIcon.scale; // setPx-normalized; shrink is relative
 
         let orbitAngle = 0;
         this.tweens.addCounter({
@@ -1954,7 +2071,7 @@ class MainScene extends Phaser.Scene {
                     const snapT = (t - 0.6) / 0.4;
                     flyingIcon.x = Phaser.Math.Linear(flyingIcon.x, this.player.x, snapT);
                     flyingIcon.y = Phaser.Math.Linear(flyingIcon.y, this.player.y, snapT);
-                    flyingIcon.scale = 1.2 * (1 - snapT);
+                    flyingIcon.scale = iconBaseScale * 1.2 * (1 - snapT);
                 }
             },
             onComplete: () => {
@@ -2459,6 +2576,7 @@ class MainScene extends Phaser.Scene {
 
     updateGems() {
         this.gems.getChildren().forEach(g => {
+            g.rotation += 0.04; // slow star twinkle-spin (no-op on circles)
             const d = Phaser.Math.Distance.Between(this.player.x, this.player.y, g.x, g.y);
             if (d < 150 || g.vortexed) this.physics.moveToObject(g, this.player, 600);
             if (d < 30) {
@@ -2800,7 +2918,12 @@ function showPowerUpSelection(context) {
             document.getElementById('levelUpMenu').classList.add('hidden');
             startMiniGame(gameType, context);
         };
-        card.innerHTML = `<div class="text-6xl mb-4">${reward.icon}</div>
+        // School-item art on the card; emoji fallback if the PNG is missing
+        const itemName = (typeof ITEM_SPRITES !== 'undefined') ? ITEM_SPRITES[reward.id] : null;
+        const iconHtml = itemName
+            ? `<img src="sprites/vs/item_${itemName}.png" alt="" style="height:64px;margin:0 auto 16px;display:block;" onerror="this.outerHTML='<div class=&quot;text-6xl mb-4&quot;>${reward.icon}</div>'">`
+            : `<div class="text-6xl mb-4">${reward.icon}</div>`;
+        card.innerHTML = `${iconHtml}
                            <h3 class="text-xl font-bold mb-2 text-purple-700">${reward.name}</h3>
                            <p class="text-sm text-gray-500">${description}</p>`;
         container.appendChild(card);

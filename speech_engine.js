@@ -473,7 +473,11 @@
   // three push the audio toward the model's training distribution. Deep voices
   // (older students, adults) measure below the threshold and get zero shift,
   // so every recording carries its own calibration; no stored profiles.
-  const F0_SHIFT_THRESHOLD = 240;  // Hz — below this (adults/deep-voiced kids) never shift
+  const F0_SHIFT_THRESHOLD = 265;  // Hz — below this, never shift. Field data 2026-07-29:
+                                   // borderline voices (Irene, 208-262Hz) bounced across the
+                                   // old 240 cutoff attempt-to-attempt and passed only 10%
+                                   // when shifted; unambiguous child voices (Neal 348, Jenny
+                                   // 308, Yoyo 271) still clear 265 comfortably.
   const F0_TARGET = 175;           // Hz — centre of Whisper's comfortable adult range
   const MAX_SHIFT_SEMITONES = 4;   // cap: over-shifting smears consonants
 
@@ -496,7 +500,7 @@
       let energy = 0;
       for (let i = start; i < start + frameLen; i++) energy += audio[i] * audio[i];
       if (Math.sqrt(energy / frameLen) < 0.01) continue; // silent frame — skip
-      let bestR = 0;
+      let bestR = 0, bestLag = 0;
       for (let lag = minLag; lag <= maxLag; lag++) {
         let num = 0, den2 = 0;
         for (let i = start; i < start + frameLen; i++) {
@@ -505,15 +509,21 @@
         }
         const r = num / (Math.sqrt(energy * den2) || 1);
         corr[lag] = r;
-        if (r > bestR) bestR = r;
+        if (r > bestR) { bestR = r; bestLag = lag; }
       }
       if (bestR <= 0.5) continue; // no confident periodicity (noise/music)
-      // Octave-error guard: autocorrelation often peaks at DOUBLE the true
-      // period (half the frequency). Prefer the SMALLEST lag whose correlation
-      // is nearly as good as the best — that's the true fundamental.
-      let lagPick = 0;
-      for (let lag = minLag; lag <= maxLag; lag++) {
-        if (corr[lag] >= 0.9 * bestR) { lagPick = lag; break; }
+      // Octave/subharmonic guard: autocorrelation can peak at an integer
+      // MULTIPLE of the true period (reads an octave or more too LOW). Check
+      // only exact submultiples of the best lag — if one correlates nearly as
+      // well, that shorter period is the true fundamental. Field lesson
+      // 2026-07-29: a flat "any smaller lag within 90% of best" rule overshot
+      // on adult voices with strong harmonics (teacher's ~150Hz voice read as
+      // 300-390Hz and got wrongly pitch-shifted, 0/2 pass vs 83% unshifted);
+      // restricting candidates to bestLag/2..4 fixes both directions.
+      let lagPick = bestLag;
+      for (const div of [4, 3, 2]) {
+        const cand = Math.round(bestLag / div);
+        if (cand >= minLag && corr[cand] >= 0.90 * bestR) { lagPick = cand; break; }
       }
       if (lagPick > 0) f0s.push(sampleRate / lagPick);
     }

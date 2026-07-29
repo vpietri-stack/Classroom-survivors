@@ -473,6 +473,16 @@ class MainScene extends Phaser.Scene {
         for (let i = 0; i < 40; i++) {
             this.spawnEnemy(Phaser.Math.Between(300, 1000));
         }
+
+        // Onboarding: drop one power-up right next to the player so the very
+        // first thing they do is a walking puzzle — teaches "go grab the shiny
+        // box" (engage) instead of just running from monsters. A short delay
+        // lets the scene settle first; ~120px = adjacent but needs one step.
+        this.time.delayedCall(500, () => {
+            if (this.gameState !== 'PLAYING' || this.puzzle) return;
+            const a = Math.random() * Math.PI * 2;
+            this.spawnPowerUp(this.player.x + Math.cos(a) * 120, this.player.y + Math.sin(a) * 120);
+        });
     }
 
     update(time, delta) {
@@ -516,6 +526,8 @@ class MainScene extends Phaser.Scene {
         if (Math.abs(this.knockbackVelocity.y) < 10) this.knockbackVelocity.y = 0;
 
         this.player.body.setVelocity((dx * speed) + this.knockbackVelocity.x, (dy * speed) + this.knockbackVelocity.y);
+
+        this.updateAntiFlee(dx, dy);
 
         if (this.invulnTimer > 0) {
             this.invulnTimer--;
@@ -685,18 +697,18 @@ class MainScene extends Phaser.Scene {
             dist = Math.sqrt(Math.pow(cam.width, 2) + Math.pow(cam.height, 2)) / 2 + 100;
         }
 
-        const ex = this.player.x + Math.cos(angle) * dist;
-        const ey = this.player.y + Math.sin(angle) * dist;
+        this.createEnemyAt(this.player.x + Math.cos(angle) * dist, this.player.y + Math.sin(angle) * dist);
+    }
 
+    // Shared enemy factory (used by ambient spawns AND the anti-flee wall)
+    createEnemyAt(ex, ey) {
+        if (this.enemies.getChildren().length >= 160) return null; // hard cap
         const type = Math.floor(this.gameTime / 1800) % 3;
         const isBat = type === 1;
         const textureKey = isBat ? 'bat' : (type === 2 ? 'zombie' : 'alien');
 
         const difficulty = this.getDifficulty();
-        // HP: starts at 12 (one spirit wand hit). 
-        // Growth is slowed so that at 10 mins (diff ~11.3) HP is ~12 * (1 + 10.3 * 0.13) = ~28 (two wand hits)
         const hp = 12 * (1 + (difficulty - 1) * 0.13);
-        // Speed: starts at 16 (0.1x player base speed of 160), scales with difficulty
         const speed = 16 * difficulty + (Math.random() * 5);
 
         const enemy = this.add.image(ex, ey, textureKey).setOrigin(0.5);
@@ -710,6 +722,100 @@ class MainScene extends Phaser.Scene {
         enemy.isBat = isBat;
         enemy.stunTimer = 0;
         this.enemies.add(enemy);
+        return enemy;
+    }
+
+    // ---------------------------------------------------------
+    // ANTI-FLEE: young kids tend to just run one direction forever and never
+    // engage. Two nudges teach "turn around and fight":
+    //  1) A soft playground FENCE (elastic push-back) caps how far they roam.
+    //  2) If they flee a consistent heading too long, a WALL of enemies rises
+    //     just off-screen ahead of them, blocking the escape so they must turn.
+    // ---------------------------------------------------------
+    updateAntiFlee(dx, dy) {
+        if (!this.arenaCenter) {
+            this.arenaCenter = { x: this.player.x, y: this.player.y };
+            this.arenaRadius = 900;
+            this.fleeHeading = { x: 0, y: 0 };
+            this.fleeTimer = 0;
+            this.wallCooldown = 0;
+            this.drawFence();
+        }
+
+        // --- Elastic playground fence ---
+        const ac = this.arenaCenter;
+        const ddx = this.player.x - ac.x, ddy = this.player.y - ac.y;
+        const dist = Math.hypot(ddx, ddy) || 1;
+        if (dist > this.arenaRadius) {
+            const over = dist - this.arenaRadius;
+            const nx = ddx / dist, ny = ddy / dist;
+            const spring = Math.min(over * 6, 480); // gentle, grows with overshoot
+            this.player.body.velocity.x -= nx * spring;
+            this.player.body.velocity.y -= ny * spring;
+            // subtle glow pulse on the fence so kids notice the boundary
+            if (this.fenceGfx) this.fenceGfx.setAlpha(0.9);
+        } else if (this.fenceGfx) {
+            this.fenceGfx.setAlpha(0.45 + 0.25 * Math.max(0, (dist / this.arenaRadius) - 0.6));
+        }
+
+        // --- Sustained-flee detection -> enemy wall ---
+        if (this.wallCooldown > 0) this.wallCooldown--;
+        const mv = Math.hypot(dx, dy);
+        if (mv > 0.35) {
+            const hx = dx / mv, hy = dy / mv;
+            const dot = hx * this.fleeHeading.x + hy * this.fleeHeading.y;
+            this.fleeHeading.x = this.fleeHeading.x * 0.9 + hx * 0.1;
+            this.fleeHeading.y = this.fleeHeading.y * 0.9 + hy * 0.1;
+            const hl = Math.hypot(this.fleeHeading.x, this.fleeHeading.y) || 1;
+            this.fleeHeading.x /= hl; this.fleeHeading.y /= hl;
+            if (dot > 0.7) this.fleeTimer++; else this.fleeTimer = Math.max(0, this.fleeTimer - 3);
+        } else {
+            this.fleeTimer = Math.max(0, this.fleeTimer - 2);
+        }
+        if (this.fleeTimer > 150 && this.wallCooldown === 0) { // ~2.5s of steady fleeing
+            this.spawnEnemyWall(this.fleeHeading.x, this.fleeHeading.y);
+            this.fleeTimer = 0;
+            this.wallCooldown = 360; // 6s before another wall can form
+        }
+    }
+
+    // A wall of enemies rises just off-screen in the flee direction, spanning
+    // the view so a straight-line runner is forced to stop and turn around
+    spawnEnemyWall(dx, dy) {
+        if (!dx && !dy) return;
+        const cam = this.cameras.main;
+        const half = Math.max(cam.worldView.width, cam.worldView.height) / 2;
+        const ahead = half + 90; // just past the screen edge = appears naturally
+        const cx = this.player.x + dx * ahead;
+        const cy = this.player.y + dy * ahead;
+        const perpx = -dy, perpy = dx;
+        const span = Math.max(cam.worldView.width, cam.worldView.height) * 1.15;
+        const count = 16;
+        for (let i = 0; i < count; i++) {
+            const off = (i / (count - 1) - 0.5) * span;
+            const back = (Math.random() - 0.5) * 50; // slight depth = a thick wall
+            this.createEnemyAt(cx + perpx * off + dx * back, cy + perpy * off + dy * back);
+        }
+        this.cameras.main.shake(120, 0.004); // gentle "here they come" cue
+    }
+
+    // Chalk-style boundary ring (schoolyard theme), drawn once in world space
+    drawFence() {
+        if (this.fenceGfx) this.fenceGfx.destroy();
+        const g = this.add.graphics().setDepth(-6);
+        const cx = this.arenaCenter.x, cy = this.arenaCenter.y, R = this.arenaRadius;
+        const dashes = 90;
+        for (let i = 0; i < dashes; i++) {
+            const a0 = (i / dashes) * Math.PI * 2;
+            const a1 = a0 + (Math.PI * 2 / dashes) * 0.55; // dash with a gap
+            g.lineStyle(10, 0xffffff, 0.85);
+            g.beginPath();
+            g.arc(cx, cy, R, a0, a1);
+            g.strokePath();
+        }
+        g.setAlpha(0.45);
+        this.fenceGfx = g;
+        this.events.once('shutdown', () => { if (this.fenceGfx) { this.fenceGfx.destroy(); this.fenceGfx = null; } });
     }
 
     spawnBoss() {
@@ -2247,7 +2353,7 @@ class MainScene extends Phaser.Scene {
     spawnXpGem(x, y, val) {
         let g;
         if (this.textures.exists('item_star')) {
-            g = this.setPx(this.add.image(x, y, 'item_star'), val >= 15 ? 30 : 22);
+            g = this.setPx(this.add.image(x, y, 'item_star'), val >= 15 ? 46 : 34);
             g.baseScale = g.scale;
             g.pulseSeed = Math.random() * Math.PI * 2;
         } else {
@@ -2863,8 +2969,10 @@ class MainScene extends Phaser.Scene {
                 if (Math.random() < 0.012) this.spawnBurstParticles(g.x, g.y, 0xffd966, 2, 2);
             }
             const d = Phaser.Math.Distance.Between(this.player.x, this.player.y, g.x, g.y);
-            if (d < 150 || g.vortexed) this.physics.moveToObject(g, this.player, 600);
-            if (d < 30) {
+            // Wide magnet so stars stream in from far (incl. the trail dropped
+            // behind a fleeing kid) — teaches "shiny = grab" and tugs attention back
+            if (d < 450 || g.vortexed) this.physics.moveToObject(g, this.player, 720);
+            if (d < 42) {
                 synthGem();
                 this.spawnBurstParticles(this.player.x, this.player.y, 0x00ffff, 5, 2.5);
                 if (g.type === 'chest') this.triggerTreasureEvent();

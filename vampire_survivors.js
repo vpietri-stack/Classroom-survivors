@@ -25,6 +25,18 @@ const ITEM_SPRITES = {
     heart: 'milk'
 };
 
+// Per-weapon evolution milestones, mirrored in gameplay code (fire* +
+// updateBullets + the bullet overlap handler). Shown on the level-up card
+// so students can see WHAT the next level unlocks (whip has its own text).
+const WEAPON_MILESTONES = {
+    wand: { 3: 'Golden Dart (+Size)', 5: 'Flaming Dart (Pierces enemies!)' },
+    knife: { 3: 'Whirling Blades (+Spin)', 4: 'Golden Shears (+Size)', 6: 'Red-Hot Blades' },
+    axe: { 4: 'Knowledge Blast (Area hit!)', 5: 'Golden Edition (+Size)' },
+    cross: { 4: 'Glowing Edge', 5: 'Twin Boomerang (Fires both ways!)' },
+    water: { 3: 'Bigger Balloons', 5: 'Double Splash (2 balloons!)' },
+    orb: { 4: 'Rubber-Dust Sparkles', 6: 'Turbo Orbit' }
+};
+
 // --- MAIN SCENE ---
 class MainScene extends Phaser.Scene {
     constructor() {
@@ -282,6 +294,26 @@ class MainScene extends Phaser.Scene {
                 this.joystick.pointerId = null;
             }
         });
+
+        // Belt-and-braces joystick release: DOM overlays above the canvas
+        // (puzzle tracker, buttons) can eat the touch events Phaser needs,
+        // leaving the stick latched ON and the player frozen. Native capture
+        // listener = when the LAST finger leaves the glass, the stick cannot
+        // possibly still be held. (A per-frame check in update() heals the
+        // remaining cases.)
+        const onGlobalTouchEnd = (e) => {
+            if (this.joystick.active && e.touches && e.touches.length === 0) {
+                this.joystick.active = false;
+                this.joystick.force = 0;
+                this.joystick.pointerId = null;
+            }
+        };
+        window.addEventListener('touchend', onGlobalTouchEnd, true);
+        window.addEventListener('touchcancel', onGlobalTouchEnd, true);
+        this.events.once('shutdown', () => {
+            window.removeEventListener('touchend', onGlobalTouchEnd, true);
+            window.removeEventListener('touchcancel', onGlobalTouchEnd, true);
+        });
         this.joyGraphics = this.add.graphics().setScrollFactor(0);
 
         // Shared particle layer (perf: one graphics for ALL burst particles)
@@ -314,6 +346,23 @@ class MainScene extends Phaser.Scene {
                 if (!b.hitList) b.hitList = [];
                 b.hitList.push(e);
                 this.damageEnemy(e, b.dmg, 200);
+                // Book evolution (L4+): Knowledge Blast — one AoE burst per book
+                if (b.type === 'axe' && b.wlevel >= 4 && !b.aoeDone) {
+                    b.aoeDone = true;
+                    this.spawnBurstParticles(b.x, b.y, 0xffe08a, 12, 4);
+                    this.enemies.getChildren().forEach(o => {
+                        if (o !== e && o.active && Phaser.Math.Distance.Between(b.x, b.y, o.x, o.y) < 75) {
+                            this.damageEnemy(o, b.dmg * 0.5, 80);
+                        }
+                    });
+                }
+            } else if (b.type === 'wand' && b.pierce > 0) {
+                // Plane evolution (L5+): Flaming Dart punches through enemies
+                if (b.hitList && b.hitList.includes(e)) return;
+                if (!b.hitList) b.hitList = [];
+                b.hitList.push(e);
+                b.pierce--;
+                this.damageEnemy(e, b.dmg, 100);
             } else {
                 this.damageEnemy(e, b.dmg, 100);
                 b.destroy();
@@ -354,6 +403,18 @@ class MainScene extends Phaser.Scene {
             return;
         }
         if (this.gameState !== 'PLAYING') return;
+
+        // Joystick watchdog: if Phaser's own bookkeeping says the owning
+        // pointer is no longer down (release event swallowed by a DOM
+        // overlay tap), free the stick so movement can never get stuck
+        if (this.joystick.active) {
+            const owner = this.input.manager.pointers.find(p => p && p.id === this.joystick.pointerId);
+            if (!owner || !owner.isDown) {
+                this.joystick.active = false;
+                this.joystick.force = 0;
+                this.joystick.pointerId = null;
+            }
+        }
 
         let dx = 0, dy = 0;
         const speed = 160 * this.playerStats.speed; // Doubled base speed (from 80 to 160)
@@ -464,6 +525,40 @@ class MainScene extends Phaser.Scene {
                 const r = t.a + t.b * t.theta;
                 t.x = t.spawnX + r * Math.cos(t.theta);
                 t.y = t.spawnY + r * Math.sin(t.theta);
+
+                if (t.spriteImg && t.spriteImg.active) {
+                    // Paper tornado: fast whirl + breathing pulse
+                    t.spriteImg.x = t.x; t.spriteImg.y = t.y;
+                    t.spriteImg.rotation += 0.28;
+                    t.spriteImg.setScale(t.spriteBaseScale * (1 + 0.12 * Math.sin(this.gameTime * 0.3)));
+
+                    // Whirlwind: paper scraps spiraling tangentially around it
+                    if (this.gameTime % 2 === 0 && this.particlePool.length < 380) {
+                        const ang = Math.random() * Math.PI * 2;
+                        const rad = 45 + Math.random() * 45;
+                        this.particlePool.push({
+                            x: t.x + Math.cos(ang) * rad,
+                            y: t.y + Math.sin(ang) * rad,
+                            vx: -Math.sin(ang) * 5,       // tangential = swirl
+                            vy: Math.cos(ang) * 5 - 1.5,  // slight updraft
+                            size: Phaser.Math.FloatBetween(2, 4.5),
+                            color: Math.random() < 0.7 ? 0xf3efe6 : 0xd8d2c4 // paper tones
+                        });
+                    }
+
+                    // Vortex suction: enemies inside 190px get dragged toward
+                    // the funnel (stronger when closer); runs AFTER the chase
+                    // AI set velocities this frame, so the pull wins up close
+                    this.enemies.getChildren().forEach(e => {
+                        if (!e.active || !e.body) return;
+                        const d = Phaser.Math.Distance.Between(t.x, t.y, e.x, e.y);
+                        if (d < 190 && d > 1) {
+                            const pull = 340 * (1 - d / 190);
+                            e.body.velocity.x += ((t.x - e.x) / d) * pull;
+                            e.body.velocity.y += ((t.y - e.y) / d) * pull;
+                        }
+                    });
+                }
 
                 if (t.fireballs) {
                     t.fireballs.forEach(fb => {
@@ -1008,15 +1103,15 @@ class MainScene extends Phaser.Scene {
                 if (w.sprites.length !== w.level) {
                     w.sprites.forEach(s => s.destroy()); w.sprites = [];
                     const orbKey = this.itemTex('orb', 'orb');
-                    // Erasers grow with level (emoji fallback matched cross at 1.5x ≈ 44px)
-                    const orbPx = 40 + Math.min(w.level, 8) * 3;
+                    // Erasers stay a fixed size — already big enough (user call);
+                    // leveling adds MORE erasers + faster orbit instead
                     for (let i = 0; i < w.level; i++) {
-                        const orb = this.setPx(this.add.image(0, 0, orbKey).setOrigin(0.5), orbPx);
+                        const orb = this.setPx(this.add.image(0, 0, orbKey).setOrigin(0.5), 44);
                         this.physics.add.existing(orb); w.sprites.push(orb);
                     }
                 }
-                // Orbit speeds up as the weapon levels
-                w.angle = (w.angle || 0) + 0.05 + Math.min(w.level, 8) * 0.005;
+                // Orbit speeds up as the weapon levels; Turbo Orbit at L6+
+                w.angle = (w.angle || 0) + 0.05 + Math.min(w.level, 8) * 0.005 + (w.level >= 6 ? 0.03 : 0);
                 // Decrement all cooldowns and clean up destroyed enemies
                 w.hitCooldowns.forEach((val, key) => {
                     if (!key.active) { w.hitCooldowns.delete(key); return; }
@@ -1079,6 +1174,7 @@ class MainScene extends Phaser.Scene {
             b.body.setVelocity(Math.cos(angle) * 300, Math.sin(angle) * 300);
             b.dmg = 12 * (1 + w.level * 0.2) * this.playerStats.might; b.type = 'wand'; b.life = 60;
             b.wlevel = w.level;
+            b.pierce = w.level >= 5 ? 2 : 0; // Flaming Dart: punches through 2 extra enemies
         }
     }
 
@@ -1600,7 +1696,7 @@ class MainScene extends Phaser.Scene {
             if (w.level >= 5) axe.setTint(0xffe08a); // gilded spellbook
             this.bullets.add(axe);
             this.physics.add.existing(axe);
-            axe.body.setCircle(15);
+            axe.body.setCircle(15 * grow); // hitbox grows with the art
             axe.body.setVelocity(this.player.scaleX * 150 + spread, -400);
             axe.body.gravity.y = 800;
             axe.dmg = 12 * this.playerStats.might; axe.type = 'axe';
@@ -1627,21 +1723,25 @@ class MainScene extends Phaser.Scene {
         const key = this.itemTex('cross', 'cross');
         const u = this.unitScale(key);
         const grow = 1 + Math.min(w.level, 6) * 0.07; // wider boomerang sweep
-        const cross = this.add.image(this.player.x, this.player.y, key).setOrigin(0.5).setScale(0.5 * u);
-        if (w.level >= 4) cross.setTint(0xaaf5ff); // glowing edge
-        this.bullets.add(cross);
-        this.physics.add.existing(cross);
-        cross.body.setCircle(15);
-        cross.body.setVelocity(this.player.scaleX * 300, 0);
-        cross.dmg = 6 * this.playerStats.might; cross.type = 'cross'; cross.returnTimer = 40;
-        cross.wlevel = w.level;
+        // Twin Boomerang evolution (L5+): one triangle each way
+        const dirs = w.level >= 5 ? [1, -1] : [1];
+        dirs.forEach(dir => {
+            const cross = this.add.image(this.player.x, this.player.y, key).setOrigin(0.5).setScale(0.5 * u);
+            if (w.level >= 4) cross.setTint(0xaaf5ff); // glowing edge
+            this.bullets.add(cross);
+            this.physics.add.existing(cross);
+            cross.body.setCircle(15 * grow); // hitbox grows with the art
+            cross.body.setVelocity(this.player.scaleX * 300 * dir, 0);
+            cross.dmg = 6 * this.playerStats.might; cross.type = 'cross'; cross.returnTimer = 40;
+            cross.wlevel = w.level;
 
-        // Bouncy expanding pop-out
-        this.tweens.add({
-            targets: cross,
-            scale: 1.5 * u * grow,
-            duration: 250,
-            ease: 'Bounce.easeOut'
+            // Bouncy expanding pop-out
+            this.tweens.add({
+                targets: cross,
+                scale: 1.5 * u * grow,
+                duration: 250,
+                ease: 'Bounce.easeOut'
+            });
         });
     }
 
@@ -1660,7 +1760,7 @@ class MainScene extends Phaser.Scene {
             else if (w.level >= 4) knife.setTint(0xffe9a3); // golden shears
             this.bullets.add(knife);
             this.physics.add.existing(knife);
-            knife.body.setCircle(12);
+            knife.body.setCircle(12 * grow); // hitbox grows with the art
 
             const baseAngle = this.player.scaleX > 0 ? 0 : Math.PI;
             const finalAngle = baseAngle + offset;
@@ -1689,6 +1789,8 @@ class MainScene extends Phaser.Scene {
     }
 
     fireSantaWater(w) {
+        // Double Splash evolution (L5+): two balloons per volley
+        const throwOne = () => {
         const angle = Math.random() * Math.PI * 2;
         const dist = Phaser.Math.Between(100, 300);
         const tx = this.player.x + Math.cos(angle) * dist;
@@ -1769,6 +1871,9 @@ class MainScene extends Phaser.Scene {
                 });
             }
         });
+        };
+        throwOne();
+        if (w.level >= 5) this.time.delayedCall(300, () => { if (this.gameState === 'PLAYING') throwOne(); });
     }
 
     updateBullets() {
@@ -1777,10 +1882,10 @@ class MainScene extends Phaser.Scene {
                 b.returnTimer--;
                 if (b.returnTimer === 0) b.body.setVelocity(-b.body.velocity.x, 0);
             }
-            // Spin per projectile: book tumbles, scissors/triangle whirl fast,
-            // the paper plane keeps its nose on the flight heading
+            // Spin per projectile: book tumbles, scissors/triangle whirl fast
+            // (Whirling Blades from L3), the paper plane keeps its heading
             if (b.type === 'axe') b.rotation += 0.2;
-            else if (b.type === 'knife') b.rotation += 0.35;
+            else if (b.type === 'knife') b.rotation += ((b.wlevel || 1) >= 3 ? 0.35 : 0.18);
             else if (b.type === 'cross') b.rotation += 0.25;
             else if (b.type !== 'wand') b.rotation += 0.1;
 
@@ -1983,11 +2088,14 @@ class MainScene extends Phaser.Scene {
     }
 
     // XP drop: gold star from the item sheet (green circle if art missing).
-    // No per-gem tweens — dozens can exist, spin happens in updateGems.
+    // Big + shiny so kids KNOW to grab them: pulse-throb and sparkles happen
+    // per-frame in updateGems (no per-gem tweens — dozens can exist).
     spawnXpGem(x, y, val) {
         let g;
         if (this.textures.exists('item_star')) {
-            g = this.setPx(this.add.image(x, y, 'item_star'), val >= 15 ? 22 : 15);
+            g = this.setPx(this.add.image(x, y, 'item_star'), val >= 15 ? 30 : 22);
+            g.baseScale = g.scale;
+            g.pulseSeed = Math.random() * Math.PI * 2;
         } else {
             g = this.add.circle(x, y, 6, 0x00ff88);
         }
@@ -2321,12 +2429,13 @@ class MainScene extends Phaser.Scene {
         // onclick silently ate taps mid-movement. React to the raw pointerup
         // instead — touch implicit-capture guarantees it fires on the element
         // where the finger went DOWN, so joystick releases never leak here.
+        // IMPORTANT: no preventDefault/stopPropagation — Phaser tracks this
+        // finger via window-level listeners, and blocking the bubble leaked a
+        // permanently-down pointer per tap until ALL input froze (stuck
+        // joystick bug). A tap up here is harmless to the game: the joystick
+        // only activates on the bottom half of the screen.
         if (window.PointerEvent) {
-            div.addEventListener('pointerup', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.onTrackerTap();
-            });
+            div.addEventListener('pointerup', () => this.onTrackerTap());
         } else {
             div.onclick = () => this.onTrackerTap(); // ancient-browser fallback
         }
@@ -2542,8 +2651,10 @@ class MainScene extends Phaser.Scene {
     }
 
     spawnTornado() {
-        const tornado = this.add.circle(this.player.x, this.player.y, 5, 0xffffff, 0);
+        // Kill zone rides the wandering spiral; enemies are also sucked in
+        const tornado = this.add.circle(this.player.x, this.player.y, 28, 0xffffff, 0);
         this.physics.add.existing(tornado);
+        tornado.body.setCircle(28);
         this.tornados.add(tornado);
 
         tornado.theta = 0;
@@ -2551,18 +2662,27 @@ class MainScene extends Phaser.Scene {
         tornado.spawnY = this.player.y;
         tornado.a = 50;
         tornado.b = 8;
-        tornado.fireballs = [];
 
-        for (let i = 0; i < 12; i++) {
-            const fb = this.add.image(this.player.x, this.player.y, 'fire_large').setOrigin(0.5);
-            this.physics.add.existing(fb);
-            fb.body.setCircle(15);
-            this.tornados.add(fb);
+        if (this.textures.exists('item_tornado')) {
+            // Paper tornado art: big spinning funnel (replaces the old emoji
+            // fireball swarm), pulse + scrap particles handled in update()
+            tornado.spriteImg = this.setPx(
+                this.add.image(tornado.x, tornado.y, 'item_tornado').setDepth(46), 110);
+            tornado.spriteBaseScale = tornado.spriteImg.scale;
+        } else {
+            // Emoji fallback: the classic orbiting fireballs
+            tornado.fireballs = [];
+            for (let i = 0; i < 12; i++) {
+                const fb = this.add.image(this.player.x, this.player.y, 'fire_large').setOrigin(0.5);
+                this.physics.add.existing(fb);
+                fb.body.setCircle(15);
+                this.tornados.add(fb);
 
-            fb.orbitRadius = Phaser.Math.Between(20, 70);
-            fb.orbitSpeed = Phaser.Math.FloatBetween(0.1, 0.2);
-            fb.orbitAngle = (i / 12) * Math.PI * 2;
-            tornado.fireballs.push(fb);
+                fb.orbitRadius = Phaser.Math.Between(20, 70);
+                fb.orbitSpeed = Phaser.Math.FloatBetween(0.1, 0.2);
+                fb.orbitAngle = (i / 12) * Math.PI * 2;
+                tornado.fireballs.push(fb);
+            }
         }
 
         if (!this.activeTornados) this.activeTornados = [];
@@ -2570,6 +2690,7 @@ class MainScene extends Phaser.Scene {
 
         this.time.delayedCall(5000, () => {
             if (tornado.fireballs) tornado.fireballs.forEach(f => { if (f.active) f.destroy(); });
+            if (tornado.spriteImg) tornado.spriteImg.destroy();
             tornado.destroy();
         });
     }
@@ -2577,6 +2698,11 @@ class MainScene extends Phaser.Scene {
     updateGems() {
         this.gems.getChildren().forEach(g => {
             g.rotation += 0.04; // slow star twinkle-spin (no-op on circles)
+            // Shine: throb between 85%-115% + occasional golden glints
+            if (g.baseScale) {
+                g.setScale(g.baseScale * (1 + 0.15 * Math.sin(this.gameTime * 0.25 + g.pulseSeed)));
+                if (Math.random() < 0.012) this.spawnBurstParticles(g.x, g.y, 0xffd966, 2, 2);
+            }
             const d = Phaser.Math.Distance.Between(this.player.x, this.player.y, g.x, g.y);
             if (d < 150 || g.vortexed) this.physics.moveToObject(g, this.player, 600);
             if (d < 30) {
@@ -2908,6 +3034,24 @@ function showPowerUpSelection(context) {
                     else if (cycle === 1) description = "Blazing Speed (Attack More Often)";
                     else description = "Wildfire Scope (+Ruler Width & Flame Aura)";
                 }
+            }
+        } else {
+            // Other weapons: show the NEXT level's evolution milestone (or the
+            // per-level default) so students see what upgrading unlocks
+            const weapon = existingWeapons.find(w => w.type === reward.id);
+            if (weapon) {
+                const nextLevel = weapon.level + 1;
+                const ms = (typeof WEAPON_MILESTONES !== 'undefined') &&
+                    WEAPON_MILESTONES[reward.id] && WEAPON_MILESTONES[reward.id][nextLevel];
+                const defaults = {
+                    wand: '+Damage & Bigger Dart',
+                    orb: '+1 Eraser & Faster Spin',
+                    axe: '+1 Book & Bigger',
+                    cross: 'Bigger Boomerang',
+                    water: 'Bigger Splash Zone',
+                    knife: '+1 Scissors & Bigger'
+                };
+                description = ms || defaults[reward.id] || reward.desc;
             }
         }
 

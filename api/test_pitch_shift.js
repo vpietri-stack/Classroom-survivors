@@ -44,10 +44,31 @@ for (const f of [150, 220, 300, 380]) {
 check(E._estimateF0(whiteNoise(2, 0.3), SR) === null, 'white noise -> null');
 check(E._estimateF0(new Float32Array(SR * 2), SR) === null, 'silence -> null');
 
-// --- shift policy ---
+// --- octave-error guard: adult voice with STRONG even harmonics must still
+//     read as the fundamental, not double it (field bug: teacher's ~150Hz
+//     voice read 300-390Hz and got wrongly shifted) ---
+function harmonicVoice(f0, seconds) {
+    const n = Math.round(SR * seconds);
+    const out = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+        const t = i / SR;
+        // dominant 2nd harmonic (typical of resonant male voices)
+        out[i] = 0.18 * Math.sin(2 * Math.PI * f0 * t)
+               + 0.40 * Math.sin(2 * Math.PI * 2 * f0 * t)
+               + 0.12 * Math.sin(2 * Math.PI * 3 * f0 * t);
+    }
+    return out;
+}
+const estAdult = E._estimateF0(harmonicVoice(150, 2), SR);
+check(estAdult !== null && Math.abs(estAdult - 150) / 150 <= 0.10, `harmonic-rich 150Hz adult voice -> ${estAdult ? estAdult.toFixed(1) : 'null'}Hz (must NOT octave-jump to 300)`);
+
+// --- shift policy (threshold 265Hz per 2026-07-29 field tuning) ---
 check(E._shiftSemitonesFor(150) === 0, 'F0 150Hz (deep voice / Max) -> no shift');
-check(E._shiftSemitonesFor(220) === 0, 'F0 220Hz (below 240 threshold) -> no shift');
+check(E._shiftSemitonesFor(220) === 0, 'F0 220Hz -> no shift');
+check(E._shiftSemitonesFor(250) === 0, 'F0 250Hz (borderline, Irene-range) -> no shift');
+check(E._shiftSemitonesFor(262) === 0, 'F0 262Hz (just below 265 threshold) -> no shift');
 check(E._shiftSemitonesFor(null) === 0, 'F0 null (unvoiced) -> no shift');
+check(E._shiftSemitonesFor(271) >= 1, 'F0 271Hz (Yoyo) -> shift active');
 const s300 = E._shiftSemitonesFor(300);
 check(s300 >= 1 && s300 <= 4, `F0 300Hz -> ${s300} semitones (clamped to 1..4)`);
 check(E._shiftSemitonesFor(380) === 4, 'F0 380Hz -> capped at 4 semitones');

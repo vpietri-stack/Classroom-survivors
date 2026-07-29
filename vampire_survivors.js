@@ -606,20 +606,25 @@ class MainScene extends Phaser.Scene {
                     t.spriteImg.setScale(t.spriteBaseScale * (1 + 0.12 * Math.sin(this.gameTime * 0.3)));
                     if (t.backdrop && t.backdrop.active) { t.backdrop.x = t.x; t.backdrop.y = t.y; }
 
-                    // Whirlwind: bigger, brighter paper scraps ringing the OUTER
-                    // edge of the funnel (sprite radius ~90) rather than over it
-                    if (this.particlePool.length < 360) {
-                        for (let k = 0; k < 2; k++) {
-                            const ang = Math.random() * Math.PI * 2;
-                            const rad = 88 + Math.random() * 54; // outer ring only
-                            this.particlePool.push({
-                                x: t.x + Math.cos(ang) * rad,
-                                y: t.y + Math.sin(ang) * rad,
-                                vx: -Math.sin(ang) * 7,       // faster tangential swirl
-                                vy: Math.cos(ang) * 7 - 1.5,  // slight updraft
-                                size: Phaser.Math.FloatBetween(3.5, 7),
-                                color: Math.random() < 0.7 ? 0xfbf7ee : 0xe6dfce // bright paper
-                            });
+                    // Zelda-spin-style swirl: ONE tilted crescent hoop orbiting
+                    // the funnel's outer edge, bright at a sweeping head and
+                    // fading to a tail, slowly tumbling so it reads as 3D spin
+                    if (t.swirl && t.swirl.active) {
+                        const sw = t.swirl; sw.clear();
+                        const rx = 108, ry = 44;                 // wide flat hoop (edge ring)
+                        const spin = this.gameTime * 0.42;        // head sweeps around
+                        const tumble = this.gameTime * 0.05;      // hoop orientation tumbles
+                        const cosT = Math.cos(tumble), sinT = Math.sin(tumble);
+                        const N = 46;
+                        for (let i = 0; i < N; i++) {
+                            const a = (i / N) * Math.PI * 2;
+                            const rel = ((a - spin) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+                            const alpha = Math.max(0, 1 - rel / (Math.PI * 1.3)); // crescent fade
+                            if (alpha < 0.05) continue;
+                            const ex = Math.cos(a) * rx, ey = Math.sin(a) * ry;
+                            const px = ex * cosT - ey * sinT, py = ex * sinT + ey * cosT;
+                            sw.fillStyle(alpha > 0.6 ? 0xffffff : 0xcfc9f5, alpha * 0.9);
+                            sw.fillCircle(t.x + px, t.y + py, 2 + alpha * 4);
                         }
                     }
 
@@ -2264,7 +2269,6 @@ class MainScene extends Phaser.Scene {
         g.lineStyle(3, 0x7cf5b0, 1);
         g.strokeRoundedRect(-bw / 2, -bh / 2, bw, bh, 12);
         const iconImg = this.setPx(this.add.image(0, 0, this.itemTex(choice.id, 'pu_' + choice.id)), 44);
-        if (choice.id === 'tornado') iconImg.setTint(0xaeb8c6); // pale swirl needs definition to read
         const box = this.add.container(x, y, [g, iconImg]);
         box.setDepth(44);
         box.reward = choice;
@@ -2805,14 +2809,14 @@ class MainScene extends Phaser.Scene {
         tornado.b = 8;
 
         if (this.textures.exists('item_tornado')) {
-            // Dark backdrop disc so the pale paper swirl reads on the grass
-            tornado.backdrop = this.add.circle(tornado.x, tornado.y, 96, 0x1a2436, 0.42).setDepth(45);
-            // Paper tornado art: big spinning funnel; a defining tint lifts the
-            // wispy near-white swirl out of the background so it's visible
+            // Faint dark backdrop just for a touch of grass contrast
+            tornado.backdrop = this.add.circle(tornado.x, tornado.y, 96, 0x14202e, 0.2).setDepth(45);
+            // Paper tornado art (re-sliced with the real vortex intact)
             tornado.spriteImg = this.setPx(
                 this.add.image(tornado.x, tornado.y, 'item_tornado').setDepth(46), 180);
-            tornado.spriteImg.setTint(0xaeb8c6);
             tornado.spriteBaseScale = tornado.spriteImg.scale;
+            // One Zelda-spin-style crescent swirl orbiting the funnel edge
+            tornado.swirl = this.add.graphics().setDepth(47);
         } else {
             // Emoji fallback: the classic orbiting fireballs
             tornado.fireballs = [];
@@ -2836,6 +2840,7 @@ class MainScene extends Phaser.Scene {
             if (tornado.fireballs) tornado.fireballs.forEach(f => { if (f.active) f.destroy(); });
             if (tornado.spriteImg) tornado.spriteImg.destroy();
             if (tornado.backdrop) tornado.backdrop.destroy();
+            if (tornado.swirl) tornado.swirl.destroy();
             tornado.destroy();
         });
     }

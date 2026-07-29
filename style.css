@@ -374,6 +374,13 @@ body {
     transform: scale(0.95);
 }
 
+/* While fitAnswerArea() is measure-shrinking the answer row, slot transitions
+   must be OFF: "transition: all" animates width, so mid-loop scrollWidth reads
+   the stale pre-transition size and the loop can never converge. */
+.fit-measuring .study-slot {
+    transition: none !important;
+}
+
 .study-letter-btn {
     width: var(--tile-size);
     height: var(--tile-size);

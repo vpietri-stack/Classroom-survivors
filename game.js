@@ -826,14 +826,20 @@ function startSpellingGame() {
     gameEl.dataset.placement = JSON.stringify(new Array(letters.length).fill(undefined));
     // Which palette bubbles are already used (placed). Length === letters.length.
     gameEl.dataset.usedKeys = JSON.stringify(new Array(letters.length).fill(false));
-    buildSpellingSlots();
-    buildSpellingKeyboard();
 
+    // Un-hide the overlay BEFORE building the slots: buildSpellingSlots() ends
+    // with fitAnswerArea(), which needs real layout widths. While the overlay is
+    // display:none every width reads 0, so long words (e.g. "beautiful") were
+    // never shrunk and their end slots rendered off-screen on narrow phones.
+    // (Resetting result-action first also keeps buildSpellingSlots from painting
+    // the fresh slots green off a previous round's success state.)
     const display = document.getElementById('spelling-input-display');
     display.classList.remove('shake');
     document.getElementById('spelling-result-action').classList.add('hidden');
     document.getElementById('spelling-actions').classList.remove('hidden');
     document.getElementById('spellingGame').classList.remove('hidden');
+    buildSpellingSlots();
+    buildSpellingKeyboard();
     setTimeout(playTTS, 500);
 }
 
@@ -909,20 +915,39 @@ function buildSpellingSlots() {
 // the box must shrink too. Adapts to any window/container size; called after
 // every (re)build and on window resize.
 function fitAnswerArea(container) {
+    // Not laid out yet (overlay still display:none / detached)? Every width
+    // reads 0, so "fitting" would be a no-op that also resets a previous good
+    // fit. Bail; the visible (re)build will fit against real widths.
+    if (!container || container.clientWidth === 0) return;
     const getVar = (name) => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name)) || 0;
-    let font = getVar('--answer-font');
-    let slot = getVar('--slot-size');
     const minFont = 12; // px floor for the letter glyph
     const minSlot = 22; // px floor for the slot box — below this we stop and let it scroll
     // Reset to the responsive defaults first, then measure from there.
     document.documentElement.style.setProperty('--answer-font', '');
     document.documentElement.style.setProperty('--slot-size', '');
-    font = getVar('--answer-font');
-    slot = getVar('--slot-size');
+    let font = getVar('--answer-font');
+    let slot = getVar('--slot-size');
+    // In real browsers the un-overridden vars resolve to their clamp() TEXT, so
+    // parseFloat gives 0 — measure the actual rendered slot box/glyph instead
+    // (always px). Without this the shrink loop never ran on devices and long
+    // words like "beautiful" spilled off narrow phone screens.
+    if (!font || !slot) {
+        const slotEl = container.querySelector('.study-slot');
+        if (slotEl) {
+            if (!slot) slot = slotEl.getBoundingClientRect().width;
+            if (!font) font = parseFloat(getComputedStyle(slotEl).fontSize) || 0;
+        }
+    }
+    if (!font && !slot) return; // nothing measurable — leave defaults
+    // Suspend slot transitions during the measure loop: ".study-slot { transition:
+    // all }" animates width, and this loop is synchronous — time never advances,
+    // so scrollWidth would keep reporting the pre-shrink size forever.
+    container.classList.add('fit-measuring');
     while ((font > minFont || slot > minSlot) && container.scrollWidth > container.clientWidth) {
         if (font > minFont) { font -= 1; document.documentElement.style.setProperty('--answer-font', font + 'px'); }
         if (slot > minSlot) { slot -= 1; document.documentElement.style.setProperty('--slot-size', slot + 'px'); }
     }
+    container.classList.remove('fit-measuring');
 }
 
 // Re-fit the answer area whenever the viewport/container size changes (rotate,

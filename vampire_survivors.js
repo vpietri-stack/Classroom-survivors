@@ -31,7 +31,7 @@ const ITEM_SPRITES = {
 const WEAPON_MILESTONES = {
     wand: { 2: 'Piercing Dart (Goes through 2!)', 3: 'Golden Dart', 5: 'Flaming Dart (Pierces 3!)', 8: 'Inferno Dart (Pierces 4!)' },
     knife: { 2: 'Splitting Scissors (Split on hit!)', 3: 'Whirling Blades', 4: 'Golden Shears', 5: 'Double Split!', 6: 'Red-Hot Blades', 8: 'Triple Split!' },
-    axe: { 2: 'Knowledge Blast (Area hit!)', 5: 'Golden Edition (Bigger Blast)', 8: 'Encyclopedia (Huge Blast)' },
+    axe: { 2: 'Knowledge Blast (Area hit!)', 3: 'Second Book', 4: 'Bigger Blast', 5: 'Third Book', 6: 'Golden Edition', 7: 'Fourth Book', 8: 'Bigger Blast', 9: 'Bigger Books', 10: 'Bigger Blast', 11: 'Bigger Books', 12: 'Bigger Blast' },
     cross: { 2: 'Ricochet (Bounces to 3!)', 4: 'Glowing Edge', 5: 'Twin Boomerang (Both ways!)', 8: 'Super Ricochet (5 bounces!)' },
     water: { 2: 'Poison Splash (Lingers!)', 3: 'Bigger Balloons', 5: 'Double Splash (2 balloons!)', 8: 'Toxic Flood (Longer poison)' },
     orb: { 2: 'Frost Erasers (Slows enemies!)', 4: 'Rubber-Dust Sparkles', 6: 'Turbo Orbit', 8: 'Deep Freeze' }
@@ -389,14 +389,21 @@ class MainScene extends Phaser.Scene {
                 this.damageEnemy(e, b.dmg, 200);
                 if (b.type === 'axe') synthSmash();       // book: heavy smash
                 else synthRicochet();                     // triangle: metallic ping
-                // Book evolution (L2+): Knowledge Blast — AoE burst per book,
-                // radius + damage step up at L5 / L8
+                // Book evolution (L2+): Knowledge Blast — AoE burst per book.
+                // Bigger blast at L4, then every even level from L8 (8,10,12...)
                 if (b.type === 'axe' && b.wlevel >= 2 && !b.aoeDone) {
                     b.aoeDone = true;
-                    const t = b.wlevel < 5 ? 0 : b.wlevel < 8 ? 1 : 2;
-                    const rad = [75, 100, 130][t];
-                    const frac = [0.5, 0.65, 0.8][t];
-                    this.spawnBurstParticles(b.x, b.y, 0xffe08a, 12 + t * 6, 4);
+                    let aoeBonus = (b.wlevel >= 4 ? 1 : 0);
+                    if (b.wlevel >= 8) aoeBonus += Math.floor((b.wlevel - 8) / 2) + 1;
+                    const rad = 70 + aoeBonus * 22;
+                    const frac = Math.min(0.85, 0.5 + aoeBonus * 0.08);
+                    // Visible golden shockwave ring so the blast reads clearly
+                    const ring = this.add.graphics().setDepth(46);
+                    ring.fillStyle(0xffe08a, 0.22); ring.fillCircle(0, 0, rad);
+                    ring.lineStyle(5, 0xffd166, 0.95); ring.strokeCircle(0, 0, rad);
+                    ring.setPosition(b.x, b.y).setScale(0.3);
+                    this.tweens.add({ targets: ring, scale: 1, alpha: 0, duration: 380, ease: 'Quad.out', onComplete: () => ring.destroy() });
+                    this.spawnBurstParticles(b.x, b.y, 0xffe08a, 12 + aoeBonus * 4, 4);
                     this.enemies.getChildren().forEach(o => {
                         if (o !== e && o.active && Phaser.Math.Distance.Between(b.x, b.y, o.x, o.y) < rad) {
                             this.damageEnemy(o, b.dmg * frac, 80);
@@ -1792,34 +1799,38 @@ class MainScene extends Phaser.Scene {
 
     fireAxe(w) {
         synthPageFlutter();
-        const count = w.level;
+        // Book count: 1,1,2,2,3,3,4(cap) at L1,L2,L3,L4,L5,L6,L7+
+        const count = Math.min(4, Math.floor((w.level + 1) / 2));
         const key = this.itemTex('axe', 'axe');
         // Legacy scale numbers below assume ~29px textures; u adapts them
         const u = this.unitScale(key);
-        const grow = 1 + Math.min(w.level, 6) * 0.06; // heavier tomes at high level
-        const BOOK = 1.75; // the book is a big, heavy hitter from the start
+        // Slight size increase only at odd levels from L9 (L9/L11/L13...)
+        const sizeBonus = w.level >= 9 ? Math.floor((w.level - 9) / 2) + 1 : 0;
+        const BOOK = 0.875 * (1 + 0.08 * sizeBonus); // halved base size + late-game growth
         for (let i = 0; i < count; i++) {
-            const spread = (i - (count - 1) / 2) * 50;
+            const spread = (i - (count - 1) / 2) * 70; // fan the landing spots
             const axe = this.add.image(this.player.x, this.player.y, key).setOrigin(0.5).setScale(0.5 * u * BOOK);
-            if (w.level >= 5) axe.setTint(0xffe08a); // gilded spellbook
+            if (w.level >= 6) axe.setTint(0xffe08a); // Golden Edition (L6)
             this.bullets.add(axe);
             this.physics.add.existing(axe);
-            axe.body.setCircle(15 * grow * BOOK); // hitbox grows with the art
-            axe.body.setVelocity(this.player.scaleX * 150 + spread, -400);
-            axe.body.gravity.y = 800;
+            axe.body.setCircle(15 * BOOK); // hitbox halved, scales only with size bonus
+            // "Up and down" attack: launch HIGH with only a little sideways drift;
+            // gravity brings it back down (all other weapons fire to the side)
+            axe.body.setVelocity(spread, -640);
+            axe.body.gravity.y = 900;
             axe.dmg = 26 * this.playerStats.might; axe.type = 'axe';
             axe.wlevel = w.level;
 
             // Squash & stretch heave throw
             this.tweens.add({
                 targets: axe,
-                scaleX: 1.8 * u * grow * BOOK,
-                scaleY: 1.3 * u * grow * BOOK,
+                scaleX: 1.8 * u * BOOK,
+                scaleY: 1.3 * u * BOOK,
                 duration: 200,
                 ease: 'Back.easeOut',
                 onComplete: () => {
                     if (axe.active) {
-                        axe.setScale(1.5 * u * grow * BOOK);
+                        axe.setScale(1.5 * u * BOOK);
                     }
                 }
             });
@@ -2028,7 +2039,7 @@ class MainScene extends Phaser.Scene {
                     trailSize = 4 + lvlBonus;
                 }
                 else if (b.type === 'axe') {
-                    trailColor = lvl >= 5 ? 0xffd700 : 0xffffff; // fluttering pages
+                    trailColor = lvl >= 6 ? 0xffd700 : 0xffffff; // fluttering pages
                     trailSize = 5 + lvlBonus;
                 }
                 else if (b.type === 'knife') {

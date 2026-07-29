@@ -1,12 +1,12 @@
 // --- GAME DATA ---
 const POWER_UPS = [
-    { id: 'whip', name: "Magic Whip", icon: "🪄", type: "weapon", desc: "Front Attack" },
-    { id: 'wand', name: "Spirit Wand", icon: "✨", type: "weapon", desc: "Fires at nearest enemy" },
-    { id: 'orb', name: "Orbit", icon: "🔮", type: "weapon", desc: "Spins around you" },
-    { id: 'axe', name: "Axe", icon: "🪓", type: "weapon", desc: "Add one more axe" },
-    { id: 'cross', name: "Cross", icon: "✝️", type: "weapon", desc: "Boomerang effect" },
-    { id: 'water', name: "Santa Water", icon: "💧", type: "weapon", desc: "Drops damaging puddle" },
-    { id: 'knife', name: "Knife", icon: "🔪", type: "weapon", desc: "Fires in facing direction" }
+    { id: 'whip', name: "Ruler", icon: "🪄", type: "weapon", desc: "Front Attack" },
+    { id: 'wand', name: "Paper Plane", icon: "✨", type: "weapon", desc: "Flies at nearest enemy" },
+    { id: 'orb', name: "Eraser Orbit", icon: "🔮", type: "weapon", desc: "Spins around you" },
+    { id: 'axe', name: "Magic Book", icon: "🪓", type: "weapon", desc: "Add one more book" },
+    { id: 'cross', name: "Triangle Ruler", icon: "✝️", type: "weapon", desc: "Boomerang effect" },
+    { id: 'water', name: "Water Balloon", icon: "💧", type: "weapon", desc: "Drops damaging puddle" },
+    { id: 'knife', name: "Scissors", icon: "🔪", type: "weapon", desc: "Fires in facing direction" }
 ];
 
 // School-item sprite for each weapon/power-up id (sliced from
@@ -339,7 +339,7 @@ class MainScene extends Phaser.Scene {
         this.physics.add.overlap(this.player, this.enemies, this.handlePlayerHit, null, this);
         this.physics.add.overlap(this.tornados, this.enemies, (t, e) => this.damageEnemy(e, 999), null, this);
 
-        this.applyReward({ id: 'whip', name: 'Magic Whip', type: 'weapon' });
+        this.applyReward({ id: 'whip', name: 'Ruler', type: 'weapon' });
         updateDOMHUD(this.playerStats, 0, 0);
 
         for (let i = 0; i < 40; i++) {
@@ -2899,14 +2899,14 @@ function showPowerUpSelection(context) {
                 if (nextLevel === 2) {
                     description = "Flaming Wake (+Damage & Fire Arc)";
                 } else if (nextLevel === 3) {
-                    description = "Whip Speed (Attack More Often)";
+                    description = "Ruler Speed (Attack More Often)";
                 } else if (nextLevel === 4) {
-                    description = "Fiery Expansion (+Whip Width & Flame Aura)";
+                    description = "Fiery Expansion (+Ruler Width & Flame Aura)";
                 } else {
                     const cycle = (nextLevel - 2) % 3;
                     if (cycle === 0) description = "Searing Heat (+Damage)";
                     else if (cycle === 1) description = "Blazing Speed (Attack More Often)";
-                    else description = "Wildfire Scope (+Whip Width & Flame Aura)";
+                    else description = "Wildfire Scope (+Ruler Width & Flame Aura)";
                 }
             }
         }

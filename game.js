@@ -1413,6 +1413,26 @@ function checkGrammar() {
 
     if (allCorrect) {
         grammarGameEl().dataset.frozen = "true";
+        // SR + analytics are recorded NOW, at the successful CHECK. The speech
+        // gate that follows is pronunciation practice only and must NEVER
+        // affect SR state (spec): pass, skip, or quitting the app at the gate
+        // all leave the unscramble result exactly as earned here. (Previously
+        // this lived in handleMinigameSuccess, which only runs after the gate
+        // closes — a student who quit at the gate lost their earned success.)
+        {
+            const tgt = document.getElementById('grammarGame').dataset.targetSentence;
+            const gramKey = itemKey(tgt);
+            if (exerciseAttempts === 1) {
+                // First-attempt success → record success (doubles interval).
+                srGameResults.push({ type: 'sentences', key: gramKey, firstAttempt: true });
+                srInSessionSuccesses.add(gramKey);
+            } else {
+                // Fail-then-success: never re-prompt again this session (spec A).
+                srInSessionFailures.delete(gramKey);
+                srInSessionSuccesses.add(gramKey);
+            }
+            queueExerciseEvent('sentenceScramble', 'game', tgt);
+        }
         // Speech step: now that the sentence is built correctly, ask the student
         // to say it aloud (Whisper). Skipped silently if the model isn't ready
         // yet, so it never blocks the reward or shows a spinner.
@@ -1688,12 +1708,13 @@ function handleMinigameSuccess(gameType) {
     if (gameType !== 'rec') {
         const exerciseTypeMap = { 'spelling': 'spelling', 'grammar': 'sentenceScramble', 'sentencematch': 'sentenceMatch' };
         
-        // SR result tracking for spelling (vocab) and grammar (sentences).
-        // A failure is already recorded at the first wrong check (in the check
-        // handlers), so here we only (a) record a first-attempt-correct success
-        // and (b) on fail-then-success, drop the key from the reprompt set (spec A).
-        if (gameType === 'spelling' || gameType === 'grammar') {
-            const srType = gameType === 'spelling' ? 'vocab' : 'sentences';
+        // SR result tracking for spelling (vocab) only. A failure is already
+        // recorded at the first wrong check (in the check handlers); grammar
+        // records BOTH its SR result and its analytics event at the successful
+        // CHECK (see checkGrammar) because the speech gate sits between
+        // check and this function — and the gate must never affect SR state.
+        if (gameType === 'spelling') {
+            const srType = 'vocab';
             const key = itemKey(itemDetails);
             if (exerciseAttempts === 1) {
                 // First-attempt success → record success (doubles interval).
@@ -1709,8 +1730,9 @@ function handleMinigameSuccess(gameType) {
             }
         }
 
-        // Only queue globally for spelling and grammar. Sentence Match handles its own item queuing.
-        if (gameType !== 'sentencematch') {
+        // Only queue globally for spelling. Sentence Match handles its own item
+        // queuing; grammar queues at check time (see above).
+        if (gameType !== 'sentencematch' && gameType !== 'grammar') {
             queueExerciseEvent(exerciseTypeMap[gameType] || gameType, 'game', itemDetails);
         }
     }

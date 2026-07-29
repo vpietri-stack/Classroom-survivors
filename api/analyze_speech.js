@@ -39,6 +39,18 @@ const LEVELS = {
     2: { minAccuracy: 0.75, maxWER: 0.30, phonPass: 0.70, allowPhonetic: true },
     3: { minAccuracy: 0.85, maxWER: 0.20, phonPass: 0.85, allowPhonetic: true }
 };
+// Book-tier leniency ladder (mirror of speech_scorer.js BOOK_TIERS) — lets the
+// what-if section replay transcripts under any tier.
+const BOOK_TIERS = {
+    PU0:    { minAccuracy: 0.62, maxWER: 0.50, phonPass: 0.55, allowPhonetic: true },
+    PU1:    { minAccuracy: 0.65, maxWER: 0.45, phonPass: 0.60, allowPhonetic: true },
+    PU2:    { minAccuracy: 0.70, maxWER: 0.38, phonPass: 0.65, allowPhonetic: true },
+    Think0: { minAccuracy: 0.72, maxWER: 0.34, phonPass: 0.68, allowPhonetic: true },
+    PU3:    { minAccuracy: 0.75, maxWER: 0.30, phonPass: 0.70, allowPhonetic: true },
+    Think1: { minAccuracy: 0.75, maxWER: 0.30, phonPass: 0.70, allowPhonetic: true },
+    PU4:    { minAccuracy: 0.78, maxWER: 0.25, phonPass: 0.75, allowPhonetic: true },
+    Think2: { minAccuracy: 0.80, maxWER: 0.22, phonPass: 0.80, allowPhonetic: true }
+};
 function normalize(s) {
     return (s || '').toLowerCase().replace(/[.,!?;:'"()\-]/g, ' ').replace(/\s+/g, ' ').trim();
 }
@@ -64,9 +76,12 @@ function phoneticMatch(a, b) {
     return levenshtein(a, b) / Math.max(a.length, b.length, 1) <= 1 / 3;
 }
 function rescore(target, transcript, level) {
-    const cfg = LEVELS[level] || LEVELS[2];
+    return rescoreCfg(LEVELS[level] || LEVELS[2], target, transcript);
+}
+function rescoreCfg(cfg, target, transcript) {
     const tgt = normalize(target), got = normalize(transcript);
-    if (tgt && tgt === got) return true;
+    if (!tgt) return false;
+    if (tgt === got) return true;
     const acc = accuracyOf(tgt, got);
     const tTok = tgt ? tgt.split(' ') : [], gTok = got ? got.split(' ') : [];
     const wer = tTok.length ? levenshtein(tTok, gTok) / tTok.length : 1;
@@ -203,10 +218,11 @@ async function main() {
     console.log(`  garbage dominant          → recording/environment: mic gain, noise, kids too quiet`);
 
     // ---- 5. what-if rescoring ----
-    console.log(`\n--- 5. WHAT-IF: same transcripts, looser scoring ---`);
-    for (const lvl of [2, 1]) {
-        const p = attempts.filter(a => rescore(a.target, a.transcript, lvl)).length;
-        console.log(`  level ${lvl}: ${p}/${attempts.length} (${pct(p, attempts.length)})${lvl === 2 ? '  ← current' : ''}`);
+    console.log(`\n--- 5. WHAT-IF: same transcripts, other scoring tiers ---`);
+    for (const [name, cfg] of Object.entries(BOOK_TIERS)) {
+        if (name === 'Think1') continue; // identical to PU3
+        const p = attempts.filter(a => rescoreCfg(cfg, a.target, a.transcript)).length;
+        console.log(`  ${name === 'PU3' ? 'PU3/Think1' : name}: ${p}/${attempts.length} (${pct(p, attempts.length)})${name === 'PU3' ? '  ← anchor' : ''}`);
     }
 
     // ---- 5b. pitch-shift effect (child-voice adaptation) ----

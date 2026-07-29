@@ -612,25 +612,28 @@ class MainScene extends Phaser.Scene {
                     t.spriteImg.setScale(t.spriteBaseScale * (1 + 0.12 * Math.sin(this.gameTime * 0.3)));
                     if (t.backdrop && t.backdrop.active) { t.backdrop.x = t.x; t.backdrop.y = t.y; }
 
-                    // Zelda-spin-style swirl: ONE tilted crescent hoop orbiting
-                    // the funnel's outer edge, bright at a sweeping head and
-                    // fading to a tail, slowly tumbling so it reads as 3D spin
+                    // Wind whirl: a flat ground disc around the funnel base with
+                    // TWO tapered wind arcs (opposite sides) sweeping continuously
+                    // around it — like Link's spin-attack wind on the floor
                     if (t.swirl && t.swirl.active) {
                         const sw = t.swirl; sw.clear();
-                        const rx = 108, ry = 44;                 // wide flat hoop (edge ring)
-                        const spin = this.gameTime * 0.42;        // head sweeps around
-                        const tumble = this.gameTime * 0.05;      // hoop orientation tumbles
-                        const cosT = Math.cos(tumble), sinT = Math.sin(tumble);
-                        const N = 46;
-                        for (let i = 0; i < N; i++) {
-                            const a = (i / N) * Math.PI * 2;
-                            const rel = ((a - spin) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
-                            const alpha = Math.max(0, 1 - rel / (Math.PI * 1.3)); // crescent fade
-                            if (alpha < 0.05) continue;
-                            const ex = Math.cos(a) * rx, ey = Math.sin(a) * ry;
-                            const px = ex * cosT - ey * sinT, py = ex * sinT + ey * cosT;
-                            sw.fillStyle(alpha > 0.6 ? 0xffffff : 0xcfc9f5, alpha * 0.9);
-                            sw.fillCircle(t.x + px, t.y + py, 2 + alpha * 4);
+                        const rx = 120, ry = 40;               // wide, flattened = ground perspective
+                        const cyOff = 44;                       // ring sits around the funnel base
+                        const spin = this.gameTime * 0.16;      // whole disc rotates
+                        const arcSpan = Math.PI * 0.6;          // length of each wind arc (gaps between)
+                        const SEG = 18;
+                        for (let arc = 0; arc < 2; arc++) {     // two arcs, opposite sides
+                            const base = spin + arc * Math.PI;
+                            for (let i = 0; i <= SEG; i++) {
+                                const tt = i / SEG;             // 0 = bright leading head, 1 = faded tail
+                                const ang = base + tt * arcSpan;
+                                const alpha = (1 - tt) * 0.9;
+                                if (alpha < 0.05) continue;
+                                const px = Math.cos(ang) * rx;
+                                const py = Math.sin(ang) * ry + cyOff;
+                                sw.fillStyle(tt < 0.3 ? 0xffffff : 0xd6d0f5, alpha); // white head -> lavender tail
+                                sw.fillCircle(t.x + px, t.y + py, 1.8 + (1 - tt) * 4.5);
+                            }
                         }
                     }
 

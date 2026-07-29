@@ -632,27 +632,36 @@ class MainScene extends Phaser.Scene {
                     t.spriteImg.setScale(t.spriteBaseScale * (1 + 0.12 * Math.sin(this.gameTime * 0.3)));
                     if (t.backdrop && t.backdrop.active) { t.backdrop.x = t.x; t.backdrop.y = t.y; }
 
-                    // Wind whirl: a flat ground disc around the funnel base with
-                    // TWO tapered wind arcs (opposite sides) sweeping continuously
-                    // around it — like Link's spin-attack wind on the floor
+                    // Sword-tip wind (Zelda spin attack): the funnel edge is the
+                    // "sword tip"; TWO tips on opposite sides each stream a long
+                    // crisp wind trail that is flung OUTWARD as it fades — twin
+                    // spiral arms of released wind chasing the spin
                     if (t.swirl && t.swirl.active) {
                         const sw = t.swirl; sw.clear();
-                        const rx = 120, ry = 40;               // wide, flattened = ground perspective
-                        const cyOff = 44;                       // ring sits around the funnel base
-                        const spin = this.gameTime * 0.16;      // whole disc rotates
-                        const arcSpan = Math.PI * 0.6;          // length of each wind arc (gaps between)
-                        const SEG = 18;
-                        for (let arc = 0; arc < 2; arc++) {     // two arcs, opposite sides
-                            const base = spin + arc * Math.PI;
-                            for (let i = 0; i <= SEG; i++) {
-                                const tt = i / SEG;             // 0 = bright leading head, 1 = faded tail
-                                const ang = base + tt * arcSpan;
-                                const alpha = (1 - tt) * 0.9;
-                                if (alpha < 0.05) continue;
-                                const px = Math.cos(ang) * rx;
-                                const py = Math.sin(ang) * ry + cyOff;
-                                sw.fillStyle(tt < 0.3 ? 0xffffff : 0xd6d0f5, alpha); // white head -> lavender tail
-                                sw.fillCircle(t.x + px, t.y + py, 1.8 + (1 - tt) * 4.5);
+                        const rx = 92, ry = 34;               // tip orbit = funnel edge (flattened = ground)
+                        const cyOff = 40;                      // ring around the funnel base
+                        const spin = this.gameTime * 0.14;     // tip sweep speed
+                        const span = Math.PI * 1.1;            // ~200° trail behind each tip
+                        const SEG = 26;
+                        for (let arm = 0; arm < 2; arm++) {
+                            const tipA = spin + arm * Math.PI;
+                            // 2 parallel strokes per arm = layered wind lines
+                            for (let line = 0; line < 2; line++) {
+                                const rOff = line * 9;
+                                let px = null, py = null;
+                                for (let i = 0; i <= SEG; i++) {
+                                    const s = i / SEG;              // 0 = at the tip, 1 = oldest wind
+                                    const ang = tipA - s * span;    // trail behind the spin
+                                    const flare = 1 + s * 0.55;     // flung outward as it ages
+                                    const x = t.x + Math.cos(ang) * (rx + rOff) * flare;
+                                    const y = t.y + Math.sin(ang) * (ry + rOff * 0.4) * flare + cyOff;
+                                    if (px !== null) {
+                                        const alpha = (1 - s) * (line === 0 ? 0.95 : 0.55);
+                                        sw.lineStyle(1 + (1 - s) * 4, s < 0.25 ? 0xffffff : 0xcfc9f5, alpha);
+                                        sw.lineBetween(px, py, x, y);
+                                    }
+                                    px = x; py = y;
+                                }
                             }
                         }
                     }

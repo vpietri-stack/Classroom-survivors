@@ -161,6 +161,18 @@ class MainScene extends Phaser.Scene {
         this.popPool = [];              // pooled damage-pop texts (perf)
         this.physics.world.timeScale = 1; // reset after death slow-mo restarts
 
+        // Hop leap is a render-only y offset; remove it BEFORE physics reads
+        // the sprite each frame (build is sprite-authoritative) so the body
+        // never drifts. Registered once — the scene instance is reused on
+        // restart, and it reads the current this.enemies each tick.
+        if (!this._hopUnhookAdded) {
+            this.events.on(Phaser.Scenes.Events.PRE_UPDATE, () => {
+                const list = this.enemies ? this.enemies.getChildren() : [];
+                for (const e of list) { if (e._hop) { e.y += e._hop; e._hop = 0; } }
+            });
+            this._hopUnhookAdded = true;
+        }
+
         // --- Walking word-puzzle state ---
         this.puzzle = null;            // active ground puzzle (null = none)
         this.puzzleDone = new Set();   // in-session dedup of completed items
@@ -1373,13 +1385,18 @@ class MainScene extends Phaser.Scene {
                 if (e.animLoop || e.animWalk) {
                     const facingX = (e.body.velocity.x < 0 ||
                         (Math.abs(e.body.velocity.x) < 1 && this.player.x < e.x)) ? -baseScale : baseScale;
-                    // Rats HOP: a vertical scale bounce while moving. MUST be
-                    // scale-only — nudging e.y made this Phaser build sync the
-                    // body upward every frame, so rats drifted off the top of
-                    // the screen and clogged the spawn cap.
+                    // Rats HOP: a real vertical LEAP (translation), not a scale
+                    // twitch. e.y is offset for render only; a PRE_UPDATE handler
+                    // removes it before physics reads it (this Phaser build is
+                    // sprite-authoritative, so an un-removed offset drifts the
+                    // body). Tiny stretch at the top of the arc sells the leap.
                     let sy = baseScale;
                     if (e.hop && (e.body.velocity.x !== 0 || e.body.velocity.y !== 0)) {
-                        sy = baseScale * (1 + Math.abs(Math.sin(this.gameTime * 0.3 + (e.animPhase || 0))) * 0.18);
+                        const ph = this.gameTime * 0.15 + (e.animPhase || 0);
+                        const lift = Math.abs(Math.sin(ph)) * 13;
+                        e.y -= lift;
+                        e._hop = lift;
+                        sy = baseScale * (1 + (lift / 13) * 0.12);
                     }
                     e.setScale(facingX, sy);
                 } else if (e.attackState === 'windup') {
@@ -2937,8 +2954,11 @@ class MainScene extends Phaser.Scene {
         for (let i = 0; i < list.length; i++) {
             const e = list[i];
             if (!e.active) continue;
-            if (e.isBoss) s.fillEllipse(e.x, e.y + 42, 60, 20);
-            else s.fillEllipse(e.x, e.y + 14, 22, 8);
+            // Shadow stays on the GROUND while a hopping rat is mid-leap (e.y is
+            // offset up by e._hop) — this is what makes the hop read as a jump
+            const gy = e.y + (e._hop || 0);
+            if (e.isBoss) s.fillEllipse(e.x, gy + 42, 60, 20);
+            else s.fillEllipse(e.x, gy + 14, 22, 8);
         }
 
         // --- Combo expiry ---

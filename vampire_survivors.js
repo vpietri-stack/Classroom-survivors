@@ -2812,7 +2812,12 @@ class MainScene extends Phaser.Scene {
     spawnPowerUp(x, y) {
         // One ESL puzzle at a time: no new bonuses drop while one is active
         if (this.puzzle) return;
-        const weapons = POWER_UPS.filter(p => p.type === 'weapon');
+        // Hero-exclusive weapons: a dropped box must never offer the OTHER
+        // hero's special weapon either (same rule as the level-up menu) —
+        // this is what let the Class Monitor grab a Jump Rope from a drop.
+        const myWeapon = this.character ? this.character.weapon : 'ruler';
+        const otherSpecials = Object.values(VS_CHARACTERS).map(c => c.weapon).filter(wid => wid !== myWeapon);
+        const weapons = POWER_UPS.filter(p => p.type === 'weapon' && !otherSpecials.includes(p.id));
         const specials = [
             { id: 'heart', icon: '❤️', type: 'special' },
             { id: 'vortex', icon: '🌀', type: 'special' },

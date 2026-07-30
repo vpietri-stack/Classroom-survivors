@@ -64,6 +64,11 @@ class MainScene extends Phaser.Scene {
         // vs_slice_enemies.js from the magenta-background sheets)
         ['rat_walk', 'rat_hit', 'bat_up', 'bat_down', 'bat_hit'].forEach(n =>
             this.load.image('enemy_' + n, u('sprites/vs/enemy_' + n + '.png')));
+        // Dropout zombie (6-frame TD sheet) + bucket-zombie boss (sliced by
+        // vs_slice_zombie_boss.js from the TD sheets)
+        ['zombie_walk_a', 'zombie_walk_b', 'zombie_windup', 'zombie_lunge',
+            'zombie_hit', 'zombie_dead', 'boss'].forEach(n =>
+                this.load.image('enemy_' + n, u('sprites/vs/enemy_' + n + '.png')));
     }
 
     // --- School-item sprite helpers ---
@@ -726,12 +731,15 @@ class MainScene extends Phaser.Scene {
         if (this.enemies.getChildren().length >= 160) return null; // hard cap
         const type = Math.floor(this.gameTime / 1800) % 3;
         const isBat = type === 1;
-        // Rat/bat sprite frames when loaded; emoji textures as fallback
+        // Rat/bat/zombie sprite frames when loaded; emoji textures as fallback
         const hasRat = this.textures.exists('enemy_rat_walk');
         const hasBat = this.textures.exists('enemy_bat_up');
+        const hasZom = this.textures.exists('enemy_zombie_walk_a');
         const textureKey = isBat
             ? (hasBat ? 'enemy_bat_down' : 'bat')
-            : (hasRat ? 'enemy_rat_walk' : (type === 2 ? 'zombie' : 'alien'));
+            : type === 2
+                ? (hasZom ? 'enemy_zombie_walk_a' : 'zombie')
+                : (hasRat ? 'enemy_rat_walk' : 'alien');
 
         const difficulty = this.getDifficulty();
         const hp = 12 * (1 + (difficulty - 1) * 0.13);
@@ -747,11 +755,21 @@ class MainScene extends Phaser.Scene {
         enemy.hp = hp; enemy.maxHp = hp; enemy.speed = speed; enemy.isBoss = false;
         enemy.isBat = isBat;
         enemy.stunTimer = 0;
-        // Animation frames: bat flaps up/down, both swap to a hit pose
+        // Animation frames: bat flaps up/down, zombie shambles A/B with attack
+        // + death poses (6-frame dropout sheet), rat holds a walk frame; all
+        // swap to a drawn hit pose on damage
         if (isBat && hasBat) {
-            enemy.animFly = ['enemy_bat_up', 'enemy_bat_down'];
+            enemy.animLoop = ['enemy_bat_up', 'enemy_bat_down'];
             enemy.animHit = 'enemy_bat_hit';
             enemy.animPhase = Math.floor(Math.random() * 16); // desync flaps
+        } else if (type === 2 && hasZom) {
+            enemy.animLoop = ['enemy_zombie_walk_a', 'enemy_zombie_walk_b'];
+            enemy.animRate = 14; // slow shamble (bats flap at 9)
+            enemy.animWindup = 'enemy_zombie_windup';
+            enemy.animLunge = 'enemy_zombie_lunge';
+            enemy.animHit = 'enemy_zombie_hit';
+            enemy.animDead = 'enemy_zombie_dead';
+            enemy.animPhase = Math.floor(Math.random() * 28);
         } else if (!isBat && hasRat) {
             enemy.animWalk = 'enemy_rat_walk';
             enemy.animHit = 'enemy_rat_hit';
@@ -854,7 +872,9 @@ class MainScene extends Phaser.Scene {
     }
 
     spawnBoss() {
-        const boss = this.add.image(this.player.x, this.player.y - 600, 'boss').setOrigin(0.5);
+        // Bucket-zombie art from the TD enemies lineup; 👹 emoji fallback
+        const bossKey = this.textures.exists('enemy_boss') ? 'enemy_boss' : 'boss';
+        const boss = this.add.image(this.player.x, this.player.y - 600, bossKey).setOrigin(0.5);
         this.physics.add.existing(boss);
         boss.body.setCircle(35);
         boss.body.setOffset(
@@ -1156,7 +1176,7 @@ class MainScene extends Phaser.Scene {
                     // Sprite art is ~46px vs the old 20px emoji — scale down so
                     // a 20+ bat swarm doesn't fill the screen
                     bat.texScale = 0.62;
-                    bat.animFly = ['enemy_bat_up', 'enemy_bat_down'];
+                    bat.animLoop = ['enemy_bat_up', 'enemy_bat_down'];
                     bat.animHit = 'enemy_bat_hit';
                     bat.animPhase = Math.floor(Math.random() * 16);
                 }
@@ -1321,12 +1341,18 @@ class MainScene extends Phaser.Scene {
 
             // Squash and stretch wobble + attack poses
             if (e.active && e.body) {
-                // Sprite frame driver: hit pose overrides, bats flap up/down,
-                // rats hold their walk frame (emoji enemies have no anim* keys)
+                // Sprite frame driver: hit pose overrides, then attack poses
+                // (zombie windup/lunge), then the 2-frame loop (bat flap /
+                // zombie walk A-B), then a static walk frame (rat). Emoji
+                // enemies have no anim* keys and skip all of this.
                 if (e.animHit && e.hitUntil && e.hitUntil > this.time.now) {
                     if (e.texture.key !== e.animHit) e.setTexture(e.animHit);
-                } else if (e.animFly) {
-                    const f = e.animFly[Math.floor((this.gameTime + (e.animPhase || 0)) / 9) % 2];
+                } else if (e.animWindup && e.attackState === 'windup') {
+                    if (e.texture.key !== e.animWindup) e.setTexture(e.animWindup);
+                } else if (e.animLunge && e.attackState === 'lunge') {
+                    if (e.texture.key !== e.animLunge) e.setTexture(e.animLunge);
+                } else if (e.animLoop) {
+                    const f = e.animLoop[Math.floor((this.gameTime + (e.animPhase || 0)) / (e.animRate || 9)) % 2];
                     if (e.texture.key !== f) e.setTexture(f);
                 } else if (e.animWalk && e.texture.key !== e.animWalk) {
                     e.setTexture(e.animWalk);
@@ -2360,6 +2386,8 @@ class MainScene extends Phaser.Scene {
 
         if (enemy.hp <= 0) {
             enemy.active = false;
+            // Defeated pose for the fade-out (zombie has a drawn death frame)
+            if (enemy.animDead) enemy.setTexture(enemy.animDead);
             enemy.body.checkCollision.none = true;
             enemy.body.setVelocity(enemy.body.velocity.x * 1.5, enemy.body.velocity.y * 1.5);
             enemy.body.setDrag(1000);

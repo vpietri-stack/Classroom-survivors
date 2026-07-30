@@ -179,6 +179,14 @@ function updateGomokuStatus(msg) {
 
 // --- RENDERING ---
 function drawGomokuBoard() {
+    // HiDPI: match the backing buffer to the DISPLAYED CSS size x DPR (capped at
+    // 2) so the board is crisp on phones and large screens. Everything below is
+    // drawn relative to gomokuCanvas.width, and clicks map via canvas.width /
+    // rect.width, so simply resizing the backing self-scales with no coord math.
+    const dpr = (typeof vsDpr === 'function') ? vsDpr() : Math.min(2, Math.max(1, window.devicePixelRatio || 1));
+    const cssSize = gomokuCanvas.clientWidth || gomokuCanvas.width;
+    const want = Math.round(cssSize * dpr);
+    if (want > 0 && gomokuCanvas.width !== want) { gomokuCanvas.width = want; gomokuCanvas.height = want; }
     const size = gomokuCanvas.width;
     const padding = 30;
 

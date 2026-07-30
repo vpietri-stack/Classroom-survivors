@@ -2700,7 +2700,9 @@ class MainScene extends Phaser.Scene {
         const positions = [];
         for (let i = 0; i < n; i++) {
             const ang = angle0 + (i / n) * Math.PI * 2 + (Math.random() - 0.5) * 0.35;
-            const rad = 150 + (i % 2) * 78 + Math.random() * 40;
+            // Wider spacing (was 150 + 78 + 40): bigger ring + larger inter-ring
+            // gap so boxes sit further apart and are easier to grab cleanly
+            const rad = 205 + (i % 2) * 100 + Math.random() * 45;
             positions.push({ x: cx + Math.cos(ang) * rad, y: cy + Math.sin(ang) * rad });
         }
         for (let i = positions.length - 1; i > 0; i--) {
@@ -2753,12 +2755,27 @@ class MainScene extends Phaser.Scene {
 
     updatePuzzle() {
         const p = this.puzzle;
-        if (!p) return;
+        if (!p || p.checking) return;
+        // Subtle correct-letter magnet: the NEXT needed token's box(es) get a
+        // slightly larger walk-on radius, wrong boxes a slightly smaller one, so
+        // dodging an enemy through a cluster is less likely to grab a wrong box.
+        // Duplicates that match the needed token share the same (bigger) radius.
+        // Preference: if a correct box is in range this frame, take the nearest
+        // correct; only take a wrong box when no correct box is reachable.
+        const need = p.item.tokens[p.attempt.length];
+        let bestCorrect = null, bestCorrectD = Infinity;
+        let bestWrong = null, bestWrongD = Infinity;
         for (const box of p.boxes) {
             if (box.used) continue;
             const d = Phaser.Math.Distance.Between(this.player.x, this.player.y, box.x, box.y);
-            if (d < box.hitR + 18) this.collectPuzzleBox(box);
+            const isCorrect = box.tokenValue === need;
+            const eff = (box.hitR + 18) * (isCorrect ? 1.15 : 0.85);
+            if (d >= eff) continue;
+            if (isCorrect) { if (d < bestCorrectD) { bestCorrectD = d; bestCorrect = box; } }
+            else if (d < bestWrongD) { bestWrongD = d; bestWrong = box; }
         }
+        const pick = bestCorrect || bestWrong;
+        if (pick) this.collectPuzzleBox(pick);
     }
 
     collectPuzzleBox(box) {
@@ -2866,15 +2883,28 @@ class MainScene extends Phaser.Scene {
         return div;
     }
 
-    // Tracker tap = send collected letters back + replay the prompt audio
+    // Tracker tap = UNDO the last collected letter/word (tap repeatedly to
+    // remove more). Only replays the prompt audio when the dock is empty.
     onTrackerTap() {
         const p = this.puzzle;
         if (!p || p.checking) return;
         if (p.attempt.length > 0) {
-            synthError();
-            this.resetPuzzleBoxes();
+            this.undoLastPuzzleBox();
+        } else {
+            this.playPuzzleAudio(); // empty dock -> re-hear the word/sentence
         }
-        this.playPuzzleAudio();
+    }
+
+    // Return only the most-recently-collected box to its home spot (silent)
+    undoLastPuzzleBox() {
+        const p = this.puzzle;
+        if (!p || !p.attempt.length) return;
+        const box = p.attempt.pop();
+        box.used = false;
+        box.x = box.homeX; box.y = box.homeY;
+        box.setVisible(true).setAlpha(0).setScale(0.4);
+        this.tweens.add({ targets: box, alpha: 1, scale: 1, duration: 260, ease: 'Back.out' });
+        this.updatePuzzleTracker();
     }
 
     setTrackerState(state) {

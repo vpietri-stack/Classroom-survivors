@@ -5,15 +5,21 @@
 // - Frames found via connected components; tiny components (the ✦ watermark,
 //   stray droplets) are dropped, near ones (impact stars around the hit pose)
 //   are merged into the nearest big frame by bbox proximity.
+// - Exports are MASKED to each frame's own components: overlapping bboxes on
+//   the sheet (e.g. a neighbour's wingtip inside this frame's box) no longer
+//   bleed into the cut frame.
+// - Colour boost (saturation ×1.3, brightness ×1.13): the sheets came back
+//   muted browns/greys next to the candy-bright weapon items, so frames are
+//   brightened in post to sit in the same palette family.
 // - Pre-shrunk so enemies render at emoji-like size in-game (perf + no GPU
-//   minification artifacts). Rat ~46px wide, bat ~40px.
+//   minification artifacts). Rat ~52px, bat ~46px.
 const { chromium } = require('playwright-core');
 const fs = require('fs');
 const EXE = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 
 const JOBS = [
-    { file: 'sprites/vs/enemy_rat_raw.png', names: ['rat_walk', 'rat_hit'], outMax: 52 },
-    { file: 'sprites/vs/enemy_bat_raw.png', names: ['bat_up', 'bat_down', 'bat_hit'], outMax: 46 }
+    { file: 'sprites/vs/enemy_rat_raw.png', names: ['rat_walk', 'rat_hit'], outMax: 52, boost: true },
+    { file: 'sprites/vs/enemy_bat_raw.png', names: ['bat_up', 'bat_down', 'bat_hit'], outMax: 46, boost: true }
 ];
 
 (async () => {
@@ -22,7 +28,7 @@ const JOBS = [
 
     for (const job of JOBS) {
         const dataUrl = 'data:image/png;base64,' + fs.readFileSync(job.file).toString('base64');
-        const result = await page.evaluate(async ({ src, names, outMax }) => {
+        const result = await page.evaluate(async ({ src, names, outMax, boost }) => {
             const img = new Image();
             await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = src; });
             const W = img.width, H = img.height;
@@ -60,13 +66,14 @@ const JOBS = [
                     if (y > 0) { const n = p - W; if (comp[n] === -1 && d[n * 4 + 3] >= 12) { comp[n] = idx; q.push(n); } }
                     if (y < H - 1) { const n = p + W; if (comp[n] === -1 && d[n * 4 + 3] >= 12) { comp[n] = idx; q.push(n); } }
                 }
-                comps.push({ minX, minY, maxX, maxY, area });
+                comps.push({ idx, minX, minY, maxX, maxY, area });
             }
 
             // Big components = frames (as many as names); the rest merge into
             // the nearest frame if close (impact stars), else dropped (✦ mark)
             const sorted = [...comps].sort((a, b) => b.area - a.area);
             const frames = sorted.slice(0, names.length);
+            frames.forEach(f => { f.ids = new Set([f.idx]); });
             const minor = sorted.slice(names.length);
             for (const m of minor) {
                 if (m.area < 60) continue; // dust / watermark sparkle
@@ -81,6 +88,7 @@ const JOBS = [
                 if (best && Math.sqrt(bd) < Math.max(best.maxX - best.minX, best.maxY - best.minY)) {
                     best.minX = Math.min(best.minX, m.minX); best.maxX = Math.max(best.maxX, m.maxX);
                     best.minY = Math.min(best.minY, m.minY); best.maxY = Math.max(best.maxY, m.maxY);
+                    best.ids.add(m.idx);
                 }
             }
             frames.sort((a, b) => a.minX - b.minX); // left-to-right = names order
@@ -90,16 +98,42 @@ const JOBS = [
                 const pad = 4;
                 const sx = Math.max(0, f.minX - pad), sy = Math.max(0, f.minY - pad);
                 const sw = Math.min(W, f.maxX + pad) - sx, sh = Math.min(H, f.maxY + pad) - sy;
+                // MASKED crop: copy only this frame's own components so a
+                // neighbour's overlapping wingtip can't bleed into the cut
+                const crop = new ImageData(sw, sh);
+                const cd = crop.data;
+                for (let y = 0; y < sh; y++) {
+                    for (let x = 0; x < sw; x++) {
+                        const sp = (sy + y) * W + (sx + x);
+                        if (d[sp * 4 + 3] < 1 || !f.ids.has(comp[sp])) continue;
+                        const si = sp * 4, di = (y * sw + x) * 4;
+                        let r = d[si], g = d[si + 1], b = d[si + 2];
+                        if (boost) {
+                            // Saturation ×1.3 + brightness ×1.13 to match the
+                            // bright weapon-item palette
+                            const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                            r = (gray + (r - gray) * 1.3) * 1.13;
+                            g = (gray + (g - gray) * 1.3) * 1.13;
+                            b = (gray + (b - gray) * 1.3) * 1.13;
+                        }
+                        cd[di] = Math.max(0, Math.min(255, r));
+                        cd[di + 1] = Math.max(0, Math.min(255, g));
+                        cd[di + 2] = Math.max(0, Math.min(255, b));
+                        cd[di + 3] = d[si + 3];
+                    }
+                }
+                const mc = document.createElement('canvas'); mc.width = sw; mc.height = sh;
+                mc.getContext('2d').putImageData(crop, 0, 0);
                 const scale = Math.min(1, outMax / Math.max(sw, sh));
                 const ow = Math.max(1, Math.round(sw * scale)), oh = Math.max(1, Math.round(sh * scale));
                 const pc = document.createElement('canvas'); pc.width = ow; pc.height = oh;
                 const pctx = pc.getContext('2d');
                 pctx.imageSmoothingEnabled = true; pctx.imageSmoothingQuality = 'high';
-                pctx.drawImage(cv, sx, sy, sw, sh, 0, 0, ow, oh);
+                pctx.drawImage(mc, 0, 0, sw, sh, 0, 0, ow, oh);
                 out[names[i]] = { url: pc.toDataURL('image/png'), w: ow, h: oh };
             });
             return out;
-        }, { src: dataUrl, names: job.names, outMax: job.outMax });
+        }, { src: dataUrl, names: job.names, outMax: job.outMax, boost: !!job.boost });
 
         for (const name of job.names) {
             const obj = result[name];

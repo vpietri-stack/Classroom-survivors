@@ -64,10 +64,10 @@ class MainScene extends Phaser.Scene {
         // vs_slice_enemies.js from the magenta-background sheets)
         ['rat_walk', 'rat_hit', 'bat_up', 'bat_down', 'bat_hit'].forEach(n =>
             this.load.image('enemy_' + n, u('sprites/vs/enemy_' + n + '.png')));
-        // Dropout zombie (6-frame TD sheet) + bucket-zombie boss (sliced by
-        // vs_slice_zombie_boss.js from the TD sheets)
-        ['zombie_walk_a', 'zombie_walk_b', 'zombie_windup', 'zombie_lunge',
-            'zombie_hit', 'zombie_dead', 'boss'].forEach(n =>
+        // Dropout zombie + bucket-zombie boss (both 6-frame sheets, sliced by
+        // vs_slice_zombie_boss.js)
+        ['zombie_walk_a', 'zombie_walk_b', 'zombie_windup', 'zombie_lunge', 'zombie_hit', 'zombie_dead',
+            'boss_walk_a', 'boss_walk_b', 'boss_windup', 'boss_lunge', 'boss_hit', 'boss_dead'].forEach(n =>
                 this.load.image('enemy_' + n, u('sprites/vs/enemy_' + n + '.png')));
     }
 
@@ -726,10 +726,11 @@ class MainScene extends Phaser.Scene {
         this.createEnemyAt(this.player.x + Math.cos(angle) * dist, this.player.y + Math.sin(angle) * dist);
     }
 
-    // Shared enemy factory (used by ambient spawns AND the anti-flee wall)
-    createEnemyAt(ex, ey) {
+    // Shared enemy factory (used by ambient spawns AND the anti-flee wall).
+    // forceType: 0=rat, 1=bat, 2=zombie; omitted = rotate by game time.
+    createEnemyAt(ex, ey, forceType) {
         if (this.enemies.getChildren().length >= 160) return null; // hard cap
-        const type = Math.floor(this.gameTime / 1800) % 3;
+        const type = (forceType === undefined) ? Math.floor(this.gameTime / 1800) % 3 : forceType;
         const isBat = type === 1;
         // Rat/bat/zombie sprite frames when loaded; emoji textures as fallback
         const hasRat = this.textures.exists('enemy_rat_walk');
@@ -773,6 +774,8 @@ class MainScene extends Phaser.Scene {
         } else if (!isBat && hasRat) {
             enemy.animWalk = 'enemy_rat_walk';
             enemy.animHit = 'enemy_rat_hit';
+            enemy.hop = true; // rats bounce along instead of wobbling
+            enemy.animPhase = Math.floor(Math.random() * 20);
         }
         this.enemies.add(enemy);
         return enemy;
@@ -872,9 +875,9 @@ class MainScene extends Phaser.Scene {
     }
 
     spawnBoss() {
-        // Bucket-zombie art from the TD enemies lineup; 👹 emoji fallback
-        const bossKey = this.textures.exists('enemy_boss') ? 'enemy_boss' : 'boss';
-        const boss = this.add.image(this.player.x, this.player.y - 600, bossKey).setOrigin(0.5);
+        // Bucket-zombie boss (6-frame sheet, sliced 2x size); 👹 emoji fallback
+        const hasBoss = this.textures.exists('enemy_boss_walk_a');
+        const boss = this.add.image(this.player.x, this.player.y - 600, hasBoss ? 'enemy_boss_walk_a' : 'boss').setOrigin(0.5);
         this.physics.add.existing(boss);
         boss.body.setCircle(35);
         boss.body.setOffset(
@@ -887,6 +890,14 @@ class MainScene extends Phaser.Scene {
         boss.speed = 20 * difficulty;
         boss.isBoss = true;
         boss.stunTimer = 0;
+        if (hasBoss) {
+            boss.animLoop = ['enemy_boss_walk_a', 'enemy_boss_walk_b'];
+            boss.animRate = 20; // heavy slow stomp
+            boss.animWindup = 'enemy_boss_windup';
+            boss.animLunge = 'enemy_boss_lunge';
+            boss.animHit = 'enemy_boss_hit';
+            boss.animDead = 'enemy_boss_dead';
+        }
         this.enemies.add(boss);
 
         // Boss Spawn visual juice
@@ -919,17 +930,9 @@ class MainScene extends Phaser.Scene {
             const angle = (i / count) * Math.PI * 2;
             const ex = this.player.x + Math.cos(angle) * radius;
             const ey = this.player.y + Math.sin(angle) * radius;
-
-            const difficulty = this.getDifficulty();
-            const hp = 12 * (1 + (difficulty - 1) * 0.13);
-            const speed = 16 * difficulty;
-
-            const enemy = this.add.image(ex, ey, 'zombie').setOrigin(0.5);
-            this.physics.add.existing(enemy);
-            enemy.body.setCircle(10);
-            enemy.hp = hp; enemy.maxHp = hp; enemy.speed = speed; enemy.isBoss = false;
-            enemy.stunTimer = 0;
-            this.enemies.add(enemy);
+            // Force zombie type so the ring uses the dropout zombie art +
+            // full animation (was hard-coded to the plain 'zombie' emoji)
+            this.createEnemyAt(ex, ey, 2);
         }
     }
 
@@ -1359,7 +1362,21 @@ class MainScene extends Phaser.Scene {
                 }
                 const baseScale = (e.texScale || 1) * (e.isBoss ? 1.0 : (e.isSwarm ? 0.8 : 1.0));
 
-                if (e.attackState === 'windup') {
+                // Enemies with DRAWN frames (rat/bat/zombie/boss) skip the
+                // squash-and-stretch wobble entirely: the frames already convey
+                // motion, and the per-frame scaleX oscillation made the art look
+                // blurry (rat) / distracting (zombie). Just face + optional hop.
+                if (e.animLoop || e.animWalk) {
+                    const facingX = (e.body.velocity.x < 0 ||
+                        (Math.abs(e.body.velocity.x) < 1 && this.player.x < e.x)) ? -baseScale : baseScale;
+                    e.setScale(facingX, baseScale);
+                    // Rats HOP: a crisp vertical bounce while moving (render-only
+                    // y offset — the physics body re-syncs ground y every frame,
+                    // so it never drifts)
+                    if (e.hop && (e.body.velocity.x !== 0 || e.body.velocity.y !== 0)) {
+                        e.y -= Math.abs(Math.sin(this.gameTime * 0.32 + (e.animPhase || 0))) * 7;
+                    }
+                } else if (e.attackState === 'windup') {
                     // Crouch pose: wide + low, quivering, facing the player
                     const facingX = this.player.x < e.x ? -baseScale : baseScale;
                     const quiver = Math.sin(this.gameTime * 0.9) * 0.03;

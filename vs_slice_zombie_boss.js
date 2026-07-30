@@ -1,5 +1,5 @@
 // Slice the TD dropout zombie sheet (6 frames, side view) + the bucket
-// zombie from the TD enemies lineup into VS enemy PNGs.
+// zombie BOSS sheet (6 frames) into VS enemy PNGs.
 // Frames via connected components sorted by x (stars/droplets merged into the
 // nearest frame, dust dropped). Auto-detects background: if the sheet still
 // has an opaque near-white bg it is flood-keyed from the borders (dark
@@ -17,10 +17,14 @@ const JOBS = [
         outMax: 56
     },
     {
-        file: 'sprites/td/enemies.png',
-        // 5 pixel zombies; only the 3rd (bucket head) is wanted -> the boss
-        names: [null, null, 'boss', null, null],
-        outMax: 110
+        file: 'sprites/vs/enemy_boss_raw.png',
+        // Bucket-zombie boss, same 6-frame convention; sliced at 220px =
+        // double the old boss size (user request). This sheet's baked checker
+        // is MID-GREY (~155/~181), not near-white — needs its own key range;
+        // the bucket's similar greys are safe behind the dark outlines.
+        names: ['boss_walk_a', 'boss_walk_b', 'boss_windup', 'boss_lunge', 'boss_hit', 'boss_dead'],
+        outMax: 220,
+        bg: 'grey'
     }
 ];
 
@@ -30,7 +34,7 @@ const JOBS = [
 
     for (const job of JOBS) {
         const dataUrl = 'data:image/png;base64,' + fs.readFileSync(job.file).toString('base64');
-        const result = await page.evaluate(async ({ src, names, outMax }) => {
+        const result = await page.evaluate(async ({ src, names, outMax, bg }) => {
             const img = new Image();
             await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = src; });
             const W = img.width, H = img.height;
@@ -49,11 +53,18 @@ const JOBS = [
                 }
             }
             if (opaqueBorder > samples * 0.5) {
-                const isBg = (i) => {
-                    const r = d[i], g = d[i + 1], b = d[i + 2];
-                    const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
-                    return d[i + 3] > 0 && (mx - mn) <= 18 && mn >= 232;
-                };
+                // Key range depends on the sheet's baked checker shade
+                const isBg = bg === 'grey'
+                    ? (i) => {
+                        const r = d[i], g = d[i + 1], b = d[i + 2];
+                        const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+                        return d[i + 3] > 0 && (mx - mn) <= 10 && mn >= 140 && mx <= 200;
+                    }
+                    : (i) => {
+                        const r = d[i], g = d[i + 1], b = d[i + 2];
+                        const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+                        return d[i + 3] > 0 && (mx - mn) <= 18 && mn >= 232;
+                    };
                 const vis = new Uint8Array(W * H); const q = [];
                 const seed = (x, y) => { const p = y * W + x; if (!vis[p] && isBg(p * 4)) { vis[p] = 1; q.push(p); } };
                 for (let x = 0; x < W; x++) { seed(x, 0); seed(x, H - 1); }
@@ -126,7 +137,7 @@ const JOBS = [
                 out[names[i]] = { url: pc.toDataURL('image/png'), w: ow, h: oh };
             });
             return out;
-        }, { src: dataUrl, names: job.names, outMax: job.outMax });
+        }, { src: dataUrl, names: job.names, outMax: job.outMax, bg: job.bg || 'white' });
 
         for (const name of job.names) {
             if (!name) continue;

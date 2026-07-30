@@ -89,10 +89,16 @@ function exitHiDpi() {
         _hiDpiResizeHandler = null;
     }
     if (!game || !game.scale) return;
-    // Restore today's exact behavior for the other games sharing the canvas
+    // Restore today's exact behavior for the other games sharing the canvas.
+    // Clearing the inline width/height/margin is REQUIRED: the NONE+zoom mode
+    // leaves an inline px style (e.g. 414x896) that RESIZE does NOT reset, so
+    // without this the canvas keeps the VS window display size while its backing
+    // shrinks to the next game's container -> stretched/offset canvas and
+    // off-screen content (observed: invisible UNO cards after VS).
     game.scale.setZoom(1);
     game.scale.scaleMode = Phaser.Scale.RESIZE;
     game.scale.parentIsWindow = true;
+    if (game.canvas) { game.canvas.style.width = ''; game.canvas.style.height = ''; game.canvas.style.margin = ''; }
     game.scale.resize(window.innerWidth, window.innerHeight);
     game.scale.refresh();
 }

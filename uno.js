@@ -1726,6 +1726,9 @@ function completeUnoESLQuestion(success) {
 
 function triggerUno() {
     activeGameMode = 'Uno';
+    // Undo VS HiDPI if it was active: restore CSS-px RESIZE + drop the HiDPI
+    // window-resize listener so it can't fight Uno's container-based sizing.
+    if (typeof exitHiDpi === 'function') exitHiDpi();
     if (typeof srGameResults !== 'undefined') srGameResults = [];
     if (typeof srInSessionFailures !== 'undefined') srInSessionFailures = new Set();
     if (typeof srInSessionSuccesses !== 'undefined') srInSessionSuccesses = new Set();

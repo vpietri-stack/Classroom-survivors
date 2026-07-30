@@ -75,6 +75,9 @@ function showGomokuModeSelection() {
 function triggerGomoku(mode = gomokuMode) {
     if (mode) gomokuMode = mode;
     activeGameMode = 'Gomoku';
+    // Undo VS HiDPI if it was active (drops the HiDPI window-resize listener);
+    // Gomoku uses its own 2D canvas but this keeps the shared Phaser canvas clean.
+    if (typeof exitHiDpi === 'function') exitHiDpi();
     
     // Reset SR tracking for this game session
     if (typeof srGameResults !== 'undefined') srGameResults = [];

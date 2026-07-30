@@ -19,10 +19,9 @@ const EXE = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 
 const JOBS = [
     { file: 'sprites/vs/enemy_rat_raw.png', names: ['rat_walk', 'rat_hit'], outMax: 52, boost: true, key: 'magenta' },
-    // New bat sheet came on a BAKED opaque grey checkerboard — flood-key it
-    // from the borders (neutral grey only; the bat's warm grey-brown fur and
-    // dark outlines block the fill, so the character survives)
-    { file: 'sprites/vs/enemy_bat_raw.png', names: ['bat_up', 'bat_down', 'bat_hit'], outMax: 46, boost: true, key: 'checker' }
+    // Bat sheet: user re-spaced the frames far apart on a clean magenta bg,
+    // so a plain magenta key (no checker flood) cuts them without wingtip bleed
+    { file: 'sprites/vs/enemy_bat_raw.png', names: ['bat_up', 'bat_down', 'bat_hit'], outMax: 46, boost: true, key: 'magenta' }
 ];
 
 (async () => {

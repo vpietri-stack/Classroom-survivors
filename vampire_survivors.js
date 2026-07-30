@@ -1298,7 +1298,11 @@ class MainScene extends Phaser.Scene {
                     if (nowT >= e.windupUntil) {
                         // Lock lunge direction at the player's position NOW — dodgeable
                         const ang = Phaser.Math.Angle.Between(e.x, e.y, this.player.x, this.player.y);
-                        const lungeSpeed = e.isBoss ? 300 : 340;
+                        // Boss lunge must actually COVER its attack range (200px):
+                        // at 420ms a 300px/s lunge only travels ~126px, so the
+                        // boss "pounced" but never reached the player (looked like
+                        // it attacked without lunging). 540px/s * 0.42s ≈ 227px.
+                        const lungeSpeed = e.isBoss ? 540 : 340;
                         e.body.setVelocity(Math.cos(ang) * lungeSpeed * moveMult, Math.sin(ang) * lungeSpeed * moveMult);
                         e.attackState = 'lunge';
                         e.lungeUntil = nowT + (e.isBoss ? 420 : 300) * durMult;
@@ -1461,6 +1465,10 @@ class MainScene extends Phaser.Scene {
                 } else if (e._chillTinted) {
                     e.clearTint(); e._chillTinted = false;
                 }
+                // Opacity self-heal: outside the brief hit flash an active enemy
+                // is always fully opaque (belt-and-braces against any stray tween
+                // leaving a boss translucent).
+                if (!e._hitFlash && e.alpha < 1) e.alpha = 1;
             }
         });
 
@@ -2432,16 +2440,22 @@ class MainScene extends Phaser.Scene {
         // Swap to the drawn "getting hit" frame briefly (frame driver reverts)
         if (enemy.animHit) enemy.hitUntil = this.time.now + 200;
 
-        // Hit Juice: Scale Pop & Alpha Tween
-        this.tweens.add({
-            targets: enemy,
-            alpha: 0.3,
-            scaleX: 1.2,
-            scaleY: 1.2,
-            duration: 50,
-            yoyo: true,
-            onComplete: () => { if (enemy.active) enemy.setScale(1); }
-        });
+        // Hit flash — guarded so a boss under constant fire can't stack dozens
+        // of overlapping alpha tweens. The old yoyo tween, when re-triggered
+        // mid-dip, captured the current 0.3 alpha as its return value, so opacity
+        // ratcheted down and left the enemy permanently translucent. One flash
+        // at a time; always restore full opacity on complete. (Scale is owned by
+        // the per-frame frame driver, so it's not tweened here.)
+        if (!enemy._hitFlash) {
+            enemy._hitFlash = true;
+            this.tweens.add({
+                targets: enemy,
+                alpha: 0.45,
+                duration: 55,
+                yoyo: true,
+                onComplete: () => { enemy._hitFlash = false; if (enemy.active) enemy.alpha = 1; }
+            });
+        }
 
         // Knockback + stun: skip entirely for the boss. It's huge and takes a
         // constant stream of hits, so knockback shoved it around "from far away"

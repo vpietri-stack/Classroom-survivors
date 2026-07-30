@@ -436,8 +436,9 @@ class MainScene extends Phaser.Scene {
         // Shared particle layer (perf: one graphics for ALL burst particles)
         this.particleGfx = this.add.graphics().setDepth(50);
 
-        // Kill combo counter (top-center, screen-space)
-        this.comboText = this.add.text(this.scale.width / 2, 110, '', {
+        // Kill combo counter (top-center, screen-space). hudY compensates for
+        // the DPR-inflated camera zoom so it stays at the same on-screen spot.
+        this.comboText = this.add.text(this.hudX(this.cw() / 2), this.hudY(110), '', {
             fontSize: '30px', fontFamily: 'Fredoka', color: '#ffdd33',
             stroke: '#000000', strokeThickness: 5, fontStyle: 'bold'
         }).setOrigin(0.5).setScrollFactor(0).setDepth(100).setVisible(false);
@@ -1033,7 +1034,7 @@ class MainScene extends Phaser.Scene {
         this.cameras.main.shake(final ? 800 : 500, final ? 0.02 : 0.015);
         this.cameras.main.flash(300, 255, 0, 0, 0.4);
 
-        const warningText = this.add.text(this.scale.width / 2, this.scale.height / 3,
+        const warningText = this.add.text(this.hudX(this.cw() / 2), this.hudY(this.ch() / 3),
             final ? '☠️ 最终BOSS！☠️' : '⚠️ BOSS INCOMING! ⚠️', {
             fontSize: final ? '52px' : '40px',
             fontFamily: 'Fredoka',
@@ -3743,14 +3744,36 @@ class MainScene extends Phaser.Scene {
     }
 
     handleResize(gameSize) {
-        const width = gameSize.width;
-        let zoom = width / 800;
-        zoom = Phaser.Math.Clamp(zoom, 0.4, 1.0);
+        // HiDPI: the backing buffer is CSS x DPR while VS is active, so the fit
+        // zoom is computed from the CSS width and the camera zoom carries DPR
+        // (visible world stays identical, just rendered on a bigger buffer).
+        const dpr = vsDpr();
+        const cssW = gameSize.width / dpr;
+        const fit = Phaser.Math.Clamp(cssW / 800, 0.4, 1.0);
+        const zoom = fit * dpr;
         this.cameras.main.setZoom(zoom);
         if (this.bg) {
-            this.bg.setPosition(width / 2, this.scale.height / 2);
-            this.bg.setSize(width / zoom + 100, this.scale.height / zoom + 100);
+            // scrollFactor(0) cover: size = backing / zoom (== CSS / fit)
+            this.bg.setPosition(gameSize.width / 2, gameSize.height / 2);
+            this.bg.setSize(gameSize.width / zoom + 100, gameSize.height / zoom + 100);
         }
+    }
+
+    // --- HiDPI screen-space helpers -----------------------------------------
+    // cw()/ch(): screen size in CSS px (backing is CSS x DPR while VS active).
+    // hudX()/hudY(): place a scrollFactor(0) element at a CSS screen coord,
+    // compensating for the world camera's zoom pivot (screen centre). Size and
+    // X-centering are auto-preserved (display divides out the DPR), so only the
+    // vertical/horizontal offset-from-centre needs this correction.
+    cw() { return this.scale.width / vsDpr(); }
+    ch() { return this.scale.height / vsDpr(); }
+    hudX(cssX) {
+        const f = (this.cameras.main.zoom / vsDpr()) || 1;
+        return this.scale.width / 2 + (cssX - this.cw() / 2) / f;
+    }
+    hudY(cssY) {
+        const f = (this.cameras.main.zoom / vsDpr()) || 1;
+        return this.scale.height / 2 + (cssY - this.ch() / 2) / f;
     }
 }
 
@@ -3830,9 +3853,7 @@ function triggerVampireSurvivors() {
             setTimeout(() => {
                 if (game && game.scale) {
                     game.scale.parent = document.body;
-                    game.scale.parentIsWindow = true;
-                    game.scale.resize(window.innerWidth, window.innerHeight);
-                    game.scale.refresh();
+                    enterHiDpi(); // backing = CSS x DPR (crisp on phones)
                 }
             }, 50);
         });
@@ -3859,9 +3880,7 @@ function triggerVampireSurvivors() {
         setTimeout(() => {
             if (game && game.scale) {
                 game.scale.parent = document.body;
-                game.scale.parentIsWindow = true;
-                game.scale.resize(window.innerWidth, window.innerHeight);
-                game.scale.refresh();
+                enterHiDpi(); // backing = CSS x DPR (crisp on phones)
             }
             // Always do a fresh start so create() runs and entities spawn correctly
             game.scene.start('MainScene');
@@ -3956,6 +3975,7 @@ function exitVampireSurvivors() {
     if (game && game.scene && game.scene.isActive('MainScene')) {
         game.scene.stop('MainScene');
     }
+    if (typeof exitHiDpi === 'function') exitHiDpi(); // restore CSS-px RESIZE for other games
     // Hide game over screen and HUD if visible
     document.getElementById('gameOverScreen').classList.add('hidden');
     document.getElementById('levelUpMenu').classList.add('hidden');

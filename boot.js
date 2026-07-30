@@ -23,31 +23,13 @@ const config = {
     },
     scene: [], // scenes register themselves via registerScene()
     scale: {
-        // NONE (not RESIZE): RESIZE pins the canvas backing store to the CSS
-        // parent size, which makes HiDPI rendering impossible (phones with
-        // devicePixelRatio 2-3 got a blurry upscaled canvas). Every game mode
-        // already sizes the canvas manually in its trigger function, and the
-        // window-resize shim below replicates the old auto-resize behavior.
-        mode: Phaser.Scale.NONE,
+        mode: Phaser.Scale.RESIZE,
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
     input: {
         activePointers: 3
     }
 };
-
-// Keep the canvas matched to the viewport on window resizes/rotation
-// (replaces what Scale.RESIZE used to do automatically). VS applies its own
-// HiDPI sizing; every other mode uses plain CSS-pixel sizing.
-window.addEventListener('resize', () => {
-    if (typeof game === 'undefined' || !game || !game.scale) return;
-    if (activeGameMode === 'VS' && typeof applyVSHiDPI === 'function') {
-        applyVSHiDPI(game);
-    } else {
-        game.scale.resize(window.innerWidth, window.innerHeight);
-        game.scale.refresh();
-    }
-});
 
 // --- PHASER STATE ---
 // The running Phaser.Game instance (assigned lazily by the first trigger*() call).
@@ -63,4 +45,58 @@ function registerScene(sceneClass) {
     if (typeof config === 'undefined') return;
     if (!Array.isArray(config.scene)) config.scene = [];
     config.scene.push(sceneClass);
+}
+
+// --- HiDPI (retina) RENDERING (Vampire Survivors only, for now) ---------------
+// The shared Phaser canvas defaults to Scale.RESIZE, which sizes the backing
+// buffer in CSS pixels and lets the browser upscale it -> blur on high-DPR
+// phones. While VS is active we take over sizing: backing buffer = CSS x DPR
+// (capped at 2 so a 160-enemy horde stays performant), displayed via CSS at the
+// real window size, and VS multiplies its camera zoom by the same DPR so the
+// visible world + all gameplay coordinates are unchanged (just sharper).
+// enterHiDpi()/exitHiDpi() are called by the VS trigger/exit so every other
+// game (Uno/TD on this same canvas) keeps the exact CSS-px RESIZE behavior.
+function vsDpr() {
+    return Math.min(2, Math.max(1, window.devicePixelRatio || 1));
+}
+let _hiDpiResizeHandler = null;
+function _applyHiDpiSize() {
+    if (!game || !game.scale) return;
+    const dpr = vsDpr();
+    const w = window.innerWidth, h = window.innerHeight;
+    game.scale.resize(w * dpr, h * dpr);     // backing buffer = CSS x DPR
+    if (game.canvas) {                        // ...displayed at CSS window size
+        game.canvas.style.width = w + 'px';
+        game.canvas.style.height = h + 'px';
+        game.canvas.style.margin = '0';       // kill CENTER_BOTH's backing-based negative margin
+    }
+}
+function enterHiDpi() {
+    if (!game || !game.scale) return;
+    // Scale.NONE + our own resize listener: Scale.RESIZE would auto-shrink the
+    // backing back to CSS px on every window/orientation change, undoing this.
+    game.scale.scaleMode = Phaser.Scale.NONE;
+    // NO_CENTER: CENTER_BOTH centers using the (inflated) backing size vs the
+    // parent, which mis-positions our manually CSS-sized canvas off-screen.
+    game.scale.autoCenter = Phaser.Scale.NO_CENTER;
+    game.scale.parentIsWindow = false;
+    _applyHiDpiSize();
+    if (!_hiDpiResizeHandler) {
+        _hiDpiResizeHandler = () => _applyHiDpiSize();
+        window.addEventListener('resize', _hiDpiResizeHandler);
+    }
+}
+function exitHiDpi() {
+    if (_hiDpiResizeHandler) {
+        window.removeEventListener('resize', _hiDpiResizeHandler);
+        _hiDpiResizeHandler = null;
+    }
+    if (!game || !game.scale) return;
+    // Restore today's exact behavior for the other games sharing the canvas
+    game.scale.scaleMode = Phaser.Scale.RESIZE;
+    game.scale.autoCenter = Phaser.Scale.CENTER_BOTH;
+    game.scale.parentIsWindow = true;
+    if (game.canvas) { game.canvas.style.width = ''; game.canvas.style.height = ''; game.canvas.style.margin = ''; }
+    game.scale.resize(window.innerWidth, window.innerHeight);
+    game.scale.refresh();
 }

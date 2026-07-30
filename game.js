@@ -655,6 +655,8 @@ function showGameSelection() {
     if (typeof game !== 'undefined' && game && game.scene && game.scene.isActive('MainScene')) {
         game.scene.stop('MainScene');
     }
+    // Restore the shared canvas to CSS-px RESIZE (undo VS HiDPI) for other games
+    if (typeof exitHiDpi === 'function') exitHiDpi();
     if (typeof game !== 'undefined' && game && game.canvas) {
         game.canvas.style.display = 'none';
     }

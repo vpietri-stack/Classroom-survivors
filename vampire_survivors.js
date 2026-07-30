@@ -1284,7 +1284,7 @@ class MainScene extends Phaser.Scene {
                 } else {
                     // CHASE: seek player; if close enough, start the attack telegraph
                     const distToPlayer = Phaser.Math.Distance.Between(e.x, e.y, this.player.x, this.player.y);
-                    const attackRange = e.isBoss ? 110 : 55;
+                    const attackRange = e.isBoss ? 200 : 55;
                     if (distToPlayer < attackRange) {
                         const difficulty = this.getDifficulty();
                         // Near-instant strike: short flash of warning tint, then pounce
@@ -2411,7 +2411,12 @@ class MainScene extends Phaser.Scene {
             onComplete: () => { if (enemy.active) enemy.setScale(1); }
         });
 
-        if (knockback > 0 && enemy.body) {
+        // Knockback + stun: skip entirely for the boss. It's huge and takes a
+        // constant stream of hits, so knockback shoved it around "from far away"
+        // and the stun-lock (stunTimer refreshed every hit) meant its attack AI
+        // never got to run — it could never actually attack. Bosses now plow
+        // through hits unflinching (hit FRAME still plays for feedback).
+        if (knockback > 0 && enemy.body && !enemy.isBoss) {
             const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, enemy.x, enemy.y);
             enemy.body.setVelocity(Math.cos(angle) * knockback, Math.sin(angle) * knockback);
             enemy.stunTimer = 15;

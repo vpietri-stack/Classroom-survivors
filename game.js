@@ -319,6 +319,60 @@ const synthStab = () => {
     o.start(now); o.stop(now + 0.12);
 };
 
+// Ruler slash: airy whoosh + bright metallic "shing" (sword slash)
+const synthSwordSlash = () => {
+    if (!audioCtx || !sfxOK('slash', 60)) return;
+    const now = audioCtx.currentTime;
+    noiseBurst(now, 0.14, 'bandpass', 1800, 1.2, 0.10); // air cut
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(2600, now + 0.02);
+    o.frequency.exponentialRampToValueAtTime(700, now + 0.16);
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.linearRampToValueAtTime(0.11, now + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(now); o.stop(now + 0.19);
+};
+
+// Ruler electric arc launch: low "vromb" travel hum (sawtooth + fast vibrato)
+const synthArcHum = () => {
+    if (!audioCtx || !sfxOK('archum', 80)) return;
+    const now = audioCtx.currentTime;
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(220, now);
+    o.frequency.linearRampToValueAtTime(150, now + 0.3);
+    const lfo = audioCtx.createOscillator(), lg = audioCtx.createGain();
+    lfo.type = 'sine'; lfo.frequency.value = 28; lg.gain.value = 42; // vromb wobble
+    lfo.connect(lg); lg.connect(o.frequency);
+    const lp = audioCtx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.linearRampToValueAtTime(0.08, now + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+    o.connect(lp); lp.connect(g); g.connect(audioCtx.destination);
+    o.start(now); o.stop(now + 0.33);
+    lfo.start(now); lfo.stop(now + 0.33);
+};
+
+// Electricity crackle when the arc zaps an enemy (stun feedback)
+const synthZap = () => {
+    if (!audioCtx || !sfxOK('zap', 55)) return;
+    const now = audioCtx.currentTime;
+    noiseBurst(now, 0.09, 'highpass', 3800, 4, 0.10); // static crackle
+    for (let i = 0; i < 2; i++) {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = 'square';
+        const s = now + i * 0.035;
+        o.frequency.setValueAtTime(1400 + Math.random() * 900, s);
+        o.frequency.exponentialRampToValueAtTime(500, s + 0.05);
+        g.gain.setValueAtTime(0.06, s);
+        g.gain.exponentialRampToValueAtTime(0.001, s + 0.06);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(s); o.stop(s + 0.07);
+    }
+};
+
 // Triangle hit: woody block ricocheting off a hard surface (tok-tik, two knocks)
 const synthRicochet = () => {
     if (!audioCtx || !sfxOK('ricochet', 60)) return;
@@ -550,7 +604,7 @@ function updateDOMHUD(stats, time, kills) {
 
 function showGameSelection() {
     // Reset all screens
-    const screens = ['startScreen', 'gomokuScreen', 'gomokuGameOverScreen', 'gameOverScreen', 'gameIntroOverlay', 'studentManagerOverlay', 'studyModeOverlay', 'unoScreen', 'unoGameOverScreen', 'spellingGame', 'wordRecGame', 'sentenceMatchGame', 'levelUpMenu'];
+    const screens = ['startScreen', 'gomokuScreen', 'gomokuGameOverScreen', 'gameOverScreen', 'gameIntroOverlay', 'vsCharSelect', 'studentManagerOverlay', 'studyModeOverlay', 'unoScreen', 'unoGameOverScreen', 'spellingGame', 'wordRecGame', 'sentenceMatchGame', 'levelUpMenu'];
     screens.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');

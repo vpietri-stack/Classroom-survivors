@@ -1,6 +1,7 @@
 // --- GAME DATA ---
 const POWER_UPS = [
-    { id: 'whip', name: "Ruler", icon: "🪄", type: "weapon", desc: "Front Attack" },
+    { id: 'whip', name: "Jump Rope", icon: "🪢", type: "weapon", desc: "Wide front lash" },
+    { id: 'ruler', name: "Ruler", icon: "📏", type: "weapon", desc: "Sword slash + electric arc" },
     { id: 'wand', name: "Paper Plane", icon: "✨", type: "weapon", desc: "Flies at nearest enemy" },
     { id: 'orb', name: "Eraser Orbit", icon: "🔮", type: "weapon", desc: "Spins around you" },
     { id: 'axe', name: "Magic Book", icon: "🪓", type: "weapon", desc: "Add one more book" },
@@ -13,7 +14,8 @@ const POWER_UPS = [
 // sprites/vs/item_sheet_raw.png by vs_slice_items.js). The emoji textures
 // above stay as fallback if a PNG fails to load (offline/slow-CDN students).
 const ITEM_SPRITES = {
-    whip: 'ruler',      // icon only — the in-game whip animation stays as-is
+    whip: 'jumprope',   // Skippy's jump-rope lash (was the old "ruler" icon)
+    ruler: 'ruler',     // Class Monitor's ruler — sword slash + electric arc
     wand: 'plane',      // paper plane dart
     knife: 'scissors',  // spinning scissors
     orb: 'eraser',      // orbiting erasers
@@ -34,7 +36,25 @@ const WEAPON_MILESTONES = {
     axe: { 2: 'Knowledge Blast (Area hit!)', 3: 'Second Book', 4: 'Bigger Blast', 5: 'Third Book', 6: 'Bigger Blast', 7: 'Fourth Book', 8: 'Bigger Blast', 9: 'Bigger Books', 10: 'Bigger Blast', 11: 'Bigger Books', 12: 'Bigger Blast' },
     cross: { 2: 'Ricochet (Bounces to 3!)', 4: 'Glowing Edge', 5: 'Twin Boomerang (Both ways!)', 8: 'Super Ricochet (5 bounces!)' },
     water: { 2: 'Poison Splash (Lingers!)', 3: 'Bigger Balloons', 5: 'Double Splash (2 balloons!)', 8: 'Toxic Flood (Longer poison)' },
-    orb: { 2: 'Frost Erasers (Slows enemies!)', 4: 'Rubber-Dust Sparkles', 6: 'Turbo Orbit', 8: 'Deep Freeze' }
+    orb: { 2: 'Frost Erasers (Slows enemies!)', 4: 'Rubber-Dust Sparkles', 6: 'Turbo Orbit', 8: 'Deep Freeze' },
+    ruler: { 2: 'Electric Arc (Stuns enemies!)', 3: 'Wider Slash', 4: 'Longer Arc (+Stun)', 5: 'Faster Swings', 6: 'Bigger Slash', 7: 'Stronger Arc (+Stun)', 8: 'Faster Swings', 9: 'Bigger Slash', 10: 'Stronger Arc (+Stun)', 11: 'Faster Swings' }
+};
+
+// Playable heroes for the character-select screen. Each hero has a paper-doll
+// puppet skin (part textures) and ONE exclusive starting weapon that only they
+// can use / level up; the other 6 weapons are shared. weaponIcon is a static
+// PNG under sprites/vs/ used by the HTML menu (not the in-game texture cache).
+const VS_CHARACTERS = {
+    monitor: {
+        id: 'monitor', name: '班长 Class Monitor',
+        parts: { body: 'p_body', arm: 'p_arm', footL: 'p_foot_l', footR: 'p_foot_r' },
+        weapon: 'ruler', weaponName: 'Ruler', weaponIcon: 'item_ruler'
+    },
+    skippy: {
+        id: 'skippy', name: 'Skippy',
+        parts: { body: 'sk_body', arm: 'sk_arm', footL: 'sk_foot_l', footR: 'sk_foot_r' },
+        weapon: 'whip', weaponName: 'Jump Rope', weaponIcon: 'item_jumprope'
+    }
 };
 
 // --- MAIN SCENE ---
@@ -56,6 +76,11 @@ class MainScene extends Phaser.Scene {
         this.load.image('p_arm', u('sprites/vs/player_arm.png'));
         this.load.image('p_foot_l', u('sprites/vs/player_foot_l.png'));
         this.load.image('p_foot_r', u('sprites/vs/player_foot_r.png'));
+        // Skippy skin parts (sliced by vs_slice_skippy.js) — jump-rope arm
+        this.load.image('sk_body', u('sprites/vs/skippy_body.png'));
+        this.load.image('sk_arm', u('sprites/vs/skippy_arm.png'));
+        this.load.image('sk_foot_l', u('sprites/vs/skippy_foot_l.png'));
+        this.load.image('sk_foot_r', u('sprites/vs/skippy_foot_r.png'));
         // School-themed weapon/power-up art (sliced by vs_slice_items.js)
         Object.values(ITEM_SPRITES).forEach(n =>
             this.load.image('item_' + n, u('sprites/vs/item_' + n + '.png')));
@@ -283,18 +308,23 @@ class MainScene extends Phaser.Scene {
         this.tornados = this.physics.add.group();
 
         // --- PLAYER: paper-doll puppet (chibi student) with emoji fallback ---
-        if (this.textures.exists('p_body')) {
-            // Parts were pre-shrunk offline to ~2x display size (vs_shrink_parts.js)
-            // so the GPU only minifies ~2:1 instead of ~11:1 — much sharper on
-            // phones where WebGL can't mipmap these NPOT textures.
+        // The selected hero (character-select screen) picks the part skin +
+        // the exclusive starting weapon. Defaults to the Class Monitor.
+        const ch = VS_CHARACTERS[window.vsSelectedCharacter] || VS_CHARACTERS.monitor;
+        this.character = ch;
+        const CP = ch.parts;
+        if (this.textures.exists(CP.body)) {
+            // Parts were pre-shrunk offline to ~2x display size (vs_shrink_parts.js
+            // / vs_slice_skippy.js) so the GPU only minifies ~2:1 instead of ~11:1
+            // — much sharper on phones where WebGL can't mipmap these NPOT textures.
             const PS = 0.45; // part scale (textures are 0.4x the originals)
             const footBaseY = 30;
-            const footL = this.add.image(-9, footBaseY, 'p_foot_l').setScale(PS);
-            const footR = this.add.image(9, footBaseY, 'p_foot_r').setScale(PS);
-            // Ruler arm pivots at its shoulder cap — mounted at the body's
+            const footL = this.add.image(-9, footBaseY, CP.footL).setScale(PS);
+            const footR = this.add.image(9, footBaseY, CP.footR).setScale(PS);
+            // Weapon arm pivots at its shoulder cap — mounted at the body's
             // shoulder line (was -20: sprouted from the head)
-            const arm = this.add.image(16, -1, 'p_arm').setOrigin(0.12, 0.18).setScale(PS);
-            const body = this.add.image(0, -10, 'p_body').setScale(PS);
+            const arm = this.add.image(16, -1, CP.arm).setOrigin(0.12, 0.18).setScale(PS);
+            const body = this.add.image(0, -10, CP.body).setScale(PS);
             this.playerParts = { body, arm, footL, footR, footBaseY, armBaseAngle: 15, armSwinging: false };
             arm.setAngle(this.playerParts.armBaseAngle);
             this.player = this.add.container(0, 0, [footL, footR, arm, body]);
@@ -463,6 +493,24 @@ class MainScene extends Phaser.Scene {
                         this.spawnBurstParticles(b.x, b.y, 0x66e0ff, 5, 3);
                     }
                 }
+            } else if (b.type === 'rulerarc') {
+                // Ruler electric arc: pierces every enemy it passes, chip damage
+                // + a brief FREEZE (electricity). Bosses immune to the freeze
+                // (like knockback). Does NOT get consumed on hit.
+                if (b.hitList && b.hitList.includes(e)) return;
+                if (!b.hitList) b.hitList = [];
+                b.hitList.push(e);
+                this.damageEnemy(e, b.dmg, 0);
+                if (!e.isBoss && b.stunFrames) {
+                    // Swarm bats fly on a fixed velocity set at spawn — save it
+                    // so the freeze doesn't leave them hanging forever
+                    if (e.isSwarm && e.body) { e._preStunVx = e.body.velocity.x; e._preStunVy = e.body.velocity.y; }
+                    e.stunTimer = Math.max(e.stunTimer || 0, b.stunFrames);
+                    if (e.body) e.body.setVelocity(0, 0);
+                    e._zapUntil = this.time.now + (b.stunFrames / 60) * 1000;
+                }
+                this.spawnBurstParticles(e.x, e.y, 0xfff27a, 6, 3);
+                synthZap(); // self-throttled
             } else if (b.type === 'wand' && b.pierce > 0) {
                 // Plane evolution (L2+): Piercing Dart punches through enemies
                 if (b.hitList && b.hitList.includes(e)) return;
@@ -504,7 +552,18 @@ class MainScene extends Phaser.Scene {
         this.physics.add.overlap(this.player, this.enemies, this.handlePlayerHit, null, this);
         this.physics.add.overlap(this.tornados, this.enemies, (t, e) => this.damageEnemy(e, 999), null, this);
 
-        this.applyReward({ id: 'whip', name: 'Ruler', type: 'weapon' });
+        // Electric-arc projectile texture (yellow crescent bow opening toward
+        // +x, so rotation = travel angle). Baked once, reused by every arc.
+        if (!this.textures.exists('fx_arc')) {
+            const S = 72, g = this.add.graphics();
+            const cx = S / 2 - 10, cy = S / 2, r = 26, a0 = -1.15, a1 = 1.15;
+            g.lineStyle(20, 0xfff27a, 0.30); g.beginPath(); g.arc(cx, cy, r, a0, a1, false); g.strokePath();
+            g.lineStyle(11, 0xffe23a, 0.9); g.beginPath(); g.arc(cx, cy, r, a0, a1, false); g.strokePath();
+            g.lineStyle(4, 0xffffff, 1); g.beginPath(); g.arc(cx, cy, r, a0, a1, false); g.strokePath();
+            g.generateTexture('fx_arc', S, S); g.destroy();
+        }
+
+        this.applyReward({ id: this.character.weapon, type: 'weapon' });
         updateDOMHUD(this.playerStats, 0, 0);
 
         for (let i = 0; i < 40; i++) {
@@ -1280,6 +1339,10 @@ class MainScene extends Phaser.Scene {
                     this.damageEnemy(e, e.poisonDmg);
                 }
             }
+            // Electric crackle while frozen by the ruler arc (visual only)
+            if (e._zapUntil && e._zapUntil > nowMs && e.active) {
+                if (this.gameTime % 6 === 0) this.spawnBurstParticles(e.x, e.y - 6, 0xfff27a, 2, 2);
+            }
             // Chill (Frost Erasers evolution): slows movement + lengthens attacks
             const chilled = e.chillUntil && e.chillUntil > nowMs;
             const moveMult = chilled ? (1 - e.chillPow) : 1;
@@ -1288,6 +1351,11 @@ class MainScene extends Phaser.Scene {
                 e.stunTimer--;
                 // Note: knockback no longer cancels attacks — only death does.
                 // (windup/lunge timers keep running through the stun)
+                // Frozen swarm bats resume their original flight when it ends
+                if (e.stunTimer === 0 && e.isSwarm && (e._preStunVx || e._preStunVy)) {
+                    if (e.body) e.body.setVelocity(e._preStunVx, e._preStunVy);
+                    e._preStunVx = e._preStunVy = 0;
+                }
             } else if (!e.isSwarm) {
                 const nowT = this.time.now;
                 if (!e.attackState) e.attackState = 'chase';
@@ -1534,6 +1602,7 @@ class MainScene extends Phaser.Scene {
                 w.timer = 0;
                 if (w.type === 'wand') this.fireWand(w);
                 if (w.type === 'whip') this.fireWhip(w);
+                if (w.type === 'ruler') this.fireRuler(w);
                 if (w.type === 'axe') this.fireAxe(w);
                 if (w.type === 'cross') this.fireCross(w);
                 if (w.type === 'knife') this.fireKnife(w);
@@ -1589,6 +1658,96 @@ class MainScene extends Phaser.Scene {
                 this.performWhipStrike(dir, damage, range, strikeDuration, w.level);
             });
         });
+    }
+
+    // --- RULER (Class Monitor exclusive): sword slash + electric arc ---
+    // Ladder: L1 base slash • L2 unlock arc • then a repeating 3-cycle:
+    // L3/6/9 slash bigger (wider + slightly longer), L4/7/10 arc bigger +
+    // travels further + longer stun, L5/8/11 faster cooldown (in applyReward).
+    fireRuler(w) {
+        // Slash damage mirrors the Jump Rope's curve so the two exclusive
+        // starting weapons stay balanced; the arc is low chip damage whose
+        // real job is the stun (user-confirmed "slash main, arc utility").
+        const dmgUpgrades = Math.floor((w.level + 1) / 3);
+        const slashDmg = (15 + dmgUpgrades * 15) * this.playerStats.might;
+        const slashTier = w.level >= 3 ? Math.floor(w.level / 3) : 0;
+        const arcTier = w.level >= 4 ? Math.floor((w.level - 1) / 3) : 0;
+
+        const facing = this.player.scaleX > 0 ? 1 : -1;
+        const baseAngle = facing === 1 ? 0 : Math.PI;
+        // ~1/3 of the jump rope's 330 reach but a WAY wider cone
+        const len = 118 * (1 + slashTier * 0.18);
+        const half = Math.min(1.35, 0.85 * (1 + slashTier * 0.14));
+
+        synthSwordSlash();
+        this.swingRulerArm(160);
+        this.drawSlashCrescent(baseAngle, len, half, facing);
+
+        // Cone hit-check: within reach AND within the angular span
+        this.enemies.getChildren().forEach(e => {
+            if (!e.active) return;
+            const dx = e.x - this.player.x, dy = e.y - this.player.y;
+            if (Math.hypot(dx, dy) > len + 20) return;
+            const da = Phaser.Math.Angle.Wrap(Math.atan2(dy, dx) - baseAngle);
+            if (Math.abs(da) <= half) this.damageEnemy(e, slashDmg, 140);
+        });
+
+        // Electric arc unlocks at L2, launched from the slash's outer edge so
+        // a bigger slash (L3/6/9) pushes the arc's start further out to match
+        if (w.level >= 2) this.spawnRulerArc(baseAngle, len, arcTier, slashDmg);
+    }
+
+    // The visible slash: white crescent swept TOP→BOTTOM in the facing
+    // direction — the same high-to-low chop as the puppet's swinging arm
+    drawSlashCrescent(centerAngle, len, half, facing) {
+        const g = this.add.graphics().setDepth(46);
+        const R = len * 0.74;
+        const startA = centerAngle - half * facing; // top of the chop
+        const endA = centerAngle + half * facing;   // bottom (arm ends low)
+        const acw = facing === -1;                  // mirrored when facing left
+        const prog = { v: 0 };
+        this.tweens.add({
+            targets: prog, v: 1, duration: 140, ease: 'Quad.out',
+            onUpdate: () => {
+                if (!g.active) return;
+                g.clear();
+                const cx = this.player.x, cy = this.player.y;
+                const a = startA + (endA - startA) * prog.v;
+                const fade = 1 - prog.v * 0.35;
+                g.lineStyle(Math.max(10, len * 0.16), 0xcfeaff, 0.75 * fade);
+                g.beginPath(); g.arc(cx, cy, R, startA, a, acw); g.strokePath();
+                g.lineStyle(6, 0xffffff, 0.95 * fade);
+                g.beginPath(); g.arc(cx, cy, R, startA, a, acw); g.strokePath();
+                // bright leading tip that rides the sweep
+                g.fillStyle(0xffffff, fade);
+                g.fillCircle(cx + Math.cos(a) * R, cy + Math.sin(a) * R, 7);
+            },
+            onComplete: () => {
+                this.tweens.add({ targets: g, alpha: 0, duration: 110, onComplete: () => g.destroy() });
+            }
+        });
+    }
+
+    // Yellow electric energy arc: travels straight ahead (facing direction),
+    // pierces every enemy, chip damage + brief freeze (handled in the bullet
+    // overlap). Travel distance ≈ the jump rope's reach, further per arc tier.
+    spawnRulerArc(baseAngle, startDist, arcTier, slashDmg) {
+        const travel = 330 * (1 + arcTier * 0.22);
+        const speed = 440;
+        const sx = this.player.x + Math.cos(baseAngle) * startDist * 0.8;
+        const sy = this.player.y + Math.sin(baseAngle) * startDist * 0.8;
+        const b = this.add.image(sx, sy, 'fx_arc').setDepth(45);
+        this.setPx(b, 52 + arcTier * 12);
+        b.rotation = baseAngle;
+        this.bullets.add(b);
+        this.physics.add.existing(b);
+        b.body.setVelocity(Math.cos(baseAngle) * speed, Math.sin(baseAngle) * speed);
+        b.type = 'rulerarc';
+        b.dmg = slashDmg * 0.35;          // chip — the stun is the point
+        b.hitList = [];
+        b.life = Math.round((travel / speed) * 60);
+        b.stunFrames = 24 + arcTier * 9;  // ~0.4s base, +0.15s per arc tier
+        synthArcHum();
     }
 
     performWhipStrike(direction, damage, range, duration, whipLevel = 1) {
@@ -2295,6 +2454,19 @@ class MainScene extends Phaser.Scene {
 
     updateBullets() {
         this.bullets.getChildren().forEach(b => {
+            if (b.type === 'rulerarc') {
+                // Electric arc: fixed heading, crackling flicker, dies at the
+                // end of its travel distance (life counts frames)
+                b.life--;
+                b.setAlpha(0.72 + Math.random() * 0.28);
+                if (this.gameTime % 2 === 0) {
+                    const s = this.add.circle(b.x + (Math.random() - 0.5) * 14,
+                        b.y + (Math.random() - 0.5) * 14, 3, 0xfff27a, 0.7);
+                    this.tweens.add({ targets: s, alpha: 0, scale: 0.2, duration: 200, onComplete: () => s.destroy() });
+                }
+                if (b.life <= 0) b.destroy();
+                return;
+            }
             if (b.type === 'cross') {
                 b.returnTimer--;
                 if (b.returnTimer === 0) b.body.setVelocity(-b.body.velocity.x, 0);
@@ -3420,12 +3592,18 @@ class MainScene extends Phaser.Scene {
                     const speedUpgrades = Math.floor(existing.level / 3);
                     existing.cooldown = Math.max(40, 120 - speedUpgrades * 25);
                 }
+                if (reward.id === 'ruler') {
+                    // Cooldown drops at L5 / L8 / L11 (the 3-cycle's 3rd step)
+                    const cdTier = existing.level >= 5 ? Math.floor((existing.level - 2) / 3) : 0;
+                    existing.cooldown = Math.max(40, 120 - cdTier * 25);
+                }
                 if (reward.id === 'wand') existing.cooldown = Math.max(5, existing.cooldown - 8);
                 if (reward.id === 'cross') existing.cooldown = Math.max(20, existing.cooldown - 5);
                 if (reward.id === 'knife') existing.cooldown = Math.max(5, existing.cooldown - 2);
                 if (reward.id === 'orb') existing.range += 20;
             } else {
                 if (reward.id === 'whip') p.weapons.push({ type: 'whip', level: 1, timer: 0, cooldown: 120 });
+                if (reward.id === 'ruler') p.weapons.push({ type: 'ruler', level: 1, timer: 0, cooldown: 120 });
                 if (reward.id === 'wand') p.weapons.push({ type: 'wand', level: 1, timer: 0, cooldown: 60 });
                 if (reward.id === 'axe') p.weapons.push({ type: 'axe', level: 1, timer: 0, cooldown: 140 });
                 if (reward.id === 'cross') p.weapons.push({ type: 'cross', level: 1, timer: 0, cooldown: 80 });
@@ -3455,6 +3633,37 @@ class MainScene extends Phaser.Scene {
 registerScene(MainScene);
 
 // --- VS WRAPPER FUNCTIONS ---
+// Character select: shown FIRST when the VS game is picked. The chosen hero is
+// stored on window.vsSelectedCharacter and read by MainScene.create().
+function showVsCharSelect() {
+    document.getElementById('startScreen').classList.add('hidden');
+    document.getElementById('gameSelectionOverlay').classList.add('hidden');
+    document.getElementById('gameIntroOverlay').classList.add('hidden');
+    document.getElementById('vsCharSelect').classList.remove('hidden');
+    selectVsCharacter(window.vsSelectedCharacter || 'monitor');
+}
+
+function selectVsCharacter(id) {
+    if (!VS_CHARACTERS[id]) id = 'monitor';
+    window.vsSelectedCharacter = id;
+    const ch = VS_CHARACTERS[id];
+    const mon = document.getElementById('vsCharMonitor');
+    const sk = document.getElementById('vsCharSkippy');
+    if (mon) mon.classList.toggle('vs-char-selected', id === 'monitor');
+    if (sk) sk.classList.toggle('vs-char-selected', id === 'skippy');
+    const nameEl = document.getElementById('vsCharName');
+    const wEl = document.getElementById('vsCharWeapon');
+    const iconEl = document.getElementById('vsCharWeaponIcon');
+    if (nameEl) nameEl.textContent = ch.name;
+    if (wEl) wEl.textContent = '专属武器 Weapon: ' + ch.weaponName;
+    if (iconEl) iconEl.src = 'sprites/vs/' + ch.weaponIcon + '.png';
+}
+
+function startVsFromCharSelect() {
+    document.getElementById('vsCharSelect').classList.add('hidden');
+    showGameIntro();
+}
+
 function showGameIntro() {
     document.getElementById('startScreen').classList.add('hidden');
     document.getElementById('gameSelectionOverlay').classList.add('hidden');
@@ -3545,7 +3754,13 @@ function showPowerUpSelection(context) {
     const scene = game.scene.getScene('MainScene');
     const existingWeapons = scene ? scene.playerStats.weapons : [];
 
-    const shuffled = [...POWER_UPS].sort(() => 0.5 - Math.random()).slice(0, 3);
+    // Exclusive hero weapons: never offer the OTHER hero's special weapon
+    // (Class Monitor never sees the Jump Rope, Skippy never sees the Ruler)
+    const myWeapon = (scene && scene.character) ? scene.character.weapon : 'ruler';
+    const otherSpecials = Object.values(VS_CHARACTERS).map(c => c.weapon).filter(wid => wid !== myWeapon);
+    const pool = POWER_UPS.filter(pu => !otherSpecials.includes(pu.id));
+
+    const shuffled = [...pool].sort(() => 0.5 - Math.random()).slice(0, 3);
     const allGameTypes = ['spelling', 'wordrec', 'scramble', 'sentencematch'];
     const pairings = shuffled.map(reward => {
         const randomGameType = allGameTypes[Math.floor(Math.random() * allGameTypes.length)];
@@ -3555,21 +3770,13 @@ function showPowerUpSelection(context) {
     pairings.forEach(({ reward, gameType }) => {
         let description = reward.desc;
         if (reward.id === 'whip') {
+            // Jump Rope (Skippy): damage bumps at L2/5/8…, speed at L3/6/9…
             const weapon = existingWeapons.find(w => w.type === 'whip');
             if (weapon) {
                 const nextLevel = weapon.level + 1;
-                if (nextLevel === 2) {
-                    description = "Flaming Wake (+Damage & Fire Arc)";
-                } else if (nextLevel === 3) {
-                    description = "Ruler Speed (Attack More Often)";
-                } else if (nextLevel === 4) {
-                    description = "Fiery Expansion (+Ruler Width & Flame Aura)";
-                } else {
-                    const cycle = (nextLevel - 2) % 3;
-                    if (cycle === 0) description = "Searing Heat (+Damage)";
-                    else if (cycle === 1) description = "Blazing Speed (Attack More Often)";
-                    else description = "Wildfire Scope (+Ruler Width & Flame Aura)";
-                }
+                if (nextLevel % 3 === 2) description = "Harder Swing (+Damage)";
+                else if (nextLevel % 3 === 0) description = "Faster Skipping (Swing More Often)";
+                else description = "Extra Practice (+Power)";
             }
         } else {
             // Other weapons: show the NEXT level's evolution milestone (or the
@@ -3585,7 +3792,8 @@ function showPowerUpSelection(context) {
                     axe: '+1 Book & Bigger',
                     cross: 'Bigger Boomerang',
                     water: 'Bigger Splash Zone',
-                    knife: '+1 Scissors & Bigger'
+                    knife: '+1 Scissors & Bigger',
+                    ruler: 'Sharper Ruler (+Damage)'
                 };
                 description = ms || defaults[reward.id] || reward.desc;
             }

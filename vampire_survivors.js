@@ -2295,7 +2295,7 @@ class MainScene extends Phaser.Scene {
     }
 
     fireAxe(w) {
-        if (!playSfxSample('sfx/book_travelling.mp3', 0.45, undefined, 140)) synthPageFlutter();
+        if (!playSfxSample('sfx/book_travelling.mp3', 0.3, undefined, 140)) synthPageFlutter();
         // Book count: 1,1,2,2,3,3,4(cap) at L1,L2,L3,L4,L5,L6,L7+
         const count = Math.min(4, Math.floor((w.level + 1) / 2));
         const key = this.itemTex('axe', 'axe');

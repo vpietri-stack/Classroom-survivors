@@ -858,10 +858,20 @@ class MainScene extends Phaser.Scene {
 
         const enemy = this.add.image(ex, ey, textureKey).setOrigin(0.5);
         this.physics.add.existing(enemy);
-        enemy.body.setCircle(10);
+        // Body sized to the DRAWN frame — the old fixed 10px circle centred in
+        // the frame left most of the sprite outside the hitbox (the dropout's
+        // whole head: bullets visibly passed through it). Cover ~75-85% of the
+        // art per type; the zombie's circle is also nudged UP to include the
+        // head (feet matter less than the visible torso/head).
+        const fw = enemy.width, fh = enemy.height;
+        let bodyR;
+        if (type === 2) bodyR = Math.round(fh * 0.42);            // tall dropout
+        else if (isBat) bodyR = Math.round(Math.max(fw, fh) * 0.38); // spread wings
+        else bodyR = Math.round(Math.max(fw, fh) * 0.36);         // long low rat
+        enemy.body.setCircle(bodyR);
         enemy.body.setOffset(
-            (enemy.width - 10 * 2) / 2,
-            (enemy.height - 10 * 2) / 2
+            (fw - bodyR * 2) / 2,
+            (fh - bodyR * 2) / 2 - (type === 2 ? fh * 0.04 : 0)
         );
         enemy.hp = hp; enemy.maxHp = hp; enemy.speed = speed; enemy.isBoss = false;
         enemy.isBat = isBat;

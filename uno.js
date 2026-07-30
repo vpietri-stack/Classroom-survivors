@@ -1729,6 +1729,10 @@ function triggerUno() {
     // Undo VS HiDPI if it was active: restore CSS-px RESIZE + drop the HiDPI
     // window-resize listener so it can't fight Uno's container-based sizing.
     if (typeof exitHiDpi === 'function') exitHiDpi();
+    // Re-show the shared Phaser canvas: showGameSelection()/exitVampireSurvivors()
+    // set display:none to hide it on the menu, and triggerUno never restored it,
+    // so a VS -> menu -> UNO path rendered UNO onto a hidden canvas (invisible cards).
+    if (typeof game !== 'undefined' && game && game.canvas) game.canvas.style.display = '';
     if (typeof srGameResults !== 'undefined') srGameResults = [];
     if (typeof srInSessionFailures !== 'undefined') srInSessionFailures = new Set();
     if (typeof srInSessionSuccesses !== 'undefined') srInSessionSuccesses = new Set();

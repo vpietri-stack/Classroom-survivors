@@ -1,13 +1,11 @@
-// Bake the Ruler slash VFX (sprites/vs/fx_slash.png): a glowing blue energy
-// COMMA — narrow pointed tip at one angular end, widening to a fat rounded end
-// (matches the ruler arm's chop: thin at the start of the swing, wide at the
-// finish). Spans ±80° around +x (belly bulges toward +x) so in-game rotation =
-// facing and the arc never wraps behind the player. Layered glow → blue → cyan
-// → white core, rendered additively in-game.
+// Bake the Ruler slash VFX (sprites/vs/fx_slash3.png): a glowing blue energy
+// crescent matching the user's CyclicSlash reference — THIN at the swing's
+// start, THICKEST just past the middle, slightly tapered (not pointed) at the
+// end, closed with a small rounded cap. Spans ±80° around +x (belly bulges
+// toward +x) so in-game rotation = facing and it never wraps behind the player.
 //
-// Calibration: the forward reach (center → outer edge at angle 0) is ~R + th(0.5)
-// ≈ 135 + 41 = 176px on the 512 canvas. drawSlashCrescent scales by len/176 so
-// the crescent's forward reach matches the hitbox reach exactly.
+// Calibration: forward reach (center → outer edge at angle 0) ≈ R + th(0.5)
+// ≈ 135 + 52 = 187px on the 512 canvas. drawSlashCrescent scales by len/187.
 const { chromium } = require('playwright-core');
 const fs = require('fs');
 const EXE = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
@@ -16,13 +14,16 @@ const EXE = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
     const page = await browser.newPage();
     const url = await page.evaluate(() => {
         const S = 512, C = S / 2, R = 135, H = 1.40; // ±80° span, centreline radius
-        const MAXT = 62;                              // fat-end half-thickness
+        const MAXT = 56;                              // belly half-thickness
         const cv = document.createElement('canvas'); cv.width = S; cv.height = S;
         const ctx = cv.getContext('2d');
 
-        // Comma thickness: 0 (point) at t=0 (angle -H, swing start) growing to
-        // MAXT (fat) at t=1 (angle +H, swing finish). Slight ragged jitter.
-        const th = t => MAXT * Math.pow(t, 0.62);
+        // Sword-slash profile: pointed thin START (t=0), thickest belly just
+        // past the middle (t≈0.55), easing down to ~25% at the END (slightly
+        // tapered, closed by the rounded cap below) — NOT a fat comma blob.
+        const th = t => t < 0.55
+            ? MAXT * Math.pow(t / 0.55, 0.7)
+            : MAXT * (1 - 0.75 * Math.pow((t - 0.55) / 0.45, 1.4));
         const jit = [];
         for (let i = 0; i <= 200; i++) jit.push((Math.random() - 0.5) * 5);
         const ribbon = (mult, fill, blur) => {
@@ -70,11 +71,10 @@ const EXE = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
         }
         return cv.toDataURL('image/png');
     });
-    fs.writeFileSync('sprites/vs/fx_slash2.png', Buffer.from(url.split(',')[1], 'base64'));
-    console.log('fx_slash2.png written (comma, +-80deg, rounded fat-end cap, forward reach ~176px)');
-    // NOTE: renamed fx_slash -> fx_slash2 on purpose: the in-place re-bake was
-    // served STALE by HTTP/proxy caches on some devices (token bump only busts
-    // IndexedDB, not the fetch URL). A new filename misses every cache layer.
+    fs.writeFileSync('sprites/vs/fx_slash3.png', Buffer.from(url.split(',')[1], 'base64'));
+    console.log('fx_slash3.png written (crescent: thin start / thick middle / tapered end, +-80deg, reach ~187px)');
+    // NOTE: renamed again (fx_slash2 -> fx_slash3): in-place re-bakes get served
+    // STALE by HTTP/proxy caches; a new filename misses every cache layer.
     await browser.close();
     process.exit(0);
 })().catch(e => { console.error('FAIL:', e.message); process.exit(1); });

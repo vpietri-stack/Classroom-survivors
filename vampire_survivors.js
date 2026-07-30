@@ -85,9 +85,9 @@ class MainScene extends Phaser.Scene {
         Object.values(ITEM_SPRITES).forEach(n =>
             this.load.image('item_' + n, u('sprites/vs/item_' + n + '.png')));
         this.load.image('item_star', u('sprites/vs/item_star.png')); // XP drops
-        // Ruler slash VFX: baked blue energy comma (vs_make_fx_slash.js).
-        // File renamed fx_slash2 to bust stale HTTP/proxy caches of the old bake
-        this.load.image('fx_slash', u('sprites/vs/fx_slash2.png'));
+        // Ruler slash VFX: baked blue energy crescent (vs_make_fx_slash.js).
+        // Renamed per re-bake (v3) to bust stale HTTP/proxy caches of old bakes
+        this.load.image('fx_slash', u('sprites/vs/fx_slash3.png'));
         // Rat/bat enemy frames (Nano Banana concept art, sliced by
         // vs_slice_enemies.js from the magenta-background sheets)
         ['rat_walk', 'rat_hit', 'bat_up', 'bat_down', 'bat_hit'].forEach(n =>
@@ -1741,8 +1741,9 @@ class MainScene extends Phaser.Scene {
             if (this._slashImgs) {
                 this._slashImgs.forEach(im => { this.tweens.killTweensOf(im); im.destroy(); });
                 if (this._slashWipeTween) { this._slashWipeTween.stop(); this._slashWipeTween = null; }
+                if (this._slashMaskG) { this._slashMaskG.destroy(); this._slashMaskG = null; }
             }
-            const sc = len / 176; // texture forward reach ≈176px at scale 1
+            const sc = len / 187; // texture forward reach ≈187px at scale 1
             const mk = (blend, alpha) => {
                 const im = this.add.image(this.player.x, this.player.y, 'fx_slash').setDepth(46);
                 im.setBlendMode(blend);
@@ -1756,32 +1757,51 @@ class MainScene extends Phaser.Scene {
             // Chop down through the swing (narrow tip -> wide end); stays vivid,
             // alpha only fades in the back half so it never washes out
             this.tweens.add({ targets: imgs, rotation: 0.12 * facing, scale: sc * 1.06, duration: 200, ease: 'Cubic.out' });
-            // WIND-WIPE fade: instead of vanishing all at once, a crop edge
-            // eats the comma from the TOP (thin tip first — the same order the
-            // swing draws it) while alpha eases down, and stray specks drift
-            // off the dissolving edge — the slash "blows away". setCrop is
-            // texture-space so it works on both WebGL (PC) and Canvas (phone).
-            const wipe = { p: 0 };
-            const TEX = 512;
+            // ARC-FOLLOWING dissolve (per the user's CyclicSlash reference): a
+            // pie-slice GeometryMask contracts along the crescent's own sweep —
+            // the tail (thin start) vanishes first and the remainder shrinks
+            // toward the end while staying bright, with specks drifting off the
+            // receding edge. Straight crop-wipes read wrong on a curved slash.
+            const HSPAN = 1.40; // texture angular half-span (bake H)
+            const maskG = this.make.graphics({ add: false });
+            const mask = maskG.createGeometryMask();
+            imgs.forEach(im => im.setMask(mask));
+            const drawSlice = (cutU) => {
+                maskG.clear();
+                maskG.fillStyle(0xffffff);
+                const cx = imgs[0].x, cy = imgs[0].y, rad = len * 2.2;
+                const a0 = facing === 1 ? cutU : Math.PI - cutU;
+                const a1 = facing === 1 ? HSPAN + 0.45 : Math.PI - (HSPAN + 0.45);
+                maskG.beginPath();
+                maskG.moveTo(cx, cy);
+                maskG.arc(cx, cy, rad, a0, a1, facing === -1);
+                maskG.closePath();
+                maskG.fillPath();
+            };
+            drawSlice(-HSPAN - 0.3); // whole slash visible at first
+            this._slashMaskG = maskG;
+            const wipe = { cut: -HSPAN - 0.3 };
             this._slashWipeTween = this.tweens.add({
-                targets: wipe, p: 1, delay: 110, duration: 240, ease: 'Sine.in',
+                targets: wipe, cut: HSPAN + 0.5, delay: 110, duration: 260, ease: 'Sine.in',
                 onUpdate: () => {
-                    const cy = wipe.p * TEX;
-                    imgs.forEach(im => {
-                        if (!im.active) return;
-                        im.setCrop(0, cy, TEX, TEX - cy);
-                        im.setAlpha((im.blendMode === Phaser.BlendModes.ADD ? 0.85 : 0.9) * (1 - wipe.p * 0.55));
-                    });
-                    // wind specks at the dissolve edge
-                    if (imgs[0].active && Math.random() < 0.45) {
-                        const ex = imgs[0].x + (20 + Math.random() * 150) * sc * facing;
-                        const ey = imgs[0].y + (cy - TEX / 2) * sc + (Math.random() - 0.5) * 14;
-                        const sp = this.add.circle(ex, ey, 2.5, 0xbfe4ff, 0.7).setDepth(46);
-                        this.tweens.add({ targets: sp, x: sp.x + 26 * facing, y: sp.y - 10, alpha: 0, duration: 240, onComplete: () => sp.destroy() });
+                    if (!imgs[0].active) return;
+                    drawSlice(wipe.cut);
+                    // remaining band stays bright — only a gentle overall dim
+                    const p = (wipe.cut + HSPAN + 0.3) / (2 * HSPAN + 0.8);
+                    imgs.forEach(im => im.setAlpha((im.blendMode === Phaser.BlendModes.ADD ? 0.85 : 0.9) * (1 - p * 0.35)));
+                    // wind specks drifting off the receding edge (on the band)
+                    if (Math.random() < 0.5) {
+                        const wa = facing === 1 ? wipe.cut : Math.PI - wipe.cut;
+                        const rr = (115 + Math.random() * 55) * sc;
+                        const sp = this.add.circle(imgs[0].x + Math.cos(wa) * rr,
+                            imgs[0].y + Math.sin(wa) * rr, 2.5, 0xbfe4ff, 0.7).setDepth(46);
+                        this.tweens.add({ targets: sp, x: sp.x + 24 * facing, y: sp.y - 8, alpha: 0, duration: 230, onComplete: () => sp.destroy() });
                     }
                 },
                 onComplete: () => {
                     imgs.forEach(im => im.destroy());
+                    maskG.destroy();
+                    if (this._slashMaskG === maskG) this._slashMaskG = null;
                     if (this._slashImgs === imgs) this._slashImgs = null;
                     this._slashWipeTween = null;
                 }

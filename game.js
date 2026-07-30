@@ -387,8 +387,13 @@ function loadSfxSample(path) {
         .then(b => { _sfxBuffers[path] = b; })
         .catch(() => { _sfxBuffers[path] = false; });
 }
-function playSfxSample(path, vol = 0.5) {
+// playSfxSample returns false while loading / on failure so callers can fall
+// back to the procedural synths. Optional dur trims playback (e.g. a clip with
+// a rubbish tail); optional throttleMs coalesces crowd events into one sound
+// (a throttled call returns TRUE so the caller doesn't fire the synth either).
+function playSfxSample(path, vol = 0.5, dur, throttleMs) {
     if (!audioCtx) return false;
+    if (throttleMs && !sfxOK('smp_' + path, throttleMs)) return true;
     const b = _sfxBuffers[path];
     if (b === undefined) { loadSfxSample(path); return false; }
     if (!b || b === 'loading') return false;
@@ -397,7 +402,7 @@ function playSfxSample(path, vol = 0.5) {
     const g = audioCtx.createGain();
     g.gain.value = vol;
     src.connect(g); g.connect(audioCtx.destination);
-    src.start();
+    if (dur) src.start(0, 0, dur); else src.start();
     return true;
 }
 

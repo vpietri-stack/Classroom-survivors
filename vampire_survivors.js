@@ -512,7 +512,7 @@ class MainScene extends Phaser.Scene {
                     e._zapUntil = this.time.now + (b.stunFrames / 60) * 1000;
                 }
                 this.spawnBurstParticles(e.x, e.y, 0xfff27a, 6, 3);
-                synthZap(); // self-throttled
+                if (!playSfxSample('sfx/electric_arc_hit.mp3', 0.5, undefined, 55)) synthZap();
             } else if (b.type === 'wand' && b.pierce > 0) {
                 // Plane evolution (L2+): Piercing Dart punches through enemies
                 if (b.hitList && b.hitList.includes(e)) return;
@@ -520,7 +520,7 @@ class MainScene extends Phaser.Scene {
                 b.hitList.push(e);
                 b.pierce--;
                 this.damageEnemy(e, b.dmg, 100);
-                synthPlaneHit();                          // arrow-through-straw
+                if (!playSfxSample('sfx/paper_plane_hit.mp3', 0.5, undefined, 70)) synthPlaneHit();
             } else if (b.type === 'knife') {
                 // Scissors evolution (L2+): split into two on hit
                 if (b.hitList && b.hitList.includes(e)) return;
@@ -530,7 +530,7 @@ class MainScene extends Phaser.Scene {
                 b.destroy();
             } else {
                 this.damageEnemy(e, b.dmg, 100);
-                if (b.type === 'wand') synthPlaneHit();   // L1 dart still thunks
+                if (b.type === 'wand' && !playSfxSample('sfx/paper_plane_hit.mp3', 0.5, undefined, 70)) synthPlaneHit();
                 b.destroy();
             }
         });
@@ -539,6 +539,8 @@ class MainScene extends Phaser.Scene {
             if (!e.lastFireWakeTime || now - e.lastFireWakeTime > 200) {
                 e.lastFireWakeTime = now;
                 this.damageEnemy(e, f.dmg, f.knockback !== undefined ? f.knockback : 10);
+                // Jump Rope L2+ burning-crescent fireball hitting an enemy
+                playSfxSample('sfx/jump_rope_fireball_hit.mp3', 0.5, undefined, 120);
             }
         }, null, this);
         this.physics.add.overlap(this.player, this.gems, (p, g) => {
@@ -566,11 +568,13 @@ class MainScene extends Phaser.Scene {
         }
 
         this.applyReward({ id: this.character.weapon, type: 'weapon' });
-        // Decode the sword slash/hit recordings up front so the very first
-        // ruler swing already uses the real samples (synth covers misses)
+        // Decode all VS sound recordings up front so the first use of each
+        // already plays the real sample (procedural synth covers any gaps)
         if (typeof loadSfxSample === 'function') {
-            loadSfxSample('sfx/sword-slash.mp3');
-            loadSfxSample('sfx/sword-hit.mp3');
+            ['sword-slash', 'sword-hit', 'jump_rope_fireball_hit', 'electric_arc_hit',
+                'paper_plane_travelling', 'paper_plane_hit', 'book_travelling',
+                'scissors_travelling', 'tornado', 'zombie_death', 'bat_death']
+                .forEach(n => loadSfxSample('sfx/' + n + '.mp3'));
         }
         updateDOMHUD(this.playerStats, 0, 0);
 
@@ -860,6 +864,7 @@ class MainScene extends Phaser.Scene {
         );
         enemy.hp = hp; enemy.maxHp = hp; enemy.speed = speed; enemy.isBoss = false;
         enemy.isBat = isBat;
+        enemy.enemyType = type; // 0=rat 1=bat 2=zombie (for death SFX)
         enemy.stunTimer = 0;
         // Animation frames: bat flaps up/down, zombie shambles A/B with attack
         // + death poses (6-frame dropout sheet), rat holds a walk frame; all
@@ -1626,7 +1631,7 @@ class MainScene extends Phaser.Scene {
             if (d < minDist) { minDist = d; nearest = e; }
         });
         if (nearest) {
-            synthSwoosh('plane');
+            if (!playSfxSample('sfx/paper_plane_travelling.mp3', 0.45, undefined, 120)) synthSwoosh('plane');
             const key = this.itemTex('wand', null);
             const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, nearest.x, nearest.y);
             let b;
@@ -2285,7 +2290,7 @@ class MainScene extends Phaser.Scene {
     }
 
     fireAxe(w) {
-        synthPageFlutter();
+        if (!playSfxSample('sfx/book_travelling.mp3', 0.45, undefined, 140)) synthPageFlutter();
         // Book count: 1,1,2,2,3,3,4(cap) at L1,L2,L3,L4,L5,L6,L7+
         const count = Math.min(4, Math.floor((w.level + 1) / 2));
         const key = this.itemTex('axe', 'axe');
@@ -2356,7 +2361,8 @@ class MainScene extends Phaser.Scene {
     }
 
     fireKnife(w) {
-        synthSwoosh('scissors');
+        // Recording has a rubbish tail — only the first 2s is usable
+        if (!playSfxSample('sfx/scissors_travelling.mp3', 0.45, 2, 60)) synthSwoosh('scissors');
         const count = w.level;
         const spreadAngle = 10 * (Math.PI / 180);
         const key = this.itemTex('knife', 'knife');
@@ -2736,7 +2742,12 @@ class MainScene extends Phaser.Scene {
             enemy.body.checkCollision.none = true;
             enemy.body.setVelocity(enemy.body.velocity.x * 1.5, enemy.body.velocity.y * 1.5);
             enemy.body.setDrag(1000);
-            synthHit();
+            // Death SFX by enemy kind (bat/zombie get their own recordings;
+            // rats/others keep the synth pop; boss handled by its own juice)
+            let deathPlayed = false;
+            if (enemy.isBat) deathPlayed = playSfxSample('sfx/bat_death.mp3', 0.5, undefined, 60);
+            else if (enemy.enemyType === 2) deathPlayed = playSfxSample('sfx/zombie_death.mp3', 0.5, undefined, 60);
+            if (!deathPlayed) synthHit();
 
             // Kill juice: combo counter
             this.registerCombo();
@@ -3373,6 +3384,7 @@ class MainScene extends Phaser.Scene {
     }
 
     spawnTornado() {
+        playSfxSample('sfx/tornado.mp3', 0.5, undefined, 400);
         // Kill zone rides the wandering spiral; enemies are also sucked in
         const tornado = this.add.circle(this.player.x, this.player.y, 60, 0xffffff, 0);
         this.physics.add.existing(tornado);

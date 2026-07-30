@@ -9,7 +9,8 @@
 //     AssetCache.VS_SPRITES (files with '_raw' in the name are
 //     uncut tooling sheets, never loaded at runtime -> excluded)
 //  3) every .mp3 under music/ on disk is listed in AssetCache.MUSIC
-//  4) every listed path exists on disk        (stale entry -> FAIL)
+//  4) every .mp3 under sfx/ on disk is listed in AssetCache.SFX
+//  5) every listed path exists on disk        (stale entry -> FAIL)
 // Vocab images + audio_mp3 need no manifest: their paths are
 // derived from TEACHING_CONTENT at runtime and cached on first
 // use, so new files are covered automatically.
@@ -62,6 +63,7 @@ checkGroup('TD_SPRITES', 'sprites/td', '.png');
 // '_raw' sheets are Nano Banana slicing inputs, never loaded at runtime
 checkGroup('VS_SPRITES', 'sprites/vs', '.png', f => !/_raw/.test(f));
 checkGroup('MUSIC', 'music', '.mp3');
+checkGroup('SFX', 'sfx', '.mp3');
 
 console.log('\n--- ASSET MANIFEST ---');
 console.log(pass + ' passed, ' + fail + ' failed');

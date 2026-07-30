@@ -3787,6 +3787,14 @@ function showVsCharSelect() {
     document.getElementById('gameSelectionOverlay').classList.add('hidden');
     document.getElementById('gameIntroOverlay').classList.add('hidden');
     document.getElementById('vsCharSelect').classList.remove('hidden');
+    // Swap the static portrait <img>s to cached blob URLs when available
+    // (index.html ships plain paths; AssetCache prefetches the portraits).
+    if (window.AssetCache) {
+        const mon = document.querySelector('#vsCharMonitor img');
+        const sk = document.querySelector('#vsCharSkippy img');
+        if (mon) mon.src = AssetCache.url('sprites/vs/portrait_monitor.png');
+        if (sk) sk.src = AssetCache.url('sprites/vs/portrait_skippy.png');
+    }
     selectVsCharacter(window.vsSelectedCharacter || 'monitor');
 }
 
@@ -3803,7 +3811,7 @@ function selectVsCharacter(id) {
     const iconEl = document.getElementById('vsCharWeaponIcon');
     if (nameEl) nameEl.textContent = ch.name;
     if (wEl) wEl.textContent = '专属武器 Weapon: ' + ch.weaponName;
-    if (iconEl) iconEl.src = 'sprites/vs/' + ch.weaponIcon + '.png';
+    if (iconEl) iconEl.src = (window.AssetCache ? window.AssetCache.url('sprites/vs/' + ch.weaponIcon + '.png') : 'sprites/vs/' + ch.weaponIcon + '.png');
 }
 
 function startVsFromCharSelect() {

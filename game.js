@@ -381,8 +381,14 @@ const _sfxBuffers = {};
 function loadSfxSample(path) {
     if (!audioCtx || _sfxBuffers[path] !== undefined) return;
     _sfxBuffers[path] = 'loading';
-    const url = (window.AssetCache && AssetCache.url) ? AssetCache.url(path) : path;
-    fetch(url).then(r => r.arrayBuffer())
+    // Resolve through AssetCache: sfx/ is a prefetched cache group, so this is
+    // usually an instant IndexedDB blob; on a cold cache getBlobUrl downloads
+    // via the gh-proxy mirror AND seeds the cache for next time. Plain path
+    // only when AssetCache is missing or every source failed.
+    const resolved = (window.AssetCache && AssetCache.getBlobUrl)
+        ? AssetCache.getBlobUrl(path).then(u => u || path)
+        : Promise.resolve(path);
+    resolved.then(url => fetch(url)).then(r => r.arrayBuffer())
         .then(ab => audioCtx.decodeAudioData(ab))
         .then(b => { _sfxBuffers[path] = b; })
         .catch(() => { _sfxBuffers[path] = false; });

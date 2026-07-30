@@ -116,9 +116,65 @@ Generated from AI "Nano Banana" sheets by Node + `playwright-core` headless-Chro
 - Background keying auto-detects magenta / grey-checker flood-fill / greyGlobal / transparent. Frames found via connected components + masked crop (no neighbor bleed).
 
 ### AssetCache version tokens (`asset_cache.js` `GROUP_VERSIONS`)
-Media is cached in **IndexedDB keyed by `<groupToken>/<path>`**. Current: `sprites/vs/ = vs-sprites-v3`, `sprites/td/ = td-sprites-v1`, etc.
-- **`test_asset_manifest.js`** asserts every on-disk `sprites/vs/*.png` (excluding `_raw`) is listed in `VS_SPRITES` and vice-versa. Keep them in sync (currently **130 pass**).
-- **PITFALL (important):** when you re-generate a sprite **in place (same filename)**, a token bump only busts the IndexedDB layer — **HTTP/gh-proxy/CDN caches keyed by URL are NOT busted**, so devices can show stale bytes inconsistently. **Prefer RENAMING the file** (e.g. `fx_slash.png → fx_slash2.png → fx_slash3.png`), update the preload path + manifest (the in-game texture key can stay the same). `sfx/` files are new names, no token.
+Media is cached in **IndexedDB keyed by `<groupToken>/<path>`**. Current: `sprites/vs/ = vs-sprites-v3`, `sprites/td/ = td-sprites-v1`, `music/ = music-v1`, `sfx/ = sfx-v1`, etc.
+- **`test_asset_manifest.js`** asserts every on-disk `sprites/vs/*.png` (excluding `_raw`), `sprites/td/*.png`, `music/*.mp3` and `sfx/*.mp3` is listed in the matching manifest (`VS_SPRITES` / `TD_SPRITES` / `MUSIC` / `SFX`) and vice-versa. Keep them in sync.
+- **PITFALL (important):** when you re-generate a sprite **in place (same filename)**, a token bump only busts the IndexedDB layer — **HTTP/gh-proxy/CDN caches keyed by URL are NOT busted**, so devices can show stale bytes inconsistently. **Prefer RENAMING the file** (e.g. `fx_slash.png → fx_slash2.png → fx_slash3.png`), update the preload path + manifest (the in-game texture key can stay the same).
+
+---
+
+## 5b. CHINA HOSTING & CACHING ARCHITECTURE (2026-07-27/28 work — why assets load the way they do)
+
+Students are in mainland China, no VPN, mostly WeChat browser. GitHub Pages is GFW-throttled
+(sometimes minutes for a few MB) and WeChat aggressively evicts the HTTP cache. Everything
+below exists to work around that. **Full details live in the code comments of the named files.**
+
+### The four load paths (know which one an asset uses)
+1. **Whisper speech model (41MB)** — `speech_engine.js` `MODEL_SOURCES`: **ModelScope first**
+   (`modelscope.cn/models/Xenova/whisper-tiny.en/resolve/master/`, mainland CDN, CORS:*, ~2.3MB/s
+   no-VPN, verified), then `gh-proxy.com`, then same-origin. Weights land in IndexedDB
+   (`whisper-model-cache`). huggingface.co is blocked and NEVER contacted; ghproxy.net is dead (removed).
+2. **Speech runtime lib (Transformers.js + 23MB ORT wasm)** — IMPORTED (needs real JS/wasm MIME),
+   so it can never go through proxies. Served from the separate, NEVER-redeployed repo
+   **`Classroom-survivors-lib`** (`vpietri-stack.github.io/Classroom-survivors-lib/tjs-v3/`, same origin).
+   WHY: GH Pages ETags are `hex(deploy-mtime)-hex(size)` — every app deploy re-stamps every file,
+   which used to invalidate the browser's compiled-wasm cache → **~160s recompile per device per
+   deploy**. The stable repo's ETags never change, so the compile cache survives app deploys.
+   `pickLibBase()` probes it and falls back to the app's own `lib/` copies (KEEP them).
+   **RULES:** never edit files in that repo in place; upgrades = new `tjs-vN/` folder (lib+wasm are a
+   version-locked PAIR) + bump `STABLE_LIB_BASE`; don't push to it for any other reason (see its README).
+3. **Runtime media** (game sprites, vocab images, hand-recorded `audio_mp3/`, `music/` BGM, `sfx/`
+   recordings) — `asset_cache.js` (§5): gh-proxy mirror → same-origin fallback → IndexedDB forever.
+   Game manifests + BGM + SFX prefetch 2s after page load; the current teaching page's vocab
+   images/MP3s prefetch at login (auto-derived from `TEACHING_CONTENT`, zero maintenance).
+   Consumers resolve via `AssetCache.url()` (sync, Phaser preloads / `<img>`) or `getBlobUrl()`
+   (async, seeds cache): VS/TD `preload()`, `showVocabImage`, `bgm.js`, `loadSfxSample`, char-select imgs.
+4. **Word/phrase audio chain** (`game.js` `playTTS`): **cached local MP3 → Youdao TTS (1s timeout) →
+   MP3 via gh-proxy (seeds cache) → Baidu TTS (robotic, last resort) → browser speechSynthesis**.
+   The teacher's recordings are preferred because Youdao mangles long phrases/word-pairs.
+   MP3 filenames = exact phrase text (sanitized of Windows-illegal chars) + `.mp3`.
+
+### Speech debug panel (`speech_debug.js`)
+Always-present 🐞 button bottom-left (state-colored dot: blue loading / purple compiling / green
+ready / red error); tap toggles the full panel (mirror, %, rolling `__speechLog`). Round E logs
+"Gate skipped: state=…" when the speech gate silently skips — first thing to check when
+"speech isn't prompting".
+
+### Speech first-load economics (field-measured, no VPN)
+Download via ModelScope ≈ seconds; WASM compile ≈ 160s per device (CPU-bound, unavoidable);
+repeat visits ≈ instant while caches hold. WeChat cache eviction can still force a recompile.
+
+### EdgeOne Pages (Tencent) — parked, awaiting custom domain
+Project `classroom-survivors-preview` (intl account, region "Global (MLC excluded)") auto-deploys
+from the preview repo, but the free `*.edgeone.dev` domain **returns 401 to mainland visitors by
+design** — a custom domain (no ICP needed for that region) is required to actually serve students.
+Also pending if revived: `.mjs` served as `application/octet-stream` (breaks module imports; needs
+an `edgeone.json` header override), missing CI-injected `app-config.json`, and a compile command
+that strips the >25MiB model files (`find . -type f -size +25M ! -path "./.git/*" -print -delete`).
+
+### gh-proxy caveats
+Free third-party proxy — fine as a mirror, never as a sole source (ghproxy.net died mid-project).
+Proxies serve `.js/.mjs` as `text/plain`, so **imported code can never be proxied** — only fetched
+bytes (model weights, images, audio).
 
 ---
 

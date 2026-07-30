@@ -41,7 +41,8 @@
     { prefix: 'sprites/vs/',   token: 'vs-sprites-v3' },
     { prefix: 'images/vocab/', token: 'vocab-v1' },
     { prefix: 'audio_mp3/',    token: 'audio-v1' },
-    { prefix: 'music/',        token: 'music-v1' }
+    { prefix: 'music/',        token: 'music-v1' },
+    { prefix: 'sfx/',          token: 'sfx-v1' }
   ];
   var MISC_TOKEN = 'misc-v1';
   function keyFor(path) {
@@ -129,6 +130,23 @@
   // GitHub Pages without a VPN, so it's prefetched + cached like the sprites.
   var MUSIC = [
     'music/study_hall_shuffle.mp3'
+  ];
+
+  // Sampled SFX recordings (game.js loadSfxSample/playSfxSample). Without the
+  // cache these streamed from GitHub Pages, so first plays fell back to the
+  // procedural synths mid-game. Manifest-checked like the sprite lists.
+  var SFX = [
+    'sfx/bat_death.mp3',
+    'sfx/book_travelling.mp3',
+    'sfx/electric_arc_hit.mp3',
+    'sfx/jump_rope_fireball_hit.mp3',
+    'sfx/paper_plane_hit.mp3',
+    'sfx/paper_plane_travelling.mp3',
+    'sfx/scissors_travelling.mp3',
+    'sfx/sword-hit.mp3',
+    'sfx/sword-slash.mp3',
+    'sfx/tornado.mp3',
+    'sfx/zombie_death.mp3'
   ];
 
   var urlMap = {};   // path -> blob: URL (memory; read synchronously by url())
@@ -313,19 +331,21 @@
     audioPath: audioPath,
     TD_SPRITES: TD_SPRITES,
     VS_SPRITES: VS_SPRITES,
-    MUSIC: MUSIC
+    MUSIC: MUSIC,
+    SFX: SFX
   };
 
-  // Game sprites + BGM: warm up shortly after load (never competes with
-  // critical page assets; the Whisper model streams from a different host, no
-  // contention). Page content: poll until login/class selection reveals the
-  // current page — re-checks cheaply so a mid-session page change prefetches
-  // the new page too.
+  // Game sprites + BGM + SFX recordings: warm up shortly after load (never
+  // competes with critical page assets; the Whisper model streams from a
+  // different host, no contention). Page content: poll until login/class
+  // selection reveals the current page — re-checks cheaply so a mid-session
+  // page change prefetches the new page too.
   function start() {
     setTimeout(function () {
       prefetch(TD_SPRITES, 'td-sprites');
       prefetch(VS_SPRITES, 'vs-sprites');
       prefetch(MUSIC, 'music');
+      prefetch(SFX, 'sfx');
     }, 2000);
     setInterval(prefetchCurrentPage, 2000);
   }

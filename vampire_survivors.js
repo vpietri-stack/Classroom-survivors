@@ -566,6 +566,12 @@ class MainScene extends Phaser.Scene {
         }
 
         this.applyReward({ id: this.character.weapon, type: 'weapon' });
+        // Decode the sword slash/hit recordings up front so the very first
+        // ruler swing already uses the real samples (synth covers misses)
+        if (typeof loadSfxSample === 'function') {
+            loadSfxSample('sfx/sword-slash.mp3');
+            loadSfxSample('sfx/sword-hit.mp3');
+        }
         updateDOMHUD(this.playerStats, 0, 0);
 
         for (let i = 0; i < 40; i++) {
@@ -1681,18 +1687,23 @@ class MainScene extends Phaser.Scene {
         const len = 118 * (1 + slashTier * 0.18);
         const half = Math.min(1.35, 0.85 * (1 + slashTier * 0.14));
 
-        synthSwordSlash();
         this.swingRulerArm(160);
         this.drawSlashCrescent(baseAngle, len, half, facing);
 
         // Cone hit-check: within reach AND within the angular span
+        let hitCount = 0;
         this.enemies.getChildren().forEach(e => {
             if (!e.active) return;
             const dx = e.x - this.player.x, dy = e.y - this.player.y;
             if (Math.hypot(dx, dy) > len + 20) return;
             const da = Phaser.Math.Angle.Wrap(Math.atan2(dy, dx) - baseAngle);
-            if (Math.abs(da) <= half) this.damageEnemy(e, slashDmg, 140);
+            if (Math.abs(da) <= half) { this.damageEnemy(e, slashDmg, 140); hitCount++; }
         });
+
+        // Real recordings (user-provided): whiff vs connect. The procedural
+        // synth covers the first swings until the MP3 buffers are decoded.
+        const sample = hitCount > 0 ? 'sfx/sword-hit.mp3' : 'sfx/sword-slash.mp3';
+        if (typeof playSfxSample !== 'function' || !playSfxSample(sample, 0.55)) synthSwordSlash();
 
         // Electric arc unlocks at L2, launched from the slash's outer edge so
         // a bigger slash (L3/6/9) pushes the arc's start further out to match

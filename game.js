@@ -373,6 +373,34 @@ const synthZap = () => {
     }
 };
 
+// ---- Sampled SFX (real recordings beat synthesis for sword sounds) ----
+// Small MP3s under sfx/, decoded ONCE into WebAudio buffers for zero-latency
+// replay. playSfxSample returns false while loading / on failure so callers
+// can fall back to the procedural synths (GFW-resilient: same-origin fetch).
+const _sfxBuffers = {};
+function loadSfxSample(path) {
+    if (!audioCtx || _sfxBuffers[path] !== undefined) return;
+    _sfxBuffers[path] = 'loading';
+    const url = (window.AssetCache && AssetCache.url) ? AssetCache.url(path) : path;
+    fetch(url).then(r => r.arrayBuffer())
+        .then(ab => audioCtx.decodeAudioData(ab))
+        .then(b => { _sfxBuffers[path] = b; })
+        .catch(() => { _sfxBuffers[path] = false; });
+}
+function playSfxSample(path, vol = 0.5) {
+    if (!audioCtx) return false;
+    const b = _sfxBuffers[path];
+    if (b === undefined) { loadSfxSample(path); return false; }
+    if (!b || b === 'loading') return false;
+    const src = audioCtx.createBufferSource();
+    src.buffer = b;
+    const g = audioCtx.createGain();
+    g.gain.value = vol;
+    src.connect(g); g.connect(audioCtx.destination);
+    src.start();
+    return true;
+}
+
 // Triangle hit: woody block ricocheting off a hard surface (tok-tik, two knocks)
 const synthRicochet = () => {
     if (!audioCtx || !sfxOK('ricochet', 60)) return;

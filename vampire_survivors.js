@@ -85,8 +85,9 @@ class MainScene extends Phaser.Scene {
         Object.values(ITEM_SPRITES).forEach(n =>
             this.load.image('item_' + n, u('sprites/vs/item_' + n + '.png')));
         this.load.image('item_star', u('sprites/vs/item_star.png')); // XP drops
-        // Ruler slash VFX: baked blue energy crescent (vs_make_fx_slash.js)
-        this.load.image('fx_slash', u('sprites/vs/fx_slash.png'));
+        // Ruler slash VFX: baked blue energy comma (vs_make_fx_slash.js).
+        // File renamed fx_slash2 to bust stale HTTP/proxy caches of the old bake
+        this.load.image('fx_slash', u('sprites/vs/fx_slash2.png'));
         // Rat/bat enemy frames (Nano Banana concept art, sliced by
         // vs_slice_enemies.js from the magenta-background sheets)
         ['rat_walk', 'rat_hit', 'bat_up', 'bat_down', 'bat_hit'].forEach(n =>

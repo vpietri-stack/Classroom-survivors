@@ -37,6 +37,10 @@ const EXE = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
                 const x = C + Math.cos(a) * r, y = C + Math.sin(a) * r;
                 if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             }
+            // ROUNDED cap on the fat end — the straight polygon close read as
+            // the VFX being "cut off in a straight line" in-game
+            const thEnd = Math.max(0.5, th(1) * mult);
+            ctx.arc(C + Math.cos(H) * R, C + Math.sin(H) * R, thEnd, H, H + Math.PI, false);
             for (let i = N; i >= 0; i--) {                 // inner edge back
                 const t = i / N, a = -H + 2 * H * t;
                 const r = R + jit[Math.floor(t * 200)] - Math.max(0.5, th(t) * mult);
@@ -66,8 +70,11 @@ const EXE = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
         }
         return cv.toDataURL('image/png');
     });
-    fs.writeFileSync('sprites/vs/fx_slash.png', Buffer.from(url.split(',')[1], 'base64'));
-    console.log('fx_slash.png written (comma, +-80deg, forward reach ~176px)');
+    fs.writeFileSync('sprites/vs/fx_slash2.png', Buffer.from(url.split(',')[1], 'base64'));
+    console.log('fx_slash2.png written (comma, +-80deg, rounded fat-end cap, forward reach ~176px)');
+    // NOTE: renamed fx_slash -> fx_slash2 on purpose: the in-place re-bake was
+    // served STALE by HTTP/proxy caches on some devices (token bump only busts
+    // IndexedDB, not the fetch URL). A new filename misses every cache layer.
     await browser.close();
     process.exit(0);
 })().catch(e => { console.error('FAIL:', e.message); process.exit(1); });

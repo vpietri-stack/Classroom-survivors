@@ -1740,6 +1740,7 @@ class MainScene extends Phaser.Scene {
         if (this.textures.exists('fx_slash')) {
             if (this._slashImgs) {
                 this._slashImgs.forEach(im => { this.tweens.killTweensOf(im); im.destroy(); });
+                if (this._slashWipeTween) { this._slashWipeTween.stop(); this._slashWipeTween = null; }
             }
             const sc = len / 176; // texture forward reach ≈176px at scale 1
             const mk = (blend, alpha) => {
@@ -1755,9 +1756,35 @@ class MainScene extends Phaser.Scene {
             // Chop down through the swing (narrow tip -> wide end); stays vivid,
             // alpha only fades in the back half so it never washes out
             this.tweens.add({ targets: imgs, rotation: 0.12 * facing, scale: sc * 1.06, duration: 200, ease: 'Cubic.out' });
-            this.tweens.add({
-                targets: imgs, alpha: 0, delay: 120, duration: 130, ease: 'Quad.in',
-                onComplete: () => { imgs.forEach(im => im.destroy()); if (this._slashImgs === imgs) this._slashImgs = null; }
+            // WIND-WIPE fade: instead of vanishing all at once, a crop edge
+            // eats the comma from the TOP (thin tip first — the same order the
+            // swing draws it) while alpha eases down, and stray specks drift
+            // off the dissolving edge — the slash "blows away". setCrop is
+            // texture-space so it works on both WebGL (PC) and Canvas (phone).
+            const wipe = { p: 0 };
+            const TEX = 512;
+            this._slashWipeTween = this.tweens.add({
+                targets: wipe, p: 1, delay: 110, duration: 240, ease: 'Sine.in',
+                onUpdate: () => {
+                    const cy = wipe.p * TEX;
+                    imgs.forEach(im => {
+                        if (!im.active) return;
+                        im.setCrop(0, cy, TEX, TEX - cy);
+                        im.setAlpha((im.blendMode === Phaser.BlendModes.ADD ? 0.85 : 0.9) * (1 - wipe.p * 0.55));
+                    });
+                    // wind specks at the dissolve edge
+                    if (imgs[0].active && Math.random() < 0.45) {
+                        const ex = imgs[0].x + (20 + Math.random() * 150) * sc * facing;
+                        const ey = imgs[0].y + (cy - TEX / 2) * sc + (Math.random() - 0.5) * 14;
+                        const sp = this.add.circle(ex, ey, 2.5, 0xbfe4ff, 0.7).setDepth(46);
+                        this.tweens.add({ targets: sp, x: sp.x + 26 * facing, y: sp.y - 10, alpha: 0, duration: 240, onComplete: () => sp.destroy() });
+                    }
+                },
+                onComplete: () => {
+                    imgs.forEach(im => im.destroy());
+                    if (this._slashImgs === imgs) this._slashImgs = null;
+                    this._slashWipeTween = null;
+                }
             });
             return;
         }

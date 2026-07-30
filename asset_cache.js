@@ -91,7 +91,12 @@
     'sprites/vs/item_scissors.png',
     'sprites/vs/item_star.png',
     'sprites/vs/item_tornado.png',
-    'sprites/vs/item_triangle.png'
+    'sprites/vs/item_triangle.png',
+    'sprites/vs/enemy_rat_walk.png',
+    'sprites/vs/enemy_rat_hit.png',
+    'sprites/vs/enemy_bat_up.png',
+    'sprites/vs/enemy_bat_down.png',
+    'sprites/vs/enemy_bat_hit.png'
   ];
 
   // Background music (bgm.js): 2MB — exactly the kind of file that stalls on

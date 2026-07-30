@@ -60,6 +60,10 @@ class MainScene extends Phaser.Scene {
         Object.values(ITEM_SPRITES).forEach(n =>
             this.load.image('item_' + n, u('sprites/vs/item_' + n + '.png')));
         this.load.image('item_star', u('sprites/vs/item_star.png')); // XP drops
+        // Rat/bat enemy frames (Nano Banana concept art, sliced by
+        // vs_slice_enemies.js from the magenta-background sheets)
+        ['rat_walk', 'rat_hit', 'bat_up', 'bat_down', 'bat_hit'].forEach(n =>
+            this.load.image('enemy_' + n, u('sprites/vs/enemy_' + n + '.png')));
     }
 
     // --- School-item sprite helpers ---
@@ -722,7 +726,12 @@ class MainScene extends Phaser.Scene {
         if (this.enemies.getChildren().length >= 160) return null; // hard cap
         const type = Math.floor(this.gameTime / 1800) % 3;
         const isBat = type === 1;
-        const textureKey = isBat ? 'bat' : (type === 2 ? 'zombie' : 'alien');
+        // Rat/bat sprite frames when loaded; emoji textures as fallback
+        const hasRat = this.textures.exists('enemy_rat_walk');
+        const hasBat = this.textures.exists('enemy_bat_up');
+        const textureKey = isBat
+            ? (hasBat ? 'enemy_bat_down' : 'bat')
+            : (hasRat ? 'enemy_rat_walk' : (type === 2 ? 'zombie' : 'alien'));
 
         const difficulty = this.getDifficulty();
         const hp = 12 * (1 + (difficulty - 1) * 0.13);
@@ -738,6 +747,15 @@ class MainScene extends Phaser.Scene {
         enemy.hp = hp; enemy.maxHp = hp; enemy.speed = speed; enemy.isBoss = false;
         enemy.isBat = isBat;
         enemy.stunTimer = 0;
+        // Animation frames: bat flaps up/down, both swap to a hit pose
+        if (isBat && hasBat) {
+            enemy.animFly = ['enemy_bat_up', 'enemy_bat_down'];
+            enemy.animHit = 'enemy_bat_hit';
+            enemy.animPhase = Math.floor(Math.random() * 16); // desync flaps
+        } else if (!isBat && hasRat) {
+            enemy.animWalk = 'enemy_rat_walk';
+            enemy.animHit = 'enemy_rat_hit';
+        }
         this.enemies.add(enemy);
         return enemy;
     }
@@ -1132,7 +1150,16 @@ class MainScene extends Phaser.Scene {
 
                 const ox = (Math.random() - 0.5) * 60;
                 const oy = (Math.random() - 0.5) * 60;
-                const bat = this.add.image(startX + ox, startY + oy, 'bat_swarm').setOrigin(0.5);
+                const hasBat = this.textures.exists('enemy_bat_up');
+                const bat = this.add.image(startX + ox, startY + oy, hasBat ? 'enemy_bat_down' : 'bat_swarm').setOrigin(0.5);
+                if (hasBat) {
+                    // Sprite art is ~46px vs the old 20px emoji — scale down so
+                    // a 20+ bat swarm doesn't fill the screen
+                    bat.texScale = 0.62;
+                    bat.animFly = ['enemy_bat_up', 'enemy_bat_down'];
+                    bat.animHit = 'enemy_bat_hit';
+                    bat.animPhase = Math.floor(Math.random() * 16);
+                }
                 this.physics.add.existing(bat);
                 bat.body.setCircle(8);
                 bat.body.setOffset(
@@ -1294,7 +1321,17 @@ class MainScene extends Phaser.Scene {
 
             // Squash and stretch wobble + attack poses
             if (e.active && e.body) {
-                const baseScale = e.isBoss ? 1.0 : (e.isSwarm ? 0.8 : 1.0);
+                // Sprite frame driver: hit pose overrides, bats flap up/down,
+                // rats hold their walk frame (emoji enemies have no anim* keys)
+                if (e.animHit && e.hitUntil && e.hitUntil > this.time.now) {
+                    if (e.texture.key !== e.animHit) e.setTexture(e.animHit);
+                } else if (e.animFly) {
+                    const f = e.animFly[Math.floor((this.gameTime + (e.animPhase || 0)) / 9) % 2];
+                    if (e.texture.key !== f) e.setTexture(f);
+                } else if (e.animWalk && e.texture.key !== e.animWalk) {
+                    e.setTexture(e.animWalk);
+                }
+                const baseScale = (e.texScale || 1) * (e.isBoss ? 1.0 : (e.isSwarm ? 0.8 : 1.0));
 
                 if (e.attackState === 'windup') {
                     // Crouch pose: wide + low, quivering, facing the player
@@ -2294,6 +2331,8 @@ class MainScene extends Phaser.Scene {
     damageEnemy(enemy, amount, knockback = 0) {
         if (!enemy.active) return;
         enemy.hp -= amount;
+        // Swap to the drawn "getting hit" frame briefly (frame driver reverts)
+        if (enemy.animHit) enemy.hitUntil = this.time.now + 200;
 
         // Hit Juice: Scale Pop & Alpha Tween
         this.tweens.add({

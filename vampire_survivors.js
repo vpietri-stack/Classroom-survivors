@@ -540,7 +540,7 @@ class MainScene extends Phaser.Scene {
                 e.lastFireWakeTime = now;
                 this.damageEnemy(e, f.dmg, f.knockback !== undefined ? f.knockback : 10);
                 // Jump Rope L2+ burning-crescent fireball hitting an enemy
-                playSfxSample('sfx/jump_rope_fireball_hit.mp3', 0.5, undefined, 120);
+                playSfxSample('sfx/jump_rope_fireball_hit.mp3', 0.2, undefined, 120);
             }
         }, null, this);
         this.physics.add.overlap(this.player, this.gems, (p, g) => {
@@ -2367,7 +2367,7 @@ class MainScene extends Phaser.Scene {
 
     fireKnife(w) {
         // Recording has a rubbish tail — only the first 2s is usable
-        if (!playSfxSample('sfx/scissors_travelling.mp3', 0.45, 2, 60)) synthSwoosh('scissors');
+        if (!playSfxSample('sfx/scissors_travelling.mp3', 0.18, 2, 60)) synthSwoosh('scissors');
         const count = w.level;
         const spreadAngle = 10 * (Math.PI / 180);
         const key = this.itemTex('knife', 'knife');

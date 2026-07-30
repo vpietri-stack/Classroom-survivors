@@ -18,8 +18,11 @@ const fs = require('fs');
 const EXE = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 
 const JOBS = [
-    { file: 'sprites/vs/enemy_rat_raw.png', names: ['rat_walk', 'rat_hit'], outMax: 52, boost: true },
-    { file: 'sprites/vs/enemy_bat_raw.png', names: ['bat_up', 'bat_down', 'bat_hit'], outMax: 46, boost: true }
+    { file: 'sprites/vs/enemy_rat_raw.png', names: ['rat_walk', 'rat_hit'], outMax: 52, boost: true, key: 'magenta' },
+    // New bat sheet came on a BAKED opaque grey checkerboard — flood-key it
+    // from the borders (neutral grey only; the bat's warm grey-brown fur and
+    // dark outlines block the fill, so the character survives)
+    { file: 'sprites/vs/enemy_bat_raw.png', names: ['bat_up', 'bat_down', 'bat_hit'], outMax: 46, boost: true, key: 'checker' }
 ];
 
 (async () => {
@@ -28,7 +31,7 @@ const JOBS = [
 
     for (const job of JOBS) {
         const dataUrl = 'data:image/png;base64,' + fs.readFileSync(job.file).toString('base64');
-        const result = await page.evaluate(async ({ src, names, outMax, boost }) => {
+        const result = await page.evaluate(async ({ src, names, outMax, boost, key }) => {
             const img = new Image();
             await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = src; });
             const W = img.width, H = img.height;
@@ -38,12 +41,37 @@ const JOBS = [
             const id = ctx.getImageData(0, 0, W, H);
             const d = id.data;
 
-            // Global magenta-family key (bg + darker shadow tints). The teal
-            // crest is g-dominant and fur is grey (r≈g≈b), so this is safe.
-            for (let p = 0; p < W * H; p++) {
-                const i = p * 4;
-                const r = d[i], g = d[i + 1], b = d[i + 2];
-                if (r > 120 && b > 110 && g < 0.62 * Math.min(r, b)) d[i + 3] = 0;
+            if (key === 'checker') {
+                // Flood-fill neutral-grey checkerboard from the borders. Only
+                // near-neutral pixels (r≈g≈b) in the checker brightness band
+                // spread; the bat's warm fur + dark outlines stop the fill.
+                const isBg = (i) => {
+                    if (d[i + 3] === 0) return false;
+                    const r = d[i], g = d[i + 1], b = d[i + 2];
+                    const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+                    return (mx - mn) <= 8 && mn >= 138 && mx <= 235;
+                };
+                const vis = new Uint8Array(W * H); const q = [];
+                const seed = (x, y) => { const p = y * W + x; if (!vis[p] && isBg(p * 4)) { vis[p] = 1; q.push(p); } };
+                for (let x = 0; x < W; x++) { seed(x, 0); seed(x, H - 1); }
+                for (let y = 0; y < H; y++) { seed(0, y); seed(W - 1, y); }
+                let h = 0;
+                while (h < q.length) {
+                    const p = q[h++]; const x = p % W, y = (p / W) | 0;
+                    if (x > 0) { const t = p - 1; if (!vis[t] && isBg(t * 4)) { vis[t] = 1; q.push(t); } }
+                    if (x < W - 1) { const t = p + 1; if (!vis[t] && isBg(t * 4)) { vis[t] = 1; q.push(t); } }
+                    if (y > 0) { const t = p - W; if (!vis[t] && isBg(t * 4)) { vis[t] = 1; q.push(t); } }
+                    if (y < H - 1) { const t = p + W; if (!vis[t] && isBg(t * 4)) { vis[t] = 1; q.push(t); } }
+                }
+                for (let p = 0; p < W * H; p++) if (vis[p]) d[p * 4 + 3] = 0;
+            } else {
+                // Global magenta-family key (bg + darker shadow tints). The teal
+                // crest is g-dominant and fur is grey (r≈g≈b), so this is safe.
+                for (let p = 0; p < W * H; p++) {
+                    const i = p * 4;
+                    const r = d[i], g = d[i + 1], b = d[i + 2];
+                    if (r > 120 && b > 110 && g < 0.62 * Math.min(r, b)) d[i + 3] = 0;
+                }
             }
             ctx.putImageData(id, 0, 0);
 
@@ -138,7 +166,7 @@ const JOBS = [
                 out[names[i]] = { url: pc.toDataURL('image/png'), w: ow, h: oh };
             });
             return out;
-        }, { src: dataUrl, names: job.names, outMax: job.outMax, boost: !!job.boost });
+        }, { src: dataUrl, names: job.names, outMax: job.outMax, boost: !!job.boost, key: job.key || 'magenta' });
 
         for (const name of job.names) {
             const obj = result[name];

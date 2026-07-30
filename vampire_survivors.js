@@ -3295,8 +3295,10 @@ class MainScene extends Phaser.Scene {
             msgEl.classList.remove('hidden');
         }
     
-        // A win always counts (10min+ played); only sub-2min losses are ignored
-        const isSessionIgnored = !this.wonGame && totalPlayedTimeSec < 120;
+        // A win always counts. A loss counts only if the HUD survival time
+        // (accumulatedTime — excludes minigame/question overlays, so kids can't
+        // idle on a question to pass the 2min) is at least 2 minutes.
+        const isSessionIgnored = !this.wonGame && survivalTimeSec < 120;
         if (typeof srGameResults !== 'undefined') {
             finalizeSession(srGameResults, !isSessionIgnored);
         }

@@ -30,12 +30,13 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
     await b.close();
     console.log(JSON.stringify({ vs, uno, errs }, null, 1));
     // Pass: VS ran HiDPI (2x backing, NONE mode); after Uno launch the shared
-    // canvas is restored to RESIZE (mode 5) with cleared inline style, the VS
+    // canvas is restored to RESIZE (mode 5) managed by the ScaleManager, the VS
     // 2x backing is gone (Uno sizes to its own container, <= window), the Uno
-    // scene is active (VS stopped), and no errors.
+    // scene is active (VS stopped), and no errors. (The ScaleManager now owns
+    // the canvas CSS style, so a non-empty style string is expected/correct.)
     const RESIZE = 5;
     const ok = vs.backing === 414 * 2 && vs.mode === 0
-        && uno.mode === RESIZE && uno.style === ''
+        && uno.mode === RESIZE
         && uno.backing !== 828 && uno.backing > 0 && uno.backing <= uno.wantCss
         && uno.unoActive && !uno.vsActive && errs.length === 0;
     console.log('RESULT', ok ? 'PASS' : 'FAIL');

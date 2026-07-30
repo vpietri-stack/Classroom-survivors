@@ -50,10 +50,14 @@ function registerScene(sceneClass) {
 // --- HiDPI (retina) RENDERING (Vampire Survivors only, for now) ---------------
 // The shared Phaser canvas defaults to Scale.RESIZE, which sizes the backing
 // buffer in CSS pixels and lets the browser upscale it -> blur on high-DPR
-// phones. While VS is active we take over sizing: backing buffer = CSS x DPR
-// (capped at 2 so a 160-enemy horde stays performant), displayed via CSS at the
-// real window size, and VS multiplies its camera zoom by the same DPR so the
-// visible world + all gameplay coordinates are unchanged (just sharper).
+// phones. While VS is active we render at HiDPI via Scale.NONE with:
+//   gameSize (backing buffer) = CSS x DPR   (capped at 2 for horde perf)
+//   ScaleManager zoom         = 1 / DPR     (canvas DISPLAYS at CSS window size)
+// Letting the ScaleManager own the display size (via its zoom) is critical:
+// it keeps displayScale = DPR so POINTER INPUT maps correctly. An earlier
+// version set canvas.style manually, which left displayScale stale at 1 and
+// broke the joystick + corrupted the scale state the other games inherit.
+// VS also multiplies its CAMERA zoom by DPR so the visible world is unchanged.
 // enterHiDpi()/exitHiDpi() are called by the VS trigger/exit so every other
 // game (Uno/TD on this same canvas) keeps the exact CSS-px RESIZE behavior.
 function vsDpr() {
@@ -63,22 +67,15 @@ let _hiDpiResizeHandler = null;
 function _applyHiDpiSize() {
     if (!game || !game.scale) return;
     const dpr = vsDpr();
-    const w = window.innerWidth, h = window.innerHeight;
-    game.scale.resize(w * dpr, h * dpr);     // backing buffer = CSS x DPR
-    if (game.canvas) {                        // ...displayed at CSS window size
-        game.canvas.style.width = w + 'px';
-        game.canvas.style.height = h + 'px';
-        game.canvas.style.margin = '0';       // kill CENTER_BOTH's backing-based negative margin
-    }
+    game.scale.setZoom(1 / dpr);                          // display = backing / DPR = CSS px
+    game.scale.resize(window.innerWidth * dpr, window.innerHeight * dpr); // backing = CSS x DPR
+    game.scale.refresh();                                 // recompute displaySize + displayScale (input)
 }
 function enterHiDpi() {
     if (!game || !game.scale) return;
-    // Scale.NONE + our own resize listener: Scale.RESIZE would auto-shrink the
-    // backing back to CSS px on every window/orientation change, undoing this.
+    // Scale.NONE: we drive the size; RESIZE would auto-shrink the backing back
+    // to CSS px on every window/orientation change, undoing the HiDPI buffer.
     game.scale.scaleMode = Phaser.Scale.NONE;
-    // NO_CENTER: CENTER_BOTH centers using the (inflated) backing size vs the
-    // parent, which mis-positions our manually CSS-sized canvas off-screen.
-    game.scale.autoCenter = Phaser.Scale.NO_CENTER;
     game.scale.parentIsWindow = false;
     _applyHiDpiSize();
     if (!_hiDpiResizeHandler) {
@@ -93,10 +90,9 @@ function exitHiDpi() {
     }
     if (!game || !game.scale) return;
     // Restore today's exact behavior for the other games sharing the canvas
+    game.scale.setZoom(1);
     game.scale.scaleMode = Phaser.Scale.RESIZE;
-    game.scale.autoCenter = Phaser.Scale.CENTER_BOTH;
     game.scale.parentIsWindow = true;
-    if (game.canvas) { game.canvas.style.width = ''; game.canvas.style.height = ''; game.canvas.style.margin = ''; }
     game.scale.resize(window.innerWidth, window.innerHeight);
     game.scale.refresh();
 }

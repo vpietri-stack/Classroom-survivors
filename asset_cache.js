@@ -108,7 +108,13 @@
     'sprites/vs/enemy_boss_windup.png',
     'sprites/vs/enemy_boss_lunge.png',
     'sprites/vs/enemy_boss_hit.png',
-    'sprites/vs/enemy_boss_dead.png'
+    'sprites/vs/enemy_boss_dead.png',
+    'sprites/vs/enemy_bp_walk_a.png',
+    'sprites/vs/enemy_bp_walk_b.png',
+    'sprites/vs/enemy_bp_windup.png',
+    'sprites/vs/enemy_bp_lunge.png',
+    'sprites/vs/enemy_bp_hit.png',
+    'sprites/vs/enemy_bp_dead.png'
   ];
 
   // Background music (bgm.js): 2MB — exactly the kind of file that stalls on

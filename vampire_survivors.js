@@ -67,7 +67,8 @@ class MainScene extends Phaser.Scene {
         // Dropout zombie + bucket-zombie boss (both 6-frame sheets, sliced by
         // vs_slice_zombie_boss.js)
         ['zombie_walk_a', 'zombie_walk_b', 'zombie_windup', 'zombie_lunge', 'zombie_hit', 'zombie_dead',
-            'boss_walk_a', 'boss_walk_b', 'boss_windup', 'boss_lunge', 'boss_hit', 'boss_dead'].forEach(n =>
+            'boss_walk_a', 'boss_walk_b', 'boss_windup', 'boss_lunge', 'boss_hit', 'boss_dead',
+            'bp_walk_a', 'bp_walk_b', 'bp_windup', 'bp_lunge', 'bp_hit', 'bp_dead'].forEach(n =>
                 this.load.image('enemy_' + n, u('sprites/vs/enemy_' + n + '.png')));
     }
 
@@ -177,6 +178,13 @@ class MainScene extends Phaser.Scene {
         this.puzzle = null;            // active ground puzzle (null = none)
         this.puzzleDone = new Set();   // in-session dedup of completed items
         this.puzzleWantSentence = Math.random() < 0.5; // alternates word/sentence
+
+        // --- Boss / victory progression state (reset every run) ---
+        this.wonGame = false;            // true once the final boss is beaten
+        this.finalBossTriggered = false; // final bucket boss spawns once at 10min
+        this.regularBossCount = 0;       // post-win: alternate backpack/bucket
+        const vm = document.getElementById('vsVictoryMenu');
+        if (vm) vm.classList.add('hidden');
 
         // --- Anti-flee arena state ---
         // MUST reset here: Phaser reuses the scene instance on restart, so a
@@ -638,6 +646,13 @@ class MainScene extends Phaser.Scene {
             this.nextSwarmTime = Phaser.Math.Between(3000, 4200);
         }
 
+        // Final boss: at 10 minutes of PLAYED time (accumulatedTime excludes
+        // minigame/puzzle overlays) the mega bucket boss appears, once.
+        if (!this.finalBossTriggered && this.accumulatedTime >= 600000) {
+            this.finalBossTriggered = true;
+            this.spawnBoss('bucket', { final: true });
+        }
+
         if (this.activeTornados) {
             this.activeTornados = this.activeTornados.filter(t => t.active);
             this.activeTornados.forEach(t => {
@@ -721,7 +736,15 @@ class MainScene extends Phaser.Scene {
 
     spawnEnemy(distance = null) {
         if (this.killCount >= 300) {
-            this.spawnBoss();
+            // Regular boss = BACKPACK zombie. Post-win, bosses alternate
+            // backpack -> bucket -> backpack ... (bucket here is a regular boss,
+            // NOT the mega final boss).
+            let kind = 'backpack';
+            if (this.wonGame) {
+                kind = (this.regularBossCount % 2 === 0) ? 'backpack' : 'bucket';
+                this.regularBossCount++;
+            }
+            this.spawnBoss(kind);
             this.killCount = 0;
             return;
         }
@@ -890,45 +913,53 @@ class MainScene extends Phaser.Scene {
         this.events.once('shutdown', () => { if (this.fenceGfx) { this.fenceGfx.destroy(); this.fenceGfx = null; } });
     }
 
-    spawnBoss() {
-        // Bucket-zombie boss (6-frame sheet, sliced 2x size); 👹 emoji fallback
-        const hasBoss = this.textures.exists('enemy_boss_walk_a');
-        const boss = this.add.image(this.player.x, this.player.y - 600, hasBoss ? 'enemy_boss_walk_a' : 'boss').setOrigin(0.5);
+    // kind: 'backpack' (regular 300-kill boss) or 'bucket'. opts.final = the
+    // one-time 10-minute mega boss (bigger, x3 HP, x2 damage, winning the game).
+    spawnBoss(kind = 'backpack', opts = {}) {
+        const final = !!opts.final;
+        // Pick the frame set; fall back to the other sheet then the emoji
+        const pfx = (kind === 'backpack' && this.textures.exists('enemy_bp_walk_a')) ? 'enemy_bp_'
+            : (this.textures.exists('enemy_boss_walk_a')) ? 'enemy_boss_' : null;
+        const boss = this.add.image(this.player.x, this.player.y - 600, pfx ? pfx + 'walk_a' : 'boss').setOrigin(0.5);
         this.physics.add.existing(boss);
-        boss.body.setCircle(35);
+        const bodyR = final ? 50 : 35;
+        boss.body.setCircle(bodyR);
         boss.body.setOffset(
-            (boss.width - 35 * 2) / 2,
-            (boss.height - 35 * 2) / 2
+            (boss.width - bodyR * 2) / 2,
+            (boss.height - bodyR * 2) / 2
         );
         const difficulty = this.getDifficulty();
-        // Boss: 25x regular enemy HP
-        boss.hp = 12 * 25 * (1 + (difficulty - 1) * 0.13);
+        // Regular boss: 25x enemy HP. Final boss: x3 that.
+        boss.hp = boss.maxHp = 12 * 25 * (1 + (difficulty - 1) * 0.13) * (final ? 3 : 1);
         boss.speed = 20 * difficulty;
         boss.isBoss = true;
         boss.stunTimer = 0;
-        if (hasBoss) {
-            boss.animLoop = ['enemy_boss_walk_a', 'enemy_boss_walk_b'];
+        boss.dmgMult = final ? 2 : 1;      // final boss hits twice as hard
+        if (final) { boss.isFinal = true; boss.texScale = 1.4; } // even bigger
+        if (pfx) {
+            boss.animLoop = [pfx + 'walk_a', pfx + 'walk_b'];
             boss.animRate = 20; // heavy slow stomp
-            boss.animWindup = 'enemy_boss_windup';
-            boss.animLunge = 'enemy_boss_lunge';
-            boss.animHit = 'enemy_boss_hit';
-            boss.animDead = 'enemy_boss_dead';
+            boss.animWindup = pfx + 'windup';
+            boss.animLunge = pfx + 'lunge';
+            boss.animHit = pfx + 'hit';
+            boss.animDead = pfx + 'dead';
         }
         this.enemies.add(boss);
 
-        // Boss Spawn visual juice
-        this.cameras.main.shake(500, 0.015);
+        // Boss Spawn visual juice (bigger for the final boss)
+        this.cameras.main.shake(final ? 800 : 500, final ? 0.02 : 0.015);
         this.cameras.main.flash(300, 255, 0, 0, 0.4);
-        
-        const warningText = this.add.text(this.scale.width / 2, this.scale.height / 3, '⚠️ BOSS INCOMING! ⚠️', {
-            fontSize: '40px',
+
+        const warningText = this.add.text(this.scale.width / 2, this.scale.height / 3,
+            final ? '☠️ 最终BOSS！☠️' : '⚠️ BOSS INCOMING! ⚠️', {
+            fontSize: final ? '52px' : '40px',
             fontFamily: 'Fredoka',
-            color: '#ff0055',
+            color: final ? '#ffd700' : '#ff0055',
             stroke: '#000000',
             strokeThickness: 6,
             fontStyle: 'bold'
-        }).setOrigin(0.5).setScrollFactor(0);
-        
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(120);
+
         this.tweens.add({
             targets: warningText,
             scale: 1.4,
@@ -2351,8 +2382,9 @@ class MainScene extends Phaser.Scene {
         }
 
         const difficulty = this.getDifficulty();
-        // Damage scales with difficulty: 1 at start, grows with difficulty, cap at 25
-        const dmg = Math.min(25, Math.ceil(difficulty));
+        // Damage scales with difficulty: 1 at start, grows with difficulty, cap at 25.
+        // Bosses carry a dmgMult (final boss = 2x) so their bite hurts more.
+        const dmg = Math.min(25, Math.ceil(difficulty)) * (enemy.dmgMult || 1);
 
         this.playerStats.hp -= dmg;
         synthHurt();
@@ -2431,6 +2463,7 @@ class MainScene extends Phaser.Scene {
 
         if (enemy.hp <= 0) {
             enemy.active = false;
+            if (enemy.isFinal) this.onFinalBossDefeated(); // beating it wins the game
             // Defeated pose for the fade-out (zombie has a drawn death frame)
             if (enemy.animDead) enemy.setTexture(enemy.animDead);
             enemy.body.checkCollision.none = true;
@@ -3206,72 +3239,130 @@ class MainScene extends Phaser.Scene {
 
                 this.time.delayedCall(500, () => {
                     this.scene.pause();
-
-                    if (minigameCountdownInterval) {
-                        clearInterval(minigameCountdownInterval);
-                        minigameCountdownInterval = null;
-                    }
-
-                    const totalPlayedTimeSec = Math.floor((this.accumulatedTime + totalMinigameTimeMs) / 1000);
-                    const survivalTimeSec = Math.floor(this.accumulatedTime / 1000);
-                    const minigameTimeSec = Math.floor(totalMinigameTimeMs / 1000);
-                    const scoreSec = Math.max(0, survivalTimeSec);
-
-                    const formatTime = (seconds) => {
-                        const m = Math.floor(seconds / 60);
-                        const s = seconds % 60;
-                        return `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
-                    };
-
-                    document.getElementById('finalLevel').innerText = this.playerStats.level;
-                    document.getElementById('finalSurvivalTime').innerText = formatTime(totalPlayedTimeSec);
-                    document.getElementById('finalMinigameTime').innerText = '-' + formatTime(minigameTimeSec);
-                    document.getElementById('finalScore').innerText = formatTime(scoreSec);
-
-                    const studentName = typeof selectedStudent !== 'undefined' && selectedStudent ? selectedStudent : '';
-                    const classInfo = selectedDay && selectedTime ? `${selectedDay} ${selectedTime}` : 'N/A';
-                    const displayText = studentName ? `${studentName} (${classInfo})` : classInfo;
-                    document.getElementById('finalContentDisplay').innerText = displayText;
-
-                    const isSessionIgnored = totalPlayedTimeSec < 120;
-                    if (typeof srGameResults !== 'undefined') {
-                        finalizeSession(srGameResults, !isSessionIgnored);
-                    }
-                    queueSessionEvent('vampireSurvivors', {
-                        level: this.playerStats.level,
-                        survivalTimeSec: survivalTimeSec,
-                        minigameTimeSec: minigameTimeSec,
-                        scoreSec: scoreSec,
-                        kills: this.killCount,
-                        ignored: isSessionIgnored
-                    });
-                    flushAnalyticsOnGameOver();
-
-                    const targetText = typeof getActiveTargetText === 'function' ? getActiveTargetText() : null;
-                    const banner = document.getElementById('vs-target-banner');
-                    if (targetText && banner) {
-                        banner.innerText = targetText;
-                        banner.classList.remove('hidden');
-                    } else if (banner) {
-                        banner.classList.add('hidden');
-                    }
-
-                    const warning = document.getElementById('vsTargetWarning');
-                    if (warning) {
-                        if (isSessionIgnored) {
-                            warning.innerText = "用时不到2分钟且挑战失败，本次练习不计入每周目标。";
-                            warning.classList.remove('hidden');
-                        } else {
-                            warning.classList.add('hidden');
-                        }
-                    }
-
-                    document.getElementById('gameOverScreen').classList.remove('hidden');
+                    this.populateGameOver();
                 });
             }
         });
     }
-
+    
+    // Fills + shows the end screen for BOTH outcomes. this.wonGame decides the
+    // title/message: win (final boss beaten, even if they later died) vs loss.
+    populateGameOver() {
+        this.gameState = 'GAMEOVER';
+        if (minigameCountdownInterval) {
+            clearInterval(minigameCountdownInterval);
+            minigameCountdownInterval = null;
+        }
+    
+        const totalPlayedTimeSec = Math.floor((this.accumulatedTime + totalMinigameTimeMs) / 1000);
+        const survivalTimeSec = Math.floor(this.accumulatedTime / 1000);
+        const minigameTimeSec = Math.floor(totalMinigameTimeMs / 1000);
+        const scoreSec = Math.max(0, survivalTimeSec);
+    
+        const formatTime = (seconds) => {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
+        };
+    
+        document.getElementById('finalLevel').innerText = this.playerStats.level;
+        document.getElementById('finalSurvivalTime').innerText = formatTime(totalPlayedTimeSec);
+        document.getElementById('finalMinigameTime').innerText = '-' + formatTime(minigameTimeSec);
+        document.getElementById('finalScore').innerText = formatTime(scoreSec);
+    
+        const studentName = typeof selectedStudent !== 'undefined' && selectedStudent ? selectedStudent : '';
+        const classInfo = selectedDay && selectedTime ? `${selectedDay} ${selectedTime}` : 'N/A';
+        const displayText = studentName ? `${studentName} (${classInfo})` : classInfo;
+        document.getElementById('finalContentDisplay').innerText = displayText;
+    
+        // Win / loss framing (uno/gomoku style, with the student's name)
+        const nm = studentName || '同学';
+        const titleEl = document.getElementById('gameOverTitle');
+        const msgEl = document.getElementById('vsResultMsg');
+        if (titleEl) {
+            if (this.wonGame) {
+                titleEl.innerText = '🏆 挑战成功！';
+                titleEl.className = 'text-4xl sm:text-6xl font-bold text-yellow-300 mb-4 text-center';
+            } else {
+                titleEl.innerText = 'GAME OVER';
+                titleEl.className = 'text-4xl sm:text-6xl font-bold text-red-500 mb-4 text-center';
+            }
+        }
+        if (msgEl) {
+            msgEl.innerText = this.wonGame
+                ? `恭喜 ${nm}！你击败了最终Boss，成为了真正的教室幸存者大师！`
+                : `再接再厉，${nm}！下一次一定能击败最终Boss！`;
+            msgEl.classList.remove('hidden');
+        }
+    
+        // A win always counts (10min+ played); only sub-2min losses are ignored
+        const isSessionIgnored = !this.wonGame && totalPlayedTimeSec < 120;
+        if (typeof srGameResults !== 'undefined') {
+            finalizeSession(srGameResults, !isSessionIgnored);
+        }
+        queueSessionEvent('vampireSurvivors', {
+            level: this.playerStats.level,
+            survivalTimeSec: survivalTimeSec,
+            minigameTimeSec: minigameTimeSec,
+            scoreSec: scoreSec,
+            kills: this.killCount,
+            won: this.wonGame,
+            ignored: isSessionIgnored
+        });
+        flushAnalyticsOnGameOver();
+    
+        const targetText = typeof getActiveTargetText === 'function' ? getActiveTargetText() : null;
+        const banner = document.getElementById('vs-target-banner');
+        if (targetText && banner) {
+            banner.innerText = targetText;
+            banner.classList.remove('hidden');
+        } else if (banner) {
+            banner.classList.add('hidden');
+        }
+    
+        const warning = document.getElementById('vsTargetWarning');
+        if (warning) {
+            if (isSessionIgnored) {
+                warning.innerText = "用时不到２分钟且挑战失败，本次练习不计入每周目标。";
+                warning.classList.remove('hidden');
+            } else {
+                warning.classList.add('hidden');
+            }
+        }
+    
+        document.getElementById('gameOverScreen').classList.remove('hidden');
+    }
+    
+    // Final boss beaten -> win. Pause and show the victory menu (continue/end).
+    onFinalBossDefeated() {
+        if (this.wonGame) return;
+        this.wonGame = true;
+        synthLevelUp();
+        this.cameras.main.flash(500, 255, 255, 180);
+        this.gameState = 'VICTORY_MENU';
+        this.time.delayedCall(600, () => {
+            this.scene.pause();
+            const vm = document.getElementById('vsVictoryMenu');
+            if (vm) vm.classList.remove('hidden');
+        });
+    }
+    
+    // "Continue": keep the current build and play on until death (still a win).
+    victoryContinue() {
+        const vm = document.getElementById('vsVictoryMenu');
+        if (vm) vm.classList.add('hidden');
+        this.gameState = 'PLAYING';
+        this.scene.resume();
+    }
+    
+    // "End": stop here with the win congratulations on the game-over screen.
+    victoryEnd() {
+        const vm = document.getElementById('vsVictoryMenu');
+        if (vm) vm.classList.add('hidden');
+        if (window.BGM) BGM.stop();
+        this.populateGameOver();
+    }
+    
     applyReward(reward) {
         if (!reward) return;
         const p = this.playerStats;
@@ -3504,8 +3595,20 @@ function exitVampireSurvivors() {
     if (vsExitBtn) vsExitBtn.classList.add('hidden');
     const vsMuteBtn = document.getElementById('vsMuteBtn');
     if (vsMuteBtn) vsMuteBtn.classList.add('hidden');
+    const vsVictory = document.getElementById('vsVictoryMenu');
+    if (vsVictory) vsVictory.classList.add('hidden');
     activeGameMode = null;
     document.getElementById('gameSelectionOverlay').classList.remove('hidden');
+}
+
+// Victory menu buttons (final boss beaten) route into the running scene
+function vsVictoryContinue() {
+    const s = (game && game.scene) ? game.scene.getScene('MainScene') : null;
+    if (s) s.victoryContinue();
+}
+function vsVictoryEnd() {
+    const s = (game && game.scene) ? game.scene.getScene('MainScene') : null;
+    if (s) s.victoryEnd();
 }
 
 function replayVampireSurvivors() {

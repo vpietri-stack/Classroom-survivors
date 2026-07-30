@@ -25,6 +25,14 @@ const JOBS = [
         names: ['boss_walk_a', 'boss_walk_b', 'boss_windup', 'boss_lunge', 'boss_hit', 'boss_dead'],
         outMax: 220,
         bg: 'grey'
+    },
+    {
+        file: 'sprites/vs/enemy_backpack_raw.png',
+        // Backpack zombie = the regular 300-kill boss. Same 6-frame convention,
+        // same 220px size as the bucket. Baked grey checker like the bucket.
+        names: ['bp_walk_a', 'bp_walk_b', 'bp_windup', 'bp_lunge', 'bp_hit', 'bp_dead'],
+        outMax: 220,
+        bg: 'greyGlobal'
     }
 ];
 
@@ -52,7 +60,19 @@ const JOBS = [
                     if (d[(y * W + x) * 4 + 3] > 200) opaqueBorder++;
                 }
             }
-            if (opaqueBorder > samples * 0.5) {
+            if (bg === 'greyGlobal') {
+                // Global neutral-grey removal (no flood): clears checker pockets
+                // enclosed by the character too. Safe ONLY for colorful sheets
+                // with no large neutral-grey areas (e.g. the backpack zombie).
+                for (let p = 0; p < W * H; p++) {
+                    const i = p * 4;
+                    if (d[i + 3] === 0) continue;
+                    const r = d[i], g = d[i + 1], b = d[i + 2];
+                    const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+                    if ((mx - mn) <= 12 && mn >= 132 && mx <= 218) d[i + 3] = 0;
+                }
+                ctx.putImageData(id, 0, 0);
+            } else if (opaqueBorder > samples * 0.5) {
                 // Key range depends on the sheet's baked checker shade
                 const isBg = bg === 'grey'
                     ? (i) => {

@@ -419,7 +419,8 @@
     </div>
 
     <div id="gameOverScreen" class="overlay hidden p-4">
-        <h2 class="text-4xl sm:text-6xl font-bold text-red-500 mb-6 text-center">GAME OVER</h2>
+        <h2 id="gameOverTitle" class="text-4xl sm:text-6xl font-bold text-red-500 mb-4 text-center">GAME OVER</h2>
+        <p id="vsResultMsg" class="hidden text-lg sm:text-xl text-white/90 mb-6 text-center max-w-md mx-auto"></p>
         <div
             class="bg-black/60 p-6 sm:p-8 rounded-2xl border-2 border-red-500/50 w-full max-w-md mx-auto mb-8 backdrop-blur-sm">
             <p class="text-lg sm:text-xl text-yellow-400 mb-4 font-bold tracking-wider text-center"
@@ -443,6 +444,18 @@
             <button class="game-btn bg-green-600 hover:bg-green-500 text-xl py-3 rounded-lg" onclick="replayVampireSurvivors()">再玩一次</button>
             <button class="game-btn bg-blue-600 hover:bg-blue-500 text-xl py-3 rounded-lg" onclick="showGameSelection()">我想玩别的</button>
             <button class="game-btn bg-orange-600 hover:bg-orange-500 text-xl py-3 rounded-lg" onclick="initStudyMode()">直接练习模式</button>
+        </div>
+    </div>
+
+    <!-- VS victory menu: shown when the final (10-min) boss is defeated -->
+    <div id="vsVictoryMenu" class="overlay hidden p-4">
+        <div class="bg-black/70 p-8 rounded-2xl border-2 border-yellow-400/60 w-full max-w-md mx-auto text-center backdrop-blur-sm">
+            <h2 class="text-4xl sm:text-5xl font-bold mb-4 text-yellow-300">🏆 挑战成功！</h2>
+            <p class="text-white text-lg mb-8">你击败了最终Boss！<br>要继续玩这一局吗？</p>
+            <div class="flex flex-col gap-4">
+                <button class="game-btn bg-green-600 hover:bg-green-500 text-xl py-3 rounded-lg" onclick="vsVictoryContinue()">继续挑战 (保留当前装备)</button>
+                <button class="game-btn bg-orange-600 hover:bg-orange-500 text-xl py-3 rounded-lg" onclick="vsVictoryEnd()">结束本局</button>
+            </div>
         </div>
     </div>
 

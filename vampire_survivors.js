@@ -85,9 +85,9 @@ class MainScene extends Phaser.Scene {
         Object.values(ITEM_SPRITES).forEach(n =>
             this.load.image('item_' + n, u('sprites/vs/item_' + n + '.png')));
         this.load.image('item_star', u('sprites/vs/item_star.png')); // XP drops
-        // Ruler slash VFX: baked blue energy crescent (vs_make_fx_slash.js).
-        // Renamed per re-bake (v3) to bust stale HTTP/proxy caches of old bakes
-        this.load.image('fx_slash', u('sprites/vs/fx_slash3.png'));
+        // Ruler slash VFX: baked 12-frame sprite sheet (vs_make_fx_slash.js),
+        // 4x3 grid of 512px cells — crescent + tail-first receding dissolve
+        this.load.spritesheet('fx_slash', u('sprites/vs/fx_slash_sheet.png'), { frameWidth: 512, frameHeight: 512 });
         // Rat/bat enemy frames (Nano Banana concept art, sliced by
         // vs_slice_enemies.js from the magenta-background sheets)
         ['rat_walk', 'rat_hit', 'bat_up', 'bat_down', 'bat_hit'].forEach(n =>
@@ -1700,10 +1700,10 @@ class MainScene extends Phaser.Scene {
         const facing = this.player.scaleX > 0 ? 1 : -1;
         const baseAngle = facing === 1 ? 0 : Math.PI;
         // Reach starts at HALF the Jump Rope's 330 reach (=165) and grows per
-        // slash tier. Angular half-width is FIXED at ±80° (matches the VFX comma
-        // in vs_make_fx_slash.js), so the linear width scales up WITH the reach
-        // (same proportion) and the hitbox is exactly the cone the crescent fills.
-        const SLASH_HALF = 1.60; // ±92° hit cone — a bit wider than the VFX ±80°
+        // slash tier. Angular half-width is FIXED at ±117° (matches the VFX
+        // sheet spanning ~65% of a circle), so the linear width scales up WITH
+        // the reach and the hitbox is exactly the arc the crescent fills.
+        const SLASH_HALF = 2.04; // ±117° — matches the VFX span (65% circle)
         const len = 165 * (1 + slashTier * 0.18);
 
         this.swingRulerArm(160);
@@ -1731,84 +1731,43 @@ class MainScene extends Phaser.Scene {
         if (w.level >= 2) this.spawnRulerArc(baseAngle, len, arcTier, slashDmg);
     }
 
-    // The visible slash: baked blue COMMA (fx_slash.png, additive) placed in
-    // FRONT of the player, narrow tip up / fat end low (matches the arm chop),
-    // sized so its forward reach == the hitbox reach. Single-instance: any
-    // still-fading slash is scrubbed first so overlapping fires can never stack
-    // into a "doubled" / full-circle smear.
+    // The visible slash: a baked 12-frame SPRITE SHEET (fx_slash_sheet.png) —
+    // full bright crescent then a tail-first receding dissolve (matches the
+    // user's CyclicSlash GIF). Two layers (NORMAL keeps it readable on grass,
+    // ADD gives the glow) play the anim in sync. Single-instance: any playing
+    // slash is scrubbed first so overlapping fires never stack.
     drawSlashCrescent(baseAngle, len, facing) {
         if (this.textures.exists('fx_slash')) {
+            if (!this.anims.exists('slashfx')) {
+                this.anims.create({
+                    key: 'slashfx',
+                    frames: this.anims.generateFrameNumbers('fx_slash', { start: 0, end: 11 }),
+                    frameRate: 30, repeat: 0
+                });
+            }
             if (this._slashImgs) {
                 this._slashImgs.forEach(im => { this.tweens.killTweensOf(im); im.destroy(); });
-                if (this._slashWipeTween) { this._slashWipeTween.stop(); this._slashWipeTween = null; }
-                if (this._slashMaskG) { this._slashMaskG.destroy(); this._slashMaskG = null; }
             }
-            const sc = len / 187; // texture forward reach ≈187px at scale 1
+            const sc = len / 187; // frame forward reach ≈187px at scale 1
             const mk = (blend, alpha) => {
-                const im = this.add.image(this.player.x, this.player.y, 'fx_slash').setDepth(46);
+                const im = this.add.sprite(this.player.x, this.player.y, 'fx_slash').setDepth(46);
                 im.setBlendMode(blend);
                 im.setScale(sc).setAlpha(alpha);
-                im.setFlipX(facing < 0);      // belly follows facing; tip stays up
-                im.rotation = -0.16 * facing; // wound up high (narrow tip leads)
+                im.setFlipX(facing < 0);      // belly follows facing
+                im.rotation = -0.16 * facing; // wound up high; chop nudge below
+                im.play('slashfx');
                 return im;
             };
             const imgs = [mk(Phaser.BlendModes.NORMAL, 0.9), mk(Phaser.BlendModes.ADD, 0.85)];
             this._slashImgs = imgs;
-            // Chop down through the swing (narrow tip -> wide end); stays vivid,
-            // alpha only fades in the back half so it never washes out
             this.tweens.add({ targets: imgs, rotation: 0.12 * facing, scale: sc * 1.06, duration: 200, ease: 'Cubic.out' });
-            // ARC-FOLLOWING dissolve (per the user's CyclicSlash reference): a
-            // pie-slice GeometryMask contracts along the crescent's own sweep —
-            // the tail (thin start) vanishes first and the remainder shrinks
-            // toward the end while staying bright, with specks drifting off the
-            // receding edge. Straight crop-wipes read wrong on a curved slash.
-            const HSPAN = 1.40; // texture angular half-span (bake H)
-            const maskG = this.make.graphics({ add: false });
-            const mask = maskG.createGeometryMask();
-            imgs.forEach(im => im.setMask(mask));
-            const drawSlice = (cutU) => {
-                maskG.clear();
-                maskG.fillStyle(0xffffff);
-                const cx = imgs[0].x, cy = imgs[0].y, rad = len * 2.2;
-                const a0 = facing === 1 ? cutU : Math.PI - cutU;
-                const a1 = facing === 1 ? HSPAN + 0.45 : Math.PI - (HSPAN + 0.45);
-                maskG.beginPath();
-                maskG.moveTo(cx, cy);
-                maskG.arc(cx, cy, rad, a0, a1, facing === -1);
-                maskG.closePath();
-                maskG.fillPath();
-            };
-            drawSlice(-HSPAN - 0.3); // whole slash visible at first
-            this._slashMaskG = maskG;
-            const wipe = { cut: -HSPAN - 0.3 };
-            this._slashWipeTween = this.tweens.add({
-                targets: wipe, cut: HSPAN + 0.5, delay: 110, duration: 260, ease: 'Sine.in',
-                onUpdate: () => {
-                    if (!imgs[0].active) return;
-                    drawSlice(wipe.cut);
-                    // remaining band stays bright — only a gentle overall dim
-                    const p = (wipe.cut + HSPAN + 0.3) / (2 * HSPAN + 0.8);
-                    imgs.forEach(im => im.setAlpha((im.blendMode === Phaser.BlendModes.ADD ? 0.85 : 0.9) * (1 - p * 0.35)));
-                    // wind specks drifting off the receding edge (on the band)
-                    if (Math.random() < 0.5) {
-                        const wa = facing === 1 ? wipe.cut : Math.PI - wipe.cut;
-                        const rr = (115 + Math.random() * 55) * sc;
-                        const sp = this.add.circle(imgs[0].x + Math.cos(wa) * rr,
-                            imgs[0].y + Math.sin(wa) * rr, 2.5, 0xbfe4ff, 0.7).setDepth(46);
-                        this.tweens.add({ targets: sp, x: sp.x + 24 * facing, y: sp.y - 8, alpha: 0, duration: 230, onComplete: () => sp.destroy() });
-                    }
-                },
-                onComplete: () => {
-                    imgs.forEach(im => im.destroy());
-                    maskG.destroy();
-                    if (this._slashMaskG === maskG) this._slashMaskG = null;
-                    if (this._slashImgs === imgs) this._slashImgs = null;
-                    this._slashWipeTween = null;
-                }
+            imgs[0].once('animationcomplete', () => {
+                imgs.forEach(im => im.destroy());
+                if (this._slashImgs === imgs) this._slashImgs = null;
             });
             return;
         }
-        const half = 1.40;
+        const half = 2.04;
         const centerAngle = baseAngle;
         const g = this.add.graphics().setDepth(46);
         const R = len * 0.74;

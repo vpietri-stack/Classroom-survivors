@@ -1776,6 +1776,12 @@ class MainScene extends Phaser.Scene {
         b.hitList = [];
         b.life = Math.round((travel / speed) * 60);
         b.stunFrames = 24 + arcTier * 9;  // ~0.4s base, +0.15s per arc tier
+        // Live electricity: a graphics layer riding the arc, redrawn every
+        // frame with fresh jagged bolts (see updateBullets) — the random
+        // re-jitter is what makes it read as crackling lightning
+        b.elecGfx = this.add.graphics().setDepth(46);
+        b.elecGfx.setBlendMode(Phaser.BlendModes.ADD);
+        b.once('destroy', () => { if (b.elecGfx) { b.elecGfx.destroy(); b.elecGfx = null; } });
         synthArcHum();
     }
 
@@ -2488,6 +2494,41 @@ class MainScene extends Phaser.Scene {
                 // end of its travel distance (life counts frames)
                 b.life--;
                 b.setAlpha(0.72 + Math.random() * 0.28);
+                // Jagged lightning bolts along the crescent band, re-rolled
+                // every frame. Local band point -> world via b.rotation, then
+                // each bolt zigzags radially in/outward with side jitter.
+                if (b.elecGfx) {
+                    const g = b.elecGfx;
+                    g.clear();
+                    const sc = b.displayWidth / 72;   // fx_arc texture is 72px
+                    const cosR = Math.cos(b.rotation), sinR = Math.sin(b.rotation);
+                    for (let i = 0; i < 3; i++) {
+                        const a = -1.15 + Math.random() * 2.3;
+                        const lx = (-10 + Math.cos(a) * 26) * sc, ly = Math.sin(a) * 26 * sc;
+                        let x = b.x + lx * cosR - ly * sinR;
+                        let y = b.y + lx * sinR + ly * cosR;
+                        const dir = Math.random() < 0.3 ? -1 : 1; // mostly outward
+                        const dax = Math.cos(a + b.rotation) * dir, day = Math.sin(a + b.rotation) * dir;
+                        const pts = [[x, y]];
+                        const segs = 3 + ((Math.random() * 2) | 0);
+                        for (let s2 = 0; s2 < segs; s2++) {
+                            x += dax * (4 + Math.random() * 7) - day * (Math.random() - 0.5) * 13;
+                            y += day * (4 + Math.random() * 7) + dax * (Math.random() - 0.5) * 13;
+                            pts.push([x, y]);
+                        }
+                        const stroke = (wd, col, alpha) => {
+                            g.lineStyle(wd, col, alpha);
+                            g.beginPath(); g.moveTo(pts[0][0], pts[0][1]);
+                            for (let k = 1; k < pts.length; k++) g.lineTo(pts[k][0], pts[k][1]);
+                            g.strokePath();
+                        };
+                        stroke(3.5, 0xffe23a, 0.55);  // yellow halo
+                        stroke(1.6, 0xffffff, 0.95);  // white hot core
+                        // bright tip node
+                        g.fillStyle(0xffffff, 0.9);
+                        g.fillCircle(pts[pts.length - 1][0], pts[pts.length - 1][1], 1.6);
+                    }
+                }
                 if (this.gameTime % 2 === 0) {
                     const s = this.add.circle(b.x + (Math.random() - 0.5) * 14,
                         b.y + (Math.random() - 0.5) * 14, 3, 0xfff27a, 0.7);

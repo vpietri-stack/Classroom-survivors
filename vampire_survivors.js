@@ -85,6 +85,8 @@ class MainScene extends Phaser.Scene {
         Object.values(ITEM_SPRITES).forEach(n =>
             this.load.image('item_' + n, u('sprites/vs/item_' + n + '.png')));
         this.load.image('item_star', u('sprites/vs/item_star.png')); // XP drops
+        // Ruler slash VFX: baked blue energy crescent (vs_make_fx_slash.js)
+        this.load.image('fx_slash', u('sprites/vs/fx_slash.png'));
         // Rat/bat enemy frames (Nano Banana concept art, sliced by
         // vs_slice_enemies.js from the magenta-background sheets)
         ['rat_walk', 'rat_hit', 'bat_up', 'bat_down', 'bat_hit'].forEach(n =>
@@ -1697,9 +1699,36 @@ class MainScene extends Phaser.Scene {
         if (w.level >= 2) this.spawnRulerArc(baseAngle, len, arcTier, slashDmg);
     }
 
-    // The visible slash: white crescent swept TOP→BOTTOM in the facing
-    // direction — the same high-to-low chop as the puppet's swinging arm
+    // The visible slash: baked blue energy-crescent sprite (fx_slash.png,
+    // additive) swept TOP→BOTTOM in the facing direction — the same
+    // high-to-low chop as the puppet's swinging arm. Graphics fallback below.
     drawSlashCrescent(centerAngle, len, half, facing) {
+        if (this.textures.exists('fx_slash')) {
+            // Two layers: NORMAL keeps the saturated blue readable on the
+            // bright grass, ADD on top restores the luminous glow of the ref
+            const sc = len / 190; // texture bow outer edge ≈ 210px at scale 1
+            const mk = (blend, alpha) => {
+                const im = this.add.image(this.player.x, this.player.y, 'fx_slash').setDepth(46);
+                im.setBlendMode(blend);
+                im.setScale(sc * 0.8).setAlpha(alpha);
+                im.rotation = centerAngle - 0.5 * facing; // wound up at the top
+                return im;
+            };
+            const imgs = [mk(Phaser.BlendModes.NORMAL, 0.9), mk(Phaser.BlendModes.ADD, 0.85)];
+            // Sweep fast, but keep the slash VIVID through most of it — alpha
+            // only fades in the back half (Cubic.out on alpha washed it teal)
+            this.tweens.add({
+                targets: imgs,
+                rotation: centerAngle + 0.42 * facing,  // chop down through facing
+                scale: sc * 1.08,
+                duration: 240, ease: 'Cubic.out'
+            });
+            this.tweens.add({
+                targets: imgs, alpha: 0, delay: 130, duration: 140, ease: 'Quad.in',
+                onComplete: () => imgs.forEach(im => im.destroy())
+            });
+            return;
+        }
         const g = this.add.graphics().setDepth(46);
         const R = len * 0.74;
         const startA = centerAngle - half * facing; // top of the chop

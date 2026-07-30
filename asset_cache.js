@@ -86,6 +86,7 @@
     'sprites/vs/skippy_foot_r.png',
     'sprites/vs/portrait_monitor.png',
     'sprites/vs/portrait_skippy.png',
+    'sprites/vs/fx_slash.png',
     'sprites/vs/item_jumprope.png',
     'sprites/vs/item_balloon.png',
     'sprites/vs/item_book.png',

@@ -730,7 +730,10 @@ class MainScene extends Phaser.Scene {
     // forceType: 0=rat, 1=bat, 2=zombie; omitted = rotate by game time.
     createEnemyAt(ex, ey, forceType) {
         if (this.enemies.getChildren().length >= 160) return null; // hard cap
-        const type = (forceType === undefined) ? Math.floor(this.gameTime / 1800) % 3 : forceType;
+        // Type: an even random MIX per spawn (rat/bat/zombie) so all three
+        // appear from the start — the old time-gated rotation meant 30s of
+        // pure rats before any bat/zombie showed up.
+        const type = (forceType === undefined) ? Math.floor(Math.random() * 3) : forceType;
         const isBat = type === 1;
         // Rat/bat/zombie sprite frames when loaded; emoji textures as fallback
         const hasRat = this.textures.exists('enemy_rat_walk');
@@ -761,6 +764,7 @@ class MainScene extends Phaser.Scene {
         // swap to a drawn hit pose on damage
         if (isBat && hasBat) {
             enemy.animLoop = ['enemy_bat_up', 'enemy_bat_down'];
+            enemy.animRate = 16; // big bats flap slower (swarm bats keep the fast default 9)
             enemy.animHit = 'enemy_bat_hit';
             enemy.animPhase = Math.floor(Math.random() * 16); // desync flaps
         } else if (type === 2 && hasZom) {
@@ -1369,13 +1373,15 @@ class MainScene extends Phaser.Scene {
                 if (e.animLoop || e.animWalk) {
                     const facingX = (e.body.velocity.x < 0 ||
                         (Math.abs(e.body.velocity.x) < 1 && this.player.x < e.x)) ? -baseScale : baseScale;
-                    e.setScale(facingX, baseScale);
-                    // Rats HOP: a crisp vertical bounce while moving (render-only
-                    // y offset — the physics body re-syncs ground y every frame,
-                    // so it never drifts)
+                    // Rats HOP: a vertical scale bounce while moving. MUST be
+                    // scale-only — nudging e.y made this Phaser build sync the
+                    // body upward every frame, so rats drifted off the top of
+                    // the screen and clogged the spawn cap.
+                    let sy = baseScale;
                     if (e.hop && (e.body.velocity.x !== 0 || e.body.velocity.y !== 0)) {
-                        e.y -= Math.abs(Math.sin(this.gameTime * 0.32 + (e.animPhase || 0))) * 7;
+                        sy = baseScale * (1 + Math.abs(Math.sin(this.gameTime * 0.3 + (e.animPhase || 0))) * 0.18);
                     }
+                    e.setScale(facingX, sy);
                 } else if (e.attackState === 'windup') {
                     // Crouch pose: wide + low, quivering, facing the player
                     const facingX = this.player.x < e.x ? -baseScale : baseScale;

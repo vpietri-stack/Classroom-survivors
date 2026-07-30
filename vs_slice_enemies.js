@@ -109,12 +109,17 @@ const JOBS = [
                         const si = sp * 4, di = (y * sw + x) * 4;
                         let r = d[si], g = d[si + 1], b = d[si + 2];
                         if (boost) {
-                            // Saturation ×1.3 + brightness ×1.13 to match the
-                            // bright weapon-item palette
+                            // The enemy art is muted grey/brown (near-zero
+                            // saturation), so it reads dim next to the vivid
+                            // weapon items. Saturation ×1.5, then a shadow-lift
+                            // gamma + brightness so the fur/wings pop.
                             const gray = 0.299 * r + 0.587 * g + 0.114 * b;
-                            r = (gray + (r - gray) * 1.3) * 1.13;
-                            g = (gray + (g - gray) * 1.3) * 1.13;
-                            b = (gray + (b - gray) * 1.3) * 1.13;
+                            r = gray + (r - gray) * 1.5;
+                            g = gray + (g - gray) * 1.5;
+                            b = gray + (b - gray) * 1.5;
+                            r = 255 * Math.pow(Math.min(1, Math.max(0, r) / 255), 1 / 1.18) * 1.08;
+                            g = 255 * Math.pow(Math.min(1, Math.max(0, g) / 255), 1 / 1.18) * 1.08;
+                            b = 255 * Math.pow(Math.min(1, Math.max(0, b) / 255), 1 / 1.18) * 1.08;
                         }
                         cd[di] = Math.max(0, Math.min(255, r));
                         cd[di + 1] = Math.max(0, Math.min(255, g));

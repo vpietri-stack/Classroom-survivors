@@ -1692,18 +1692,20 @@ class MainScene extends Phaser.Scene {
         // slash tier. Angular half-width is FIXED at ±80° (matches the VFX comma
         // in vs_make_fx_slash.js), so the linear width scales up WITH the reach
         // (same proportion) and the hitbox is exactly the cone the crescent fills.
-        const SLASH_HALF = 1.40; // ±80° — keep in sync with the fx_slash bake (H)
+        const SLASH_HALF = 1.60; // ±92° hit cone — a bit wider than the VFX ±80°
         const len = 165 * (1 + slashTier * 0.18);
 
         this.swingRulerArm(160);
         this.drawSlashCrescent(baseAngle, len, facing);
 
-        // Cone hit-check: within reach AND within the angular span (= the VFX)
+        // Cone hit-check, GENEROUS: the cone is wider than the drawn comma and
+        // the reach carries a +12% margin (the fat end + glow extend past the
+        // calibrated forward reach) so anything the VFX touches really gets hit
         let hitCount = 0;
         this.enemies.getChildren().forEach(e => {
             if (!e.active) return;
             const dx = e.x - this.player.x, dy = e.y - this.player.y;
-            if (Math.hypot(dx, dy) > len) return;
+            if (Math.hypot(dx, dy) > len * 1.12) return;
             const da = Phaser.Math.Angle.Wrap(Math.atan2(dy, dx) - baseAngle);
             if (Math.abs(da) <= SLASH_HALF) { this.damageEnemy(e, slashDmg, 140); hitCount++; }
         });
@@ -1787,7 +1789,9 @@ class MainScene extends Phaser.Scene {
         const sx = this.player.x + Math.cos(baseAngle) * startDist * 0.8;
         const sy = this.player.y + Math.sin(baseAngle) * startDist * 0.8;
         const b = this.add.image(sx, sy, 'fx_arc').setDepth(45);
-        this.setPx(b, 52 + arcTier * 12);
+        // WAY wider arc: starting visible width ≈ 0.6× the starting slash's
+        // span (was a small 52px crescent), still growing per arc tier
+        this.setPx(b, 190 + arcTier * 40);
         b.rotation = baseAngle;
         this.bullets.add(b);
         this.physics.add.existing(b);
@@ -2747,10 +2751,10 @@ class MainScene extends Phaser.Scene {
             enemy.body.checkCollision.none = true;
             enemy.body.setVelocity(enemy.body.velocity.x * 1.5, enemy.body.velocity.y * 1.5);
             enemy.body.setDrag(1000);
-            // Death SFX by enemy kind (bat/zombie get their own recordings;
-            // rats/others keep the synth pop; boss handled by its own juice)
+            // Death SFX by enemy kind: bats AND rats share the squeak (user
+            // request), zombies get their own; boss keeps its own juice
             let deathPlayed = false;
-            if (enemy.isBat) deathPlayed = playSfxSample('sfx/bat_death.mp3', 0.5, undefined, 60);
+            if (enemy.isBat || enemy.enemyType === 0) deathPlayed = playSfxSample('sfx/bat_death.mp3', 0.3, undefined, 60);
             else if (enemy.enemyType === 2) deathPlayed = playSfxSample('sfx/zombie_death.mp3', 0.5, undefined, 60);
             if (!deathPlayed) synthHit();
 

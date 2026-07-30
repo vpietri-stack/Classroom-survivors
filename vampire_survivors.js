@@ -1688,21 +1688,24 @@ class MainScene extends Phaser.Scene {
 
         const facing = this.player.scaleX > 0 ? 1 : -1;
         const baseAngle = facing === 1 ? 0 : Math.PI;
-        // ~1/3 of the jump rope's 330 reach but a WAY wider cone
-        const len = 118 * (1 + slashTier * 0.18);
-        const half = Math.min(1.35, 0.85 * (1 + slashTier * 0.14));
+        // Reach starts at HALF the Jump Rope's 330 reach (=165) and grows per
+        // slash tier. Angular half-width is FIXED at ±80° (matches the VFX comma
+        // in vs_make_fx_slash.js), so the linear width scales up WITH the reach
+        // (same proportion) and the hitbox is exactly the cone the crescent fills.
+        const SLASH_HALF = 1.40; // ±80° — keep in sync with the fx_slash bake (H)
+        const len = 165 * (1 + slashTier * 0.18);
 
         this.swingRulerArm(160);
-        this.drawSlashCrescent(baseAngle, len, half, facing);
+        this.drawSlashCrescent(baseAngle, len, facing);
 
-        // Cone hit-check: within reach AND within the angular span
+        // Cone hit-check: within reach AND within the angular span (= the VFX)
         let hitCount = 0;
         this.enemies.getChildren().forEach(e => {
             if (!e.active) return;
             const dx = e.x - this.player.x, dy = e.y - this.player.y;
-            if (Math.hypot(dx, dy) > len + 20) return;
+            if (Math.hypot(dx, dy) > len) return;
             const da = Phaser.Math.Angle.Wrap(Math.atan2(dy, dx) - baseAngle);
-            if (Math.abs(da) <= half) { this.damageEnemy(e, slashDmg, 140); hitCount++; }
+            if (Math.abs(da) <= SLASH_HALF) { this.damageEnemy(e, slashDmg, 140); hitCount++; }
         });
 
         // Real recordings (user-provided): whiff vs connect. The procedural
@@ -1715,36 +1718,38 @@ class MainScene extends Phaser.Scene {
         if (w.level >= 2) this.spawnRulerArc(baseAngle, len, arcTier, slashDmg);
     }
 
-    // The visible slash: baked blue energy-crescent sprite (fx_slash.png,
-    // additive) swept TOP→BOTTOM in the facing direction — the same
-    // high-to-low chop as the puppet's swinging arm. Graphics fallback below.
-    drawSlashCrescent(centerAngle, len, half, facing) {
+    // The visible slash: baked blue COMMA (fx_slash.png, additive) placed in
+    // FRONT of the player, narrow tip up / fat end low (matches the arm chop),
+    // sized so its forward reach == the hitbox reach. Single-instance: any
+    // still-fading slash is scrubbed first so overlapping fires can never stack
+    // into a "doubled" / full-circle smear.
+    drawSlashCrescent(baseAngle, len, facing) {
         if (this.textures.exists('fx_slash')) {
-            // Two layers: NORMAL keeps the saturated blue readable on the
-            // bright grass, ADD on top restores the luminous glow of the ref
-            const sc = len / 190; // texture bow outer edge ≈ 210px at scale 1
+            if (this._slashImgs) {
+                this._slashImgs.forEach(im => { this.tweens.killTweensOf(im); im.destroy(); });
+            }
+            const sc = len / 176; // texture forward reach ≈176px at scale 1
             const mk = (blend, alpha) => {
                 const im = this.add.image(this.player.x, this.player.y, 'fx_slash').setDepth(46);
                 im.setBlendMode(blend);
-                im.setScale(sc * 0.8).setAlpha(alpha);
-                im.rotation = centerAngle - 0.5 * facing; // wound up at the top
+                im.setScale(sc).setAlpha(alpha);
+                im.setFlipX(facing < 0);      // belly follows facing; tip stays up
+                im.rotation = -0.16 * facing; // wound up high (narrow tip leads)
                 return im;
             };
             const imgs = [mk(Phaser.BlendModes.NORMAL, 0.9), mk(Phaser.BlendModes.ADD, 0.85)];
-            // Sweep fast, but keep the slash VIVID through most of it — alpha
-            // only fades in the back half (Cubic.out on alpha washed it teal)
+            this._slashImgs = imgs;
+            // Chop down through the swing (narrow tip -> wide end); stays vivid,
+            // alpha only fades in the back half so it never washes out
+            this.tweens.add({ targets: imgs, rotation: 0.12 * facing, scale: sc * 1.06, duration: 200, ease: 'Cubic.out' });
             this.tweens.add({
-                targets: imgs,
-                rotation: centerAngle + 0.42 * facing,  // chop down through facing
-                scale: sc * 1.08,
-                duration: 240, ease: 'Cubic.out'
-            });
-            this.tweens.add({
-                targets: imgs, alpha: 0, delay: 130, duration: 140, ease: 'Quad.in',
-                onComplete: () => imgs.forEach(im => im.destroy())
+                targets: imgs, alpha: 0, delay: 120, duration: 130, ease: 'Quad.in',
+                onComplete: () => { imgs.forEach(im => im.destroy()); if (this._slashImgs === imgs) this._slashImgs = null; }
             });
             return;
         }
+        const half = 1.40;
+        const centerAngle = baseAngle;
         const g = this.add.graphics().setDepth(46);
         const R = len * 0.74;
         const startA = centerAngle - half * facing; // top of the chop

@@ -38,7 +38,7 @@
   // only that group re-downloads. Unmatched paths fall into the 'misc' group.
   var GROUP_VERSIONS = [
     { prefix: 'sprites/td/',   token: 'td-sprites-v1' },
-    { prefix: 'sprites/vs/',   token: 'vs-sprites-v2' },
+    { prefix: 'sprites/vs/',   token: 'vs-sprites-v3' },
     { prefix: 'images/vocab/', token: 'vocab-v1' },
     { prefix: 'audio_mp3/',    token: 'audio-v1' },
     { prefix: 'music/',        token: 'music-v1' }

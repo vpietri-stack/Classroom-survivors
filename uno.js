@@ -27,9 +27,13 @@ class UnoScene extends Phaser.Scene {
         
         // Reset camera angle in case a previous game left it tilted
         this.cameras.main.setAngle(0);
+                // HiDPI: backing buffer = container x DPR, so render at DPR camera zoom and
+                // treat the layout in CSS space (this.scale.width/height are backing px).
+                this.cameras.main.setZoom(vsDpr());
+                        this.cameras.main.centerOn(this.scale.width / vsDpr() / 2, this.scale.height / vsDpr() / 2);
 
-        const cw = this.scale.width;
-        const ch = this.scale.height;
+        const cw = this.scale.width / vsDpr();
+        const ch = this.scale.height / vsDpr();
         this.layout = {
             deck: { x: cw / 2 + 70, y: ch / 2 - 20 },
             discard: { x: cw / 2 - 70, y: ch / 2 - 20 },
@@ -289,6 +293,10 @@ class UnoScene extends Phaser.Scene {
         this.clearAllTurnTimers();
         this.tweens.killAll();
         this.cameras.main.setAngle(0);
+                // HiDPI: backing buffer = container x DPR, so render at DPR camera zoom and
+                // treat the layout in CSS space (this.scale.width/height are backing px).
+                this.cameras.main.setZoom(vsDpr());
+                        this.cameras.main.centerOn(this.scale.width / vsDpr() / 2, this.scale.height / vsDpr() / 2);
 
         this.cardSprites = []; // track all active sprites
         this.aiTextSprites = [];
@@ -308,8 +316,8 @@ class UnoScene extends Phaser.Scene {
         }
 
         // Set initial layout positions
-        const cw = this.scale.width;
-        const ch = this.scale.height;
+        const cw = this.scale.width / vsDpr();
+        const ch = this.scale.height / vsDpr();
         this.layout = {
             deck: { x: cw / 2 + 70, y: ch / 2 - 20 },
             discard: { x: cw / 2 - 70, y: ch / 2 - 20 },
@@ -367,8 +375,8 @@ class UnoScene extends Phaser.Scene {
         let destX, destY;
         if (p === 0) {
             const nextHandLen = this.players[0].length + 1;
-            const spacing = Math.min(80, (this.scale.width - 40) / Math.max(1, nextHandLen));
-            const startX = this.scale.width / 2 - ((nextHandLen - 1) * spacing) / 2;
+            const spacing = Math.min(80, (this.scale.width / vsDpr() - 40) / Math.max(1, nextHandLen));
+            const startX = this.scale.width / vsDpr() / 2 - ((nextHandLen - 1) * spacing) / 2;
             destX = startX + (nextHandLen - 1) * spacing;
             destY = this.layout.playerHandY;
         } else {
@@ -413,8 +421,8 @@ class UnoScene extends Phaser.Scene {
     }
 
     renderAll() {
-        const cw = this.scale.width;
-        const ch = this.scale.height;
+        const cw = this.scale.width / vsDpr();
+        const ch = this.scale.height / vsDpr();
         this.layout = {
             deck: { x: cw / 2 + 70, y: ch / 2 - 20 },
             discard: { x: cw / 2 - 70, y: ch / 2 - 20 },
@@ -458,8 +466,8 @@ class UnoScene extends Phaser.Scene {
 
         // Human Hand
         const hand = this.players[0];
-        const spacing = Math.min(80, (this.scale.width - 40) / Math.max(1, hand.length));
-        const startX = this.scale.width / 2 - ((hand.length - 1) * spacing) / 2;
+        const spacing = Math.min(80, (this.scale.width / vsDpr() - 40) / Math.max(1, hand.length));
+        const startX = this.scale.width / vsDpr() / 2 - ((hand.length - 1) * spacing) / 2;
         
         const topCard = this.discard[this.discard.length - 1];
         const isMyTurn = this.currentPlayer === 0 && !this.isProcessing;
@@ -832,8 +840,8 @@ class UnoScene extends Phaser.Scene {
         this.freePlay = false;
         this.resolveUnoVulnerabilities(() => {
             const card = this.players[0].splice(idx, 1)[0];
-            const spacing = Math.min(80, (this.scale.width - 40) / Math.max(1, this.players[0].length));
-            const startX = this.scale.width / 2 - ((this.players[0].length) * spacing) / 2 + idx * spacing;
+            const spacing = Math.min(80, (this.scale.width / vsDpr() - 40) / Math.max(1, this.players[0].length));
+            const startX = this.scale.width / vsDpr() / 2 - ((this.players[0].length) * spacing) / 2 + idx * spacing;
             
             this.renderAll(); // refresh hand
 
@@ -955,6 +963,10 @@ class UnoScene extends Phaser.Scene {
                     },
                     onComplete: () => {
                         this.cameras.main.setAngle(0);
+                                // HiDPI: backing buffer = container x DPR, so render at DPR camera zoom and
+                                // treat the layout in CSS space (this.scale.width/height are backing px).
+                                this.cameras.main.setZoom(vsDpr());
+                                        this.cameras.main.centerOn(this.scale.width / vsDpr() / 2, this.scale.height / vsDpr() / 2);
                     }
                 });
             }
@@ -1017,8 +1029,8 @@ class UnoScene extends Phaser.Scene {
             
             this.addTurnTimer(this.time.delayedCall(500, () => {
                 const card = this.players[0].splice(idx, 1)[0];
-                const spacing = Math.min(80, (this.scale.width - 40) / Math.max(1, this.players[0].length));
-                const startX = this.scale.width / 2 - ((this.players[0].length) * spacing) / 2 + idx * spacing;
+                const spacing = Math.min(80, (this.scale.width / vsDpr() - 40) / Math.max(1, this.players[0].length));
+                const startX = this.scale.width / vsDpr() / 2 - ((this.players[0].length) * spacing) / 2 + idx * spacing;
                 
                 this.renderAll();
                 this.burstParticles(startX, this.layout.playerHandY, 0xfacc15);
@@ -1706,6 +1718,10 @@ class UnoScene extends Phaser.Scene {
         // Reset camera angle to zero (animateReverseCamera may have left it tilted)
         if (this.cameras && this.cameras.main) {
             this.cameras.main.setAngle(0);
+                    // HiDPI: backing buffer = container x DPR, so render at DPR camera zoom and
+                    // treat the layout in CSS space (this.scale.width/height are backing px).
+                    this.cameras.main.setZoom(vsDpr());
+                            this.cameras.main.centerOn(this.scale.width / vsDpr() / 2, this.scale.height / vsDpr() / 2);
         }
         // Remove resize listener
         if (this.scale) {
@@ -1726,9 +1742,6 @@ function completeUnoESLQuestion(success) {
 
 function triggerUno() {
     activeGameMode = 'Uno';
-    // Undo VS HiDPI if it was active: restore CSS-px RESIZE + drop the HiDPI
-    // window-resize listener so it can't fight Uno's container-based sizing.
-    if (typeof exitHiDpi === 'function') exitHiDpi();
     // Re-show the shared Phaser canvas: showGameSelection()/exitVampireSurvivors()
     // set display:none to hide it on the menu, and triggerUno never restored it,
     // so a VS -> menu -> UNO path rendered UNO onto a hidden canvas (invisible cards).
@@ -1755,12 +1768,9 @@ function triggerUno() {
             setTimeout(() => {
                 if (game && game.scale) {
                     const parentEl = document.getElementById('uno-phaser-container');
-                    game.scale.parent = parentEl;
-                    game.scale.parentIsWindow = false;
-                    if (parentEl) {
-                        game.scale.resize(parentEl.clientWidth, parentEl.clientHeight);
-                    }
-                    game.scale.refresh();
+                    // HiDPI: render UNO crisp into its container (backing = container x DPR)
+                    if (typeof enterHiDpi === 'function') { enterHiDpi(parentEl); }
+                    else { game.scale.parent = parentEl; game.scale.parentIsWindow = false; if (parentEl) game.scale.resize(parentEl.clientWidth, parentEl.clientHeight); game.scale.refresh(); }
                 }
                 game.scene.start('UnoScene');
             }, 50);
@@ -1783,14 +1793,9 @@ function triggerUno() {
 
         // Defer refresh and start
         setTimeout(() => {
-            if (game && game.scale) {
-                game.scale.parent = parentEl;
-                game.scale.parentIsWindow = false;
-                if (parentEl) {
-                    game.scale.resize(parentEl.clientWidth, parentEl.clientHeight);
-                }
-                game.scale.refresh();
-            }
+            // HiDPI: render UNO crisp into its container (backing = container x DPR)
+            if (typeof enterHiDpi === 'function') { enterHiDpi(parentEl); }
+            else if (game && game.scale) { game.scale.parent = parentEl; game.scale.parentIsWindow = false; if (parentEl) game.scale.resize(parentEl.clientWidth, parentEl.clientHeight); game.scale.refresh(); }
             game.scene.start('UnoScene');
         }, 50);
     }

@@ -64,19 +64,27 @@ function vsDpr() {
     return Math.min(2, Math.max(1, window.devicePixelRatio || 1));
 }
 let _hiDpiResizeHandler = null;
+let _hiDpiEl = null; // sizing target: null = full window (VS), else an element (UNO container)
 function _applyHiDpiSize() {
     if (!game || !game.scale) return;
     const dpr = vsDpr();
-    game.scale.setZoom(1 / dpr);                          // display = backing / DPR = CSS px
-    game.scale.resize(window.innerWidth * dpr, window.innerHeight * dpr); // backing = CSS x DPR
-    game.scale.refresh();                                 // recompute displaySize + displayScale (input)
+    const w = _hiDpiEl ? _hiDpiEl.clientWidth : window.innerWidth;
+    const h = _hiDpiEl ? _hiDpiEl.clientHeight : window.innerHeight;
+    if (w <= 0 || h <= 0) return;
+    game.scale.setZoom(1 / dpr);            // display = backing / DPR = CSS px
+    game.scale.resize(w * dpr, h * dpr);    // backing = CSS x DPR
+    game.scale.refresh();                   // recompute displaySize + displayScale (input)
 }
-function enterHiDpi() {
+// enterHiDpi(el?) : HiDPI-render into `el` (or the full window when omitted).
+// The single shared game canvas is used by VS (window) and UNO (its container).
+function enterHiDpi(targetEl) {
     if (!game || !game.scale) return;
+    _hiDpiEl = targetEl || null;
     // Scale.NONE: we drive the size; RESIZE would auto-shrink the backing back
     // to CSS px on every window/orientation change, undoing the HiDPI buffer.
     game.scale.scaleMode = Phaser.Scale.NONE;
     game.scale.parentIsWindow = false;
+    if (_hiDpiEl) game.scale.parent = _hiDpiEl;
     _applyHiDpiSize();
     if (!_hiDpiResizeHandler) {
         _hiDpiResizeHandler = () => _applyHiDpiSize();
@@ -88,6 +96,7 @@ function exitHiDpi() {
         window.removeEventListener('resize', _hiDpiResizeHandler);
         _hiDpiResizeHandler = null;
     }
+    _hiDpiEl = null;
     if (!game || !game.scale) return;
     // Restore today's exact behavior for the other games sharing the canvas.
     // Clearing the inline width/height/margin is REQUIRED: the NONE+zoom mode

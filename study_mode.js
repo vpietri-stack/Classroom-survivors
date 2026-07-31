@@ -85,6 +85,8 @@ function initStudyMode() {
     if (vsExitBtn) vsExitBtn.classList.add('hidden');
     const vsMuteBtn = document.getElementById('vsMuteBtn');
     if (vsMuteBtn) vsMuteBtn.classList.add('hidden');
+    const vsMusicBtn = document.getElementById('vsMusicBtn');
+    if (vsMusicBtn) vsMusicBtn.classList.add('hidden');
     activeGameMode = null;
 
     // Show Study Overlay

@@ -116,9 +116,13 @@
 
     <!-- HUD -->
     <div id="hud">
-        <button id="vsMuteBtn" onclick="if(window.BGM)BGM.toggleMute()"
+        <button id="vsMuteBtn" onclick="toggleSfxMute()"
             class="pointer-events-auto hidden" style="position:absolute;top:12px;left:12px;z-index:20;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.3);color:#ccc;font-size:14px;font-weight:bold;padding:6px 10px;border-radius:6px;cursor:pointer;">
             <i id="vsMuteIcon" class="fas fa-volume-up"></i>
+        </button>
+        <button id="vsMusicBtn" onclick="if(window.BGM)BGM.toggleMute()"
+            class="pointer-events-auto hidden" style="position:absolute;top:52px;left:12px;z-index:20;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.3);color:#ccc;font-size:14px;font-weight:bold;padding:6px 10px;border-radius:6px;cursor:pointer;">
+            <i id="vsMusicMuteIcon" class="fas fa-music"></i>
         </button>
         <button id="vsExitBtn" onclick="exitVampireSurvivors()"
             class="pointer-events-auto hidden" style="position:absolute;top:12px;left:56px;z-index:20;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.3);color:#ccc;font-size:12px;font-weight:bold;padding:6px 12px;border-radius:6px;cursor:pointer;">

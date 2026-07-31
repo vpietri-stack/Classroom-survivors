@@ -60,10 +60,16 @@
         gainNode.gain.linearRampToValueAtTime(playing ? currentTarget() : 0, t + (fadeSec || 0.4));
     }
 
-    // Keep the HUD mute icon in sync with state (index.html #vsMuteIcon)
+    // Keep the HUD music-mute icon in sync with state (index.html
+    // #vsMusicMuteIcon on the dedicated music button; the volume icon
+    // #vsMuteIcon now belongs to the SFX mute in game.js)
     function syncMuteIcon() {
-        const icon = document.getElementById('vsMuteIcon');
-        if (icon) icon.className = muted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+        const icon = document.getElementById('vsMusicMuteIcon');
+        if (icon) {
+            icon.className = 'fas fa-music';
+            icon.style.opacity = muted ? '0.35' : '1';
+            icon.style.color = muted ? '#f87171' : '';
+        }
     }
 
     const BGM = {

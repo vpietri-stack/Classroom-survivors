@@ -1322,7 +1322,7 @@ class UnoScene extends Phaser.Scene {
 
             noise.connect(noiseFilter);
             noiseFilter.connect(noiseGain);
-            noiseGain.connect(audioCtx.destination);
+            noiseGain.connect(sfxDest());
 
             // Click transient (crack)
             const oscNode = audioCtx.createOscillator();
@@ -1335,7 +1335,7 @@ class UnoScene extends Phaser.Scene {
             oscGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.025);
 
             oscNode.connect(oscGain);
-            oscGain.connect(audioCtx.destination);
+            oscGain.connect(sfxDest());
 
             noise.start();
             oscNode.start();
@@ -1365,7 +1365,7 @@ class UnoScene extends Phaser.Scene {
 
             osc1.connect(filter1);
             filter1.connect(gain1);
-            gain1.connect(audioCtx.destination);
+            gain1.connect(sfxDest());
 
             // Layer 2: Metallic high ring
             const osc2 = audioCtx.createOscillator();
@@ -1377,7 +1377,7 @@ class UnoScene extends Phaser.Scene {
             gain2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
 
             osc2.connect(gain2);
-            gain2.connect(audioCtx.destination);
+            gain2.connect(sfxDest());
 
             // Layer 3: Lock bolt click at 80ms
             const bufferSize = audioCtx.sampleRate * 0.02; // 20ms
@@ -1395,7 +1395,7 @@ class UnoScene extends Phaser.Scene {
             noiseGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
 
             noise.connect(noiseGain);
-            noiseGain.connect(audioCtx.destination);
+            noiseGain.connect(sfxDest());
 
             osc1.start();
             osc2.start();
@@ -1430,7 +1430,7 @@ class UnoScene extends Phaser.Scene {
 
             osc1.connect(filter1);
             filter1.connect(gain1);
-            gain1.connect(audioCtx.destination);
+            gain1.connect(sfxDest());
 
             // Layer 2: impact thud at 300ms
             const bufferSize = audioCtx.sampleRate * 0.06; // 60ms
@@ -1453,7 +1453,7 @@ class UnoScene extends Phaser.Scene {
 
             noise.connect(noiseFilter);
             noiseFilter.connect(noiseGain);
-            noiseGain.connect(audioCtx.destination);
+            noiseGain.connect(sfxDest());
 
             // Layer 3: rubber band spring tone at 300ms
             const osc3 = audioCtx.createOscillator();
@@ -1467,7 +1467,7 @@ class UnoScene extends Phaser.Scene {
             gain3.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
 
             osc3.connect(gain3);
-            gain3.connect(audioCtx.destination);
+            gain3.connect(sfxDest());
 
             osc1.start();
             osc3.start();
@@ -1510,7 +1510,7 @@ class UnoScene extends Phaser.Scene {
             lowGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
             
             oscLow.connect(lowGain);
-            lowGain.connect(audioCtx.destination);
+            lowGain.connect(sfxDest());
             
             // High sizzle tail
             const sizzleSource = audioCtx.createBufferSource();
@@ -1526,7 +1526,7 @@ class UnoScene extends Phaser.Scene {
             
             sizzleSource.connect(sizzleFilter);
             sizzleFilter.connect(sizzleGain);
-            sizzleGain.connect(audioCtx.destination);
+            sizzleGain.connect(sfxDest());
             
             oscLow.start();
             sizzleSource.start();

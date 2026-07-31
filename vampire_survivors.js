@@ -3848,6 +3848,8 @@ function triggerVampireSurvivors() {
     if (vsExitBtn) vsExitBtn.classList.remove('hidden');
     const vsMuteBtn = document.getElementById('vsMuteBtn');
     if (vsMuteBtn) vsMuteBtn.classList.remove('hidden');
+    const vsMusicBtn = document.getElementById('vsMusicBtn');
+    if (vsMusicBtn) vsMusicBtn.classList.remove('hidden');
     initAudio();
     totalMinigameTimeMs = 0;
     // Ensure canvas is visible (may have been hidden by exitVampireSurvivors)
@@ -4001,6 +4003,8 @@ function exitVampireSurvivors() {
     if (vsExitBtn) vsExitBtn.classList.add('hidden');
     const vsMuteBtn = document.getElementById('vsMuteBtn');
     if (vsMuteBtn) vsMuteBtn.classList.add('hidden');
+    const vsMusicBtn = document.getElementById('vsMusicBtn');
+    if (vsMusicBtn) vsMusicBtn.classList.add('hidden');
     const vsVictory = document.getElementById('vsVictoryMenu');
     if (vsVictory) vsVictory.classList.add('hidden');
     activeGameMode = null;

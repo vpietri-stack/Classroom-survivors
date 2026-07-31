@@ -1,6 +1,6 @@
 # PROJECT HANDOFF — Classroom Survivors
 
-_Last updated: 2026-07-29 (night turn 2: WeChat-iOS BGM unlock). Branch: `preview`._
+_Last updated: 2026-07-29 (night turn 3: split SFX/music mute buttons). Branch: `preview`._
 
 This is a detailed handoff for the **Classroom Survivors** ESL educational game — an HTML/JS web app for young Chinese English learners. It documents architecture, the games, the recent work, the HiDPI system, the asset pipeline, testing, known pitfalls, and open items. Read the "Golden Rules" first.
 
@@ -101,6 +101,8 @@ Elastic playground fence (arenaRadius 1800), enemy wall ahead when fleeing too l
 Two layers:
 1. **Procedural WebAudio synths** (GFW-resilient, no files): `synthWhipCrack`, `synthSwoosh`, `synthPlaneHit`, `synthStab`, `synthRicochet`, `synthSmash`, `synthPageFlutter`, `synthSwordSlash`, `synthArcHum`, `synthZap`, etc. Throttled via `sfxOK(key, ms)`.
 2. **Sampled SFX** — real MP3 recordings under **`sfx/`**, decoded once into WebAudio buffers by `loadSfxSample` / `playSfxSample(path, vol, dur?, throttleMs?)`. `dur` trims a clip (scissors = first 2s); `throttleMs` coalesces crowd events (and suppresses the synth fallback when throttled). All preloaded at VS scene create; synth is the fallback while loading / on failure.
+
+**SFX master gain + split mute buttons:** ALL sound effects (game.js synths + uno.js synths + sampled sfx/) route through one master gain — `sfxDest()` in game.js (the ONLY node connected directly to `audioCtx.destination`; never connect SFX to the destination directly). HUD has TWO mute buttons (top-left, VS): `#vsMuteBtn` (volume icon, top) = SFX mute via `toggleSfxMute()` (gain 0/1, persisted `localStorage.sfxMuted`); `#vsMusicBtn` (music-note icon, below it) = music mute via `BGM.toggleMute()` (persisted `bgmMuted`; icon dims red at 0.35 opacity via bgm.js `syncMuteIcon` → `#vsMusicMuteIcon`). TTS word audio (HTML5 `<audio>`) is learning content and is NOT muted by either. Both buttons show/hide together (trigger/exit VS, menu, study mode).
 
 Current sampled mappings & volumes: `sword-slash` 0.55 (whiff) / `sword-hit` 0.55 (connect), `paper_plane_travelling` 0.45 (launch) / `paper_plane_hit` 0.5, `book_travelling` 0.3, `scissors_travelling` 0.18 (2s trim), `tornado` 0.5, `jump_rope_fireball_hit` 0.2, `electric_arc_hit` 0.5, `bat_death` 0.3 (rats share it), `zombie_death` 0.5. "travelling" = one-shot on launch (not a sustained loop).
 
@@ -255,7 +257,7 @@ Key scripts (run with `node <file>`):
 
 ## 9. OPEN ITEMS / NEXT STEPS
 
-- **Playtest status (2026-07-29 night):** PC ok ✅, Android ok ✅ (incl. WeChat), iPad layout ok ✅, iPad Safari audio ok ✅ after keep-alive. iPad WeChat: SFX ok, **music never played** — root-caused (BGM's separate AudioContext resumed outside a gesture after async decode; WeChat-iOS requires in-gesture resume) and **fixed** with the universal gesture unlock + WeixinJSBridge hook (see §4) — awaiting iPad WeChat re-test.
+- **Playtest status (2026-07-29 night):** PC ✅, Android ✅ (incl. WeChat), iPad layout ✅, iPad audio ✅ (Safari + WeChat, after keep-alive + WeChat unlock — user-confirmed "music is back on all devices and browsers"). New: split SFX/music mute buttons shipped — verify on devices.
 - **Device coverage strategy:** real devices can't all be tested — `vs_device_matrix_test.js` emulates **12 profiles** (small/mid/big phones @2-3, iPad Mini/standard/Pro @2 incl. mid-game rotation, laptops @1, Windows 125%/150% fractional DPR, ultrawide) and asserts the sizing invariants for all three games; the invariants are container-relative (window for VS, uno container for UNO, min(600,container) for Gomoku), so any screen size/orientation resolves correctly by construction. Latest run: **MATRIX PASS (12/12)**. Add a profile if a new form factor misbehaves.
 - Possible tuning after playtest: HiDPI 2× cap could be raised if a device still looks soft (one number in `vsDpr()`); slash/arc feel; SFX volume balance; final-boss ×2 damage.
 - TD (Tower Defense) is still in development (gated off live).

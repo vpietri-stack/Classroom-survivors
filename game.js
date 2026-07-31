@@ -64,6 +64,35 @@ function showVocabImage(elementId, word) {
 // --- AUDIO SYSTEM ---
 let audioCtx;
 
+// --- SFX master gain + mute -------------------------------------------------
+// ALL sound effects (procedural synths here + uno.js + sampled sfx/) route
+// through one master gain so the HUD SFX-mute button can silence them without
+// touching the music (bgm.js has its own context) or the TTS word audio
+// (HTML5 <audio>, learning content — never muted by this).
+let sfxGainNode = null;
+let sfxMuted = false;
+try { sfxMuted = localStorage.getItem('sfxMuted') === '1'; } catch (e) { }
+function sfxDest() {
+    if (!audioCtx) return null;
+    if (!sfxGainNode) {
+        sfxGainNode = audioCtx.createGain();
+        sfxGainNode.gain.value = sfxMuted ? 0 : 1;
+        sfxGainNode.connect(audioCtx.destination); // master -> speakers (only direct connection)
+    }
+    return sfxGainNode;
+}
+function syncSfxMuteIcon() {
+    const icon = document.getElementById('vsMuteIcon');
+    if (icon) icon.className = sfxMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+}
+function toggleSfxMute() {
+    sfxMuted = !sfxMuted;
+    try { localStorage.setItem('sfxMuted', sfxMuted ? '1' : '0'); } catch (e) { }
+    if (sfxGainNode) sfxGainNode.gain.value = sfxMuted ? 0 : 1;
+    syncSfxMuteIcon();
+    return sfxMuted;
+}
+
 // --- iOS audio-session keep-alive -------------------------------------------
 // On iPad/iPhone, WebAudio alone runs in the "ambient" audio session, which the
 // hardware SILENT SWITCH mutes — so all our music/SFX (BGM + synths are pure
@@ -141,6 +170,8 @@ if (typeof WeixinJSBridge !== 'undefined' && WeixinJSBridge.invoke) {
 function initAudio() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
+    sfxDest();          // ensure the SFX master gain exists (applies saved mute)
+    syncSfxMuteIcon();
     _ensureIosKeepAlive(); // initAudio is always called from a user gesture
 }
 const osc = (type, freq, dur, vol = 0.1) => {
@@ -148,7 +179,7 @@ const osc = (type, freq, dur, vol = 0.1) => {
     const o = audioCtx.createOscillator();
     const g = audioCtx.createGain();
     o.type = type; o.frequency.value = freq;
-    o.connect(g); g.connect(audioCtx.destination);
+    o.connect(g); g.connect(sfxDest());
     g.gain.setValueAtTime(vol, audioCtx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
     o.start(); o.stop(audioCtx.currentTime + dur);
@@ -164,7 +195,7 @@ const noise = (dur) => {
     const g = audioCtx.createGain();
     g.gain.setValueAtTime(0.1, audioCtx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
-    n.connect(g); g.connect(audioCtx.destination);
+    n.connect(g); g.connect(sfxDest());
     n.start();
 }
 const synthWhipCrack = () => {
@@ -182,7 +213,7 @@ const synthWhipCrack = () => {
     gainSwing.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
     
     oscSwing.connect(gainSwing);
-    gainSwing.connect(audioCtx.destination);
+    gainSwing.connect(sfxDest());
     oscSwing.start(now);
     oscSwing.stop(now + 0.1);
 
@@ -198,7 +229,7 @@ const synthWhipCrack = () => {
     gainCrack.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
     
     oscCrack.connect(gainCrack);
-    gainCrack.connect(audioCtx.destination);
+    gainCrack.connect(sfxDest());
     oscCrack.start(now + 0.07);
     oscCrack.stop(now + 0.15);
 
@@ -224,7 +255,7 @@ const synthWhipCrack = () => {
 
     noiseNode.connect(filter);
     filter.connect(gainNoise);
-    gainNoise.connect(audioCtx.destination);
+    gainNoise.connect(sfxDest());
     noiseNode.start(now + 0.07);
 };
 
@@ -244,7 +275,7 @@ const synthLevelUp = () => {
     const now = audioCtx.currentTime;
     [440, 554, 659, 880].forEach((f, i) => {
         const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-        o.frequency.value = f; o.connect(g); g.connect(audioCtx.destination);
+        o.frequency.value = f; o.connect(g); g.connect(sfxDest());
         g.gain.setValueAtTime(0.1, now + i * 0.1);
         g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.3);
         o.start(now + i * 0.1); o.stop(now + i * 0.1 + 0.3);
@@ -259,7 +290,7 @@ const synthHurt = () => {
     o.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.3);
     g.gain.setValueAtTime(0.2, audioCtx.currentTime);
     g.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
-    o.connect(g); g.connect(audioCtx.destination);
+    o.connect(g); g.connect(sfxDest());
     o.start(); o.stop(audioCtx.currentTime + 0.3);
 }
 const synthError = () => {
@@ -271,7 +302,7 @@ const synthError = () => {
     o.frequency.linearRampToValueAtTime(50, audioCtx.currentTime + 0.2);
     g.gain.setValueAtTime(0.2, audioCtx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-    o.connect(g); g.connect(audioCtx.destination);
+    o.connect(g); g.connect(sfxDest());
     o.start(); o.stop(audioCtx.currentTime + 0.2);
 };
 
@@ -285,7 +316,7 @@ const synthDeath = () => {
         o.frequency.setValueAtTime(freq, start);
         g.gain.setValueAtTime(0.2, start);
         g.gain.exponentialRampToValueAtTime(0.01, start + dur);
-        o.connect(g); g.connect(audioCtx.destination);
+        o.connect(g); g.connect(sfxDest());
         o.start(start); o.stop(start + dur);
     };
     // dadadadum
@@ -306,7 +337,7 @@ const synthLootbox = () => {
     o.frequency.exponentialRampToValueAtTime(1320, now + 0.2);
     g.gain.setValueAtTime(0.2, now);
     g.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-    o.connect(g); g.connect(audioCtx.destination);
+    o.connect(g); g.connect(sfxDest());
     o.start(); o.stop(now + 0.3);
 };
 
@@ -335,7 +366,7 @@ const noiseBurst = (start, dur, filterType, freq, Q, vol) => {
     const g = audioCtx.createGain();
     g.gain.setValueAtTime(vol, start);
     g.gain.exponentialRampToValueAtTime(0.001, start + dur);
-    src.connect(f); f.connect(g); g.connect(audioCtx.destination);
+    src.connect(f); f.connect(g); g.connect(sfxDest());
     src.start(start); src.stop(start + dur);
 };
 
@@ -361,7 +392,7 @@ const synthSwoosh = (variant = 'plane') => {
     g.gain.setValueAtTime(0.001, now);
     g.gain.linearRampToValueAtTime(cfg.vol, now + cfg.dur * 0.35);
     g.gain.exponentialRampToValueAtTime(0.001, now + cfg.dur);
-    src.connect(bp); bp.connect(g); g.connect(audioCtx.destination);
+    src.connect(bp); bp.connect(g); g.connect(sfxDest());
     src.start(now); src.stop(now + cfg.dur);
 };
 
@@ -376,7 +407,7 @@ const synthPlaneHit = () => {
     o.frequency.exponentialRampToValueAtTime(90, now + 0.12);
     g.gain.setValueAtTime(0.09, now);
     g.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-    o.connect(g); g.connect(audioCtx.destination);
+    o.connect(g); g.connect(sfxDest());
     o.start(now); o.stop(now + 0.13);
 };
 
@@ -391,7 +422,7 @@ const synthStab = () => {
     o.frequency.exponentialRampToValueAtTime(60, now + 0.11);
     g.gain.setValueAtTime(0.12, now);
     g.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
-    o.connect(g); g.connect(audioCtx.destination);
+    o.connect(g); g.connect(sfxDest());
     o.start(now); o.stop(now + 0.12);
 };
 
@@ -407,7 +438,7 @@ const synthSwordSlash = () => {
     g.gain.setValueAtTime(0.001, now);
     g.gain.linearRampToValueAtTime(0.11, now + 0.03);
     g.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
-    o.connect(g); g.connect(audioCtx.destination);
+    o.connect(g); g.connect(sfxDest());
     o.start(now); o.stop(now + 0.19);
 };
 
@@ -426,7 +457,7 @@ const synthArcHum = () => {
     g.gain.setValueAtTime(0.001, now);
     g.gain.linearRampToValueAtTime(0.08, now + 0.05);
     g.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
-    o.connect(lp); lp.connect(g); g.connect(audioCtx.destination);
+    o.connect(lp); lp.connect(g); g.connect(sfxDest());
     o.start(now); o.stop(now + 0.33);
     lfo.start(now); lfo.stop(now + 0.33);
 };
@@ -444,7 +475,7 @@ const synthZap = () => {
         o.frequency.exponentialRampToValueAtTime(500, s + 0.05);
         g.gain.setValueAtTime(0.06, s);
         g.gain.exponentialRampToValueAtTime(0.001, s + 0.06);
-        o.connect(g); g.connect(audioCtx.destination);
+        o.connect(g); g.connect(sfxDest());
         o.start(s); o.stop(s + 0.07);
     }
 };
@@ -483,7 +514,7 @@ function playSfxSample(path, vol = 0.5, dur, throttleMs) {
     src.buffer = b;
     const g = audioCtx.createGain();
     g.gain.value = vol;
-    src.connect(g); g.connect(audioCtx.destination);
+    src.connect(g); g.connect(sfxDest());
     if (dur) src.start(0, 0, dur); else src.start();
     return true;
 }
@@ -499,7 +530,7 @@ const synthRicochet = () => {
         o.frequency.exponentialRampToValueAtTime(f * 0.6, t + 0.05); // woody pitch drop
         g.gain.setValueAtTime(vol, t);
         g.gain.exponentialRampToValueAtTime(0.001, t + 0.08);        // short hard decay
-        o.connect(g); g.connect(audioCtx.destination);
+        o.connect(g); g.connect(sfxDest());
         o.start(t); o.stop(t + 0.09);
         noiseBurst(t, 0.02, 'highpass', 3200, 5, vol * 0.5);        // hard-surface click
     };
@@ -517,7 +548,7 @@ const synthSmash = () => {
     o.frequency.exponentialRampToValueAtTime(45, now + 0.18);
     g.gain.setValueAtTime(0.16, now);
     g.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-    o.connect(g); g.connect(audioCtx.destination);
+    o.connect(g); g.connect(sfxDest());
     o.start(now); o.stop(now + 0.21);
     noiseBurst(now, 0.08, 'lowpass', 500, 0.7, 0.09);
 };
@@ -539,7 +570,7 @@ const synthEraserPass = () => {
     g.gain.setValueAtTime(0.001, now);
     g.gain.linearRampToValueAtTime(0.09, now + dur * 0.5); // swell on approach
     g.gain.linearRampToValueAtTime(0.001, now + dur);      // fade on recede
-    o.connect(lp); lp.connect(g); g.connect(audioCtx.destination);
+    o.connect(lp); lp.connect(g); g.connect(sfxDest());
     o.start(now); o.stop(now + dur);
     lfo.start(now); lfo.stop(now + dur);
 };
@@ -565,7 +596,7 @@ const synthBombFall = () => {
     g.gain.linearRampToValueAtTime(0.05, now + 0.1);
     g.gain.setValueAtTime(0.05, now + dur - 0.1);
     g.gain.exponentialRampToValueAtTime(0.001, now + dur);
-    o.connect(g); g.connect(audioCtx.destination);
+    o.connect(g); g.connect(sfxDest());
     o.start(now); o.stop(now + dur);
 };
 
@@ -584,7 +615,7 @@ const synthSplash = () => {
     const g = audioCtx.createGain();
     g.gain.setValueAtTime(0.12, now);
     g.gain.exponentialRampToValueAtTime(0.001, now + dur);
-    src.connect(lp); lp.connect(g); g.connect(audioCtx.destination);
+    src.connect(lp); lp.connect(g); g.connect(sfxDest());
     src.start(now); src.stop(now + dur);
     const o = audioCtx.createOscillator(), bg = audioCtx.createGain();
     o.type = 'sine';
@@ -592,7 +623,7 @@ const synthSplash = () => {
     o.frequency.exponentialRampToValueAtTime(900, now + 0.2);
     bg.gain.setValueAtTime(0.04, now + 0.05);
     bg.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-    o.connect(bg); bg.connect(audioCtx.destination);
+    o.connect(bg); bg.connect(sfxDest());
     o.start(now + 0.05); o.stop(now + 0.23);
 };
 let currentTTSWord = "";
@@ -751,6 +782,8 @@ function showGameSelection() {
     if (vsExitBtn) vsExitBtn.classList.add('hidden');
     const vsMuteBtn = document.getElementById('vsMuteBtn');
     if (vsMuteBtn) vsMuteBtn.classList.add('hidden');
+    const vsMusicBtn2 = document.getElementById('vsMusicBtn');
+    if (vsMusicBtn2) vsMusicBtn2.classList.add('hidden');
     activeGameMode = null;
 
     document.getElementById('gameSelectionOverlay').classList.remove('hidden');

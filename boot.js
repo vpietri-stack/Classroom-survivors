@@ -73,6 +73,16 @@ function _applyHiDpiSize() {
     if (w <= 0 || h <= 0) return;
     game.scale.setZoom(1 / dpr);            // display = backing / DPR = CSS px
     game.scale.resize(w * dpr, h * dpr);    // backing = CSS x DPR
+    // DPR-1 PITFALL: setZoom(1) and resize(sameDims) are NO-OPS in Phaser, so
+    // refresh() alone never rewrites the canvas inline style — a stale style
+    // from the previous mode survives (seen on PC: UNO stretched to the VS
+    // window size / VS invisible at 0px). Write the intended display size
+    // explicitly — it equals what the ScaleManager computes (backing x zoom)
+    // so displayScale stays consistent — then refresh() to sync canvasBounds.
+    if (game.canvas) {
+        game.canvas.style.width = w + 'px';
+        game.canvas.style.height = h + 'px';
+    }
     game.scale.refresh();                   // recompute displaySize + displayScale (input)
 }
 // enterHiDpi(el?) : HiDPI-render into `el` (or the full window when omitted).

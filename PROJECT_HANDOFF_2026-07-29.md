@@ -1,6 +1,6 @@
 # PROJECT HANDOFF — Classroom Survivors
 
-_Last updated: 2026-07-29. Branch: `preview`. Latest commit at write time: `7f091d7`._
+_Last updated: 2026-07-29 (evening turn: DPR-1 transition fixes). Branch: `preview`._
 
 This is a detailed handoff for the **Classroom Survivors** ESL educational game — an HTML/JS web app for young Chinese English learners. It documents architecture, the games, the recent work, the HiDPI system, the asset pipeline, testing, known pitfalls, and open items. Read the "Golden Rules" first.
 
@@ -199,6 +199,9 @@ bytes (model weights, images, audio).
 - Set the **scene camera zoom** so the world stays in CSS-equivalent units: VS uses `fit × dpr`; UNO uses `dpr` (+ `centerOn`).
 - VS helpers: `cw()/ch()` (CSS dims), `hudX()/hudY()` (place a `scrollFactor(0)` HUD element at a CSS screen coord, compensating for the camera-zoom pivot — used for the combo counter & BOSS-warning text).
 
+### DPR-1 pitfall (PC) — explicit style write in `_applyHiDpiSize`
+At DPR 1, `setZoom(1)` and `resize(sameDims)` are **no-ops** in Phaser, so `refresh()` never rewrites the canvas inline style — a stale style from the previous game survives the transition. Observed on PC only: VS→UNO cards stretched (style stuck at the VS window size while backing = container) and UNO→VS invisible game (style stuck at `0px`). Fix: `_applyHiDpiSize` writes `canvas.style.width/height = CSS px` explicitly — this matches exactly what the ScaleManager computes (`backing × zoom`), so `displayScale` stays == DPR (do NOT confuse this with the forbidden "manual styling without zoom" from pitfall #1). Repro/verify: `node vs_transition_repro.js 1` (and `2`) — checks both directions with screenshots.
+
 ### Gomoku (own 2D canvas)
 `drawGomokuBoard()` sizes `gomokuCanvas.width/height = clientWidth × dpr` each draw. Everything is drawn relative to `gomokuCanvas.width` and clicks map via `canvas.width/rect.width`, so it **self-scales with zero coordinate math**.
 
@@ -217,6 +220,7 @@ Chrome path in scripts: `C:/Program Files/Google/Chrome/Application/chrome.exe`.
 Key scripts (run with `node <file>`):
 - `test_asset_manifest.js` — sprite/audio/music manifest ↔ disk (expect `RESULT: PASS`, 130).
 - `vs_dpr_test.js` — HiDPI at deviceScaleFactor 1/2/3 (backing, style, zoom, world-point).
+- `vs_transition_repro.js [dsf]` — VS→menu→UNO and UNO→menu→VS transitions with metrics + screenshots (the DPR-1 PC bugs repro/verify).
 - `vs_input_uno_test.js` — VS joystick (real mouse drag) + UNO cards visible after VS.
 - `vs_uno_transition_test.js` — VS→UNO canvas state.
 - `vs_charselect_test.js`, `vs_boss_test.js`, `vs_hitbox_test.js`, `vs_puzzle_test.js`, `vs_bosscombat_test.js`, `vs_sfx_samples_test.js`, `vs_bat_check.js`.
@@ -229,22 +233,24 @@ Key scripts (run with `node <file>`):
 
 ## 8. KNOWN PITFALLS (learned the hard way)
 
-1. **HiDPI via ScaleManager `setZoom`, never manual `canvas.style`** (stale `displayScale` breaks input + shared scenes). §6.
+1. **HiDPI via ScaleManager `setZoom`, never manual `canvas.style` alone** (stale `displayScale` breaks input + shared scenes). §6.
 2. **`exitHiDpi` must clear inline canvas style** (RESIZE won't reset a NONE+zoom style).
 3. **Static camera + zoom needs `centerOn`** or half the layout goes off-screen.
-4. **Re-baked in-place assets get served STALE by HTTP/CDN caches** — rename the file, don't just bump the IndexedDB token.
-5. **Phaser build is sprite-authoritative** — mutating `e.y` drifts the physics body; use a PRE_UPDATE un-offset for effects like hop.
-6. **Repeating yoyo alpha tweens stack** and ratchet opacity down (boss goes translucent) — single-flash guard + restore.
-7. **PowerShell**: `;` not `&&`; no `tail`/`grep`.
+4. **At DPR 1, `setZoom(1)`/`resize(same)` are no-ops** — the canvas style is never rewritten on game transitions; `_applyHiDpiSize` must write the CSS style explicitly (PC-only stretched-UNO / invisible-VS bugs). §6.
+5. **Re-baked in-place assets get served STALE by HTTP/CDN caches** — rename the file, don't just bump the IndexedDB token.
+6. **Phaser build is sprite-authoritative** — mutating `e.y` drifts the physics body; use a PRE_UPDATE un-offset for effects like hop.
+7. **Repeating yoyo alpha tweens stack** and ratchet opacity down (boss goes translucent) — single-flash guard + restore.
+8. **PowerShell**: `;` not `&&`; no `tail`/`grep`.
 
 ---
 
 ## 9. OPEN ITEMS / NEXT STEPS
 
-- **User is testing tomorrow (2026-07-30) on phone + PC.** Expected to verify: VS movement (joystick), UNO cards visible in all paths, and crispness of VS / UNO / Gomoku at real device DPR. Await feedback.
+- **Playtest status (2026-07-29 evening):** Android phone = all good (joystick, UNO cards, crispness). PC bugs (VS→UNO stretched cards, UNO→VS invisible game) reproduced at DPR 1 and **fixed** (see §6 DPR-1 pitfall). **iPad not tested yet** — Safari DPR 2, watch the same transitions.
 - Possible tuning after playtest: HiDPI 2× cap could be raised if a device still looks soft (one number in `vsDpr()`); slash/arc feel; SFX volume balance; final-boss ×2 damage.
 - TD (Tower Defense) is still in development (gated off live).
-- If any HiDPI transition misbehaves on a real device, first log `game.scale.displayScale.y` (must == DPR) and the canvas `getBoundingClientRect` vs its container.
+- If any HiDPI transition misbehaves on a real device, run `node vs_transition_repro.js <dpr>` first; log `game.scale.displayScale.y` (must == DPR) and the canvas `getBoundingClientRect` vs its container.
+- **Standing instruction: update THIS handoff file at the end of every working turn** (bugs found+fixed with root cause, new behavior, test status) and commit it with the turn's changes.
 
 ---
 
@@ -260,4 +266,74 @@ node vs_input_uno_test.js                # VS input + UNO cards
 git add <files>; git commit -m "..."; git push preview preview:main
 ```
 
-Always confirm a change with a headless screenshot before claiming it works. Keep `preview/main` the only target.
+Always confirm a change with a headless screenshot before claiming it works. Keep `preview/main` the only target for VS/game work (but see §11 for the production cherry-pick exception the speech track uses).
+
+---
+
+## 11. SPEECH RECOGNITION QUALITY & DEPLOYMENT (2026-07-27→29 speech track)
+
+This section covers the **speech-exercise quality** work — a separate track from the VS/HiDPI work above. §5b already documents how the Whisper model *loads*; this is about how well it *scores students* and how that pipeline is measured and deployed. All of it is LIVE on production.
+
+### 11.1 What the speech exercise is
+After a student unscrambles a sentence (game-mode grammar, or study-mode Round E), a "now say it aloud" **gate** appears (`speech_ui.js` `makeSentenceGate`). It records mic audio, transcribes locally with Whisper tiny.en (`speech_engine.js`), scores the transcript vs the target (`speech_scorer.js`), and shows pass/fail. The gate is **pronunciation practice only** — see §11.7, it must never affect SR.
+
+### 11.2 Telemetry (the backbone — everything is measured)
+Every gate interaction logs through the existing analytics pipeline (`queueExerciseEvent` → `saveAnalytics` Azure fn → Cosmos `Students.analytics[]`, offline-queued + de-duped). Event types (all `exerciseType` on an `exercise` event, tagged `mode: 'study'|'game'`):
+- **`speech_attempt`** — every transcription. Fields: `target`, `transcript`, `pass`, `accuracy`, `phoneticRatio`, `edits`, `level`, `book`, `f0` (measured pitch Hz), `shiftSemis` (pitch shift applied), `audioMs`, `transcribeMs`, `blobBytes`, `ua`.
+- **`speech_gated`** — audio rejected BEFORE transcription; `reason: 'too_short'|'too_quiet'|'empty'` + `durMs`/`peak`.
+- **`speech_skip`** — student pressed Skip; `failsBeforeSkip`.
+- **`speech_error`** — mic/permission/engine error; `message`.
+- **`device`** — one-shot OS/platform census per session.
+
+### 11.3 Analysis toolkit (all in `api/`, run with `node`; needs `local.settings.json` Cosmos creds)
+- **`analyze_speech.js [--hours N] [--json out.json]`** — THE report: headline pass rates, per-student, per-device, failure-mode classification (garbage/wrong/near-miss), what-if rescoring across the BOOK_TIERS ladder (§5), pitch shifted-vs-unshifted (§5b), per-book, audio sanity, worst transcript pairs. `--json` dumps raw events for the deep-dive scripts.
+- **`test_scorer_regression.js`** — must-pass/must-fail scorer cases + anchor equivalence + gibberish-fails-every-tier + monotonic field-replay ladder. Run after ANY scorer change.
+- **`test_pitch_shift.js`** — F0 estimation accuracy, noise→null, shift policy, octave/harmonic guard. Run after ANY pitch change.
+- One-off diagnostics (dump JSON first): `deep_dive_speech.js`, `whatif_scorer.js`, `tune_scorer.js`, `mic_working_compare.js`, `student_transcripts.js <Name...>`, `compare_28_29.js`, `compare_updates_0729.js`, `pitch_window_dive.js`, `check_student_activity.js <Name> [hours]`, `ruly_session_trace.js <Name> [hours]`. These read the `speech_events_*.json` dumps.
+- PowerShell mangles inline `node -e` with quotes/regex — write a throwaway `.js` file instead.
+
+### 11.4 Scorer (`speech_scorer.js`) — WER-based, book-tier leniency
+OLD rule (charAcc AND fixed edit-cap) punished long sentences. NEW rule ("variant D") passes if **ANY** of: `charAcc >= minAccuracy` OR `WER <= maxWER` (word-error-rate, length-proportional) OR `phoneticRatio >= phonPass`. Empty target never passes.
+- **`BOOK_TIERS`** leniency ladder, most→least lenient: **PU0 > PU1 > PU2 > Think0 > PU3=Think1 (anchor) > PU4 > Think2**. Anchor = the field-tuned thresholds (minAcc .75 / maxWER .30 / phonPass .70). `scoreForBook(target, transcript, book)` resolves the tier; unknown book → anchor.
+- **Book is DB-first:** `speech_ui.js` `currentBook()` reads `authActiveUser.book` (student's DB settings record) first; legacy `class_config`/`selectedClassContent` only as logged-out fallback. `class_config.js` is legacy.
+- Gibberish ([Music]/[BLANK_AUDIO]/"Bye!"/"me?") scores <30% on all three paths → fails EVERY tier including PU0 (regression-locked).
+
+### 11.5 Child-voice pitch adaptation (`speech_engine.js`, in `transcribe()`)
+Whisper tiny.en is adult-trained; kids' high F0 degrades recognition. Each recording self-calibrates — no stored profiles:
+- `estimateF0(audio, sr)` — median F0 via normalized autocorrelation over sampled 40ms frames; confidence gate returns `null` on noise/music/silence (→ never shift). **Octave/subharmonic guard:** picks the true fundamental by checking exact submultiples (÷2/÷3/÷4) of the best-correlation lag (v2 fix — a flat "any smaller lag" rule misread deep adult voices as 300–390Hz).
+- Policy: `F0 >= 265Hz` → resample DOWN toward 175Hz (cap 4 semitones); below 265Hz (deep/adult voices, e.g. teacher Test1 ~130–150Hz) → **zero shift**. Threshold was 240 in v1, raised to **265** so borderline voices (e.g. Irene ~246Hz) stop bouncing across the cutoff. Returns `f0`+`shiftSemitones` for telemetry.
+- **v1 (240Hz, flat guard) had two regressions** since fixed in v2: teacher's voice octave-misread & shifted; borderline kids bounced. Field-proven: shifted-attempt pass rate 52%→66% v1→v2.
+
+### 11.6 Audio gating, mic UX, Skip, feedback (`speech_ui.js`)
+- **Pre-transcription gate:** reject <1000ms (post VAD-trim; was 1500ms, lowered so natural short sentences like "He's my brother" pass) or near-silent audio → instant coaching, no doomed transcription.
+- **Mic permission:** detects blocked mic (Permissions API + getUserMedia error) → per-browser Chinese re-enable instructions + reveals Skip immediately. WeChat-open is the most reliable path for CN students.
+- **Skip reveal:** after 3 fails. `too_short` gating does NOT count toward it (anti-spam-tap); `too_quiet`/`empty`/real fails/no-mic DO.
+- **Feedback:** PASS shows a pure celebration (“✓ 太棒了！”) — deliberately NO score/transcript, so a low-tier kid passing at 70% feels like a win. FAIL shows only heard-text + score % (no threshold internals). Full breakdown stays in telemetry.
+
+### 11.7 SR must depend ONLY on the unscramble CHECK, never the speech gate
+Grammar SR result + analytics are recorded at the successful **check** (`checkGrammar` in `game.js`), NOT in `handleMinigameSuccess` (which runs only after the gate closes). Rationale: a student who skips or quits at the gate must keep their earned unscramble result. Study-mode Round E already recorded at check. The gate module (`speech_ui.js`) has **zero** SR references (regression-locked). Spelling (no gate) still records in `handleMinigameSuccess`.
+
+### 11.8 Deployment: cherry-pick to production (the §0 Golden-Rule exception)
+`preview/main` remains the default. BUT the user has an established, explicit policy: **critical speech fixes are promoted to `origin/main` (live) by SURGICAL CHERRY-PICK**, never a full branch push (which would drag along in-progress VS work). Procedure, each time (only on explicit user request):
+1. Check no repo lock / parallel-session collision (`Test-Path .git\index.lock`; check `git status`).
+2. `git stash` any WIP; `git checkout -b tmp-xxx origin/main`; `git cherry-pick <sha>`.
+3. **Verify the diff vs `origin/main` contains ONLY the intended speech files** — grep it for `vampire|bgm|joystick|boot` etc.; abort if contaminated.
+4. Retry-loop `git push origin HEAD:main` (GFW); then `git checkout preview`, delete temp branch, `git stash pop`.
+5. Verify live: fetch the deployed file, confirm the change is present AND VS/other files are untouched.
+`origin/main` and `preview/main` intentionally DIVERGE (cherry-picks have different SHAs). A future full promotion needs a merge, not a force-push.
+
+### 11.9 Current production state & open field items (updated 2026-07-31 AM, after the 07-30 run)
+- Production `origin/main` speech chain: pitch **v2** (265Hz + submultiple guard), book tiers, hide-score-on-pass, SR-at-check, WER scorer. `speech_engine v9 / speech_ui v10 / speech_scorer v3`. Unchanged since 07-29 — 07-30 was a clean monitor-only day (no speech deploys).
+- **3-day real-speech pass-rate trend: 45% (07-28) → 66% (07-29) → 66% (07-30).** The jump came with the pitch+tiers deploy; it has now **plateaued/held steady** at 66% on the stable v2 build (not declining, not climbing — the expected shape for a settled build). 07-30 day totals: 65% attempt-level, **90% sentence-level** (66/73 sentences eventually passed), across 14 students.
+- **Device gap worth noting (07-30):** Android/Chrome 78% vs iOS/iPad/Safari 48% pass. Same scorer/pitch — likely mic-capture/environment differences on the iPad Safari cohort; watch if it persists.
+- **Watch-item movement:**
+  - **Ruly** 0%→67% (07-29), held (no 07-30 session logged).
+  - **Ethan** 0%→45%→33% — but 07-30 was only 3 attempts and medF0 read 165Hz (vs 348 on 07-29): either a calmer/lower reading or small-sample noise. Inconclusive.
+  - **Cody** 0%→14%→100% (07-30 only 2 attempts, unshifted 258Hz) — tiny sample, encouraging.
+  - **Gabriel** 0%→0% — persistent genuine ASR/pronunciation tier (real-but-wrong English). Candidate for future model-level work, not a bug.
+  - **Test1 (teacher)** 100%→70%→67%, medF0 now stable ~132Hz, **0 shifts** — octave fix confirmed holding across two days; his score is irrelevant per his own call.
+  - **NEW — Coco:** 9% (1/11) on 07-30, medF0 222Hz (unshifted), transcripts show `[Music]` → environment/noise, not a system issue. New watch-item.
+- **Irene (the key v2 confirmation) STILL UNRESOLVED:** no attempts on 07-30, so her post-v2 behaviour (should sit unshifted at ~246Hz under the 265 threshold) remains unconfirmed. Her only v2-era data is still needed.
+- **Status:** stable-build monitoring continues; no speech change pending. Next action is simply the next daily run.
+
+

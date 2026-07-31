@@ -749,20 +749,45 @@ function updateDOMHUD(stats, time, kills) {
 
 
 // "New improved version" promo: highlight the VS button + show a badge to
-// nudge kids who haven't tried the revamped VS. Shown ONCE per device — the
-// FIRST time the game-selection menu appears; any later visit clears it.
-// localStorage flag 'vsPromoSeen' persists the "already nudged" state. Called
-// from EVERY path that reveals the menu (showGameSelection + the return-from-
-// game paths that un-hide the overlay directly).
+// nudge kids who haven't tried the revamped VS. Shown ONCE PER USER — the
+// FIRST time the game-selection menu appears for that student; any later visit
+// clears it. Persistence is PER-USER (server-side `vsPromoSeen` on the student
+// record, so it follows them across devices) with a localStorage fallback for
+// anonymous / test-mode play (no logged-in student). Called from EVERY path
+// that reveals the menu (showGameSelection + the return-from-game paths).
+function _vsPromoGetSeen() {
+    // Logged-in student: authoritative flag is on their account record
+    if (typeof authActiveUser !== 'undefined' && authActiveUser && authActiveUser.id) {
+        return !!authActiveUser.vsPromoSeen;
+    }
+    // Anonymous / test mode: device-local fallback
+    try { return localStorage.getItem('vsPromoSeen') === '1'; } catch (e) { return false; }
+}
+function _vsPromoSetSeen() {
+    if (typeof authActiveUser !== 'undefined' && authActiveUser && authActiveUser.id) {
+        authActiveUser.vsPromoSeen = true;
+        // Persist to the student's cached profile + backend (fire-and-forget,
+        // same pattern as the auto page-advance in frontend_auth.js). Falls
+        // back silently if offline — the in-memory flag still hides it this session.
+        if (typeof saveActiveUserToCache === 'function') { try { saveActiveUserToCache(); } catch (e) { } }
+        if (typeof apiFetch === 'function' && typeof API_BASE !== 'undefined') {
+            apiFetch(`${API_BASE}/updateStudent`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ studentId: authActiveUser.id, fields: { vsPromoSeen: true } })
+            }).catch(e => console.warn('Failed to persist vsPromoSeen', e));
+        }
+    } else {
+        try { localStorage.setItem('vsPromoSeen', '1'); } catch (e) { }
+    }
+}
 function applyVsPromo() {
     const badge = document.getElementById('vsPromoBadge');
     const btn = document.getElementById('vsGameBtn');
-    let seen = false;
-    try { seen = localStorage.getItem('vsPromoSeen') === '1'; } catch (e) { }
-    if (!seen) {
+    if (!_vsPromoGetSeen()) {
         if (badge) badge.classList.remove('hidden');
         if (btn) btn.classList.add('vs-promo-glow');
-        try { localStorage.setItem('vsPromoSeen', '1'); } catch (e) { }
+        _vsPromoSetSeen();
     } else {
         if (badge) badge.classList.add('hidden');
         if (btn) btn.classList.remove('vs-promo-glow');

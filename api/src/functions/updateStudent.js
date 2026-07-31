@@ -29,7 +29,8 @@ app.http('updateStudent', {
 
             const allowedFields = [
                 'book', 'unit', 'page', 'classTime', 'password',
-                'needsPasswordChange', 'fullName', 'login', 'targets', 'teacher'
+                'needsPasswordChange', 'fullName', 'login', 'targets', 'teacher',
+                'vsPromoSeen'
             ];
 
             const { resources: items } = await getContainer().items

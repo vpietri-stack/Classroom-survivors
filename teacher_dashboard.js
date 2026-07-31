@@ -256,8 +256,8 @@ function sessionTypeLabel(sessionType) {
         'study': 'Study Mode',
         'gomoku': 'Gomoku',
         'uno': 'UNO',
-        'vampire': 'Vampire Survivors',
-        'vampireSurvivors': 'Vampire Survivors'
+        'vampire': 'Classroom Survivors',
+        'vampireSurvivors': 'Classroom Survivors'
     };
     return map[sessionType] || sessionType;
 }

@@ -38,8 +38,11 @@
   // only that group re-downloads. Unmatched paths fall into the 'misc' group.
   var GROUP_VERSIONS = [
     { prefix: 'sprites/td/',   token: 'td-sprites-v1' },
+    { prefix: 'sprites/vs/',   token: 'vs-sprites-v3' },
     { prefix: 'images/vocab/', token: 'vocab-v1' },
-    { prefix: 'audio_mp3/',    token: 'audio-v1' }
+    { prefix: 'audio_mp3/',    token: 'audio-v1' },
+    { prefix: 'music/',        token: 'music-v1' },
+    { prefix: 'sfx/',          token: 'sfx-v1' }
   ];
   var MISC_TOKEN = 'misc-v1';
   function keyFor(path) {
@@ -67,6 +70,83 @@
     'sprites/td/anim/parts/dropout/head_hit.png',
     'sprites/td/anim/dropout_walk.png',
     'sprites/td/anim/dropout_action.png'
+  ];
+
+  // Every image vampire_survivors.js preload() requests (player puppet parts +
+  // school-item art). Same manifest-test guarantee as TD_SPRITES. Files with
+  // '_raw' in the name (uncut Nano Banana sheets, tooling input only) are
+  // deliberately excluded — they are never loaded at runtime.
+  var VS_SPRITES = [
+    'sprites/vs/player_body.png',
+    'sprites/vs/player_arm.png',
+    'sprites/vs/player_foot_l.png',
+    'sprites/vs/player_foot_r.png',
+    'sprites/vs/skippy_body.png',
+    'sprites/vs/skippy_arm.png',
+    'sprites/vs/skippy_foot_l.png',
+    'sprites/vs/skippy_foot_r.png',
+    'sprites/vs/portrait_monitor.png',
+    'sprites/vs/portrait_skippy.png',
+    'sprites/vs/fx_slash_sheet.png',
+    'sprites/vs/item_jumprope.png',
+    'sprites/vs/item_balloon.png',
+    'sprites/vs/item_book.png',
+    'sprites/vs/item_chest.png',
+    'sprites/vs/item_eraser.png',
+    'sprites/vs/item_magnet.png',
+    'sprites/vs/item_milk.png',
+    'sprites/vs/item_plane.png',
+    'sprites/vs/item_ruler.png',
+    'sprites/vs/item_scissors.png',
+    'sprites/vs/item_star.png',
+    'sprites/vs/item_tornado.png',
+    'sprites/vs/item_triangle.png',
+    'sprites/vs/enemy_rat_walk.png',
+    'sprites/vs/enemy_rat_hit.png',
+    'sprites/vs/enemy_bat_up.png',
+    'sprites/vs/enemy_bat_down.png',
+    'sprites/vs/enemy_bat_hit.png',
+    'sprites/vs/enemy_zombie_walk_a.png',
+    'sprites/vs/enemy_zombie_walk_b.png',
+    'sprites/vs/enemy_zombie_windup.png',
+    'sprites/vs/enemy_zombie_lunge.png',
+    'sprites/vs/enemy_zombie_hit.png',
+    'sprites/vs/enemy_zombie_dead.png',
+    'sprites/vs/enemy_boss_walk_a.png',
+    'sprites/vs/enemy_boss_walk_b.png',
+    'sprites/vs/enemy_boss_windup.png',
+    'sprites/vs/enemy_boss_lunge.png',
+    'sprites/vs/enemy_boss_hit.png',
+    'sprites/vs/enemy_boss_dead.png',
+    'sprites/vs/enemy_bp_walk_a.png',
+    'sprites/vs/enemy_bp_walk_b.png',
+    'sprites/vs/enemy_bp_windup.png',
+    'sprites/vs/enemy_bp_lunge.png',
+    'sprites/vs/enemy_bp_hit.png',
+    'sprites/vs/enemy_bp_dead.png'
+  ];
+
+  // Background music (bgm.js): 2MB — exactly the kind of file that stalls on
+  // GitHub Pages without a VPN, so it's prefetched + cached like the sprites.
+  var MUSIC = [
+    'music/study_hall_shuffle.mp3'
+  ];
+
+  // Sampled SFX recordings (game.js loadSfxSample/playSfxSample). Without the
+  // cache these streamed from GitHub Pages, so first plays fell back to the
+  // procedural synths mid-game. Manifest-checked like the sprite lists.
+  var SFX = [
+    'sfx/bat_death.mp3',
+    'sfx/book_travelling.mp3',
+    'sfx/electric_arc_hit.mp3',
+    'sfx/jump_rope_fireball_hit.mp3',
+    'sfx/paper_plane_hit.mp3',
+    'sfx/paper_plane_travelling.mp3',
+    'sfx/scissors_travelling.mp3',
+    'sfx/sword-hit.mp3',
+    'sfx/sword-slash.mp3',
+    'sfx/tornado.mp3',
+    'sfx/zombie_death.mp3'
   ];
 
   var urlMap = {};   // path -> blob: URL (memory; read synchronously by url())
@@ -249,15 +329,24 @@
     prefetch: prefetch,
     vocabImagePath: vocabImagePath,
     audioPath: audioPath,
-    TD_SPRITES: TD_SPRITES
+    TD_SPRITES: TD_SPRITES,
+    VS_SPRITES: VS_SPRITES,
+    MUSIC: MUSIC,
+    SFX: SFX
   };
 
-  // TD sprites: warm up shortly after load (never competes with critical page
-  // assets; the Whisper model streams from a different host, no contention).
-  // Page content: poll until login/class selection reveals the current page —
-  // re-checks cheaply so a mid-session page change prefetches the new page too.
+  // Game sprites + BGM + SFX recordings: warm up shortly after load (never
+  // competes with critical page assets; the Whisper model streams from a
+  // different host, no contention). Page content: poll until login/class
+  // selection reveals the current page — re-checks cheaply so a mid-session
+  // page change prefetches the new page too.
   function start() {
-    setTimeout(function () { prefetch(TD_SPRITES, 'td-sprites'); }, 2000);
+    setTimeout(function () {
+      prefetch(TD_SPRITES, 'td-sprites');
+      prefetch(VS_SPRITES, 'vs-sprites');
+      prefetch(MUSIC, 'music');
+      prefetch(SFX, 'sfx');
+    }, 2000);
     setInterval(prefetchCurrentPage, 2000);
   }
   if (document.readyState === 'complete') start();

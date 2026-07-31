@@ -63,16 +63,123 @@ function showVocabImage(elementId, word) {
 
 // --- AUDIO SYSTEM ---
 let audioCtx;
+
+// --- SFX master gain + mute -------------------------------------------------
+// ALL sound effects (procedural synths here + uno.js + sampled sfx/) route
+// through one master gain so the HUD SFX-mute button can silence them without
+// touching the music (bgm.js has its own context) or the TTS word audio
+// (HTML5 <audio>, learning content — never muted by this).
+let sfxGainNode = null;
+let sfxMuted = false;
+try { sfxMuted = localStorage.getItem('sfxMuted') === '1'; } catch (e) { }
+function sfxDest() {
+    if (!audioCtx) return null;
+    if (!sfxGainNode) {
+        sfxGainNode = audioCtx.createGain();
+        sfxGainNode.gain.value = sfxMuted ? 0 : 1;
+        sfxGainNode.connect(audioCtx.destination); // master -> speakers (only direct connection)
+    }
+    return sfxGainNode;
+}
+function syncSfxMuteIcon() {
+    const icon = document.getElementById('vsMuteIcon');
+    if (icon) icon.className = sfxMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+}
+function toggleSfxMute() {
+    sfxMuted = !sfxMuted;
+    try { localStorage.setItem('sfxMuted', sfxMuted ? '1' : '0'); } catch (e) { }
+    if (sfxGainNode) sfxGainNode.gain.value = sfxMuted ? 0 : 1;
+    syncSfxMuteIcon();
+    return sfxMuted;
+}
+
+// --- iOS audio-session keep-alive -------------------------------------------
+// On iPad/iPhone, WebAudio alone runs in the "ambient" audio session, which the
+// hardware SILENT SWITCH mutes — so all our music/SFX (BGM + synths are pure
+// WebAudio) were inaudible, EXCEPT while an HTML5 <audio> (the Youdao TTS MP3)
+// was playing: media elements use the "playback" session, and while one plays
+// iOS promotes the whole session, letting the music bleed through for a second.
+// Fix: keep a silent, looping <audio> element playing (started inside a user
+// gesture) so the session stays promoted and WebAudio ignores the mute switch.
+// iOS-only: on Android/desktop a looping media element could steal audio focus
+// (e.g. pause the user's own music), so we gate it.
+let _iosKeepAlive = null;
+function _isIOS() {
+    const ua = navigator.userAgent || '';
+    // iPadOS 13+ masquerades as Mac ("MacIntel") but has multi-touch
+    return /iPad|iPhone|iPod/.test(ua) ||
+        (navigator.platform === 'MacIntel' && (navigator.maxTouchPoints || 0) > 1);
+}
+function _silentWavUri() {
+    // 0.5s of 8kHz mono silence, built at runtime (no asset, ~4KB base64)
+    const rate = 8000, n = rate / 2, size = 44 + n * 2;
+    const b = new ArrayBuffer(size), v = new DataView(b);
+    const ws = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    ws(0, 'RIFF'); v.setUint32(4, size - 8, true); ws(8, 'WAVEfmt ');
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true);
+    v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+    ws(36, 'data'); v.setUint32(40, n * 2, true); // samples stay zero = silence
+    let bin = ''; const u8 = new Uint8Array(b);
+    for (let i = 0; i < u8.length; i++) bin += String.fromCharCode(u8[i]);
+    return 'data:audio/wav;base64,' + btoa(bin);
+}
+function _ensureIosKeepAlive() {
+    if (!_isIOS() || _iosKeepAlive) return;
+    try {
+        const a = document.createElement('audio');
+        a.src = _silentWavUri();
+        a.loop = true;
+        a.setAttribute('playsinline', '');
+        a.volume = 0.01; // effectively silent; iOS just needs it PLAYING
+        const pr = a.play();
+        if (pr && pr.catch) pr.catch(() => { _iosKeepAlive = null; }); // retry next gesture
+        _iosKeepAlive = a;
+    } catch (e) { _iosKeepAlive = null; }
+}
+// iOS also suspends AudioContexts when the tab/app backgrounds — resume on return
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        if (window.BGM && typeof BGM.resumeCtx === 'function') BGM.resumeCtx();
+    }
+});
+
+// --- Universal audio unlock (WeChat-iOS especially) --------------------------
+// WeChat on iOS keeps an AudioContext 'suspended'/'interrupted' unless resume()
+// happens inside a DIRECT user gesture — and BGM's context often needs waking
+// AFTER its async MP3 decode (no gesture at that point). Symptom fixed here:
+// SFX audible but MUSIC never plays on iPad WeChat (fine in Safari + Android).
+// Cheap permanent capture listeners: on every tap, wake anything not running.
+function _unlockAllAudio() {
+    if (audioCtx && audioCtx.state !== 'running') { try { audioCtx.resume(); } catch (e) { } }
+    if (window.BGM && typeof BGM.resumeCtx === 'function') BGM.resumeCtx();
+    _ensureIosKeepAlive();
+}
+document.addEventListener('touchend', _unlockAllAudio, true);
+document.addEventListener('pointerdown', _unlockAllAudio, true);
+// WeChat's own "audio is now allowed" moment (fires once its JS bridge is up)
+if (typeof WeixinJSBridge !== 'undefined' && WeixinJSBridge.invoke) {
+    try { WeixinJSBridge.invoke('getNetworkType', {}, _unlockAllAudio); } catch (e) { }
+} else {
+    document.addEventListener('WeixinJSBridgeReady', () => {
+        try { WeixinJSBridge.invoke('getNetworkType', {}, _unlockAllAudio); } catch (e) { _unlockAllAudio(); }
+    }, false);
+}
+
 function initAudio() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
+    sfxDest();          // ensure the SFX master gain exists (applies saved mute)
+    syncSfxMuteIcon();
+    _ensureIosKeepAlive(); // initAudio is always called from a user gesture
 }
 const osc = (type, freq, dur, vol = 0.1) => {
     if (!audioCtx) return;
     const o = audioCtx.createOscillator();
     const g = audioCtx.createGain();
     o.type = type; o.frequency.value = freq;
-    o.connect(g); g.connect(audioCtx.destination);
+    o.connect(g); g.connect(sfxDest());
     g.gain.setValueAtTime(vol, audioCtx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
     o.start(); o.stop(audioCtx.currentTime + dur);
@@ -88,7 +195,7 @@ const noise = (dur) => {
     const g = audioCtx.createGain();
     g.gain.setValueAtTime(0.1, audioCtx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
-    n.connect(g); g.connect(audioCtx.destination);
+    n.connect(g); g.connect(sfxDest());
     n.start();
 }
 const synthWhipCrack = () => {
@@ -106,7 +213,7 @@ const synthWhipCrack = () => {
     gainSwing.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
     
     oscSwing.connect(gainSwing);
-    gainSwing.connect(audioCtx.destination);
+    gainSwing.connect(sfxDest());
     oscSwing.start(now);
     oscSwing.stop(now + 0.1);
 
@@ -122,7 +229,7 @@ const synthWhipCrack = () => {
     gainCrack.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
     
     oscCrack.connect(gainCrack);
-    gainCrack.connect(audioCtx.destination);
+    gainCrack.connect(sfxDest());
     oscCrack.start(now + 0.07);
     oscCrack.stop(now + 0.15);
 
@@ -148,7 +255,7 @@ const synthWhipCrack = () => {
 
     noiseNode.connect(filter);
     filter.connect(gainNoise);
-    gainNoise.connect(audioCtx.destination);
+    gainNoise.connect(sfxDest());
     noiseNode.start(now + 0.07);
 };
 
@@ -168,7 +275,7 @@ const synthLevelUp = () => {
     const now = audioCtx.currentTime;
     [440, 554, 659, 880].forEach((f, i) => {
         const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-        o.frequency.value = f; o.connect(g); g.connect(audioCtx.destination);
+        o.frequency.value = f; o.connect(g); g.connect(sfxDest());
         g.gain.setValueAtTime(0.1, now + i * 0.1);
         g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.3);
         o.start(now + i * 0.1); o.stop(now + i * 0.1 + 0.3);
@@ -183,7 +290,7 @@ const synthHurt = () => {
     o.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.3);
     g.gain.setValueAtTime(0.2, audioCtx.currentTime);
     g.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
-    o.connect(g); g.connect(audioCtx.destination);
+    o.connect(g); g.connect(sfxDest());
     o.start(); o.stop(audioCtx.currentTime + 0.3);
 }
 const synthError = () => {
@@ -195,7 +302,7 @@ const synthError = () => {
     o.frequency.linearRampToValueAtTime(50, audioCtx.currentTime + 0.2);
     g.gain.setValueAtTime(0.2, audioCtx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-    o.connect(g); g.connect(audioCtx.destination);
+    o.connect(g); g.connect(sfxDest());
     o.start(); o.stop(audioCtx.currentTime + 0.2);
 };
 
@@ -209,7 +316,7 @@ const synthDeath = () => {
         o.frequency.setValueAtTime(freq, start);
         g.gain.setValueAtTime(0.2, start);
         g.gain.exponentialRampToValueAtTime(0.01, start + dur);
-        o.connect(g); g.connect(audioCtx.destination);
+        o.connect(g); g.connect(sfxDest());
         o.start(start); o.stop(start + dur);
     };
     // dadadadum
@@ -230,8 +337,294 @@ const synthLootbox = () => {
     o.frequency.exponentialRampToValueAtTime(1320, now + 0.2);
     g.gain.setValueAtTime(0.2, now);
     g.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-    o.connect(g); g.connect(audioCtx.destination);
+    o.connect(g); g.connect(sfxDest());
     o.start(); o.stop(now + 0.3);
+};
+
+// ============================================================
+// VS WEAPON SFX (procedural, matches the synth style above)
+// Throttled per key so fast-firing weapons / crowd hits make ONE
+// satisfying sound instead of a wall of noise (user request).
+// ============================================================
+const _sfxLast = {};
+const sfxOK = (key, ms) => {
+    if (!audioCtx) return false;
+    const t = audioCtx.currentTime * 1000;
+    if (_sfxLast[key] && t - _sfxLast[key] < ms) return false;
+    _sfxLast[key] = t;
+    return true;
+};
+// Filtered white-noise burst building block
+const noiseBurst = (start, dur, filterType, freq, Q, vol) => {
+    if (!audioCtx) return;
+    const n = Math.floor(audioCtx.sampleRate * dur);
+    const buf = audioCtx.createBuffer(1, n, audioCtx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    const src = audioCtx.createBufferSource(); src.buffer = buf;
+    const f = audioCtx.createBiquadFilter(); f.type = filterType; f.frequency.value = freq; f.Q.value = Q;
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(vol, start);
+    g.gain.exponentialRampToValueAtTime(0.001, start + dur);
+    src.connect(f); f.connect(g); g.connect(sfxDest());
+    src.start(start); src.stop(start + dur);
+};
+
+// Air whoosh (thrown-blade-through-air). variant tweaks tone per projectile.
+const synthSwoosh = (variant = 'plane') => {
+    if (!audioCtx || !sfxOK('sw_' + variant, 55)) return;
+    const now = audioCtx.currentTime;
+    const cfg = {
+        plane:    { dur: 0.22, f0: 700,  f1: 2400, Q: 0.9, vol: 0.12 }, // light & airy (boosted to be audible)
+        scissors: { dur: 0.12, f0: 1600, f1: 3400, Q: 3.0, vol: 0.05 }, // sharp & metallic
+        cross:    { dur: 0.20, f0: 600,  f1: 1700, Q: 1.0, vol: 0.05 }  // heavy & low
+    }[variant] || { dur: 0.16, f0: 900, f1: 2800, Q: 1.2, vol: 0.05 };
+    const n = Math.floor(audioCtx.sampleRate * cfg.dur);
+    const buf = audioCtx.createBuffer(1, n, audioCtx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    const src = audioCtx.createBufferSource(); src.buffer = buf;
+    const bp = audioCtx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = cfg.Q;
+    bp.frequency.setValueAtTime(cfg.f0, now);
+    bp.frequency.exponentialRampToValueAtTime(cfg.f1, now + cfg.dur * 0.6);
+    bp.frequency.exponentialRampToValueAtTime(cfg.f0, now + cfg.dur);
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.linearRampToValueAtTime(cfg.vol, now + cfg.dur * 0.35);
+    g.gain.exponentialRampToValueAtTime(0.001, now + cfg.dur);
+    src.connect(bp); bp.connect(g); g.connect(sfxDest());
+    src.start(now); src.stop(now + cfg.dur);
+};
+
+// Paper plane hit: arrow punching through a straw target (fwip + thunk)
+const synthPlaneHit = () => {
+    if (!audioCtx || !sfxOK('planehit', 70)) return;
+    const now = audioCtx.currentTime;
+    noiseBurst(now, 0.06, 'highpass', 2600, 6, 0.06); // fwip
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(320, now);
+    o.frequency.exponentialRampToValueAtTime(90, now + 0.12);
+    g.gain.setValueAtTime(0.09, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+    o.connect(g); g.connect(sfxDest());
+    o.start(now); o.stop(now + 0.13);
+};
+
+// Scissors hit: wet blade-into-flesh stab
+const synthStab = () => {
+    if (!audioCtx || !sfxOK('stab', 70)) return;
+    const now = audioCtx.currentTime;
+    noiseBurst(now, 0.1, 'bandpass', 750, 1.0, 0.16); // wet slice (boosted)
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(180, now);
+    o.frequency.exponentialRampToValueAtTime(60, now + 0.11);
+    g.gain.setValueAtTime(0.12, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+    o.connect(g); g.connect(sfxDest());
+    o.start(now); o.stop(now + 0.12);
+};
+
+// Ruler slash: airy whoosh + bright metallic "shing" (sword slash)
+const synthSwordSlash = () => {
+    if (!audioCtx || !sfxOK('slash', 60)) return;
+    const now = audioCtx.currentTime;
+    noiseBurst(now, 0.14, 'bandpass', 1800, 1.2, 0.10); // air cut
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(2600, now + 0.02);
+    o.frequency.exponentialRampToValueAtTime(700, now + 0.16);
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.linearRampToValueAtTime(0.11, now + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+    o.connect(g); g.connect(sfxDest());
+    o.start(now); o.stop(now + 0.19);
+};
+
+// Ruler electric arc launch: low "vromb" travel hum (sawtooth + fast vibrato)
+const synthArcHum = () => {
+    if (!audioCtx || !sfxOK('archum', 80)) return;
+    const now = audioCtx.currentTime;
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(220, now);
+    o.frequency.linearRampToValueAtTime(150, now + 0.3);
+    const lfo = audioCtx.createOscillator(), lg = audioCtx.createGain();
+    lfo.type = 'sine'; lfo.frequency.value = 28; lg.gain.value = 42; // vromb wobble
+    lfo.connect(lg); lg.connect(o.frequency);
+    const lp = audioCtx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.linearRampToValueAtTime(0.08, now + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+    o.connect(lp); lp.connect(g); g.connect(sfxDest());
+    o.start(now); o.stop(now + 0.33);
+    lfo.start(now); lfo.stop(now + 0.33);
+};
+
+// Electricity crackle when the arc zaps an enemy (stun feedback)
+const synthZap = () => {
+    if (!audioCtx || !sfxOK('zap', 55)) return;
+    const now = audioCtx.currentTime;
+    noiseBurst(now, 0.09, 'highpass', 3800, 4, 0.10); // static crackle
+    for (let i = 0; i < 2; i++) {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = 'square';
+        const s = now + i * 0.035;
+        o.frequency.setValueAtTime(1400 + Math.random() * 900, s);
+        o.frequency.exponentialRampToValueAtTime(500, s + 0.05);
+        g.gain.setValueAtTime(0.06, s);
+        g.gain.exponentialRampToValueAtTime(0.001, s + 0.06);
+        o.connect(g); g.connect(sfxDest());
+        o.start(s); o.stop(s + 0.07);
+    }
+};
+
+// ---- Sampled SFX (real recordings beat synthesis for sword sounds) ----
+// Small MP3s under sfx/, decoded ONCE into WebAudio buffers for zero-latency
+// replay. playSfxSample returns false while loading / on failure so callers
+// can fall back to the procedural synths (GFW-resilient: same-origin fetch).
+const _sfxBuffers = {};
+function loadSfxSample(path) {
+    if (!audioCtx || _sfxBuffers[path] !== undefined) return;
+    _sfxBuffers[path] = 'loading';
+    // Resolve through AssetCache: sfx/ is a prefetched cache group, so this is
+    // usually an instant IndexedDB blob; on a cold cache getBlobUrl downloads
+    // via the gh-proxy mirror AND seeds the cache for next time. Plain path
+    // only when AssetCache is missing or every source failed.
+    const resolved = (window.AssetCache && AssetCache.getBlobUrl)
+        ? AssetCache.getBlobUrl(path).then(u => u || path)
+        : Promise.resolve(path);
+    resolved.then(url => fetch(url)).then(r => r.arrayBuffer())
+        .then(ab => audioCtx.decodeAudioData(ab))
+        .then(b => { _sfxBuffers[path] = b; })
+        .catch(() => { _sfxBuffers[path] = false; });
+}
+// playSfxSample returns false while loading / on failure so callers can fall
+// back to the procedural synths. Optional dur trims playback (e.g. a clip with
+// a rubbish tail); optional throttleMs coalesces crowd events into one sound
+// (a throttled call returns TRUE so the caller doesn't fire the synth either).
+function playSfxSample(path, vol = 0.5, dur, throttleMs) {
+    if (!audioCtx) return false;
+    if (throttleMs && !sfxOK('smp_' + path, throttleMs)) return true;
+    const b = _sfxBuffers[path];
+    if (b === undefined) { loadSfxSample(path); return false; }
+    if (!b || b === 'loading') return false;
+    const src = audioCtx.createBufferSource();
+    src.buffer = b;
+    const g = audioCtx.createGain();
+    g.gain.value = vol;
+    src.connect(g); g.connect(sfxDest());
+    if (dur) src.start(0, 0, dur); else src.start();
+    return true;
+}
+
+// Triangle hit: woody block ricocheting off a hard surface (tok-tik, two knocks)
+const synthRicochet = () => {
+    if (!audioCtx || !sfxOK('ricochet', 60)) return;
+    const now = audioCtx.currentTime;
+    const knock = (t, f, vol) => {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = 'triangle';
+        o.frequency.setValueAtTime(f, t);
+        o.frequency.exponentialRampToValueAtTime(f * 0.6, t + 0.05); // woody pitch drop
+        g.gain.setValueAtTime(vol, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.08);        // short hard decay
+        o.connect(g); g.connect(sfxDest());
+        o.start(t); o.stop(t + 0.09);
+        noiseBurst(t, 0.02, 'highpass', 3200, 5, vol * 0.5);        // hard-surface click
+    };
+    knock(now, 1150, 0.14);        // first bounce
+    knock(now + 0.07, 1550, 0.07); // lighter second bounce = ricochet
+};
+
+// Eraser / book hit: heavy blunt smash into flesh (deep thud + meaty splat)
+const synthSmash = () => {
+    if (!audioCtx || !sfxOK('smash', 80)) return;
+    const now = audioCtx.currentTime;
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(140, now);
+    o.frequency.exponentialRampToValueAtTime(45, now + 0.18);
+    g.gain.setValueAtTime(0.16, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+    o.connect(g); g.connect(sfxDest());
+    o.start(now); o.stop(now + 0.21);
+    noiseBurst(now, 0.08, 'lowpass', 500, 0.7, 0.09);
+};
+
+// Eraser doppler pass-by: low strobing bumblebee that swells then recedes
+const synthEraserPass = () => {
+    if (!audioCtx || !sfxOK('eraserpass', 180)) return;
+    const now = audioCtx.currentTime, dur = 0.4;
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(70, now);
+    o.frequency.linearRampToValueAtTime(130, now + dur * 0.5); // doppler approach
+    o.frequency.linearRampToValueAtTime(60, now + dur);        // doppler recede
+    const lp = audioCtx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 420;
+    // Strobing tremolo (bumblebee wing-beat) modulating the gain
+    const lfo = audioCtx.createOscillator(), lfoG = audioCtx.createGain();
+    lfo.type = 'sine'; lfo.frequency.value = 22; lfoG.gain.value = 0.045;
+    lfo.connect(lfoG); lfoG.connect(g.gain);
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.linearRampToValueAtTime(0.09, now + dur * 0.5); // swell on approach
+    g.gain.linearRampToValueAtTime(0.001, now + dur);      // fade on recede
+    o.connect(lp); lp.connect(g); g.connect(sfxDest());
+    o.start(now); o.stop(now + dur);
+    lfo.start(now); lfo.stop(now + dur);
+};
+
+// Magic book travelling: fluttering pages (rapid soft paper blips)
+const synthPageFlutter = () => {
+    if (!audioCtx || !sfxOK('flutter', 80)) return;
+    const now = audioCtx.currentTime;
+    for (let i = 0; i < 6; i++) {
+        noiseBurst(now + i * 0.04, 0.04, 'bandpass', 1500 + Math.random() * 900, 1.4, 0.11);
+    }
+};
+
+// Water balloon falling: descending bomb whistle
+const synthBombFall = () => {
+    if (!audioCtx || !sfxOK('bombfall', 120)) return;
+    const now = audioCtx.currentTime, dur = 0.55;
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(1400, now);
+    o.frequency.exponentialRampToValueAtTime(300, now + dur);
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.linearRampToValueAtTime(0.05, now + 0.1);
+    g.gain.setValueAtTime(0.05, now + dur - 0.1);
+    g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+    o.connect(g); g.connect(sfxDest());
+    o.start(now); o.stop(now + dur);
+};
+
+// Water balloon impact: splash (noise sweep + a bubble)
+const synthSplash = () => {
+    if (!audioCtx || !sfxOK('splash', 80)) return;
+    const now = audioCtx.currentTime, dur = 0.25;
+    const n = Math.floor(audioCtx.sampleRate * dur);
+    const buf = audioCtx.createBuffer(1, n, audioCtx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+    const src = audioCtx.createBufferSource(); src.buffer = buf;
+    const lp = audioCtx.createBiquadFilter(); lp.type = 'lowpass';
+    lp.frequency.setValueAtTime(3000, now);
+    lp.frequency.exponentialRampToValueAtTime(500, now + dur);
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.12, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+    src.connect(lp); lp.connect(g); g.connect(sfxDest());
+    src.start(now); src.stop(now + dur);
+    const o = audioCtx.createOscillator(), bg = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(500, now + 0.05);
+    o.frequency.exponentialRampToValueAtTime(900, now + 0.2);
+    bg.gain.setValueAtTime(0.04, now + 0.05);
+    bg.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+    o.connect(bg); bg.connect(sfxDest());
+    o.start(now + 0.05); o.stop(now + 0.23);
 };
 let currentTTSWord = "";
 const playTTS = () => {
@@ -355,9 +748,55 @@ function updateDOMHUD(stats, time, kills) {
 }
 
 
+// "New improved version" promo: highlight the VS button + show a badge to
+// nudge kids who haven't tried the revamped VS. Shown ONCE PER USER — the
+// FIRST time the game-selection menu appears for that student; any later visit
+// clears it. Persistence is PER-USER (server-side `vsPromoSeen` on the student
+// record, so it follows them across devices) with a localStorage fallback for
+// anonymous / test-mode play (no logged-in student). Called from EVERY path
+// that reveals the menu (showGameSelection + the return-from-game paths).
+function _vsPromoGetSeen() {
+    // Logged-in student: authoritative flag is on their account record
+    if (typeof authActiveUser !== 'undefined' && authActiveUser && authActiveUser.id) {
+        return !!authActiveUser.vsPromoSeen;
+    }
+    // Anonymous / test mode: device-local fallback
+    try { return localStorage.getItem('vsPromoSeen') === '1'; } catch (e) { return false; }
+}
+function _vsPromoSetSeen() {
+    if (typeof authActiveUser !== 'undefined' && authActiveUser && authActiveUser.id) {
+        authActiveUser.vsPromoSeen = true;
+        // Persist to the student's cached profile + backend (fire-and-forget,
+        // same pattern as the auto page-advance in frontend_auth.js). Falls
+        // back silently if offline — the in-memory flag still hides it this session.
+        if (typeof saveActiveUserToCache === 'function') { try { saveActiveUserToCache(); } catch (e) { } }
+        if (typeof apiFetch === 'function' && typeof API_BASE !== 'undefined') {
+            apiFetch(`${API_BASE}/updateStudent`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ studentId: authActiveUser.id, fields: { vsPromoSeen: true } })
+            }).catch(e => console.warn('Failed to persist vsPromoSeen', e));
+        }
+    } else {
+        try { localStorage.setItem('vsPromoSeen', '1'); } catch (e) { }
+    }
+}
+function applyVsPromo() {
+    const badge = document.getElementById('vsPromoBadge');
+    const btn = document.getElementById('vsGameBtn');
+    if (!_vsPromoGetSeen()) {
+        if (badge) badge.classList.remove('hidden');
+        if (btn) btn.classList.add('vs-promo-glow');
+        _vsPromoSetSeen();
+    } else {
+        if (badge) badge.classList.add('hidden');
+        if (btn) btn.classList.remove('vs-promo-glow');
+    }
+}
+
 function showGameSelection() {
     // Reset all screens
-    const screens = ['startScreen', 'gomokuScreen', 'gomokuGameOverScreen', 'gameOverScreen', 'gameIntroOverlay', 'studentManagerOverlay', 'studyModeOverlay', 'unoScreen', 'unoGameOverScreen', 'spellingGame', 'wordRecGame', 'sentenceMatchGame', 'levelUpMenu'];
+    const screens = ['startScreen', 'gomokuScreen', 'gomokuGameOverScreen', 'gameOverScreen', 'gameIntroOverlay', 'vsCharSelect', 'studentManagerOverlay', 'studyModeOverlay', 'unoScreen', 'unoGameOverScreen', 'spellingGame', 'wordRecGame', 'sentenceMatchGame', 'levelUpMenu'];
     screens.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
@@ -375,6 +814,8 @@ function showGameSelection() {
     if (typeof game !== 'undefined' && game && game.scene && game.scene.isActive('MainScene')) {
         game.scene.stop('MainScene');
     }
+    // Restore the shared canvas to CSS-px RESIZE (undo VS HiDPI) for other games
+    if (typeof exitHiDpi === 'function') exitHiDpi();
     if (typeof game !== 'undefined' && game && game.canvas) {
         game.canvas.style.display = 'none';
     }
@@ -382,12 +823,18 @@ function showGameSelection() {
         clearInterval(minigameCountdownInterval);
         minigameCountdownInterval = null;
     }
-    // Hide VS exit button
+    // Hide VS exit button + mute toggle
     const vsExitBtn = document.getElementById('vsExitBtn');
     if (vsExitBtn) vsExitBtn.classList.add('hidden');
+    const vsMuteBtn = document.getElementById('vsMuteBtn');
+    if (vsMuteBtn) vsMuteBtn.classList.add('hidden');
+    const vsMusicBtn2 = document.getElementById('vsMusicBtn');
+    if (vsMusicBtn2) vsMusicBtn2.classList.add('hidden');
     activeGameMode = null;
 
     document.getElementById('gameSelectionOverlay').classList.remove('hidden');
+
+    applyVsPromo();
 
     // Gate the Tower Defense entry on sites where it isn't released yet (live).
     // Preview / localhost keep it selectable. (TD_ENABLED is defined in config.js,
@@ -615,10 +1062,11 @@ function startMinigameCountdown(scene) {
         if (grammarTimer) grammarTimer.textContent = timeString;
         if (sentencematchTimer) sentencematchTimer.textContent = timeString;
 
-        // Deduct time from survival time (if VS)
-        if (activeGameMode === 'VS' && scene) {
-            scene.accumulatedTime = Math.max(0, scene.accumulatedTime - 100);
-        }
+        // NOTE: no survival-time deduction here. The VS scene is PAUSED while
+        // a minigame is open, so accumulatedTime is already frozen — the old
+        // "deduct 100ms per tick" on top of that made the HUD clock run
+        // BACKWARDS during questions (survival = fight time MINUS question
+        // time), which made the 10-minute final boss nearly unreachable.
     }, 100);
 }
 

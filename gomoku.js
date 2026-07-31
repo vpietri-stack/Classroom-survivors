@@ -75,6 +75,9 @@ function showGomokuModeSelection() {
 function triggerGomoku(mode = gomokuMode) {
     if (mode) gomokuMode = mode;
     activeGameMode = 'Gomoku';
+    // Undo VS HiDPI if it was active (drops the HiDPI window-resize listener);
+    // Gomoku uses its own 2D canvas but this keeps the shared Phaser canvas clean.
+    if (typeof exitHiDpi === 'function') exitHiDpi();
     
     // Reset SR tracking for this game session
     if (typeof srGameResults !== 'undefined') srGameResults = [];
@@ -101,6 +104,10 @@ function triggerGomoku(mode = gomokuMode) {
     if (!dragInitialized) {
         initDragAndDrop();
         dragInitialized = true;
+        // Rotation/resize adaptivity: the board redraws (and re-derives its
+        // HiDPI backing from the new clientWidth) as soon as the window size
+        // changes, instead of waiting for the next move.
+        window.addEventListener('resize', () => { if (gomokuGameActive) drawGomokuBoard(); });
     }
 
     gomokuGameActive = true;
@@ -176,6 +183,24 @@ function updateGomokuStatus(msg) {
 
 // --- RENDERING ---
 function drawGomokuBoard() {
+    // HiDPI + device-adaptive sizing. The DISPLAY size must be independent of
+    // the backing attribute: the markup's `max-w-full h-auto` sizes the element
+    // from its INTRINSIC (attribute) size, so inflating the backing for DPR
+    // also grew the on-screen board on wide screens (iPad: board ballooned
+    // past 600 -> "too zoomed in"). Pinning style width to 600px (capped at
+    // 100% of the container) reproduces the ORIGINAL pre-HiDPI layout exactly
+    // on every device/orientation — display = min(600, container) — while the
+    // backing becomes display x DPR (capped 2) purely for crispness. No
+    // feedback loop: layout no longer reads the width attribute at all.
+    if (gomokuCanvas.style.width !== '600px') {
+        gomokuCanvas.style.width = '600px';
+        gomokuCanvas.style.maxWidth = '100%';
+        gomokuCanvas.style.height = 'auto'; // square attrs keep the 1:1 aspect
+    }
+    const dpr = (typeof vsDpr === 'function') ? vsDpr() : Math.min(2, Math.max(1, window.devicePixelRatio || 1));
+    const cssSize = gomokuCanvas.clientWidth || 600;
+    const want = Math.round(cssSize * dpr);
+    if (want > 0 && gomokuCanvas.width !== want) { gomokuCanvas.width = want; gomokuCanvas.height = want; }
     const size = gomokuCanvas.width;
     const padding = 30;
 
@@ -746,6 +771,7 @@ function exitGomokuGame() {
     if (gomokuSpeedInterval) clearInterval(gomokuSpeedInterval);
     document.getElementById('gomokuScreen').classList.add('hidden');
     document.getElementById('gameSelectionOverlay').classList.remove('hidden');
+    if (typeof applyVsPromo === 'function') applyVsPromo();
 }
 
 

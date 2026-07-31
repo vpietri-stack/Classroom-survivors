@@ -80,9 +80,13 @@ function initStudyMode() {
         clearInterval(minigameCountdownInterval);
         minigameCountdownInterval = null;
     }
-    // Hide VS exit button
+    // Hide VS exit button + mute toggle
     const vsExitBtn = document.getElementById('vsExitBtn');
     if (vsExitBtn) vsExitBtn.classList.add('hidden');
+    const vsMuteBtn = document.getElementById('vsMuteBtn');
+    if (vsMuteBtn) vsMuteBtn.classList.add('hidden');
+    const vsMusicBtn = document.getElementById('vsMusicBtn');
+    if (vsMusicBtn) vsMusicBtn.classList.add('hidden');
     activeGameMode = null;
 
     // Show Study Overlay

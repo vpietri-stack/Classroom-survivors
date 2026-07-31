@@ -116,8 +116,16 @@
 
     <!-- HUD -->
     <div id="hud">
+        <button id="vsMuteBtn" onclick="toggleSfxMute()"
+            class="pointer-events-auto hidden" style="position:absolute;top:12px;left:12px;z-index:20;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.3);color:#ccc;font-size:14px;font-weight:bold;padding:6px 10px;border-radius:6px;cursor:pointer;">
+            <i id="vsMuteIcon" class="fas fa-volume-up"></i>
+        </button>
+        <button id="vsMusicBtn" onclick="if(window.BGM)BGM.toggleMute()"
+            class="pointer-events-auto hidden" style="position:absolute;top:52px;left:12px;z-index:20;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.3);color:#ccc;font-size:14px;font-weight:bold;padding:6px 10px;border-radius:6px;cursor:pointer;">
+            <i id="vsMusicMuteIcon" class="fas fa-music"></i>
+        </button>
         <button id="vsExitBtn" onclick="exitVampireSurvivors()"
-            class="pointer-events-auto hidden" style="position:absolute;top:12px;right:12px;z-index:20;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.3);color:#ccc;font-size:12px;font-weight:bold;padding:6px 12px;border-radius:6px;cursor:pointer;">
+            class="pointer-events-auto hidden" style="position:absolute;top:12px;left:56px;z-index:20;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.3);color:#ccc;font-size:12px;font-weight:bold;padding:6px 12px;border-radius:6px;cursor:pointer;">
             <i class="fas fa-arrow-left" style="margin-right:4px;"></i>返回 (Exit)
         </button>
         <div class="xp-bar-container">
@@ -243,10 +251,11 @@
             </h1>
 
             <div class="text-left text-gray-200 space-y-3 mb-8 text-base sm:text-lg">
-                <p>🎮 <strong class="text-yellow-400">如何操作：</strong>使用 WASD 或方向键移动角色，手机端可以触屏移动。</p>
-                <p>👾 <strong class="text-yellow-400">游戏目标：</strong>躲避敌人，收集经验值升级，获得更强大的武器！</p>
-                <p>📚 <strong class="text-yellow-400">学习挑战：</strong>每次升级都需要完成英语小挑战才能获得奖励。</p>
-                <p>⏱️ <strong class="text-yellow-400">计时模式：</strong>答题时间会从生存时间中扣除，答得越快分数越高！</p>
+                <p>🎮 <strong class="text-yellow-400">操作：</strong>电脑用 WASD/方向键，手机按住屏幕下半部滑动。武器自动攻击！</p>
+                <p>⭐ <strong class="text-yellow-400">升级：</strong>捡金星星升级，完成英语小挑战才能拿到新武器！</p>
+                <p>🔤 <strong class="text-yellow-400">拼词：</strong>碰到宝箱后，走到地上的字母上，按顺序拼出听到的单词！</p>
+                <p>👾 <strong class="text-yellow-400">Boss：</strong>每消灭300个敌人会出现一个Boss！</p>
+                <p>🏆 <strong class="text-yellow-400">获胜：</strong>坚持10分钟，打败最终Boss就赢了！（答题时计时暂停）</p>
             </div>
 
             <button
@@ -255,7 +264,47 @@
                 <i class="fas fa-play mr-2"></i>开始游戏
             </button>
             <button
-                onclick="document.getElementById('gameIntroOverlay').classList.add('hidden'); document.getElementById('gameSelectionOverlay').classList.remove('hidden');"
+                onclick="document.getElementById('gameIntroOverlay').classList.add('hidden'); showVsCharSelect();"
+                class="mt-6 text-gray-300 hover:text-white text-sm w-full text-center">
+                <i class="fas fa-arrow-left mr-1"></i>返回 (Back)
+            </button>
+        </div>
+    </div>
+
+    <!-- VS Character Select (shown BEFORE the how-to-play intro) -->
+    <div id="vsCharSelect" class="overlay hidden p-4">
+        <div
+            class="bg-black/60 p-6 sm:p-8 rounded-2xl border-2 border-yellow-500/50 w-full max-w-md sm:max-w-lg mx-auto backdrop-blur-sm text-center">
+            <h1
+                class="text-2xl sm:text-4xl font-bold mb-5 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">
+                选择你的角色</h1>
+            <div class="flex gap-4 justify-center mb-5">
+                <button id="vsCharMonitor" class="vs-char-card flex-1" onclick="selectVsCharacter('monitor')">
+                    <img src="sprites/vs/portrait_monitor.png" alt="Class Monitor"
+                        class="h-28 mx-auto object-contain pointer-events-none">
+                    <div class="mt-2 font-bold text-yellow-300">班长</div>
+                </button>
+                <button id="vsCharSkippy" class="vs-char-card flex-1" onclick="selectVsCharacter('skippy')">
+                    <img src="sprites/vs/portrait_skippy.png" alt="Skippy"
+                        class="h-28 mx-auto object-contain pointer-events-none">
+                    <div class="mt-2 font-bold text-yellow-300">Skippy</div>
+                </button>
+            </div>
+            <div class="bg-black/40 rounded-xl p-3 mb-6 flex items-center justify-center gap-3">
+                <img id="vsCharWeaponIcon" src="sprites/vs/item_ruler.png" alt="weapon"
+                    class="h-12 w-12 object-contain">
+                <div class="text-left">
+                    <div id="vsCharName" class="font-bold text-white text-lg">班长 Class Monitor</div>
+                    <div id="vsCharWeapon" class="text-sm text-yellow-200">专属武器 Weapon: Ruler</div>
+                </div>
+            </div>
+            <button
+                class="game-btn text-xl sm:text-2xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 w-full py-3 sm:py-4 shadow-lg"
+                onclick="startVsFromCharSelect()">
+                <i class="fas fa-check mr-2"></i>确定 Confirm
+            </button>
+            <button
+                onclick="document.getElementById('vsCharSelect').classList.add('hidden'); document.getElementById('gameSelectionOverlay').classList.remove('hidden');"
                 class="mt-6 text-gray-300 hover:text-white text-sm w-full text-center">
                 <i class="fas fa-arrow-left mr-1"></i>返回 (Back)
             </button>
@@ -415,7 +464,8 @@
     </div>
 
     <div id="gameOverScreen" class="overlay hidden p-4">
-        <h2 class="text-4xl sm:text-6xl font-bold text-red-500 mb-6 text-center">GAME OVER</h2>
+        <h2 id="gameOverTitle" class="text-4xl sm:text-6xl font-bold text-red-500 mb-4 text-center">GAME OVER</h2>
+        <p id="vsResultMsg" class="hidden text-lg sm:text-xl text-white/90 mb-6 text-center max-w-md mx-auto"></p>
         <div
             class="bg-black/60 p-6 sm:p-8 rounded-2xl border-2 border-red-500/50 w-full max-w-md mx-auto mb-8 backdrop-blur-sm">
             <p class="text-lg sm:text-xl text-yellow-400 mb-4 font-bold tracking-wider text-center"
@@ -442,6 +492,18 @@
         </div>
     </div>
 
+    <!-- VS victory menu: shown when the final (10-min) boss is defeated -->
+    <div id="vsVictoryMenu" class="overlay hidden p-4">
+        <div class="bg-black/70 p-8 rounded-2xl border-2 border-yellow-400/60 w-full max-w-md mx-auto text-center backdrop-blur-sm">
+            <h2 class="text-4xl sm:text-5xl font-bold mb-4 text-yellow-300">🏆 挑战成功！</h2>
+            <p class="text-white text-lg mb-8">你击败了最终Boss！<br>要继续玩这一局吗？</p>
+            <div class="flex flex-col gap-4">
+                <button class="game-btn bg-green-600 hover:bg-green-500 text-xl py-3 rounded-lg" onclick="vsVictoryContinue()">继续挑战 (保留当前装备)</button>
+                <button class="game-btn bg-orange-600 hover:bg-orange-500 text-xl py-3 rounded-lg" onclick="vsVictoryEnd()">结束本局</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Game Selection Overlay -->
     <div id="gameSelectionOverlay" class="overlay hidden p-4">
         <div
@@ -451,9 +513,10 @@
                 你想玩什么？
             </h2>
             <div class="flex flex-col gap-6">
-                <button
+                <div id="vsPromoBadge" class="hidden vs-promo-badge">✨ 全新升级版！快来试试吧！ ✨</div>
+                <button id="vsGameBtn"
                     class="game-btn text-2xl bg-orange-600 hover:bg-orange-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all"
-                    onclick="showGameIntro()">Vampire Survivors</button>
+                    onclick="showVsCharSelect()">Vampire Survivors</button>
                 <button
                     class="game-btn text-2xl bg-indigo-600 hover:bg-indigo-500 w-full py-4 rounded-xl shadow-lg transform active:scale-95 transition-all"
                     onclick="showGomokuModeSelection()">五子棋 (5 in a row)</button>
@@ -676,7 +739,8 @@
     <script src="content_test.js?v=2026-07-25a"></script>
     <script src="class_config.js?v=2026-07-25a"></script>
     <script src="boot.js?v=2026-07-25a"></script>
-    <script src="vampire_survivors.js?v=2026-07-27a"></script>
+    <script src="bgm.js?v=2"></script>
+    <script src="vampire_survivors.js?v=2026-07-30a"></script>
     <script src="gomoku.js?v=2026-07-27a"></script>
     <script src="uno.js?v=2026-07-27a"></script>
 
@@ -813,11 +877,11 @@
         .td-play-again-btn:hover { background: #66bb6a; }
     </style>
 
-    <script src="game.js?v=2026-07-29d"></script>
+    <script src="game.js?v=2026-07-30a"></script>
     <!-- Mirror-aware asset cache: prefetch + IndexedDB for TD sprites, vocab
          images and hand-recorded MP3s (fast first load in CN; survives WeChat
          cache eviction). Must load BEFORE tower_defense.js reads AssetCache. -->
-    <script src="asset_cache.js?v=1"></script>
+    <script src="asset_cache.js?v=3"></script>
     <script src="tower_defense.js?v=2026-07-28c"></script>
     <script src="study_mode.js?v=2026-07-27a"></script>
     <script>

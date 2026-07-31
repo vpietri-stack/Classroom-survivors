@@ -1014,10 +1014,11 @@ function startMinigameCountdown(scene) {
         if (grammarTimer) grammarTimer.textContent = timeString;
         if (sentencematchTimer) sentencematchTimer.textContent = timeString;
 
-        // Deduct time from survival time (if VS)
-        if (activeGameMode === 'VS' && scene) {
-            scene.accumulatedTime = Math.max(0, scene.accumulatedTime - 100);
-        }
+        // NOTE: no survival-time deduction here. The VS scene is PAUSED while
+        // a minigame is open, so accumulatedTime is already frozen — the old
+        // "deduct 100ms per tick" on top of that made the HUD clock run
+        // BACKWARDS during questions (survival = fight time MINUS question
+        // time), which made the 10-minute final boss nearly unreachable.
     }, 100);
 }
 

@@ -1,6 +1,6 @@
 # PROJECT HANDOFF — Classroom Survivors
 
-_Last updated: 2026-07-29 (night turn 3: split SFX/music mute buttons). Branch: `preview`._
+_Last updated: 2026-07-29 (night turn 4: HUD timer fix + new intro text — pre-live polish). Branch: `preview`._
 
 This is a detailed handoff for the **Classroom Survivors** ESL educational game — an HTML/JS web app for young Chinese English learners. It documents architecture, the games, the recent work, the HiDPI system, the asset pipeline, testing, known pitfalls, and open items. Read the "Golden Rules" first.
 
@@ -87,6 +87,7 @@ Wide front lash at range 330, `fireWhip`/`performWhipStrike`. L2+ spawns a burni
 - Killing the final boss → Chinese **victory menu** (`#vsVictoryMenu`): 继续挑战 (keep playing current build till death) / 结束本局 (end → congrats game-over). `wonGame` flag drives the game-over title/message.
 - Boss combat: `attackRange 200`, lunge speed 540 (reaches the range), knockback/stun immune.
 - **Session-count rule:** a loss counts as a completed session only if HUD survival time (`accumulatedTime`, excludes minigame/question overlays) ≥ 2 min. Wins always count. (Gomoku/UNO keep their own rule — do NOT change them; their question time IS game time.)
+- **HUD survival clock semantics (fixed pre-live):** `accumulatedTime` accrues only while the scene runs and simply FREEZES while an ESL minigame is open (scene paused). The old extra "deduct 100ms/tick during questions" in `startMinigameCountdown` (game.js) made the clock run BACKWARDS during questions — survival = fight time MINUS question time — which made the 10-minute final boss nearly unreachable; that deduction is removed. Verify with `node vs_timer_test.js` (accrue → freeze(0) → accrue → PASS). The intro screen text matches: “答题时计时暂停”.
 
 ### Walking puzzles (ESL)
 Boxes spread in a ring (`205 + (i%2)*100`), tap tracker = UNDO last collected token (repeat to remove more), silent; audio replays only when the dock is empty. Subtle "correct-letter magnet": next-needed token boxes get +15% walk-on radius, wrong −15%, and a correct box always wins when overlapping a wrong one.
@@ -231,6 +232,7 @@ Key scripts (run with `node <file>`):
 - `vs_dpr_test.js` — HiDPI at deviceScaleFactor 1/2/3 (backing, style, zoom, world-point).
 - `vs_transition_repro.js [dsf]` — VS→menu→UNO and UNO→menu→VS transitions with metrics + screenshots (the DPR-1 PC bugs repro/verify).
 - `vs_device_matrix_test.js` — **device matrix (12 profiles)**: iphone-se(375×667@2), small-android(360×800@2), android-mid(390×844@3), big-phone(430×932@3), ipad-mini(744×1133@2, +rotation), ipad(810×1080@2), ipad-pro-12.9(1024×1366@2, +rotation), laptop-1366(@1), win-125pct(1536×864@1.25), win-150pct(1280×720@1.5), pc-1080p(@1), ultrawide(2560×1080@1). Asserts the adaptive-sizing invariants for ALL THREE games per profile (VS backing/displayScale/camera + full-viewport canvas, UNO container+cards-in-view+camera, Gomoku ≤600 display + stable draws), tolerant of fractional DPR, and re-checks VS + Gomoku invariants after MID-GAME ROTATION on the marked profiles. Expect `MATRIX PASS`. **Run this after any scaling/canvas change.**
+- `vs_timer_test.js` — survival clock accrues in play, freezes (exactly 0 delta) during an ESL minigame, resumes after. Expect `RESULT PASS`.
 - `vs_input_uno_test.js` — VS joystick (real mouse drag) + UNO cards visible after VS.
 - `vs_uno_transition_test.js` — VS→UNO canvas state.
 - `vs_charselect_test.js`, `vs_boss_test.js`, `vs_hitbox_test.js`, `vs_puzzle_test.js`, `vs_bosscombat_test.js`, `vs_sfx_samples_test.js`, `vs_bat_check.js`.
@@ -257,7 +259,7 @@ Key scripts (run with `node <file>`):
 
 ## 9. OPEN ITEMS / NEXT STEPS
 
-- **Playtest status (2026-07-29 night):** PC ✅, Android ✅ (incl. WeChat), iPad layout ✅, iPad audio ✅ (Safari + WeChat, after keep-alive + WeChat unlock — user-confirmed "music is back on all devices and browsers"). New: split SFX/music mute buttons shipped — verify on devices.
+- **Playtest status (2026-07-29 night):** PC ✅, Android ✅ (incl. WeChat), iPad layout ✅, iPad audio ✅ (Safari + WeChat — user-confirmed). Pre-live polish done: split SFX/music mute buttons; HUD timer no longer drains during questions; intro (“How to play”) rewritten in simple 简体中文 (controls / stars+ESL / walking-puzzle spelling / 300-kill bosses / win = survive 10min + beat final boss, 答题时计时暂停). **Next: ship to live (origin/main) — remember the cherry-pick/exclusion policies in §scm before doing so.**
 - **Device coverage strategy:** real devices can't all be tested — `vs_device_matrix_test.js` emulates **12 profiles** (small/mid/big phones @2-3, iPad Mini/standard/Pro @2 incl. mid-game rotation, laptops @1, Windows 125%/150% fractional DPR, ultrawide) and asserts the sizing invariants for all three games; the invariants are container-relative (window for VS, uno container for UNO, min(600,container) for Gomoku), so any screen size/orientation resolves correctly by construction. Latest run: **MATRIX PASS (12/12)**. Add a profile if a new form factor misbehaves.
 - Possible tuning after playtest: HiDPI 2× cap could be raised if a device still looks soft (one number in `vsDpr()`); slash/arc feel; SFX volume balance; final-boss ×2 damage.
 - TD (Tower Defense) is still in development (gated off live).

@@ -179,12 +179,22 @@ function updateGomokuStatus(msg) {
 
 // --- RENDERING ---
 function drawGomokuBoard() {
-    // HiDPI: match the backing buffer to the DISPLAYED CSS size x DPR (capped at
-    // 2) so the board is crisp on phones and large screens. Everything below is
-    // drawn relative to gomokuCanvas.width, and clicks map via canvas.width /
-    // rect.width, so simply resizing the backing self-scales with no coord math.
+    // HiDPI + device-adaptive sizing. The DISPLAY size must be independent of
+    // the backing attribute: the markup's `max-w-full h-auto` sizes the element
+    // from its INTRINSIC (attribute) size, so inflating the backing for DPR
+    // also grew the on-screen board on wide screens (iPad: board ballooned
+    // past 600 -> "too zoomed in"). Pinning style width to 600px (capped at
+    // 100% of the container) reproduces the ORIGINAL pre-HiDPI layout exactly
+    // on every device/orientation — display = min(600, container) — while the
+    // backing becomes display x DPR (capped 2) purely for crispness. No
+    // feedback loop: layout no longer reads the width attribute at all.
+    if (gomokuCanvas.style.width !== '600px') {
+        gomokuCanvas.style.width = '600px';
+        gomokuCanvas.style.maxWidth = '100%';
+        gomokuCanvas.style.height = 'auto'; // square attrs keep the 1:1 aspect
+    }
     const dpr = (typeof vsDpr === 'function') ? vsDpr() : Math.min(2, Math.max(1, window.devicePixelRatio || 1));
-    const cssSize = gomokuCanvas.clientWidth || gomokuCanvas.width;
+    const cssSize = gomokuCanvas.clientWidth || 600;
     const want = Math.round(cssSize * dpr);
     if (want > 0 && gomokuCanvas.width !== want) { gomokuCanvas.width = want; gomokuCanvas.height = want; }
     const size = gomokuCanvas.width;

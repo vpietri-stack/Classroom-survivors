@@ -756,9 +756,13 @@ function updateDOMHUD(stats, time, kills) {
 // anonymous / test-mode play (no logged-in student). Called from EVERY path
 // that reveals the menu (showGameSelection + the return-from-game paths).
 function _vsPromoGetSeen() {
-    // Logged-in student: authoritative flag is on their account record
+    // Logged-in student: seen if EITHER the account flag (cross-device, from the
+    // server via login) OR a per-user device mirror is set. The mirror covers
+    // the gap before the server value round-trips back on the next login, and
+    // survives even if the persistence POST fails.
     if (typeof authActiveUser !== 'undefined' && authActiveUser && authActiveUser.id) {
-        return !!authActiveUser.vsPromoSeen;
+        if (authActiveUser.vsPromoSeen) return true;
+        try { return localStorage.getItem('vsPromoSeen_' + authActiveUser.id) === '1'; } catch (e) { return false; }
     }
     // Anonymous / test mode: device-local fallback
     try { return localStorage.getItem('vsPromoSeen') === '1'; } catch (e) { return false; }
@@ -766,9 +770,11 @@ function _vsPromoGetSeen() {
 function _vsPromoSetSeen() {
     if (typeof authActiveUser !== 'undefined' && authActiveUser && authActiveUser.id) {
         authActiveUser.vsPromoSeen = true;
-        // Persist to the student's cached profile + backend (fire-and-forget,
-        // same pattern as the auto page-advance in frontend_auth.js). Falls
-        // back silently if offline — the in-memory flag still hides it this session.
+        // Per-user device mirror: remembered immediately on THIS device even
+        // before the server value comes back on next login.
+        try { localStorage.setItem('vsPromoSeen_' + authActiveUser.id, '1'); } catch (e) { }
+        // Persist to the student's cached profile + backend (fire-and-forget)
+        // so it follows the child to OTHER devices.
         if (typeof saveActiveUserToCache === 'function') { try { saveActiveUserToCache(); } catch (e) { } }
         if (typeof apiFetch === 'function' && typeof API_BASE !== 'undefined') {
             apiFetch(`${API_BASE}/updateStudent`, {

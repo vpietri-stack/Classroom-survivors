@@ -808,7 +808,8 @@ async function loginWithProfile(user, clickedBtn) {
                     page: data.page,
                     password: user.password,
                     analytics: data.analytics || [],
-                    teacher: data.teacher || null
+                    teacher: data.teacher || null,
+                    vsPromoSeen: !!data.vsPromoSeen
                 };
                 window.authLoading = false;
                 showChangePasswordScreen(data.fullName);
@@ -829,7 +830,8 @@ async function loginWithProfile(user, clickedBtn) {
                 sessionCount: data.sessionCount || 0,
                 targets: data.targets || [],
                 analytics: data.analytics || [],
-                teacher: data.teacher || null
+                teacher: data.teacher || null,
+                vsPromoSeen: !!data.vsPromoSeen
             };
             
             // Update the local cache with the fresh data
@@ -1010,7 +1012,8 @@ async function handleLoginSubmit() {
             sessionCount: data.sessionCount || 0,
             targets: data.targets || [],
             analytics: data.analytics || [],
-            teacher: data.teacher || null
+            teacher: data.teacher || null,
+            vsPromoSeen: !!data.vsPromoSeen
         };
         
         window.authLoading = false;

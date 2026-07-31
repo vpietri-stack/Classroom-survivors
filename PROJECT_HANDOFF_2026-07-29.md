@@ -1,6 +1,6 @@
 # PROJECT HANDOFF — Classroom Survivors
 
-_Last updated: 2026-07-31 (renamed game to “Classroom Survivors”; API deploy pipeline restored + backend LIVE). Branch: `preview`._
+_Last updated: 2026-07-31 (fixed VS promo not remembering ‘seen’ across logins). Branch: `preview`._
 
 This is a detailed handoff for the **Classroom Survivors** ESL educational game — an HTML/JS web app for young Chinese English learners. It documents architecture, the games, the recent work, the HiDPI system, the asset pipeline, testing, known pitfalls, and open items. Read the "Golden Rules" first.
 
@@ -258,6 +258,8 @@ Key scripts (run with `node <file>`):
 ---
 
 ## 9. OPEN ITEMS / NEXT STEPS
+
+- **FIXED: VS promo re-appeared after being seen (2026-07-31).** Root cause: the login flow rebuilds `authActiveUser` from a HARDCODED field list (frontend_auth.js, all 3 sites: normal login ~L817, cached/auto-login ~L998, change-password ~L799) that OMITTED `vsPromoSeen` — so even though the server stored + returned it (via `publicUser`), every login dropped it → `authActiveUser.vsPromoSeen` was always undefined → promo showed again. Fix: (1) all 3 login constructions now carry `vsPromoSeen: !!data.vsPromoSeen`; (2) `_vsPromoSetSeen`/`_vsPromoGetSeen` (game.js) also read/write a PER-USER device mirror `localStorage['vsPromoSeen_'+id]` so it's remembered instantly on the same device even before the server value round-trips (and survives a failed POST). Same-device works with zero backend dependency; cross-device works via the (now-deployed) server field. Verified: `node vs_promo_test.js` (adds a relogin-drops-flag regression case) + `node vs_promo_lifecycle_test.js` both PASS. Lesson: when adding a persisted user field, update ALL `authActiveUser = {...}` constructions in frontend_auth.js (they are explicit allow-lists, not spreads).
 
 - **Game renamed “Vampire Survivors” → “Classroom Survivors” (2026-07-31, user-facing only):** the menu button (`#vsGameBtn` in index.html) and the teacher-dashboard session-type label (teacher_dashboard.js `map.vampire`/`vampireSurvivors`) now read “Classroom Survivors”. Code identifiers are deliberately UNCHANGED (`triggerVampireSurvivors`/`exitVampireSurvivors`/`replayVampireSurvivors`, `queueSessionEvent('vampireSurvivors', ...)`, the `vs*` DOM ids, file `vampire_survivors.js`, comments) — renaming those would be churn with no user benefit and would break the session-event key already stored in telemetry/Cosmos. If ever renamed, keep accepting the legacy `vampireSurvivors` session key.
 

@@ -27,8 +27,17 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
         // 3) SAME user, DIFFERENT device: fresh object but server says seen:true, no localStorage
         window.authActiveUser = { id: 'stu_123', fullName: 'Kid', vsPromoSeen: true };
         localStorage.removeItem('vsPromoSeen');
+        localStorage.removeItem('vsPromoSeen_stu_123');
         showGameSelection();
         out.otherDevice_shown = shown(); // should be false (follows the account)
+        // 3b) SAME user, SAME device, NEW login that DROPPED the server flag
+        // (regression guard: login used to rebuild the user without vsPromoSeen).
+        // The per-user device mirror set in step 1 must still hide it.
+        window.authActiveUser = { id: 'stu_promo_dev', fullName: 'Kid2' };
+        localStorage.removeItem('vsPromoSeen'); localStorage.removeItem('vsPromoSeen_stu_promo_dev');
+        showGameSelection(); out.dev_first_shown = shown();      // shows once, sets mirror
+        window.authActiveUser = { id: 'stu_promo_dev', fullName: 'Kid2' }; // relogin, flag dropped
+        showGameSelection(); out.dev_after_relogin_shown = shown(); // mirror -> hidden
         // 4) Anonymous / test: localStorage fallback
         window.authActiveUser = null;
         localStorage.removeItem('vsPromoSeen');
@@ -45,6 +54,7 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
     console.log('errs', JSON.stringify(errs));
     const ok = r.loggedIn_first_shown && r.loggedIn_flagSetInMemory && r.localStorageUntouched === null &&
         !r.loggedIn_second_shown && !r.otherDevice_shown &&
+        r.dev_first_shown && !r.dev_after_relogin_shown &&
         r.anon_first_shown && r.anon_flag === '1' && !r.anon_second_shown &&
         posts.some(pd => pd && pd.includes('vsPromoSeen')) && errs.length === 0;
     console.log('RESULT', ok ? 'PASS' : 'FAIL');

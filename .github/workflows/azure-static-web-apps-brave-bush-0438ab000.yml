@@ -23,13 +23,23 @@ jobs:
         with:
           submodules: true
           lfs: false
+      # The SWA only exists to host the /api Functions — the game itself is
+      # served by GitHub Pages. Uploading the whole repo now exceeds the Free
+      # tier's 250MB app limit (sprites/audio/vocab grew), so stage a MINIMAL
+      # app dir: routes/CORS config + injected key + a stub index.
+      - name: Stage minimal SWA app (API host only)
+        shell: bash
+        run: |
+          mkdir -p swa_app
+          cp staticwebapp.config.json swa_app/
+          printf '<!doctype html><title>Classroom Survivors API</title>API host. The game lives at https://vpietri-stack.github.io/Classroom-survivors/\n' > swa_app/index.html
       - name: Inject client app config (keep app key out of repo)
         if: ${{ env.APP_CLIENT_KEY != '' }}
         env:
           APP_CLIENT_KEY: ${{ secrets.APP_CLIENT_KEY }}
         shell: bash
         run: |
-          printf '{"APP_API_KEY":"%s"}\n' "$APP_CLIENT_KEY" > app-config.json
+          printf '{"APP_API_KEY":"%s"}\n' "$APP_CLIENT_KEY" > swa_app/app-config.json
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
@@ -37,12 +47,11 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_BRAVE_BUSH_0438AB000 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
           action: "upload"
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "/" # App source code path
-          api_location: "api" # Api source code path - optional
-          output_location: "/" # Built app content directory - optional
-          app_build_command: 'echo "static site - no build step"' # frontend is plain HTML/JS, skip Oryx build
+          ###### Repository/Build Configurations ######
+          app_location: "swa_app" # minimal API-host app (see staging step)
+          api_location: "api" # Api source code path
+          output_location: "" # no build output dir
+          skip_app_build: true # plain static stub, nothing to build
           ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:

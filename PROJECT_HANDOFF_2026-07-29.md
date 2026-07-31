@@ -1,6 +1,6 @@
 # PROJECT HANDOFF — Classroom Survivors
 
-_Last updated: 2026-07-31 (fixed VS promo not remembering ‘seen’ across logins). Branch: `preview`._
+_Last updated: 2026-07-31 (documented §12 OS-census device telemetry + APK/EXE decision track; fixed VS promo not remembering ‘seen’ across logins). Branch: `preview`._
 
 This is a detailed handoff for the **Classroom Survivors** ESL educational game — an HTML/JS web app for young Chinese English learners. It documents architecture, the games, the recent work, the HiDPI system, the asset pipeline, testing, known pitfalls, and open items. Read the "Golden Rules" first.
 
@@ -304,7 +304,7 @@ Every gate interaction logs through the existing analytics pipeline (`queueExerc
 - **`speech_gated`** — audio rejected BEFORE transcription; `reason: 'too_short'|'too_quiet'|'empty'` + `durMs`/`peak`.
 - **`speech_skip`** — student pressed Skip; `failsBeforeSkip`.
 - **`speech_error`** — mic/permission/engine error; `message`.
-- **`device`** — one-shot OS/platform census per session.
+- **`device`** — OS/platform census logged at login, once per student per device per day (NOT a speech event; full spec in §12).
 
 ### 11.3 Analysis toolkit (all in `api/`, run with `node`; needs `local.settings.json` Cosmos creds)
 - **`analyze_speech.js [--hours N] [--json out.json]`** — THE report: headline pass rates, per-student, per-device, failure-mode classification (garbage/wrong/near-miss), what-if rescoring across the BOOK_TIERS ladder (§5), pitch shifted-vs-unshifted (§5b), per-book, audio sanity, worst transcript pairs. `--json` dumps raw events for the deep-dive scripts.
@@ -356,5 +356,47 @@ Grammar SR result + analytics are recorded at the successful **check** (`checkGr
   - **NEW — Coco:** 9% (1/11) on 07-30, medF0 222Hz (unshifted), transcripts show `[Music]` → environment/noise, not a system issue. New watch-item.
 - **Irene (the key v2 confirmation) STILL UNRESOLVED:** no attempts on 07-30, so her post-v2 behaviour (should sit unshifted at ~246Hz under the 265 threshold) remains unconfirmed. Her only v2-era data is still needed.
 - **Status:** stable-build monitoring continues; no speech change pending. Next action is simply the next daily run.
+
+---
+
+## 12. OS CENSUS / DEVICE TELEMETRY (2026-07-29 → 2026-08-29) — the APK/EXE decision track
+
+### 12.1 Why this exists
+The user is considering shipping a **sideloadable APK (Android/Huawei) and/or EXE (Windows)** version of the web app. That only makes sense if the student base isn't mostly iOS — the Chinese iOS App Store is an administrative nightmare the user wants to avoid. So: measure exactly which OS every student actually plays on, for one month, then decide.
+
+### 12.2 What the pre-existing data already showed (2026-07-29 analysis of speech-telemetry UAs)
+Speech events already carried `ua` (first 160 chars of `navigator.userAgent`), so the July dumps (`api/speech_events_dump_full.json` + `api/speech_events_postfix.json`) gave a first cut across ~27 real students:
+- **≈50% iOS/iPadOS** (~13): Domi, Jenny, Neal, Max, Ethan, Candy, Cody, Nick, Zander, Doris, Leon, Amy, Mia. **CRITICAL trap: iPadOS Safari sends a desktop "Macintosh" UA** — the 6 "macOS" students are almost certainly iPads (giveaway: `Version/26.5.2` / `Version/18.7.5` are iOS version numbers).
+- **≈33% Android** (~9, incl. Honor/Xiaomi/realme/OnePlus WebViews): Jojo, Andy, Yoyo, May, Irene, Coco, Milk, Zozo, Mia.
+- **≈15% HarmonyOS NEXT** (4: Ruly, Susie, Iris, Zozo) — `OpenHarmony 6.1` / `ArkWeb` UAs. **These CANNOT sideload APKs** (no Android compat layer); a Harmony build would be a separate ArkTS app. Iris's tablet even spoofs `Windows NT` in desktop mode (OpenHarmony token must win over the Windows token when classifying).
+- **3 Windows**: Gabriel, Harvey, Rex.
+- Multi-device kids exist (Mia: iPhone+iPad+Android; Zozo: Android phone + Harmony tablet). Many access via **WeChat's MicroMessenger WebView** or the **Baidu app**, not standalone browsers.
+- **Caveat → why the census was built:** that sample only covered students who hit SPEECH exercises; kids playing only other modes were invisible.
+
+### 12.3 Client implementation (`frontend_auth.js`, shipped `2026-07-29a`)
+`queueDeviceInfoEvent()`, called from `finishLogin()` **after** the teacher/BM redirect (so only students are counted; test mode skipped):
+- Emits a **`type:'device'`** event through the existing pipeline (`analyticsQueue` → `saveAnalytics` → Cosmos `Students.analytics[]`) — inherits `eventId` de-dup, localStorage offline queue, and beacon flush for free. No backend change was needed (saveAnalytics stores arbitrary event objects).
+- **Once per student per device per calendar day**, guarded by `localStorage['csDeviceLogDay_'+id]` = `toDateString()` — a month of data stays tiny.
+- Fields: `ua` (300 chars), `platform`, **`maxTouchPoints`** (the key to unmasking iPads-as-Macs: Mac UA + touchPoints>1 = iPad), `uaData` (`navigator.userAgentData` platform/mobile/brands where available), `screen` (WxH), `appVersion`, `timestamp`, `eventId` (`dv_` prefix).
+- **Deliberately NOT `type:'session'`** (would inflate weekly-target counts) **and NOT `type:'exercise'`** (would pollute teacher-dashboard exercise tables). Both dashboards filter by type, so `device` events are invisible to them — verified against `countSessionsInRange`/`countCompletedSessionsForTarget` and the dashboard exercise filters before shipping.
+- Version bumps shipped together per the deploy-stamp rule: `APP_VERSION` + `version.json` + `index.html` `frontend_auth.js?v=` all → `2026-07-29a`. This matters for census completeness: the version watchdog nudges stale WeChat builds to reload, otherwise those students would never run the new code and never be counted.
+- Verified via stubbed Node unit run: exactly 1 event queued per day, correct shape, test-mode skipped; `node --check` clean.
+
+### 12.4 Report script (`api/analyze_devices.js`)
+Run **on/after 2026-08-29** (a scheduled reminder exists in the Quest session for that date):
+```
+cd api; node analyze_devices.js            # all device events ever
+node analyze_devices.js --days 30          # windowed
+```
+Needs `local.settings.json` Cosmos creds (same as analyze_speech.js). Outputs: per-student OS + login-day counts + last-seen; per-OS student tallies; and **APK/EXE decision buckets** — `iOS/iPadOS` / `Android (APK OK)` / `HarmonyOS (no APK)` / `Windows (EXE OK)` with percentages. Classification corrections built in: Mac-UA+touch→iPad, OpenHarmony-beats-Windows-token, Xiaomi desktop-mode Linux UA→Android.
+
+### 12.5 Deployment history of this track
+- `d5a084d` → preview/main; **`1443d33` → origin/main** (2026-07-29, telemetry-exception policy). At the time the branches were divergent lineages, so this went to production as a surgical cherry-pick: local `main` fast-forwarded to origin/main, telemetry commit cherry-picked, the index.html cache-bust line re-applied by hand (on preview it was trapped inside the VS-tainted `85b48d7` commit), and the final `origin/main..HEAD` diff verified VS-free (exactly 4 files: frontend_auth.js, index.html one line, version.json, api/analyze_devices.js). **Historical note only:** since `edf0577` (2026-07-31) the branches are converged and the cherry-pick/VS-exclusion procedure is obsolete (§9).
+- Census live on BOTH sites since 2026-07-29; data has been accumulating from every student login since.
+
+### 12.6 The decision framework (when the month is up)
+- If iOS/iPadOS share holds at ~50%: an APK-only strategy misses half the class → sideload builds are questionable; the web app stays primary.
+- APK covers only the Android cohort; HarmonyOS NEXT kids need a separate ArkTS app (another store/signing headache — likely not worth it for ~4 students); Windows kids could get an EXE but the web version already works well there.
+- Expected outcome format from analyze_devices.js: per-bucket student counts + %, ready to eyeball against the admin effort of each channel.
 
 

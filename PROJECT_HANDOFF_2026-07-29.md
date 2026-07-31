@@ -1,6 +1,6 @@
 # PROJECT HANDOFF — Classroom Survivors
 
-_Last updated: 2026-07-29 (late turn: iPad Gomoku fix + device-matrix test). Branch: `preview`._
+_Last updated: 2026-07-29 (final turn: 12-profile device matrix + rotation + Gomoku resize listener). Branch: `preview`._
 
 This is a detailed handoff for the **Classroom Survivors** ESL educational game — an HTML/JS web app for young Chinese English learners. It documents architecture, the games, the recent work, the HiDPI system, the asset pipeline, testing, known pitfalls, and open items. Read the "Golden Rules" first.
 
@@ -203,7 +203,7 @@ bytes (model weights, images, audio).
 At DPR 1, `setZoom(1)` and `resize(sameDims)` are **no-ops** in Phaser, so `refresh()` never rewrites the canvas inline style — a stale style from the previous game survives the transition. Observed on PC only: VS→UNO cards stretched (style stuck at the VS window size while backing = container) and UNO→VS invisible game (style stuck at `0px`). Fix: `_applyHiDpiSize` writes `canvas.style.width/height = CSS px` explicitly — this matches exactly what the ScaleManager computes (`backing × zoom`), so `displayScale` stays == DPR (do NOT confuse this with the forbidden "manual styling without zoom" from pitfall #1). Repro/verify: `node vs_transition_repro.js 1` (and `2`) — checks both directions with screenshots.
 
 ### Gomoku (own 2D canvas)
-`drawGomokuBoard()` first pins the DISPLAY size via explicit CSS (`width:600px; max-width:100%; height:auto` = the original pre-HiDPI layout: min(600, container) on every device), then sizes the backing `= clientWidth × dpr`. Display is therefore INDEPENDENT of the backing attribute. Everything is drawn relative to `gomokuCanvas.width` and clicks map via `canvas.width/rect.width`, so it self-scales with zero coordinate math.
+`drawGomokuBoard()` first pins the DISPLAY size via explicit CSS (`width:600px; max-width:100%; height:auto` = the original pre-HiDPI layout: min(600, container) on every device), then sizes the backing `= clientWidth × dpr`. Display is therefore INDEPENDENT of the backing attribute. Everything is drawn relative to `gomokuCanvas.width` and clicks map via `canvas.width/rect.width`, so it self-scales with zero coordinate math. A `window` resize listener (added once in `triggerGomoku`) redraws on rotation/resize so the backing re-derives immediately instead of on the next move.
 **iPad pitfall (fixed):** the markup's `max-w-full h-auto` sized the element from its INTRINSIC (attribute) width, so inflating the backing for DPR also grew the on-screen board on wide screens (600 → 694+ on tablet; "too zoomed in, unplayable" on iPad WeChat/Safari). PC survived only because DPR 1 never inflates; phones because the container is narrower than 600. The explicit-CSS pin breaks that feedback entirely.
 
 ### Game transitions (must stay correct)
@@ -222,7 +222,7 @@ Key scripts (run with `node <file>`):
 - `test_asset_manifest.js` — sprite/audio/music manifest ↔ disk (expect `RESULT: PASS`, 130).
 - `vs_dpr_test.js` — HiDPI at deviceScaleFactor 1/2/3 (backing, style, zoom, world-point).
 - `vs_transition_repro.js [dsf]` — VS→menu→UNO and UNO→menu→VS transitions with metrics + screenshots (the DPR-1 PC bugs repro/verify).
-- `vs_device_matrix_test.js` — **device matrix**: phone(390×844@3) / tablet-portrait(810×1080@2) / tablet-landscape(1080×810@2) / PC(1600×900@1), asserting the adaptive-sizing invariants for ALL THREE games per profile (VS backing/displayScale/camera, UNO container+cards-in-view, Gomoku ≤600 display + stable across draws). Expect `MATRIX PASS`. **Run this after any scaling/canvas change.**
+- `vs_device_matrix_test.js` — **device matrix (12 profiles)**: iphone-se(375×667@2), small-android(360×800@2), android-mid(390×844@3), big-phone(430×932@3), ipad-mini(744×1133@2, +rotation), ipad(810×1080@2), ipad-pro-12.9(1024×1366@2, +rotation), laptop-1366(@1), win-125pct(1536×864@1.25), win-150pct(1280×720@1.5), pc-1080p(@1), ultrawide(2560×1080@1). Asserts the adaptive-sizing invariants for ALL THREE games per profile (VS backing/displayScale/camera + full-viewport canvas, UNO container+cards-in-view+camera, Gomoku ≤600 display + stable draws), tolerant of fractional DPR, and re-checks VS + Gomoku invariants after MID-GAME ROTATION on the marked profiles. Expect `MATRIX PASS`. **Run this after any scaling/canvas change.**
 - `vs_input_uno_test.js` — VS joystick (real mouse drag) + UNO cards visible after VS.
 - `vs_uno_transition_test.js` — VS→UNO canvas state.
 - `vs_charselect_test.js`, `vs_boss_test.js`, `vs_hitbox_test.js`, `vs_puzzle_test.js`, `vs_bosscombat_test.js`, `vs_sfx_samples_test.js`, `vs_bat_check.js`.
@@ -250,7 +250,7 @@ Key scripts (run with `node <file>`):
 ## 9. OPEN ITEMS / NEXT STEPS
 
 - **Playtest status (2026-07-29 late):** PC ok ✅, Android ok ✅, iPad VS+UNO ok ✅; iPad Gomoku was "too zoomed in" — root-caused (display size fed back from the DPR-inflated backing via `max-w-full h-auto`) and **fixed** (explicit CSS pin, see §6 Gomoku). Awaiting iPad re-test.
-- **Device coverage strategy:** real devices can't all be tested — `vs_device_matrix_test.js` emulates phone/tablet-portrait/tablet-landscape/PC and asserts the sizing invariants for all three games; the invariants themselves are container-relative (window for VS, uno container for UNO, min(600,container) for Gomoku), so any screen size/orientation resolves correctly by construction. Add a profile to the matrix if a new form factor misbehaves.
+- **Device coverage strategy:** real devices can't all be tested — `vs_device_matrix_test.js` emulates **12 profiles** (small/mid/big phones @2-3, iPad Mini/standard/Pro @2 incl. mid-game rotation, laptops @1, Windows 125%/150% fractional DPR, ultrawide) and asserts the sizing invariants for all three games; the invariants are container-relative (window for VS, uno container for UNO, min(600,container) for Gomoku), so any screen size/orientation resolves correctly by construction. Latest run: **MATRIX PASS (12/12)**. Add a profile if a new form factor misbehaves.
 - Possible tuning after playtest: HiDPI 2× cap could be raised if a device still looks soft (one number in `vsDpr()`); slash/arc feel; SFX volume balance; final-boss ×2 damage.
 - TD (Tower Defense) is still in development (gated off live).
 - If any HiDPI transition misbehaves on a real device, run `node vs_transition_repro.js <dpr>` first; log `game.scale.displayScale.y` (must == DPR) and the canvas `getBoundingClientRect` vs its container.

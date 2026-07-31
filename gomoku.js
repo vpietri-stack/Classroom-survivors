@@ -104,6 +104,10 @@ function triggerGomoku(mode = gomokuMode) {
     if (!dragInitialized) {
         initDragAndDrop();
         dragInitialized = true;
+        // Rotation/resize adaptivity: the board redraws (and re-derives its
+        // HiDPI backing from the new clientWidth) as soon as the window size
+        // changes, instead of waiting for the next move.
+        window.addEventListener('resize', () => { if (gomokuGameActive) drawGomokuBoard(); });
     }
 
     gomokuGameActive = true;

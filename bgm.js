@@ -91,6 +91,10 @@
                 .catch(e => { loading = false; console.warn('BGM load failed', e); });
         },
         _play() {
+            // WeChat-iOS: _play() runs after an async fetch+decode (outside any
+            // gesture); if the ctx is still not running, try to wake it — the
+            // global gesture unlock in game.js will finish the job on next tap
+            if (ctx && ctx.state !== 'running') { try { ctx.resume(); } catch (e) { } }
             if (srcNode) { try { srcNode.stop(); } catch (e) { } srcNode = null; }
             srcNode = ctx.createBufferSource();
             srcNode.buffer = buffer;
@@ -121,8 +125,10 @@
         isMuted() { return muted; },
         isPlaying() { return playing; },
         // Wake this module's own AudioContext (iOS suspends contexts when the
-        // tab/app backgrounds; game.js calls this on visibilitychange)
-        resumeCtx() { if (ctx && ctx.state === 'suspended') ctx.resume(); },
+        // tab/app backgrounds; WeChat-iOS can leave it 'interrupted'/'suspended'
+        // until resumed inside a user gesture — game.js calls this from its
+        // global gesture unlock + visibilitychange + WeixinJSBridgeReady)
+        resumeCtx() { if (ctx && ctx.state !== 'running') { try { ctx.resume(); } catch (e) { } } },
         // introspection for tests/diagnostics
         _debug() {
             return {

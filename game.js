@@ -116,6 +116,28 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
+// --- Universal audio unlock (WeChat-iOS especially) --------------------------
+// WeChat on iOS keeps an AudioContext 'suspended'/'interrupted' unless resume()
+// happens inside a DIRECT user gesture — and BGM's context often needs waking
+// AFTER its async MP3 decode (no gesture at that point). Symptom fixed here:
+// SFX audible but MUSIC never plays on iPad WeChat (fine in Safari + Android).
+// Cheap permanent capture listeners: on every tap, wake anything not running.
+function _unlockAllAudio() {
+    if (audioCtx && audioCtx.state !== 'running') { try { audioCtx.resume(); } catch (e) { } }
+    if (window.BGM && typeof BGM.resumeCtx === 'function') BGM.resumeCtx();
+    _ensureIosKeepAlive();
+}
+document.addEventListener('touchend', _unlockAllAudio, true);
+document.addEventListener('pointerdown', _unlockAllAudio, true);
+// WeChat's own "audio is now allowed" moment (fires once its JS bridge is up)
+if (typeof WeixinJSBridge !== 'undefined' && WeixinJSBridge.invoke) {
+    try { WeixinJSBridge.invoke('getNetworkType', {}, _unlockAllAudio); } catch (e) { }
+} else {
+    document.addEventListener('WeixinJSBridgeReady', () => {
+        try { WeixinJSBridge.invoke('getNetworkType', {}, _unlockAllAudio); } catch (e) { _unlockAllAudio(); }
+    }, false);
+}
+
 function initAudio() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();

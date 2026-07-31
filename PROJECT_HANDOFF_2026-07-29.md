@@ -1,6 +1,6 @@
 # PROJECT HANDOFF — Classroom Survivors
 
-_Last updated: 2026-07-29 (night turn: iOS audio-session keep-alive). Branch: `preview`._
+_Last updated: 2026-07-29 (night turn 2: WeChat-iOS BGM unlock). Branch: `preview`._
 
 This is a detailed handoff for the **Classroom Survivors** ESL educational game — an HTML/JS web app for young Chinese English learners. It documents architecture, the games, the recent work, the HiDPI system, the asset pipeline, testing, known pitfalls, and open items. Read the "Golden Rules" first.
 
@@ -106,6 +106,9 @@ Current sampled mappings & volumes: `sword-slash` 0.55 (whiff) / `sword-hit` 0.5
 
 ### iOS audio-session keep-alive (iPad/iPhone silence fix)
 All music/SFX are WebAudio (BGM has its own AudioContext in `bgm.js`; SFX use `audioCtx` in `game.js`). On iOS, WebAudio alone runs in the "ambient" session, which the hardware SILENT SWITCH mutes — symptom: no sound at all on iPad, except music bleeding through for the duration of a TTS `<audio>` clip (media elements use the "playback" session and temporarily promote everything). Fix in `game.js`: `_ensureIosKeepAlive()` (called from `initAudio()`, which always runs inside a user gesture) plays a silent looping `<audio>` element (runtime-generated 0.5s WAV data URI) on iOS-detected devices only (`_isIOS()` covers iPadOS-masquerading-as-Mac via maxTouchPoints) — keeping the session promoted so WebAudio ignores the mute switch. iOS-gated because a looping media element could steal audio focus on Android. Also: a `visibilitychange` handler resumes BOTH AudioContexts (`audioCtx` + `BGM.resumeCtx()`) when the tab/app returns to foreground.
+
+### WeChat-iOS BGM unlock (music silent in iPad WeChat while SFX worked)
+WeChat on iOS keeps an AudioContext `suspended`/`interrupted` unless `resume()` runs inside a DIRECT user gesture. `game.js`'s `audioCtx` gets that via `initAudio()` (called in the tap), but BGM's separate context finishes its async MP3 fetch+decode OUTSIDE any gesture — so on iPad WeChat the music never started (Safari is more lenient; Android WeChat unlocks globally). Fix (`game.js` + `bgm.js`): (1) permanent capture listeners on `touchend` + `pointerdown` call `_unlockAllAudio()` — resumes any non-running context (`audioCtx`, `BGM.resumeCtx()` now handles any `!== 'running'` state incl. `interrupted`) + re-arms the iOS keep-alive; (2) the WeChat bridge moment (`WeixinJSBridgeReady` → `WeixinJSBridge.invoke('getNetworkType')` callback) also triggers the unlock; (3) `BGM._play()` self-heals by attempting a resume right before starting its source.
 
 ---
 
@@ -252,7 +255,7 @@ Key scripts (run with `node <file>`):
 
 ## 9. OPEN ITEMS / NEXT STEPS
 
-- **Playtest status (2026-07-29 night):** PC ok ✅, Android ok ✅, iPad VS/UNO/Gomoku layout ok ✅ (after fixes). iPad AUDIO bug (silence except during TTS) root-caused as the iOS silent-switch/ambient-session issue and **fixed** with the keep-alive (see §4) — awaiting iPad re-test (both WeChat + Safari; also try with the side switch on/off).
+- **Playtest status (2026-07-29 night):** PC ok ✅, Android ok ✅ (incl. WeChat), iPad layout ok ✅, iPad Safari audio ok ✅ after keep-alive. iPad WeChat: SFX ok, **music never played** — root-caused (BGM's separate AudioContext resumed outside a gesture after async decode; WeChat-iOS requires in-gesture resume) and **fixed** with the universal gesture unlock + WeixinJSBridge hook (see §4) — awaiting iPad WeChat re-test.
 - **Device coverage strategy:** real devices can't all be tested — `vs_device_matrix_test.js` emulates **12 profiles** (small/mid/big phones @2-3, iPad Mini/standard/Pro @2 incl. mid-game rotation, laptops @1, Windows 125%/150% fractional DPR, ultrawide) and asserts the sizing invariants for all three games; the invariants are container-relative (window for VS, uno container for UNO, min(600,container) for Gomoku), so any screen size/orientation resolves correctly by construction. Latest run: **MATRIX PASS (12/12)**. Add a profile if a new form factor misbehaves.
 - Possible tuning after playtest: HiDPI 2× cap could be raised if a device still looks soft (one number in `vsDpr()`); slash/arc feel; SFX volume balance; final-boss ×2 damage.
 - TD (Tower Defense) is still in development (gated off live).

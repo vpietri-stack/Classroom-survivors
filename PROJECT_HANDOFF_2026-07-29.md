@@ -1,6 +1,6 @@
 # PROJECT HANDOFF — Classroom Survivors
 
-_Last updated: 2026-07-29 (final turn: 12-profile device matrix + rotation + Gomoku resize listener). Branch: `preview`._
+_Last updated: 2026-07-29 (night turn: iOS audio-session keep-alive). Branch: `preview`._
 
 This is a detailed handoff for the **Classroom Survivors** ESL educational game — an HTML/JS web app for young Chinese English learners. It documents architecture, the games, the recent work, the HiDPI system, the asset pipeline, testing, known pitfalls, and open items. Read the "Golden Rules" first.
 
@@ -103,6 +103,9 @@ Two layers:
 2. **Sampled SFX** — real MP3 recordings under **`sfx/`**, decoded once into WebAudio buffers by `loadSfxSample` / `playSfxSample(path, vol, dur?, throttleMs?)`. `dur` trims a clip (scissors = first 2s); `throttleMs` coalesces crowd events (and suppresses the synth fallback when throttled). All preloaded at VS scene create; synth is the fallback while loading / on failure.
 
 Current sampled mappings & volumes: `sword-slash` 0.55 (whiff) / `sword-hit` 0.55 (connect), `paper_plane_travelling` 0.45 (launch) / `paper_plane_hit` 0.5, `book_travelling` 0.3, `scissors_travelling` 0.18 (2s trim), `tornado` 0.5, `jump_rope_fireball_hit` 0.2, `electric_arc_hit` 0.5, `bat_death` 0.3 (rats share it), `zombie_death` 0.5. "travelling" = one-shot on launch (not a sustained loop).
+
+### iOS audio-session keep-alive (iPad/iPhone silence fix)
+All music/SFX are WebAudio (BGM has its own AudioContext in `bgm.js`; SFX use `audioCtx` in `game.js`). On iOS, WebAudio alone runs in the "ambient" session, which the hardware SILENT SWITCH mutes — symptom: no sound at all on iPad, except music bleeding through for the duration of a TTS `<audio>` clip (media elements use the "playback" session and temporarily promote everything). Fix in `game.js`: `_ensureIosKeepAlive()` (called from `initAudio()`, which always runs inside a user gesture) plays a silent looping `<audio>` element (runtime-generated 0.5s WAV data URI) on iOS-detected devices only (`_isIOS()` covers iPadOS-masquerading-as-Mac via maxTouchPoints) — keeping the session promoted so WebAudio ignores the mute switch. iOS-gated because a looping media element could steal audio focus on Android. Also: a `visibilitychange` handler resumes BOTH AudioContexts (`audioCtx` + `BGM.resumeCtx()`) when the tab/app returns to foreground.
 
 ---
 
@@ -249,7 +252,7 @@ Key scripts (run with `node <file>`):
 
 ## 9. OPEN ITEMS / NEXT STEPS
 
-- **Playtest status (2026-07-29 late):** PC ok ✅, Android ok ✅, iPad VS+UNO ok ✅; iPad Gomoku was "too zoomed in" — root-caused (display size fed back from the DPR-inflated backing via `max-w-full h-auto`) and **fixed** (explicit CSS pin, see §6 Gomoku). Awaiting iPad re-test.
+- **Playtest status (2026-07-29 night):** PC ok ✅, Android ok ✅, iPad VS/UNO/Gomoku layout ok ✅ (after fixes). iPad AUDIO bug (silence except during TTS) root-caused as the iOS silent-switch/ambient-session issue and **fixed** with the keep-alive (see §4) — awaiting iPad re-test (both WeChat + Safari; also try with the side switch on/off).
 - **Device coverage strategy:** real devices can't all be tested — `vs_device_matrix_test.js` emulates **12 profiles** (small/mid/big phones @2-3, iPad Mini/standard/Pro @2 incl. mid-game rotation, laptops @1, Windows 125%/150% fractional DPR, ultrawide) and asserts the sizing invariants for all three games; the invariants are container-relative (window for VS, uno container for UNO, min(600,container) for Gomoku), so any screen size/orientation resolves correctly by construction. Latest run: **MATRIX PASS (12/12)**. Add a profile if a new form factor misbehaves.
 - Possible tuning after playtest: HiDPI 2× cap could be raised if a device still looks soft (one number in `vsDpr()`); slash/arc feel; SFX volume balance; final-boss ×2 damage.
 - TD (Tower Defense) is still in development (gated off live).

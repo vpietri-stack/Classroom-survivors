@@ -120,6 +120,9 @@
         },
         isMuted() { return muted; },
         isPlaying() { return playing; },
+        // Wake this module's own AudioContext (iOS suspends contexts when the
+        // tab/app backgrounds; game.js calls this on visibilitychange)
+        resumeCtx() { if (ctx && ctx.state === 'suspended') ctx.resume(); },
         // introspection for tests/diagnostics
         _debug() {
             return {

@@ -63,9 +63,63 @@ function showVocabImage(elementId, word) {
 
 // --- AUDIO SYSTEM ---
 let audioCtx;
+
+// --- iOS audio-session keep-alive -------------------------------------------
+// On iPad/iPhone, WebAudio alone runs in the "ambient" audio session, which the
+// hardware SILENT SWITCH mutes — so all our music/SFX (BGM + synths are pure
+// WebAudio) were inaudible, EXCEPT while an HTML5 <audio> (the Youdao TTS MP3)
+// was playing: media elements use the "playback" session, and while one plays
+// iOS promotes the whole session, letting the music bleed through for a second.
+// Fix: keep a silent, looping <audio> element playing (started inside a user
+// gesture) so the session stays promoted and WebAudio ignores the mute switch.
+// iOS-only: on Android/desktop a looping media element could steal audio focus
+// (e.g. pause the user's own music), so we gate it.
+let _iosKeepAlive = null;
+function _isIOS() {
+    const ua = navigator.userAgent || '';
+    // iPadOS 13+ masquerades as Mac ("MacIntel") but has multi-touch
+    return /iPad|iPhone|iPod/.test(ua) ||
+        (navigator.platform === 'MacIntel' && (navigator.maxTouchPoints || 0) > 1);
+}
+function _silentWavUri() {
+    // 0.5s of 8kHz mono silence, built at runtime (no asset, ~4KB base64)
+    const rate = 8000, n = rate / 2, size = 44 + n * 2;
+    const b = new ArrayBuffer(size), v = new DataView(b);
+    const ws = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    ws(0, 'RIFF'); v.setUint32(4, size - 8, true); ws(8, 'WAVEfmt ');
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true);
+    v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+    ws(36, 'data'); v.setUint32(40, n * 2, true); // samples stay zero = silence
+    let bin = ''; const u8 = new Uint8Array(b);
+    for (let i = 0; i < u8.length; i++) bin += String.fromCharCode(u8[i]);
+    return 'data:audio/wav;base64,' + btoa(bin);
+}
+function _ensureIosKeepAlive() {
+    if (!_isIOS() || _iosKeepAlive) return;
+    try {
+        const a = document.createElement('audio');
+        a.src = _silentWavUri();
+        a.loop = true;
+        a.setAttribute('playsinline', '');
+        a.volume = 0.01; // effectively silent; iOS just needs it PLAYING
+        const pr = a.play();
+        if (pr && pr.catch) pr.catch(() => { _iosKeepAlive = null; }); // retry next gesture
+        _iosKeepAlive = a;
+    } catch (e) { _iosKeepAlive = null; }
+}
+// iOS also suspends AudioContexts when the tab/app backgrounds — resume on return
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        if (window.BGM && typeof BGM.resumeCtx === 'function') BGM.resumeCtx();
+    }
+});
+
 function initAudio() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
+    _ensureIosKeepAlive(); // initAudio is always called from a user gesture
 }
 const osc = (type, freq, dur, vol = 0.1) => {
     if (!audioCtx) return;

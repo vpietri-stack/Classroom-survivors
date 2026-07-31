@@ -1,6 +1,6 @@
 # PROJECT HANDOFF — Classroom Survivors
 
-_Last updated: 2026-07-29 (night turn 6: VS promo made per-user/cross-device). Branch: `preview`._
+_Last updated: 2026-07-29 (SHIPPED TO PRODUCTION — full preview→origin/main release). Branch: `preview`._
 
 This is a detailed handoff for the **Classroom Survivors** ESL educational game — an HTML/JS web app for young Chinese English learners. It documents architecture, the games, the recent work, the HiDPI system, the asset pipeline, testing, known pitfalls, and open items. Read the "Golden Rules" first.
 
@@ -258,6 +258,9 @@ Key scripts (run with `node <file>`):
 ---
 
 ## 9. OPEN ITEMS / NEXT STEPS
+
+- **🚀 PRODUCTION RELEASE DONE (2026-07-29, commit `edf0577`).** The full preview line (VS revamp + character select + Ruler/Jump Rope + HiDPI on all 3 games + iOS/WeChat audio fixes + split SFX/music mute + HUD-timer fix + new intro + one-time VS promo) is now LIVE at https://vpietri-stack.github.io/Classroom-survivors/. This **reversed the old “VS must never go to origin/main” rule** (VS was in-dev then; user explicitly shipped it). Method: branches had DIVERGED — origin/main held 3 production-only commits NOT on preview (`8c87a58` speech PASS-screen UI, `1443d33` OS-census telemetry+`api/analyze_devices.js`, `5a8616b` scramble variant) plus cherry-pick duplicates of preview fixes. A force-push would have DESTROYED those 3, so instead: `git checkout main; git merge preview` (1 trivial conflict = game.js cache-bust string, kept preview's), verified prod-only content preserved + full suite green (manifest, 12×3 device matrix, input+uno, timer, promo, boss, charselect), pushed origin/main, then fast-forwarded preview to match. **Both branches are now identical at `edf0577` — divergence resolved, future deploys are clean.** SCM memories still say “VS excluded / cherry-pick only” — those are now OBSOLETE; the project ships full preview→origin/main.
+- **BACKEND still pending deploy:** the `updateStudent.js` `vsPromoSeen` whitelist addition ships with the Azure Functions deploy (separate from GitHub Pages). Until deployed, the VS promo hides correctly per-session but the cross-device persistence POST is a no-op. `api/analyze_devices.js` (telemetry report) is already in the tree.
 
 - **VS re-engagement promo (once per USER, cross-device):** on the game-selection menu, a pulsing gold badge “✨ 全新升级版！快来试试吧！ ✨” (`#vsPromoBadge`) sits above a gold-glowing VS button (`#vsGameBtn` + `.vs-promo-glow`). `applyVsPromo()` in game.js shows it the FIRST time the menu appears for that student then clears it on every later visit. **Persistence is PER-USER** via a server-side `vsPromoSeen` field on the student record (added to updateStudent.js allowedFields; round-trips through `publicUser` on login + `saveActiveUserToCache`), so it follows the child across devices — `_vsPromoSetSeen()` sets it in memory + caches + fires a fire-and-forget `POST /updateStudent {vsPromoSeen:true}`. Anonymous / test-mode play (no `authActiveUser.id`) falls back to a `localStorage.vsPromoSeen` device flag. Called from `showGameSelection()` + the 3 return-from-game paths (VS exit / exitUnoGame / exitGomokuGame). NOTE: the updateStudent.js change is BACKEND — it ships with the Azure Functions deploy, not the GitHub Pages preview. Verify: `node vs_promo_test.js` (logged-in show-once + POST, cross-device follows account, anon localStorage fallback).
 

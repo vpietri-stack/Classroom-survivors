@@ -4009,6 +4009,7 @@ function exitVampireSurvivors() {
     if (vsVictory) vsVictory.classList.add('hidden');
     activeGameMode = null;
     document.getElementById('gameSelectionOverlay').classList.remove('hidden');
+    if (typeof applyVsPromo === 'function') applyVsPromo();
 }
 
 // Victory menu buttons (final boss beaten) route into the running scene

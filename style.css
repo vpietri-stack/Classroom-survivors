@@ -1543,3 +1543,26 @@ body.kid-friendly .translation-hint {
     box-shadow: 0 0 18px rgba(250, 204, 21, 0.45);
     background: rgba(60, 45, 0, 0.45);
 }
+
+/* --- VS 'new version' promo (game-selection menu, shown once per device) --- */
+.vs-promo-badge {
+    text-align: center;
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: #fff59d;
+    text-shadow: 0 0 8px rgba(255, 213, 79, 0.8);
+    margin-bottom: -8px;
+    animation: vsPromoPulse 1.1s ease-in-out infinite;
+}
+@keyframes vsPromoPulse {
+    0%, 100% { transform: scale(1); opacity: 0.85; }
+    50% { transform: scale(1.06); opacity: 1; }
+}
+.vs-promo-glow {
+    animation: vsPromoGlow 1.3s ease-in-out infinite;
+    outline: 3px solid #ffd54f;
+}
+@keyframes vsPromoGlow {
+    0%, 100% { box-shadow: 0 0 10px 2px rgba(255, 213, 79, 0.55); }
+    50% { box-shadow: 0 0 26px 8px rgba(255, 213, 79, 0.95); }
+}

@@ -748,6 +748,27 @@ function updateDOMHUD(stats, time, kills) {
 }
 
 
+// "New improved version" promo: highlight the VS button + show a badge to
+// nudge kids who haven't tried the revamped VS. Shown ONCE per device — the
+// FIRST time the game-selection menu appears; any later visit clears it.
+// localStorage flag 'vsPromoSeen' persists the "already nudged" state. Called
+// from EVERY path that reveals the menu (showGameSelection + the return-from-
+// game paths that un-hide the overlay directly).
+function applyVsPromo() {
+    const badge = document.getElementById('vsPromoBadge');
+    const btn = document.getElementById('vsGameBtn');
+    let seen = false;
+    try { seen = localStorage.getItem('vsPromoSeen') === '1'; } catch (e) { }
+    if (!seen) {
+        if (badge) badge.classList.remove('hidden');
+        if (btn) btn.classList.add('vs-promo-glow');
+        try { localStorage.setItem('vsPromoSeen', '1'); } catch (e) { }
+    } else {
+        if (badge) badge.classList.add('hidden');
+        if (btn) btn.classList.remove('vs-promo-glow');
+    }
+}
+
 function showGameSelection() {
     // Reset all screens
     const screens = ['startScreen', 'gomokuScreen', 'gomokuGameOverScreen', 'gameOverScreen', 'gameIntroOverlay', 'vsCharSelect', 'studentManagerOverlay', 'studyModeOverlay', 'unoScreen', 'unoGameOverScreen', 'spellingGame', 'wordRecGame', 'sentenceMatchGame', 'levelUpMenu'];
@@ -787,6 +808,8 @@ function showGameSelection() {
     activeGameMode = null;
 
     document.getElementById('gameSelectionOverlay').classList.remove('hidden');
+
+    applyVsPromo();
 
     // Gate the Tower Defense entry on sites where it isn't released yet (live).
     // Preview / localhost keep it selectable. (TD_ENABLED is defined in config.js,

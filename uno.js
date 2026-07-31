@@ -1813,4 +1813,5 @@ function exitUnoGame() {
     }
     document.getElementById('unoScreen').classList.add('hidden');
     document.getElementById('gameSelectionOverlay').classList.remove('hidden');
+    if (typeof applyVsPromo === 'function') applyVsPromo();
 }

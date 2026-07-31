@@ -1,6 +1,6 @@
 # PROJECT HANDOFF — Classroom Survivors
 
-_Last updated: 2026-07-29 (night turn 4: HUD timer fix + new intro text — pre-live polish). Branch: `preview`._
+_Last updated: 2026-07-29 (night turn 5: one-time VS “new version” promo). Branch: `preview`._
 
 This is a detailed handoff for the **Classroom Survivors** ESL educational game — an HTML/JS web app for young Chinese English learners. It documents architecture, the games, the recent work, the HiDPI system, the asset pipeline, testing, known pitfalls, and open items. Read the "Golden Rules" first.
 
@@ -258,6 +258,8 @@ Key scripts (run with `node <file>`):
 ---
 
 ## 9. OPEN ITEMS / NEXT STEPS
+
+- **VS re-engagement promo (once per device):** on the game-selection menu, a pulsing gold badge “✨ 全新升级版！快来试试吧！ ✨” (`#vsPromoBadge`) sits above a gold-glowing VS button (`#vsGameBtn` + `.vs-promo-glow`). `applyVsPromo()` in game.js shows it the FIRST time the menu appears then sets `localStorage.vsPromoSeen='1'`; every later menu visit clears it. Called from `showGameSelection()` AND the 3 return-from-game paths that un-hide the overlay directly (vampire_survivors exit, uno.js `exitUnoGame`, gomoku.js `exitGomokuGame`). Verified: first visit badge+glow+flag set, second visit both cleared.
 
 - **Playtest status (2026-07-29 night):** PC ✅, Android ✅ (incl. WeChat), iPad layout ✅, iPad audio ✅ (Safari + WeChat — user-confirmed). Pre-live polish done: split SFX/music mute buttons; HUD timer no longer drains during questions; intro (“How to play”) rewritten in simple 简体中文 (controls / stars+ESL / walking-puzzle spelling / 300-kill bosses / win = survive 10min + beat final boss, 答题时计时暂停). **Next: ship to live (origin/main) — remember the cherry-pick/exclusion policies in §scm before doing so.**
 - **Device coverage strategy:** real devices can't all be tested — `vs_device_matrix_test.js` emulates **12 profiles** (small/mid/big phones @2-3, iPad Mini/standard/Pro @2 incl. mid-game rotation, laptops @1, Windows 125%/150% fractional DPR, ultrawide) and asserts the sizing invariants for all three games; the invariants are container-relative (window for VS, uno container for UNO, min(600,container) for Gomoku), so any screen size/orientation resolves correctly by construction. Latest run: **MATRIX PASS (12/12)**. Add a profile if a new form factor misbehaves.

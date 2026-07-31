@@ -771,6 +771,7 @@ function exitGomokuGame() {
     if (gomokuSpeedInterval) clearInterval(gomokuSpeedInterval);
     document.getElementById('gomokuScreen').classList.add('hidden');
     document.getElementById('gameSelectionOverlay').classList.remove('hidden');
+    if (typeof applyVsPromo === 'function') applyVsPromo();
 }
 
 

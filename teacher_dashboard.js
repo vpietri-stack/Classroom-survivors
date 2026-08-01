@@ -248,7 +248,19 @@ function exerciseTypeLabel(type) {
         'sentenceScramble': 'Sentence Scramble',
         'sentenceMatch': 'Sentence Match'
     };
-    return map[type] || type;
+    if (map[type]) return map[type];
+    // Speech telemetry types: speech_attempt, speech_error, etc.
+    if (type && type.startsWith('speech_')) return 'Speech (' + type.slice(7) + ')';
+    return type || '—';
+}
+
+/** Safely convert itemDetails (string or object) to a display string. */
+function formatItemDetails(details) {
+    if (!details) return '—';
+    if (typeof details === 'string') return details;
+    // Object (e.g. speech telemetry payload)
+    if (details.target) return details.target;
+    try { return JSON.stringify(details); } catch (_) { return '—'; }
 }
 
 function sessionTypeLabel(sessionType) {
@@ -274,6 +286,11 @@ function getSessionDuration(session) {
     // Game sessions: totalTimeSec
     if (session.data?.totalTimeSec) {
         return session.data.totalTimeSec * 1000;
+    }
+    // Classroom Survivors: survivalTimeSec + minigameTimeSec
+    if (session.sessionType === 'vampireSurvivors' || session.sessionType === 'vampire') {
+        const sec = (session.data?.survivalTimeSec || 0) + (session.data?.minigameTimeSec || 0);
+        return sec * 1000;
     }
     return 0;
 }
@@ -313,6 +330,12 @@ function getSessionResult(session) {
         if (winner === 0) {
             return `<span class="badge badge-result-win">Win</span>`;
         } else if (winner !== undefined) {
+            return `<span class="badge badge-result-loss">Loss</span>`;
+        }
+    } else if (session.sessionType === 'vampireSurvivors' || session.sessionType === 'vampire') {
+        if (session.data?.won) {
+            return `<span class="badge badge-result-win">Win</span>`;
+        } else {
             return `<span class="badge badge-result-loss">Loss</span>`;
         }
     }
@@ -596,9 +619,11 @@ function openSessionDetail(sessionIdx) {
             ? `<span class="badge badge-attempts-high">${ex.attempts}</span>`
             : `<span class="badge badge-attempts-1">${ex.attempts}</span>`;
 
+        const detailStr = formatItemDetails(ex.itemDetails);
+
         return `<tr>
             <td><span class="badge badge-type">${exerciseTypeLabel(ex.exerciseType)}</span></td>
-            <td><span class="item-detail-text" title="${(ex.itemDetails || '—').replace(/"/g, '&quot;')}">${ex.itemDetails || '—'}</span></td>
+            <td><span class="item-detail-text" title="${detailStr.replace(/"/g, '&quot;')}">${detailStr}</span></td>
             <td>${attBadge}</td>
         </tr>`;
     }).join('');
@@ -693,9 +718,11 @@ function applyExerciseFilters() {
             ? `style="cursor:pointer" onclick="showSRPopup(${JSON.stringify(JSON.stringify(srKey))})" title="Click to view SR state"`
             : '';
 
+        const detailStr = formatItemDetails(ex.itemDetails);
+
         return `<tr ${srClickAttr}>
             <td><span class="badge badge-type">${exerciseTypeLabel(ex.exerciseType)}</span></td>
-            <td><span class="item-detail-text" title="${(ex.itemDetails || '—').replace(/"/g, '&quot;')}">${ex.itemDetails || '—'}</span>${srKey ? ' <i class="fas fa-brain" style="color:var(--dash-primary);font-size:0.7rem;opacity:0.7"></i>' : ''}</td>
+            <td><span class="item-detail-text" title="${detailStr.replace(/"/g, '&quot;')}">${detailStr}</span>${srKey ? ' <i class="fas fa-brain" style="color:var(--dash-primary);font-size:0.7rem;opacity:0.7"></i>' : ''}</td>
             <td>${attBadge}</td>
             <td>${modeBadge}</td>
             <td style="color: var(--dash-text-dim); font-size: 0.78rem;">${formatTimestamp(ex.timestamp)}</td>

@@ -287,10 +287,9 @@ function getSessionDuration(session) {
     if (session.data?.totalTimeSec) {
         return session.data.totalTimeSec * 1000;
     }
-    // Classroom Survivors: survivalTimeSec + minigameTimeSec
+    // Classroom Survivors: survival time only (excludes question/minigame time)
     if (session.sessionType === 'vampireSurvivors' || session.sessionType === 'vampire') {
-        const sec = (session.data?.survivalTimeSec || 0) + (session.data?.minigameTimeSec || 0);
-        return sec * 1000;
+        return (session.data?.survivalTimeSec || 0) * 1000;
     }
     return 0;
 }

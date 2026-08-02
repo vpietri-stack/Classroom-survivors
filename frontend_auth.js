@@ -1344,12 +1344,13 @@ const TWO_MIN_RULE_START = new Date('2026-07-27T00:00:00+08:00').getTime();
 function isUncountedShortLoss(e) {
     if (e.type !== 'session' || !e.data) return false;
     if (e.sessionType === 'study') return false; // study sessions always count
-    // Classroom Survivors: use total time (survival + minigame) for the 2-min
-    // rule. The game's `ignored` flag is based on survival-only time which
-    // unfairly excludes legitimate question-answering time.
+    // Classroom Survivors: only survival (fighting) time counts for the 2-min
+    // rule. Question/minigame time is excluded so students can't idle on a
+    // question overlay to rack up "session time".
     if (e.sessionType === 'vampireSurvivors' || e.sessionType === 'vampire') {
+        if (e.data.won) return false; // wins always count (boss requires 10 min)
         if (new Date(e.timestamp).getTime() < TWO_MIN_RULE_START) return false;
-        const sec = (e.data.survivalTimeSec || 0) + (e.data.minigameTimeSec || 0);
+        const sec = e.data.survivalTimeSec || 0;
         return sec < TARGET_MIN_LOSS_SEC;
     }
     if (e.data.ignored === true) return true;    // flagged by the game itself (uno/gomoku)

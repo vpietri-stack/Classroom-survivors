@@ -1342,7 +1342,9 @@ class MainScene extends Phaser.Scene {
     }
 
     getDifficulty() {
-        const secondsSinceStart = (Date.now() - this.startTime) / 1000;
+        // Use accumulatedTime (survival/HUD time) so difficulty does NOT scale
+        // while the student is answering questions in a minigame overlay.
+        const secondsSinceStart = this.accumulatedTime / 1000;
 
         if (secondsSinceStart <= 300) {
             // First 5 minutes: gentle linear growth from 1.0 to 2.0

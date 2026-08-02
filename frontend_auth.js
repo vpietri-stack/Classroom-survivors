@@ -1344,7 +1344,15 @@ const TWO_MIN_RULE_START = new Date('2026-07-27T00:00:00+08:00').getTime();
 function isUncountedShortLoss(e) {
     if (e.type !== 'session' || !e.data) return false;
     if (e.sessionType === 'study') return false; // study sessions always count
-    if (e.data.ignored === true) return true;    // flagged by the game itself
+    // Classroom Survivors: use total time (survival + minigame) for the 2-min
+    // rule. The game's `ignored` flag is based on survival-only time which
+    // unfairly excludes legitimate question-answering time.
+    if (e.sessionType === 'vampireSurvivors' || e.sessionType === 'vampire') {
+        if (new Date(e.timestamp).getTime() < TWO_MIN_RULE_START) return false;
+        const sec = (e.data.survivalTimeSec || 0) + (e.data.minigameTimeSec || 0);
+        return sec < TARGET_MIN_LOSS_SEC;
+    }
+    if (e.data.ignored === true) return true;    // flagged by the game itself (uno/gomoku)
     if (new Date(e.timestamp).getTime() < TWO_MIN_RULE_START) return false;
     let sec = null, loss = false;
     if (e.sessionType === 'gomoku') {
@@ -1353,10 +1361,6 @@ function isUncountedShortLoss(e) {
     } else if (e.sessionType === 'uno') {
         sec = e.data.totalTimeSec;
         loss = e.data.winner !== 0;
-    } else if (e.sessionType === 'vampireSurvivors' || e.sessionType === 'vampire') {
-        // Survival mode always ends in death; only played time matters.
-        sec = (e.data.survivalTimeSec || 0) + (e.data.minigameTimeSec || 0);
-        loss = true;
     }
     return loss && typeof sec === 'number' && sec < TARGET_MIN_LOSS_SEC;
 }

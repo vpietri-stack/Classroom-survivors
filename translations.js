@@ -4721,6 +4721,23 @@ const LOCAL_TRANSLATIONS = {
     "In China, people drive on the right side of the road.": "在中国，人们靠路的右侧行驶。",
     "In the UK, people drive on the left side of the road.": "在英国，人们靠路的左侧行驶。",
 
+    // --- PU3 Unit 8 Page 95 ---
+
+    "I'm going to": "我将",
+    "You're going to": "你将",
+    "He's going to": "他将",
+    "She's going to": "她将",
+    "We're going to": "我们将",
+    "They're going to": "他们将",
+    "It's going to": "它将",
+
+    "I think it's going to rain.": "我认为要下雨了。",
+    "We're going to play football.": "我们要去踢足球。",
+    "He isn't going to catch the bus.": "他不会赶上这趟公共汽车。",
+    "What are you going to do tomorrow?": "你明天打算做什么？",
+    "They're going to go for a swim.": "他们要去游泳。",
+    "Is she going to have breakfast?": "她要吃早餐吗？",
+
     // --- PU1 Content Check Additions ---
     "I - my": "我 - 我的",
     "you - your": "你 - 你的",

@@ -784,6 +784,27 @@ TEACHING_CONTENT["PU3"] = {
                 { a: "In China, people drive", b: "on the right side of the road." },
                 { a: "In the UK, people drive", b: "on the left side of the road." }
             ]
+        },
+        "97": {
+            vocab: [
+                "I'm going to", "You're going to", "He's going to", "She's going to", "We're going to", "They're going to", "It's going to"
+            ],
+            sentences: [
+                "I think it's going to rain.",
+                "We're going to play football.",
+                "He isn't going to catch the bus.",
+                "What are you going to do tomorrow?",
+                "They're going to go for a swim.",
+                "Is she going to have breakfast?"
+            ],
+            sentencePairs: [
+                { a: "Look at those black clouds!", b: "I think it's going to rain!" },
+                { a: "He's running very fast! He's", b: "going to catch the bus!" },
+                { a: "I'm hungry. I'm", b: "going to have lunch" },
+                { a: "Look at the clock!", b: "She's going to be late!" },
+                { a: "It's hot today, so", b: "we're going to go for a swim." },
+                { a: "What are they going to do tomorrow?", b: "They're going to play football." }
+            ]
         }
     }
 };
@@ -797,5 +818,5 @@ AVAILABLE_CONTENT["PU3"] = {
     "5": [57, 59, 66],
     "6": [69, 71, 73],
     "7": [83, 85, 87],
-    "8": [95]
+    "8": [95, 97]
 };

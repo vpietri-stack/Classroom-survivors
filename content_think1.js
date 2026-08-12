@@ -525,6 +525,89 @@ TEACHING_CONTENT["Think1"] = {
                 { a: "Nevermind,", b: "I can do it myself." }
             ]
         }
+    },
+    "8": {
+        "81": {
+            vocab: [
+                'play tennis', 'play rugby', 'play volleyball', 'play golf', 'play basketball', 'play badminton', 'play football', 'play baseball', 'play table tennis', 'play ping-pong',
+                'go skateboarding', 'go skating', 'go cycling', 'go diving', 'go horse racing', 'go swimming', 'go skiing', 'go snowboarding', 'go ice skating', 'go surfing', 'go windsurfing', 'go sailing',
+                'do gymnastics', 'do athletics', 'do karate', 'do judo', 'do aerobics', 'do yoga', 'do boxing', 'do kung-fu', 'do weightlifting', 'do exercise', 'do rock climbing'
+            ],
+            sentences: [
+                "She wasn't playing tennis.",
+                "We were playing rugby.",
+                "I wasn't playing volleyball.",
+                "I was playing football.",
+                "We weren't playing badminton.",
+                "They weren't doing gymnastics.",
+                "They were cycling.",
+                "We weren't going diving.",
+                "I wasn't skateboarding.",
+                "They were horse racing.",
+                "I wasn't ice skating.",
+                "I was snowboarding.",
+                "You weren't skiing.",
+                "You were windsurfing.",
+                "We were sailing.",
+                "I wasn't doing gymnastics.",
+                "They were doing athletics.",
+                "He wasn't doing karate.",
+                "He was doing judo.",
+                "I wasn't doing aerobics.",
+                "We were doing yoga.",
+                "They weren't doing boxing.",
+                "I wasn't doing kung-fu.",
+                "She wasn't doing weight lifting.",
+                "They weren't doing exercise.",
+                "She wasn't doing rock climbing.",
+                "He plays football, he's a footballer.",
+                "She plays golf, he's a golfer",
+                "They play basketball, they're basketball players",
+                "I play table tennis, I'm a table tennis player",
+                "She plays tennis, she's a tennis player",
+                "He plays rugby, he's a rugby player",
+                "They play volleyball, they're volleyball players",
+                "I play baseball, I'm a baseball player",
+                "She plays badminton, she's a badminton player",
+                "They play ping-pong, they're ping-pong players",
+                "I skateboard, I'm a skateboarder",
+                "She skates, she's a skater",
+                "They go cycling, they're cyclists",
+                "I go diving, I'm a diver",
+                "She rides horses, she's a horse racer",
+                "They go swimming, they're swimmers",
+                "I ski, I'm a skier",
+                "She snowboard, she's a snowboarder",
+                "They go ice skating, they're ice skaters",
+                "I surf, I'm a surfer",
+                "She goes windsurfing, she's a windsurfer",
+                "They sail boats, they're sailors",
+                "I do gymnastics, I'm a gymnast",
+                "She does athletics, she's an athlete",
+                "They do karate, they're karateka",
+                "I do judo, I'm a judoka",
+                "They do yoga, they're yogis",
+                "I do boxing, I'm a boxer",
+                "They do weightlifting, they're weightlifters",
+                "She does rock climbing, she's a climber"
+            ],
+            sentencePairs: [
+                { a: "While the teacher was talking", b: "I put my hand up to ask a question." },
+                { a: "Evan was making an omelette", b: "when he burned his hand on the pan." },
+                { a: "I was skateboarding", b: "when I fell over and hurt my knee." },
+                { a: "The boys were fighting", b: "when their mum walked into the room." },
+                { a: "While I was reading in the bath,", b: "I dropped my book in the water." },
+                { a: "She was brushing her teeth", b: "but the toothpaste fell on the floor." },
+                { a: "While I was trying to fall asleep,", b: "the dog started barking and woke me up." },
+                { a: "She was eating an apple", b: "when she bit her tongue." },
+                { a: "We were driving in the car", b: "when we saw Robin on his bike." },
+                { a: "While I was waiting at the bus stop,", b: "I realised I didn't have any money for the ticket." },
+                { a: "Olivia was doing the Maths test", b: "when her phone rang." },
+                { a: "While Pablo was swimming in the sea,", b: "he saw a dolphin." },
+                { a: "Megan was windsurfing,", b: "when a big wave knocked her over." },
+                { a: "Sasha and Eva got lost", b: "while they were hiking in the mountains." }
+            ]
+        }
     }
 };
 
@@ -536,5 +619,6 @@ AVAILABLE_CONTENT["Think1"] = {
     "4": [46],
     "5": [55],
     "6": [58, 64],
-    "7": [66, 68, 69, 70, 71, 72]
+    "7": [66, 68, 69, 70, 71, 72],
+    "8": [81]
 };

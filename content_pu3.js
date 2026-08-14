@@ -805,6 +805,35 @@ TEACHING_CONTENT["PU3"] = {
                 { a: "It's hot today, so", b: "we're going to go for a swim." },
                 { a: "What are they going to do tomorrow?", b: "They're going to play football." }
             ]
+        },
+        "98": {
+            vocab: [
+                "airport", "buildings", "bank", "money", "post office", "stamps", "chemist's", "theatre", "museum", "university", "hotel", "restaurant"
+            ],
+            sentences: [
+                "We're going to go to the aiport to catch a plane.",
+                "There are many tall buildings in the city centre.",
+                "My mum is going to the bank to get some money.",
+                "My dad is going to the post office to buy some stamps.",
+                "I'm going to the chemist's to get some medicine.",
+                "Let's go to the theatre tonight to see a play.",
+                "We're going to the art museum tomorrow.",
+                "My big brother is going to start university in September.",
+                "We're going to stay at a hotel in the north of the city.",
+                "They're going to eat at a Chinese restaurant for dinner."
+            ],
+            sentencePairs: [
+                { a: "We go to the aiport ", b: "to catch a plane." },
+                { a: "Look at those tall buildings ", b: "in the city centre." },
+                { a: "My mum is going to the bank ", b: "to get some money." },
+                { a: "My dad is going to the post office ", b: "to buy some stamps." },
+                { a: "I'm going to the chemist's ", b: "to get some medicine." },
+                { a: "Let's go to the theatre ", b: "tonight to see a play." },
+                { a: "We're going to the museum tomorrow, ", b: "to see some art." },
+                { a: "My big brother is going to study engineering ", b: "at Tsinghua university." },
+                { a: "We're going to stay at a hotel near the beach", b: "during our holiday." },
+                { a: "They're going to eat at a ", b: "Chinese restaurant for dinner." }
+            ]
         }
     }
 };
@@ -818,5 +847,5 @@ AVAILABLE_CONTENT["PU3"] = {
     "5": [57, 59, 66],
     "6": [69, 71, 73],
     "7": [83, 85, 87],
-    "8": [95, 97]
+    "8": [95, 97, 98]
 };

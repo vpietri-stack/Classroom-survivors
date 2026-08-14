@@ -4813,7 +4813,7 @@ const LOCAL_TRANSLATIONS = {
     "In China, people drive on the right side of the road.": "在中国，人们靠路的右侧行驶。",
     "In the UK, people drive on the left side of the road.": "在英国，人们靠路的左侧行驶。",
 
-    // --- PU3 Unit 8 Page 95 ---
+    // --- PU3 Unit 8 Page 97 ---
 
     "I'm going to": "我将",
     "You're going to": "你将",
@@ -4829,6 +4829,32 @@ const LOCAL_TRANSLATIONS = {
     "What are you going to do tomorrow?": "你明天打算做什么？",
     "They're going to go for a swim.": "他们要去游泳。",
     "Is she going to have breakfast?": "她要吃早餐吗？",
+
+    // --- PU3 Unit 8 Page 98 ---
+
+    "airport": "机场",
+    "buildings": "建筑物",
+    "bank": "银行",
+    "money": "钱",
+    "post office": "邮局",
+    "stamps": "邮票",
+    "chemist's": "药店",
+    "theatre": "剧院",
+    "museum": "博物馆",
+    "university": "大学",
+    "hotel": "酒店",
+    "restaurant": "餐厅",
+
+    "We're going to go to the aiport to catch a plane.": "我们要去机场赶飞机。",
+    "There are many tall buildings in the city centre.": "市中心有很多高楼大厦。",
+    "My mum is going to the bank to get some money.": "我妈妈要去银行取钱。",
+    "My dad is going to the post office to buy some stamps.": "我爸爸要去邮局买邮票。",
+    "I'm going to the chemist's to get some medicine.": "我要去药店拿药。",
+    "Let's go to the theatre tonight to see a play.": "今晚我们去看戏吧。",
+    "We're going to the art museum tomorrow.": "我们明天要去艺术博物馆。",
+    "My big brother is going to start university in September.": "我哥哥九月就要上大学了。",
+    "We're going to stay at a hotel in the north of the city.": "我们要住在市北的一家酒店。",
+    "They're going to eat at a Chinese restaurant for dinner.": "他们晚上要去中餐馆吃饭。",
 
     // --- PU1 Content Check Additions ---
     "I - my": "我 - 我的",

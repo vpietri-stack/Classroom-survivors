@@ -496,6 +496,33 @@ TEACHING_CONTENT["Think0"] = {
                 { a: "Grandma and Grandpa have got a", b: "house. It's their house." },
                 { a: "You've got a", b: "doll. It's your doll." },
             ]
+        },
+        "35": {
+            vocab: [
+                "this", "that", "these", "those",
+                "bathroom", "bedroom", "living room", "garden", "kitchen", "garage", "hall",
+                "bed", "bath", "sofa", "armchair", "toilet", "fridge", "cooker",
+
+            ],
+            sentences: [
+                "Please put this sofa in the living room.",
+                "Please put those oranges in the fridge.",
+                "Please put this bed in the bedroom.",
+                "Please put that toilet in the bathroom.",
+                "Please put these armchairs in the living room.",
+                "Please put those shoes in the hall.",
+                "Please put that cooker in the kitchen."
+            ],
+            sentencePairs: [
+                { a: "Please put this sofa", b: "in the living room." },
+                { a: "Please put that cooker", b: "in the kitchen." },
+                { a: "Please put this", b: "bed in the bedroom." },
+                { a: "Please put that toilet", b: "in the bathroom." },
+                { a: "Please put these", b: "armchairs in the living room." },
+                { a: "Please put those shoes", b: "in the hall." },
+                { a: "Please put those oranges", b: "in the fridge." },
+                { a: "Please put that cooker", b: "in the kitchen." },
+            ]
         }
     }
 };
@@ -504,5 +531,5 @@ AVAILABLE_CONTENT["Think0"] = {
     "0": [11],
     "1": [15, 17, 18],
     "2": [23, 25],
-    "3": [30, 33]
+    "3": [30, 33, 35]
 };

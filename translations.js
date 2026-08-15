@@ -4856,6 +4856,24 @@ const LOCAL_TRANSLATIONS = {
     "We're going to stay at a hotel in the north of the city.": "我们要住在市北的一家酒店。",
     "They're going to eat at a Chinese restaurant for dinner.": "他们晚上要去中餐馆吃饭。",
 
+    // --- PU3 Unit 8 Page 99 ---
+    "across": "穿过 (外面）",
+    "into": "进入",
+    "out of": "出来",
+    "over": "越过",
+    "past": "经过",
+    "through": "穿过 (里面）",
+    "round": "绕过",
+
+    "My dog ran across the park.": "我的狗跑过公园。",
+    "A bird flew over the house.": "一只鸟飞过房子。",
+    "The children ran into the sea.": "孩子们跑进大海里。",
+    "The man walked past the shop.": "那个男人走过商店。",
+    "We drove through the tunnel.": "我们开车穿过隧道。",
+    "The cat jumped over the fence.": "猫跳过篱笆。",
+    "Go round the back of the building.": "绕到建筑物后面去。",
+    "She got out of the car and walked away.": "她下了车走开了。",
+
     // --- PU1 Content Check Additions ---
     "I - my": "我 - 我的",
     "you - your": "你 - 你的",

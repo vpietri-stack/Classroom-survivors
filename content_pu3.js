@@ -834,7 +834,32 @@ TEACHING_CONTENT["PU3"] = {
                 { a: "We're going to stay at a hotel near the beach", b: "during our holiday." },
                 { a: "They're going to eat at a ", b: "Chinese restaurant for dinner." }
             ]
-        }
+        },
+        "99": {
+            vocab: [
+                "across", "into", "out of", "over", "past", "through", "round"
+            ],
+            sentences: [
+                "My dog ran across the park.",
+                "A bird flew over the house.",
+                "The children ran into the sea.",
+                "The man walked past the shop.",
+                "We drove through the tunnel.",
+                "The cat jumped over the fence.",
+                "Go round the back of the building.",
+                "She got out of the car and walked away."
+            ],
+            sentencePairs: [
+                { a: "My dog ran across", b: "the park." },
+                { a: "A bird flew", b: "over the house." },
+                { a: "The children ran into", b: "the sea." },
+                { a: "The man walked past", b: "the shop." },
+                { a: "We drove through", b: "the tunnel." },
+                { a: "The cat jumped over", b: "the fence." },
+                { a: "Go round", b: "the back of the building." },
+                { a: "She got", b: "out of the car." }
+            ]
+        },
     }
 };
 
@@ -847,5 +872,5 @@ AVAILABLE_CONTENT["PU3"] = {
     "5": [57, 59, 66],
     "6": [69, 71, 73],
     "7": [83, 85, 87],
-    "8": [95, 97, 98]
+    "8": [95, 97, 98, 99]
 };

@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-25
 **Reporter:** Teacher Val (student: `doris_zhangyanyi`, iPad 11, iOS 26.6, WeChat in-app browser AND Safari, LIVE URL)
-**Status:** FIXED on `preview/main` (pending standard preview→main deployment to reach LIVE)
+**Status:** FIXED and DEPLOYED TO LIVE (2026-08-25, merge `aee7c40` = preview→main; both remotes synchronized; LIVE serves `2026-08-25a` with `flushAnalyticsWithDeadline` verified)
 
 ---
 
@@ -93,10 +93,10 @@ storage-disposability trait, not an app bug — but fix (B) makes it harmless fo
 
 ## 6. Follow-ups (not done here)
 
-1. **Deploy to LIVE via the standard preview→main merge** — Doris plays on the LIVE URL, so she
-   keeps losing sessions until this reaches `origin/main`. The merge is the teacher-approved
-   deployment process; do NOT push directly to `origin/main`. After the merge, verify stamps match
-   on both sites (`version.json` = `APP_VERSION` = `2026-08-25a`).
+1. ~~Deploy to LIVE via the standard preview→main merge~~ — **DONE 2026-08-25** (merge commit
+   `aee7c40`, pushed to both remotes; LIVE verified serving `version.json`/`APP_VERSION` =
+   `2026-08-25a` with the deadline flush). Ask the teacher to have Doris play one session on the
+   LIVE URL and confirm it records; stale cached builds will self-heal via the version watchdog.
 2. **Recover Doris's lost sessions:** the 2026-08-22 / 2026-08-24 study sessions were lost
    client-side before delivery (no events ever reached the server) and cannot be reconstructed.
    If the teacher wants her weekly target corrected, use the dashboard's `manualOffset`

@@ -1197,7 +1197,7 @@ function resetRoundF() {
 }
 
 
-function finishStudySession() {
+async function finishStudySession() {
     const durationMs = Date.now() - STUDY_STATE.startTime;
     const durationSec = Math.floor(durationMs / 1000);
     const mm = Math.floor(durationSec / 60);
@@ -1215,7 +1215,15 @@ function finishStudySession() {
         durationMs: durationMs,
         durationFormatted: timeStr
     });
-    flushAnalyticsOnGameOver(); // Reliable flush with retry on session end
+    // FIX (2026-08-25, "Doris refresh"): AWAIT the delivery of the session
+    // record + SR state BEFORE showing the completion screen. On iPad/iOS the
+    // page process can restart within ~1s of completion (WeChat/Safari WebKit
+    // recycle, or the student switching away to send the result screenshot),
+    // and a fire-and-forget flush loses the session. The deadline keeps the
+    // UI responsive even on a bad network (worst case the events stay in the
+    // persisted queue for the next-login drain).
+    if (typeof flushAnalyticsWithDeadline === 'function') await flushAnalyticsWithDeadline(4000);
+    else flushAnalyticsOnGameOver(); // Reliable flush with retry on session end
 
     const targetText = typeof getActiveTargetText === 'function' ? getActiveTargetText() : null;
     const messageHtml = targetText 

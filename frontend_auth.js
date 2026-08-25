@@ -13,7 +13,7 @@ const API_BASE = API_BASE_URL;
 // The version watchdog (startVersionWatchdog) compares this to the live
 // version.json; a mismatch means stale WeChat builds never self-heal or
 // permanently nag. See DEPLOY_VERSION_STAMP.md. Bump BOTH together.
-const APP_VERSION = '2026-07-29a';
+const APP_VERSION = '2026-08-25a';
 
 // --- SESSION TOKEN (c) design) ---
 // The server mints a signed token on login. We store it in localStorage
@@ -418,6 +418,29 @@ async function flushAnalyticsOnGameOver() {
         // Still queued — wait briefly then retry.
         if (attempt < MAX_RETRIES) await new Promise(r => setTimeout(r, 800 * attempt));
     }
+}
+
+/**
+ * Deadline-guaranteed completion flush (2026-08-25, "Doris refresh" fix).
+ * On iPad/iOS (both Safari and WeChat's WKWebView) the page process can be
+ * restarted by the OS/browser within ~1s of the session-complete overlay —
+ * e.g. when the student switches away to send the result screenshot, or on a
+ * WebKit process recycle. A fire-and-forget flush routinely loses the session
+ * record + SR state to that restart. Callers therefore AWAIT this before
+ * showing the completion screen; the deadline guarantees the UI never hangs
+ * longer than maxMs (worst case the events stay in the persisted localStorage
+ * queue for the next-launch drain). Returns true when the queue drained.
+ */
+async function flushAnalyticsWithDeadline(maxMs = 4000) {
+    try {
+        await Promise.race([
+            flushAnalyticsOnGameOver(),
+            new Promise(r => setTimeout(r, maxMs))
+        ]);
+    } catch (e) {
+        console.warn('flushAnalyticsWithDeadline error:', e);
+    }
+    return (typeof analyticsQueue === 'undefined') ? false : analyticsQueue.length === 0;
 }
 
 /**
@@ -1112,14 +1135,39 @@ function saveUserToLocalAndStart(user) {
 }
 
 /**
- * Updates the currently active user in the local storage cache
+ * Updates the currently active user in the local storage cache.
+ * HARDENED (2026-08-25, "Doris refresh" fix): this runs after EVERY queued
+ * event and serializes the user's WHOLE analytics history, so it is the most
+ * quota-hungry localStorage write in the app. An unguarded setItem throwing
+ * QuotaExceededError here propagates into queueExerciseEvent/queueSessionEvent
+ * and aborts the session-completion path mid-way. Never throw; on quota error
+ * retry with a trimmed analytics mirror (the server remains the source of
+ * truth — full history is re-fetched on every login).
  */
 function saveActiveUserToCache() {
     if (!authActiveUser) return;
-    let savedUsers = JSON.parse(localStorage.getItem('savedUsers') || '[]');
-    savedUsers = savedUsers.filter(u => u.id !== authActiveUser.id);
-    savedUsers.unshift(authActiveUser);
-    localStorage.setItem('savedUsers', JSON.stringify(savedUsers));
+    try {
+        let savedUsers = JSON.parse(localStorage.getItem('savedUsers') || '[]');
+        savedUsers = savedUsers.filter(u => u.id !== authActiveUser.id);
+        savedUsers.unshift(authActiveUser);
+        try {
+            localStorage.setItem('savedUsers', JSON.stringify(savedUsers));
+        } catch {
+            // Storage full (likely the analytics mirror): retry once with the
+            // most recent 500 events only.
+            const original = authActiveUser.analytics;
+            if (Array.isArray(original) && original.length > 500) {
+                authActiveUser.analytics = original.slice(-500);
+                try {
+                    savedUsers = JSON.parse(localStorage.getItem('savedUsers') || '[]')
+                        .filter(u => u.id !== authActiveUser.id);
+                    savedUsers.unshift(authActiveUser);
+                    localStorage.setItem('savedUsers', JSON.stringify(savedUsers));
+                } catch { /* still full — cached profile unavailable; non-fatal */ }
+                authActiveUser.analytics = original;
+            }
+        }
+    } catch { /* storage unavailable — non-fatal */ }
 }
 
 function finishLogin() {

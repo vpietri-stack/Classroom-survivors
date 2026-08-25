@@ -1634,7 +1634,7 @@ class UnoScene extends Phaser.Scene {
         }
     }
 
-    endUno(winner) {
+    async endUno(winner) {
         unoGameActive = false;
         if (window.unoTimerInterval) clearInterval(window.unoTimerInterval);
         unoAccumulatedTime += (Date.now() - unoStartTime);
@@ -1673,7 +1673,11 @@ class UnoScene extends Phaser.Scene {
                 ignored: isSessionIgnored
             });
         }
-        if (typeof flushAnalyticsOnGameOver === 'function') flushAnalyticsOnGameOver(); else if (typeof flushAnalytics === 'function') flushAnalytics();
+        // FIX (2026-08-25, "Doris refresh"): await delivery (deadline-capped)
+        // before showing the game-over screen so an iOS WebKit page restart
+        // can't drop the session record. See frontend_auth.js for details.
+        if (typeof flushAnalyticsWithDeadline === 'function') await flushAnalyticsWithDeadline(4000);
+        else if (typeof flushAnalyticsOnGameOver === 'function') flushAnalyticsOnGameOver(); else if (typeof flushAnalytics === 'function') flushAnalytics();
 
         const targetText = typeof getActiveTargetText === 'function' ? getActiveTargetText() : null;
         const targetBanner = document.getElementById('uno-target-banner');

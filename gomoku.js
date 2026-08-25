@@ -691,7 +691,7 @@ function scoreLine(line, p) {
 }
 
 // --- GAME OVER ---
-function endGomokuGame(result) {
+async function endGomokuGame(result) {
     gomokuGameActive = false;
     clearInterval(window.gomokuTimerInterval);
     if (gomokuSpeedInterval) clearInterval(gomokuSpeedInterval);
@@ -741,7 +741,11 @@ function endGomokuGame(result) {
         totalTimeSec: totalTimeSec,
         ignored: isSessionIgnored
     });
-    if (typeof flushAnalyticsOnGameOver === 'function') flushAnalyticsOnGameOver(); else flushAnalytics();
+    // FIX (2026-08-25, "Doris refresh"): await delivery (deadline-capped)
+    // before showing the game-over screen so an iOS WebKit page restart can't
+    // drop the session record. See frontend_auth.js for details.
+    if (typeof flushAnalyticsWithDeadline === 'function') await flushAnalyticsWithDeadline(4000);
+    else if (typeof flushAnalyticsOnGameOver === 'function') flushAnalyticsOnGameOver(); else flushAnalytics();
 
     const targetText = typeof getActiveTargetText === 'function' ? getActiveTargetText() : null;
     const banner = document.getElementById('gomoku-target-banner');

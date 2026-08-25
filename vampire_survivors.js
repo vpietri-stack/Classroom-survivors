@@ -3590,7 +3590,7 @@ class MainScene extends Phaser.Scene {
     
     // Fills + shows the end screen for BOTH outcomes. this.wonGame decides the
     // title/message: win (final boss beaten, even if they later died) vs loss.
-    populateGameOver() {
+    async populateGameOver() {
         this.gameState = 'GAMEOVER';
         if (minigameCountdownInterval) {
             clearInterval(minigameCountdownInterval);
@@ -3654,7 +3654,11 @@ class MainScene extends Phaser.Scene {
             won: this.wonGame,
             ignored: isSessionIgnored
         });
-        flushAnalyticsOnGameOver();
+        // FIX (2026-08-25, "Doris refresh"): await delivery (deadline-capped)
+        // before showing the end screen so an iOS WebKit page restart can't
+        // drop the session record + SR state. See frontend_auth.js.
+        if (typeof flushAnalyticsWithDeadline === 'function') await flushAnalyticsWithDeadline(4000);
+        else flushAnalyticsOnGameOver();
     
         const targetText = typeof getActiveTargetText === 'function' ? getActiveTargetText() : null;
         const banner = document.getElementById('vs-target-banner');

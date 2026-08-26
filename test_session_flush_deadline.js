@@ -215,6 +215,29 @@ function makeUser() {
   ok('graceful unload (pagehide marker) yields no diagnostic',
      sandbox.analyticsQueue.filter(e => e.diagnostic === 'restart').length === 0);
 
+  // ---- 3c. device signature (2026-08-26b, iPhone-vs-iPad experiment) ----
+  // The login heartbeat stamps platform|touchpoints|browser into the
+  // breadcrumb; a later kill must carry it in the diagnostic's pageState.dev
+  // so iPad vs iPhone vs WeChat data separates without joining events.
+  store = {};
+  sandbox.authActiveUser = makeUser();
+  vm.runInContext('authActiveUser = __user; analyticsQueue = [];', Object.assign(sandbox, { __user: sandbox.authActiveUser }));
+  vm.runInContext(`
+    csNewPageSession();
+    csPageHeartbeat({ dev: 'iPhone|tp5|wx' });
+    csPageHeartbeat({ mode: 'study', round: 'D' }); // later merges must keep dev
+    queueExerciseEvent('spelling', 'study');
+  `, sandbox);
+  const hb2 = JSON.parse(store['csPageHeartbeat']);
+  ok('device signature survives later heartbeat merges', hb2.state.dev === 'iPhone|tp5|wx' && hb2.state.round === 'D');
+  vm.runInContext(`
+    authActiveUser.analytics = [];
+    csRestartDetectionDone = false;
+    csDetectRestartAndQueueDiagnostic();
+  `, sandbox);
+  const diag2 = sandbox.analyticsQueue.find(e => e.diagnostic === 'restart');
+  ok('restart diagnostic carries the device signature', !!diag2 && diag2.pageState.dev === 'iPhone|tp5|wx');
+
   console.log('\n' + pass + ' passed, ' + fail + ' failed');
   process.exit(fail ? 1 : 0);
 })().catch(e => { console.error('TEST CRASH:', e); process.exit(1); });

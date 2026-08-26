@@ -13,7 +13,7 @@ const API_BASE = API_BASE_URL;
 // The version watchdog (startVersionWatchdog) compares this to the live
 // version.json; a mismatch means stale WeChat builds never self-heal or
 // permanently nag. See DEPLOY_VERSION_STAMP.md. Bump BOTH together.
-const APP_VERSION = '2026-08-26a';
+const APP_VERSION = '2026-08-26b';
 
 // --- SESSION TOKEN (c) design) ---
 // The server mints a signed token on login. We store it in localStorage
@@ -1302,7 +1302,18 @@ function finishLogin() {
     // the previous one died. Runs BEFORE queueDeviceInfoEvent so the login
     // device event already carries this page-session id.
     csNewPageSession();
-    csPageHeartbeat();
+    // 2026-08-26b: stamp a compact device signature into the breadcrumb so a
+    // restart diagnostic is self-describing across devices (Doris is now
+    // testing iPhone vs iPad). Format: platform|tp<touchpoints>|wx/br —
+    // e.g. "iPad|tp5|wx", "MacIntel|tp5|br" (iPadOS Safari spoofs Macintosh),
+    // "iPhone|tp5|wx". Lands in pageState.dev of the diagnostic event.
+    try {
+        const ua = navigator.userAgent || '';
+        csPageHeartbeat({
+            dev: (navigator.platform || '?') + '|tp' + (navigator.maxTouchPoints || 0)
+                + '|' + (ua.includes('MicroMessenger') ? 'wx' : 'br')
+        });
+    } catch { csPageHeartbeat(); }
 
     // OS census: record what device/OS this student logs in from (once per
     // device per day). Runs after the teacher redirect so only students count.

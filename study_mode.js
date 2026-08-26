@@ -1268,6 +1268,10 @@ const STUDY_ROUND_LABELS = { A: 'Listen', C: 'Scramble', D: 'Spell', E: 'Sentenc
 function updateStudyUI(title, subtitle) {
     document.getElementById('study-title').innerText = title;
     document.getElementById('study-instruction').innerText = subtitle;
+    // Restart telemetry (2026-08-26a): keep the kill-surviving breadcrumb
+    // current so a WebKit process restart can be correlated with the round
+    // the student was on. Best-effort, no-op if unavailable.
+    if (typeof csPageHeartbeat === 'function') csPageHeartbeat({ mode: 'study', round: STUDY_STATE.round });
     updateStudyProgress();
 }
 

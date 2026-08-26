@@ -254,7 +254,9 @@
   // output — "[Music]", "[BLANK_AUDIO]", "[speaking in foreign language]",
   // lone "Bye!"/"You" — emitted when the model hears no clear speech. Grading
   // them as failures punishes kids for a too-quiet/too-far recording instead
-  // of coaching them. Detect the pattern, coach, and DON'T count a fail.
+  // of coaching them. Detect the pattern, coach, and DON'T grade — but DO
+  // count toward Skip progress: repeated hallucinations mean a faulty mic or
+  // a noisy room, and those students need the escape hatch.
   function isHallucination(text) {
     const x = (text || '').trim();
     if (!x) return true;
@@ -429,6 +431,10 @@
           }, failCount + 1);
           feedback.className = 'heard-feedback no';
           feedback.innerText = '\uD83D\uDD0A \u6ca1\u542c\u6e05\u695a \u2014 \u8bf7\u5927\u58f0\u4e00\u70b9\uff0c\u79bb\u9ea6\u514b\u98ce\u8fd1\u4e00\u70b9\u518d\u8bd5';
+          // Counts toward Skip (same policy as too_quiet/empty): a mic or
+          // environment that keeps producing junk must not trap the student.
+          failCount++;
+          if (failCount >= SKIP_AFTER_FAILS) skip.style.display = '';
           return;
         }
         // NOTE: feedback text is set INSIDE the pass/fail branches below —

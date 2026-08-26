@@ -110,4 +110,36 @@ storage-disposability trait, not an app bug — but fix (B) makes it harmless fo
    (`edf0577`), and preview is now a strict ancestor of live.
 
 ---
+
+## 7. ROUND 2 (2026-08-26) — video evidence: the kill is MID-SESSION
+
+Doris's mum sent a video (08:33 CST, Safari, LIVE URL):
+
+1. **Frame 1:** she is mid-session, actively dragging a tile in **Round D: Sentence Scramble**.
+2. **Frame 2 (<1 s later):** Safari's system banner **“此网页已重新载入” (“This web page has been reloaded”)** — the message iOS shows when WebKit's WebContent process is TERMINATED and Safari auto-restores the page. This is OS-level confirmation of cause (A), and proves the kill runs no JS (no pagehide, no flush).
+3. **Frame 3:** the reloaded page is back at profile selection (“谁在玩?”).
+
+**Server evidence the same morning:** ZERO events from Doris on 2026-08-25/26 — not even the login
+`device` event, which queues at login and flushes within ~2 s. The kill therefore happens at/near
+page start on some loads, before the first flush leaves the device. (Cohort check: ~55 students
+use the speech engine heavily — speech memory load is NOT Doris-unique.)
+
+**Conclusion:** the completion-flush fix (§4) remains correct and necessary, but the process kill
+also strikes mid-session, so some disruption/re-login is unavoidable until the trigger itself is
+understood. Round-2 response: **restart telemetry** (additive, shipped 2026-08-26a):
+
+- every page load gets a page-session id (`ps`) stamped onto all queued events;
+- a kill-surviving localStorage breadcrumb (`csPageHeartbeat`: mode/round/last exercise, page-load
+  time, build stamp) is updated on every queued event and every study round change;
+- graceful `pagehide` sets a clean-unload marker, so only TRUE hard kills are reported;
+- on the next student login, a hard kill is detected and ONE dashboard-invisible
+  `type:'device', diagnostic:'restart'` event is queued, carrying time-since-page-load, last
+  round/exercise and build stamp. Regression-tested (test_session_flush_deadline.js, 30 tests).
+
+**Next:** once diagnostics accumulate from Doris's device, the time-to-kill distribution will
+separate the two remaining trigger hypotheses — a startup-path crash (fixed minutes/seconds after
+load, e.g. model preload / IndexedDB) vs cumulative memory pressure (grows with session length) —
+and point at the concrete fix.
+
+---
 *Prepared by the scheduled 2026-08-25 investigation task. Fix committed to `preview/main` only.*

@@ -59,7 +59,7 @@ const sandbox = {
   console,
   API_BASE_URL: 'http://test.local/api',
   document: { addEventListener: () => {} },
-  window: {},
+  window: { addEventListener: () => {} },
   localStorage: localStorageStub,
   setTimeout, clearTimeout, setInterval, clearInterval,
   navigator: {},          // no sendBeacon — unload path irrelevant here
@@ -158,6 +158,62 @@ function makeUser() {
   try { sandbox.saveActiveUserToCache(); } catch { threw = true; }
   ok('saveActiveUserToCache silent when storage is unusable', !threw);
   quotaLimit = Infinity;
+
+  // ---- 3. restart telemetry (2026-08-26a, mid-session WebKit kill) ----
+  const buildDiag = sandbox.csBuildRestartDiagnostic;
+  const now = Date.now();
+
+  // Hard kill: fresh breadcrumb, nothing delivered after it -> diagnostic.
+  let d = buildDiag({ ps: 'ps_1', ts: now - 90000, loadTs: now - 400000, v: '2026-08-26a', state: { mode: 'study', round: 'D' } }, now, () => false);
+  ok('hard kill -> diagnostic produced', !!d && d.diagnostic === 'restart');
+  ok('diagnostic carries time-since-page-load (5-7 min range)', d.secSincePageLoad >= 309 && d.secSincePageLoad <= 311);
+  ok('diagnostic carries last page state', d.pageState.mode === 'study' && d.pageState.round === 'D');
+  ok('diagnostic carries the build stamp', d.appVersion === '2026-08-26a');
+
+  // Graceful close already delivered the tail -> NO diagnostic.
+  d = buildDiag({ ps: 'ps_1', ts: now - 90000 }, now, () => true);
+  ok('delivered tail suppresses the diagnostic', d === null);
+
+  // Stale breadcrumb (>1h, student simply stopped) -> NO diagnostic.
+  d = buildDiag({ ps: 'ps_1', ts: now - 3700000 }, now, () => false);
+  ok('stale breadcrumb (>1h) suppressed', d === null);
+
+  // Missing/malformed breadcrumb -> NO diagnostic.
+  d = buildDiag(null, now, () => false);
+  ok('missing breadcrumb suppressed', d === null);
+  d = buildDiag({ ts: now - 1000 }, now, () => false); // no ps
+  ok('breadcrumb without page-session id suppressed', d === null);
+
+  // ---- 3b. heartbeat + queue stamping integration ----
+  store = {};
+  sandbox.authActiveUser = makeUser();
+  vm.runInContext('authActiveUser = __user; analyticsQueue = [];', Object.assign(sandbox, { __user: sandbox.authActiveUser }));
+  vm.runInContext(`
+    csNewPageSession();
+    csPageHeartbeat({ mode: 'study', round: 'D' });
+    queueExerciseEvent('sentenceScramble', 'study');
+  `, sandbox);
+  const hb = JSON.parse(store['csPageHeartbeat']);
+  ok('heartbeat written with page-session + state', !!hb.ps && hb.state.round === 'D' && hb.state.ex === 'sentenceScramble');
+  ok('queued exercise event carries the page-session stamp', sandbox.analyticsQueue[0].ps === hb.ps);
+  // Simulate the kill: no csCleanUnload marker, then detect.
+  vm.runInContext(`
+    authActiveUser.analytics = []; // server never saw the tail
+    csRestartDetectionDone = false;
+    csDetectRestartAndQueueDiagnostic();
+  `, sandbox);
+  const restartEvents = sandbox.analyticsQueue.filter(e => e.diagnostic === 'restart');
+  ok('next load queues exactly one restart diagnostic after a kill', restartEvents.length === 1);
+  ok('restart diagnostic is dashboard-invisible type device', restartEvents[0].type === 'device');
+  // Graceful close path: pagehide marker set -> no diagnostic.
+  vm.runInContext(`
+    analyticsQueue = [];
+    localStorage.setItem('csCleanUnload', '1');
+    csRestartDetectionDone = false;
+    csDetectRestartAndQueueDiagnostic();
+  `, sandbox);
+  ok('graceful unload (pagehide marker) yields no diagnostic',
+     sandbox.analyticsQueue.filter(e => e.diagnostic === 'restart').length === 0);
 
   console.log('\n' + pass + ' passed, ' + fail + ' failed');
   process.exit(fail ? 1 : 0);

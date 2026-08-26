@@ -13,7 +13,7 @@ const API_BASE = API_BASE_URL;
 // The version watchdog (startVersionWatchdog) compares this to the live
 // version.json; a mismatch means stale WeChat builds never self-heal or
 // permanently nag. See DEPLOY_VERSION_STAMP.md. Bump BOTH together.
-const APP_VERSION = '2026-08-25a';
+const APP_VERSION = '2026-08-26a';
 
 // --- SESSION TOKEN (c) design) ---
 // The server mints a signed token on login. We store it in localStorage
@@ -156,7 +156,10 @@ function queueExerciseEvent(exerciseType, mode, itemDetails = null, customAttemp
         timestamp: new Date().toISOString(),
         // Stable id so the server can de-duplicate if this event is flushed
         // again after a retry (tab-close + next-launch re-send).
-        eventId: 'ex_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10)
+        eventId: 'ex_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10),
+        // Restart telemetry: ties this event to its page load so a hard-kill
+        // restart can be correlated with the last delivered tail.
+        ps: csPageSessionId
     };
     
     if (itemDetails) {
@@ -165,6 +168,7 @@ function queueExerciseEvent(exerciseType, mode, itemDetails = null, customAttemp
     
     analyticsQueue.push(event);
     persistAnalyticsQueue();
+    csPageHeartbeat({ ex: exerciseType, mode: mode });
     if (authActiveUser) {
         if (!authActiveUser.analytics) authActiveUser.analytics = [];
         authActiveUser.analytics.push(event);
@@ -182,10 +186,12 @@ function queueSessionEvent(sessionType, data) {
         timestamp: new Date().toISOString(),
         // Stable id so the server can de-duplicate if this event is flushed
         // again after a retry (tab-close + next-launch re-send).
-        eventId: 'se_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10)
+        eventId: 'se_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10),
+        ps: csPageSessionId // restart telemetry page-session stamp
     };
     analyticsQueue.push(event);
     persistAnalyticsQueue();
+    csPageHeartbeat({ sess: sessionType });
     if (authActiveUser) {
         if (!authActiveUser.analytics) authActiveUser.analytics = [];
         authActiveUser.analytics.push(event);
@@ -219,7 +225,8 @@ function queueDeviceInfoEvent() {
         screen: (window.screen && window.screen.width) ? window.screen.width + 'x' + window.screen.height : '',
         appVersion: APP_VERSION,
         timestamp: new Date().toISOString(),
-        eventId: 'dv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10)
+        eventId: 'dv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10),
+        ps: csPageSessionId // restart telemetry page-session stamp
     };
     analyticsQueue.push(event);
     persistAnalyticsQueue();
@@ -234,6 +241,110 @@ function scheduleAnalyticsFlush() {
     if (analyticsFlushTimer) clearTimeout(analyticsFlushTimer);
     analyticsFlushTimer = setTimeout(flushAnalytics, 2000);
 }
+
+// --- RESTART TELEMETRY (2026-08-26a, "Doris mid-session reload" round 2) -----
+// The mum's video proved iOS Safari kills the page's WebContent process and
+// auto-reloads it ("此网页已重新载入") MID-SESSION, not only at completion.
+// A process kill runs no JS at all — no pagehide, no flush — so the only way
+// to learn WHEN/WHAT was running when it died is a breadcrumb that SURVIVES
+// the kill (localStorage) and is interpreted by the NEXT page load.
+//
+// Mechanics:
+//  - every queued event stamps a page-session id + updates the breadcrumb;
+//  - a graceful pagehide/close sets csCleanUnload=1;
+//  - on the next student login, if the breadcrumb shows a RECENT (<1h) page
+//    session with no clean-unload marker and no delivered tail (i.e. the
+//    flush never completed), we queue ONE type:'device' diagnostic event
+//    (diagnostic:'restart') that rides the next flush to the server.
+// Deliberately type:'device' + diagnostic flag: invisible to both dashboards
+// and weekly targets, exactly like the OS-census events.
+const CS_HB_KEY = 'csPageHeartbeat';
+const CS_UNLOAD_KEY = 'csCleanUnload';
+let csPageSessionId = null;
+let csPageLoadTime = Date.now();
+let csRestartDetectionDone = false;
+
+function csNewPageSession() {
+    csPageSessionId = 'ps_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+    csPageLoadTime = Date.now();
+    try { localStorage.removeItem(CS_UNLOAD_KEY); } catch { /* non-fatal */ }
+}
+
+/**
+ * Update the kill-surviving breadcrumb. state is a small optional object
+ * (e.g. { mode:'study', round:'D', ex:'sentenceScramble' }) merged over the
+ * previous one, so callers only pass what they know.
+ */
+function csPageHeartbeat(state) {
+    try {
+        if (!csPageSessionId) csNewPageSession();
+        let prev = {};
+        try { prev = JSON.parse(localStorage.getItem(CS_HB_KEY) || '{}') || {}; } catch { prev = {}; }
+        const hb = Object.assign({}, prev.state || {}, state || {});
+        localStorage.setItem(CS_HB_KEY, JSON.stringify({
+            ps: csPageSessionId,
+            ts: Date.now(),
+            loadTs: csPageLoadTime,
+            v: APP_VERSION,
+            state: hb
+        }));
+    } catch { /* storage unavailable — telemetry is best-effort */ }
+}
+
+// Pure decision helper (unit-tested): returns a diagnostic event descriptor
+// or null. A "hard kill" = recent breadcrumb + no clean-unload marker + no
+// evidence that the killed session's last events were already delivered.
+function csBuildRestartDiagnostic(last, nowMs, hasRecentDeliveredEvent) {
+    if (!last || !last.ps || !last.ts) return null;
+    const ageMs = nowMs - last.ts;
+    if (ageMs < 0 || ageMs > 3600000) return null;   // >1h stale = normal close, not a kill
+    if (typeof hasRecentDeliveredEvent === 'function' && hasRecentDeliveredEvent(last.ts)) return null;
+    return {
+        diagnostic: 'restart',
+        lastTs: new Date(last.ts).toISOString(),
+        secondsSinceLastEvent: Math.round(ageMs / 1000),
+        secSincePageLoad: (last.loadTs && last.ts >= last.loadTs)
+            ? Math.round((last.ts - last.loadTs) / 1000) : null,
+        appVersion: last.v || null,
+        pageState: last.state || {},
+        pageSessionId: last.ps
+    };
+}
+
+function csDetectRestartAndQueueDiagnostic() {
+    if (csRestartDetectionDone) return;
+    csRestartDetectionDone = true;
+    try {
+        if (localStorage.getItem(CS_UNLOAD_KEY) === '1') return; // graceful end
+        const last = JSON.parse(localStorage.getItem(CS_HB_KEY) || 'null');
+        const hasRecentDeliveredEvent = (lastTs) => {
+            if (!authActiveUser || !Array.isArray(authActiveUser.analytics)) return false;
+            // The fresh login response carries the server's current history:
+            // if any event delivered AFTER the last heartbeat exists, the
+            // previous page session flushed fine before it ended.
+            return authActiveUser.analytics.some(e => e && e.timestamp && e.timestamp > new Date(lastTs).toISOString());
+        };
+        const diag = csBuildRestartDiagnostic(last, Date.now(), hasRecentDeliveredEvent);
+        if (!diag) return;
+        const event = Object.assign({
+            type: 'device',
+            timestamp: new Date().toISOString(),
+            eventId: 'rs_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10)
+        }, diag);
+        analyticsQueue.push(event);
+        persistAnalyticsQueue();
+    } catch { /* non-fatal */ }
+}
+
+// Graceful exits (tab close / navigation) mark the breadcrumb as explained,
+// so only TRUE hard kills (process termination runs no JS) get reported.
+try {
+    if (typeof window.addEventListener === 'function') {
+        window.addEventListener('pagehide', () => {
+            try { localStorage.setItem(CS_UNLOAD_KEY, '1'); } catch { /* non-fatal */ }
+        });
+    }
+} catch { /* non-browser environment — telemetry is best-effort */ }
 
 /**
  * FIX #2: fire-and-forget flush on page hide / tab close.
@@ -1184,6 +1295,15 @@ function finishLogin() {
     // ships the queued analytics.
     bindUnloadAnalyticsFlush();
 
+    // Restart telemetry (2026-08-26a): this page load is a new page-session.
+    // On Doris's iPad the WebKit WebContent process is killed mid-session
+    // and the browser silently reloads ("此网页已重新载入"); the breadcrumb
+    // below survives the kill and lets the NEXT load report when and where
+    // the previous one died. Runs BEFORE queueDeviceInfoEvent so the login
+    // device event already carries this page-session id.
+    csNewPageSession();
+    csPageHeartbeat();
+
     // OS census: record what device/OS this student logs in from (once per
     // device per day). Runs after the teacher redirect so only students count.
     queueDeviceInfoEvent();
@@ -1191,6 +1311,9 @@ function finishLogin() {
     // FIX #3: flush any events carried over in localStorage from a previous
     // session that was killed/closed before it could deliver them.
     if (typeof loadPersistedSR === 'function') loadPersistedSR(); // restore SR state that survived app-kill
+    // Restart telemetry: report a hard-kill restart BEFORE the drain is
+    // scheduled so the diagnostic rides along in the same flush.
+    csDetectRestartAndQueueDiagnostic();
     if (analyticsQueue.length > 0) scheduleAnalyticsFlush();
 
     // Auto-resolve the student's class content

@@ -193,11 +193,7 @@
               durMs: stats ? Math.round(stats.durMs) : null,
               peak: stats ? stats.peak : null,
               transcribeMs: Date.now() - t0,
-              blobBytes: blob.size,
-              // Pitch-adaptation diagnostics (speech_engine): measured voice
-              // pitch + how many semitones the audio was shifted down (0 = none).
-              f0: typeof r.f0 === 'number' ? r.f0 : null,
-              shiftSemitones: typeof r.shiftSemitones === 'number' ? r.shiftSemitones : null
+              blobBytes: blob.size
             });
           });
         });
@@ -251,6 +247,21 @@
       }
       return { durMs: (n / sampleRate) * 1000, peak: peak };
     }).catch(function () { return null; }); // unreadable → don't gate, let Whisper try
+  }
+
+  // --- hallucination transcript gate ----------------------------------------
+  // Field data 2026-08 (3067 attempts): ~9% of attempts are Whisper junk
+  // output — "[Music]", "[BLANK_AUDIO]", "[speaking in foreign language]",
+  // lone "Bye!"/"You" — emitted when the model hears no clear speech. Grading
+  // them as failures punishes kids for a too-quiet/too-far recording instead
+  // of coaching them. Detect the pattern, coach, and DON'T count a fail.
+  function isHallucination(text) {
+    const x = (text || '').trim();
+    if (!x) return true;
+    // Whisper's bracketed sound-effect tags ([Music], [INAUDIBLE], …).
+    if (/^\[.*\]$/.test(x) || /^\(.*\)$/.test(x)) return true;
+    // The classic one-token junk outputs.
+    return /^(you|bye!?|huh\?|thank you\.?|thanks for watching!?|inaudible|\.|\?)+$/i.test(x);
   }
 
   // --- microphone permission helpers ---------------------------------------
@@ -355,9 +366,20 @@
 
     // Permission-denied state: show the per-browser fix instructions ONCE and
     // reveal Skip immediately — a blocked student can do nothing else.
+    // Field data 2026-08: 4 students generated 435 of 861 permission errors by
+    // re-tapping after being blocked — so (a) cap telemetry at 2 error events
+    // per gate, and (b) swap the record button for an explicit "已允许，重试"
+    // button so the recovery path is visible instead of mystery re-taps.
     let helpShown = false;
+    let permErrors = 0;
+    let retryBtn = null;
     function showMicHelp(source) {
-      logSpeechEvent('error', mode, { target: target, level: level, message: 'Permission denied (' + source + ')', ua: UA }, failCount + 1);
+      permErrors++;
+      if (permErrors <= 2) {
+        logSpeechEvent('error', mode, { target: target, level: level, message: 'Permission denied (' + source + ')', ua: UA }, failCount + 1);
+      } else if (permErrors === 3) {
+        logSpeechEvent('error', mode, { target: target, level: level, message: 'Permission denied (repeats suppressed)', ua: UA }, failCount + 1);
+      }
       if (!helpShown) {
         helpShown = true;
         wrap.insertAdjacentHTML('beforeend', micHelpHTML());
@@ -365,6 +387,20 @@
       feedback.className = 'heard-feedback no';
       feedback.innerText = '\u9ea6\u514b\u98ce\u672a\u6388\u6743 \u2014 \u770b\u4e0b\u65b9\u63d0\u793a\uff0c\u6216\u70b9\u201c\u8df3\u8fc7\u201d\u7ee7\u7eed';
       skip.style.display = '';
+      // Swap the record button for a visible recovery action.
+      recBtn.style.display = 'none';
+      if (!retryBtn) {
+        retryBtn = document.createElement('button');
+        retryBtn.className = 'game-btn bg-red-600 hover:bg-red-500 text-lg px-6 py-3 rounded-2xl';
+        retryBtn.innerText = '\u2705 \u5df2\u5141\u8bb8\uff0c\u91cd\u8bd5';
+        retryBtn.onclick = function () {
+          retryBtn.style.display = 'none';
+          recBtn.style.display = '';
+          recBtn.click(); // re-request the mic; failure re-enters showMicHelp
+        };
+        btns.insertBefore(retryBtn, skip);
+      }
+      retryBtn.style.display = '';
     }
 
     const skip = document.createElement('button');
@@ -384,6 +420,17 @@
     const recBtn = makeRecordButton({
       idleText: '\uD83C\uDF99\uFE0F \u70b9\u51fb\u8bf4\u8bdd',
       onResult: function (text, meta) {
+        // Junk transcript (Whisper hallucination): coach, don't grade. Not a
+        // fail — the recording itself was fine, the kid just needs to be louder.
+        if (isHallucination(text)) {
+          logSpeechEvent('gated', mode, {
+            target: target, level: level, reason: 'hallucination', transcript: (text || '').slice(0, 60),
+            audioMs: meta && meta.audioMs, ua: UA
+          }, failCount + 1);
+          feedback.className = 'heard-feedback no';
+          feedback.innerText = '\uD83D\uDD0A \u6ca1\u542c\u6e05\u695a \u2014 \u8bf7\u5927\u58f0\u4e00\u70b9\uff0c\u79bb\u9ea6\u514b\u98ce\u8fd1\u4e00\u70b9\u518d\u8bd5';
+          return;
+        }
         // NOTE: feedback text is set INSIDE the pass/fail branches below —
         // pass hides transcript+score entirely (pure celebration), fail shows
         // only "heard + score" (no threshold internals).
@@ -401,8 +448,6 @@
           edits: typeof res.edits === 'number' ? res.edits : null,
           level: level,
           book: book,
-          f0: meta && typeof meta.f0 === 'number' ? meta.f0 : null,
-          shiftSemis: meta && typeof meta.shiftSemitones === 'number' ? meta.shiftSemitones : null,
           details: res.details || '',
           audioMs: meta && typeof meta.audioMs === 'number' ? meta.audioMs : null,
           transcribeMs: meta && typeof meta.transcribeMs === 'number' ? meta.transcribeMs : null,

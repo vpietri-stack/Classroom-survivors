@@ -67,9 +67,10 @@ for (const minAcc of [0.70, 0.72, 0.75, 0.78, 0.80]) {
     }
 }
 // show only configs satisfying ALL regression constraints, sorted by pass yield
+const N = d.attempts.length;
 const good = results.filter(r => r.mp === MUST_PASS.length && r.mf === MUST_FAIL.length);
 for (const r of good.sort((a, b) => b.real - a.real)) {
-    console.log(pad(r.minAcc, 8) + pad(r.maxWER, 8) + pad(r.phonPass, 6) + pad(r.mp + '/' + MUST_PASS.length, 10) + pad(r.mf + '/' + MUST_FAIL.length, 10) + pad(r.all + '/272 (' + (100 * r.all / 272).toFixed(0) + '%)', 12) + r.real + '/' + nonHallu.length + ' (' + (100 * r.real / nonHallu.length).toFixed(0) + '%)');
+    console.log(pad(r.minAcc, 8) + pad(r.maxWER, 8) + pad(r.phonPass, 6) + pad(r.mp + '/' + MUST_PASS.length, 10) + pad(r.mf + '/' + MUST_FAIL.length, 10) + pad(r.all + '/' + N + ' (' + (100 * r.all / N).toFixed(0) + '%)', 14) + r.real + '/' + nonHallu.length + ' (' + (100 * r.real / nonHallu.length).toFixed(0) + '%)');
 }
 if (!good.length) {
     console.log('NO config satisfies all constraints. Best mustFail performers:');

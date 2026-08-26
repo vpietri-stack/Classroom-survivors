@@ -1,5 +1,10 @@
 # HANDOFF — Classroom Survivors: session-recording data-loss thread (Lucas → WeChat)
 
+> ⚠️ **2026-08-26 UPDATE:** The LIVE-vs-PREVIEW deployment gap described below is OBSOLETE —
+> branches re-converged on 2026-07-31. For the CURRENT thread (Doris forced page-refresh /
+> WebKit mid-session kill, fixes `2026-08-25a`→`2026-08-26b`, restart telemetry, open work),
+> read **`HANDOFF_SESSION_REFRESH_FIX.md`** and **`SESSION_REFRESH_ROOTCAUSE_2026-08-25.md`**.
+
 **Date:** 2026-07-23
 **Author:** Hermes Agent (this thread)
 **Audience:** Overnight coding agent. Read top-to-bottom. The "Current State" + "Commit Timeline" sections are ground truth (verified against `git log`); the "What happened" narrative is reconstructed from commit history + the verified WeChat diagnosis. Do not assume — verify against the repo before changing anything.

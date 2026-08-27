@@ -13,7 +13,7 @@ const API_BASE = API_BASE_URL;
 // The version watchdog (startVersionWatchdog) compares this to the live
 // version.json; a mismatch means stale WeChat builds never self-heal or
 // permanently nag. See DEPLOY_VERSION_STAMP.md. Bump BOTH together.
-const APP_VERSION = '2026-08-26b';
+const APP_VERSION = '2026-08-26c';
 
 // --- SESSION TOKEN (c) design) ---
 // The server mints a signed token on login. We store it in localStorage
@@ -317,6 +317,14 @@ function csDetectRestartAndQueueDiagnostic() {
     try {
         if (localStorage.getItem(CS_UNLOAD_KEY) === '1') return; // graceful end
         const last = JSON.parse(localStorage.getItem(CS_HB_KEY) || 'null');
+        // Self-breadcrumb guard (2026-08-26c): localStorage is shared across
+        // tabs of the same origin. With two Safari tabs open (seen on Doris's
+        // mum's iPhone), tab B's freshly-written breadcrumb can be read by
+        // tab A's detection and misreported as a kill — producing a bogus
+        // diagnostic with secSinceLastEvent≈0. A TRUE kill always leaves a
+        // breadcrumb from a DIFFERENT page session, so same-ps means "this
+        // breadcrumb is ours" → skip.
+        if (last && last.ps === csPageSessionId) return;
         const hasRecentDeliveredEvent = (lastTs) => {
             if (!authActiveUser || !Array.isArray(authActiveUser.analytics)) return false;
             // The fresh login response carries the server's current history:
@@ -1295,6 +1303,19 @@ function finishLogin() {
     // ships the queued analytics.
     bindUnloadAnalyticsFlush();
 
+    // Restart telemetry — ORDER IS LOAD-BEARING (fixed 2026-08-26c after the
+    // 2026-08-26 field data showed only self-reads): detection MUST run
+    // BEFORE csNewPageSession()/csPageHeartbeat(). Reasons:
+    //   1. csPageHeartbeat overwrites the shared breadcrumb key with THIS
+    //      page's ps — a later detection would read its own breadcrumb and
+    //      either self-report a bogus kill or (with the same-ps guard) never
+    //      report anything at all.
+    //   2. csNewPageSession clears the csCleanUnload marker set by the
+    //      previous page's graceful pagehide — detection must still see it.
+    // A genuine kill always leaves a breadcrumb whose ps differs from the
+    // page session we are about to start.
+    csDetectRestartAndQueueDiagnostic();
+
     // Restart telemetry (2026-08-26a): this page load is a new page-session.
     // On Doris's iPad the WebKit WebContent process is killed mid-session
     // and the browser silently reloads ("此网页已重新载入"); the breadcrumb
@@ -1322,9 +1343,8 @@ function finishLogin() {
     // FIX #3: flush any events carried over in localStorage from a previous
     // session that was killed/closed before it could deliver them.
     if (typeof loadPersistedSR === 'function') loadPersistedSR(); // restore SR state that survived app-kill
-    // Restart telemetry: report a hard-kill restart BEFORE the drain is
-    // scheduled so the diagnostic rides along in the same flush.
-    csDetectRestartAndQueueDiagnostic();
+    // Drain whatever is queued (backlog + any restart diagnostic queued at
+    // the top of finishLogin) so it rides the first flush.
     if (analyticsQueue.length > 0) scheduleAnalyticsFlush();
 
     // Auto-resolve the student's class content

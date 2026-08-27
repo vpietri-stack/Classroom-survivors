@@ -1,5 +1,5 @@
 {
-  "version": "2026-08-26b",
-  "deployedAt": "2026-08-26",
-  "notes": "Restart telemetry + device signature in breadcrumb (Doris iPhone-vs-iPad experiment: diagnostics self-describe the device). 🔴 DEPLOY STAMP — MUST match APP_VERSION in frontend_auth.js on EVERY deploy. See DEPLOY_VERSION_STAMP.md. The version watchdog (startVersionWatchdog) polls this file; if 'version' is newer than APP_VERSION it shows the update banner. Bump BOTH together or stale WeChat builds never self-heal (or permanently nag)."
+  "version": "2026-08-26c",
+  "deployedAt": "2026-08-27",
+  "notes": "Restart telemetry ordering fix (detect BEFORE new page-session/breadcrumb — 2026-08-26 field data showed only self-read artifacts) + same-ps guard. 🔴 DEPLOY STAMP — MUST match APP_VERSION in frontend_auth.js on EVERY deploy. See DEPLOY_VERSION_STAMP.md. The version watchdog (startVersionWatchdog) polls this file; if 'version' is newer than APP_VERSION it shows the update banner. Bump BOTH together or stale WeChat builds never self-heal (or permanently nag)."
 }

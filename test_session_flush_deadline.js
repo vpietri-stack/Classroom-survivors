@@ -185,6 +185,11 @@ function makeUser() {
   ok('breadcrumb without page-session id suppressed', d === null);
 
   // ---- 3b. heartbeat + queue stamping integration ----
+  // Mirrors the REAL kill flow: page session #1 runs and dies without a
+  // pagehide marker; page session #2 starts (csNewPageSession) and detects.
+  // The 2026-08-26c ordering fix makes detection run BEFORE the new
+  // heartbeat write — simulated here by detecting right after the new
+  // page-session id is minted.
   store = {};
   sandbox.authActiveUser = makeUser();
   vm.runInContext('authActiveUser = __user; analyticsQueue = [];', Object.assign(sandbox, { __user: sandbox.authActiveUser }));
@@ -196,15 +201,30 @@ function makeUser() {
   const hb = JSON.parse(store['csPageHeartbeat']);
   ok('heartbeat written with page-session + state', !!hb.ps && hb.state.round === 'D' && hb.state.ex === 'sentenceScramble');
   ok('queued exercise event carries the page-session stamp', sandbox.analyticsQueue[0].ps === hb.ps);
-  // Simulate the kill: no csCleanUnload marker, then detect.
+  // Simulate the kill: no csCleanUnload marker; next page load begins.
   vm.runInContext(`
     authActiveUser.analytics = []; // server never saw the tail
+    analyticsQueue = [];
+    csNewPageSession();            // NEW page load (kill survivor)
     csRestartDetectionDone = false;
     csDetectRestartAndQueueDiagnostic();
   `, sandbox);
   const restartEvents = sandbox.analyticsQueue.filter(e => e.diagnostic === 'restart');
   ok('next load queues exactly one restart diagnostic after a kill', restartEvents.length === 1);
   ok('restart diagnostic is dashboard-invisible type device', restartEvents[0].type === 'device');
+  ok('diagnostic references the KILLED page session, not the new one',
+     restartEvents[0].pageSessionId === hb.ps);
+  // Self-breadcrumb regression (2026-08-26c): if detection ever reads THIS
+  // page's own breadcrumb (same ps), it must NOT report a kill — that was
+  // the 2026-08-26 field artifact (two bogus diagnostics with 0-second ages).
+  vm.runInContext(`
+    analyticsQueue = [];
+    csPageHeartbeat({ mode: 'study' }); // this page's own breadcrumb
+    csRestartDetectionDone = false;
+    csDetectRestartAndQueueDiagnostic();
+  `, sandbox);
+  ok('self-breadcrumb (same ps) never reports a kill',
+     sandbox.analyticsQueue.filter(e => e.diagnostic === 'restart').length === 0);
   // Graceful close path: pagehide marker set -> no diagnostic.
   vm.runInContext(`
     analyticsQueue = [];
@@ -232,6 +252,8 @@ function makeUser() {
   ok('device signature survives later heartbeat merges', hb2.state.dev === 'iPhone|tp5|wx' && hb2.state.round === 'D');
   vm.runInContext(`
     authActiveUser.analytics = [];
+    analyticsQueue = [];
+    csNewPageSession(); // simulate the NEXT page load after the kill
     csRestartDetectionDone = false;
     csDetectRestartAndQueueDiagnostic();
   `, sandbox);

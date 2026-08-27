@@ -1,6 +1,6 @@
 # HANDOFF — Classroom Survivors: forced page-refresh / session-loss thread (Doris)
 
-**Date:** 2026-08-26
+**Date:** 2026-08-26 (updated 2026-08-27, round 3)
 **Author:** Investigation agent (scheduled task + follow-ups)
 **Audience:** Next coding agent. Read top-to-bottom. "Current State" is ground truth (verified
 against `git log` + live-site fetches on 2026-08-26). Supersedes the deployment-gap sections of
@@ -84,20 +84,46 @@ Full report: `SESSION_REFRESH_ROOTCAUSE_2026-08-25.md` (incl. §7 round-2 update
     (e.g. `iPad|tp5|wx`, `MacIntel|tp5|br` = iPadOS Safari, `iPhone|tp5|wx`).
 - Ruled out: speech-engine memory as a Doris-unique factor (~55 students use speech heavily).
 
+### Round 3 (2026-08-27, first telemetry readout + telemetry bug fix)
+- Teacher queried the DB: Doris's mum reported 3 sessions on 2026-08-26, DB showed exercises only.
+- Pulling the raw stream (read-only Cosmos query) revealed:
+  - **The iPhone experiment works:** device event at 07:34 UTC = `iPhone, iOS 18.7, Safari,
+    build 2026-08-26b` — mum tested on the iPhone as planned.
+  - Only ONE study attempt left a trace (07:42–07:47 UTC: 5× wordScramble + 5× spelling +
+    5× sentenceScramble, then abrupt stop). The other ~2 sessions left ZERO events → killed
+    before the first ~2 s flush (startup-kill pattern) or played on a cached pre-telemetry build.
+  - Both `diagnostic:'restart'` events were **SELF-READ ARTIFACTS** (age 0 s, `ps` identical to
+    their own login's device event): `csDetectRestartAndQueueDiagnostic()` ran AFTER
+    `csNewPageSession()`/`csPageHeartbeat()`, so it always read the page's OWN fresh breadcrumb,
+    and the previous session's `csCleanUnload` marker had already been cleared. Genuine kills
+    could therefore never be reported.
+- **Fix (`a05ac68`, stamp `2026-08-26c`):** `finishLogin` now runs detection FIRST (before the
+  new page session is minted) + a same-`ps` guard as defense in depth. +2 regression tests
+  (34 in `test_session_flush_deadline.js`). Deployed to LIVE 2026-08-27.
+
 ## 4. Current state / what is LIVE
 
+- LIVE serves **`2026-08-26c`** (completion-flush deadline + quota hardening + corrected restart
+  telemetry with device signatures).
 - Completion records survive the completion-time race (round-1 fix) — end screens wait for the
   server ACK; worst case 4 s, then the persisted queue drains on next login.
-- Telemetry is LIVE and collecting. Doris's mum is now also testing her IPHONE (teacher-initiated
-  isolation experiment) — diagnostics self-describe the device via `pageState.dev`.
+- Telemetry is LIVE and NOW CORRECT — all diagnostics collected before `2026-08-26c` are
+  self-read artifacts (identifiable: `secondsSinceLastEvent≈0` and `pageSessionId` equal to the
+  same login's device-event `ps`); discard them.
+- Doris's mum is testing the IPHONE (teacher-initiated isolation experiment) — diagnostics
+  self-describe the device via `pageState.dev` (`iPhone|tp5|br` confirmed working 2026-08-26).
 - Doris's Aug 22/24 sessions are unrecoverable client-side; teacher may adjust her weekly target
   via dashboard `manualOffset` (current target `t_1787531803987_u2jyxb` already carries offset 5).
+- Open observation: on 2026-08-26 the one traced study attempt died mid-way after exactly 3
+  exercise rounds — the corrected telemetry will show whether kills also happen on the iPhone.
 
 ## 5. Open work (prioritized)
 
-### P0 — Interpret the restart diagnostics (after 1–2 days of data)
+### P0 — Interpret the restart diagnostics (data valid from `2026-08-26c` onward)
 Query Doris's doc for `diagnostic:'restart'` events (see `api/check_db2.js` for the Cosmos pattern;
-write a READ-ONLY script, print NO secrets, delete it after). Then:
+write a READ-ONLY script, print NO secrets, delete it after). DISCARD any diagnostic with
+`secondsSinceLastEvent≈0` whose `pageSessionId` matches the same login's device-event `ps`
+(pre-`2026-08-26c` self-read artifacts). Then:
 - Kills clustered at a FIXED time-after-load → startup-path crash suspect (Whisper model preload /
   IndexedDB/Cache writes in `speech_preload.js`/`asset_cache.js`). Consider targeted mitigations
   (e.g. lazy preload on her device class) — additive only, preview first.
@@ -135,18 +161,18 @@ mid-session loss to ≤2 s of exercise events).
   `scheduleAnalyticsFlush`, hardened `saveActiveUserToCache`, telemetry wiring in `finishLogin`.
 - `study_mode.js` — `finishStudySession` (awaited flush), `updateStudyUI` (round breadcrumb).
 - `vampire_survivors.js` / `uno.js` / `gomoku.js` — awaited deadline flush at game over.
-- `test_session_flush_deadline.js` — 32 regression tests (deadline flush, quota hardening,
-  restart telemetry, device signature); part of the mandatory `npm test` chain.
-- `version.json` + `APP_VERSION` — deploy stamp (`2026-08-26b`).
+- `test_session_flush_deadline.js` — 34 regression tests (deadline flush, quota hardening,
+  restart telemetry incl. self-read guard, device signature); part of the mandatory `npm test` chain.
+- `version.json` + `APP_VERSION` — deploy stamp (`2026-08-26c`).
 
 ## 8. Definition of DONE for this thread
 
 - [ ] Restart diagnostics from Doris collected AND interpreted (P0 verdict: startup-crash vs memory
-      vs device-specific, split by iPad/iPhone/WeChat).
+      vs device-specific, split by iPad/iPhone/WeChat). Valid data starts at stamp `2026-08-26c`.
 - [ ] Trigger-level fix shipped via standard preview→main deploy (or documented as OS-level
       unfixable with mitigations in place).
 - [ ] Teacher confirms Doris's completed sessions record on LIVE for ≥1 week without loss.
-- [ ] No regressions in the mandatory suite (currently 81+22+11+32+11+23+154).
+- [ ] No regressions in the mandatory suite (currently 81+22+11+34+11+23+154).
 
 ---
 *Previous handoff in this lineage: `HANDOFF_SESSION_FIX_FULL.md` (July beacon-401 / WeChat fixes —

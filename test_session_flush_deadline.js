@@ -62,7 +62,21 @@ const sandbox = {
   window: { addEventListener: () => {} },
   localStorage: localStorageStub,
   setTimeout, clearTimeout, setInterval, clearInterval,
-  navigator: {},          // no sendBeacon — unload path irrelevant here
+  // Minimal Blob stub: the beacon path does `new Blob([payload])` then passes
+  // it to navigator.sendBeacon. We capture the text synchronously so the
+  // sendBeacon stub can record the POST body.
+  Blob: class { constructor(parts) { this._text = Array.isArray(parts) ? parts.join('') : String(parts); } },
+  URLSearchParams,          // used by the beacon path to build the query string
+  navigator: {
+    // sendBeacon stub: records the POST exactly like the unload flush uses it.
+    // Without this, the beacon path (the real browser fast-path) is skipped and
+    // only the fire-and-forget fetch fallback runs (unawaited, so posts never
+    // land) — which would make the immediate-login-flush assertions flaky.
+    sendBeacon: (url, blob) => {
+      posts.push({ url: String(url), body: (blob && blob._text) ? blob._text : String(blob) });
+      return true;
+    }
+  },          // real browsers provide sendBeacon
   fetch: fetchStub,
   getAppKey: () => Promise.resolve('test-key'),
   // teach-content globals that frontend_auth expects to find at module scope
@@ -124,6 +138,32 @@ function makeUser() {
   ok('stalled events remain in the queue for next-login drain', sandbox.analyticsQueue.length === 1);
   ok('stalled events stay persisted in localStorage', typeof store['csAnalyticsQueue'] === 'string');
   fetchBehavior = 'ok';
+
+  // ---- 1c. immediate login flush (2026-08-28a, startup-kill blind-spot) ----
+  // Before this fix, the login device event only rode the 2s debounced flush,
+  // so an iOS WebKit kill inside the first 2s + no surviving later login left a
+  // TOTAL server blackout (proven on 2026-08-27: zero Doris events all day).
+  // flushAnalyticsOnLogin() must ship the queued login event RIGHT NOW (beacon),
+  // non-blocking, without waiting for the debounce.
+  posts = [];
+  store = {};
+  sandbox.authActiveUser = makeUser();
+  vm.runInContext('authActiveUser = __user; analyticsQueue = [];', Object.assign(sandbox, { __user: sandbox.authActiveUser }));
+  // Simulate the login path: the device event is queued (day-key + isTestMode
+  // guards are already satisfied in the harness).
+  vm.runInContext(`queueDeviceInfoEvent();`, sandbox);
+  ok('login device event queued before immediate flush', sandbox.analyticsQueue.length === 1);
+  const loginT0 = Date.now();
+  await sandbox.flushAnalyticsOnLogin();    // must resolve WITHOUT the 2s debounce
+  const loginElapsed = Date.now() - loginT0;
+  ok('immediate login flush fires a POST without the 2s debounce', loginElapsed < 1000);
+  ok('immediate login flush POSTs to /saveAnalytics', posts.some(p => p.url.includes('/saveAnalytics')));
+  const loginBody = JSON.parse(posts.filter(p => p.url.includes('/saveAnalytics')).pop().body);
+  ok('immediate login flush carries the device event', loginBody.events.some(e => e.type === 'device'));
+  // Beacon semantics: the queue is NOT cleared here (it stays persisted for the
+  // reliable 2s debounce / next-launch drain; server eventId de-dups duplicates).
+  ok('immediate login flush does NOT clear the queue (beacon, not the clearing flush)',
+     sandbox.analyticsQueue.length === 1);
 
   // ---- 2a. saveActiveUserToCache never throws, even when storage is full ----
   sandbox.authActiveUser = makeUser();

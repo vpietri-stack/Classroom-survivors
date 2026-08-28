@@ -1,5 +1,5 @@
 {
-  "version": "2026-08-26c",
-  "deployedAt": "2026-08-27",
-  "notes": "Restart telemetry ordering fix (detect BEFORE new page-session/breadcrumb — 2026-08-26 field data showed only self-read artifacts) + same-ps guard. 🔴 DEPLOY STAMP — MUST match APP_VERSION in frontend_auth.js on EVERY deploy. See DEPLOY_VERSION_STAMP.md. The version watchdog (startVersionWatchdog) polls this file; if 'version' is newer than APP_VERSION it shows the update banner. Bump BOTH together or stale WeChat builds never self-heal (or permanently nag)."
+  "version": "2026-08-28a",
+  "deployedAt": "2026-08-28",
+  "notes": "Immediate login flush (2026-08-28a) — on student login, ship the queued login device event RIGHT NOW via sendBeacon (non-blocking, no 2s debounce) so a WebKit startup-kill leaves its login breadcrumb on the server instead of a total telemetry blackout. Additive; server eventId de-dup makes the later debounced flush idempotent. Closes the blind spot proven on 2026-08-27 (Doris's two iPad/iPhone attempts killed inside 2s with no surviving later login = zero server events). 🔴 DEPLOY STAMP — MUST match APP_VERSION in frontend_auth.js on EVERY deploy. See DEPLOY_VERSION_STAMP.md."
 }

@@ -13,7 +13,7 @@ const API_BASE = API_BASE_URL;
 // The version watchdog (startVersionWatchdog) compares this to the live
 // version.json; a mismatch means stale WeChat builds never self-heal or
 // permanently nag. See DEPLOY_VERSION_STAMP.md. Bump BOTH together.
-const APP_VERSION = '2026-08-26c';
+const APP_VERSION = '2026-08-28a';
 
 // --- SESSION TOKEN (c) design) ---
 // The server mints a signed token on login. We store it in localStorage
@@ -384,8 +384,11 @@ function bindUnloadAnalyticsFlush() {
     });
 }
 
-async function flushAnalyticsViaBeacon() {
-    if (!authActiveUser || analyticsQueue.length === 0) return;
+async function flushAnalyticsViaBeacon(opts = {}) {
+    // The empty-queue guard normally skips idle unloads. opts.force lets the
+    // login path fire a best-effort beacon even though the debounced flush
+    // hasn't run yet (2026-08-28a startup-kill blind-spot fix).
+    if (!authActiveUser || (analyticsQueue.length === 0 && !opts.force)) return;
 
     const events = [...analyticsQueue];
     // Capture pending SR state for this final send.
@@ -560,6 +563,30 @@ async function flushAnalyticsWithDeadline(maxMs = 4000) {
         console.warn('flushAnalyticsWithDeadline error:', e);
     }
     return (typeof analyticsQueue === 'undefined') ? false : analyticsQueue.length === 0;
+}
+
+/**
+ * Immediate best-effort login flush (2026-08-28a, "Doris refresh" follow-up).
+ *
+ * Every other flush path is debounced by 2s (scheduleAnalyticsFlush) or gated
+ * behind a LATER surviving login (restart telemetry). That left a deadly blind
+ * spot proven on 2026-08-27: Doris's mum ran TWO sessions that iOS WebKit
+ * killed within the first ~2s — before the debounced flush fired, and with no
+ * later surviving login to drain the queue. Result: a TOTAL server blackout
+ * for the day, not even the login device event arrived.
+ *
+ * Fix: on student login, ship the queued login event RIGHT NOW via sendBeacon
+ * (non-blocking, no debounce). A startup kill at least leaves its login
+ * breadcrumb on the server — closing the blackout and giving the restart
+ * detector a real "previous session" to compare against.
+ *
+ * Additive + non-blocking: a browser without sendBeacon (or a failed beacon)
+ * simply no-ops here; the existing 2s debounce stays the reliable path. The
+ * server's eventId de-dup makes any duplicate (beacon + later debounce) idempotent.
+ */
+function flushAnalyticsOnLogin() {
+    // Fire-and-forget — do NOT await. The login device event must leave NOW.
+    return flushAnalyticsViaBeacon({ force: true }).catch(() => {});
 }
 
 /**
@@ -1339,6 +1366,11 @@ function finishLogin() {
     // OS census: record what device/OS this student logs in from (once per
     // device per day). Runs after the teacher redirect so only students count.
     queueDeviceInfoEvent();
+
+    // 2026-08-28a: ship the login event IMMEDIATELY (beacon, non-blocking) so a
+    // startup kill leaves its login breadcrumb on the server instead of a total
+    // blackout. The 2s debounce below remains the reliable in-session path.
+    flushAnalyticsOnLogin();
 
     // FIX #3: flush any events carried over in localStorage from a previous
     // session that was killed/closed before it could deliver them.

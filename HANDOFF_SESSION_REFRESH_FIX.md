@@ -1,6 +1,6 @@
 # HANDOFF — Classroom Survivors: forced page-refresh / session-loss thread (Doris)
 
-**Date:** 2026-08-26 (updated 2026-08-27, round 3)
+**Date:** 2026-08-26 (updated 2026-08-28, round 4 — immediate login-flush deploy)
 **Author:** Investigation agent (scheduled task + follow-ups)
 **Audience:** Next coding agent. Read top-to-bottom. "Current State" is ground truth (verified
 against `git log` + live-site fetches on 2026-08-26). Supersedes the deployment-gap sections of
@@ -16,11 +16,15 @@ proven by her mum's video on 2026-08-26: **iOS WebKit terminates the page's WebC
 (Safari shows “此网页已重新载入”) and auto-reloads — MID-SESSION, with no JS running at the kill.**
 The app's vulnerability: the completion record was shipped fire-and-forget, so the kill ate it.
 
-**Fixed & deployed (LIVE, stamps `2026-08-25a` → `2026-08-26b`):**
+**Fixed & deployed (LIVE, stamps `2026-08-25a` → `2026-08-28a`):**
 1. Completion flush is now AWAITED (deadline-capped) before every end screen renders.
 2. `saveActiveUserToCache` hardened against QuotaExceededError.
 3. Restart telemetry: kill-surviving breadcrumb + page-session stamps + restart diagnostic events.
 4. Device signature in the breadcrumb (iPhone-vs-iPad experiment support).
+5. (2026-08-28a) **Immediate login flush** — the login `device` event is beamed RIGHT NOW via
+   `sendBeacon` on login, before `finishLogin` continues, so a WebKit startup-kill leaves its
+   login breadcrumb instead of a total server blackout. Telemetry-visibility fix ONLY; the kill
+   itself remains unsolved (see Round 4).
 
 **NOT yet solved:** the WebKit kill itself (trigger unknown; telemetry is collecting evidence).
 Full report: `SESSION_REFRESH_ROOTCAUSE_2026-08-25.md` (incl. §7 round-2 update).
@@ -48,7 +52,8 @@ Full report: `SESSION_REFRESH_ROOTCAUSE_2026-08-25.md` (incl. §7 round-2 update
 - The July session-fix "deployment gap" (LIVE had fixes, PREVIEW didn't) is OBSOLETE: branches
   re-converged 2026-07-31 (`edf0577`); since then preview ⊆ main by ancestry.
 - As of this handoff: `main` = `preview` = `origin/main` = `preview/main` should all sit at the
-  handoff commit (previous landmark: `fdcb1ee` = device-signature telemetry `2026-08-26b`).
+  handoff commit (round-3 landmark: `fdcb1ee` = device-signature telemetry `2026-08-26b`;
+  round-4 landmark: `a73fc01` = immediate login-flush `2026-08-28a`).
   Verify with `git rev-parse refs/heads/main refs/heads/preview origin/main preview/main`.
 - LIVE + PREVIEW both serve the same build stamps; verify with
   `https://vpietri-stack.github.io/Classroom-survivors[-preview]/version.json`.
@@ -101,9 +106,32 @@ Full report: `SESSION_REFRESH_ROOTCAUSE_2026-08-25.md` (incl. §7 round-2 update
   new page session is minted) + a same-`ps` guard as defense in depth. +2 regression tests
   (34 in `test_session_flush_deadline.js`). Deployed to LIVE 2026-08-27.
 
+### Round 4 (2026-08-28, immediate login-flush deploy — closes the blackout)
+- Round-3 telemetry readout exposed a residual blind spot: on 2026-08-27 BOTH of Doris's
+  reported attempts left ZERO server events — not even the login `device` event. Root cause:
+  the login device event only rode the 2 s debounced flush (`scheduleAnalyticsFlush`), so a
+  WebKit kill INSIDE the first 2 s, with NO surviving later login to drain the persisted queue,
+  produced a total server blackout. That also starved the restart telemetry (2026-08-26c) of its
+  "previous session" — an attempt day could look completely empty.
+- **Fix (`a73fc01`, stamp `2026-08-28a`):** on student login, `flushAnalyticsOnLogin()` ships the
+  queued login device event IMMEDIATELY via `navigator.sendBeacon` (non-blocking, no 2 s debounce)
+  — called in `finishLogin` right after `queueDeviceInfoEvent()`. `flushAnalyticsViaBeacon(opts)`
+  gained a `force` opt so the normally-idle unload guard doesn't skip it. Beacon semantics: the
+  queue is NOT cleared here (stays persisted for the reliable 2 s debounce / next-launch drain;
+  the server's `eventId` de-dup makes the duplicate idempotent). Pure telemetry-visibility fix —
+  it does NOT stop the WebKit kill, but a startup-kill now leaves its login breadcrumb, so the
+  restart diagnostics finally have real signal to compare against.
+- Test-harness note: the flush suite's vm sandbox lacked `navigator.sendBeacon` / `Blob` /
+  `URLSearchParams`, so the beacon branch was silently skipped and the immediate-flush assertions
+  couldn't pass. Round 4 added those stubs (incl. a `sendBeacon` recorder) — the real browser
+  fast-path is now exercised. +5 regression tests (**34 → 39** in `test_session_flush_deadline.js`,
+  block 1c). Deployed LIVE + PREVIEW 2026-08-28 via the standard preview→main merge; both
+  `version.json` confirmed serving `2026-08-28a` after the Pages build propagated (the served
+  stamp lagged ~90 s behind the push — re-verify with a wait, not just `git ls-remote`).
+
 ## 4. Current state / what is LIVE
 
-- LIVE serves **`2026-08-26c`** (completion-flush deadline + quota hardening + corrected restart
+- LIVE serves **`2026-08-28a`** (immediate login flush + completion-flush deadline + quota hardening + corrected restart
   telemetry with device signatures).
 - Completion records survive the completion-time race (round-1 fix) — end screens wait for the
   server ACK; worst case 4 s, then the persisted queue drains on next login.
@@ -123,7 +151,14 @@ Full report: `SESSION_REFRESH_ROOTCAUSE_2026-08-25.md` (incl. §7 round-2 update
 Query Doris's doc for `diagnostic:'restart'` events (see `api/check_db2.js` for the Cosmos pattern;
 write a READ-ONLY script, print NO secrets, delete it after). DISCARD any diagnostic with
 `secondsSinceLastEvent≈0` whose `pageSessionId` matches the same login's device-event `ps`
-(pre-`2026-08-26c` self-read artifacts). Then:
+(pre-`2026-08-26c` self-read artifacts).
+- **From `2026-08-28a` the blackout is closed:** a startup-kill now leaves its login `device`
+event (immediate beacon), so an attempt-day is no longer empty-by-default. Split the two
+failure shapes: attempt-day WITH a login event but NO restart diagnostic = kill happened
+AFTER load (mid-session / memory suspect); attempt-day with NO login event at all = kill
+BEFORE the beacon fired (extreme startup crash) or the device was offline. Both are now
+distinguishable from a genuine no-activity day.
+Then:
 - Kills clustered at a FIXED time-after-load → startup-path crash suspect (Whisper model preload /
   IndexedDB/Cache writes in `speech_preload.js`/`asset_cache.js`). Consider targeted mitigations
   (e.g. lazy preload on her device class) — additive only, preview first.
@@ -157,13 +192,17 @@ mid-session loss to ≤2 s of exercise events).
 ## 7. Key file references
 
 - `SESSION_REFRESH_ROOTCAUSE_2026-08-25.md` — full root-cause report (§7 = round 2).
-- `frontend_auth.js` — `flushAnalyticsWithDeadline` (~line 425), restart-telemetry block after
+- `frontend_auth.js` — `flushAnalyticsWithDeadline` (~line 425), `flushAnalyticsViaBeacon(opts)`
+  (~line 387, `force` opt for the immediate login beacon), `flushAnalyticsOnLogin()` (~line 587,
+  wired into `finishLogin` right after `queueDeviceInfoEvent`), restart-telemetry block after
   `scheduleAnalyticsFlush`, hardened `saveActiveUserToCache`, telemetry wiring in `finishLogin`.
 - `study_mode.js` — `finishStudySession` (awaited flush), `updateStudyUI` (round breadcrumb).
 - `vampire_survivors.js` / `uno.js` / `gomoku.js` — awaited deadline flush at game over.
-- `test_session_flush_deadline.js` — 34 regression tests (deadline flush, quota hardening,
-  restart telemetry incl. self-read guard, device signature); part of the mandatory `npm test` chain.
-- `version.json` + `APP_VERSION` — deploy stamp (`2026-08-26c`).
+- `test_session_flush_deadline.js` — 39 regression tests (deadline flush, quota hardening,
+  restart telemetry incl. self-read guard, device signature, immediate login flush); part of the
+  mandatory `npm test` chain. NOTE: the vm sandbox needs `navigator.sendBeacon` + `Blob` +
+  `URLSearchParams` stubs or the beacon path is silently untested.
+- `version.json` + `APP_VERSION` — deploy stamp (`2026-08-28a`).
 
 ## 8. Definition of DONE for this thread
 
@@ -172,7 +211,7 @@ mid-session loss to ≤2 s of exercise events).
 - [ ] Trigger-level fix shipped via standard preview→main deploy (or documented as OS-level
       unfixable with mitigations in place).
 - [ ] Teacher confirms Doris's completed sessions record on LIVE for ≥1 week without loss.
-- [ ] No regressions in the mandatory suite (currently 81+22+11+34+11+23+154).
+- [ ] No regressions in the mandatory suite (currently 81+22+11+39+11+23+154).
 
 ---
 *Previous handoff in this lineage: `HANDOFF_SESSION_FIX_FULL.md` (July beacon-401 / WeChat fixes —

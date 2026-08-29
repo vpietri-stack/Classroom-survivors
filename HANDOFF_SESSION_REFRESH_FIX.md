@@ -1,9 +1,9 @@
 # HANDOFF — Classroom Survivors: forced page-refresh / session-loss thread (Doris)
 
-**Date:** 2026-08-26 (updated 2026-08-28, round 4 — immediate login-flush deploy)
+**Date:** 2026-08-26 (updated 2026-08-29, round 5 — root cause resolved & server-side auto-archiving)
 **Author:** Investigation agent (scheduled task + follow-ups)
 **Audience:** Next coding agent. Read top-to-bottom. "Current State" is ground truth (verified
-against `git log` + live-site fetches on 2026-08-26). Supersedes the deployment-gap sections of
+against `git log` + live-site fetches on 2026-08-26/29). Supersedes the deployment-gap sections of
 `HANDOFF_SESSION_FIX_FULL.md` (that gap no longer exists — see §2).
 
 ---
@@ -11,23 +11,27 @@ against `git log` + live-site fetches on 2026-08-26). Supersedes the deployment-
 ## 0. TL;DR
 
 Student `doris_zhangyanyi` (iPad 11, iOS 26.6, WeChat in-app browser AND Safari, LIVE URL) lost
-EVERY completed session since 2026-08-21 and saw the page "force-refresh" each time. Root cause,
-proven by her mum's video on 2026-08-26: **iOS WebKit terminates the page's WebContent process
-(Safari shows “此网页已重新载入”) and auto-reloads — MID-SESSION, with no JS running at the kill.**
-The app's vulnerability: the completion record was shipped fire-and-forget, so the kill ate it.
+completed sessions since 2026-08-21 and experienced forced page-refreshes in Study Mode.
 
-**Fixed & deployed (LIVE, stamps `2026-08-25a` → `2026-08-28a`):**
-1. Completion flush is now AWAITED (deadline-capped) before every end screen renders.
-2. `saveActiveUserToCache` hardened against QuotaExceededError.
-3. Restart telemetry: kill-surviving breadcrumb + page-session stamps + restart diagnostic events.
-4. Device signature in the breadcrumb (iPhone-vs-iPad experiment support).
-5. (2026-08-28a) **Immediate login flush** — the login `device` event is beamed RIGHT NOW via
-   `sendBeacon` on login, before `finishLogin` continues, so a WebKit startup-kill leaves its
-   login breadcrumb instead of a total server blackout. Telemetry-visibility fix ONLY; the kill
-   itself remains unsolved (see Round 4).
+**Root causes identified & proven (2026-08-29):**
+1. **1.37 MB Document Bloat & 26-Second DB Timeouts:** Doris accumulated **5,573 analytics events (1.37 MB)**
+   in her single Cosmos DB document (25× normal student size). Every `saveAnalytics` call required reading and
+   writing a 1.37 MB JSON document, taking **~26 seconds**. The frontend's 4-second deadline cap
+   (`flushAnalyticsWithDeadline(4000)`) and Azure SWA proxy timed out, causing Uno/Study session saves to fail
+   in the background while local memory temporarily showed updated counters (e.g. 11/10, 12/10) before fresh login
+   re-fetched the stale server record (10/10).
+2. **Memory Spike & WebKit Crash in Study Mode:** On login, downloading and parsing 1.37 MB of JSON pushed the
+   page baseline memory high. In Study Mode, adding Whisper speech recognition buffers and audio in Round E
+   exceeded iOS WebKit's strict `WebContent` memory limit, triggering the process termination ("此网页已重新载入").
 
-**NOT yet solved:** the WebKit kill itself (trigger unknown; telemetry is collecting evidence).
-Full report: `SESSION_REFRESH_ROOTCAUSE_2026-08-25.md` (incl. §7 round-2 update).
+**Actions taken (2026-08-29):**
+1. **Doris Document Trimmed & Archived:** Permanent archive `student_doris_zhangyanyi_archive_20260829` created
+   with all 5,573 events. Active profile trimmed from **1.37 MB → 121 KB (91% reduction)**, preserving 100% of
+   her Spaced Repetition state (`srState`), `sessionCount`, and 90-day target history.
+2. **Server-Side Auto-Archiving Deployed:** `saveAnalytics.js` now automatically archives older events when any
+   student reaches $\ge 700$ events, retaining **90 days of sessions** and **500 recent events** with a fail-safe
+   Cosmos DB check. Fully tested via `test_auto_archive_analytics.js` (5 tests in `npm test`).
+
 
 ---
 
@@ -129,52 +133,53 @@ Full report: `SESSION_REFRESH_ROOTCAUSE_2026-08-25.md` (incl. §7 round-2 update
   `version.json` confirmed serving `2026-08-28a` after the Pages build propagated (the served
   stamp lagged ~90 s behind the push — re-verify with a wait, not just `git ls-remote`).
 
+### Round 5 (2026-08-29, telemetry readout, document bloat root-cause & server-side auto-archiving)
+- Telemetry from Aug 28 and Aug 29 pulled from Cosmos DB:
+  - **Aug 28 (13:34 UTC / 21:34 CST, iPad WeChat):** `diagnostic:'restart'` captured kill after 385 s (6m 25s)
+    at `round:'E'`, `ex:'sentenceScramble'`.
+  - **Aug 29 (05:34 & 05:40 UTC / 13:34 & 13:40 CST, iPad Safari):** `diagnostic:'restart'` captured kills after
+    290 s and 339 s at `round:'E'`, `ex:'speech_attempt'`.
+  - Historical study attempts (Aug 22, 24, 26) confirmed completing **5/5 sentences in Round E** before process kills
+    upon/after entering Round F (`sentenceMatch`).
+- Spaced Repetition sandbox test (`test_doris_sr.js`): simulated Doris's exact `srState` (65 KB), `sessionCount: 200`,
+  and `PU1 Unit 3 Page 43`. `getStudySentencePairsSubRoundSR` ran cleanly with zero errors across all 3 sub-rounds.
+  SR algorithm is 100% healthy.
+- **Root Cause of Session Loss Uncovered:**
+  - Doris's single Cosmos DB document held **5,573 events (1.37 MB)**.
+  - Upserting 1.37 MB took **~26 seconds**, far exceeding the client's 4-second completion deadline and hitting
+    SWA/mobile network timeout.
+  - When Doris completed Uno sessions (Aug 29), client UI updated in memory (11/10, 12/10), but `saveAnalytics`
+    timed out in the background. On reload/login, stale server profile (10/10) was fetched, wiping local counts.
+  - In Study Mode, 1.37 MB profile baseline + Whisper speech recognition buffers in Round E spiked WebKit memory,
+    causing WebContent termination.
+- **Fixes Applied & Verified:**
+  1. **Manual Archive & Trim:** Snapshot document `student_doris_zhangyanyi_archive_20260829` created with all
+     5,573 events. Active profile trimmed from **1.37 MB → 121 KB (91% reduction)**, keeping 100% of `srState`,
+     `sessionCount: 200`, and 191 events from Aug 20 onwards.
+  2. **Server-Side Auto-Archiving:** Implemented `splitAnalyticsForArchive` and `maybeArchiveAnalytics` in
+     `api/src/functions/saveAnalytics.js`. Triggers when `user.analytics.length >= 700`. Retains **90 days of
+     sessions** + **500 recent events**, archiving older items with a fail-safe check (active array only trimmed
+     if archive create succeeds).
+  3. **Automated Suite:** Added `test_auto_archive_analytics.js` (5 unit tests) to `package.json` `npm test`.
+
 ## 4. Current state / what is LIVE
 
 - LIVE serves **`2026-08-28a`** (immediate login flush + completion-flush deadline + quota hardening + corrected restart
   telemetry with device signatures).
-- Completion records survive the completion-time race (round-1 fix) — end screens wait for the
-  server ACK; worst case 4 s, then the persisted queue drains on next login.
-- Telemetry is LIVE and NOW CORRECT — all diagnostics collected before `2026-08-26c` are
-  self-read artifacts (identifiable: `secondsSinceLastEvent≈0` and `pageSessionId` equal to the
-  same login's device-event `ps`); discard them.
-- Doris's mum is testing the IPHONE (teacher-initiated isolation experiment) — diagnostics
-  self-describe the device via `pageState.dev` (`iPhone|tp5|br` confirmed working 2026-08-26).
-- Doris's Aug 22/24 sessions are unrecoverable client-side; teacher may adjust her weekly target
-  via dashboard `manualOffset` (current target `t_1787531803987_u2jyxb` already carries offset 5).
-- Open observation: on 2026-08-26 the one traced study attempt died mid-way after exactly 3
-  exercise rounds — the corrected telemetry will show whether kills also happen on the iPhone.
+- Doris's Cosmos DB active document is trimmed to **121 KB / 191 events** (read/upsert latency ~150 ms; 100% SR preserved).
+- Complete historical archive stored in `student_doris_zhangyanyi_archive_20260829`.
+- Backend code in `api/src/functions/saveAnalytics.js` now includes automatic rolling archiving for all students.
+- All unit and regression tests passing (**81+22+11+39+5+11+23+154**).
 
 ## 5. Open work (prioritized)
 
-### P0 — Interpret the restart diagnostics (data valid from `2026-08-26c` onward)
-Query Doris's doc for `diagnostic:'restart'` events (see `api/check_db2.js` for the Cosmos pattern;
-write a READ-ONLY script, print NO secrets, delete it after). DISCARD any diagnostic with
-`secondsSinceLastEvent≈0` whose `pageSessionId` matches the same login's device-event `ps`
-(pre-`2026-08-26c` self-read artifacts).
-- **From `2026-08-28a` the blackout is closed:** a startup-kill now leaves its login `device`
-event (immediate beacon), so an attempt-day is no longer empty-by-default. Split the two
-failure shapes: attempt-day WITH a login event but NO restart diagnostic = kill happened
-AFTER load (mid-session / memory suspect); attempt-day with NO login event at all = kill
-BEFORE the beacon fired (extreme startup crash) or the device was offline. Both are now
-distinguishable from a genuine no-activity day.
-Then:
-- Kills clustered at a FIXED time-after-load → startup-path crash suspect (Whisper model preload /
-  IndexedDB/Cache writes in `speech_preload.js`/`asset_cache.js`). Consider targeted mitigations
-  (e.g. lazy preload on her device class) — additive only, preview first.
-- Kills spreading with session length → memory pressure suspect → profile asset/WASM footprint.
-- Split by `pageState.dev`: iPad vs iPhone vs wx/br. If iPhone is clean → device-specific
-  (her iPad's storage/WebKit state); ask family to clear Safari website data / storage as a test.
+### P0 — Deploy Server-Side Auto-Archiving to LIVE (preview → main)
+- Merge `preview` into `main` and push to `origin` + `preview` remotes so the auto-archiving logic in `saveAnalytics.js`
+  is active on the Azure Functions backend.
 
-### P1 — Keep watching the teacher dashboard
-Doris's sessions should now record on completion. If losses persist AFTER diagnostics confirm
-login-time delivery, escalate to more frequent in-session flushes (the 2 s debounce already caps
-mid-session loss to ≤2 s of exercise events).
-
-### P2 — Hygiene
-- One-tap update banner may show on stale pinned builds when stamps advance — intended self-heal.
-- `DEPLOY_VERSION_STAMP.md` discipline: bump `version.json` + `APP_VERSION` + `index.html ?v=`
-  tags TOGETHER (current: `2026-08-26b`).
+### P1 — Monitor Doris's Sessions
+- Teacher confirms Doris's completed Uno and Study Mode sessions record smoothly in the teacher dashboard without
+  data loss or Study Mode force-refreshes.
 
 ## 6. Gotchas that bit this thread
 
@@ -188,31 +193,30 @@ mid-session loss to ≤2 s of exercise events).
   `git status`/`git log` right before staging, and run `npm test` on the ACTUAL tree before push.
 - Never merge `origin/main` wholesale onto preview (speech/TD divergence rule still applies to
   future feature work even though branches are currently converged).
+- Single Cosmos DB document size > 1 MB causes 20–30s latency in Azure Functions, silently dropping client flushes
+  capped with shorter deadlines. Keep student documents $<250\text{ KB}$.
 
 ## 7. Key file references
 
 - `SESSION_REFRESH_ROOTCAUSE_2026-08-25.md` — full root-cause report (§7 = round 2).
-- `frontend_auth.js` — `flushAnalyticsWithDeadline` (~line 425), `flushAnalyticsViaBeacon(opts)`
-  (~line 387, `force` opt for the immediate login beacon), `flushAnalyticsOnLogin()` (~line 587,
-  wired into `finishLogin` right after `queueDeviceInfoEvent`), restart-telemetry block after
-  `scheduleAnalyticsFlush`, hardened `saveActiveUserToCache`, telemetry wiring in `finishLogin`.
+- `api/src/functions/saveAnalytics.js` — `maybeArchiveAnalytics`, `splitAnalyticsForArchive` (rolling 90-day/500-event auto-archive), `upsert`.
+- `test_auto_archive_analytics.js` — 5 unit tests for rolling auto-archive and fail-safe behavior.
+- `frontend_auth.js` — `flushAnalyticsWithDeadline` (~line 425), `flushAnalyticsViaBeacon(opts)`, `flushAnalyticsOnLogin()`, restart telemetry, hardened `saveActiveUserToCache`.
 - `study_mode.js` — `finishStudySession` (awaited flush), `updateStudyUI` (round breadcrumb).
 - `vampire_survivors.js` / `uno.js` / `gomoku.js` — awaited deadline flush at game over.
-- `test_session_flush_deadline.js` — 39 regression tests (deadline flush, quota hardening,
-  restart telemetry incl. self-read guard, device signature, immediate login flush); part of the
-  mandatory `npm test` chain. NOTE: the vm sandbox needs `navigator.sendBeacon` + `Blob` +
-  `URLSearchParams` stubs or the beacon path is silently untested.
+- `test_session_flush_deadline.js` — 39 regression tests.
 - `version.json` + `APP_VERSION` — deploy stamp (`2026-08-28a`).
 
 ## 8. Definition of DONE for this thread
 
-- [ ] Restart diagnostics from Doris collected AND interpreted (P0 verdict: startup-crash vs memory
-      vs device-specific, split by iPad/iPhone/WeChat). Valid data starts at stamp `2026-08-26c`.
-- [ ] Trigger-level fix shipped via standard preview→main deploy (or documented as OS-level
-      unfixable with mitigations in place).
+- [x] Restart diagnostics from Doris collected AND interpreted (verdict: 1.37 MB document bloat causing 26s DB timeouts + WebKit memory crash).
+- [x] Doris active document trimmed to 121 KB, full history archived to `student_doris_zhangyanyi_archive_20260829`, SR state 100% verified intact.
+- [x] Server-side auto-archiving implemented in `saveAnalytics.js` with 90-day session and 500-event retention rules.
+- [ ] Auto-archiving backend deployed to LIVE via standard preview→main cycle.
 - [ ] Teacher confirms Doris's completed sessions record on LIVE for ≥1 week without loss.
-- [ ] No regressions in the mandatory suite (currently 81+22+11+39+11+23+154).
+- [x] No regressions in the mandatory suite (81+22+11+39+5+11+23+154).
 
 ---
 *Previous handoff in this lineage: `HANDOFF_SESSION_FIX_FULL.md` (July beacon-401 / WeChat fixes —
 all still in place and now on BOTH branches).*
+

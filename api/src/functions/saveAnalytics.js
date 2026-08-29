@@ -3,6 +3,102 @@ const { validateApiKey } = require('./shared/validateApiKey');
 const { getContainer } = require('./shared/db');
 const auth = require('./shared/auth');
 
+const ARCHIVE_TRIGGER_COUNT = 700;
+const RETENTION_DAYS_MS = 90 * 24 * 60 * 60 * 1000; // 90 days
+const RETENTION_MAX_RECENT_EVENTS = 500; // 500 recent events
+
+/**
+ * Splits an analytics array into retained events and events to archive.
+ * Retains:
+ *   1. All `type === 'session'` events from the last 90 days (for target calculations).
+ *   2. The 500 most recent events (for recent activity, speech analysis, and diagnostics).
+ *
+ * @param {Array} analytics
+ * @param {number} [now]
+ * @returns {{ shouldArchive: boolean, retained: Array, toArchive: Array }}
+ */
+function splitAnalyticsForArchive(analytics, now = Date.now()) {
+    if (!analytics || !Array.isArray(analytics) || analytics.length < ARCHIVE_TRIGGER_COUNT) {
+        return { shouldArchive: false, retained: analytics || [], toArchive: [] };
+    }
+
+    const cutoffTs = now - RETENTION_DAYS_MS;
+
+    // 1. All session events from the last 90 days
+    const recentSessions = analytics.filter(e => {
+        if (!e || e.type !== 'session') return false;
+        if (!e.timestamp) return false;
+        const t = new Date(e.timestamp).getTime();
+        return !isNaN(t) && t >= cutoffTs;
+    });
+
+    // 2. The most recent 500 events
+    const recentEvents = analytics.slice(-RETENTION_MAX_RECENT_EVENTS);
+
+    // Merge and deduplicate retained events
+    const retainedMap = new Map();
+    recentSessions.forEach(e => retainedMap.set(e.eventId || JSON.stringify(e), e));
+    recentEvents.forEach(e => retainedMap.set(e.eventId || JSON.stringify(e), e));
+
+    const retainedList = Array.from(retainedMap.values()).sort((a, b) => {
+        const ta = a && a.timestamp ? new Date(a.timestamp).getTime() : 0;
+        const tb = b && b.timestamp ? new Date(b.timestamp).getTime() : 0;
+        return ta - tb;
+    });
+
+    const retainedIds = new Set(retainedList.map(e => e.eventId || JSON.stringify(e)));
+    const archiveList = analytics.filter(e => !retainedIds.has(e.eventId || JSON.stringify(e)));
+
+    if (archiveList.length === 0) {
+        return { shouldArchive: false, retained: analytics, toArchive: [] };
+    }
+
+    return { shouldArchive: true, retained: retainedList, toArchive: archiveList };
+}
+
+/**
+ * Checks if the student document's analytics array has grown too large (>=700 events).
+ * If so, creates a permanent archive document in Cosmos DB before trimming the active
+ * document's analytics array. Fail-safe: if archive creation fails, active document
+ * is NOT trimmed.
+ *
+ * @param {Object} container Cosmos DB container
+ * @param {Object} user Student document
+ * @param {Object} [context] Azure Functions context
+ */
+async function maybeArchiveAnalytics(container, user, context) {
+    if (!container || !user || !user.analytics) return;
+
+    const { shouldArchive, retained, toArchive } = splitAnalyticsForArchive(user.analytics);
+    if (!shouldArchive || toArchive.length === 0) return;
+
+    const archiveDoc = {
+        id: `archive_${user.id}_${Date.now()}`,
+        type: 'student_analytics_archive',
+        studentId: user.id,
+        login: user.login,
+        fullName: user.fullName,
+        archivedAt: new Date().toISOString(),
+        totalArchivedEvents: toArchive.length,
+        sessionCountAtArchive: user.sessionCount,
+        events: toArchive
+    };
+
+    try {
+        await container.items.create(archiveDoc);
+        // Only trim active document if archive creation succeeded in Cosmos DB
+        user.analytics = retained;
+        if (context && typeof context.log === 'function') {
+            context.log(`Archived ${toArchive.length} events for ${user.id} to ${archiveDoc.id}. Retained ${retained.length} events.`);
+        }
+    } catch (archiveErr) {
+        if (context && typeof context.warn === 'function') {
+            context.warn(`Failed to create analytics archive for ${user.id}:`, archiveErr);
+        }
+        // Do not trim user.analytics if archive fails — ensures zero data loss
+    }
+}
+
 app.http('saveAnalytics', {
     route: 'saveAnalytics',
     methods: ['POST'],
@@ -50,6 +146,11 @@ app.http('saveAnalytics', {
             if (srState && typeof srState === 'object') user.srState = srState;
             if (incrementSession) user.sessionCount = (user.sessionCount || 0) + 1;
 
+            // Automatic rolling archival: if user.analytics gets too large (>=700 events),
+            // safely archive older events (keeping 90-day sessions + 500 recent events)
+            // before saving the active record.
+            await maybeArchiveAnalytics(getContainer(), user, context);
+
             await getContainer().items.upsert(user);
 
             return {
@@ -66,3 +167,12 @@ app.http('saveAnalytics', {
         }
     }
 });
+
+module.exports = {
+    splitAnalyticsForArchive,
+    maybeArchiveAnalytics,
+    ARCHIVE_TRIGGER_COUNT,
+    RETENTION_DAYS_MS,
+    RETENTION_MAX_RECENT_EVENTS
+};
+

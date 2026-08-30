@@ -173,9 +173,13 @@ completed sessions since 2026-08-21 and experienced forced page-refreshes in Stu
 
 ## 5. Open work (prioritized)
 
-### P0 — Deploy Server-Side Auto-Archiving to LIVE (preview → main)
-- Merge `preview` into `main` and push to `origin` + `preview` remotes so the auto-archiving logic in `saveAnalytics.js`
-  is active on the Azure Functions backend.
+### P0 — Deploy Server-Side Auto-Archiving to LIVE (preview → main) ✅ DONE (verified 2026-08-30)
+- Merged `preview` → `main`; pushed to `origin` + `preview` remotes. All four refs = `e275195`.
+- **Verification that the running Azure Function is the new code** (not just the git push):
+  - SWA app `Val-ESL` is GitHub-linked (Branch `main`) → push to `origin/main` triggers the build. Build record `status: Ready`, `lastUpdatedOn 2026-08-29T06:44:51Z` — 2 min after `e275195` landed (06:42:51Z).
+  - **Decisive:** read-only Cosmos probe found **20 `student_analytics_archive` docs** that can only exist if `maybeArchiveAnalytics` fired. 19 were created by live student traffic AFTER the deploy — `dave_suzhengan` (06:45), `milk_yangkaicheng`, `ivan_wangzichuan` (×2), `koey_likeyu`, `ruly_zhangruixi`, `simon_liyusen`, `mia_zhengxinmiao`, `nick_wangzixi`, `zozo_zhangchuxin` (×2), `apple_fengyiyuan`, `jojo_xujinyan`, `amber_duanyu`, `zoe_zhangchutian`, `leon_lizihao`, `lucky_suying`, `mia_linyutong`, `selena_lipuyi` (through 2026-08-30T05:27Z).
+  - **Scope correction:** the 700-event document-bloat problem was NOT Doris-only — auto-archive has fired for ~19 different students. The fix is global, as intended.
+  - Note: Doris's `student_doris_zhangyanyi_archive_20260829` (5,573 events) was created at 06:23Z — a manual trim by the prior agent BEFORE the build went live; subsequent student archives are the live function's own work.
 
 ### P1 — Monitor Doris's Sessions
 - Teacher confirms Doris's completed Uno and Study Mode sessions record smoothly in the teacher dashboard without
@@ -212,8 +216,8 @@ completed sessions since 2026-08-21 and experienced forced page-refreshes in Stu
 - [x] Restart diagnostics from Doris collected AND interpreted (verdict: 1.37 MB document bloat causing 26s DB timeouts + WebKit memory crash).
 - [x] Doris active document trimmed to 121 KB, full history archived to `student_doris_zhangyanyi_archive_20260829`, SR state 100% verified intact.
 - [x] Server-side auto-archiving implemented in `saveAnalytics.js` with 90-day session and 500-event retention rules.
-- [ ] Auto-archiving backend deployed to LIVE via standard preview→main cycle.
-- [ ] Teacher confirms Doris's completed sessions record on LIVE for ≥1 week without loss.
+- [x] Auto-archiving backend deployed to LIVE via standard preview→main cycle — **runtime verified** (SWA build `Ready` 2026-08-29T06:44:51Z; 19+ live `student_analytics_archive` docs created by student traffic prove the function runs `e275195`). Affects ~19 students, not just Doris.
+- [ ] Teacher confirms Doris's (and other students') completed sessions record on LIVE for ≥1 week without loss.
 - [x] No regressions in the mandatory suite (81+22+11+39+5+11+23+154).
 
 ---

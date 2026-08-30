@@ -201,8 +201,13 @@ function onTeacherFilterChange() {
 // ----- ANALYTICS HELPERS -----
 
 function getAnalyticsInRange(student, dateFrom, dateTo) {
-    if (!student.analytics || !Array.isArray(student.analytics)) return [];
-    return student.analytics.filter(e => {
+    // Prefer the merged live+archive set (populated by loadStudentArchives);
+    // fall back to the live-only analytics array.
+    const all = (student && Array.isArray(student._fullAnalytics))
+        ? student._fullAnalytics
+        : (student && student.analytics) || [];
+    if (!Array.isArray(all)) return [];
+    return all.filter(e => {
         if (!e.timestamp) return false;
         const ts = e.timestamp.substring(0, 10); // YYYY-MM-DD
         if (dateFrom && ts < dateFrom) return false;
@@ -445,7 +450,7 @@ function renderStudentsTable(dateFrom, dateTo) {
 
 // ----- STUDENT DETAIL -----
 
-function openStudentDetail(studentId) {
+async function openStudentDetail(studentId) {
     currentStudent = allStudents.find(s => s.id === studentId);
     if (!currentStudent) return;
 
@@ -459,6 +464,10 @@ function openStudentDetail(studentId) {
     document.getElementById('detailStudentBook').innerText = currentStudent.book
         ? `${currentStudent.book} U${currentStudent.unit} P${currentStudent.page}`
         : 'No content assigned';
+
+    // Fetch + merge analytics archives so the student's full history shows in
+    // the sessions/exercises views (live doc stays small; archives carry the rest).
+    await loadStudentArchives(studentId);
 
     // Reset tabs
     switchTab('sessions');
@@ -477,6 +486,49 @@ function backToDashboard() {
 
     // Stop test iframe if running
     document.getElementById('testIframe').src = '';
+}
+
+// Pure merge: combine a live analytics array with archive docs' `events` arrays.
+// De-dups by eventId/timestamp (archives may slightly overlap the live tail).
+// Exported for unit testing (no DOM/network dependency).
+function mergeAnalytics(live, archives) {
+    const liveArr = Array.isArray(live) ? live : [];
+    if (!Array.isArray(archives) || archives.length === 0) return liveArr;
+    const seen = new Set(liveArr.map(e => e && (e.eventId || e.timestamp)));
+    const archived = archives.flatMap(a => (a && Array.isArray(a.events)) ? a.events : []);
+    const merged = liveArr.concat(archived.filter(e => e && !seen.has(e.eventId || e.timestamp)));
+    return merged;
+}
+
+// Fetches a student's analytics-archive docs and merges their events into a
+// `_fullAnalytics` array on the current student so sessions/exercises views show
+// the complete history (live doc only keeps the most recent events). If the
+// fetch fails (e.g. archive endpoint unreachable), we silently fall back to the
+// live data — never block the detail view on it.
+async function loadStudentArchives(studentId) {
+    const badge = document.getElementById('detailArchiveBadge');
+    const countEl = document.getElementById('detailArchiveCount');
+    const liveEvents = (currentStudent && Array.isArray(currentStudent.analytics)) ? currentStudent.analytics : [];
+    currentStudent._fullAnalytics = liveEvents; // default: live only
+    if (badge) badge.classList.add('hidden');
+
+    try {
+        const res = await apiFetch(`${API_BASE}/getStudentArchive?studentId=${encodeURIComponent(studentId)}`);
+        if (!res.ok) return;
+        const archives = await res.json();
+        if (!Array.isArray(archives) || archives.length === 0) return;
+
+        const merged = mergeAnalytics(liveEvents, archives);
+        currentStudent._fullAnalytics = merged;
+
+        const totalArchived = merged.length - liveEvents.length;
+        if (badge && countEl) {
+            countEl.textContent = totalArchived;
+            badge.classList.remove('hidden');
+        }
+    } catch (_) {
+        // Keep live-only view; archives are a non-critical enhancement.
+    }
 }
 
 function switchTab(tab) {
@@ -756,4 +808,9 @@ function logoutTeacher() {
     localStorage.removeItem('activeUserId');
     // Go back to profile selection on main app
     window.location.href = 'index.html';
+}
+
+// Export pure helpers for unit testing (no-op in the browser).
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { mergeAnalytics, getAnalyticsInRange };
 }

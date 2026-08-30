@@ -46,8 +46,12 @@ app.http('getStudents', {
 async function getAllStudents(context, request, allowSecure) {
     try {
         const container = getContainer();
+        // Exclude analytics-archive docs: they have no `role` (so the
+        // NOT IS_DEFINED(c.role) clause would otherwise pull them in as
+        // phantom students on the dashboard). Keep them out of the list;
+        // they are fetched on demand via /getStudentArchive.
         const { resources } = await container.items
-            .query("SELECT * FROM c WHERE c.role = 'student' OR NOT IS_DEFINED(c.role)")
+            .query("SELECT * FROM c WHERE (c.role = 'student' OR NOT IS_DEFINED(c.role)) AND (NOT IS_DEFINED(c.type) OR c.type <> 'student_analytics_archive')")
             .fetchAll();
         const wantSecure = allowSecure && request.query.get('includeSecure') === 'true';
         const sanitized = resources.map(s => {

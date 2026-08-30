@@ -486,6 +486,19 @@ body {
     font-weight: 600;
 }
 
+.detail-archive-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 10px;
+    background: rgba(245, 158, 11, 0.14);
+    color: #f59e0b;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
 /* ---- TABS ---- */
 .detail-tabs {
     display: flex;

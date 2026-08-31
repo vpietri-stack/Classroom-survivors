@@ -181,9 +181,47 @@ completed sessions since 2026-08-21 and experienced forced page-refreshes in Stu
   - **Scope correction:** the 700-event document-bloat problem was NOT Doris-only — auto-archive has fired for ~19 different students. The fix is global, as intended.
   - Note: Doris's `student_doris_zhangyanyi_archive_20260829` (5,573 events) was created at 06:23Z — a manual trim by the prior agent BEFORE the build went live; subsequent student archives are the live function's own work.
 
-### P1 — Monitor Doris's Sessions
-- Teacher confirms Doris's completed Uno and Study Mode sessions record smoothly in the teacher dashboard without
-  data loss or Study Mode force-refreshes.
+### P1 — Diagnose Doris's remaining data loss (post-archive; 2026-08-30)
+- After the 2026-08-28a + e275195 deploys, Doris's active doc is small (193 events) so the
+  "doc bloat" failure mode is fixed. But the *forced refresh* failure mode is still active —
+  2026-08-31 CN: 2 sessions on Doris's iPad+WeChat, **0 study/exercise events** on the server
+  (only the 2 login beacons survived — the option A `flushAnalyticsOnLogin` worked, but every
+  post-login event was lost). 2 prior failure breadcrumbs on the same device+exercise:
+  `2026-08-28 21:34 CN, iPad|tp5|wx, mode:study, round:E, ex:sentenceScramble` and
+  `2026-08-29 13:40 CN, MacIntel|tp5|br, mode:study, round:E, ex:speech_attempt`.
+
+#### Path B — "are we causing the forced refresh?" (2026-08-31)
+Read-only audit of every reload path in the app:
+- `sw.js` is passive: only does `skipWaiting` + `clients.claim` on activate; never
+  calls `location.reload`, `clients.matchAll`, or `postMessage` to trigger a reload. The
+  revalidation-only `fetch` handler cannot refresh the open page.
+- `startVersionWatchdog` (frontend_auth.js:781) polls `version.json` every 60s; on stale-build
+  detection it calls `registerUpdateBanner` which shows the red "⚠️ 无法保存进度" banner.
+  The banner is **user-tap-only** — no auto-reload.
+- `registerUpdateBanner('save-401')` (frontend_auth.js:504) is the same user-tap banner.
+- The only auto-reload path in the app is `forceBtn.onclick` inside `showReloginOverlay`,
+  which is user-tap-only.
+- `three_td/main.js:220` reloads on a replay button click (TD-specific, irrelevant to study mode).
+- **Verdict: the app has zero automatic reload paths. We are NOT the cause.** Most likely
+  external killer: WeChat's WKWebView on iPad (`device: iPad|tp5|wx` in breadcrumbs) is
+  recycling the WebContent process on tab-switch / screenshot-share / memory pressure.
+  This is a known characteristic of WKWebView-in-WeChat; the prior
+  `HANDOFF_SESSION_FIX_FULL.md` thread already called it out (hence the WeChat-specific
+  version-watchdog self-heal).
+
+#### Path A — Last-breath diagnostic beacon (2026-08-31, in progress)
+- Rationale: we cannot prevent the WeChat kill, but we can make the next failure
+  *self-describing*. Every existing flush path (login beacon, 2s debounce, pagehide
+  unload beacon, deadline flush) is gated on a non-empty queue or on graceful unload
+  signals — none of which fire when WeChat force-kills the WebContent process.
+- Plan: add a tiny `csLastBreathBeacon` event that fires on `pagehide` / `visibilitychange:hidden` /
+  `beforeunload` carrying the current kill-surviving breadcrumb + a `cause` tag. Independent
+  of `analyticsQueue` (so it fires even if the queue is empty). Lands server-side as a
+  single `device` event with `diagnostic:'lastBreath'` and a `lastBreath.cause` field, so
+  the next failure is forensically decodable from one event.
+- This is a diagnostic, not a fix. It still loses the in-flight exercise event — but it
+  tells us EXACTLY what was in flight and which unload signal (if any) fired. That data
+  drives whatever the real fix is.
 
 ## 6. Gotchas that bit this thread
 
@@ -218,6 +256,8 @@ completed sessions since 2026-08-21 and experienced forced page-refreshes in Stu
 - [x] Server-side auto-archiving implemented in `saveAnalytics.js` with 90-day session and 500-event retention rules.
 - [x] Auto-archiving backend deployed to LIVE via standard preview→main cycle — **runtime verified** (SWA build `Ready` 2026-08-29T06:44:51Z; 19+ live `student_analytics_archive` docs created by student traffic prove the function runs `e275195`). Affects ~19 students, not just Doris.
 - [ ] Teacher confirms Doris's (and other students') completed sessions record on LIVE for ≥1 week without loss.
+- [x] Path B done: app has no auto-reload paths; cause of Doris's forced refresh is external (WeChat WKWebView kill on iPad).
+- [ ] Path A done: last-breath diagnostic beacon deployed; first post-deploy failure produces a forensically decodable `lastBreath` event.
 - [x] No regressions in the mandatory suite (81+22+11+39+5+11+23+154).
 
 ---

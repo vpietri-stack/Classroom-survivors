@@ -13,7 +13,7 @@ const API_BASE = API_BASE_URL;
 // The version watchdog (startVersionWatchdog) compares this to the live
 // version.json; a mismatch means stale WeChat builds never self-heal or
 // permanently nag. See DEPLOY_VERSION_STAMP.md. Bump BOTH together.
-const APP_VERSION = '2026-08-30a';
+const APP_VERSION = '2026-08-31a';
 
 // --- SESSION TOKEN (c) design) ---
 // The server mints a signed token on login. We store it in localStorage
@@ -587,6 +587,90 @@ async function flushAnalyticsWithDeadline(maxMs = 4000) {
 function flushAnalyticsOnLogin() {
     // Fire-and-forget — do NOT await. The login device event must leave NOW.
     return flushAnalyticsViaBeacon({ force: true }).catch(() => {});
+}
+
+/**
+ * Last-breath diagnostic beacon (2026-08-31a, "Doris forced refresh" round 3).
+ *
+ * Doris's iPad+WeChat (iPad|tp5|wx) lost every post-login event on 2026-08-31
+ * because the iOS WKWebView killed the page between login and the 2s debounce
+ * flush. ALL existing flush paths fail to capture a forensic breadcrumb for
+ * that failure mode:
+ *   - flushAnalyticsViaBeacon (pagehide/visibilitychange) early-returns when
+ *     the queue is empty (the very state at the moment of death).
+ *   - csDetectRestartAndQueueDiagnostic only fires on the NEXT page load,
+ *     so it cannot tell us what the dying tab actually saw.
+ *
+ * Fix: on every unload/visibility-hidden/beforeunload signal, send ONE small
+ * device event carrying whatever forensic context we have at the moment of
+ * death (current kill-surviving breadcrumb, queue length, build stamp, and
+ * WHICH signal triggered the beacon). This is independent of analyticsQueue
+ * so it always fires, even if the queue is empty. Lands server-side as a
+ * single `device` event with `diagnostic:'lastBreath'`, forensically
+ * decodable from one event so the next failure is debuggable.
+ *
+ * No risk: additive, fire-and-forget, dedup-safe (single-fire flag below
+ * + server eventId de-dup). NOT a fix for data loss — only makes the next
+ * loss self-describing so the real fix can be designed from data.
+ */
+let _lastBreathFired = false;
+let _lastBreathBound = false;
+function csLastBreathBeacon(cause) {
+    if (_lastBreathFired) return;
+    _lastBreathFired = true;
+    // Best-effort studentId — try active user, then localStorage mirror.
+    let studentId = null;
+    if (typeof authActiveUser !== 'undefined' && authActiveUser && authActiveUser.id) {
+        studentId = authActiveUser.id;
+    } else {
+        try {
+            const saved = JSON.parse(localStorage.getItem('savedUsers') || '[]');
+            if (Array.isArray(saved) && saved[0] && saved[0].id) studentId = saved[0].id;
+        } catch { /* storage unavailable — beacon still ships, just anonymous */ }
+    }
+    if (!studentId) return; // no student to attribute the death to; nothing useful to send
+
+    // Snapshot the kill-surviving breadcrumb + queue length at the moment of death.
+    let breadcrumb = null;
+    try { breadcrumb = JSON.parse(localStorage.getItem(CS_HB_KEY) || 'null'); } catch {}
+    const queueLen = (typeof analyticsQueue !== 'undefined' && analyticsQueue.length) || 0;
+
+    const event = {
+        type: 'device',
+        diagnostic: 'lastBreath',
+        appVersion: (typeof APP_VERSION !== 'undefined') ? APP_VERSION : '?',
+        timestamp: new Date().toISOString(),
+        eventId: 'lb_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+        ps: (typeof csPageSessionId !== 'undefined' && csPageSessionId) ? csPageSessionId : undefined,
+        lastBreath: {
+            cause: cause || 'unknown',
+            queueLenAtDeath: queueLen,
+            breadcrumb: breadcrumb || undefined
+        }
+    };
+    const body = JSON.stringify({ studentId, events: [event] });
+
+    const url = (typeof API_BASE !== 'undefined' ? API_BASE : API_BASE_URL) + '/saveAnalytics';
+    let sent = false;
+    try {
+        if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+            const blob = new Blob([body], { type: 'text/plain;charset=UTF-8' });
+            sent = navigator.sendBeacon(url, blob);
+        }
+    } catch { sent = false; }
+    if (!sent && typeof fetch === 'function') {
+        try { fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }); }
+        catch { /* truly offline at death — nothing more we can do */ }
+    }
+}
+function bindLastBreathBeacon() {
+    if (_lastBreathBound) return;
+    _lastBreathBound = true;
+    window.addEventListener('pagehide', () => csLastBreathBeacon('pagehide'));
+    window.addEventListener('beforeunload', () => csLastBreathBeacon('beforeunload'));
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') csLastBreathBeacon('visibilitychange:hidden');
+    });
 }
 
 /**
@@ -1329,6 +1413,13 @@ function finishLogin() {
     // logged in, so a tab-close / app-background right after game-over still
     // ships the queued analytics.
     bindUnloadAnalyticsFlush();
+
+    // FIX #5 (2026-08-31a): arm the last-breath diagnostic beacon so the NEXT
+    // tab-death (WeChat WKWebView kill on iPad, app reload, OS memory pressure)
+    // leaves a single forensically decodable server event — even when the
+    // analytics queue is empty. Independent of bindUnloadAnalyticsFlush so a
+    // kill at any time (not only mid-flush) is self-describing.
+    bindLastBreathBeacon();
 
     // Restart telemetry — ORDER IS LOAD-BEARING (fixed 2026-08-26c after the
     // 2026-08-26 field data showed only self-reads): detection MUST run

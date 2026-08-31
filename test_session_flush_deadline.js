@@ -165,6 +165,62 @@ function makeUser() {
   ok('immediate login flush does NOT clear the queue (beacon, not the clearing flush)',
      sandbox.analyticsQueue.length === 1);
 
+  // ---- 1d. last-breath diagnostic beacon (2026-08-31a, Doris forced-refresh round 3) ----
+  // The key gap: flushAnalyticsViaBeacon early-returns when analyticsQueue is empty,
+  // so a tab that dies AFTER the 2s debounce has already drained the queue
+  // (or BEFORE any post-login event is queued) leaves NO server trace. Doris's
+  // iPad+WeChat failure on 2026-08-31 is exactly this state. csLastBreathBeacon
+  // fires INDEPENDENTLY of the analytics queue and ships one small device event
+  // carrying the in-flight breadcrumb, queue length, and triggering signal —
+  // enough to decode the next failure from a single event.
+  posts = [];
+  store = {};
+  // Pre-condition: NO active user, NO queue — exactly the state when the
+  // WeChat WKWebView kills the tab between login-beacon and first exercise event.
+  sandbox.authActiveUser = null;
+  vm.runInContext('authActiveUser = null; analyticsQueue = []; _lastBreathFired = false; _lastBreathBound = false;', sandbox);
+  // But we DO have a saved user in localStorage (the WeChat case: a previous
+  // login left the profile cached, but the active session just got killed).
+  store['savedUsers'] = JSON.stringify([{ id: 'student_doris_wechat', login: 'doris_zhangyanyi' }]);
+  // A kill-surviving breadcrumb from the dying tab is present.
+  store['csPageHeartbeat'] = JSON.stringify({
+    ps: 'ps_dying', ts: Date.now() - 5000, loadTs: Date.now() - 60000, v: '2026-08-31a',
+    state: { mode: 'study', round: 'E', ex: 'sentenceScramble', dev: 'iPad|tp5|wx' }
+  });
+  sandbox.csLastBreathBeacon('pagehide');
+  ok('lastBreath fires with NO authActiveUser and empty queue', posts.some(p => p.url.includes('/saveAnalytics')));
+  const lbBody = JSON.parse(posts.filter(p => p.url.includes('/saveAnalytics')).pop().body);
+  ok('lastBreath is exactly one event', lbBody.events.length === 1);
+  ok('lastBreath event is type=device', lbBody.events[0].type === 'device');
+  ok('lastBreath event carries diagnostic:lastBreath', lbBody.events[0].diagnostic === 'lastBreath');
+  ok('lastBreath event carries the cause (pagehide)', lbBody.events[0].lastBreath.cause === 'pagehide');
+  ok('lastBreath event carries the dying-tab breadcrumb',
+     lbBody.events[0].lastBreath.breadcrumb.state.ex === 'sentenceScramble'
+     && lbBody.events[0].lastBreath.breadcrumb.state.dev === 'iPad|tp5|wx');
+  ok('lastBreath event records queueLenAtDeath=0 (empty queue case)',
+     lbBody.events[0].lastBreath.queueLenAtDeath === 0);
+  ok('lastBreath event carries the running app version',
+     lbBody.events[0].appVersion === '2026-08-31a');
+  ok('lastBreath attributed to the saved user (no active session)',
+     lbBody.studentId === 'student_doris_wechat');
+  // Dedup: a second call must be a no-op (single-fire flag).
+  posts = [];
+  sandbox._lastBreathFired = false; // reset to test the dedup property itself
+  vm.runInContext('_lastBreathFired = false;', sandbox);
+  sandbox.csLastBreathBeacon('pagehide');
+  sandbox.csLastBreathBeacon('beforeunload');
+  sandbox.csLastBreathBeacon('visibilitychange:hidden');
+  const dedupCount = posts.filter(p => p.url.includes('/saveAnalytics')).length;
+  ok('lastBreath is single-fire across all causes (pagehide/beforeunload/visibilitychange)', dedupCount === 1);
+  // No studentId -> silent no-op (anonymous death).
+  store = {};
+  posts = [];
+  vm.runInContext('_lastBreathFired = false;', sandbox);
+  sandbox.csLastBreathBeacon('pagehide');
+  ok('lastBreath no-ops when there is no studentId to attribute to', posts.length === 0);
+  // Reset for downstream tests.
+  vm.runInContext('_lastBreathFired = false; _lastBreathBound = false;', sandbox);
+
   // ---- 2a. saveActiveUserToCache never throws, even when storage is full ----
   sandbox.authActiveUser = makeUser();
   vm.runInContext('authActiveUser = __user;', Object.assign(sandbox, { __user: sandbox.authActiveUser }));

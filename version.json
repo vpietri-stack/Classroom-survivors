@@ -1,5 +1,5 @@
 {
-  "version": "2026-08-30a",
-  "deployedAt": "2026-08-30",
-  "notes": "Archive-merge dashboard fix (2026-08-30a): getStudents now excludes student_analytics_archive docs so they no longer appear as phantom students (the ghost Amber/Apple rows). New getStudentArchive endpoint + teacher_dashboard merge shows each student's full history (live + archived events) in the Sessions/Exercises views, with an 'archived' badge. Live doc stays small; view combines. Backend-only + dashboard, additive."
+  "version": "2026-08-31a",
+  "deployedAt": "2026-08-31",
+  "notes": "Last-breath diagnostic beacon (2026-08-31a) — on tab death (pagehide / beforeunload / visibilitychange:hidden) ship a single forensically decodable device event with diagnostic:'lastBreath' carrying the in-flight kill-surviving breadcrumb, queue length at death, and the triggering signal. Independent of analyticsQueue so it fires even when the queue is empty (the exact state when WeChat's WKWebView on iPad killed Doris's tab on 2026-08-31). Diagnostic only — data loss is NOT fixed, but the next failure is self-describing so the real fix can be designed from data. Additive + non-blocking + server eventId de-dup safe."
 }

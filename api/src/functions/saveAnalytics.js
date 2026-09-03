@@ -169,7 +169,7 @@ app.http('saveAnalytics', {
             // the response now lists EXACTLY which eventIds were added vs
             // skipped-as-duplicate so the client only clears its persisted
             // queue when the server accounts for every shipped event.
-            const { added, addedEventIds, duplicateEventIds } = applyEventsWithAck(user.analytics, events);
+            const { addedCount: added, addedEventIds, duplicateEventIds } = applyEventsWithAck(user.analytics, events);
             if (srState && typeof srState === 'object') user.srState = srState;
             if (incrementSession) user.sessionCount = (user.sessionCount || 0) + 1;
 

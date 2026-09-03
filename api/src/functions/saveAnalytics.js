@@ -57,6 +57,39 @@ function splitAnalyticsForArchive(analytics, now = Date.now()) {
 }
 
 /**
+ * Applies incoming events to an existing analytics array with idempotent
+ * de-dup (stable eventId) and returns per-event acks. Exported pure so tests
+ * can pin the contract the client relies on (2026-09-03a, "Doris silent-200").
+ *
+ * Events WITH an eventId are either added (acked in addedEventIds) or skipped
+ * as already-seen (acked in duplicateEventIds). Events WITHOUT an eventId are
+ * always added and carry no ack id — the client treats them as delivered on
+ * any 2xx (no client code path enqueues an event without one today).
+ *
+ * @param {Array} existingAnalytics - the student's analytics array (mutated)
+ * @param {Array} events - incoming events
+ * @returns {{ addedCount: number, addedEventIds: string[], duplicateEventIds: string[] }}
+ */
+function applyEventsWithAck(existingAnalytics, events) {
+    const addedEventIds = [];
+    const duplicateEventIds = [];
+    let addedCount = 0;
+    (events || []).forEach(event => {
+        if (event && event.eventId) {
+            const seen = (existingAnalytics || []).some(a => a && a.eventId === event.eventId);
+            if (seen) {
+                duplicateEventIds.push(event.eventId);
+                return;
+            }
+            addedEventIds.push(event.eventId);
+        }
+        existingAnalytics.push(event);
+        addedCount++;
+    });
+    return { addedCount, addedEventIds, duplicateEventIds };
+}
+
+/**
  * Checks if the student document's analytics array has grown too large (>=700 events).
  * If so, creates a permanent archive document in Cosmos DB before trimming the active
  * document's analytics array. Fail-safe: if archive creation fails, active document
@@ -131,18 +164,12 @@ app.http('saveAnalytics', {
 
             const user = items[0];
             if (!user.analytics) user.analytics = [];
-            let added = 0;
-            events.forEach(event => {
-                // Idempotent de-dup: the client stamps each event with a stable
-                // eventId so a retried flush (tab-close re-send + next-launch
-                // retry) cannot double-count a session or exercise.
-                if (event && event.eventId) {
-                    const seen = user.analytics.some(a => a && a.eventId === event.eventId);
-                    if (seen) return;
-                }
-                user.analytics.push(event);
-                added++;
-            });
+            // Idempotent de-dup with per-event acks: the client stamps each
+            // event with a stable eventId, and (2026-09-03a, "Doris silent-200")
+            // the response now lists EXACTLY which eventIds were added vs
+            // skipped-as-duplicate so the client only clears its persisted
+            // queue when the server accounts for every shipped event.
+            const { added, addedEventIds, duplicateEventIds } = applyEventsWithAck(user.analytics, events);
             if (srState && typeof srState === 'object') user.srState = srState;
             if (incrementSession) user.sessionCount = (user.sessionCount || 0) + 1;
 
@@ -153,11 +180,40 @@ app.http('saveAnalytics', {
 
             await getContainer().items.upsert(user);
 
+            // Delivery diagnostics (2026-09-03a): one tiny record per accepted
+            // saveAnalytics request, in a separate telemetry doc. Purpose: the
+            // 2026-08-28→09-03 Doris iPad blackout proved a client can receive
+            // ok-looking responses while nothing persists server-side — with no
+            // App Insights on the SWA, this doc is the only server-side trace.
+            // Best-effort: diagnostics failures must NEVER fail the save.
+            try {
+                const ua = request.headers.get('user-agent') || '';
+                await getContainer().items.upsert({
+                    id: 'delivery_diag_saveAnalytics',
+                    type: 'delivery_diagnostics',
+                    updatedAt: new Date().toISOString(),
+                    // Single-slot ring: last accepted request only. If Doris's
+                    // fetch flushes go missing again, absence of her UA here
+                    // while her device events keep arriving proves the
+                    // requests never reach the function (edge/network loss).
+                    recent: [{
+                        ts: new Date().toISOString(),
+                        studentId, added, total: events.length,
+                        ua: ua.slice(0, 120),
+                        transport: request.headers.get('x-auth-token') ? 'header' : 'body'
+                    }]
+                });
+            } catch (diagErr) {
+                context.warn('delivery diagnostics write failed (non-fatal):', diagErr);
+            }
+
             return {
                 status: 200,
                 jsonBody: {
                     success: true,
                     message: `${added} event(s) saved (${events.length - added} duplicate(s) skipped).`,
+                    addedEventIds,
+                    duplicateEventIds,
                     sessionCount: user.sessionCount || 0
                 }
             };
@@ -171,6 +227,7 @@ app.http('saveAnalytics', {
 module.exports = {
     splitAnalyticsForArchive,
     maybeArchiveAnalytics,
+    applyEventsWithAck,
     ARCHIVE_TRIGGER_COUNT,
     RETENTION_DAYS_MS,
     RETENTION_MAX_RECENT_EVENTS

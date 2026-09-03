@@ -47,12 +47,26 @@ const localStorageStub = {
 // --- controllable network stub ------------------------------------------------
 // frontend_auth.js defines its own apiFetch() that calls the GLOBAL fetch, so
 // the interception point is fetch itself.
-let fetchBehavior = 'ok'; // 'ok' | 'hang'
+let fetchBehavior = 'ok'; // 'ok' | 'hang' | 'silent200' (200 without event acks)
 let posts = [];
 function fetchStub(url, options = {}) {
   posts.push({ url: String(url), body: options.body });
   if (fetchBehavior === 'hang') return new Promise(() => {}); // never resolves
-  return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ success: true }) });
+  // Echo the server's 2026-09-03a ack contract: list every shipped eventId as
+  // added (the real saveAnalytics response now carries addedEventIds /
+  // duplicateEventIds). 'silent200' simulates Doris's iPad: ok-looking 200
+  // that accounts for NOTHING.
+  let ack = {};
+  if (fetchBehavior !== 'silent200') {
+    try {
+      const b = JSON.parse(options.body || '{}');
+      ack = {
+        addedEventIds: (b.events || []).filter(e => e && e.eventId).map(e => e.eventId),
+        duplicateEventIds: []
+      };
+    } catch { /* body-less request */ }
+  }
+  return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ success: true, ...ack }) });
 }
 
 const sandbox = {
@@ -165,6 +179,59 @@ function makeUser() {
   ok('immediate login flush does NOT clear the queue (beacon, not the clearing flush)',
      sandbox.analyticsQueue.length === 1);
 
+  // ---- 1c-2. ACK DISCIPLINE (2026-09-03a, "Doris silent-200") ----
+  // For 6 days (2026-08-28 → 09-03) Doris's iPad received ok-looking 200s from
+  // saveAnalytics while NOTHING persisted server-side — the old client trusted
+  // response.ok and drained its persisted queue on a lie. New contract: the
+  // persisted queue only clears when the response lists EVERY shipped eventId
+  // as added or duplicate. Silent-200s keep the queue (the sendBeacon path
+  // re-ships it on the next launch; the server de-dups by eventId).
+  // Case A: honest 200 with a full ack -> queue drains (the normal path).
+  fetchBehavior = 'ok';
+  posts = []; store = {};
+  sandbox.authActiveUser = makeUser();
+  vm.runInContext('authActiveUser = __user; analyticsQueue = []; srPendingState = null; srIncrementSession = false;', sandbox);
+  vm.runInContext(`queueSessionEvent('study', { durationMs: 2000 });`, sandbox);
+  const drainedAck = await sandbox.flushAnalytics();
+  ok('full-ack 200 drains the queue', drainedAck !== false && sandbox.analyticsQueue.length === 0);
+  ok('full-ack 200 clears the localStorage queue mirror', !('csAnalyticsQueue' in store));
+
+  // Case B: Doris's silent-200 — 200 ok, response accounts for NOTHING.
+  fetchBehavior = 'silent200';
+  posts = []; store = {};
+  sandbox.authActiveUser = makeUser();
+  vm.runInContext('authActiveUser = __user; analyticsQueue = []; srPendingState = null; srIncrementSession = false;', sandbox);
+  vm.runInContext(`
+    srPendingState = { vocab: { cat: { interval: 2 } } };
+    srIncrementSession = true;
+    queueSessionEvent('study', { durationMs: 3000 });
+  `, sandbox);
+  const qBefore = sandbox.analyticsQueue.length;
+  await sandbox.flushAnalytics();
+  ok('silent-200 (no acks) does NOT drain the queue', sandbox.analyticsQueue.length === qBefore);
+  ok('silent-200 keeps events persisted for the next-launch beacon re-send',
+     typeof store['csAnalyticsQueue'] === 'string');
+  ok('silent-200 restores pending SR state so it rides the re-send',
+     sandbox.srPendingState !== null && sandbox.srIncrementSession === true);
+
+  // Case C: partial ack — server acked only one of two shipped events.
+  posts = []; store = {};
+  sandbox.authActiveUser = makeUser();
+  vm.runInContext('authActiveUser = __user; analyticsQueue = []; srPendingState = null; srIncrementSession = false;', sandbox);
+  vm.runInContext(`queueExerciseEvent('spelling', 'study'); queueSessionEvent('study', {});`, sandbox);
+  const twoIds = sandbox.analyticsQueue.map(e => e.eventId);
+  sandbox.fetch = function (url, options = {}) { // one-off partial-ack server
+    posts.push({ url: String(url), body: options.body });
+    return Promise.resolve({
+      ok: true, status: 200,
+      json: () => Promise.resolve({ success: true, addedEventIds: [twoIds[0]], duplicateEventIds: [] })
+    });
+  };
+  await sandbox.flushAnalytics();
+  ok('partial-ack 200 does NOT drain the queue (all-or-nothing)',
+     sandbox.analyticsQueue.length === 2);
+  sandbox.fetch = fetchStub; // restore the echoing stub
+
   // ---- 1d. last-breath diagnostic beacon (2026-08-31a, Doris forced-refresh round 3) ----
   // The key gap: flushAnalyticsViaBeacon early-returns when analyticsQueue is empty,
   // so a tab that dies AFTER the 2s debounce has already drained the queue
@@ -200,7 +267,7 @@ function makeUser() {
   ok('lastBreath event records queueLenAtDeath=0 (empty queue case)',
      lbBody.events[0].lastBreath.queueLenAtDeath === 0);
   ok('lastBreath event carries the running app version',
-     lbBody.events[0].appVersion === '2026-08-31a');
+     lbBody.events[0].appVersion === (src.match(/const\s+APP_VERSION\s*=\s*'([^']+)'/) || [])[1]);
   ok('lastBreath attributed to the saved user (no active session)',
      lbBody.studentId === 'student_doris_wechat');
   // Dedup: a second call must be a no-op (single-fire flag).

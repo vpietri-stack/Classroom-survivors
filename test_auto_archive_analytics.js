@@ -2,6 +2,7 @@ const assert = require('assert');
 const {
     splitAnalyticsForArchive,
     maybeArchiveAnalytics,
+    applyEventsWithAck,
     ARCHIVE_TRIGGER_COUNT,
     RETENTION_DAYS_MS,
     RETENTION_MAX_RECENT_EVENTS
@@ -188,6 +189,46 @@ async function main() {
 
         assert.ok(warningLogged, 'Warning should be logged on error');
         assert.strictEqual(user.analytics.length, 800, 'Active analytics array must NOT be trimmed on error');
+    });
+
+    // ---- applyEventsWithAck (2026-09-03a, "Doris silent-200" server contract) ----
+    // The client only drains its persisted queue when the response accounts for
+    // every shipped eventId, so the ack arrays MUST be exactly right.
+    test('Ack: all-new events -> every id in addedEventIds, no duplicates', () => {
+        const existing = [{ eventId: 'old_1' }];
+        const { addedCount, addedEventIds, duplicateEventIds } = applyEventsWithAck(existing, [
+            { eventId: 'new_1' }, { eventId: 'new_2' }
+        ]);
+        assert.strictEqual(addedCount, 2);
+        assert.deepStrictEqual(addedEventIds.sort(), ['new_1', 'new_2']);
+        assert.deepStrictEqual(duplicateEventIds, []);
+        assert.strictEqual(existing.length, 3);
+    });
+
+    test('Ack: already-seen events -> duplicateEventIds, array not re-added', () => {
+        const existing = [{ eventId: 'ex_1' }, { eventId: 'ex_2' }];
+        const { addedCount, addedEventIds, duplicateEventIds } = applyEventsWithAck(existing, [
+            { eventId: 'ex_1' }, { eventId: 'ex_3' }
+        ]);
+        assert.strictEqual(addedCount, 1);
+        assert.deepStrictEqual(addedEventIds, ['ex_3']);
+        assert.deepStrictEqual(duplicateEventIds, ['ex_1']);
+        assert.strictEqual(existing.length, 3, 'duplicate must not be appended');
+    });
+
+    test('Ack: event without eventId is added but carries no ack id', () => {
+        const existing = [];
+        const { addedCount, addedEventIds } = applyEventsWithAck(existing, [{ type: 'exercise' }]);
+        assert.strictEqual(addedCount, 1);
+        assert.deepStrictEqual(addedEventIds, []);
+        assert.strictEqual(existing.length, 1);
+    });
+
+    test('Ack: null/empty events -> zero counts, empty arrays', () => {
+        const { addedCount, addedEventIds, duplicateEventIds } = applyEventsWithAck([], null);
+        assert.strictEqual(addedCount, 0);
+        assert.deepStrictEqual(addedEventIds, []);
+        assert.deepStrictEqual(duplicateEventIds, []);
     });
 
     console.log('\n--- AUTO-ARCHIVE ANALYTICS TEST RESULTS ---');

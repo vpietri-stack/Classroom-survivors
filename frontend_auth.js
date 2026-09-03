@@ -13,7 +13,7 @@ const API_BASE = API_BASE_URL;
 // The version watchdog (startVersionWatchdog) compares this to the live
 // version.json; a mismatch means stale WeChat builds never self-heal or
 // permanently nag. See DEPLOY_VERSION_STAMP.md. Bump BOTH together.
-const APP_VERSION = '2026-08-31a';
+const APP_VERSION = '2026-09-03a';
 
 // --- SESSION TOKEN (c) design) ---
 // The server mints a signed token on login. We store it in localStorage
@@ -509,10 +509,35 @@ async function flushAnalytics(opts = {}) {
         // Success: these events are now safely persisted server-side.
         // Remove only the events we just sent from the persisted queue (they may
         // have been joined by newer events during the await above).
-        const sentSet = new Set(events);
-        analyticsQueue = analyticsQueue.filter(e => !sentSet.has(e));
-        persistAnalyticsQueue();
-        if (typeof clearPersistedSR === 'function') clearPersistedSR(); // SR state delivered — remove from localStorage
+        //
+        // ACK DISCIPLINE (2026-09-03a, "Doris silent-200"): a 200 alone is no
+        // longer trusted. Doris's iPad received ok-looking responses for 6 days
+        // while nothing persisted server-side, so the persisted queue must only
+        // drain when the response lists EVERY shipped eventId as added or
+        // duplicate. Servers older than the ack contract (or proxies faking
+        // 200s) fail this check -> the queue stays persisted and the proven
+        // sendBeacon path re-ships it on the next launch (server de-dups).
+        const resBody = await response.json().catch(() => null);
+        const acked = new Set([
+            ...((resBody && resBody.addedEventIds) || []),
+            ...((resBody && resBody.duplicateEventIds) || [])
+        ]);
+        const accounted = events.every(e => !e.eventId || acked.has(e.eventId));
+        if (accounted) {
+            const sentSet = new Set(events);
+            analyticsQueue = analyticsQueue.filter(e => !sentSet.has(e));
+            persistAnalyticsQueue();
+            if (typeof clearPersistedSR === 'function') clearPersistedSR(); // SR state delivered — remove from localStorage
+        } else {
+            // Delivered-but-unacked: leave everything queued; the next login
+            // beacon / debounce re-ships it and the server de-dups by eventId.
+            // SR pending state was consumed at the top of this function —
+            // restore it so the SR update rides the re-send too.
+            console.warn('saveAnalytics 200 without full event ack — keeping queue for re-send');
+            if (srPayload && !srPendingState) srPendingState = srPayload;
+            if (incrementSession) srIncrementSession = true;
+            persistAnalyticsQueue();
+        }
     } catch (e) {
         console.warn('Failed to flush analytics:', e);
         // Re-queue failed events and restore SR pending state.

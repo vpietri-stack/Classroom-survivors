@@ -1,10 +1,58 @@
 # HANDOFF — Classroom Survivors: forced page-refresh / session-loss thread (Doris)
 
-**Date:** 2026-08-26 (updated 2026-08-29, round 5 — root cause resolved & server-side auto-archiving)
+**Date:** 2026-08-26 (updated 2026-08-29, round 5; **round 6 — 2026-09-03: see §R6 first**)
 **Author:** Investigation agent (scheduled task + follow-ups)
 **Audience:** Next coding agent. Read top-to-bottom. "Current State" is ground truth (verified
 against `git log` + live-site fetches on 2026-08-26/29). Supersedes the deployment-gap sections of
 `HANDOFF_SESSION_FIX_FULL.md` (that gap no longer exists — see §2).
+
+---
+
+## R6. 2026-09-03 — ROUND 6: the refresh was NEVER the data-loss vector ("silent-200")
+
+**Deployed:** `2026-09-03a` (commit `574f820` + hotfix `86363f0`), all four refs, live-verified.
+
+**Round-6 forensics (videos + Cosmos + fleet survey) supersede rounds 1–5 conclusions:**
+
+1. **Blackout since Aug 28, not a Sep-2 incident.** Doris zhangyanyi's doc has ZERO
+   exercise/session events from 2026-08-28 through 2026-09-03 — device/restart beacons only.
+   Aug 20–26 flowed fine (dozens/day). Sep-3 Edge test on her account: 21 events landed
+   perfectly → backend + her doc are healthy.
+2. **The forced refreshes (mum's videos: Safari, NOT WeChat) are real WebKit WebContent
+   auto-reloads mid-interaction, but they are NOT what eats the data.** Page B's login beacon
+   (17:00:55) carried ONLY the fresh device event — page A's exercised events were already
+   gone from localStorage. Only the fetch path removes queued events → the fetch flushes
+   "succeeded" client-side while nothing persisted server-side.
+3. **Fleet-survey exonerations:** another student's iPad on the SAME iOS 26.6 delivered 37
+   exercise events since 08-28; four WeChat-WebKit students deliver daily; her iPad was
+   already on 26_6 on Aug 20–21 while data flowed. iOS/WebKit/CORS/backend all exonerated.
+   Her device alone gets ok-looking 200s that don't persist — indistinguishable further
+   without the new diagnostics (α silent-200-added-0 / β 401/403 / γ edge-drop).
+4. **The 2026-09-03a fix (what shipped):**
+   - Server `saveAnalytics`: per-event acks (`addedEventIds`/`duplicateEventIds`) in every
+     200 + best-effort `delivery_diag_saveAnalytics` telemetry doc (single-slot: last
+     accepted request: ts/studentId/added/total/ua/transport). With no App Insights on the
+     SWA this is the only server-side trace of whether fetch flushes arrive.
+   - Client `flushAnalytics`: ack discipline — the persisted queue clears ONLY when the
+     response accounts for EVERY shipped eventId (added or duplicate). Silent/partial 200s
+     keep the queue + restore SR pending state; the proven sendBeacon path re-ships on next
+     launch (server eventId de-dup keeps it idempotent).
+   - Tests: `applyEventsWithAck` unit suite (auto-archive file, +4) + client ack paths
+     (+6 incl. all-or-nothing partial-ack). 220 green. Stamps synced `2026-09-03a`.
+5. **How to read Doris's NEXT session (the discriminator):**
+   - New exercise events in her doc AND `delivery_diag_saveAnalytics.recent[].ua` showing
+     her iPad UA → requests DO reach the function; previously a server-side add path issue
+     (now watched by acks).
+   - New exercise events in her doc but diag doc still shows only curl/desktop UAs → her
+     fetch flushes never reach the function (γ edge/network); the queue now survives
+     client-side and drains via next-launch beacon (data saved, mystery = transport).
+   - Nothing new in her doc but queue persists on her device → her client keeps the events
+     (no more silent eating) and each login beacon carries the backlog; watch for
+     `duplicateEventIds` spikes = retry storms (benign, de-duped).
+6. **Earlier-round conclusions that STILL STAND:** doc bloat/26s timeouts (fixed by
+   auto-archive, `e275195`) and WebKit kills mid-session (real, mitigated by
+   deadline-flush + last-breath beacon). What changed: the kill/refresh is no longer
+   blamed for the *data* loss — the silent-200 was.
 
 ---
 

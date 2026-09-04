@@ -318,6 +318,7 @@
     if (transcriber) return transcriber;
     if (loading) return loading;
 
+    const loadT0 = performance.now(); // for the spCompileMs crash breadcrumb
     loading = (async () => {
       const src = await pickSource();
       // localModelPath only shapes the URLs transformers.js *requests*; the
@@ -402,6 +403,19 @@
         }
       }
       transcriber = pipe;
+      // B1 CRASH BREADCRUMB (2026-09-04): record how the engine came up —
+      // which runtime copy won and how long the compile took. These fields
+      // ride csPageHeartbeat, so a hard kill later in the session reports
+      // the exact speech-pipeline state it died with.
+      try {
+        if (typeof csPageHeartbeat === 'function') {
+          csPageHeartbeat({
+            spLib: libBase ? 'stable' : 'local',
+            spSrc: src && src.name ? String(src.name).slice(0, 16) : '?',
+            spCompileMs: Math.round(performance.now() - loadT0)
+          });
+        }
+      } catch (_) { /* breadcrumb is best-effort */ }
       log('Engine: ready ✅');
       return pipe;
     })();
@@ -531,6 +545,15 @@
     });
     const timeSec = ((performance.now() - t0) / 1000).toFixed(1);
     let text = (out && out.text ? out.text : '').trim();
+    // MEMORY HYGIENE (2026-09-04): Transformers.js pipeline outputs are tensor
+    //-backed objects. They are not auto-released promptly on WebKit; across a
+    // long session (10+ gates) they pile up and Safari eventually kills the
+    // page (the "forced refresh" pattern). Release eagerly when the API allows.
+    try {
+      if (out && typeof out.dispose === 'function') out.dispose();
+      else if (out && out.logits && typeof out.logits.dispose === 'function') out.logits.dispose();
+    } catch (_) { /* older runtime without dispose — GC will handle it */ }
+    audio = null; // release the (possibly 3×-repeated) Float32 buffer
 
     // Post-pass: catch any residual repetition hallucination (tiny models can still
     // n-gram-loop on TTS echo). If the transcript is literally the same token N+

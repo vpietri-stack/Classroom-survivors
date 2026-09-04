@@ -80,6 +80,23 @@
       try { this.processor.disconnect(); } catch (_) {}
       if (this.stream) this.stream.getTracks().forEach(t => t.stop());
 
+      // MEMORY HYGIENE (2026-09-04, Doris iPad crash investigation):
+      // iPadOS Safari enforces a hard limit on live AudioContexts. Every
+      // sentence gate creates a fresh Recorder → a fresh AudioContext +
+      // getUserMedia stream. Without an explicit close(), the context stays
+      // alive holding its (now stopped) stream until GC *feels like it* —
+      // field pattern: ~10 gates/session → ~10 live contexts → WebContent
+      // process killed ~5 min into a session ("forced refresh"). Closing
+      // synchronously here is safe: all audio work (merge/VAD/WAV) happens
+      // on already-captured PCM, not on the live graph.
+      if (this.audioCtx && typeof this.audioCtx.close === 'function') {
+        try { this.audioCtx.close(); } catch (_) {}
+        this.audioCtx = null;
+      }
+      this.source = null;
+      this.processor = null;
+      this.stream = null;
+
       // Trim speechless lead (Android echo tap + dead air) via adaptive VAD:
       // keep everything from the first meaningful-amplitude window onward.
       const pcm = mergeChunks(this._chunks);
@@ -87,6 +104,7 @@
       const start = findSpeechStart(pcm, rate);
       const trimmed = pcm.slice(start);
       const wav = encodeWav(trimmed, rate);
+      this._chunks = []; // release raw PCM after the WAV is encoded
       return wav;
     }
   }

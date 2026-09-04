@@ -45,6 +45,18 @@
   let _onInlineStop = null;
   let _onInlineCancel = null;
 
+  // B1 CRASH BREADCRUMB (2026-09-04): module-level speech heartbeat. Merges
+  // speech-pipeline state into the kill-surviving csPageHeartbeat breadcrumb
+  // so a WebContent kill reports exactly what speech was doing. Safe no-op
+  // when the auth/telemetry layer isn't loaded (test mode, teacher pages).
+  function spHeartbeat(extra) {
+    try {
+      if (typeof csPageHeartbeat === 'function') {
+        csPageHeartbeat(Object.assign({ spGate: 1 }, extra || {}));
+      }
+    } catch (_) { /* best-effort */ }
+  }
+
   function loop() {
     if (!_inlineEl || !_inlineEl.classList.contains('show')) { _raf = null; return; }
     const lvl = (global.Recorder && global._activeRecorder) ? global._activeRecorder.level || 0 : 0;
@@ -128,7 +140,7 @@
       }
     }
     function clearSafety() { if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; } }
-    function toIdle() { state = 'idle'; clearSafety(); hideInline(); updateUI(); }
+    function toIdle() { state = 'idle'; clearSafety(); hideInline(); updateUI(); spHeartbeat({ spRec: 0 }); }
 
     // Wire the inline indicator's Stop + Cancel (active while this button records).
     _onInlineStop = function () { if (state === 'recording') finishRecording(); };
@@ -150,6 +162,7 @@
         updateUI();
         clearSafety();
         safetyTimer = setTimeout(finishRecording, MAX_RECORD_MS);
+        spHeartbeat({ spRec: 1 });
       }).catch(function (err) {
         // Permission denied / mic error -> clean, retryable reset (no stuck state).
         toIdle();
@@ -188,6 +201,7 @@
           const t0 = Date.now();
           return global.LocalEngine.transcribe(blob).then(function (r) {
             toIdle();
+            spHeartbeat({ spLastMs: Date.now() - t0 }); // last transcribe duration
             if (opts.onResult) opts.onResult(r.text || '', {
               audioMs: audioMs,
               durMs: stats ? Math.round(stats.durMs) : null,
@@ -366,6 +380,8 @@
     let failCount = 0;
     const SKIP_AFTER_FAILS = 3; // let the student try 3 times before offering Skip
 
+    spHeartbeat({ spFails: 0 }); // gate opened (module-level spHeartbeat merges state)
+
     // Permission-denied state: show the per-browser fix instructions ONCE and
     // reveal Skip immediately — a blocked student can do nothing else.
     // Field data 2026-08: 4 students generated 435 of 861 permission errors by
@@ -415,6 +431,7 @@
         // A skip after repeated fails is the strongest "recognition is broken
         // for this student" signal — record it with the fail count.
         logSpeechEvent('skip', mode, { target: target, level: level, failsBeforeSkip: failCount, ua: UA }, failCount);
+        spHeartbeat({ spGate: 0, spFails: failCount }); // gate closing
         onDone();
       }
     };
@@ -434,6 +451,7 @@
           // Counts toward Skip (same policy as too_quiet/empty): a mic or
           // environment that keeps producing junk must not trap the student.
           failCount++;
+          spHeartbeat({ spFails: failCount });
           if (failCount >= SKIP_AFTER_FAILS) skip.style.display = '';
           return;
         }
@@ -475,10 +493,11 @@
           const cont = document.createElement('button');
           cont.className = 'game-btn bg-emerald-600 hover:bg-emerald-500 text-lg px-8 py-4 rounded-2xl shadow-lg';
           cont.innerText = '\u7ee7\u7eed \u25B6';
-          cont.onclick = function () { if (!done) { done = true; onDone(); } };
+          cont.onclick = function () { if (!done) { done = true; spHeartbeat({ spGate: 0 }); onDone(); } };
           btns.appendChild(cont);
         } else {
           failCount++;
+          spHeartbeat({ spFails: failCount });
           // Failed: show only what was heard + the score — no threshold
           // internals (WER/phonetic reasons stay in telemetry only).
           const pct = Math.round((res.accuracy || 0) * 100);

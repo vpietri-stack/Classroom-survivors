@@ -157,28 +157,72 @@ app.http('saveAnalytics', {
                 return { status: 400, body: 'Missing events array.' };
             }
 
-            const { resources: items } = await getContainer().items
-                .query({ query: 'SELECT * FROM c WHERE c.id = @id', parameters: [{ name: '@id', value: studentId }] })
-                .fetchAll();
-            if (items.length === 0) return { status: 404, body: 'Student not found.' };
+            // LOST-UPDATE GUARD (2026-09-04, "Doris silent-200" root cause):
+            // saveAnalytics is a read-modify-write of the WHOLE student doc.
+            // Two concurrent flushes (crash-reload login beacon racing the
+            // killed page's in-flight debounced flush) both read the same
+            // doc, both upsert — last writer wins and the loser's JUST-ACKED
+            // events are silently erased. Proven live 2026-09-04: 15 rounds
+            // of 2 concurrent writes → 50 of 150 acked events missing (33%).
+            // Doris's iPad reloads constantly (WebContent kills) → constant
+            // overlap; the healthy fleet never overlaps → never loses.
+            // Fix: optimistic concurrency — replace with IfMatch(_etag); on
+            // a 412/precondition failure re-read, re-apply (dedup drops what
+            // the winner already wrote), retry. Bounded, then 409.
+            const container = getContainer();
+            let added = 0, addedEventIds = [], duplicateEventIds = [];
+            let sessionCount = null;
+            const MAX_ATTEMPTS = 4;
+            for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+                let user, etag;
+                if (attempt === 1) {
+                    const { resources: items } = await container.items
+                        .query({ query: 'SELECT * FROM c WHERE c.id = @id', parameters: [{ name: '@id', value: studentId }] })
+                        .fetchAll();
+                    if (items.length === 0) return { status: 404, body: 'Student not found.' };
+                    user = items[0];
+                } else {
+                    // Re-read AFTER losing the race so we merge onto the winner.
+                    try {
+                        const { resource } = await container.item(studentId, studentId).read();
+                        user = resource;
+                    } catch (readErr) {
+                        if (readErr && readErr.code === 404) return { status: 404, body: 'Student not found.' };
+                        throw readErr;
+                    }
+                }
+                etag = user._etag;
+                if (!user.analytics) user.analytics = [];
+                // Idempotent de-dup with per-event acks: the client stamps each
+                // event with a stable eventId, and (2026-09-03a, "Doris silent-200")
+                // the response lists EXACTLY which eventIds were added vs
+                // skipped-as-duplicate so the client only clears its persisted
+                // queue when the server accounts for every shipped event. On a
+                // concurrency retry the dedup also drops events the race winner
+                // already persisted — exactly the merge semantics we need.
+                ({ addedCount: added, addedEventIds, duplicateEventIds } = applyEventsWithAck(user.analytics, events));
+                if (srState && typeof srState === 'object') user.srState = srState;
+                if (incrementSession) user.sessionCount = (user.sessionCount || 0) + 1;
+                sessionCount = user.sessionCount || 0;
 
-            const user = items[0];
-            if (!user.analytics) user.analytics = [];
-            // Idempotent de-dup with per-event acks: the client stamps each
-            // event with a stable eventId, and (2026-09-03a, "Doris silent-200")
-            // the response now lists EXACTLY which eventIds were added vs
-            // skipped-as-duplicate so the client only clears its persisted
-            // queue when the server accounts for every shipped event.
-            const { addedCount: added, addedEventIds, duplicateEventIds } = applyEventsWithAck(user.analytics, events);
-            if (srState && typeof srState === 'object') user.srState = srState;
-            if (incrementSession) user.sessionCount = (user.sessionCount || 0) + 1;
+                // Automatic rolling archival: if user.analytics gets too large (>=700 events),
+                // safely archive older events (keeping 90-day sessions + 500 recent events)
+                // before saving the active record.
+                await maybeArchiveAnalytics(container, user, context);
 
-            // Automatic rolling archival: if user.analytics gets too large (>=700 events),
-            // safely archive older events (keeping 90-day sessions + 500 recent events)
-            // before saving the active record.
-            await maybeArchiveAnalytics(getContainer(), user, context);
-
-            await getContainer().items.upsert(user);
+                try {
+                    await container.item(studentId, studentId).replace(user, {
+                        accessCondition: { type: 'IfMatch', condition: etag }
+                    });
+                    break; // won the race — done
+                } catch (replaceErr) {
+                    const status = replaceErr && (replaceErr.code || replaceErr.statusCode);
+                    const preconditionFailed = status === 412 ||
+                        /precondition|etag/i.test(String(replaceErr && replaceErr.message));
+                    if (preconditionFailed && attempt < MAX_ATTEMPTS) continue; // lost race — merge onto winner
+                    throw replaceErr;
+                }
+            }
 
             // Delivery diagnostics (2026-09-03a): one tiny record per accepted
             // saveAnalytics request, in a separate telemetry doc. Purpose: the
@@ -214,7 +258,7 @@ app.http('saveAnalytics', {
                     message: `${added} event(s) saved (${events.length - added} duplicate(s) skipped).`,
                     addedEventIds,
                     duplicateEventIds,
-                    sessionCount: user.sessionCount || 0
+                    sessionCount: sessionCount !== null ? sessionCount : undefined
                 }
             };
         } catch (error) {

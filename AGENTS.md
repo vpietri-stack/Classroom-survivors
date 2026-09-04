@@ -8,6 +8,22 @@ this so you don't drift in the first place.
 
 ---
 
+## 📚 REPO WIKI — `docs/wiki/` (load before ANY work)
+
+`docs/wiki/` is the **single source of truth** for what this project is and how
+it works: architecture, subsystems, data model, API, telemetry, testing,
+deployment, and the don't-re-break-it gotchas/history page. **Start with
+`docs/wiki/01-overview.md`** (it routes you to the right page per task).
+
+**Update discipline:** any agent that changes code covered by a wiki page must
+update that page in the same commit. Architecture changes, new API endpoints,
+new localStorage keys, new event types, new tests, deploy-process changes, and
+post-incident lessons all belong there. Root-level `*_HANDOFF*.md` write-ups
+must be indexed in `docs/wiki/15-gotchas-and-history.md` and ideally distilled
+into the wiki (the root should not accumulate undying docs).
+
+---
+
 ## ⛔ RULE 1 — Deploy version stamps MUST stay in sync (or ALL users get a red banner)
 
 There are **THREE** stamps that must be byte-identical after every deploy:

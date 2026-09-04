@@ -192,6 +192,12 @@ app.http('saveAnalytics', {
                     }
                 }
                 etag = user._etag;
+                // PK-safe point-write: some legacy docs (93 in prod, incl.
+                // doris) predate the /studentId partition-key field and live
+                // with a null PK value — guessing PK=id 404s them. Use the
+                // doc's own studentId when present, else a null-PK write
+                // (partition key omitted = targets the null-PK partition).
+                const pkValue = user.studentId !== undefined ? user.studentId : undefined;
                 if (!user.analytics) user.analytics = [];
                 // Idempotent de-dup with per-event acks: the client stamps each
                 // event with a stable eventId, and (2026-09-03a, "Doris silent-200")
@@ -211,9 +217,9 @@ app.http('saveAnalytics', {
                 await maybeArchiveAnalytics(container, user, context);
 
                 try {
-                    await container.item(studentId, studentId).replace(user, {
-                        accessCondition: { type: 'IfMatch', condition: etag }
-                    });
+                    await (pkValue !== undefined
+                        ? container.item(studentId, pkValue).replace(user, { accessCondition: { type: 'IfMatch', condition: etag } })
+                        : container.item(studentId).replace(user, { accessCondition: { type: 'IfMatch', condition: etag } }));
                     break; // won the race — done
                 } catch (replaceErr) {
                     const status = replaceErr && (replaceErr.code || replaceErr.statusCode);

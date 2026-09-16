@@ -636,6 +636,26 @@ function makeUser() {
   ok('save-blocked banner raised after 5 network failures', bannerOn === true);
   sandbox.fetch = fetchStub;
 
+  // ---- 8. session-first ordering (2026-09-16, Val 2-session log) ----
+  // The session record is queued LAST but matters MOST. A failed completion
+  // flush used to re-queue the whole batch to the FRONT, burying the session
+  // behind exercises (~60 delivered, 0 confirmed). Sessions now sort front.
+  store = {};
+  posts = [];
+  fetchBehavior = 'ok';
+  sandbox.fetch = fetchStub;
+  sandbox.document._banner = null;
+  sandbox.authActiveUser = makeUser();
+  vm.runInContext('authActiveUser = __user; analyticsQueue = []; srPendingState = null; srIncrementSession = false; srPendingSeq = 0; confirmedSrSeq = 0;', Object.assign(sandbox, { __user: sandbox.authActiveUser }));
+  vm.runInContext('finalizeSession([{ type: "vocab", key: "cat", firstAttempt: true }]);', sandbox);
+  // Queue exercises FIRST, session LAST (the real completion order):
+  vm.runInContext('queueExerciseEvent("spelling", "study"); queueExerciseEvent("spelling", "study"); queueSessionEvent("study", { durationMs: 1000 });', sandbox);
+  var orderBefore = sandbox.analyticsQueue.map(function(e){ return e.type; }).join(',');
+  await sandbox.flushAnalytics();
+  ok('session sorts to the front before batching', orderBefore.split(',')[0] === 'exercise' && sandbox.analyticsQueue.length === 0);
+  var firstBody = JSON.parse(posts.filter(function(pp){ return pp.url.includes('/saveAnalytics'); }).pop().body);
+  ok('session event rides in the first batch', (firstBody.events || []).some(function(e){ return e.type === 'session'; }));
+
   console.log('\n' + pass + ' passed, ' + fail + ' failed');
   process.exit(fail ? 1 : 0);
 })().catch(e => { console.error('TEST CRASH:', e); process.exit(1); });

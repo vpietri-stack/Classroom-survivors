@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-16a",
+  "version": "2026-09-16b",
   "deployedAt": "2026-09-16",
-  "notes": "Blocker-era hardening (2026-09-16a, Val PC uBlock log). Queue: 500-event backpressure cap (shed oldest), 200-event flush chunks, stringify guard (oldest-50 fallback, Invalid string length can never wedge the page). API bypass in speech patchedFetch (model cache can never break saving). updateStudent: self-service placement (own book/unit/page) fixes student 403 on auto-advance. Per-account localStorage (queue/SR/page keys scoped per id + ownerId tags + login reset) fixes cross-account contamination. Save-blocked orange banner after 5 network failures. Vocab images: strip apostrophes/commas (we're->were). Tests: block 7 (cap/chunk/foreign/banner) + scoped-key updates; flush-deadline 78 pass."
+  "notes": "Session-first ordering (2026-09-16b, Val 2-session log: ~60 exercises delivered, 0 sessions confirmed). Sessions sort to queue front before batching so the session ack depends on the first small packet, not a 60-event batch. Completion retry backoff 800ms->400ms (the completion screen awaits it; cap added delay ~1.2s). Tests: block 8 (session-first), flush-deadline 80 pass."
 }

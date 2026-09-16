@@ -13,7 +13,7 @@ const API_BASE = API_BASE_URL;
 // The version watchdog (startVersionWatchdog) compares this to the live
 // version.json; a mismatch means stale WeChat builds never self-heal or
 // permanently nag. See DEPLOY_VERSION_STAMP.md. Bump BOTH together.
-const APP_VERSION = '2026-09-16a';
+const APP_VERSION = '2026-09-16b';
 
 // --- SESSION TOKEN (c) design) ---
 // The server mints a signed token on login. We store it in localStorage
@@ -537,11 +537,26 @@ async function flushAnalytics(opts = {}) {
     if (analyticsQueue.length !== before) persistAnalyticsQueue();
     if (analyticsQueue.length === 0) return;
 
+    // Session-first ordering (2026-09-16, "Val 2-session log"): the session
+    // record is queued LAST but matters MOST. A failed completion flush used
+    // to re-queue the whole batch to the FRONT, so the session event kept
+    // rejoining a pile it could never escape (~60 exercises delivered, 0
+    // sessions confirmed). Sessions now sort to the front, so the first
+    // successful batch always confirms them. Stable for the rest.
+    const sessFirst = analyticsQueue.filter(e => e && e.type === 'session');
+    if (sessFirst.length > 0) {
+        const rest = analyticsQueue.filter(e => !e || e.type !== 'session');
+        analyticsQueue = [...sessFirst, ...rest];
+        persistAnalyticsQueue();
+    }
+
     // Chunk cap (2026-09-16, "Val PC freeze"): a hostile network (blocker,
     // offline) lets the queue grow without bound; the next flush then builds
     // a body so large JSON.stringify throws Invalid string length and the
     // page wedges. Send at most one batch per flush; the 2s debounce +
     // game-over retry drain the rest progressively.
+    // Sessions ride in the FIRST batch: with sessions sorted front, the
+    // session ack depends on one small packet, not a 60-event batch.
     const MAX_BATCH = 200;
     const batch = analyticsQueue.slice(0, MAX_BATCH);
     const events = [...batch];
@@ -682,6 +697,11 @@ async function flushAnalytics(opts = {}) {
  * times with short delays so transient network blips don't lose the session
  * record + SR state. Returns a promise that resolves when the flush succeeds
  * or all retries are exhausted (data remains in localStorage either way).
+ * (2026-09-16, "slightly longer": the completion screen awaits this, so the
+ * retry waits are the hang the user feels. Back off fast — the first retry
+ * after 400ms catches most blips; longer waits just hold the child staring
+ * at a frozen screen. Cap total added delay ~1.2s; the 4s deadline + next-
+ * login drain cover the rest.)
  */
 async function flushAnalyticsOnGameOver() {
     const MAX_RETRIES = 3;
@@ -692,7 +712,7 @@ async function flushAnalyticsOnGameOver() {
         // If queue drained, the flush succeeded.
         if (analyticsQueue.length < queueLen || analyticsQueue.length === 0) return;
         // Still queued — wait briefly then retry.
-        if (attempt < MAX_RETRIES) await new Promise(r => setTimeout(r, 800 * attempt));
+        if (attempt < MAX_RETRIES) await new Promise(r => setTimeout(r, 400 * attempt));
     }
 }
 

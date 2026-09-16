@@ -158,8 +158,16 @@
 
   function patchFetchForModel() {
     const origFetch = globalThis.fetch.bind(globalThis);
+    // API bypass (2026-09-16, "Val PC log"): every analytics/network failure
+    // in the log stacks through patchedFetch — the model cache layer must
+    // NEVER see API traffic, so a cache bug can never break saving. API calls
+    // (same-origin /saveAnalytics, /login, /updateStudent, model-scope
+    // allow-list below) go straight to the raw fetch.
     globalThis.fetch = async function patchedFetch(url, init) {
       const urlStr = (typeof url === 'string' ? url : url.url || url.toString());
+      if (/\/api\/(saveAnalytics|login|updateStudent|getStudents|changePassword)/.test(urlStr)) {
+        return origFetch(url, init);
+      }
       // Only intercept model-file requests.
       const rel = modelRelPath(urlStr);
       if (rel) {

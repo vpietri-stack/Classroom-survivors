@@ -37,11 +37,21 @@ var analyticsFlushTimer = null;
 // The unsent queue is mirrored to localStorage after every enqueue and every
 // failed flush, so a crash, tab-close, or dead battery mid-session doesn't drop
 // student data. It is cleared only after the server confirms a successful write.
-const PERSISTED_QUEUE_KEY = 'csAnalyticsQueue';
+// (2026-09-16, "Val PC cross-account": the key is per-student — a global key
+// let one account inherit + flush another account's leftovers. Queued events
+// also carry ownerId so a flush under the wrong login is dropped, not sent.)
+const PERSISTED_QUEUE_KEY = 'csAnalyticsQueue'; // legacy global key (migrated)
+function persistedQueueKey() {
+    try {
+        const id = (typeof authActiveUser !== 'undefined' && authActiveUser && authActiveUser.id) || null;
+        if (id) return 'csAnalyticsQueue_' + id;
+    } catch { /* fall through to legacy */ }
+    return PERSISTED_QUEUE_KEY;
+}
 
 function loadPersistedAnalyticsQueue() {
     try {
-        const raw = localStorage.getItem(PERSISTED_QUEUE_KEY);
+        const raw = localStorage.getItem(persistedQueueKey());
         if (!raw) return [];
         const arr = JSON.parse(raw);
         return Array.isArray(arr) ? arr : [];
@@ -50,66 +60,124 @@ function loadPersistedAnalyticsQueue() {
     }
 }
 
+/**
+ * Scope-guard (2026-09-16): after any login/logout switch, reload the queue
+ * from the newly-active account's key so the previous account's leftovers
+ * can neither render nor flush under the new identity. Call after
+ * authActiveUser is (re)assigned and before the first enqueue of the session.
+ */
+function reloadAnalyticsQueueForActiveUser() {
+    try {
+        analyticsQueue = loadPersistedAnalyticsQueue();
+    } catch { analyticsQueue = []; }
+}
+
+/**
+ * In-memory session reset (2026-09-16, cross-account): clears the volatile
+ * leftovers of the previous login (SR pending triple, debounce timer,
+ * page-session breadcrumb) BEFORE hydrating the new account's persisted
+ * state. Idempotent; safe to call when nothing is set.
+ */
+function resetInMemorySessionState() {
+    try {
+        srPendingState = null;
+        srIncrementSession = false;
+        srPendingSeq = 0;
+        if (typeof analyticsFlushTimer !== 'undefined' && analyticsFlushTimer) {
+            clearTimeout(analyticsFlushTimer);
+            analyticsFlushTimer = null;
+        }
+    } catch { /* non-fatal */ }
+    try {
+        if (typeof csNewPageSession === 'function') csNewPageSession();
+    } catch { /* cs breadcrumb lives in frontend_auth — may be undefined here */ }
+}
+
 function persistAnalyticsQueue() {
     try {
         // Only persist when there is genuinely unsent work.
         if (!analyticsQueue || analyticsQueue.length === 0) {
-            localStorage.removeItem(PERSISTED_QUEUE_KEY);
+            localStorage.removeItem(persistedQueueKey());
         } else {
-            localStorage.setItem(PERSISTED_QUEUE_KEY, JSON.stringify(analyticsQueue));
+            localStorage.setItem(persistedQueueKey(), JSON.stringify(analyticsQueue));
         }
     } catch { /* storage full / unavailable — non-fatal */ }
 }
 
 // --- PERSISTENT SR STATE (survives app-kill between finalizeSession and flush) ---
+// (2026-09-16: per-student keys — see queue note above. Legacy global keys are
+// migrated on load: if a per-student key is absent but the global one exists,
+// adopt it once, then remove the global.)
 const PERSISTED_SR_KEY = 'csPendingSRState';
 const PERSISTED_SR_INCR_KEY = 'csPendingSRIncrement';
 const PERSISTED_SR_SEQ_KEY = 'csPendingSRSeq';       // seq of the pending update (2026-09-10)
 const CONFIRMED_SR_SEQ_KEY = 'csConfirmedSrSeq';     // highest server-confirmed seq (2026-09-10)
+function scopedKey(base) {
+    try {
+        const id = (typeof authActiveUser !== 'undefined' && authActiveUser && authActiveUser.id) || null;
+        if (id) return base + '_' + id;
+    } catch { /* fall through */ }
+    return base;
+}
+function migrateScopedKey(base) {
+    // One-time adoption: global -> per-student, then drop the global.
+    try {
+        const scoped = scopedKey(base);
+        if (scoped === base) return base;
+        if (localStorage.getItem(scoped) === null && localStorage.getItem(base) !== null) {
+            localStorage.setItem(scoped, localStorage.getItem(base));
+            localStorage.removeItem(base);
+        }
+        return scoped;
+    } catch { return base; }
+}
 
 function persistPendingSR() {
     try {
+        const K = migrateScopedKey(PERSISTED_SR_KEY);
+        const KI = migrateScopedKey(PERSISTED_SR_INCR_KEY);
+        const KS = migrateScopedKey(PERSISTED_SR_SEQ_KEY);
         if (srPendingState) {
-            localStorage.setItem(PERSISTED_SR_KEY, JSON.stringify(srPendingState));
+            localStorage.setItem(K, JSON.stringify(srPendingState));
         } else {
-            localStorage.removeItem(PERSISTED_SR_KEY);
+            localStorage.removeItem(K);
         }
         if (srIncrementSession) {
-            localStorage.setItem(PERSISTED_SR_INCR_KEY, '1');
+            localStorage.setItem(KI, '1');
         } else {
-            localStorage.removeItem(PERSISTED_SR_INCR_KEY);
+            localStorage.removeItem(KI);
         }
         if (srPendingSeq) {
-            localStorage.setItem(PERSISTED_SR_SEQ_KEY, String(srPendingSeq));
+            localStorage.setItem(KS, String(srPendingSeq));
         } else {
-            localStorage.removeItem(PERSISTED_SR_SEQ_KEY);
+            localStorage.removeItem(KS);
         }
     } catch { /* non-fatal */ }
 }
 
 function persistConfirmedSrSeq() {
     try {
-        localStorage.setItem(CONFIRMED_SR_SEQ_KEY, String(confirmedSrSeq || 0));
+        localStorage.setItem(migrateScopedKey(CONFIRMED_SR_SEQ_KEY), String(confirmedSrSeq || 0));
     } catch { /* non-fatal */ }
 }
 
 function loadPersistedSR() {
     try {
-        const raw = localStorage.getItem(PERSISTED_SR_KEY);
+        const raw = localStorage.getItem(migrateScopedKey(PERSISTED_SR_KEY));
         if (raw) srPendingState = JSON.parse(raw);
-        if (localStorage.getItem(PERSISTED_SR_INCR_KEY) === '1') srIncrementSession = true;
-        const seq = parseInt(localStorage.getItem(PERSISTED_SR_SEQ_KEY) || '0', 10);
+        if (localStorage.getItem(migrateScopedKey(PERSISTED_SR_INCR_KEY)) === '1') srIncrementSession = true;
+        const seq = parseInt(localStorage.getItem(migrateScopedKey(PERSISTED_SR_SEQ_KEY)) || '0', 10);
         if (seq) srPendingSeq = seq;
-        const conf = parseInt(localStorage.getItem(CONFIRMED_SR_SEQ_KEY) || '0', 10);
+        const conf = parseInt(localStorage.getItem(migrateScopedKey(CONFIRMED_SR_SEQ_KEY)) || '0', 10);
         if (conf) confirmedSrSeq = conf;
     } catch { /* non-fatal */ }
 }
 
 function clearPersistedSR() {
     try {
-        localStorage.removeItem(PERSISTED_SR_KEY);
-        localStorage.removeItem(PERSISTED_SR_INCR_KEY);
-        localStorage.removeItem(PERSISTED_SR_SEQ_KEY);
+        localStorage.removeItem(scopedKey(PERSISTED_SR_KEY));
+        localStorage.removeItem(scopedKey(PERSISTED_SR_INCR_KEY));
+        localStorage.removeItem(scopedKey(PERSISTED_SR_SEQ_KEY));
     } catch { /* non-fatal */ }
     // NOTE: CONFIRMED_SR_SEQ_KEY is intentionally kept — confirmation is monotonic.
     srPendingSeq = 0;

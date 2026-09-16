@@ -76,7 +76,20 @@ function fetchStub(url, options = {}) {
 const sandbox = {
   console,
   API_BASE_URL: 'http://test.local/api',
-  document: { addEventListener: () => {} },
+  document: {
+    addEventListener: () => {},
+    _banner: null,
+    getElementById: function (id) {
+      if (id === 'appUpdateBanner') return this._banner;
+      return null;
+    },
+    createElement: function () {
+      const el = { style: {}, innerHTML: '', onclick: null };
+      el.setAttribute = () => {};
+      return el;
+    },
+    body: { appendChild: function (el) { sandbox.document._banner = el; } }
+  },
   window: { addEventListener: () => {} },
   localStorage: localStorageStub,
   setTimeout, clearTimeout, setInterval, clearInterval,
@@ -144,7 +157,7 @@ function makeUser() {
   ok('flush POSTed saveAnalytics', posts.some(p => p.url.includes('/saveAnalytics')));
   const body = JSON.parse(posts.filter(p => p.url.includes('/saveAnalytics')).pop().body);
   ok('session event carried srState + incrementSession', !!body.srState && body.incrementSession === true);
-  ok('queue mirror cleared after server ack', !('csAnalyticsQueue' in store));
+  ok('queue mirror cleared after server ack', !('csAnalyticsQueue_student_doris_test' in store));
 
   // ---- 1b. deadline flush NEVER hangs past the deadline on a dead network ----
   fetchBehavior = 'hang';
@@ -158,7 +171,7 @@ function makeUser() {
   ok('deadline flush returns false when network stalls', drained2 === false);
   ok('deadline flush respects the deadline (<=1.5s for a 600ms cap)', waited <= 1500);
   ok('stalled events remain in the queue for next-login drain', sandbox.analyticsQueue.length === 1);
-  ok('stalled events stay persisted in localStorage', typeof store['csAnalyticsQueue'] === 'string');
+  ok('stalled events stay persisted in localStorage', typeof store['csAnalyticsQueue_student_doris_test'] === 'string');
   fetchBehavior = 'ok';
 
   // ---- 1c. immediate login flush (2026-08-28a, startup-kill blind-spot) ----
@@ -202,7 +215,7 @@ function makeUser() {
   vm.runInContext(`queueSessionEvent('study', { durationMs: 2000 });`, sandbox);
   const drainedAck = await sandbox.flushAnalytics();
   ok('full-ack 200 drains the queue', drainedAck !== false && sandbox.analyticsQueue.length === 0);
-  ok('full-ack 200 clears the localStorage queue mirror', !('csAnalyticsQueue' in store));
+  ok('full-ack 200 clears the localStorage queue mirror', !('csAnalyticsQueue_student_doris_test' in store));
 
   // Case B: Doris's silent-200 — 200 ok, response accounts for NOTHING.
   fetchBehavior = 'silent200';
@@ -219,7 +232,7 @@ function makeUser() {
   await sandbox.flushAnalytics();
   ok('silent-200 (no acks) does NOT drain the queue', sandbox.analyticsQueue.length === qBefore);
   ok('silent-200 keeps events persisted for the next-launch beacon re-send',
-     typeof store['csAnalyticsQueue'] === 'string');
+     typeof store['csAnalyticsQueue_student_doris_test'] === 'string');
   ok('silent-200 restores pending SR state so it rides the re-send',
      sandbox.srPendingState !== null && sandbox.srIncrementSession === true);
 
@@ -475,8 +488,8 @@ function makeUser() {
     queueExerciseEvent('wordScramble', 'study');
     queueExerciseEvent('spelling', 'study');
     srPendingState = { vocab: {} }; srIncrementSession = true;
-    localStorage.setItem('csPendingSRState', JSON.stringify({ vocab: {} }));
-    localStorage.setItem('csPendingSRIncrement', '1');
+    localStorage.setItem('csPendingSRState_student_doris_test', JSON.stringify({ vocab: {} }));
+    localStorage.setItem('csPendingSRIncrement_student_doris_test', '1');
   `, sandbox);
   const backlogLen = sandbox.analyticsQueue.length;
   vm.runInContext('queueDrainReportEvent();', sandbox);
@@ -491,7 +504,7 @@ function makeUser() {
   ok('drain report is dashboard-invisible (type device)', !!drain && drain.type === 'device');
   // Clean device: no backlog, no pending SR -> silent (no noise in the diag doc).
   vm.runInContext('analyticsQueue = []; srPendingState = null; srIncrementSession = false;', sandbox);
-  try { delete store['csPendingSRState']; delete store['csPendingSRIncrement']; } catch { /* noop */ }
+  try { delete store['csPendingSRState_student_doris_test']; delete store['csPendingSRIncrement_student_doris_test']; } catch { /* noop */ }
   const lenBefore = sandbox.analyticsQueue.length;
   vm.runInContext('queueDrainReportEvent();', sandbox);
   ok('drain report stays silent on a clean device',
@@ -512,7 +525,7 @@ function makeUser() {
   vm.runInContext(`finalizeSession([{ type: 'vocab', key: 'cat', firstAttempt: true }]);`, sandbox);
   const seq1 = vm.runInContext('srPendingSeq', sandbox);
   ok('finalize stamps a nonzero srSeq', typeof seq1 === 'number' && seq1 > 0);
-  ok('srSeq persists across page loads', store['csPendingSRSeq'] === String(seq1));
+  ok('srSeq persists across page loads', store['csPendingSRSeq_student_doris_test'] === String(seq1));
 
   // (b) flush attaches sr triple (state + seq + increment).
   // finalizeSession queues no events itself — only the SR pending triple —
@@ -525,7 +538,7 @@ function makeUser() {
   ok('flush sends srState + srSeq + incrementSession', !!sent1.srState && sent1.srSeq === seq1 && sent1.incrementSession === true);
 
   // (c) accounted + srApplied:true advances the watermark and clears the flag.
-  ok('accounted flush clears persisted SR keys', !('csPendingSRState' in store) && !('csPendingSRSeq' in store));
+  ok('accounted flush clears persisted SR keys', !('csPendingSRState_student_doris_test' in store) && !('csPendingSRSeq_student_doris_test' in store));
   const conf1 = vm.runInContext('confirmedSrSeq', sandbox);
   ok('confirmed watermark advances to the applied seq', conf1 === seq1);
 
@@ -557,7 +570,7 @@ function makeUser() {
     return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ success: true, ...ack }) });
   };
   await sandbox.flushAnalytics();
-  ok('legacy response still clears the flag on full ack', !('csPendingSRState' in store));
+  ok('legacy response still clears the flag on full ack', !('csPendingSRState_student_doris_test' in store));
   sandbox.fetch = realFetch;
 
   // (f) lost response reuses the SAME seq (no new finalize): server sees a
@@ -580,6 +593,48 @@ function makeUser() {
   const sentF = JSON.parse(posts.filter(p => p.url.includes('/saveAnalytics')).pop().body);
   ok('resend after lost response reuses the same srSeq (server dedups by seq)',
      sentF.srSeq === seqF && !!sentF.srState);
+
+  // ---- 7. blocker-era hardening (2026-09-16, Val PC uBlock log) ----
+  store = {};
+  posts = [];
+  fetchBehavior = 'ok';
+  sandbox.fetch = fetchStub;
+  sandbox.document._banner = null;
+  sandbox.authActiveUser = makeUser();
+  vm.runInContext('authActiveUser = __user; analyticsQueue = []; srPendingState = null; srIncrementSession = false; srPendingSeq = 0; confirmedSrSeq = 0;', Object.assign(sandbox, { __user: sandbox.authActiveUser }));
+
+  // (7a) queue cap: 600 rapid exercises never exceed 500 queued.
+  vm.runInContext('for (let i = 0; i < 600; i++) queueExerciseEvent("spelling", "study");', sandbox);
+  ok('queue capped at 500 under hostile network', sandbox.analyticsQueue.length <= 500);
+
+  // (7b) chunk: a deep queue ships at most 200 events per flush.
+  posts = [];
+  await sandbox.flushAnalytics();
+  var bigBody = JSON.parse(posts.filter(function(pp){ return pp.url.includes('/saveAnalytics'); }).pop().body);
+  ok('flush sends at most one 200-event batch', Array.isArray(bigBody.events) && bigBody.events.length <= 200);
+
+  // (7c) cross-account: foreign-owned events are dropped, never sent.
+  store = {};
+  posts = [];
+  vm.runInContext('authActiveUser = __user; analyticsQueue = [];', Object.assign(sandbox, { __user: sandbox.authActiveUser }));
+  vm.runInContext('queueExerciseEvent("spelling", "study");', sandbox);
+  vm.runInContext('analyticsQueue.push({ type: "exercise", exerciseType: "x", eventId: "ex_foreign", ownerId: "student_someone_else", timestamp: new Date().toISOString() });', sandbox);
+  await sandbox.flushAnalytics();
+  var sentBodies = posts.filter(function(pp){ return pp.url.includes('/saveAnalytics'); }).map(function(pp){ return JSON.parse(pp.body); });
+  var leaked = sentBodies.some(function(b){ return (b.events || []).some(function(e){ return e.ownerId === 'student_someone_else'; }); });
+  ok('foreign-owned events never leave the device', !leaked);
+  ok('foreign-owned events purged from the queue', !sandbox.analyticsQueue.some(function(e){ return e && e.ownerId === 'student_someone_else'; }));
+
+  // (7d) save-blocked banner: 5 straight network throws raise the banner.
+  vm.runInContext('analyticsQueue = [];', sandbox);
+  sandbox.fetch = function () { return Promise.reject(new TypeError('Failed to fetch')); };
+  for (let i = 0; i < 5; i++) {
+    vm.runInContext('queueExerciseEvent("spelling", "study");', sandbox);
+    try { await sandbox.flushAnalytics(); } catch (e) { /* rethrow-proof */ }
+  }
+  var bannerOn = vm.runInContext('(function(){ try { var b = document.getElementById("appUpdateBanner"); return !!(b && b.style && b.style.display === "block"); } catch (e) { return false; } })()', sandbox);
+  ok('save-blocked banner raised after 5 network failures', bannerOn === true);
+  sandbox.fetch = fetchStub;
 
   console.log('\n' + pass + ' passed, ' + fail + ' failed');
   process.exit(fail ? 1 : 0);

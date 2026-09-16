@@ -13,7 +13,7 @@ const API_BASE = API_BASE_URL;
 // The version watchdog (startVersionWatchdog) compares this to the live
 // version.json; a mismatch means stale WeChat builds never self-heal or
 // permanently nag. See DEPLOY_VERSION_STAMP.md. Bump BOTH together.
-const APP_VERSION = '2026-09-10a';
+const APP_VERSION = '2026-09-16a';
 
 // --- SESSION TOKEN (c) design) ---
 // The server mints a signed token on login. We store it in localStorage
@@ -149,6 +149,15 @@ function incrementExerciseAttempts() {
 function queueExerciseEvent(exerciseType, mode, itemDetails = null, customAttempts = null) {
     if (!authActiveUser || isTestMode) return;  // Skip recording in test mode
     const durationMs = Date.now() - exerciseStartTime;
+
+    // Backpressure cap (2026-09-16): when saves never succeed (blocker,
+    // offline), the queue would grow until serialization throws and the page
+    // wedges (Val PC log: Invalid string length). Shed the OLDEST exercises
+    // first — the session record + newest work matter most.
+    if (analyticsQueue.length >= 500) {
+        const drop = analyticsQueue.length - 499;
+        analyticsQueue.splice(0, drop);
+    }
     
     const event = {
         type: 'exercise',
@@ -160,6 +169,10 @@ function queueExerciseEvent(exerciseType, mode, itemDetails = null, customAttemp
         // Stable id so the server can de-duplicate if this event is flushed
         // again after a retry (tab-close + next-launch re-send).
         eventId: 'ex_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10),
+        // Owner tag (2026-09-16, cross-account): the flush drops events whose
+        // owner differs from the logged-in user instead of sending them under
+        // the wrong name.
+        ownerId: authActiveUser.id,
         // Restart telemetry: ties this event to its page load so a hard-kill
         // restart can be correlated with the last delivered tail.
         ps: csPageSessionId
@@ -190,6 +203,7 @@ function queueSessionEvent(sessionType, data) {
         // Stable id so the server can de-duplicate if this event is flushed
         // again after a retry (tab-close + next-launch re-send).
         eventId: 'se_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10),
+        ownerId: authActiveUser.id, // cross-account guard (2026-09-16, see queueExerciseEvent)
         ps: csPageSessionId // restart telemetry page-session stamp
     };
     analyticsQueue.push(event);
@@ -265,8 +279,11 @@ function queueDrainReportEvent() {
         }
         let pendingSR = false, pendingIncr = false;
         try {
-            pendingSR = !!localStorage.getItem('csPendingSRState');
-            pendingIncr = localStorage.getItem('csPendingSRIncrement') === '1';
+            // Scoped keys (2026-09-16): read this account's keys, falling back
+            // to legacy global keys so old persisted state still reports.
+            const id = (authActiveUser && authActiveUser.id) ? '_' + authActiveUser.id : '';
+            pendingSR = !!(localStorage.getItem('csPendingSRState' + id) || localStorage.getItem('csPendingSRState'));
+            pendingIncr = localStorage.getItem('csPendingSRIncrement' + id) === '1' || localStorage.getItem('csPendingSRIncrement') === '1';
         } catch { /* non-fatal */ }
         // Silent when there is genuinely nothing to report (keeps the diag doc quiet).
         if (q.length === 0 && !pendingSR && !pendingIncr) return;
@@ -512,7 +529,22 @@ async function flushAnalyticsViaBeacon(opts = {}) {
 async function flushAnalytics(opts = {}) {
     if (!authActiveUser || analyticsQueue.length === 0) return;
 
-    const events = [...analyticsQueue];
+    // Cross-account guard (2026-09-16): drop events owned by a DIFFERENT
+    // login instead of flushing them under this account's name. (Pre-scoped
+    // keys make this rare; the tag makes it impossible.)
+    const before = analyticsQueue.length;
+    analyticsQueue = analyticsQueue.filter(e => !e || !e.ownerId || e.ownerId === authActiveUser.id);
+    if (analyticsQueue.length !== before) persistAnalyticsQueue();
+    if (analyticsQueue.length === 0) return;
+
+    // Chunk cap (2026-09-16, "Val PC freeze"): a hostile network (blocker,
+    // offline) lets the queue grow without bound; the next flush then builds
+    // a body so large JSON.stringify throws Invalid string length and the
+    // page wedges. Send at most one batch per flush; the 2s debounce +
+    // game-over retry drain the rest progressively.
+    const MAX_BATCH = 200;
+    const batch = analyticsQueue.slice(0, MAX_BATCH);
+    const events = [...batch];
 
     // Capture and clear pending SR update
     const srPayload = srPendingState;
@@ -543,10 +575,23 @@ async function flushAnalytics(opts = {}) {
         // is being torn down (WeChat/iOS WebView killing the tab right after
         // game-over). This is our primary in-session delivery path; the
         // unload beacon is the backstop for events queued after the flush.
+        // Stringify guard (2026-09-16): a huge backlog can exceed the engine's
+        // max string length and throw SYNCHRONOUSLY — without this, the throw
+        // skips the catch below (it happens before try's await) and wedges the
+        // caller. Shrink to a survivable batch instead.
+        let bodyJson;
+        try {
+            bodyJson = JSON.stringify(body);
+        } catch (stringifyErr) {
+            console.warn('flush body too large, sending oldest 50 only:', stringifyErr);
+            const tiny = { studentId: body.studentId, events: events.slice(0, 50) };
+            bodyJson = JSON.stringify(tiny);
+            events.splice(50); // keep accounted/drain logic consistent with what ships
+        }
         const response = await apiFetch(`${API_BASE}/saveAnalytics`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
+            body: bodyJson,
             keepalive: true
         });
 
@@ -597,6 +642,7 @@ async function flushAnalytics(opts = {}) {
         // loop forever because the server only ever applies newer seqs
         // (shouldApplySr) and the client drops anything at/below confirmed.
         const srvSeq = (resBody && typeof resBody.srSeq === 'number') ? resBody.srSeq : null;
+        if (typeof noteFlushNetworkSuccess === 'function') noteFlushNetworkSuccess();
         if (accounted) {
             const sentSet = new Set(events);
             analyticsQueue = analyticsQueue.filter(e => !sentSet.has(e));
@@ -619,6 +665,9 @@ async function flushAnalytics(opts = {}) {
             persistAnalyticsQueue();
         }
     } catch (e) {
+        // Network threw (blocked/offline/timeout) — track the streak for the
+        // save-blocked banner, then re-queue + restore SR as before.
+        if (typeof noteFlushNetworkFailure === 'function') noteFlushNetworkFailure();
         console.warn('Failed to flush analytics:', e);
         // Re-queue failed events and restore SR pending state.
         analyticsQueue = events.concat(analyticsQueue);
@@ -823,6 +872,44 @@ document.addEventListener('DOMContentLoaded', () => {
 // student's progress is saved locally but NOT synced. Rather than silently
 // re-queue forever, surface a visible, tappable banner so the user (or teacher)
 // knows to reload — which pulls the current build and self-heals.
+//
+// SAVE-BLOCKED DETECTOR (2026-09-16, "Val PC uBlock"): consecutive NETWORK
+// failures (fetch threw — blocked/offline) with the page itself loading fine
+// means a content-blocker or captive portal is eating our API host, NOT a
+// server problem. After N straight network failures, show a distinct banner
+// telling the user to check their ad-blocker — the update banner's
+// "re-enter password" wording would send them down the wrong path.
+let _netFailStreak = 0;
+const NET_FAIL_BANNER_AFTER = 5;
+let _netBannerShown = false;
+function noteFlushNetworkFailure() {
+    _netFailStreak++;
+    if (_netFailStreak >= NET_FAIL_BANNER_AFTER && !_netBannerShown) {
+        _netBannerShown = true;
+        registerSaveBlockedBanner();
+    }
+}
+function noteFlushNetworkSuccess() {
+    _netFailStreak = 0;
+}
+function registerSaveBlockedBanner() {
+    let banner = document.getElementById('appUpdateBanner');
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'appUpdateBanner';
+        banner.style.cssText = [
+            'position:fixed', 'left:0', 'right:0', 'bottom:0', 'z-index:999998',
+            'background:#92400e', 'color:#fff', 'font-family:system-ui,sans-serif',
+            'font-size:14px', 'padding:12px 16px', 'text-align:center', 'cursor:pointer',
+            'box-shadow:0 -4px 12px rgba(0,0,0,.3)'
+        ].join(';');
+        banner.setAttribute('role', 'alert');
+        try { document.body.appendChild(banner); } catch { return; }
+    }
+    banner.innerHTML = '⚠️ 保存被浏览器拦截 — 请检查广告拦截器 (uBlock/AdGuard) 是否阻止了本页面，然后点击重试';
+    banner.onclick = () => { _netBannerShown = false; _netFailStreak = 0; flushAnalytics(); };
+    banner.style.display = 'block';
+}
 let _updateBannerShown = false;
 function registerUpdateBanner(reason) {
     if (_updateBannerShown) return;
@@ -1458,6 +1545,15 @@ async function selectAvatar(avatarEmoji) {
 }
 
 function saveUserToLocalAndStart(user) {
+    // Cross-account reset (2026-09-16): in-memory session leftovers (SR
+    // pending triple, queue, page-session breadcrumb) belong to the PREVIOUS
+    // login. Clear them FIRST, then hydrate this account's persisted state.
+    if (typeof resetInMemorySessionState === 'function') resetInMemorySessionState();
+    authActiveUser = user;
+    if (typeof reloadAnalyticsQueueForActiveUser === 'function') reloadAnalyticsQueueForActiveUser();
+    if (typeof loadPersistedSR === 'function') {
+        try { loadPersistedSR(); } catch { /* non-fatal */ }
+    }
     let savedUsers = JSON.parse(localStorage.getItem('savedUsers') || '[]');
     // Remove if exists
     savedUsers = savedUsers.filter(u => u.id !== user.id);

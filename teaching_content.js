@@ -164,7 +164,22 @@ function persistConfirmedSrSeq() {
 function loadPersistedSR() {
     try {
         const raw = localStorage.getItem(migrateScopedKey(PERSISTED_SR_KEY));
-        if (raw) srPendingState = JSON.parse(raw);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            // Delta envelope (2026-09-16 quota guard): merge onto the cached
+            // full profile state if present, else hold the delta alone — the
+            // flush ships srPendingDelta either way.
+            if (parsed && parsed.__srDelta && parsed.delta) {
+                try {
+                    const saved = JSON.parse(localStorage.getItem('savedUsers') || '[]');
+                    const me = saved.find(u => authActiveUser && u.id === authActiveUser.id);
+                    const base = (me && me.srState) || ((typeof authActiveUser !== 'undefined' && authActiveUser && authActiveUser.srState) || {});
+                    srPendingState = (typeof mergeSRDelta === 'function') ? mergeSRDelta(base, parsed.delta) : parsed.delta;
+                } catch { srPendingState = parsed.delta; }
+            } else {
+                srPendingState = parsed;
+            }
+        }
         if (localStorage.getItem(migrateScopedKey(PERSISTED_SR_INCR_KEY)) === '1') srIncrementSession = true;
         const seq = parseInt(localStorage.getItem(migrateScopedKey(PERSISTED_SR_SEQ_KEY)) || '0', 10);
         if (seq) srPendingSeq = seq;

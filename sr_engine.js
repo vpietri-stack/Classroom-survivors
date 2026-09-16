@@ -305,6 +305,60 @@ function selectSamePageSR(pagesWithItems, count, srTypeState, currentSession, ac
  * @param {number} currentSession session index that just completed
  * @returns {Object} new srState (does not mutate input)
  */
+/**
+ * Extracts the per-session delta from a full post-update SR state.
+ * updateSRStateForSession returns a FULL state (every entry copied); only
+ * entries whose lastSession === currentSession were touched this session.
+ * Shipping just those keeps the completion packet at a few KB no matter how
+ * large the student's history grows (2026-09-16, "poisoned account": a 65KB
+ * full-state packet exceeds Chromium's ~64KB keepalive cap and EVERY flush
+ * fails with Failed to fetch — including small in-session ones once the
+ * pending SR rides along).
+ *
+ * @param {Object} fullState full SR state after updateSRStateForSession
+ * @param {number} currentSession session index just completed
+ * @returns {Object} { vocab:{}, sentences:{}, sentencePairs:{} } with only touched entries
+ */
+function extractSRDelta(fullState, currentSession) {
+    const delta = { vocab: {}, sentences: {}, sentencePairs: {} };
+    for (const type of ['vocab', 'sentences', 'sentencePairs']) {
+        const bucket = (fullState || {})[type] || {};
+        for (const key of Object.keys(bucket)) {
+            if (bucket[key] && bucket[key].lastSession === currentSession) {
+                delta[type][key] = bucket[key];
+            }
+        }
+    }
+    return delta;
+}
+
+/**
+ * Merges an SR delta onto a stored full state (server side). Entries in the
+ * delta overwrite by key; everything else is preserved. Returns a NEW object.
+ *
+ * @param {Object} stored full SR state on the doc (may be missing buckets)
+ * @param {Object} delta sparse update { vocab:{}, sentences:{}, sentencePairs:{} }
+ * @returns {Object} merged full state
+ */
+function mergeSRDelta(stored, delta) {
+    const out = {
+        vocab: Object.assign({}, (stored || {}).vocab || {}),
+        sentences: Object.assign({}, (stored || {}).sentences || {}),
+        sentencePairs: Object.assign({}, (stored || {}).sentencePairs || {})
+    };
+    for (const type of ['vocab', 'sentences', 'sentencePairs']) {
+        const bucket = (delta || {})[type] || {};
+        for (const key of Object.keys(bucket)) {
+            out[type][key] = bucket[key];
+        }
+    }
+    return out;
+}
+
+/**
+ * Full per-session SR update (see docstring above updateSRStateForSession
+ * in git history).
+ */
 function updateSRStateForSession(srState, sessionResults, currentSession) {
     const newState = {
         vocab: Object.assign({}, (srState || {}).vocab || {}),

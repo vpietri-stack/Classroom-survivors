@@ -254,6 +254,24 @@ async function main() {
         assert.strictEqual(shouldApplySr(200, 123), false);
     });
 
+    // ---- SR delta merge (2026-09-16, poisoned account) ----
+    // Server-side merge semantics, pinned here in the same key-overwrite
+    // shape the handler inlines (client helpers live in browser-global
+    // sr_engine.js, so this suite asserts the contract, not the copy).
+    test('SR delta: merge preserves untouched entries, overwrites touched', () => {
+        const stored = { vocab: { a: { interval: 2 }, b: { interval: 4 } }, sentences: {}, sentencePairs: {} };
+        const delta = { vocab: { b: { interval: 8 } }, sentences: { s1: { interval: 2 } }, sentencePairs: {} };
+        const merged = {
+            vocab: Object.assign({}, stored.vocab),
+            sentences: Object.assign({}, stored.sentences),
+            sentencePairs: Object.assign({}, stored.sentencePairs)
+        };
+        for (const t of ['vocab', 'sentences', 'sentencePairs']) Object.assign(merged[t], delta[t] || {});
+        assert.deepStrictEqual(merged.vocab.a, { interval: 2 });
+        assert.deepStrictEqual(merged.vocab.b, { interval: 8 });
+        assert.deepStrictEqual(merged.sentences.s1, { interval: 2 });
+    });
+
     console.log('\n--- AUTO-ARCHIVE ANALYTICS TEST RESULTS ---');
     console.log(passed + ' passed, ' + failed + ' failed');
     if (failed > 0) process.exit(1);

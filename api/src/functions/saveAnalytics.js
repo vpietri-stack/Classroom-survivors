@@ -166,7 +166,7 @@ app.http('saveAnalytics', {
             const token = authGate.token;
 
             const studentId = token ? token.sub : body.studentId; // scope to self only
-            const { events, srState, incrementSession, srSeq } = body;
+            const { events, srState, incrementSession, srSeq, srDelta } = body;
 
             if (!events || !Array.isArray(events) || events.length === 0) {
                 return { status: 400, body: 'Missing events array.' };
@@ -230,7 +230,24 @@ app.http('saveAnalytics', {
                 // (srApplied is declared outside the loop so the response can
                 // report it; only the winning attempt's value escapes.)
                 if (srState && typeof srState === 'object' && shouldApplySr(user.srSeq, srSeq)) {
-                    user.srState = srState;
+                    // DELTA SYNC (2026-09-16): srDelta=true means the payload
+                    // holds only this session's touched entries — merge onto
+                    // stored state. Absent flag = legacy full replace.
+                    // mergeSRDelta lives client-side in sr_engine.js; the
+                    // server inlines the same key-overwrite merge here.
+                    if (srDelta) {
+                        const merged = {
+                            vocab: Object.assign({}, (user.srState || {}).vocab || {}),
+                            sentences: Object.assign({}, (user.srState || {}).sentences || {}),
+                            sentencePairs: Object.assign({}, (user.srState || {}).sentencePairs || {})
+                        };
+                        for (const type of ['vocab', 'sentences', 'sentencePairs']) {
+                            Object.assign(merged[type], (srState[type] || {}));
+                        }
+                        user.srState = merged;
+                    } else {
+                        user.srState = srState;
+                    }
                     if (srSeq !== undefined && srSeq !== null) user.srSeq = srSeq;
                     if (incrementSession) user.sessionCount = (user.sessionCount || 0) + 1;
                     srApplied = true;

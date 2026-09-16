@@ -656,6 +656,33 @@ function makeUser() {
   var firstBody = JSON.parse(posts.filter(function(pp){ return pp.url.includes('/saveAnalytics'); }).pop().body);
   ok('session event rides in the first batch', (firstBody.events || []).some(function(e){ return e.type === 'session'; }));
 
+  // ---- 9. delta sync (2026-09-16, poisoned account) ----
+  // finalizeSession ships a DELTA wire payload (touched entries only), not
+  // the full state. A 65KB full-state packet exceeds the keepalive cap.
+  store = {};
+  posts = [];
+  fetchBehavior = 'ok';
+  sandbox.fetch = fetchStub;
+  sandbox.document._banner = null;
+  sandbox.authActiveUser = makeUser();
+  vm.runInContext('authActiveUser = __user; analyticsQueue = []; srPendingState = null; srIncrementSession = false; srPendingSeq = 0; confirmedSrSeq = 0; srPendingDelta = null; srPendingIsDelta = false;', Object.assign(sandbox, { __user: sandbox.authActiveUser }));
+  // Seed a FAT stored state (200 untouched entries) + one session touch:
+  vm.runInContext(`authActiveUser.srState = { vocab: {}, sentences: {}, sentencePairs: {} };
+    for (let i = 0; i < 200; i++) authActiveUser.srState.vocab['old_' + i] = { interval: 128, dueAfterSession: 9999, lastSession: 50, lastResult: 'success' };`, sandbox);
+  vm.runInContext('finalizeSession([{ type: "vocab", key: "cat", firstAttempt: true }]);', sandbox);
+  var fullBytes = JSON.stringify(vm.runInContext('srPendingState', sandbox)).length;
+  var deltaBytes = JSON.stringify(vm.runInContext('srPendingDelta', sandbox)).length;
+  ok('delta is a small fraction of the full state', deltaBytes < fullBytes / 10);
+  vm.runInContext('queueSessionEvent("study", { durationMs: 1000 });', sandbox);
+  posts = [];
+  await sandbox.flushAnalytics();
+  var dBody = JSON.parse(posts.filter(function(pp){ return pp.url.includes('/saveAnalytics'); }).pop().body);
+  ok('wire payload carries the delta flag', dBody.srDelta === true);
+  ok('wire srState is the delta (single touched entry)', Object.keys(dBody.srState.vocab || {}).length === 1 && !!dBody.srState.vocab['cat']);
+  // (after an accounted flush the in-memory triple is consumed — assert the
+  // SENT delta was complete by checking the request body keys instead)
+  ok('delta covers every touched key (cat present)', !!dBody.srState.vocab['cat']);
+
   console.log('\n' + pass + ' passed, ' + fail + ' failed');
   process.exit(fail ? 1 : 0);
 })().catch(e => { console.error('TEST CRASH:', e); process.exit(1); });

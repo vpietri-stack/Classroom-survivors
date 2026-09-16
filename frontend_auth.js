@@ -13,7 +13,7 @@ const API_BASE = API_BASE_URL;
 // The version watchdog (startVersionWatchdog) compares this to the live
 // version.json; a mismatch means stale WeChat builds never self-heal or
 // permanently nag. See DEPLOY_VERSION_STAMP.md. Bump BOTH together.
-const APP_VERSION = '2026-09-16b';
+const APP_VERSION = '2026-09-16c';
 
 // --- SESSION TOKEN (c) design) ---
 // The server mints a signed token on login. We store it in localStorage
@@ -56,6 +56,8 @@ var srPendingState = null;       // computed new srState waiting for the next fl
 var srIncrementSession = false;  // whether this flush should increment sessionCount
 var srPendingSeq = 0;            // monotonic seq tagging the pending SR update (2026-09-10)
 var confirmedSrSeq = 0;          // highest server-confirmed srSeq (persisted)
+var srPendingDelta = null;       // wire payload: session delta (2026-09-16); null = fall back to full state
+var srPendingIsDelta = false;    // whether srPendingDelta is a merge-delta (server merges) vs full replace
 
 /** Current session index = completed sessions so far (0-based). */
 function getCurrentSession() {
@@ -128,8 +130,21 @@ function finalizeSession(sessionResults, shouldIncrementSession = true) {
         markSRSessionAdvancedToday();
     }
 
-    // Queue for next flush
+    // Queue for next flush.
+    // DELTA SYNC (2026-09-16, "poisoned account"): ship ONLY the entries
+    // this session touched (lastSession === currentSession), not the full
+    // state. A 65KB full-state packet exceeds Chromium's ~64KB keepalive cap
+    // and EVERY flush fails. The server merges the delta onto stored state.
+    // The in-memory + persisted full state stays complete (next session in
+    // this page-load and the selector need it); only the WIRE payload is a
+    // delta, flagged so the server knows to merge, not replace.
     srPendingState = newSRState;
+    srPendingIsDelta = true;
+    try {
+        const delta = (typeof extractSRDelta === 'function')
+            ? extractSRDelta(newSRState, currentSession) : newSRState;
+        srPendingDelta = delta;
+    } catch { srPendingDelta = newSRState; }
     srPendingSeq = Date.now(); // monotonic tag: server applies each seq at most once (2026-09-10)
     if (typeof persistPendingSR === 'function') persistPendingSR(); // survive app-kill between here and successful flush
 
@@ -565,9 +580,15 @@ async function flushAnalytics(opts = {}) {
     const srPayload = srPendingState;
     const incrementSession = srIncrementSession;
     const srSeqAtSend = srPendingSeq;
+    // Wire payload: the session delta when available (few KB), else the full
+    // state (legacy path). The full state stays in srPayload for restore.
+    const srWire = (srPendingIsDelta && srPendingDelta) ? srPendingDelta : srPayload;
+    const srIsDelta = !!(srPendingIsDelta && srPendingDelta);
     srPendingState = null;
     srIncrementSession = false;
     srPendingSeq = 0;
+    srPendingDelta = null;
+    srPendingIsDelta = false;
 
     // SR rides ONLY when newer than server-confirmed (2026-09-10, Doris
     // stuck-flag fix): an obsolete pending update is dropped locally instead
@@ -580,8 +601,9 @@ async function flushAnalytics(opts = {}) {
 
     const body = { studentId: authActiveUser.id, events };
     if (sendSr) {
-        body.srState = srPayload;
+        body.srState = srWire;
         body.srSeq = srSeqAtSend;
+        if (srIsDelta) body.srDelta = true; // server merges; absent = legacy full replace
         if (incrementSession) body.incrementSession = true;
     }
 
@@ -590,6 +612,10 @@ async function flushAnalytics(opts = {}) {
         // is being torn down (WeChat/iOS WebView killing the tab right after
         // game-over). This is our primary in-session delivery path; the
         // unload beacon is the backstop for events queued after the flush.
+        // NOTE (2026-09-16, keepalive cap): keepalive bodies are capped (~64KB
+        // in Chromium) — over-cap bodies fail with Failed to fetch WITHOUT
+        // server contact. Delta sync keeps completion packets at a few KB, so
+        // the cap no longer bites; no second code path needed.
         // Stringify guard (2026-09-16): a huge backlog can exceed the engine's
         // max string length and throw SYNCHRONOUSLY — without this, the throw
         // skips the catch below (it happens before try's await) and wedges the
@@ -621,7 +647,7 @@ async function flushAnalytics(opts = {}) {
                 const relogged = await trySilentRelogin();
                 if (relogged) {
                     // Restore pending SR state for the retry, then re-flush.
-                    if (srPayload && !srPendingState) { srPendingState = srPayload; srPendingSeq = srSeqAtSend; }
+                    if (srPayload && !srPendingState) { srPendingState = srPayload; srPendingSeq = srSeqAtSend; srPendingDelta = srWire; srPendingIsDelta = srIsDelta; }
                     if (incrementSession) srIncrementSession = true;
                     if (typeof persistPendingSR === 'function') persistPendingSR();
                     return await flushAnalytics({ ...opts, _retried: true });
@@ -675,7 +701,7 @@ async function flushAnalytics(opts = {}) {
             // SR pending state was consumed at the top of this function —
             // restore it so the SR update rides the re-send too.
             console.warn('saveAnalytics 200 without full event ack — keeping queue for re-send');
-            if (srPayload && !srPendingState) { srPendingState = srPayload; srPendingSeq = srSeqAtSend; }
+            if (srPayload && !srPendingState) { srPendingState = srPayload; srPendingSeq = srSeqAtSend; srPendingDelta = srWire; srPendingIsDelta = srIsDelta; }
             if (incrementSession) srIncrementSession = true;
             persistAnalyticsQueue();
         }
@@ -686,7 +712,7 @@ async function flushAnalytics(opts = {}) {
         console.warn('Failed to flush analytics:', e);
         // Re-queue failed events and restore SR pending state.
         analyticsQueue = events.concat(analyticsQueue);
-        if (srPayload && !srPendingState) { srPendingState = srPayload; srPendingSeq = srSeqAtSend; }
+        if (srPayload && !srPendingState) { srPendingState = srPayload; srPendingSeq = srSeqAtSend; srPendingDelta = srWire; srPendingIsDelta = srIsDelta; }
         if (incrementSession) srIncrementSession = true;
         persistAnalyticsQueue();
     }

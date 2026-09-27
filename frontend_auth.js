@@ -274,29 +274,27 @@ function queueDeviceInfoEvent() {
 }
 
 // --- PASSIVE GEOLOCATION CAPTURE (2026-09-25, campus-relocation survey) ------
-// One ~1km-rounded position fix per student, captured at login via the browser
+// A ~1km-rounded position fix, captured at every login via the browser
 // Geolocation API. Privacy: coords are rounded to 2 decimals ON THE CLIENT
 // before enqueue and again server-side (saveAnalytics extractGeoUpdates); the
 // raw GPS fix never leaves the device. Ships as a type:'geo' analytics event
 // through the normal queue (retry/beacon/ack for free); the server diverts it
 // to the student doc's top-level `geo` field — it never enters the analytics
-// array. Retry policy (teacher-mandated): failures retry EVERY login until a
-// fix succeeds; only 'ok' is permanent. Caveats: WeChat Android webview often
-// lacks geolocation (fail flag, silent), and the browser's own permission
-// popup is the consent record.
+// array. v2 (2026-09-26): captures on EVERY login — one fix is a snapshot,
+// not a verdict (trip contamination, 2026-09-26). The SERVER dedups (same
+// cell + same Beijing day) and derives home as the unique-day consensus, so
+// repeated home fixes cost nothing and a trip can never freeze in. The
+// csGeoDone flag is diagnostic-only now — it no longer gates capture.
+// Caveats: iOS Safari re-prompts per login (accepted); WeChat Android webview
+// often lacks geolocation (silent fail, retried next login).
 function csGeoRound(v) { return Math.round(Number(v) * 100) / 100; }
 function csGeoFlagKey() { return 'csGeoDone_' + (authActiveUser && authActiveUser.id ? authActiveUser.id : ''); }
-function csGeoGetFlag() {
-    try { return JSON.parse(localStorage.getItem(csGeoFlagKey()) || 'null'); } catch { return null; }
-}
 function csGeoSetFlag(status) {
     try { localStorage.setItem(csGeoFlagKey(), JSON.stringify({ status: status, ts: new Date().toISOString() })); } catch { /* non-fatal */ }
 }
 function csMaybeCaptureGeo() {
     if (!authActiveUser || isTestMode) return;
     if (!navigator.geolocation) { csGeoSetFlag('fail'); return; }
-    const flag = csGeoGetFlag();
-    if (flag && flag.status === 'ok') return; // captured once — never ask again
     navigator.geolocation.getCurrentPosition(
         (pos) => {
             if (!authActiveUser || !pos || !pos.coords) { csGeoSetFlag('fail'); return; }

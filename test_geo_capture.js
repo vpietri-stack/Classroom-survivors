@@ -1,7 +1,9 @@
 // Tests for passive geolocation capture (2026-09-25 student-geolocation spec):
 //   1. csGeoRound — client-side ~1km rounding BEFORE enqueue (privacy).
-//   2. csMaybeCaptureGeo — gating: ok-flag stops capture; fail retries EVERY
-//      login (user-mandated); test mode and missing geolocation are no-ops.
+//   2. csMaybeCaptureGeo — v2 (2026-09-26): NO ok-gate; capture happens EVERY
+//      login (success and failure both retry; the server dedups same cell +
+//      same Beijing day). The csGeoDone flag is diagnostic-only. Test mode and
+//      missing geolocation stay no-ops (fail flag aside).
 //   3. Success enqueues a type:'geo' event with rounded coords + eventId.
 const fs = require('fs');
 const path = require('path');
@@ -96,15 +98,18 @@ ${src}
   var flag = JSON.parse(localStorage.getItem('csGeoDone_stu1') || 'null');
   report('success: ok flag persisted', flag && flag.status === 'ok');
 
-  // --- ok flag stops further capture ---
+  // --- v2: NO ok gate — every login captures again (server dedups) ---
   var callsBefore = geoCalls;
   csMaybeCaptureGeo();
-  report('ok flag: geolocation not called again', geoCalls === callsBefore);
+  report('v2: captures again on next login even after success', geoCalls === callsBefore + 1);
+  var okFlag = JSON.parse(localStorage.getItem('csGeoDone_stu1') || 'null');
+  report('v2: ok flag still written for diagnostics', okFlag && okFlag.status === 'ok');
 
   // --- failure path: flag set, retries every login ---
   store = {};
   analyticsQueue.length = 0;
   geoBehavior = 'fail';
+  callsBefore = geoCalls; // re-snapshot: the v2 success re-capture above moved the counter
   csMaybeCaptureGeo();
   flag = JSON.parse(localStorage.getItem('csGeoDone_stu1') || 'null');
   report('failure: fail flag persisted', flag && flag.status === 'fail');

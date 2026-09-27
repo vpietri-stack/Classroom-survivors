@@ -13,7 +13,7 @@ const API_BASE = API_BASE_URL;
 // The version watchdog (startVersionWatchdog) compares this to the live
 // version.json; a mismatch means stale WeChat builds never self-heal or
 // permanently nag. See DEPLOY_VERSION_STAMP.md. Bump BOTH together.
-const APP_VERSION = '2026-09-25b';
+const APP_VERSION = '2026-09-26a';
 
 // --- SESSION TOKEN (c) design) ---
 // The server mints a signed token on login. We store it in localStorage
@@ -315,7 +315,7 @@ function csMaybeCaptureGeo() {
             scheduleAnalyticsFlush();
             csGeoSetFlag('ok');
         },
-        () => { csGeoSetFlag('fail'); }, // retry on next login (per policy)
+        () => { csGeoSetFlag('fail'); }, // diagnostic only — v2 captures on every login, so this fix simply retries next time
         { enableHighAccuracy: false, timeout: 10000, maximumAge: 86400000 }
     );
 }

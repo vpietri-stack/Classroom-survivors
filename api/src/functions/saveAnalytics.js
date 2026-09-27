@@ -288,8 +288,9 @@ app.http('saveAnalytics', {
                 return { status: 400, body: 'Missing events array.' };
             }
 
-            // Geo diversion (2026-09-25): geo events never enter the analytics
-            // array — newest valid fix lands on the doc's top-level `geo` field.
+            // Geo diversion (v2, 2026-09-26): geo events never enter the analytics
+            // array — valid fixes accumulate in user.geoSamples and the top-level
+            // user.geo is recomputed as the unique-day consensus (applyGeoSamples).
             const { geoEvents, geoEventIds, cleanEvents } = extractGeoUpdates(events);
 
             // LOST-UPDATE GUARD (2026-09-04, "Doris silent-200" root cause):

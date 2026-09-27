@@ -1,19 +1,19 @@
 # Teacher & Admin Dashboards
 
-> **Last verified:** 2026-09-04 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
+> **Last verified:** 2026-09-27 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
 
-**Owner files:** `teacher_dashboard.html` (472 ln), `teacher_dashboard.js` (816 ln), `teacher_dashboard.css` (1151 ln), `admin_dashboard.js` (958 ln), `test_archive_merge_dashboard.js`
+**Owner files:** `teacher_dashboard.html` (488 ln), `teacher_dashboard.js` (818 ln), `teacher_dashboard.css` (1151 ln), `admin_dashboard.js` (958 ln), `geo_export.js` (368 ln), `test_archive_merge_dashboard.js`
 
 One HTML app shell (`teacher_dashboard.html`), two role views. `teacher_dashboard.js` is the base (list/filters/detail tabs); `admin_dashboard.js` (loaded AFTER it — header comment "ADMIN DASHBOARD - Additional functionality for admin role") layers on admin/BM powers: add student, settings editing, targets with manual offset, BM management. There is no separate admin HTML page — `initAdminUI()` re-skins the same shell.
 
 ## Files & load order
 
-`teacher_dashboard.html:459-470` loads, in order:
+`teacher_dashboard.html:474-486` loads, in order:
 
 1. `config.js`, `frontend_auth.js` (API base, `apiFetch`, app key)
 2. **Inline stub:** `<script>var TEACHING_CONTENT = {}; var AVAILABLE_CONTENT = {};</script>` — the content packs are loaded to serve the **test iframe** (`#testIframe` loads `index.html?testMode=true&…`); the stub exists so pack files parse, and `sr_engine.js`/`teaching_content.js` are deliberately NOT loaded (the dashboard never does SR math itself; it renders `srState` read-only)
 3. All 7 content packs (`content_pu1/2/3.js`, `content_think0/1/2.js`, `content_test.js`)
-4. `teacher_dashboard.js` (declares `let isBM = false` at top level, ~12) then `admin_dashboard.js` (declares `let isAdmin = false`, ~6) — **do not redeclare either**; both are top-level `let` shared across the two files
+4. `teacher_dashboard.js` (declares `let isBM = false` at top level, ~12) then `geo_export.js` (Student Locations panel + location exports; needs `allStudents` from the base script) then `admin_dashboard.js` (declares `let isAdmin = false`, ~6) — **do not redeclare either**; both are top-level `let` shared across the two files
 
 `apiFetch` (defined in `frontend_auth.js`) attaches `X-App-Key` + `X-Auth-Token` automatically — dashboards never hand-roll auth headers.
 
@@ -44,7 +44,7 @@ flowchart TD
 | **Sessions** | `renderSessions()` — `type:'session'` events, date-filtered, with detail panel; labels via `sessionTypeLabel` (`study`/`gomoku`/`uno`/`vampireSurvivors`) |
 | **Exercises** | `renderExercises()` — `type:'exercise'` events; `exerciseTypeLabel` maps `wordScramble`/`spelling`/`sentenceScramble`/`sentenceMatch` + `speech_*` types |
 | **Test** | `startTestMode()` (~786) — loads `index.html?testMode=true&…` into `#testIframe` to try the student's exact content assignment |
-| **Settings** | `populateSettingsTab()` + `saveStudentSettings()` (admin_dashboard.js ~150/~175) |
+| **Settings** | `populateSettingsTab()` + `saveStudentSettings()` (admin_dashboard.js ~150/~175); the Student Locations panel sits at the bottom (see below) |
 | **Targets** | `renderTargetsTab()` + `adjustTargetOffset` (admin_dashboard.js ~222/~344) |
 | **SR** | `renderSRTab()` — read-only SR state explorer; per-item popup shows interval/due/last result (admin_dashboard.js ~700-724) |
 
@@ -60,6 +60,14 @@ flowchart TD
 
 - `populateSettingsTab()` (admin_dashboard.js ~150): fills fullName, teacher (dropdown + custom), classTime, book/unit/page cascading selects, **`settingsLogin` (read-only + copy button via `copyLogin()` ~43)** and **`settingsPassword`** with the stored plaintext (eye-toggle `togglePwVis`).
 - `saveStudentSettings()` (~175) POSTs `updateStudent` with the whitelisted field set. **Load-bearing rule:** only include `password` when the box is non-empty (`if (newPw) fields.password = newPw`, ~196-197) — an empty box means "leave unchanged". The historical empty-save bug wiped real passwords; do not "simplify" this away. The password plaintext view is the sanctioned recovery path (no email reset exists) — one-at-a-time only, never bulk-export (see [Backend API](10-backend-api.md)).
+
+## Student Locations panel & geo_export.js (2026-09-25, geo v2 2026-09-26)
+
+The Settings tab's bottom `.admin-panel` ("Student Locations", `teacher_dashboard.html:232-246`) holds a coverage line (`#geoCoverage`, "N/M students have location data"), the student table mount (`#geoList`), the Baidu-AK input (`#geoBaiduAk`), and the two export buttons. All behavior lives in `geo_export.js`; `teacher_dashboard.js` only re-renders on `switchTab('settings')` by calling `renderGeoCoverage()` + `renderGeoList()` (~563-566).
+
+- `renderGeoList()` (geo v2): one row per student that has `user.geo` — name, winning ~1 km cell, `days`/`samples` (the unique-day-consensus confidence, see [Data Model](11-data-model.md)), captured date, and a **清除位置** button → `POST /clearGeo` (with confirm; drops local `geo`/`geoSamples` and re-renders). A `同址` badge marks students whose winning cell equals another student's (`_cellShareMap`) — sibling/trip twins. Empty-state text when nobody has data yet.
+- **Escaping rule (load-bearing):** this table is the one place in the dashboard that pastes teacher-entered strings (bulk-imported roster names) into `innerHTML`, so every such sink must go through `geo_export.js`'s `_esc()` (HTML) or `_escJsArg()` (values embedded in `onclick="fn('…')"` — quotes escaped at the JS layer *first*, because the attribute is HTML-decoded before JS parsing). `test_geo_export.js` pins both. Never add raw name interpolations here.
+- Exports: `exportLocationsCsv()` → `buildLocationCsv` (v2 columns `studentId,name,hasLocation,capturedAt,days,samples,wgs84_lat,wgs84_lng,bd09_lat,bd09_lng,sharesCellWith`); `exportBaiduMapHtml()` → self-contained Baidu GL map page (marker label `name (Nd)` = `geo.days`, campus pins + driving-time panel remain dormant pending an AK). The AK lives in `localStorage.csBaiduAk`, teacher browser only — never sent to the server.
 
 ## Targets & the manual offset
 
@@ -87,12 +95,14 @@ flowchart TD
 | `POST /setTargets` | Bulk target creation |
 | `POST /addStudent` | Add-student modal |
 | `GET/POST /manageBms` | BM list/add/delete + activity logs |
+| `POST /clearGeo` | Student Locations panel 清除位置 button (geo v2) |
 | `POST /changePassword` | (student-facing; not used by dashboards) |
 
 ## Dashboard testing
 
 - `test_archive_merge_dashboard.js` (in `npm test`): unit-tests the exported pure `mergeAnalytics` + `getAnalyticsInRange` by stubbing a minimal `document` before requiring `teacher_dashboard.js` (its DOMContentLoaded listener never fires in Node).
-- **The rest of the dashboards have NO automated coverage** — the jsdom suite loads `index.html`, not `teacher_dashboard.html`. Verify `admin_dashboard.js` edits with a `vm.runInContext` harness (mind the `let isBM`/`let isAdmin` double-declaration and the `AVAILABLE_CONTENT` stub) — method in the `classroom-survivors-dev` skill's `references/dashboard_testing.md`.
+- `test_geo_export.js` (in `npm test`): covers `geo_export.js` — WGS→GCJ→BD conversion, the v2 CSV columns + `sharesCellWith` grouping, map-HTML data embedding, and the `_esc`/`_escJsArg` guards on `renderGeoList`'s innerHTML sinks.
+- **The rest of the dashboards have NO automated coverage** (neither `teacher_dashboard.js` beyond the two helpers nor `admin_dashboard.js` are unit-tested) — the jsdom suite loads `index.html`, not `teacher_dashboard.html`. Verify `admin_dashboard.js` edits with a `vm.runInContext` harness (mind the `let isBM`/`let isAdmin` double-declaration and the `AVAILABLE_CONTENT` stub) — method in the `classroom-survivors-dev` skill's `references/dashboard_testing.md`.
 
 ## Update discipline
 

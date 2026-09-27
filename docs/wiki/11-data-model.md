@@ -1,8 +1,8 @@
 # Data Model: Cosmos DB & Client Persistence
 
-> **Last verified:** 2026-09-25 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
+> **Last verified:** 2026-09-27 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
 
-**Owner files:** `api/src/functions/shared/db.js`, `api/src/functions/saveAnalytics.js`, `teaching_content.js`, `frontend_auth.js`, `api/src/functions/shared/auth.js`
+**Owner files:** `api/src/functions/shared/db.js`, `api/src/functions/saveAnalytics.js`, `api/src/functions/clearGeo.js`, `teaching_content.js`, `frontend_auth.js`, `api/src/functions/shared/auth.js`
 
 One Cosmos DB (`Val-EslApp`), one main container (`Students`) holding **everything**: students, teachers, BMs, activity logs, analytics archives, diagnostics docs — discriminated by `role` / `type` fields. Names are env-overridable (`COSMOS_DB_NAME` / `COSMOS_CONTAINER_NAME`) so the test harness points at an isolated container without code edits.
 
@@ -54,7 +54,8 @@ Fields written by the API (addStudent.js ~40-57 + later mutations). Client-visib
   "sessionCount": 7,                 // incremented via saveAnalytics incrementSession (rides only with an applied SR update, 2026-09-10)
   "srSeq": 1789040382646,             // monotonic seq of last applied SR update; server applies only newer (shouldApplySr), client watermark confirmedSrSeq (2026-09-10)
   "analytics": [ /* event array — see below; auto-trimmed at 700 */ ],
-  "geo": { "lat": 31.23, "lng": 121.47, "capturedAt": "ISO", "source": "browser" },
+  "geo": { "lat": 31.23, "lng": 121.47, "capturedAt": "ISO", "source": "browser", "days": 5, "samples": 12 },  // consensus home (geo v2, 2026-09-26)
+  "geoSamples": [ { "lat": 31.23, "lng": 121.47, "capturedAt": "ISO" } ],  // capped raw sample list the consensus is derived from
   "srState": { "vocab": {}, "sentences": {}, "sentencePairs": {} },  // spaced-repetition state (server holds the FULL state; client ships per-session deltas)
   "targets": [
     { "id": "t_<ts>_<rand>", "startTime": "ISO", "endTime": "ISO",
@@ -68,7 +69,8 @@ Notes:
 - `srState` shape is owned by `sr_engine.js` (spaced repetition). `saveAnalytics` **replaces** the whole object from the client payload when `srDelta` is absent (legacy), but **merges it key-by-key** onto the stored state when `body.srDelta === true` (2026-09-16c) — which is what the current client always sends. Each entry records `lastSession`, and the client's `extractSRDelta` ships only entries whose `lastSession === currentSession`. Consequence for readers: the server copy is the authoritative *full* state, so never assume a delta-only write lost the untouched entries.
 - A per-item entry carries lapse counts too — at `SR_LEECH_LAPSES = 4` an item becomes a "leech" and returns every other session instead of every session, so long-lived docs accumulate items with irregular cadence by design ([SR engine](05-study-mode.md)).
 - `updateStudent` whitelists editable fields (add new fields there or they silently don't persist).
-- `geo` (2026-09-25b) is the student's **last known location**: WGS-84 coordinates rounded to 2 decimals (~1.1 km precision — the raw GPS fix never leaves the device, and the server re-rounds). **Latest fix wins** (each capture overwrites the previous one); the field is **absent until the first successful capture**. It is written **only** by `saveAnalytics`'s geo diversion (`extractGeoUpdates`, see [Backend API](10-backend-api.md)) — `updateStudent` does not whitelist it. To delete a student's location, remove the field in Cosmos directly (no UI in v1).
+- `geo` (geo v2, 2026-09-26; replaced the v1 "last known location" field) is the student's **consensus home**: WGS-84 coords rounded to 2 decimals (~1.1 km precision — the raw GPS fix never leaves the device, and the server re-rounds). It is **no longer latest-wins** — it is recomputed from `geoSamples` on every accepted capture: samples are grouped by ~1 km cell and the cell seen on the **most distinct Beijing calendar days** wins, ties broken by the latest `capturedAt` (a 20-login trip day is still 1 day-vote and can never outvote a spread of home days). `days` = distinct day-votes of the winning cell, `samples` = total kept samples. **Absent until the first accepted capture**; v1 consumers (dashboard coverage, CSV, map HTML) read only `lat/lng/capturedAt`, so `days`/`samples` are additive.
+- `geoSamples` (geo v2) is the raw list the consensus derives from: `{lat, lng, capturedAt}` entries appended by `saveAnalytics`'s geo diversion (`applyGeoSamples`), **deduped by same cell + same Beijing date** (first fix of a day per cell is kept; different cells on the same day are both kept — home+school diversity), **cap 30** (oldest trimmed). A legacy v1 `geo` on a doc without `geoSamples` is **seeded** as the first sample so old captures count as one day-vote instead of vanishing. Like `geo`, written **only** by the geo diversion — `updateStudent` whitelists neither. To wipe a student's location: **`POST /api/clearGeo`** (privileged; removes `/geo` + `/geoSamples` — the dashboard Settings-tab 清除位置 button calls it), after which the student's next login re-captures automatically (v2 captures every login). See [Backend API](10-backend-api.md) and the trip-contamination incident in [Gotchas](15-gotchas-and-history.md).
 
 ## Analytics event shapes (client-queued)
 
@@ -79,7 +81,7 @@ All events are created in `frontend_auth.js` and share: `timestamp` (ISO), `even
 | `exercise` | `queueExerciseEvent(exerciseType, mode, itemDetails?, customAttempts?)` (frontend_auth.js :164) | `exerciseType`, `mode`, `attempts`, `durationMs`, `itemDetails?` (word/sentence + exercise-specific fields, may include `ua`) |
 | `session` | `queueSessionEvent(sessionType, data)` (:211) | `sessionType`, `data` — counts toward weekly targets (dashboards filter on this type). Sorted to the **front** of the queue at flush time (2026-09-16b) so its ack never starves behind an exercise pile. |
 | `device` | `queueDeviceInfoEvent()` (~210) — once per student/device/calendar day | `ua` (≤300ch), `platform`, `maxTouchPoints`, `uaData`, `screen`, `appVersion` — OS census; invisible to dashboards' exercise/session tables by design |
-| `geo` | `csMaybeCaptureGeo()` (~295) — passive browser-geolocation capture, once per student (retry on failure until success, 2026-09-25b) | `lat`, `lng` (both rounded to 2 decimals **client-side before enqueue**), `timestamp`, `eventId:'geo_*'`, `ownerId`, `ps`. **NEVER stored in the `analytics` array** — `saveAnalytics`'s `extractGeoUpdates` diverts it to the doc's top-level `geo` field; its eventId is always acked in `addedEventIds` so the client clears its queue |
+| `geo` | `csMaybeCaptureGeo()` (~295) — passive browser-geolocation capture, **every login** (v2, 2026-09-26; the client no longer gates on a previous success) | `lat`, `lng` (both rounded to 2 decimals **client-side before enqueue**), `timestamp`, `eventId:'geo_*'`, `ownerId`, `ps`. **NEVER stored in the `analytics` array** — `saveAnalytics`'s geo diversion (`extractGeoUpdates` → `applyGeoSamples`) accumulates it into `geoSamples` and recomputes the consensus `geo`; its eventId is always acked in `addedEventIds` so the client clears its queue |
 | (crash breadcrumb) | `csPageHeartbeat` on next launch detecting a dirty kill (~317) | synthesized `exercise`/session events describing the previous page's last activity |
 
 Target-counting only ever uses `type:'session'` events in a date range; exercise tables use `type:'exercise'`.
@@ -97,7 +99,7 @@ Target-counting only ever uses `type:'session'` events in a date range; exercise
 | `csPageHeartbeat` | `frontend_auth.js` (`CS_HB_KEY`) | `{ps, state, ts}` breadcrumb of last activity — used to detect hard kills and emit crash breadcrumbs. Page-lifecycle, not per-account. |
 | `csCleanUnload` | `frontend_auth.js` (`CS_UNLOAD_KEY`) | `'1'` on graceful `pagehide` — absence + stale heartbeat = dirty kill |
 | `csDeviceLogDay_<id>` | `frontend_auth.js` | Day-key de-dup for `device` events |
-| `csGeoDone_<id>` | `frontend_auth.js` (`csGeoFlagKey()`, 2026-09-25b) | `{status:'ok'\|'fail', ts}` geolocation-capture flag. **`ok` is permanent** — never re-capture on that device for that student; **`fail` retries every login** until a fix succeeds (WeChat Android webview often lacks geolocation → silent fail). Scoped by id via its own helper, not `scopedKey()`. |
+| `csGeoDone_<id>` | `frontend_auth.js` (`csGeoFlagKey()`, 2026-09-25b) | `{status:'ok'\|'fail', ts}` geolocation-capture flag. **Diagnostic-only since geo v2 (2026-09-26)** — it no longer gates anything; capture runs on **every** login regardless (v1's permanent `ok` gate froze trip captures in as "home"; see [Gotchas](15-gotchas-and-history.md)). Still useful when a student reports prompting issues: `ok` with no server sample means the flush was lost, not the fix. Scoped by id via its own helper, not `scopedKey()`. |
 | `csBaiduAk` | `geo_export.js` (teacher dashboard) | Baidu Maps JS API key for the HTML map export. **Teacher browser only — never sent to the server.** Not id-scoped (one key per browser). |
 
 All `_<id>` keys are produced by `scopedKey(base)` and adopted from the legacy global name by

@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-25b",
-  "deployedAt": "2026-09-25",
-  "notes": "Passive ~1km student geolocation capture (frontend_auth.js) diverted by saveAnalytics extractGeoUpdates to the student doc's top-level geo field; teacher dashboard Settings-tab CSV + Baidu-map HTML export with driving-time analysis (geo_export.js). Coordinates rounded to 2 decimals client-side before enqueue and re-rounded server-side; raw GPS never stored."
+  "version": "2026-09-26a",
+  "deployedAt": "2026-09-27",
+  "notes": "geo v2: every-login sampling (csGeoDone_* demoted to diagnostics); server keeps user.geoSamples (dedup same ~1km cell + Beijing day, cap 30) and derives user.geo as the unique-day consensus (days/samples confidence fields); new privileged POST /api/clearGeo removes /geo + /geoSamples so the next login re-captures; dashboard Student Locations panel (coverage line, days/samples/同址 table, per-student 清除位置 button) and CSV gains days,samples,sharesCellWith."
 }

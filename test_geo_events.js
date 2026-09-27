@@ -2,6 +2,7 @@ const assert = require('assert');
 const {
     extractGeoUpdates,
     applyGeoSamples,
+    _consensusGeo,
     GEO_SAMPLE_CAP
 } = require('./api/src/functions/saveAnalytics.js');
 
@@ -111,6 +112,7 @@ test('cap trims oldest beyond GEO_SAMPLE_CAP', () => {
     assert.strictEqual(user.geoSamples.length, GEO_SAMPLE_CAP);
     assert.strictEqual(user.geo.samples, GEO_SAMPLE_CAP);
 });
+test('_consensusGeo returns null on empty samples', () => { assert.strictEqual(_consensusGeo([]), null); });
 
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed > 0) process.exit(1);

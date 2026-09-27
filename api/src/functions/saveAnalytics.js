@@ -152,9 +152,11 @@ function _validGeoFix(event) {
  * Consensus home over samples: group by ~1km cell, count DISTINCT Beijing
  * calendar days per cell (burst of same-day logins = 1 vote), winner = most
  * days, tie = most recent fix. Returns the v1-compatible `geo` shape plus
- * additive days/samples confidence fields.
+ * additive days/samples confidence fields. Returns null for an empty (or
+ * missing) sample list — callers must handle it.
  */
 function _consensusGeo(samples) {
+    if (!samples || !samples.length) return null;
     const byCell = new Map();
     samples.forEach(s => {
         const key = s.lat.toFixed(2) + ',' + s.lng.toFixed(2);

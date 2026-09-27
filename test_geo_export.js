@@ -214,6 +214,39 @@ test('geo list: 同址 badge and columns still render for plain data', () => {
     assert.ok(page.html.includes('<td>4</td><td>9</td><td>2026-09-25</td>'), 'days/samples/captured kept');
 });
 
+test('geo list: header labels the Samples column as the all-cell total', () => {
+    const page = loadGeoPage([lily]);
+    page.renderGeoList();
+    assert.ok(page.html.includes('<th>Samples (all)</th>'), 'Samples column is scoped to all cells: ' + page.html);
+});
+
+test('malformed geo (lat only, no usable lng): excluded from list, share map and CSV coords', () => {
+    const broken = [
+        { id: 's1', fullName: 'Ann', geo: { lat: 25.05, lng: 102.71, capturedAt: 'x', days: 2, samples: 2 } },
+        { id: 'bad1', fullName: 'Broken Null Lng', geo: { lat: 25.05, lng: null, capturedAt: 'y', days: 1, samples: 1 } },
+        { id: 'bad2', fullName: 'Broken Text Lng', geo: { lat: 25.05, lng: 'abc', capturedAt: 'z', days: 1, samples: 1 } },
+        { id: 'bad3', fullName: 'Broken Zero Lng', geo: { lat: 25.05, lng: '', capturedAt: 'w', days: 1, samples: 1 } }
+    ];
+    // share map: only the one usable student is keyed, and nobody false-shares
+    const share = G._cellShareMap(broken);
+    assert.deepStrictEqual(Object.keys(share), ['25.05,102.71'], 'no NaN/0 cell buckets');
+    assert.deepStrictEqual(share['25.05,102.71'], ['s1']);
+    // dashboard list: the three malformed rows are gone, the healthy one stays
+    const page = loadGeoPage(broken);
+    page.renderGeoList();
+    assert.ok(page.html.includes('Ann'), 'usable student still listed');
+    ['Broken Null Lng', 'Broken Text Lng', 'Broken Zero Lng'].forEach(function (n) {
+        assert.ok(!page.html.includes(n), n + ' filtered out of the table');
+    });
+    assert.ok(!/25\.05,(NaN|null|abc|,|<\/td>)/.test(page.html), 'no garbage coordinate cell rendered');
+    assert.ok(!page.html.includes('同址'), 'malformed docs cannot create a phantom 同址 badge');
+    // CSV: malformed docs report hasLocation=0 with empty coord columns
+    const lines = G.buildLocationCsv(broken).replace(/^\uFEFF/, '').trim().split('\r\n');
+    ['bad1', 'bad2', 'bad3'].forEach(function (id, i) {
+        assert.strictEqual(lines[i + 2].split(',')[2], '0', id + ' hasLocation=0');
+    });
+});
+
 test('clearGeo: POSTs through apiFetch with a JSON content-type and id-only body', () => {
     const page = loadGeoPage([lily]);
     page.clearStudentGeo('student_lily');

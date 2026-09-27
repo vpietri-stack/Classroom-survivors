@@ -33,6 +33,34 @@ test('geo events diverted, ids collected, order kept', () => {
     assert.strictEqual(r.geoEvents.length, 2);
     assert.strictEqual(r.geoEvents[0].eventId, 'g1');
 });
+test('extractGeoUpdates returns no `geo` key (diversion never writes consensus here)', () => {
+    const r = extractGeoUpdates([{ type: 'geo', lat: 25.05, lng: 102.71, eventId: 'g1' }]);
+    assert.strictEqual('geo' in r, false);
+    assert.deepStrictEqual(Object.keys(r).sort(), ['cleanEvents', 'geoEventIds', 'geoEvents']);
+});
+test('extractGeoUpdates(null) is safe and returns three empty arrays', () => {
+    const r = extractGeoUpdates(null);
+    assert.deepStrictEqual(r.geoEvents, []);
+    assert.deepStrictEqual(r.geoEventIds, []);
+    assert.deepStrictEqual(r.cleanEvents, []);
+});
+test('client timestamp is clamped and re-serialised (no garbage / future dates)', () => {
+    const now = Date.now();
+    const user = {};
+    applyGeoSamples(user, [
+        { type: 'geo', lat: 25.05, lng: 102.71, timestamp: '2099-01-01T00:00:00Z', eventId: 'g_future' },
+        { type: 'geo', lat: 24.90, lng: 102.80, timestamp: 'garbage!!!', eventId: 'g_junk' },
+        { type: 'geo', lat: 24.80, lng: 102.60, timestamp: 'x'.repeat(5000), eventId: 'g_long' }
+    ]);
+    assert.strictEqual(user.geoSamples.length, 3, 'valid fixes survive, bad stamps do not discard them');
+    user.geoSamples.forEach(s => {
+        assert.ok(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(s.capturedAt), 'server-generated ISO stamp: ' + s.capturedAt);
+        assert.ok(Date.parse(s.capturedAt) <= now + 1000, 'never future-dated: ' + s.capturedAt);
+    });
+    const past = {};
+    applyGeoSamples(past, [{ type: 'geo', lat: 25.05, lng: 102.71, timestamp: '2026-01-04T06:00:00Z' }]);
+    assert.strictEqual(past.geoSamples[0].capturedAt, '2026-01-04T06:00:00.000Z', 'offline-queue replay keeps its real past time');
+});
 
 // ---- applyGeoSamples ----
 function fix(lat, lng, ts) { return { type: 'geo', lat, lng, timestamp: ts, eventId: 'g_' + ts }; }
@@ -106,11 +134,21 @@ test('legacy seed: v1 geo without geoSamples counts as one day-vote', () => {
 });
 test('cap trims oldest beyond GEO_SAMPLE_CAP', () => {
     const user = {};
-    for (let d = 1; d <= 35; d++) {
-        applyGeoSamples(user, [fix(25.05, 102.71, `2026-08-${String(d).padStart(2, '0')}T01:00:00Z`)]);
+    // 35 REAL, distinct Beijing days spread over three months. (The first
+    // version of this test iterated 2026-08-32…35 — invalid dates that parsed
+    // to NaN and silently collapsed onto one day, which is exactly how the
+    // unbounded/unvalidated `capturedAt` got past review. Real dates + the
+    // `geo.days` assertion below make day-count corruption catchable.)
+    for (let i = 0; i < 35; i++) {
+        const month = 7 + Math.floor(i / 12);   // Jul, Aug, Sep
+        const day = 1 + (i % 12);               // 1..12, always a valid date
+        applyGeoSamples(user, [fix(25.05, 102.71,
+            `2026-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T01:00:00Z`)]);
     }
     assert.strictEqual(user.geoSamples.length, GEO_SAMPLE_CAP);
     assert.strictEqual(user.geo.samples, GEO_SAMPLE_CAP);
+    assert.strictEqual(user.geo.days, GEO_SAMPLE_CAP, 'kept samples are 30 DISTINCT day-votes');
+    assert.strictEqual(new Set(user.geoSamples.map(s => s.capturedAt.slice(0, 10))).size, GEO_SAMPLE_CAP);
 });
 test('_consensusGeo returns null on empty samples', () => { assert.strictEqual(_consensusGeo([]), null); });
 

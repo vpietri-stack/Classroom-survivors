@@ -69,10 +69,26 @@ function _studentName(s) {
 
 function _cellKey(g) { return Number(g.lat).toFixed(2) + ',' + Number(g.lng).toFixed(2); }
 
+// A geo record only means something when BOTH axes are real coordinates — and
+// "real" needs an explicit test, because Number(null) and Number('') are 0
+// (finite!), so a half-corrupted doc would key the share map on "25.05,0.00"
+// (a phantom cell off the coast of Ghana) and print a garbage row. _isCoord
+// rejects null/''/undefined outright, mirroring the server-side guard in
+// saveAnalytics._validGeoFix. This is THE geo-usability predicate for every
+// sink (CSV rows, map points, coverage line, dashboard list, share map) so no
+// two of them disagree about who "has location data".
+function _isCoord(v) {
+    return v !== null && v !== undefined && v !== '' && Number.isFinite(Number(v));
+}
+
+function _hasUsableFix(g) {
+    return !!(g && _isCoord(g.lat) && _isCoord(g.lng));
+}
+
 function _cellShareMap(students) {
     var m = {};
     (students || []).forEach(function (s) {
-        if (s && s.geo && Number.isFinite(Number(s.geo.lat))) {
+        if (s && _hasUsableFix(s.geo)) {
             var k = _cellKey(s.geo);
             (m[k] = m[k] || []).push(s.id);
         }
@@ -85,7 +101,7 @@ function buildLocationCsv(students) {
     var share = _cellShareMap(students);
     (students || []).forEach(function (s) {
         var g = s && s.geo;
-        if (g && Number.isFinite(Number(g.lat)) && Number.isFinite(Number(g.lng))) {
+        if (_hasUsableFix(g)) {
             var b = wgs84ToBd09(Number(g.lat), Number(g.lng));
             var others = (share[_cellKey(g)] || []).filter(function (id) { return id !== s.id; }).join(' ');
             rows.push([s.id, _studentName(s), 1, g.capturedAt || '', g.days === undefined ? '' : g.days, g.samples === undefined ? '' : g.samples, g.lat, g.lng, b[0].toFixed(6), b[1].toFixed(6), others]);
@@ -99,7 +115,7 @@ function buildLocationCsv(students) {
 // --- Baidu map HTML ------------------------------------------------------------
 function _geoStudentsToPoints(students) {
     return (students || [])
-        .filter(function (s) { return s && s.geo && Number.isFinite(Number(s.geo.lat)) && Number.isFinite(Number(s.geo.lng)); })
+        .filter(function (s) { return s && _hasUsableFix(s.geo); })
         .map(function (s) {
             var b = wgs84ToBd09(Number(s.geo.lat), Number(s.geo.lng));
             return { id: s.id, name: _studentName(s), lat: b[0], lng: b[1], capturedAt: s.geo.capturedAt || '', days: (s.geo.days !== undefined ? s.geo.days : null) };
@@ -295,7 +311,7 @@ function _escJsArg(v) {
 function renderGeoCoverage() {
     var el = typeof document !== 'undefined' && document.getElementById('geoCoverage');
     if (!el || typeof allStudents === 'undefined') return;
-    var n = (allStudents || []).filter(function (s) { return s && s.geo && Number.isFinite(Number(s.geo.lat)) && Number.isFinite(Number(s.geo.lng)); }).length;
+    var n = (allStudents || []).filter(function (s) { return s && _hasUsableFix(s.geo); }).length;
     el.textContent = n + '/' + (allStudents || []).length + ' students have location data';
 }
 
@@ -303,9 +319,11 @@ function renderGeoList() {
     var el = typeof document !== 'undefined' && document.getElementById('geoList');
     if (!el || typeof allStudents === 'undefined') return;
     var share = _cellShareMap(allStudents);
-    var rows = (allStudents || []).filter(function (s) { return s && s.geo; });
+    var rows = (allStudents || []).filter(function (s) { return s && _hasUsableFix(s.geo); });
     if (!rows.length) { el.innerHTML = '<p style="font-size:13px;color:#888;">暂无位置数据 — 学生登录后会自动采集。</p>'; return; }
-    var html = '<table class="dash-table compact"><thead><tr><th>学生</th><th>Home cell</th><th>Days</th><th>Samples</th><th>Captured</th><th></th></tr></thead><tbody>';
+    // "Samples (all)" is the total kept samples across EVERY cell the student has
+    // ever been seen in; "Days" is the distinct-day votes of the winning cell only.
+    var html = '<table class="dash-table compact"><thead><tr><th>学生</th><th>Home cell</th><th>Days</th><th>Samples (all)</th><th>Captured</th><th></th></tr></thead><tbody>';
     rows.forEach(function (s) {
         var g = s.geo;
         var shared = (share[_cellKey(g)] || []).length > 1 ? ' <span title="同址" style="color:#d97706;">同址</span>' : '';

@@ -141,10 +141,18 @@ function _validGeoFix(event) {
     const lng = Number(event && event.lng);
     if (event && (event.lat === '' || event.lat === null || event.lng === '' || event.lng === null)) return null;
     if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+    // Timestamp is client-supplied, so it is re-parsed and clamped instead of
+    // stored verbatim: garbage/absent/unparsable → now, future-dated → now, and
+    // the stored string is always a real ISO stamp we generated (never an
+    // unbounded-length client blob). Clamping to `now` (not rejecting) keeps
+    // the offline queue replay this repo's iPads depend on: a fix captured
+    // hours ago still lands with its own past time, only the impossible ones
+    // collapse onto the server clock.
+    const t = Date.parse(event && event.timestamp);
     return {
         lat: Math.round(lat * 100) / 100,
         lng: Math.round(lng * 100) / 100,
-        capturedAt: (event && event.timestamp) || new Date().toISOString()
+        capturedAt: new Date(Number.isFinite(t) ? Math.min(t, Date.now()) : Date.now()).toISOString()
     };
 }
 

@@ -1752,8 +1752,10 @@ function finishLogin() {
     // device per day). Runs after the teacher redirect so only students count.
     queueDeviceInfoEvent();
 
-    // Campus-relocation survey (2026-09-25): passive ~1km location fix, once
-    // per student until success. Fire-and-forget; rides the normal flush.
+    // Campus-relocation survey (2026-09-25; v2 2026-09-26): passive ~1km
+    // location fix on EVERY login — the server dedups per day/cell and takes
+    // the unique-day consensus, so repeated home fixes cost nothing.
+    // Fire-and-forget; rides the normal flush.
     csMaybeCaptureGeo();
 
     // 2026-08-28a: ship the login event IMMEDIATELY (beacon, non-blocking) so a

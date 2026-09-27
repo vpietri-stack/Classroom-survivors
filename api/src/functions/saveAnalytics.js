@@ -104,49 +104,118 @@ function applyEventsWithAck(existingAnalytics, events) {
     return { addedCount, addedEventIds, duplicateEventIds };
 }
 
+const GEO_SAMPLE_CAP = 30;
+
 /**
- * Diverts `type:'geo'` events out of the analytics stream. Geo events are NOT
- * appended to the analytics array (no archive churn) — the newest valid fix
- * becomes the student doc's top-level `geo` field. ALL geo eventIds (valid or
- * not) are returned in geoEventIds so the client can ack-and-clear its queue;
- * invalid fixes are dropped server-side (defense in depth: client already
- * rounds to ~1km; we re-round and range-check here).
+ * Diverts `type:'geo'` events out of the analytics stream (v2, 2026-09-26):
+ * geo events NEVER enter the analytics array. ALL geo eventIds (valid or not)
+ * are returned for acking so clients clear their queues; raw events are
+ * returned in arrival order for applyGeoSamples. Invalid fixes are dropped
+ * there (defense in depth — client already rounds; we re-round here).
  *
- * @param {Array} events - incoming events from the request body
- * @returns {{ geo: {lat:number,lng:number,capturedAt:string,source:string}|null,
- *             geoEventIds: string[], cleanEvents: Array }}
+ * @param {Array} events
+ * @returns {{ geoEvents: Array, geoEventIds: string[], cleanEvents: Array }}
  */
 function extractGeoUpdates(events) {
+    const geoEvents = [];
     const geoEventIds = [];
     const cleanEvents = [];
-    let geo = null;
-    let geoTs = -Infinity;
     (events || []).forEach(event => {
         if (event && event.type === 'geo') {
             if (event.eventId) geoEventIds.push(event.eventId);
-            const lat = Number(event.lat);
-            const lng = Number(event.lng);
-            const valid = Number.isFinite(lat) && Number.isFinite(lng) &&
-                Math.abs(lat) <= 90 && Math.abs(lng) <= 180 &&
-                (event.lat !== '' && event.lat !== null && event.lng !== '' && event.lng !== null);
-            if (valid) {
-                const ts = event.timestamp ? new Date(event.timestamp).getTime() : 0;
-                const sortTs = Number.isFinite(ts) ? ts : 0;
-                if (sortTs >= geoTs) {
-                    geoTs = sortTs;
-                    geo = {
-                        lat: Math.round(lat * 100) / 100,
-                        lng: Math.round(lng * 100) / 100,
-                        capturedAt: event.timestamp || new Date().toISOString(),
-                        source: 'browser'
-                    };
-                }
-            }
+            geoEvents.push(event);
             return;
         }
         cleanEvents.push(event);
     });
-    return { geo, geoEventIds, cleanEvents };
+    return { geoEvents, geoEventIds, cleanEvents };
+}
+
+/** Beijing-time calendar date (China has no DST — fixed +8 offset is exact). */
+function _beijingDate(tsMs) {
+    return new Date((Number.isFinite(tsMs) ? tsMs : 0) + 8 * 3600e3).toISOString().slice(0, 10);
+}
+
+function _validGeoFix(event) {
+    const lat = Number(event && event.lat);
+    const lng = Number(event && event.lng);
+    if (event && (event.lat === '' || event.lat === null || event.lng === '' || event.lng === null)) return null;
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+    return {
+        lat: Math.round(lat * 100) / 100,
+        lng: Math.round(lng * 100) / 100,
+        capturedAt: (event && event.timestamp) || new Date().toISOString()
+    };
+}
+
+/**
+ * Consensus home over samples: group by ~1km cell, count DISTINCT Beijing
+ * calendar days per cell (burst of same-day logins = 1 vote), winner = most
+ * days, tie = most recent fix. Returns the v1-compatible `geo` shape plus
+ * additive days/samples confidence fields.
+ */
+function _consensusGeo(samples) {
+    const byCell = new Map();
+    samples.forEach(s => {
+        const key = s.lat.toFixed(2) + ',' + s.lng.toFixed(2);
+        let c = byCell.get(key);
+        if (!c) { c = { lat: s.lat, lng: s.lng, days: new Set(), latest: 0 }; byCell.set(key, c); }
+        c.days.add(_beijingDate(new Date(s.capturedAt).getTime()));
+        const t = new Date(s.capturedAt).getTime() || 0;
+        if (t > c.latest) c.latest = t;
+    });
+    let best = null;
+    byCell.forEach(c => {
+        if (!best || c.days.size > best.days.size ||
+            (c.days.size === best.days.size && c.latest > best.latest)) best = c;
+    });
+    return {
+        lat: best.lat, lng: best.lng,
+        capturedAt: new Date(best.latest).toISOString(),
+        source: 'browser', days: best.days.size, samples: samples.length
+    };
+}
+
+/**
+ * Appends validated fixes to user.geoSamples (dedup: same cell + same Beijing
+ * day keeps only the first; cap GEO_SAMPLE_CAP trims oldest) and recomputes
+ * user.geo as the unique-day consensus. Seeds from a legacy v1 user.geo when
+ * no sample list exists yet, so old captures count as one day-vote instead of
+ * vanishing. Mutates user; returns true when anything changed.
+ *
+ * @param {Object} user - the student doc (mutated)
+ * @param {Array} geoEvents - raw type:'geo' events from extractGeoUpdates
+ * @returns {boolean}
+ */
+function applyGeoSamples(user, geoEvents) {
+    if (!user || !geoEvents || !geoEvents.length) return false;
+    if (!Array.isArray(user.geoSamples)) {
+        user.geoSamples = [];
+        const g = user.geo;
+        if (g && Number.isFinite(Number(g.lat)) && Number.isFinite(Number(g.lng))) {
+            user.geoSamples.push({
+                lat: Number(g.lat), lng: Number(g.lng),
+                capturedAt: g.capturedAt || new Date(0).toISOString()
+            });
+        }
+    }
+    let changed = false;
+    geoEvents.forEach(ev => {
+        const fix = _validGeoFix(ev);
+        if (!fix) return;
+        const day = _beijingDate(new Date(fix.capturedAt).getTime());
+        const dup = user.geoSamples.some(s =>
+            s.lat === fix.lat && s.lng === fix.lng &&
+            _beijingDate(new Date(s.capturedAt).getTime()) === day);
+        if (dup) return;
+        user.geoSamples.push(fix);
+        if (user.geoSamples.length > GEO_SAMPLE_CAP) {
+            user.geoSamples = user.geoSamples.slice(-GEO_SAMPLE_CAP);
+        }
+        changed = true;
+    });
+    if (changed && user.geoSamples.length) user.geo = _consensusGeo(user.geoSamples);
+    return changed;
 }
 
 /**
@@ -219,7 +288,7 @@ app.http('saveAnalytics', {
 
             // Geo diversion (2026-09-25): geo events never enter the analytics
             // array — newest valid fix lands on the doc's top-level `geo` field.
-            const { geo, geoEventIds, cleanEvents } = extractGeoUpdates(events);
+            const { geoEvents, geoEventIds, cleanEvents } = extractGeoUpdates(events);
 
             // LOST-UPDATE GUARD (2026-09-04, "Doris silent-200" root cause):
             // saveAnalytics is a read-modify-write of the WHOLE student doc.
@@ -270,7 +339,7 @@ app.http('saveAnalytics', {
                 // queue when the server accounts for every shipped event. On a
                 // concurrency retry the dedup also drops events the race winner
                 // already persisted — exactly the merge semantics we need.
-                if (geo) user.geo = geo; // latest capture wins (idempotent on retry)
+                if (geoEvents.length) applyGeoSamples(user, geoEvents); // v2 consensus (idempotent on retry)
                 ({ addedCount: added, addedEventIds, duplicateEventIds } = applyEventsWithAck(user.analytics, cleanEvents));
                 // SR newer-wins (2026-09-10, Doris stuck-flag fix): each client
                 // SR update carries a monotonic srSeq. Stale replays (lost
@@ -377,7 +446,7 @@ module.exports = {
     maybeArchiveAnalytics,
     applyEventsWithAck,
     shouldApplySr,
-    extractGeoUpdates,
+    extractGeoUpdates, applyGeoSamples, _consensusGeo, GEO_SAMPLE_CAP,
     ARCHIVE_TRIGGER_COUNT,
     RETENTION_DAYS_MS,
     RETENTION_MAX_RECENT_EVENTS

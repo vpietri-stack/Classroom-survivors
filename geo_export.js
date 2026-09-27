@@ -271,6 +271,27 @@ function geoSaveAk(v) { try { localStorage.setItem('csBaiduAk', String(v || '').
 
 function _todayStamp() { return new Date().toISOString().slice(0, 10); }
 
+// --- HTML escaping (first — and only — helper of its kind in this repo) -------
+// renderGeoList is the one place that pastes teacher-entered strings (roster
+// bulk-import names) into innerHTML, so every such sink must go through these.
+function _esc(v) {
+    return String(v === null || v === undefined ? '' : v)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// _escJsArg: for a value interpolated into onclick="fn('<value>')".
+// An attribute value is HTML-entity-decoded BEFORE the decoded text is parsed as
+// JS, so escaping ' as &#39; would hand the JS parser a real quote and allow a
+// breakout. Quotes are therefore escaped at the JS layer (\'), the remaining
+// HTML-significant chars at the attribute layer.
+function _escJsArg(v) {
+    return String(v === null || v === undefined ? '' : v)
+        .replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/[\r\n]+/g, ' ')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
 function renderGeoCoverage() {
     var el = typeof document !== 'undefined' && document.getElementById('geoCoverage');
     if (!el || typeof allStudents === 'undefined') return;
@@ -288,22 +309,26 @@ function renderGeoList() {
     rows.forEach(function (s) {
         var g = s.geo;
         var shared = (share[_cellKey(g)] || []).length > 1 ? ' <span title="同址" style="color:#d97706;">同址</span>' : '';
-        html += '<tr><td>' + _studentName(s) + shared + '</td><td>' + g.lat + ',' + g.lng + '</td><td>' + (g.days !== undefined ? g.days : '-') +
-            '</td><td>' + (g.samples !== undefined ? g.samples : '-') + '</td><td>' + String(g.capturedAt || '').slice(0, 10) +
-            '</td><td><button class="dash-action-btn" onclick="clearStudentGeo(\'' + s.id + '\',\'' + _studentName(s).replace(/'/g, '') + '\')">清除位置</button></td></tr>';
+        html += '<tr><td>' + _esc(_studentName(s)) + shared + '</td><td>' + _esc(g.lat) + ',' + _esc(g.lng) + '</td><td>' + _esc(g.days !== undefined ? g.days : '-') +
+            '</td><td>' + _esc(g.samples !== undefined ? g.samples : '-') + '</td><td>' + _esc(String(g.capturedAt || '').slice(0, 10)) +
+            '</td><td><button class="dash-action-btn" onclick="clearStudentGeo(\'' + _escJsArg(s.id) + '\')">清除位置</button></td></tr>';
     });
     el.innerHTML = html + '</tbody></table>';
 }
 
 function clearStudentGeo(id, name) {
-    if (!confirm('清除 ' + name + ' 的位置数据？该学生下次登录会重新采集。')) return;
+    var known = (typeof allStudents !== 'undefined' ? allStudents : []).find(function (x) { return x && x.id === id; });
+    // The list passes the id only (no teacher-entered string ever has to survive
+    // an attribute payload); re-resolve the name here for the confirm() text.
+    // confirm()/alert() are plain-text sinks, so no escaping is needed there.
+    var label = name || (known ? _studentName(known) : '') || id;
+    if (!confirm('清除 ' + label + ' 的位置数据？该学生下次登录会重新采集。')) return;
     apiFetch(`${API_BASE}/clearGeo`, {
-        method: 'POST',
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ studentId: id })
     }).then(function (res) { return res.json(); }).then(function (j) {
         if (!j || !j.success) throw new Error('clear failed');
-        var s = (typeof allStudents !== 'undefined' ? allStudents : []).find(function (x) { return x.id === id; });
-        if (s) { delete s.geo; delete s.geoSamples; }
+        if (known) { delete known.geo; delete known.geoSamples; }
         renderGeoCoverage();
         renderGeoList();
     }).catch(function () { alert('清除失败 — 请重试或检查登录状态'); });
@@ -337,6 +362,7 @@ if (typeof module !== 'undefined' && module.exports) {
         outOfChina, wgs84ToGcj02, gcj02ToBd09, wgs84ToBd09,
         buildLocationCsv, buildBaiduMapHtml, geoDownload,
         geoGetAk, geoSaveAk, renderGeoCoverage, renderGeoList, clearStudentGeo, _cellShareMap,
+        _esc, _escJsArg,
         exportLocationsCsv, exportBaiduMapHtml
     };
 }

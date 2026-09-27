@@ -67,15 +67,30 @@ function _studentName(s) {
     return (s && (s.fullName || s.name || s.login)) || '';
 }
 
+function _cellKey(g) { return Number(g.lat).toFixed(2) + ',' + Number(g.lng).toFixed(2); }
+
+function _cellShareMap(students) {
+    var m = {};
+    (students || []).forEach(function (s) {
+        if (s && s.geo && Number.isFinite(Number(s.geo.lat))) {
+            var k = _cellKey(s.geo);
+            (m[k] = m[k] || []).push(s.id);
+        }
+    });
+    return m;
+}
+
 function buildLocationCsv(students) {
-    var rows = [['studentId', 'name', 'hasLocation', 'capturedAt', 'wgs84_lat', 'wgs84_lng', 'bd09_lat', 'bd09_lng']];
+    var rows = [['studentId', 'name', 'hasLocation', 'capturedAt', 'days', 'samples', 'wgs84_lat', 'wgs84_lng', 'bd09_lat', 'bd09_lng', 'sharesCellWith']];
+    var share = _cellShareMap(students);
     (students || []).forEach(function (s) {
         var g = s && s.geo;
         if (g && Number.isFinite(Number(g.lat)) && Number.isFinite(Number(g.lng))) {
             var b = wgs84ToBd09(Number(g.lat), Number(g.lng));
-            rows.push([s.id, _studentName(s), 1, g.capturedAt || '', g.lat, g.lng, b[0].toFixed(6), b[1].toFixed(6)]);
+            var others = (share[_cellKey(g)] || []).filter(function (id) { return id !== s.id; }).join(' ');
+            rows.push([s.id, _studentName(s), 1, g.capturedAt || '', g.days === undefined ? '' : g.days, g.samples === undefined ? '' : g.samples, g.lat, g.lng, b[0].toFixed(6), b[1].toFixed(6), others]);
         } else {
-            rows.push([s.id, _studentName(s), 0, '', '', '', '', '']);
+            rows.push([s.id, _studentName(s), 0, '', '', '', '', '', '', '', '']);
         }
     });
     return '\uFEFF' + rows.map(function (r) { return r.map(_csvCell).join(','); }).join('\r\n') + '\r\n';
@@ -87,7 +102,7 @@ function _geoStudentsToPoints(students) {
         .filter(function (s) { return s && s.geo && Number.isFinite(Number(s.geo.lat)) && Number.isFinite(Number(s.geo.lng)); })
         .map(function (s) {
             var b = wgs84ToBd09(Number(s.geo.lat), Number(s.geo.lng));
-            return { id: s.id, name: _studentName(s), lat: b[0], lng: b[1], capturedAt: s.geo.capturedAt || '' };
+            return { id: s.id, name: _studentName(s), lat: b[0], lng: b[1], capturedAt: s.geo.capturedAt || '', days: (s.geo.days !== undefined ? s.geo.days : null) };
         });
 }
 
@@ -156,7 +171,7 @@ var BAH_TEMPLATE = [
 '  const pts = STUDENTS.map(s=>new BMapGL.Point(s.lng, s.lat));',
 '  STUDENTS.forEach(s=>{',
 '    const m = new BMapGL.Marker(new BMapGL.Point(s.lng, s.lat));',
-'    m.setLabel(new BMapGL.Label(s.name, {offset: new BMapGL.Size(15,-5)}));',
+'    m.setLabel(new BMapGL.Label(s.name + (s.days > 1 ? " (" + s.days + "d)" : ""), {offset: new BMapGL.Size(15,-5)}));',
 '    m.addEventListener("click", ()=>{ map.openInfoWindow(new BMapGL.InfoWindow("<b>"+s.name+"</b><br>采集: "+(s.capturedAt||"?").slice(0,10), {width:200}), m.getPosition()); });',
 '    map.addOverlay(m);',
 '  });',
@@ -263,6 +278,37 @@ function renderGeoCoverage() {
     el.textContent = n + '/' + (allStudents || []).length + ' students have location data';
 }
 
+function renderGeoList() {
+    var el = typeof document !== 'undefined' && document.getElementById('geoList');
+    if (!el || typeof allStudents === 'undefined') return;
+    var share = _cellShareMap(allStudents);
+    var rows = (allStudents || []).filter(function (s) { return s && s.geo; });
+    if (!rows.length) { el.innerHTML = '<p style="font-size:13px;color:#888;">暂无位置数据 — 学生登录后会自动采集。</p>'; return; }
+    var html = '<table class="dash-table compact"><thead><tr><th>学生</th><th>Home cell</th><th>Days</th><th>Samples</th><th>Captured</th><th></th></tr></thead><tbody>';
+    rows.forEach(function (s) {
+        var g = s.geo;
+        var shared = (share[_cellKey(g)] || []).length > 1 ? ' <span title="同址" style="color:#d97706;">同址</span>' : '';
+        html += '<tr><td>' + _studentName(s) + shared + '</td><td>' + g.lat + ',' + g.lng + '</td><td>' + (g.days !== undefined ? g.days : '-') +
+            '</td><td>' + (g.samples !== undefined ? g.samples : '-') + '</td><td>' + String(g.capturedAt || '').slice(0, 10) +
+            '</td><td><button class="dash-action-btn" onclick="clearStudentGeo(\'' + s.id + '\',\'' + _studentName(s).replace(/'/g, '') + '\')">清除位置</button></td></tr>';
+    });
+    el.innerHTML = html + '</tbody></table>';
+}
+
+function clearStudentGeo(id, name) {
+    if (!confirm('清除 ' + name + ' 的位置数据？该学生下次登录会重新采集。')) return;
+    apiFetch(`${API_BASE}/clearGeo`, {
+        method: 'POST',
+        body: JSON.stringify({ studentId: id })
+    }).then(function (res) { return res.json(); }).then(function (j) {
+        if (!j || !j.success) throw new Error('clear failed');
+        var s = (typeof allStudents !== 'undefined' ? allStudents : []).find(function (x) { return x.id === id; });
+        if (s) { delete s.geo; delete s.geoSamples; }
+        renderGeoCoverage();
+        renderGeoList();
+    }).catch(function () { alert('清除失败 — 请重试或检查登录状态'); });
+}
+
 function exportLocationsCsv() {
     var students = (typeof allStudents !== 'undefined' && allStudents) || [];
     geoDownload('student_locations_' + _todayStamp() + '.csv', buildLocationCsv(students), 'text/csv;charset=utf-8');
@@ -290,6 +336,7 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         outOfChina, wgs84ToGcj02, gcj02ToBd09, wgs84ToBd09,
         buildLocationCsv, buildBaiduMapHtml, geoDownload,
-        geoGetAk, geoSaveAk, renderGeoCoverage, exportLocationsCsv, exportBaiduMapHtml
+        geoGetAk, geoSaveAk, renderGeoCoverage, renderGeoList, clearStudentGeo, _cellShareMap,
+        exportLocationsCsv, exportBaiduMapHtml
     };
 }

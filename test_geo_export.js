@@ -49,7 +49,7 @@ test('known anchor: Beijing wgs(39.9042,116.4074) -> bd09 within 1.5km NE', () =
 
 // --- CSV ---------------------------------------------------------------------
 const students = [
-    { id: 's1', fullName: 'Zhang, San', geo: { lat: 25.05, lng: 102.71, capturedAt: '2026-09-25T10:00:00.000Z' } },
+    { id: 's1', fullName: 'Zhang, San', geo: { lat: 25.05, lng: 102.71, capturedAt: '2026-09-25T10:00:00.000Z', days: 3, samples: 7 } },
     { id: 's2', fullName: 'Li "Lily"', geo: null },
     { id: 's3', name: 'Wang Wu' } // no geo field at all
 ];
@@ -57,7 +57,7 @@ test('CSV: BOM + header + all students incl. missing', () => {
     const csv = G.buildLocationCsv(students);
     assert.ok(csv.charCodeAt(0) === 0xFEFF, 'starts with UTF-8 BOM');
     const lines = csv.replace(/^\uFEFF/, '').trim().split('\r\n');
-    assert.strictEqual(lines[0], 'studentId,name,hasLocation,capturedAt,wgs84_lat,wgs84_lng,bd09_lat,bd09_lng');
+    assert.strictEqual(lines[0], 'studentId,name,hasLocation,capturedAt,days,samples,wgs84_lat,wgs84_lng,bd09_lat,bd09_lng,sharesCellWith');
     assert.strictEqual(lines.length, 4);
 });
 test('CSV: quoting for commas and double quotes', () => {
@@ -67,7 +67,7 @@ test('CSV: quoting for commas and double quotes', () => {
 });
 test('CSV: hasLocation flags + bd09 columns populated only when geo present', () => {
     const lines = G.buildLocationCsv(students).replace(/^\uFEFF/, '').trim().split('\r\n');
-    assert.ok(lines[1].startsWith('s1,"Zhang, San",1,2026-09-25T10:00:00.000Z,25.05,102.71,'));
+    assert.ok(lines[1].startsWith('s1,"Zhang, San",1,2026-09-25T10:00:00.000Z,3,7,25.05,102.71,'));
     assert.strictEqual(lines[2].split(',')[2], '0');
     assert.ok(lines[2].endsWith(',,,,'));
     assert.strictEqual(lines[3].split(',')[2], '0');
@@ -75,6 +75,22 @@ test('CSV: hasLocation flags + bd09 columns populated only when geo present', ()
 test('CSV: name falls back through fullName -> name -> login', () => {
     const csv = G.buildLocationCsv([{ id: 'x', login: 'x_login' }]);
     assert.ok(csv.includes('x_login'));
+});
+test('CSV: sharesCellWith lists other students in the same ~1km cell', () => {
+    const pair = [
+        { id: 's1', fullName: 'A', geo: { lat: 25.05, lng: 102.71, capturedAt: 'x', days: 2, samples: 2 } },
+        { id: 's2', fullName: 'B', geo: { lat: 25.05, lng: 102.71, capturedAt: 'y', days: 1, samples: 1 } },
+        { id: 's3', fullName: 'C', geo: { lat: 24.90, lng: 102.80, capturedAt: 'z', days: 4, samples: 4 } }
+    ];
+    const lines = G.buildLocationCsv(pair).replace(/^\uFEFF/, '').trim().split('\r\n');
+    assert.ok(lines[1].endsWith(',s2'), 's1 shares with s2');
+    assert.ok(lines[2].endsWith(',s1'), 's2 shares with s1');
+    assert.ok(lines[3].endsWith(','), 'lone cell has empty sharesCellWith');
+});
+test('map HTML: label shows day-count for confidence', () => {
+    const html = G.buildBaiduMapHtml(
+        [{ id: 's1', fullName: 'A', geo: { lat: 25.05, lng: 102.71, capturedAt: 'x', days: 6, samples: 9 } }], 'AK');
+    assert.ok(html.includes('"days":6'), 'days embedded in point data');
 });
 
 // --- Baidu HTML ---------------------------------------------------------------

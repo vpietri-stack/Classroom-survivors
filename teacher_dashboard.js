@@ -563,6 +563,7 @@ function switchTab(tab) {
     } else if (tab === 'settings') {
         document.getElementById('tabSettings').classList.remove('hidden');
         if (typeof renderGeoCoverage === 'function') renderGeoCoverage();
+        if (typeof renderGeoList === 'function') renderGeoList();
         dateFilter.classList.add('hidden');
         if (typeof populateSettingsTab === 'function') populateSettingsTab();
     } else if (tab === 'targets') {

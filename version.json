@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-26a",
+  "version": "2026-09-27a",
   "deployedAt": "2026-09-27",
-  "notes": "geo v2: every-login sampling (csGeoDone_* demoted to diagnostics); server keeps user.geoSamples (dedup same ~1km cell + Beijing day, cap 30) and derives user.geo as the unique-day consensus (days/samples confidence fields); new privileged POST /api/clearGeo removes /geo + /geoSamples so the next login re-captures; dashboard Student Locations panel (coverage line, days/samples/同址 table, per-student 清除位置 button) and CSV gains days,samples,sharesCellWith."
+  "notes": "Security hotfix on top of geo v2: the student-writable avatar field was interpolated raw into the teacher dashboard's innerHTML (student table + bulk chips) — stored XSS with the teacher's privileged token as payoff. updateAvatar.js now rejects HTML-significant or >32-char values (sanitizeAvatar, exported pure); both dashboard sinks escape avatar AND names via _esc; clearGeo's privileged gate gained tracked coverage (authorizeClearGeo + new test_dashboard_security.js, 7 assertions — api/test_auth.js is deliberately gitignored). Wiki refreshed (avatar escaping rule, clamp clause, renderGeoList wording, 12-testing counts: 15 files / 500 assertions)."
 }

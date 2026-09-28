@@ -1,11 +1,11 @@
 # Testing
 
-> **Last verified:** 2026-09-25 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
+> **Last verified:** 2026-09-27 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
 
 **Owner files:** `package.json` (`test` script), `test_*.js` (root), `api/test_auth.js`, plus the out-of-chain `vs_*` test family.
 
-`npm test` (root) is the **required-green gate before any commit**. It chains 11 Node scripts
-(`package.json:7`). Verified 2026-09-25: **440 assertions, 0 failures** (counts per file below;
+`npm test` (root) is the **required-green gate before any commit**. It chains 15 Node scripts
+(`package.json:7`). Verified 2026-09-27: **500 assertions, 0 failures** (counts per file below;
 the stamp guard prints no summary line).
 
 ```text
@@ -20,6 +20,10 @@ test_speech_hygiene.js             # Recorder AudioContext teardown + sp* breadc
 test_td_gate.js                    # Tower Defense live/preview URL gate (jsdom)      (11)
 test_td_core.js                    # Tower Defense core behaviors (Playwright + real Chrome) (23)
 test_asset_manifest.js             # sprite/music/sfx lists + 3-way vocab naming contract (171)
+test_geo_events.js                 # saveAnalytics geo v2: diversion, samples, consensus (15)
+test_geo_capture.js                # client capture gate/rounding/flags (vm)          (15)
+test_geo_export.js                 # geo_export: conversion, CSV, map HTML, escaping  (23)
+test_dashboard_security.js         # sanitizeAvatar allowlist + authorizeClearGeo     (7)
 ```
 
 Two extra aliases: `npm run test:td` = `test_td_gate.js && test_td_core.js`. The backend has its own suite: `cd api && npm test` → `api/test_auth.js` (requires the local Functions runtime on `:7072` + an isolated test container — see [Backend API](10-backend-api.md)).

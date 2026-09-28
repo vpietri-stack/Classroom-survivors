@@ -482,7 +482,7 @@ function previewBulkStudents(classSelId, previewId) {
     const currentTeacher = document.getElementById('filterTeacher') ? document.getElementById('filterTeacher').value : '';
     const students = allStudents.filter(s => s.classTime === classTime && s.role !== 'BM' && s.role !== 'admin' && (!currentTeacher || s.teacher === currentTeacher));
     preview.innerHTML = `<div class="bulk-preview-label">Will apply to ${students.length} student(s):</div>` +
-        students.map(s => `<span class="bulk-chip">${s.avatar||'👤'} ${s.fullName||s.login}</span>`).join('');
+        students.map(s => `<span class="bulk-chip">${_esc(s.avatar) || '👤'} ${_esc(s.fullName || s.login)}</span>`).join('');
 }
 
 function openBulkTargetsModal() {

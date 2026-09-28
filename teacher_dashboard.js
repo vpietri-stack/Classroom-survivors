@@ -437,7 +437,7 @@ function renderStudentsTable(dateFrom, dateTo) {
         const pwCol = (isAdmin || isBM) ? `<td><span data-visible="false" style="font-size:0.82rem;color:var(--dash-text-dim)">••••••</span><button onclick="event.stopPropagation();toggleRowPw(this,'${(s.password||'').replace(/'/g,"\\'")}')" class="row-action-btn" style="margin-left:6px"><i class="fas fa-eye"></i></button></td>` : '';
 
         return `<tr class="clickable" onclick="openStudentDetail('${s.id}')">
-            <td><div class="student-name-cell"><span class="cell-avatar">${s.avatar || '👤'}</span>${s.fullName || s.login || 'Unknown'}</div></td>
+            <td><div class="student-name-cell"><span class="cell-avatar">${_esc(s.avatar) || '👤'}</span>${_esc(s.fullName || s.login) || 'Unknown'}</div></td>
             <td>${s.teacher || '—'}</td>
             <td>${s.classTime || '—'}</td>
             ${renderTargetCell(targetInfo)}

@@ -3,6 +3,13 @@ const { validateApiKey } = require('./shared/validateApiKey');
 const { getContainer } = require('./shared/db');
 const auth = require('./shared/auth');
 
+// Privileged-only gate for a PII-deleting endpoint, exported pure so the
+// 403-for-students contract has TRACKED coverage (api/test_auth.js is
+// deliberately gitignored). Returns null when allowed, else the 403 response.
+function authorizeClearGeo(token) {
+    return auth.isPrivileged(token) ? null : auth.forbidden();
+}
+
 // Geo v2 (2026-09-26): teacher/BM/admin clears a student's captured location
 // (trip contamination, moved family). Removes /geo + /geoSamples only. The
 // client captures on every login, so the student's next login re-seeds the
@@ -21,7 +28,8 @@ app.http('clearGeo', {
 
             const { token, error } = auth.requireAuth(request);
             if (error) return error;
-            if (!auth.isPrivileged(token)) return auth.forbidden();
+            const authzError = authorizeClearGeo(token);
+            if (authzError) return authzError;
 
             const container = getContainer();
             const { resources } = await container.items
@@ -45,3 +53,5 @@ app.http('clearGeo', {
         }
     }
 });
+
+module.exports = { authorizeClearGeo };

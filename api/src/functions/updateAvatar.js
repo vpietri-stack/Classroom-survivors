@@ -3,6 +3,20 @@ const { validateApiKey } = require('./shared/validateApiKey');
 const { getContainer } = require('./shared/db');
 const auth = require('./shared/auth');
 
+// Avatar values come from a fixed emoji picker (frontend_auth.js
+// selectAvatar) but the field is self-writable via this endpoint — and the
+// teacher dashboard interpolates it into innerHTML (student table + bulk
+// chips). Reject anything HTML-significant or oversized; the dashboard
+// escapes too (geo_export.js _esc), this is the belt. Exported pure for
+// test_dashboard_security.js.
+function sanitizeAvatar(value) {
+    if (typeof value !== 'string') return null;
+    const s = value.trim();
+    if (!s || s.length > 32) return null;
+    if (/[<>&"'`]/.test(s)) return null;
+    return s;
+}
+
 app.http('updateAvatar', {
     route: 'updateAvatar',
     methods: ['POST'],
@@ -21,8 +35,8 @@ app.http('updateAvatar', {
             const { id, avatar, avatarUrl, avatarId } = body;
             if (!auth.requireSelfOrRole(token, id)) return auth.forbidden();
 
-            const avatarValue = avatar || avatarUrl || avatarId;
-            if (!avatarValue) return { status: 400, body: 'Missing avatar data.' };
+            const avatarValue = sanitizeAvatar(avatar || avatarUrl || avatarId);
+            if (!avatarValue) return { status: 400, body: 'Missing or invalid avatar data.' };
 
             const { resources: items } = await getContainer().items
                 .query({ query: 'SELECT * FROM c WHERE c.id = @id', parameters: [{ name: '@id', value: id }] })
@@ -43,3 +57,5 @@ app.http('updateAvatar', {
         }
     }
 });
+
+module.exports = { sanitizeAvatar };

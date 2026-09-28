@@ -22,7 +22,7 @@ All HTTP triggers use `authLevel: 'anonymous'` — real gating is two applicatio
 | `setTargets.js` | POST | `setTargets` | Bulk-assign practice targets `{startTime, endTime, targetSessions}` to many students; replaces fully-covered existing targets | App key + privileged token |
 | `manageBms.js` | GET, POST | `manageBms` | GET `?action=list` (BM accounts) / `?action=logs` (`bmActivity` docs). POST `add` / `changePassword` (self only) / `delete` | App key + privileged token (self-scoped for `changePassword`) |
 | `changePassword.js` | POST | `changePassword` | Self-service password change; stores **scrypt hash**, clears `needsPasswordChange` | App key + self-or-role token |
-| `updateAvatar.js` | POST | `updateAvatar` | Set `user.avatar` (self only) | App key + self-or-role token |
+| `updateAvatar.js` | POST | `updateAvatar` | Set `user.avatar` (self only). `sanitizeAvatar` (exported pure) rejects non-strings, >32 chars, or any `<>&"'\`` — the field renders inside the teacher dashboard's innerHTML (2026-09-27 XSS hotfix; client also escapes) | App key + self-or-role token |
 | `corsHooks.js` | OPTIONS | (one per API route) | Preflight responders via `app.http('options_<route>')` loop | none |
 | `corsHooks.js` (hook) | — | — | `app.hook.postInvocation` wraps every HTTP response with CORS headers (`withCors`) | — |
 

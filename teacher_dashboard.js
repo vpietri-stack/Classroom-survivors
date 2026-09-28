@@ -535,7 +535,7 @@ function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
 
-    ['tabSessions','tabExercises','tabTest','tabSettings','tabTargets','tabSR'].forEach(id => {
+    ['tabSessions','tabExercises','tabTest','tabSettings','tabTargets','tabSR','tabMap'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
     });
@@ -570,6 +570,10 @@ function switchTab(tab) {
         document.getElementById('tabTargets').classList.remove('hidden');
         dateFilter.classList.add('hidden');
         if (typeof renderTargetsTab === 'function') renderTargetsTab();
+    } else if (tab === 'map') {
+        document.getElementById('tabMap').classList.remove('hidden');
+        dateFilter.classList.add('hidden');
+        if (typeof renderGeoMap === 'function') renderGeoMap();
     }
 }
 

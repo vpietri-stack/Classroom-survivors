@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-27a",
-  "deployedAt": "2026-09-27",
-  "notes": "Security hotfix on top of geo v2: the student-writable avatar field was interpolated raw into the teacher dashboard's innerHTML (student table + bulk chips) — stored XSS with the teacher's privileged token as payoff. updateAvatar.js now rejects HTML-significant or >32-char values (sanitizeAvatar, exported pure); both dashboard sinks escape avatar AND names via _esc; clearGeo's privileged gate gained tracked coverage (authorizeClearGeo + new test_dashboard_security.js, 7 assertions — api/test_auth.js is deliberately gitignored). Wiki refreshed (avatar escaping rule, clamp clause, renderGeoList wording, 12-testing counts: 15 files / 500 assertions)."
+  "version": "2026-09-28a",
+  "deployedAt": "2026-09-28",
+  "notes": "Teacher dashboard gains a Map tab: embedded Leaflet map on key-less Gaode (AMap) GCJ-02 raster tiles showing every student with location data as one dot (name + days tooltip), click-to-drop candidate campus pins persisted in teacher localStorage (csGeoCampusPins), per-campus straight-line ranking (avg/median km, within 3/5 km) and per-student rows with key-less uri.amap.com driving-directions deep links (Gaode routing API needs a real-name-verified key, which is unobtainable here). Leaflet 1.9.4 vendored at lib/leaflet/. Pure builders (buildStudentPoints/haversineKm/rankCampuses/gaodeDriveUrl/pin persistence) covered by test_geo_map.js (17 assertions, VM-blob pattern)."
 }

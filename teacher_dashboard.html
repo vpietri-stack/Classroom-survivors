@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="teacher_dashboard.css">
+    <link rel="stylesheet" href="lib/leaflet/leaflet.css?v=2026-09-28a">
 </head>
 <body>
     <!-- MAIN DASHBOARD -->
@@ -117,6 +118,7 @@
             <button class="tab-btn active" data-tab="sessions" onclick="switchTab('sessions')"><i class="fas fa-history"></i> Sessions</button>
             <button class="tab-btn" data-tab="exercises" onclick="switchTab('exercises')"><i class="fas fa-dumbbell"></i> Exercises</button>
             <button class="tab-btn" data-tab="sr" onclick="switchTab('sr')"><i class="fas fa-brain"></i> SR State</button>
+            <button class="tab-btn" data-tab="map" onclick="switchTab('map')"><i class="fas fa-map-marked-alt"></i> Map</button>
             <button class="tab-btn bm-or-admin-only hidden" data-tab="settings" onclick="switchTab('settings')"><i class="fas fa-cog"></i> Settings</button>
             <button class="tab-btn bm-or-admin-only hidden" data-tab="targets" onclick="switchTab('targets')"><i class="fas fa-bullseye"></i> Targets</button>
             <button class="tab-btn tab-test" data-tab="test" onclick="switchTab('test')"><i class="fas fa-play-circle"></i> Test</button>
@@ -242,6 +244,25 @@
                     <button onclick="exportLocationsCsv()" class="dash-action-btn"><i class="fas fa-file-csv"></i> 导出位置 CSV</button>
                     <button onclick="exportBaiduMapHtml()" class="dash-action-btn primary"><i class="fas fa-map-marked-alt"></i> 导出百度地图 HTML</button>
                     <span id="geoExportStatus" class="save-status"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAP TAB (Gaode tiles, key-less; geo_map.js) -->
+        <div id="tabMap" class="tab-content hidden">
+            <div class="admin-panel" style="display:flex;gap:16px;flex-wrap:wrap;">
+                <div style="flex:1 1 480px;min-width:320px;">
+                    <div id="geoMapCanvas" style="height:68vh;border-radius:8px;"></div>
+                    <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                        <button class="dash-action-btn" onclick="geoMapAddCampusMode()"><i class="fas fa-map-pin"></i> 添加候选校区</button>
+                        <button class="dash-action-btn" onclick="geoMapClearCampuses()"><i class="fas fa-eraser"></i> 清空校区</button>
+                        <span id="geoMapStatus" class="save-status"></span>
+                    </div>
+                </div>
+                <div style="flex:1 1 300px;min-width:280px;">
+                    <p id="geoMapCoverage" style="font-size:13px;color:#888;margin:0 0 8px;"></p>
+                    <p style="font-size:12px;color:#666;margin:0 0 8px;">直线距离排名；「驾车」= 高德真实驾车路线（新窗口）。days 为下限估计。</p>
+                    <div id="geoMapPanel"></div>
                 </div>
             </div>
         </div>
@@ -476,7 +497,7 @@
          revalidation here, so a stale buster means a stale APP_VERSION and the
          version watchdog raises a FALSE red banner on the teacher's page. Keep this
          ?v= equal to version.json; the sibling busters above/below are cache-only. -->
-    <script src="frontend_auth.js?v=2026-09-27a"></script>
+    <script src="frontend_auth.js?v=2026-09-28a"></script>
     <script>var TEACHING_CONTENT = {}; var AVAILABLE_CONTENT = {};</script>
     <script src="content_pu1.js?v=2026-08-01a"></script>
     <script src="content_pu2.js?v=2026-08-01a"></script>
@@ -485,8 +506,10 @@
     <script src="content_think1.js?v=2026-08-01a"></script>
     <script src="content_think2.js?v=2026-08-01a"></script>
     <script src="content_test.js?v=2026-08-01a"></script>
-    <script src="teacher_dashboard.js?v=2026-09-27a"></script>
+    <script src="teacher_dashboard.js?v=2026-09-28a"></script>
     <script src="geo_export.js?v=2026-09-26a"></script>
+    <script src="lib/leaflet/leaflet.js?v=2026-09-28a"></script>
+    <script src="geo_map.js?v=2026-09-28a"></script>
     <script src="admin_dashboard.js?v=2026-09-27a"></script>
 </body>
 </html>

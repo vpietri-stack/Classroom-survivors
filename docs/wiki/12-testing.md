@@ -4,8 +4,8 @@
 
 **Owner files:** `package.json` (`test` script), `test_*.js` (root), `api/test_auth.js`, plus the out-of-chain `vs_*` test family.
 
-`npm test` (root) is the **required-green gate before any commit**. It chains 15 Node scripts
-(`package.json:7`). Verified 2026-09-27: **500 assertions, 0 failures** (counts per file below;
+`npm test` (root) is the **required-green gate before any commit**. It chains 16 Node scripts
+(`package.json:7`). Verified 2026-09-28: **517 assertions, 0 failures** (counts per file below;
 the stamp guard prints no summary line).
 
 ```text
@@ -23,6 +23,7 @@ test_asset_manifest.js             # sprite/music/sfx lists + 3-way vocab naming
 test_geo_events.js                 # saveAnalytics geo v2: diversion, samples, consensus (15)
 test_geo_capture.js                # client capture gate/rounding/flags (vm)          (15)
 test_geo_export.js                 # geo_export: conversion, CSV, map HTML, escaping  (23)
+test_geo_map.js                    # geo_map: GCJ points, haversine, ranking, Gaode links (17)
 test_dashboard_security.js         # sanitizeAvatar allowlist + authorizeClearGeo     (7)
 ```
 

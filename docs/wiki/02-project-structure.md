@@ -94,7 +94,7 @@ directly with a `?v=` cache-buster; files share state through the global JS name
 | `content_pu1.js` | 1689 | Pack PU1: `TEACHING_CONTENT["PU1"]` (units 0–9) + `AVAILABLE_CONTENT["PU1"]` (~1678). |
 | `content_pu2.js` | 1475 | Pack PU2 (units 0–9). |
 | `content_pu3.js` | 876 | Pack PU3 (units 0–8). |
-| `content_think0.js` | 535 | Pack Think0 (units 0–2). |
+| `content_think0.js` | 755 | Pack Think0 (units 0–4). |
 | `content_think1.js` | 624 | Pack Think1 (units 0–7). |
 | `content_think2.js` | 681 | Pack Think2 (units 0–12). |
 | `content_test.js` | 42 | Tiny `"test"` book (1 unit, 2 pages) for QA. |

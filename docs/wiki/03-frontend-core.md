@@ -108,10 +108,39 @@ AVAILABLE_CONTENT["PU1"] = { "<unit>": [page, page, …] };   // ~1678 in conten
 | PU1 | `content_pu1.js` (1689 ln) | 0–9 | PetrovisKids(?) level-1 book — see pack header comments |
 | PU2 | `content_pu2.js` (1475 ln) | 0–9 | |
 | PU3 | `content_pu3.js` (876 ln) | 0–8 | |
-| Think0 | `content_think0.js` (535 ln) | 0–2 | |
+| Think0 | `content_think0.js` (755 ln) | 0–4 | Unit 4 = "City Life" (p45), added 2026-10-02a |
 | Think1 | `content_think1.js` (624 ln) | 0–7 | |
 | Think2 | `content_think2.js` (681 ln) | 0–12 | |
 | test | `content_test.js` (42 ln) | 1 | fruit QA fixture |
+
+#### Authoring rules for a new unit (learned shipping Think0 U4, 2026-10-02a)
+
+These are *data* contracts, not code contracts — nothing validates them at runtime, so a
+violation shows up as a student getting a correct answer marked wrong.
+
+- **`sentences` feed the word-scramble game**, which splits on spaces (`study_mode.js`
+  `nextRoundESentence`, compared slot-by-slot exact in `checkRoundE`). A sentence is only
+  fair if English grammar forces ONE tile order: exactly one capitalised tile (first),
+  exactly one tile with terminal punctuation (last), no proper nouns mid-sentence, and no
+  `between X and Y` / `X and Y` / comma-joined parallel chunks whose halves are
+  semantically reversible. One tail adverbial max — `…in the library today` can also read
+  `…today in the library`.
+- **`sentencePairs` feed the match game**, which shows N A's with N shuffled B's and
+  accepts only `correctIndex` (`renderRoundF`). Many A's may share one B, but one A must
+  never plausibly take two B's. Answers must *add information the question doesn't
+  contain* — an answer that just echoes the question teaches nothing. Agreement
+  (`There's a` / `There's an`, `is there` / `are there`, `it's` / `they're`) and
+  polarity (`any` only after a negative) are the cheapest way to lock a pairing.
+- **De-duplicate against the same book's earlier units** before adding a vocab word — the
+  SR engine resurfaces old items as review, so repeats are noise, not reinforcement.
+- **Group `vocab` by category, not by textbook page**, and keep one merged lesson per unit
+  unless the teacher asks for a split.
+- **The textbook page is the source of truth** — don't add plausible vocabulary the unit
+  doesn't actually teach.
+- After editing a pack: add any missing keys to `translations.js` under a
+  `// --- <Book> Unit N Page P ---` section (pairs need no translation), bump that pack's
+  own `?v=` in `index.html`, and re-run `npm test` (the asset-manifest test re-derives
+  `images/vocab/<word>.png` for every vocab string in every pack).
 
 `class_config.js:6–74` carries a comment block mapping every book/unit to page-number lists —
 this mirrors `AVAILABLE_CONTENT`.

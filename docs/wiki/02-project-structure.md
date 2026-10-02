@@ -24,7 +24,7 @@ directly with a `?v=` cache-buster; files share state through the global JS name
 | Assets & media | `asset_cache.js`, `bgm.js`, `audio_mp3/`, `music/`, `sfx/`, `images/`, `sprites/`, `fonts/`, `models/` |
 | Self-hosted libs | `lib/` (tailwind.js, fontawesome, transformers.min.js, wasm), `phaser.min.js` |
 | Tests | `test_*.js` (root), `vs_*.js` (VS asset/test tools), `boot_refactor_test*.js` |
-| Asset tooling | `gen_missing_audio.js`, `gen_pair_images.js`, `slice_vocab_sheet.js`, `fetch_selfhost_assets.js`, `extract_*.js`, `reorganize_translations.js`, `insert_translations.py`, `check_missing_audio.py`, `verify_all.py` |
+| Asset tooling | `gen_missing_audio.js`, `gen_pair_images.js`, `slice_vocab_sheet.js`, `shrink_vocab.js` (320px/≤100KB ladder), `crop_regions.js` (crop a drifted sheet by explicit rects), `stamp_oval.js` (draw an oval at fractional heights — the generator can't hold a 1/2/3 sequence), `fetch_selfhost_assets.js`, `extract_*.js`, `reorganize_translations.js`, `insert_translations.py`, `check_missing_audio.py`, `verify_all.py` |
 | TD tools (one-off) | `td_fix_alpha.js`, `td_slice_parts.js`, `td_verify*.js`, `tmp_gif_frames.js` |
 | Backend | `api/` (Azure Functions v4), `staticwebapp.config.json`, `.nojekyll` |
 | Docs / handoffs | `AGENTS.md`, `DEPLOY_VERSION_STAMP.md`, `SESSION_REFRESH_ROOTCAUSE_2026-08-25.md`, `HANDOFF_SESSION_REFRESH_FIX.md`, `HANDOFF_SESSION_FIX_FULL.md`, `PROJECT_HANDOFF_2026-07-29.md`, `PROJECT_STATE_HANDOFF.md`, `SECURITY_AUDIT_HANDOFF.md`, `TD_HANDOFF_QODERCN.md`, `MINIGAME_TIMER_FEATURES.md`, `boot_refactor_plan.md`, `TEACHING_CONTENT_*.md`, `docs/` |
@@ -93,7 +93,7 @@ directly with a `?v=` cache-buster; files share state through the global JS name
 | `teaching_content.js` | 667 | Declares `TEACHING_CONTENT = {}` / `AVAILABLE_CONTENT = {}` + shared wizard state + per-account localStorage scoping + SR selection helpers (`getStudyContentSR`, `getGameItemSR`, …). |
 | `content_pu1.js` | 1689 | Pack PU1: `TEACHING_CONTENT["PU1"]` (units 0–9) + `AVAILABLE_CONTENT["PU1"]` (~1678). |
 | `content_pu2.js` | 1475 | Pack PU2 (units 0–9). |
-| `content_pu3.js` | 876 | Pack PU3 (units 0–8). |
+| `content_pu3.js` | 939 | Pack PU3 (units 0–9). |
 | `content_think0.js` | 755 | Pack Think0 (units 0–4). |
 | `content_think1.js` | 624 | Pack Think1 (units 0–7). |
 | `content_think2.js` | 681 | Pack Think2 (units 0–12). |

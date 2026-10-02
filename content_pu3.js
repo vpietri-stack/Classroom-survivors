@@ -860,7 +860,69 @@ TEACHING_CONTENT["PU3"] = {
                 { a: "She got", b: "out of the car." }
             ]
         },
-    }
+    },
+    "9": {
+        "107": {
+            vocab: [
+                // ----- Size -----
+                'little', 'huge', 'enormous',
+
+                // ----- Sound -----
+                'loud', 'noisy',
+
+                // ----- Opinion / quality -----
+                'excellent', 'fantastic', 'horrible',
+
+                // ----- Feelings & states -----
+                'pleased', 'alone', 'lucky',
+
+                // ----- The comic (bold in the bubbles) -----
+                'hero', 'superhero', 'comic', 'strange', 'special', 'mouth',
+
+                // ----- Normal vs weird -----
+                'normal', 'regular', 'weird'
+            ],
+            sentences: [
+                "The horrible dog has got a huge mouth.",
+                "That man looks strange.",
+                "The man has got a horrible, little dog.",
+                "The little dog is noisy.",
+                "He's got his excellent, special shoes.",
+                "The superhero is alone in the dark street.",
+                "The hero has got a strange hat.",
+                "He's so lucky: he never loses!",
+                "The elephant is enormous.",
+                "My room is noisy.",
+                "The music is very loud.",
+                "That's a fantastic comic!",
+                "The food is excellent.",
+                "He's got a lucky coin.",
+                "The test is difficult.",
+                "Her hair is blonde.",
+                "The teacher was pleased with my maths homework.",
+            ],
+            sentencePairs: [
+                { a: "Enormous means the same as", b: "huge." },
+                { a: "Noisy means the same as", b: "loud." },
+                { a: "Horrible means the same as", b: "terrible." },
+                { a: "Pleased means the same as", b: "happy." },
+                { a: "Fantastic means the same as", b: "brilliant." },
+                { a: "Difficult means the opposite of", b: "easy." },
+                { a: "Beautiful means the opposite of", b: "ugly." },
+                { a: "Dark means the opposite of", b: "light or bright." },
+                { a: "Alone means the opposite of", b: "together." },
+                { a: "Is the elephant enormous?", b: "Yes, it's very big." },
+                { a: "Is the mouse little?", b: "Yes, it's very small." },
+                { a: "Is the baby noisy?", b: "Yes, it's crying loudly." },
+                { a: "Are these special shoes?", b: "No, they aren't. They're normal." },
+                { a: "Is the man strange?", b: "Yes, he is. He looks very weird." },
+                { a: "Is the test easy?", b: "No, it's difficult." },
+                { a: "Is the comic boring?", b: "No, it's excellent!" },
+                { a: "Is the dog friendly?", b: "No, it's horrible!" },
+                { a: "Is your teacher pretty?", b: "Yes, she's very beautiful!" }
+            ]
+        }
+    },
 };
 
 AVAILABLE_CONTENT["PU3"] = {
@@ -872,5 +934,6 @@ AVAILABLE_CONTENT["PU3"] = {
     "5": [57, 59, 66],
     "6": [69, 71, 73],
     "7": [83, 85, 87],
-    "8": [95, 97, 98, 99]
+    "8": [95, 97, 98, 99],
+    "9": [107]
 };

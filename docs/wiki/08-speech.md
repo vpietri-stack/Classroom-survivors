@@ -16,6 +16,7 @@ The app does **fully in-browser speech recognition** (no server round-trip, no A
 | `speech_ui.js` (601 ln) | `window.SpeechUI` | Record button, sentence gates, junk-audio/hallucination gates, permission recovery, telemetry |
 | `speech_preload.js` (78 ln) | `window.SpeechStatus` | Eager model preload before login; state machine for UI |
 | `speech_debug.js` (153 ln) | `window.__speechLog` + debug panel | On-screen load diagnostics + rolling log + Retry |
+| `speech_sample_capture.js` | `window.SpeechSampleCapture` | ⏳ **Temporary** (2026-10-10 → 2026-10-17): stores the WAV for consented students so ASR changes can be measured. See §11.1 |
 | `sr_engine.js` (329 ln) | pure functions | ⚠️ **Not speech** — "SR" = *Spaced Repetition*. Item selection + SR interval math (see §7) |
 | `test_sr_once_per_session.js` (172 ln) | test | SR once-per-session invariant tests (see §7) |
 
@@ -221,10 +222,33 @@ Despite sitting in the speech file cluster, `sr_engine.js` is the **Spaced Repet
 
 ## 11. Security & privacy considerations (from `SECURITY_AUDIT_HANDOFF.md` + code)
 
-- **Audio retention: none.** Recognition is fully local; audio blobs are never uploaded, never persisted server-side. The only artifacts leaving the device are *transcripts and metadata* in analytics events (target/transcript/accuracy/UA/durations).
+- **Audio retention: none for the overwhelming majority of students** — recognition is fully local and audio blobs are discarded after transcription. ⚠️ **Temporary exception, 2026-10-10 → 2026-10-17:** a bounded research collection stores the WAV for **11 explicitly consented students only** (see §11.1). Outside that list, and outside that window, the "audio never leaves the device" guarantee holds exactly as before.
+- For everyone else the only artifacts leaving the device are *transcripts and metadata* in analytics events (target/transcript/accuracy/UA/durations).
 - **Mic permissions** are standard `getUserMedia` prompts handled client-side (§6); no permission state is stored server-side beyond error events.
 - Speech telemetry rides the same auth'd pipeline as all analytics: token in `X-Auth-Token`, events scoped to the token identity (`saveAnalytics`); dashboards can read them via `getStudents` under the privileged-role gate (`teacher/BM/admin`) — see [Auth & Versioning](04-auth-versioning.md) and [Backend API](10-backend-api.md).
 - Sanitization note: transcript/target strings in telemetry are exercise content, not personal data; student identity rides only on the authenticated document, and names must never be copied into docs/wiki or commits (see [Gotchas & History](15-gotchas-and-history.md)).
+
+### 11.1 Temporary speech-sample research collection (2026-10-10 → 2026-10-17)
+
+**Owner files:** `speech_sample_capture.js`, `api/src/functions/saveSpeechSample.js`, `api/src/functions/speechSampleConsent.js`, `api/src/functions/shared/speechSamples.js`, `api/download_speech_samples.js`, `test_speech_samples.js`
+
+**Why it exists:** the app has never stored audio, so no candidate ASR model and no scoring change could ever be evaluated against real classroom voices. Analysis of 3,067 field attempts found that 54% of failures are not a model problem and that the model-side opportunities (target-conditioned decoding, a Moonshine swap) are unmeasurable without recordings. The teacher obtained face-to-face consent from a specific list of students and their parents for a **one-week** collection to build that calibration set. Full reasoning: `docs/research/2026-10-10-speech-improvement-research.md`.
+
+**Inert unless every one of these holds** (`speech_sample_capture.js` + `shared/speechSamples.js`):
+
+1. the server confirms this exact `studentId` is on the consent list — the client asks `GET /api/speechSampleConsent` once per session and stays completely inert otherwise, so **audio never leaves a non-consented child's device**;
+2. the capture window is still open, checked **client-side and server-side**; after `2026-10-17T00:00:00+08:00` the upload endpoint returns 410 and the client will not even encode audio;
+3. the per-student cap (60) has not been reached, enforced client-side *and* server-side.
+
+**Consent is keyed on `studentId`, never on a display name.** Three of the consented children share a display name with a *different* live student ("Annie", "Simon", "Cindy" each have two live records), so name matching could have recorded a child whose parents never agreed. `test_speech_samples.js` pins this.
+
+**The consent list lives in the `SPEECH_SAMPLE_CONSENTED_IDS` app setting on the Functions app, never in the repository** — the repo is public and student IDs embed children's full pinyin names. It is **fail-closed**: unset or empty means nobody is consented. `test_speech_samples.js` asserts the list is not embedded in client code.
+
+**Storage:** a separate `speech_samples` container in the existing `Val-EslApp` database, partitioned by `/studentId`. It must stay in that database so it shares the existing 1000 RU/s autoscale pool — a *second* database would need its own 1000 RU/s minimum and push the account past the Cosmos free-tier ceiling. Writes are capped at 1.6 M base64 chars so an item cannot breach Cosmos's 2 MB limit (a 15 s clip at 48 kHz base64-encodes to ~1.92 MB), and the client paces uploads 2.5 s apart so a burst cannot throttle the container that saves student progress.
+
+**Retrieval:** `cd api && node download_speech_samples.js` writes `speech_samples/wav/*.wav` plus `manifest.csv` (target = ground truth; transcript/pass/accuracy = what the shipped scorer decided). The output directory is **gitignored** (`speech_samples/` and `*.wav`) and must be deleted once the calibration work is done.
+
+**Removal:** delete `speech_sample_capture.js`, its `<script>` tag, the capture block in `makeSentenceGate`, the two Functions, `shared/speechSamples.js`, and this subsection. Even if it is forgotten, the server-side window check makes it permanently inert after 2026-10-17.
 
 ## 12. Related pages
 

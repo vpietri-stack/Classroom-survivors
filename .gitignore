@@ -45,3 +45,11 @@ test_screenshot.png
 # Root-level test/debug screenshots (automation artifacts, not shipped)
 /screenshot_*.png
 /td_*.png
+
+# Consented-student speech recordings pulled down by
+# api/download_speech_samples.js. These are CHILDREN'S VOICES and must never be
+# committed — the repo is public. Delete the directory when the calibration work
+# is finished.
+/speech_samples/
+speech_samples/
+*.wav

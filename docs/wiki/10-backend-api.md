@@ -23,6 +23,8 @@ All HTTP triggers use `authLevel: 'anonymous'` — real gating is two applicatio
 | `manageBms.js` | GET, POST | `manageBms` | GET `?action=list` (BM accounts) / `?action=logs` (`bmActivity` docs). POST `add` / `changePassword` (self only) / `delete` | App key + privileged token (self-scoped for `changePassword`) |
 | `changePassword.js` | POST | `changePassword` | Self-service password change; stores **scrypt hash**, clears `needsPasswordChange` | App key + self-or-role token |
 | `updateAvatar.js` | POST | `updateAvatar` | Set `user.avatar` (self only). `sanitizeAvatar` (exported pure) rejects non-strings, >32 chars, or any `<>&"'\`` — the field renders inside the teacher dashboard's innerHTML (2026-09-27 XSS hotfix; client also escapes) | App key + self-or-role token |
+| `speechSampleConsent.js` | GET | `speechSampleConsent` | ⏳ **Temporary (until 2026-10-17).** Tells the signed-in client whether it may record+upload speech samples, so audio never leaves a non-consented device. Returns `{consented, open, endsAt}`; fails closed on any error | App key + token |
+| `saveSpeechSample.js` | POST | `saveSpeechSample` | ⏳ **Temporary (until 2026-10-17).** Stores one consented student's WAV + scorer metadata into the `speech_samples` container. Window-, consent-, size- and cap-enforced server-side; 410 once the window closes | App key + token (consent keyed on `token.sub`) |
 | `corsHooks.js` | OPTIONS | (one per API route) | Preflight responders via `app.http('options_<route>')` loop | none |
 | `corsHooks.js` (hook) | — | — | `app.hook.postInvocation` wraps every HTTP response with CORS headers (`withCors`) | — |
 
@@ -81,6 +83,9 @@ Read-modify-write of the whole student doc; carries the hardest-won concurrency 
 | `SESSION_SECRET` | Function App settings | HMAC secret for session tokens (per-environment) |
 | `REQUIRE_AUTH` | Function App settings | `'true'` → hard-401 on missing/invalid tokens |
 | `TEST_MODE` | Function App settings (local dev) | Enables password-less teacher login bypass |
+| `SPEECH_SAMPLE_CONSENTED_IDS` | Function App settings | ⏳ **Temporary.** Comma/semicolon/space-separated list of `studentId`s allowed to upload speech samples. **Never put this in the repo** — it is public and IDs embed children's full pinyin names. Unset or empty ⇒ fail closed, nobody is consented |
+| `SPEECH_SAMPLE_CAPTURE_ENDS` | optional | ⏳ **Temporary.** Override the collection deadline (default `2026-10-17T00:00:00+08:00`). Set to a past instant to close collection early without a redeploy |
+| `COSMOS_SPEECH_SAMPLES_CONTAINER` | optional | ⏳ **Temporary.** Override the samples container name (default `speech_samples`). Must stay in `Val-EslApp` so it shares that database's 1000 RU/s autoscale pool — see [Speech](08-speech.md) §11.1 |
 
 ## Local development & testing
 

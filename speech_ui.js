@@ -207,7 +207,13 @@
               durMs: stats ? Math.round(stats.durMs) : null,
               peak: stats ? stats.peak : null,
               transcribeMs: Date.now() - t0,
-              blobBytes: blob.size
+              blobBytes: blob.size,
+              // The exact WAV the recogniser received, plus its true sample rate
+              // (the recorder does not force 16 kHz — devices give 44.1/48 kHz
+              // and the engine resamples). Consumed only by the temporary
+              // speech-sample research collection; ignored otherwise.
+              blob: blob,
+              sampleRate: stats ? stats.sampleRate : null
             });
           });
         });
@@ -259,7 +265,7 @@
         const a = Math.abs(dv.getInt16(44 + i * 2, true)) / 32768;
         if (a > peak) peak = a;
       }
-      return { durMs: (n / sampleRate) * 1000, peak: peak };
+      return { durMs: (n / sampleRate) * 1000, peak: peak, sampleRate: sampleRate };
     }).catch(function () { return null; }); // unreadable → don't gate, let Whisper try
   }
 
@@ -494,6 +500,38 @@
           blobBytes: meta && typeof meta.blobBytes === 'number' ? meta.blobBytes : null,
           ua: UA
         }, failCount + 1);
+        // TEMPORARY research collection (one week, consented students only).
+        // The module is inert unless the server confirms consent for this exact
+        // student AND the capture window is still open; it queues the upload and
+        // returns immediately, so it cannot slow the attempt or throw into it.
+        // Remove this block with speech_sample_capture.js once the calibration
+        // set is built.
+        if (global.SpeechSampleCapture && typeof global.SpeechSampleCapture.maybeCapture === 'function') {
+          global.SpeechSampleCapture.maybeCapture({
+            blob: meta && meta.blob,
+            student: (function () {
+              try { return (typeof authActiveUser !== 'undefined' && authActiveUser && authActiveUser.name) || ''; }
+              catch (_) { return ''; }
+            })(),
+            target: target,
+            transcript: text || '',
+            pass: !!res.pass,
+            accuracy: res.accuracy,
+            phoneticRatio: res.phoneticRatio,
+            attempt: tryNo,
+            level: level,
+            book: book,
+            mode: mode,
+            audioMs: meta && typeof meta.audioMs === 'number' ? meta.audioMs : null,
+            durMs: meta && typeof meta.durMs === 'number' ? meta.durMs : null,
+            peak: meta && typeof meta.peak === 'number' ? meta.peak : null,
+            sampleRate: meta && typeof meta.sampleRate === 'number' ? meta.sampleRate : null,
+            transcribeMs: meta && typeof meta.transcribeMs === 'number' ? meta.transcribeMs : null,
+            details: res.details || '',
+            ua: UA,
+            capturedAt: Date.now()
+          });
+        }
         if (res.pass) {
           // Passed: pure celebration — deliberately NO score and NO transcript.
           // A lower-level student passing at 70% under their book's leniency

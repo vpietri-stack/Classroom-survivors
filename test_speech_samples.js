@@ -1,5 +1,5 @@
 /* test_speech_samples.js — regression tests for the TEMPORARY speech-sample
- * research collection (consented students only, one week from 2026-10-10).
+ * research collection (consented students only, 2026-10-11 → 2026-10-19).
  *
  * These exist because the failure modes here are consent violations and
  * unbounded writes into the account that also holds student progress — both
@@ -139,7 +139,7 @@ check(typeof cap.maybeCapture === 'function', 'exposes maybeCapture()');
 check(typeof cap.ensureConsent === 'function', 'exposes ensureConsent()');
 check(typeof cap.decideCapture === 'function', 'exposes decideCapture() for unit tests');
 
-const ENDS = Date.parse('2026-10-17T00:00:00+08:00');
+const ENDS = Date.parse('2026-10-19T00:00:00+08:00');
 const BEFORE = ENDS - 60000;
 const good = { consented: true, endsAt: ENDS, nowMs: BEFORE, blobSize: 160000, sentCount: 0 };
 

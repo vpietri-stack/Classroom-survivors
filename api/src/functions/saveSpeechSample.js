@@ -9,9 +9,10 @@ const policy = require('./shared/speechSamples');
 // WHY THIS EXISTS: the app has never stored audio (recognition is fully local,
 // by design), so no candidate ASR model or scoring change can be evaluated
 // against real classroom voices. The teacher obtained face-to-face consent from
-// a specific list of students and their parents for a ONE-WEEK collection to
-// build that calibration set. See docs/research/2026-10-10-speech-improvement-
-// research.md.
+// a specific list of students and their parents for a time-boxed collection
+// (2026-10-11 to 2026-10-19) to build that calibration set. Reasoning lives in
+// the 2026-10-10 speech-improvement research report, which is held locally and
+// deliberately not committed because it names individual students.
 //
 // WHY A SEPARATE ENDPOINT: base64 audio is ~200 KB-1.6 MB per call. Routing it
 // through saveAnalytics would put large writes into the same pipeline, the same

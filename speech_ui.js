@@ -500,7 +500,7 @@
           blobBytes: meta && typeof meta.blobBytes === 'number' ? meta.blobBytes : null,
           ua: UA
         }, failCount + 1);
-        // TEMPORARY research collection (one week, consented students only).
+        // TEMPORARY research collection (consented students only; closes 2026-10-19).
         // The module is inert unless the server confirms consent for this exact
         // student AND the capture window is still open; it queues the upload and
         // returns immediately, so it cannot slow the attempt or throw into it.

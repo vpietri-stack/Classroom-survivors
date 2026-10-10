@@ -15,9 +15,10 @@
 //      well as in the client, so a stale page or a hand-built request cannot
 //      keep uploading children's audio afterwards.
 
-// 7-day collection agreed with the teacher on 2026-10-10. Override with
+// Collection window agreed with the teacher: went live 2026-10-11, extended the
+// same day to close at the start of 2026-10-19 China time. Override with
 // SPEECH_SAMPLE_CAPTURE_ENDS (any Date.parse-able instant) to close early.
-const DEFAULT_CAPTURE_ENDS = '2026-10-17T00:00:00+08:00';
+const DEFAULT_CAPTURE_ENDS = '2026-10-19T00:00:00+08:00';
 
 function captureEndsAt() {
     const raw = process.env.SPEECH_SAMPLE_CAPTURE_ENDS || DEFAULT_CAPTURE_ENDS;

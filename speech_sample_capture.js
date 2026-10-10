@@ -1,11 +1,11 @@
 /* =========================================================================
- * speech_sample_capture.js — TEMPORARY research collection (one week).
+ * speech_sample_capture.js — TEMPORARY research collection (2026-10-11 → 2026-10-19).
  *
  * Stores the WAV the recogniser already received, for consented students only,
  * so candidate models and scoring changes can finally be evaluated against real
  * classroom voices. The app has never kept audio, which is why no ASR change
  * could ever be measured before. See
- * docs/research/2026-10-10-speech-improvement-research.md.
+ * the 2026-10-10 speech-improvement research report (local only, not committed — it names students).
  *
  * HARD SAFETY RULES — this module is inert unless every one holds:
  *   1. the server said this exact student is consented (checked once per
@@ -19,14 +19,14 @@
  *
  * REMOVE THIS FILE, its <script> tag and the two API functions once the
  * calibration set is built. The server-side window check means it goes inert
- * on 2026-10-17 even if it is forgotten.
+ * on 2026-10-19 even if it is forgotten.
  * ========================================================================= */
 (function (global) {
   'use strict';
 
   // Mirrors the server default. The server is authoritative; this only stops
   // the client from encoding and sending audio it knows will be refused.
-  const CAPTURE_ENDS_AT = Date.parse('2026-10-17T00:00:00+08:00');
+  const CAPTURE_ENDS_AT = Date.parse('2026-10-19T00:00:00+08:00');
   const MAX_SAMPLES_PER_STUDENT = 60;
   const MAX_WAV_BYTES = 1_200_000; // raw WAV cap; base64 inflates ~1.33x
   const UPLOAD_GAP_MS = 2500;      // pace writes: the Cosmos autoscale ceiling

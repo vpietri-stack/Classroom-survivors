@@ -1,24 +1,27 @@
 # Testing
 
-> **Last verified:** 2026-10-05 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
+> **Last verified:** 2026-10-11 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
 
 **Owner files:** `package.json` (`test` script), `test_*.js` (root), `api/test_auth.js`, plus the out-of-chain `vs_*` test family.
 
-`npm test` (root) is the **required-green gate before any commit**. It chains 18 Node scripts
-(`package.json:7`). Verified 2026-10-05: **589 assertions, 0 failures** (counts per file below;
+`npm test` (root) is the **required-green gate before any commit**. It chains 21 Node scripts
+(`package.json:7`). Verified 2026-10-11: **865 assertions, 0 failures** (counts per file below;
 the stamp guard prints no summary line).
 
 ```text
 test_deploy_stamp_sync.js          # GUARD — runs FIRST, fails run on stamp drift   (— )
 test_widgets_regression.js         # jsdom — scramble + handwriting answer row, real scripts (82)
-test_handwriting.js                # pure Node — handwriting mask maths, synthetic rings (40)
-test_handwriting_browser.js        # Playwright + real Chrome — Fredoka glyph masks + trace flow (30)
+test_handwriting.js                # pure Node — handwriting mask maths, synthetic rings (42)
+test_handwriting_browser.js        # Playwright + real Chrome — Fredoka glyph masks + trace flow (54)
+test_handwriting_samples.js        # ⏳ trace collection: policy, sanitizers, compaction, wiring (137)
+test_handwriting_capture_browser.js# ⏳ Playwright — traces reach the payload and replay to the same verdict (34)
 test_sr_once_per_session.js        # SR spaced-repetition invariants (sr_engine)      (22)
 test_round_e_dedup.js              # Round E sub-round pair selection rules           (16)
 test_session_flush_deadline.js     # flush deadline + queue/SR sync contracts (vm)    (84)
 test_auto_archive_analytics.js     # saveAnalytics pure helpers (archive + acks)      (15)
 test_archive_merge_dashboard.js    # teacher_dashboard mergeAnalytics/getAnalyticsInRange (7)
 test_speech_hygiene.js             # Recorder AudioContext teardown + sp* breadcrumbs (10)
+test_speech_samples.js             # ⏳ speech sample collection: consent fail-closed, WAV guard, caps (79)
 test_td_gate.js                    # Tower Defense live/preview URL gate (jsdom)      (11)
 test_td_core.js                    # Tower Defense core behaviors (Playwright + real Chrome) (23)
 test_asset_manifest.js             # sprite/music/sfx lists + 3-way vocab naming contract (171)
@@ -39,12 +42,14 @@ Two extra aliases: `npm run test:td` = `test_td_gate.js && test_td_core.js`. The
 
 | Harness | Files | How it works |
 |---|---|---|
-| **Pure Node** (no DOM) | stamp guard, auto-archive, archive-merge, sr tests (VM-loaded pure logic), `test_handwriting.js` | `node -e` style asserts; some load real source into a `vm` context with fixture data. `test_handwriting.js` `require`s `handwriting.js` (it exports its pure functions under a `module.exports` guard that is inert in the browser) and drives the mask maths with synthetic rings. |
+| **Pure Node** (no DOM) | stamp guard, auto-archive, archive-merge, sr tests (VM-loaded pure logic), `test_handwriting.js`, `test_speech_samples.js`, `test_handwriting_samples.js` | `node -e` style asserts; some load real source into a `vm` context with fixture data. `test_handwriting.js` `require`s `handwriting.js` (it exports its pure functions under a `module.exports` guard that is inert in the browser) and drives the mask maths with synthetic rings. The two ⏳ collection tests `require` their endpoint module (which logs an `@azure/functions` "test mode" warning and registers nothing) plus the shared policy, and load the browser-only capture module in a `vm` sandbox with a fake `localStorage`. |
 | **jsdom, real scripts** | `test_widgets_regression.js`, `test_sr_once_per_session.js`, `test_td_gate.js`, `test_round_e_dedup.js` | Loads `index.html` into JSDOM, strips remote `<script src>`, evals the REAL project scripts in index.html order into one blob (so top-level bindings are visible), stubs only externals (Phaser, Web Audio, Firebase, matchMedia). Asserts real widget behavior (placements, freezes, depleting banks). **jsdom has no 2D canvas**, so the handwriting trace box cannot run there — only its answer row can. |
-| **Playwright + real Chrome** | `test_td_core.js`, `test_handwriting_browser.js` (and the standalone `vs_*` device/gameplay tests) | `playwright-core` driving `C:\Program Files\Google\Chrome\Application\chrome.exe` against `file:///<repo>/index.html`. Network-dependent environment (jsdom can't run Phaser, and only a real browser can rasterise the Fredoka glyph masks). |
+| **Playwright + real Chrome** | `test_td_core.js`, `test_handwriting_browser.js`, `test_handwriting_capture_browser.js` (and the standalone `vs_*` device/gameplay tests) | `playwright-core` driving `C:\Program Files\Google\Chrome\Application\chrome.exe` against `file:///<repo>/index.html`. Network-dependent environment (jsdom can't run Phaser, and only a real browser can rasterise the Fredoka glyph masks). |
 | **HTTP integration** | `api/test_auth.js` | Starts from a running `func start` on `:7072`; exercises login/token/save flows against the test Cosmos container. |
 
 jsdom harness details that bite: the script order list inside each test **must mirror index.html** — adding a new production script means updating the tests' `order` arrays; tests eval scripts as one concatenated blob so cross-file top-level bindings resolve; `file://` URL is used so relative asset paths resolve.
+
+**Any page code that calls the API must have `apiFetch` stubbed in the Playwright harnesses.** From `file://` a real call goes to the production Functions app and dies on CORS (the allowlist is `vpietri-stack.github.io` / `azurestaticapps.net`), which surfaces as a `runtime: no JS errors` failure — and worse, the test has just talked to live infrastructure. This bit when the handwriting round started asking `/api/handwritingCaptureConfig`; both handwriting harnesses now install a stub that records the requests instead of sending them, which is also how the collection's "nothing leaves the device when capture is off" and "traces never ride `saveAnalytics`" assertions are proven.
 
 ## Contract tests that pin cross-layer promises
 

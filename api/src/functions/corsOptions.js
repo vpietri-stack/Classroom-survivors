@@ -16,6 +16,10 @@ const API_ROUTES = [
     // X-Auth-Token, so they need preflight or the browser blocks them.
     'speechSampleConsent',
     'saveSpeechSample',
+    // Handwriting-trace research collection (see docs/wiki/05-study-mode.md).
+    // Same cross-origin situation, so the same preflight requirement.
+    'handwritingCaptureConfig',
+    'saveHandwritingSample',
 ];
 
 for (const route of API_ROUTES) {

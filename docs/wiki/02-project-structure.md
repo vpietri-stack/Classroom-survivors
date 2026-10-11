@@ -18,8 +18,9 @@ directly with a `?v=` cache-buster; files share state through the global JS name
 | Entry & config | `index.html`, `config.js`, `boot.js`, `class_config.js` |
 | Auth / sessions | `frontend_auth.js`, `teaching_content.js` (holds auth+analytics globals), `sw.js` |
 | Teaching content | `teaching_content.js`, `content_pu1/2/3.js`, `content_think0/1/2.js`, `content_test.js` |
-| Game modes | `vampire_survivors.js`, `gomoku.js`, `uno.js`, `tower_defense.js`, `game.js`, `study_mode.js` |
+| Game modes | `vampire_survivors.js`, `gomoku.js`, `uno.js`, `tower_defense.js`, `game.js`, `study_mode.js`, `handwriting.js` |
 | Speech stack | `sr_engine.js`, `speech_preload.js`, `speech_recorder.js`, `speech_engine.js`, `speech_scorer.js`, `speech_ui.js`, `speech_debug.js` |
+| ⏳ Research collections (temporary) | `speech_sample_capture.js` (audio, until 2026-10-19), `handwriting_sample_capture.js` (pen traces, until 2027-01-31) |
 | Dashboards | `teacher_dashboard.html/.js/.css`, `admin_dashboard.js` |
 | Assets & media | `asset_cache.js`, `bgm.js`, `audio_mp3/`, `music/`, `sfx/`, `images/`, `sprites/`, `fonts/`, `models/` |
 | Self-hosted libs | `lib/` (tailwind.js, fontawesome, transformers.min.js, wasm), `phaser.min.js` |
@@ -57,7 +58,9 @@ directly with a `?v=` cache-buster; files share state through the global JS name
 | File | ~Lines | Role |
 |---|---|---|
 | `game.js` | 2348 | Dashboard/menu wiring + the three game-mode ESL minigames (`startMiniGame()` dispatcher: spelling→scramble, wordrec, scramble→sentence reorder, sentencematch), SFX sampling, global gesture unlock, `getLocalTranslation()`, `showVocabImage()` (vocab filename rule — one of three copies pinned by `test_asset_manifest.js`, see [Frontend Core](03-frontend-core.md)). |
-| `study_mode.js` | 1369 | Study Mode rounds — internal functions A/C/D/E/F, on-screen labels A / B / C / D / Match (labels and internals disagree; see [Study Mode](05-study-mode.md)); `STUDY_STATE` global; `finishStudySession()` awaits the deadline flush. |
+| `study_mode.js` | 1342 | Study Mode rounds — internal functions A/C/D/E/F, on-screen labels A / B / C / D / Match (labels and internals disagree; see [Study Mode](05-study-mode.md)); `STUDY_STATE` global; `finishStudySession()` awaits the deadline flush. |
+| `handwriting.js` | 812 | UI Round C: the mask geometry that verifies a traced letter against its Fredoka glyph, plus the `hwCreateTraceBox` canvas widget. Pure above the `BROWSER` banner (exported under a `module.exports` guard for `test_handwriting.js`). |
+| `handwriting_sample_capture.js` | 313 | ⏳ **Temporary (until 2027-01-31).** Buffers each judged letter's strokes and uploads them per word to `saveHandwritingSample`, gated on the server's enable list, the capture window and a daily cap — see [Study Mode](05-study-mode.md) for the removal checklist. |
 | `vampire_survivors.js` | 4035 | The flagship Phaser run-and-gun: MainScene, enemies/bosses/items, character select, `populateGameOver()` (awaits deadline flush). |
 | `gomoku.js` | 781 | Five-in-a-row mode with ESL questions (`endGomokuGame()` awaits deadline flush). |
 | `uno.js` | 1821 | UNO mode with ESL question cards (`endUno()` awaits deadline flush, tension/countdown overlays). |
@@ -191,8 +194,11 @@ flowchart TD
 | 25 | `game.js` (880) | everything above; defines `getLocalTranslation`, minigames, dashboard |
 | 26 | `asset_cache.js` (884) | `TEACHING_CONTENT` + `selectedClassContent` at prefetch time; defines `window.AssetCache` |
 | 27 | `tower_defense.js` (885) | `AssetCache` (hence asset_cache.js loads immediately before it), `TD_ENABLED` |
-| 28 | `study_mode.js` (886) | content globals, `authActiveUser`, flush helpers |
-| 29 | inline `THREE_TD_ENABLED` gate (887–898) | `THREE_TD_ENABLED` (config.js) |
+| 28 | `handwriting.js` (894) | nothing at load time — defines the mask maths and `hwCreateTraceBox`, which `study_mode.js` calls |
+| 29 | `handwriting_sample_capture.js` (898) | ⏳ defines `window.HandwritingSampleCapture`; reads `apiFetch`/`authActiveUser` lazily, so its position is not load-bearing |
+| 30 | `hw_dev_entry.js` (901) | ⏳ test harness, handwriting branch only — inert unless `?hw=`; **must be removed before this merges to `main`** |
+| 31 | `study_mode.js` (902) | content globals, `authActiveUser`, flush helpers, the `hw*` functions |
+| 32 | inline `THREE_TD_ENABLED` gate (903–914) | `THREE_TD_ENABLED` (config.js) |
 
 Note: the `<head>` also loads `lib/tailwind.js?v=1` (~54), `fonts/fonts.css?v=1` (~56), `lib/fontawesome/css/all.min.css?v=1` (~58), `style.css` (~59), then `phaser.min.js` (~60) — Phaser must exist before `boot.js`.
 

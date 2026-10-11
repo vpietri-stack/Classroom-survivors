@@ -519,6 +519,7 @@ function nextRoundDWord() {
     roundDGapOrder = hwPickGaps(word, ROUND_D_MAX_GAPS);
     roundDGapOrder.forEach(i => { roundDSlots[i].gap = true; });
     roundDCursor = 0;
+    hwCaptureBeginWord(word);
 
     renderRoundDSlots();
 
@@ -539,6 +540,7 @@ let roundDCursor = 0;      // index into roundDGapOrder: the gap being written
 let roundDAttempts = 0;    // rejected traces on the CURRENT gap
 let roundDGuided = false;  // has the outline faded in yet?
 let roundDTrace = null;    // the hwCreateTraceBox widget
+let roundDTargetShownAt = 0;  // when the current gap was offered, for trace timing
 
 const ROUND_D_MAX_GAPS = 6;      // cap per word, so a 29-letter item stays quick
 const ROUND_D_GUIDE_AFTER = 2;   // rejected traces before the outline fades in
@@ -581,13 +583,15 @@ function roundDShowTarget() {
     if (roundDCursor >= roundDGapOrder.length) { roundDWordComplete(); return; }
     roundDAttempts = 0;
     roundDGuided = false;
+    roundDTargetShownAt = Date.now();
     roundDTrace.setGuided(false);
     roundDTrace.setTarget(roundDSlots[roundDGapOrder[roundDCursor]].char);
     renderRoundDSlots();
 }
 
-function roundDAcceptLetter() {
+function roundDAcceptLetter(letter, scores) {
     if (STUDY_STATE.isTransitioning) return;
+    hwCaptureLetter(true, scores, roundDAttempts + 1, false);
     const slot = roundDSlots[roundDGapOrder[roundDCursor]];
     slot.filled = true;
     slot.given = false;
@@ -599,9 +603,11 @@ function roundDAcceptLetter() {
     }, 420);
 }
 
-function roundDRejectLetter() {
+function roundDRejectLetter(letter, scores) {
     if (STUDY_STATE.isTransitioning) return;
     roundDAttempts++;
+    // Recorded before clearInk(), which wipes the strokes this trace refers to.
+    hwCaptureLetter(false, scores, roundDAttempts, roundDAttempts >= ROUND_D_GIVE_UP_AFTER);
     incrementExerciseAttempts();
     roundDTrace.clearInk();
     const wrap = roundDTrace.el;
@@ -636,6 +642,7 @@ function roundDWordComplete() {
     renderRoundDSlots();
     playHappySound();
     queueExerciseEvent('handwriting', 'study', roundDWord);
+    hwCaptureEndWord();
     setTimeout(() => {
         STUDY_STATE.currentWordIndex++;
         startExerciseTracking();
@@ -652,6 +659,44 @@ function clearRoundD() {
 
 function finishRoundD() {
     startRoundE();
+}
+
+// --- Handwriting trace collection (research) --------------------------------
+// Feeds handwriting_sample_capture.js, which decides on its own whether anything
+// may be recorded. The only guard needed here is for the module being absent: it
+// is a temporary collection with a documented removal checklist, and deleting it
+// must not break the round.
+
+function hwCapture() {
+    return (typeof HandwritingSampleCapture !== 'undefined' && HandwritingSampleCapture) || null;
+}
+
+function hwCaptureBeginWord(word) {
+    const cap = hwCapture();
+    if (!cap) return;
+    const content = (typeof selectedClassContent !== 'undefined' && selectedClassContent) || {};
+    cap.beginWord({ word: word, book: content.book || '', unit: content.unit || '', mode: 'study' });
+}
+
+function hwCaptureLetter(ok, scores, attempt, revealed) {
+    const cap = hwCapture();
+    if (!cap || !roundDTrace) return;
+    const slot = roundDSlots[roundDGapOrder[roundDCursor]];
+    cap.recordLetter({
+        ch: slot ? slot.char : '',
+        ok: ok,
+        attempt: attempt,
+        guided: roundDGuided,
+        revealed: revealed,
+        ms: roundDTargetShownAt ? Date.now() - roundDTargetShownAt : 0,
+        scores: scores,
+        trace: roundDTrace.takeTrace()
+    });
+}
+
+function hwCaptureEndWord() {
+    const cap = hwCapture();
+    if (cap) cap.endWord();
 }
 
 
@@ -1200,6 +1245,9 @@ function exitStudyMode() {
         srStudyResults = [];
     }
     STUDY_STATE.active = false; // so the game-mode keydown listener resumes
+    // A word abandoned halfway is still worth keeping: the letters a child gave
+    // up on are the ones the recognition needs to learn from.
+    hwCaptureEndWord();
     // The trace box registers window resize/orientation listeners, so tear it
     // down here or they accumulate across study sessions.
     if (roundDTrace) { roundDTrace.destroy(); roundDTrace = null; }

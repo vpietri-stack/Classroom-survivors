@@ -891,11 +891,15 @@
     <script src="tower_defense.js?v=2026-07-28c"></script>
     <!-- Handwriting round (study Round C): mask geometry + trace box. Must load
          before study_mode.js, which calls hwEnsureFont()/hwCreateTraceBox(). -->
-    <script src="handwriting.js?v=2026-10-05a"></script>
+    <script src="handwriting.js?v=2026-10-11a"></script>
+    <!-- Trace collection for the handwriting round (research; temporary — see the
+         removal checklist in docs/wiki/05-study-mode.md). Inert unless the server
+         enables it for this student. -->
+    <script src="handwriting_sample_capture.js?v=2026-10-11a"></script>
     <!-- TEST HARNESS ONLY (handwriting repo): ?hw= jumps straight to the round.
          Remove this tag before the feature merges for real. -->
     <script src="hw_dev_entry.js?v=1"></script>
-    <script src="study_mode.js?v=2026-10-05a"></script>
+    <script src="study_mode.js?v=2026-10-11a"></script>
     <script>
         // School Defense 3D (three.js POC) menu entry: revealed ONLY where
         // THREE_TD_ENABLED (config.js) is true — preview deploy, localhost,

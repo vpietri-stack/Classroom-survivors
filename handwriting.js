@@ -77,6 +77,16 @@ var HW_SCALE_MAX = 1.35;
 // impossible to write.
 var HW_STROKE_GAP_MS = 1500;
 
+// Bump whenever the geometry above changes, so a stored trace can still be
+// matched to the bars that judged it (see handwriting_sample_capture.js).
+var HW_ENGINE_VERSION = 1;
+
+// A slow finger can leave thousands of points on one stroke, and every stored
+// trace has to share a request-unit pool with student progress. Stride-sampling
+// to this many points per stroke keeps the shape — the rasteriser interpolates
+// between points anyway — at a bounded size.
+var HW_MAX_TRACE_POINTS = 160;
+
 
 // ---------------------------------------------------------------------------
 // PURE MASK MATHS
@@ -487,6 +497,28 @@ function hwPickGaps(word, maxGaps, rng, punct) {
     return letters.slice(0, k).sort(function (a, b) { return a - b; });
 }
 
+/**
+ * A stroke as flat integer grid coordinates [x0,y0,x1,y1,...], bounded to
+ * HW_MAX_TRACE_POINTS and copied, so a later clearInk() cannot mutate a trace
+ * that is waiting to be uploaded.
+ */
+function hwCompactStroke(pts, maxPoints) {
+    var cap = maxPoints || HW_MAX_TRACE_POINTS;
+    var n = pts ? pts.length : 0;
+    var out = [];
+    if (!n) return out;
+    if (n <= cap) {
+        for (var i = 0; i < n; i++) out.push(Math.round(pts[i].x), Math.round(pts[i].y));
+        return out;
+    }
+    var stride = (n - 1) / (cap - 1);
+    for (var k = 0; k < cap; k++) {
+        var p = pts[Math.round(k * stride)];
+        out.push(Math.round(p.x), Math.round(p.y));
+    }
+    return out;
+}
+
 
 // ---------------------------------------------------------------------------
 // BROWSER: glyph masks + the trace box widget
@@ -550,7 +582,7 @@ function hwOtherCase(ch) {
  * the round owns the scaffold ladder and calls onAccept / onReject.
  *
  * opts: { onAccept(char, scores), onReject(char, scores) }
- * returns { el, measure, setTarget, setGuided, clearInk, freeze, unfreeze, destroy }
+ * returns { el, measure, setTarget, setGuided, takeTrace, clearInk, freeze, unfreeze, destroy }
  */
 function hwCreateTraceBox(opts) {
     opts = opts || {};
@@ -732,6 +764,21 @@ function hwCreateTraceBox(opts) {
             redraw();
         },
         setGuided: function (on) { guided = !!on; redraw(); },
+        // Snapshot of what is on the paper right now, in the engine's own grid,
+        // for the research collection. A copy, not a reference: the round wipes
+        // the ink immediately after a rejection.
+        takeTrace: function () {
+            var out = [];
+            for (var s = 0; s < strokes.length; s++) {
+                var flat = hwCompactStroke(strokes[s]);
+                if (flat.length) out.push(flat);
+            }
+            return {
+                s: out, target: target, guided: guided,
+                boxPx: cssSize, dpr: dpr,
+                size: HW_SIZE, pen: HW_PEN, tol: HW_TOL, engine: HW_ENGINE_VERSION
+            };
+        },
         clearInk: function () { strokes = []; drawing = null; cancelPending(); redraw(); },
         freeze: function () { frozen = true; cancelPending(); },
         unfreeze: function () { frozen = false; },
@@ -754,11 +801,12 @@ if (typeof module !== 'undefined' && module.exports) {
         HW_PROFILE: HW_PROFILE, HW_PUNCT: HW_PUNCT,
         HW_MAX_MISSING: HW_MAX_MISSING, HW_MIN_EXTENT: HW_MIN_EXTENT,
         HW_STROKE_GAP_MS: HW_STROKE_GAP_MS,
+        HW_ENGINE_VERSION: HW_ENGINE_VERSION, HW_MAX_TRACE_POINTS: HW_MAX_TRACE_POINTS,
         hwBbox: hwBbox, hwCentroid: hwCentroid, hwDilate: hwDilate, hwErode: hwErode,
         hwRasterise: hwRasterise,
         hwNormalise: hwNormalise, hwScore: hwScore, hwScoreStrokes: hwScoreStrokes,
         hwScoreLetter: hwScoreLetter, hwMissingPart: hwMissingPart, hwVerify: hwVerify,
         hwAccept: hwAccept,
-        hwPickGaps: hwPickGaps, hwOtherCase: hwOtherCase
+        hwPickGaps: hwPickGaps, hwOtherCase: hwOtherCase, hwCompactStroke: hwCompactStroke
     };
 }

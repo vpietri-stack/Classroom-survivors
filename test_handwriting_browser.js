@@ -74,6 +74,24 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
 
   // --- harness ----------------------------------------------------------------
   await page.evaluate(() => {
+    // The round asks the server whether it may keep traces (see
+    // handwriting_sample_capture.js). Stub the API layer: from file:// a real
+    // call goes to the production backend and dies on CORS, and a test must
+    // never touch live infrastructure. Disabled by default — the capture
+    // scenarios live in test_handwriting_capture_browser.js.
+    window.__hwConfig = { enabled: false, open: false, endsAt: 0, maxPerDay: 0 };
+    window.__hwUploads = [];
+    window.apiFetch = function (url, opts) {
+      const u = String(url);
+      if (u.indexOf('handwritingCaptureConfig') >= 0) {
+        return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(window.__hwConfig) });
+      }
+      if (u.indexOf('saveHandwritingSample') >= 0) {
+        window.__hwUploads.push(JSON.parse(opts.body));
+        return Promise.resolve({ ok: true, status: 201, json: () => Promise.resolve({ success: true }) });
+      }
+      return Promise.resolve({ ok: false, status: 0, json: () => Promise.resolve(null) });
+    };
     window.playTTS = function () { };
     window.synthGem = function () { };
     window.synthError = function () { };
@@ -178,6 +196,39 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
     last: window.__hwLast || null,
     events: window.__events || []
   }));
+
+  // --- the entry point production actually calls ------------------------------
+  // Everything below drives nextRoundDWord() directly. This is the real door:
+  // the previous round's completion calls startRoundD(), which waits for Fredoka
+  // before the first glyph mask is built.
+  await page.evaluate(() => {
+    STUDY_STATE.words = ['cat'];
+    STUDY_STATE.currentWordIndex = 0;
+    STUDY_STATE.isTransitioning = false;
+    startRoundD();
+  });
+  await page.waitForTimeout(600);
+  const entry = await page.evaluate(() => {
+    const cv = document.querySelector('.hw-trace-canvas');
+    return {
+      round: STUDY_STATE.round,
+      title: document.getElementById('study-title').innerText,
+      subtitle: document.getElementById('study-instruction').innerText,
+      gaps: roundDGapOrder.length,
+      target: roundDCursor < roundDGapOrder.length ? roundDSlots[roundDGapOrder[roundDCursor]].char : null,
+      canvas: !!cv,
+      boxPx: cv ? Math.round(cv.getBoundingClientRect().width) : 0,
+      backingStore: cv ? cv.width : 0
+    };
+  });
+  ok(entry.round === 'D', 'entry: startRoundD() leaves the round in the handwriting state');
+  ok(/Round C/.test(entry.title) && /Handwriting/i.test(entry.title),
+    'entry: the child is told "Round C: Handwriting" (got "' + entry.title + '")');
+  ok(/missing letters/i.test(entry.subtitle), 'entry: the instruction explains the task ("' + entry.subtitle + '")');
+  ok(entry.canvas && entry.boxPx >= 64, 'entry: the writing box is on screen and sized (' + entry.boxPx + 'px)');
+  ok(entry.backingStore >= entry.boxPx, 'entry: the canvas backing store is scaled for the device');
+  ok(entry.gaps >= 1 && typeof entry.target === 'string',
+    'entry: a gap is offered straight away (target "' + entry.target + '")');
 
   // --- a complete letter is accepted -----------------------------------------
   await loadWord('cat', [0, 1, 2]);
@@ -343,6 +394,14 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
   ok(cap.gaps === 6, 'pacing: a 16-letter item is capped at 6 handwritten letters (got ' + cap.gaps + ')');
   ok(cap.given === 10, 'pacing: the other 10 letters are given as context');
   ok(!cap.eraseCostAnAttempt, 'erase: wiping a slip does not count as a failed attempt');
+
+  // --- nothing leaves the device unless the server enabled capture ------------
+  // The whole round above ran with the stubbed config saying "disabled", so this
+  // is the privacy property proven against the real flow, not a unit test.
+  const uploadsWhileOff = await page.evaluate(() => (window.__hwUploads || []).length);
+  ok(uploadsWhileOff === 0,
+    'privacy: with capture disabled, a full round of accepted and rejected letters uploaded nothing (' +
+    uploadsWhileOff + ' payloads)');
 
   await browser.close();
 

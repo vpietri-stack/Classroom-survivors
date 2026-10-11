@@ -8,6 +8,7 @@ const { CosmosClient } = require('@azure/cosmos');
 let _client = null;
 let _container = null;
 let _samplesContainer = null;
+let _handwritingContainer = null;
 
 function getClient() {
     if (!_client) {
@@ -43,4 +44,18 @@ function getSamplesContainer() {
     return _samplesContainer;
 }
 
-module.exports = { getContainer, getSamplesContainer, getClient };
+// Handwriting traces from study mode's writing round, kept so the letter
+// geometry can be tuned against real children's ink instead of synthetic pen
+// paths. Same reasoning as the speech container above: separate from Students so
+// a research write can never touch student progress, same database so it shares
+// the existing autoscale pool instead of needing a second 1000 RU/s minimum.
+function getHandwritingContainer() {
+    if (!_handwritingContainer) {
+        const dbName = process.env.COSMOS_DB_NAME || 'Val-EslApp';
+        const containerName = process.env.COSMOS_HANDWRITING_SAMPLES_CONTAINER || 'handwriting_samples';
+        _handwritingContainer = getClient().database(dbName).container(containerName);
+    }
+    return _handwritingContainer;
+}
+
+module.exports = { getContainer, getSamplesContainer, getHandwritingContainer, getClient };

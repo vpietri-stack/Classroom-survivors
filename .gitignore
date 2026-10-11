@@ -53,3 +53,9 @@ test_screenshot.png
 /speech_samples/
 speech_samples/
 *.wav
+
+# Handwriting traces pulled down by api/download_handwriting_samples.js. These are
+# children's handwriting tied to a student id and must never be committed — the
+# repo is public. Delete the directory when the recognition tuning is finished.
+/handwriting_samples/
+handwriting_samples/

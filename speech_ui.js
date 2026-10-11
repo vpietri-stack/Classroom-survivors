@@ -207,7 +207,13 @@
               durMs: stats ? Math.round(stats.durMs) : null,
               peak: stats ? stats.peak : null,
               transcribeMs: Date.now() - t0,
-              blobBytes: blob.size
+              blobBytes: blob.size,
+              // The exact WAV the recogniser received, plus its true sample rate
+              // (the recorder does not force 16 kHz — devices give 44.1/48 kHz
+              // and the engine resamples). Consumed only by the temporary
+              // speech-sample research collection; ignored otherwise.
+              blob: blob,
+              sampleRate: stats ? stats.sampleRate : null
             });
           });
         });
@@ -259,7 +265,7 @@
         const a = Math.abs(dv.getInt16(44 + i * 2, true)) / 32768;
         if (a > peak) peak = a;
       }
-      return { durMs: (n / sampleRate) * 1000, peak: peak };
+      return { durMs: (n / sampleRate) * 1000, peak: peak, sampleRate: sampleRate };
     }).catch(function () { return null; }); // unreadable → don't gate, let Whisper try
   }
 
@@ -348,6 +354,9 @@
   // unscramble). Returns a DOM node with: prompt, hold-to-talk record button,
   // heard-feedback line, and a Skip button that appears only after 3 failed
   // attempts (so students genuinely try before they can bypass).
+  // Each graded try is scored against a progressively more lenient rung of
+  // Scorer.RETRY_LADDER — deliberately invisible to the student, whose feedback
+  // text is identical on every try.
   // On a pass it plays the success sound, shows the score, and swaps in a
   // Continue button so the student controls when to advance.
   // Callers should only build this when SpeechStatus.isReady() is already true.
@@ -378,6 +387,13 @@
     const feedback = wrap.querySelector('.heard-feedback');
     let done = false;
     let failCount = 0;
+    // Two counters, two jobs. failCount drives the Skip reveal and counts every
+    // way an attempt can go wrong (graded fail, junk transcript, too quiet, mic
+    // error). gradedTries counts only attempts that were actually transcribed
+    // and scored, and drives the scorer's leniency ladder — a kid who
+    // double-taps and gets "太短啦" three times has not spoken three times, so
+    // they must not arrive at the lenient try-3 rung without ever being heard.
+    let gradedTries = 0;
     const SKIP_AFTER_FAILS = 3; // let the student try 3 times before offering Skip
 
     spHeartbeat({ spFails: 0 }); // gate opened (module-level spHeartbeat merges state)
@@ -458,8 +474,10 @@
         // NOTE: feedback text is set INSIDE the pass/fail branches below —
         // pass hides transcript+score entirely (pure celebration), fail shows
         // only "heard + score" (no threshold internals).
+        const tryNo = gradedTries + 1;
+        gradedTries++;
         const res = global.Scorer.scoreForBook
-          ? global.Scorer.scoreForBook(target, text, book)
+          ? global.Scorer.scoreForBook(target, text, book, tryNo)
           : global.Scorer.score(target, text, level);
         // Log EVERY attempt (pass or fail) with the full score breakdown — the
         // transcript is the diagnostic gold for the children's-voices problem.
@@ -472,12 +490,48 @@
           edits: typeof res.edits === 'number' ? res.edits : null,
           level: level,
           book: book,
+          // Which rung of the leniency ladder graded this. Without it the
+          // dashboard pass rate mixes strict and grace verdicts and
+          // api/analyze_speech.js can no longer isolate scorer strictness.
+          attempt: tryNo,
           details: res.details || '',
           audioMs: meta && typeof meta.audioMs === 'number' ? meta.audioMs : null,
           transcribeMs: meta && typeof meta.transcribeMs === 'number' ? meta.transcribeMs : null,
           blobBytes: meta && typeof meta.blobBytes === 'number' ? meta.blobBytes : null,
           ua: UA
         }, failCount + 1);
+        // TEMPORARY research collection (consented students only; closes 2026-10-19).
+        // The module is inert unless the server confirms consent for this exact
+        // student AND the capture window is still open; it queues the upload and
+        // returns immediately, so it cannot slow the attempt or throw into it.
+        // Remove this block with speech_sample_capture.js once the calibration
+        // set is built.
+        if (global.SpeechSampleCapture && typeof global.SpeechSampleCapture.maybeCapture === 'function') {
+          global.SpeechSampleCapture.maybeCapture({
+            blob: meta && meta.blob,
+            student: (function () {
+              try { return (typeof authActiveUser !== 'undefined' && authActiveUser && authActiveUser.name) || ''; }
+              catch (_) { return ''; }
+            })(),
+            target: target,
+            transcript: text || '',
+            pass: !!res.pass,
+            accuracy: res.accuracy,
+            phoneticRatio: res.phoneticRatio,
+            attempt: tryNo,
+            level: level,
+            book: book,
+            mode: mode,
+            audioMs: meta && typeof meta.audioMs === 'number' ? meta.audioMs : null,
+            durMs: meta && typeof meta.durMs === 'number' ? meta.durMs : null,
+            peak: meta && typeof meta.peak === 'number' ? meta.peak : null,
+            sampleRate: meta && typeof meta.sampleRate === 'number' ? meta.sampleRate : null,
+            transcribeMs: meta && typeof meta.transcribeMs === 'number' ? meta.transcribeMs : null,
+            details: res.details || '',
+            ua: UA,
+            capturedAt: Date.now()
+          });
+        }
         if (res.pass) {
           // Passed: pure celebration — deliberately NO score and NO transcript.
           // A lower-level student passing at 70% under their book's leniency

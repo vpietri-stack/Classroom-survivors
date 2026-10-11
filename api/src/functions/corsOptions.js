@@ -11,6 +11,11 @@ const API_ROUTES = [
     'updateStudent',
     'setTargets',
     'manageBms',
+    // Temporary speech-sample research collection (see docs/wiki/08-speech.md
+    // §11.1). Both are called cross-origin from GitHub Pages with X-App-Key /
+    // X-Auth-Token, so they need preflight or the browser blocks them.
+    'speechSampleConsent',
+    'saveSpeechSample',
 ];
 
 for (const route of API_ROUTES) {

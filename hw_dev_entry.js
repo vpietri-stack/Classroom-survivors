@@ -5,11 +5,16 @@
 //   index.html?hw=                  default word list
 //   index.html?hw=cat,happy%20face  your own comma-separated list
 //
-// The tag for this file exists ONLY in that repo's index.html. If this file ever
-// reaches preview or production, the ?hw= gate keeps it inert — but the tag
-// should still be removed before merging the feature for real.
+// The tag for this file exists ONLY in that repo's index.html and should still be
+// removed before merging the feature for real. In case it is not: the harness
+// also refuses to run anywhere except this test site or a local checkout, so a
+// shipped copy can never let a student skip login or loosen the bars by URL.
 (function () {
     if (typeof location === 'undefined' || typeof URLSearchParams === 'undefined') return;
+    var host = location.hostname;
+    var local = host === 'localhost' || host === '127.0.0.1' || host === '';
+    var testSite = location.pathname.indexOf('/Classroom-survivors-handwriting') === 0;
+    if (!local && !testSite) return;
     var params = new URLSearchParams(location.search);
     if (!params.has('hw')) return;
 

@@ -30,6 +30,7 @@
 // Run:  node test_handwriting_browser.js   (part of npm test)
 // ============================================================
 const { chromium } = require('playwright-core');
+const fs = require('fs');
 const path = require('path');
 const CHROME_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const fileUrl = 'file:///' + path.resolve(__dirname, 'index.html').replace(/\\/g, '/');
@@ -394,6 +395,34 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
   ok(cap.gaps === 6, 'pacing: a 16-letter item is capped at 6 handwritten letters (got ' + cap.gaps + ')');
   ok(cap.given === 10, 'pacing: the other 10 letters are given as context');
   ok(!cap.eraseCostAnAttempt, 'erase: wiping a slip does not count as a failed attempt');
+
+  // --- the ?hw= test shortcut still works, and is fenced to the test site -----
+  // The teacher's whole workflow on the handwriting test repo is this URL, so an
+  // over-eager guard would silently cost them their harness.
+  const devSrc = fs.readFileSync(path.join(__dirname, 'hw_dev_entry.js'), 'utf8');
+  ok(/hostname/.test(devSrc) && /Classroom-survivors-handwriting/.test(devSrc),
+    'the ?hw= harness is fenced to the test site / localhost, so a shipped copy stays inert');
+
+  const devPage = await browser.newPage({ viewport: { width: 480, height: 900 } });
+  // Intercept the API so this page cannot reach the production backend either.
+  await devPage.route('**/api/**', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: '{"enabled":false,"open":false,"endsAt":0,"maxPerDay":0}'
+  }));
+  await devPage.goto(fileUrl + '?hw=cat,dog', { waitUntil: 'load' });
+  await devPage.waitForTimeout(2200);
+  const dev = await devPage.evaluate(() => ({
+    round: STUDY_STATE.round,
+    words: STUDY_STATE.words.slice(),
+    panel: !!document.getElementById('hw-dev-panel'),
+    startHidden: document.getElementById('startScreen').classList.contains('hidden'),
+    canvas: !!document.querySelector('.hw-trace-canvas')
+  }));
+  ok(dev.round === 'D' && dev.canvas, '?hw=: drops straight into the handwriting round');
+  ok(dev.words.join(',') === 'cat,dog', '?hw=: the word list comes from the URL (' + dev.words.join(',') + ')');
+  ok(dev.panel, '?hw=: the tuning panel is on screen for the teacher');
+  ok(dev.startHidden, '?hw=: the start screen is bypassed (test site only)');
+  await devPage.close();
 
   // --- nothing leaves the device unless the server enabled capture ------------
   // The whole round above ran with the stubbed config saying "disabled", so this

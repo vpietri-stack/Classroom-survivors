@@ -196,9 +196,8 @@ flowchart TD
 | 27 | `tower_defense.js` (885) | `AssetCache` (hence asset_cache.js loads immediately before it), `TD_ENABLED` |
 | 28 | `handwriting.js` (894) | nothing at load time — defines the mask maths and `hwCreateTraceBox`, which `study_mode.js` calls |
 | 29 | `handwriting_sample_capture.js` (898) | ⏳ defines `window.HandwritingSampleCapture`; reads `apiFetch`/`authActiveUser` lazily, so its position is not load-bearing |
-| 30 | `hw_dev_entry.js` (901) | ⏳ test harness, handwriting branch only — inert unless `?hw=`; **must be removed before this merges to `main`** |
-| 31 | `study_mode.js` (902) | content globals, `authActiveUser`, flush helpers, the `hw*` functions |
-| 32 | inline `THREE_TD_ENABLED` gate (903–914) | `THREE_TD_ENABLED` (config.js) |
+| 30 | `study_mode.js` (902) | content globals, `authActiveUser`, flush helpers, the `hw*` functions |
+| 31 | inline `THREE_TD_ENABLED` gate (903–914) | `THREE_TD_ENABLED` (config.js) |
 
 Note: the `<head>` also loads `lib/tailwind.js?v=1` (~54), `fonts/fonts.css?v=1` (~56), `lib/fontawesome/css/all.min.css?v=1` (~58), `style.css` (~59), then `phaser.min.js` (~60) — Phaser must exist before `boot.js`.
 

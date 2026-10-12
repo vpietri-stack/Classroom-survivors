@@ -5,7 +5,7 @@
 **Owner files:** `package.json` (`test` script), `test_*.js` (root), `api/test_auth.js`, plus the out-of-chain `vs_*` test family.
 
 `npm test` (root) is the **required-green gate before any commit**. It chains 21 Node scripts
-(`package.json:7`). Verified 2026-10-11: **870 assertions, 0 failures** (counts per file below;
+(`package.json:7`). Verified 2026-10-12: **880 assertions, 0 failures** (counts per file below;
 the stamp guard prints no summary line).
 
 ```text
@@ -13,8 +13,8 @@ test_deploy_stamp_sync.js          # GUARD — runs FIRST, fails run on stamp dr
 test_widgets_regression.js         # jsdom — scramble + handwriting answer row, real scripts (82)
 test_handwriting.js                # pure Node — handwriting mask maths, synthetic rings (42)
 test_handwriting_browser.js        # Playwright + real Chrome — Fredoka glyph masks + trace flow (59)
-test_handwriting_samples.js        # ⏳ trace collection: policy, sanitizers, compaction, wiring (137)
-test_handwriting_capture_browser.js# ⏳ Playwright — traces reach the payload and replay to the same verdict (34)
+test_handwriting_samples.js        # ⏳ trace collection: policy, sanitizers, compaction, wiring (145)
+test_handwriting_capture_browser.js# ⏳ Playwright — traces reach the payload and replay to the same verdict (36)
 test_sr_once_per_session.js        # SR spaced-repetition invariants (sr_engine)      (22)
 test_round_e_dedup.js              # Round E sub-round pair selection rules           (16)
 test_session_flush_deadline.js     # flush deadline + queue/SR sync contracts (vm)    (84)

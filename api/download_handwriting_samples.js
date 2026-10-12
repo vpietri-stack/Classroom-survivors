@@ -87,12 +87,12 @@ function pointCount(strokes) {
     const docs = LIMIT ? resources.slice(0, LIMIT) : resources;
 
     const COLS = ['studentId', 'student', 'capturedAt', 'capturedAtIso', 'word', 'pos', 'ch', 'ok', 'att',
-        'gui', 'rev', 'ms', 'p', 'r', 'mi', 'wr', 'hr', 'st', 'mn', 'ov', 'points', 'strokes',
+        'gui', 'rev', 'ms', 'p', 'r', 'mi', 'wr', 'hr', 'gc', 'st', 'mn', 'ov', 'points', 'strokes',
         'book', 'unit', 'mode', 'engine', 'size', 'pen', 'tol', 'boxPx', 'dpr', 'ua'];
     const lines = [COLS.join(',')];
     const jsonl = [];
 
-    let letters = 0, accepts = 0, reveals = 0;
+    let letters = 0, accepts = 0, firstTry = 0, reveals = 0;
     const perStudent = new Map();
     const perLetter = new Map();
 
@@ -104,6 +104,7 @@ function pointCount(strokes) {
         list.forEach((l, i) => {
             letters++;
             if (l.ok) accepts++;
+            if (l.ok && l.att === 1) firstTry++;
             if (l.rev) reveals++;
             const key = String(l.ch || '?');
             const t = perLetter.get(key) || { tries: 0, ok: 0, rev: 0 };
@@ -116,7 +117,7 @@ function pointCount(strokes) {
                 d.studentId, d.student, d.capturedAt,
                 d.capturedAt ? new Date(d.capturedAt).toISOString() : '',
                 d.word, i, l.ch, l.ok, l.att, l.gui, l.rev, l.ms,
-                l.p, l.r, l.mi, l.wr, l.hr, l.st, l.mn, l.ov,
+                l.p, l.r, l.mi, l.wr, l.hr, l.gc, l.st, l.mn, l.ov,
                 pointCount(l.s), strokesToString(l.s),
                 d.book, d.unit, d.mode, d.engine, d.size, d.pen, d.tol, d.boxPx, d.dpr, d.ua
             ].map(csvField).join(','));
@@ -131,7 +132,8 @@ function pointCount(strokes) {
     console.log(`  manifest.csv           : ${lines.length - 1} letter rows`);
     console.log(`  words.jsonl            : ${docs.length} documents`);
     console.log(`\nLetters judged           : ${letters}`);
-    console.log(`  accepted on first try… : ${accepts} (${letters ? Math.round(accepts / letters * 100) : 0}%)`);
+    console.log(`  accepted               : ${accepts} (${letters ? Math.round(accepts / letters * 100) : 0}%)`);
+    console.log(`  …of those on try 1     : ${firstTry} (${accepts ? Math.round(firstTry / accepts * 100) : 0}% of accepts, ${letters ? Math.round(firstTry / letters * 100) : 0}% of all)`);
     console.log(`  revealed (gave up)     : ${reveals}`);
 
     // The actionable table: which letters the shipped geometry refuses most.

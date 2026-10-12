@@ -141,6 +141,11 @@ eq(ep.cleanLetter(Object.assign({}, goodLetter, { ms: 1e9 })).ms, 600000, 'a run
 eq(ep.cleanLetter(Object.assign({}, goodLetter, { att: 0 })).att, 1, 'attempt is at least 1');
 eq(ep.cleanLetter(Object.assign({}, goodLetter, { ov: 'yes' })).ov, true, 'overfilled is coerced to a boolean');
 eq(ep.cleanLetter(Object.assign({}, goodLetter, { p: 'junk' })).p, null, 'a non-numeric score becomes null, not 0');
+eq(ep.cleanLetter(Object.assign({}, goodLetter, { gc: 727 })).gc, 727, 'the guide pixel count is kept');
+eq(ep.cleanLetter(Object.assign({}, goodLetter, { gc: 999999 })).gc, ep.MAX_GUIDE_PIXELS, 'an absurd guide count is clamped to the grid');
+eq(ep.cleanLetter(Object.assign({}, goodLetter, { gc: -5 })).gc, 0, 'a negative guide count clamps to zero');
+eq(ep.cleanLetter(Object.assign({}, goodLetter, { gc: 'x' })).gc, null, 'a non-numeric guide count is null, not 0');
+eq(ep.cleanLetter(Object.assign({}, goodLetter, { r: 0.8955 })).r, 0.8955, 'a recall below the 0.90 bar survives the round trip');
 eq(ep.cleanLetter(Object.assign({}, goodLetter, { ch: 'abcdefgh' })).ch, 'ab', 'the character field cannot hold a string');
 
 const many = [];
@@ -332,6 +337,11 @@ check(rejectIdx > 0 && recordIdx2 > rejectIdx && recordIdx2 < clearIdx,
 const engineSrc = fs.readFileSync(path.join(ROOT, 'handwriting.js'), 'utf8');
 check(/takeTrace: function/.test(engineSrc), 'the trace box exposes takeTrace()');
 check(/HW_ENGINE_VERSION/.test(engineSrc), 'the engine stamps a version into every trace');
+check(/guideCount: guideCount/.test(engineSrc),
+    'the engine reports the guide pixel count, so rendering drift can be measured later');
+check(/gc: intOr\(sc\.guideCount/.test(captureSrc), 'the client stores the guide pixel count with each letter');
+check(/Math\.round\(v \* 1000\) \/ 1000/.test(captureSrc) && !/Math\.round\(v \* 100\) \/ 100\b/.test(captureSrc),
+    'scores are kept to three decimals — at two, a 0.8955 recall would store as 0.90 and look like it met the bar');
 
 console.log('\n=== both endpoints are registered for CORS preflight ===');
 // Called cross-origin from GitHub Pages with X-App-Key / X-Auth-Token, so a

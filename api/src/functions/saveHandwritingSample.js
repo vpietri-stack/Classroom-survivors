@@ -35,6 +35,7 @@ const MAX_STROKES_PER_LETTER = 40;
 const MAX_NUMBERS_PER_STROKE = 320;        // 160 points; the client sends ≤160
 const MAX_NUMBERS_PER_LETTER = 1600;       // 800 points across all its strokes
 const MAX_COORD = 256;                     // grid units; the client grid is 128
+const MAX_GUIDE_PIXELS = 128 * 128;        // a guide can never hold more ink than the grid
 const MAX_DOC_CHARS = 200_000;             // backstop; far below Cosmos's 2 MB limit
 
 const { cleanText, cleanNumber } = policy;
@@ -89,6 +90,7 @@ function cleanLetter(raw) {
         mi: cleanNumber(raw.mi, 0, 1),
         wr: cleanNumber(raw.wr, 0, 10),
         hr: cleanNumber(raw.hr, 0, 10),
+        gc: cleanNumber(raw.gc, 0, MAX_GUIDE_PIXELS),
         st: cleanNumber(raw.st, 0, 64),
         mn: cleanNumber(raw.mn, 0, 16),
         ov: !!raw.ov,
@@ -216,5 +218,6 @@ module.exports = {
     MAX_NUMBERS_PER_STROKE,
     MAX_NUMBERS_PER_LETTER,
     MAX_COORD,
+    MAX_GUIDE_PIXELS,
     MAX_DOC_CHARS,
 };

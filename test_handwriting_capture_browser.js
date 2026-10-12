@@ -198,18 +198,26 @@ const uploads = page => page.evaluate(() => window.__hwUploads.slice());
   ok(typeof L[0].mi === 'number', 'the missing-part measure is kept for refusals (mi=' + (L[0] || {}).mi + ')');
 
   // Replaying the stored stroke must reproduce the verdict the round reached —
-  // that is the whole point of keeping it.
+  // that is the whole point of keeping it. Valid WITHIN one rendering context:
+  // the guide comes from antialiased text thresholded at alpha>90, so a
+  // different browser (or headless vs headed) can disagree by a few percent on
+  // the guide's own pixel count, which is why that count is stored as `gc`.
   const replay = await page.evaluate(([letters]) => {
     const rebuild = l => l.s.map(s => {
       const pts = [];
       for (let i = 0; i + 1 < s.length; i += 2) pts.push({ x: s[i], y: s[i + 1] });
       return pts;
     });
-    return letters.map(l => ({
-      ch: l.ch,
-      stored: l.ok,
-      replayed: hwAccept(hwVerify(rebuild(l), l.ch, HW_PEN, HW_TOL).scores, HW_PROFILE.free)
-    }));
+    return letters.map(l => {
+      const v = hwVerify(rebuild(l), l.ch, HW_PEN, HW_TOL).scores;
+      const guide = hwBbox(hwGlyphMask(l.ch), HW_SIZE);
+      return {
+        ch: l.ch, stored: l.ok,
+        replayed: hwAccept(v, l.gui ? HW_PROFILE.guided : HW_PROFILE.free),
+        dP: Math.abs(v.precision - l.p), dR: Math.abs(v.recall - l.r),
+        storedGc: l.gc, guidePixels: guide ? guide.count : -1
+      };
+    });
   }, [L]);
   const mismatches = replay.filter(r => r.stored !== r.replayed);
   // The refusal was judged while the box was still free-stage, and the accepted
@@ -217,6 +225,12 @@ const uploads = page => page.evaluate(() => window.__hwUploads.slice());
   ok(mismatches.length === 0,
     'replaying the stored strokes reproduces every verdict (' +
     replay.map(r => r.ch + ':' + (r.stored === r.replayed ? 'same' : 'DIFFERENT')).join(' ') + ')');
+  ok(replay.every(r => r.dP <= 0.0005 && r.dR <= 0.0005),
+    'scores are stored to 3dp, so a letter at recall 0.8955 cannot masquerade as one that met the 0.90 bar ' +
+    '(max drift p ' + Math.max(...replay.map(r => r.dP)).toFixed(4) + ', r ' + Math.max(...replay.map(r => r.dR)).toFixed(4) + ')');
+  ok(replay.every(r => r.storedGc === r.guidePixels && r.storedGc > 0),
+    'the guide pixel count travels with the letter, so rendering drift is measurable (e.g. ' +
+    replay[1].storedGc + ' px for "' + replay[1].ch + '")');
 
   console.log('--- the daily counter and the request path ---');
   const counter = await page.evaluate(() => JSON.parse(localStorage.getItem('csHwWordsSent_student_test_kid') || 'null'));

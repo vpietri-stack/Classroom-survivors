@@ -421,6 +421,13 @@ function hwScoreLetter(letter, ink, tol, pen) {
         precision: inkCount ? inside / inkCount : 0,
         recall: guideCount ? covered / guideCount : 0,
         inkCount: inkCount,
+        // The guide's own pixel count. recall is covered/guideCount, and the
+        // guide comes from antialiased text thresholded at alpha>90, so two
+        // devices (or headed vs headless Chrome) can disagree by a few percent
+        // on guideCount alone. Stored with every trace, that difference becomes
+        // measurable and correctable offline instead of looking like the child
+        // wrote worse.
+        guideCount: guideCount,
         nb: hwBbox(norm, HW_SIZE),
         missingPart: hwMissingPart(guide, inkDil, HW_SIZE)
     };

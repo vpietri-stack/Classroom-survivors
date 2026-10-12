@@ -139,9 +139,11 @@
     }
   }
 
-  function round2(n) {
+  // Three decimals, not two: the bars live at 0.90, and a letter whose real
+  // recall was 0.8955 otherwise stores as 0.90 and looks like it met the bar.
+  function round3(n) {
     const v = Number(n);
-    return Number.isFinite(v) ? Math.round(v * 100) / 100 : null;
+    return Number.isFinite(v) ? Math.round(v * 1000) / 1000 : null;
   }
 
   function intOr(n, fallback) {
@@ -173,7 +175,7 @@
         pen: intOr(rec.trace.pen, 0),
         tol: intOr(rec.trace.tol, 0),
         boxPx: intOr(rec.trace.boxPx, 0),
-        dpr: round2(rec.trace.dpr)
+        dpr: round3(rec.trace.dpr)
       };
       current.letters.push({
         ch: String(rec.ch || (rec.trace.target || '')).slice(0, 2),
@@ -182,11 +184,14 @@
         gui: !!rec.guided,
         rev: !!rec.revealed,
         ms: Math.max(0, intOr(rec.ms, 0)),
-        p: round2(sc.precision),
-        r: round2(sc.recall),
-        mi: round2(sc.missingPart),
-        wr: round2(sc.widthRatio),
-        hr: round2(sc.heightRatio),
+        p: round3(sc.precision),
+        r: round3(sc.recall),
+        mi: round3(sc.missingPart),
+        wr: round3(sc.widthRatio),
+        hr: round3(sc.heightRatio),
+        // The guide's pixel count, so a device that renders the glyph a few
+        // percent heavier can be told apart from a child who wrote badly.
+        gc: intOr(sc.guideCount, 0),
         st: intOr(sc.strokeCount, 0),
         mn: intOr(sc.minStrokes, 0),
         ov: !!sc.overfilled,

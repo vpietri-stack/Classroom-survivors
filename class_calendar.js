@@ -37,7 +37,7 @@ async function loadClassCalendar() {
     try {
         const [year,month] = monthInput.value.split('-').map(Number);
         const through = new Date(Date.UTC(year,month,0)).toISOString().slice(0,10);
-        const res = await apiFetch(`${API_BASE}/classCalendar?through=${through}`);
+        const res = await apiFetch(`${API_BASE}/classCalendar?through=${through}`,{cache:'no-store'});
         if (!res.ok) throw new Error(await res.text());
         const data = await res.json();
         if (seq !== calendarLoadSeq) return;

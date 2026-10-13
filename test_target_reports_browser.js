@@ -8,7 +8,7 @@ const groups=core.groups(students.map((s,i)=>({...core.row(s,s.targets[0],[],now
 (async()=>{
     const browser=await chromium.launch({executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe',headless:true});
     try {
-        const page=await browser.newPage({viewport:{width:1440,height:1080}}),errors=[];let fail=true;
+        const page=await browser.newPage({viewport:{width:1440,height:1080}}),errors=[];let fail=true,failRefresh=false,studentFetches=0,calendarFetches=0,reportFetches=0;
         page.on('pageerror',e=>errors.push(e.message));
         await page.addInitScript(()=>{
             localStorage.setItem('savedUsers',JSON.stringify([{id:'admin-test',name:'Test admin',role:'admin'}]));localStorage.setItem('activeUserId','admin-test');
@@ -18,9 +18,14 @@ const groups=core.groups(students.map((s,i)=>({...core.row(s,s.targets[0],[],now
         await page.route('**/*',async route=>{
             const url=new URL(route.request().url()),send=body=>route.fulfill({contentType:'application/json',body:JSON.stringify(body)});
             if(url.pathname.endsWith('/login')) return send({id:'admin-test',role:'admin'});
-            if(url.pathname.endsWith('/getStudents')) return send(students);
-            if(url.pathname.endsWith('/classCalendar')) return send({events:[]});
+            if(url.pathname.endsWith('/getStudents')) {
+                studentFetches++;
+                if(failRefresh) {failRefresh=false;return route.fulfill({status:500,body:'Test refresh failed'});}
+                return send(students);
+            }
+            if(url.pathname.endsWith('/classCalendar')) {calendarFetches++;return send({events:[]});}
             if(url.pathname.endsWith('/getTargetReports')) {
+                reportFetches++;
                 assert.equal(url.searchParams.get('teacher'),'Teacher A');
                 if(fail){fail=false;return route.fulfill({status:500,contentType:'application/json',body:JSON.stringify({error:'Test fetch failed'})});}
                 return send({teacher:'Teacher A',generatedAt:new Date(now).toISOString(),groups});
@@ -32,17 +37,50 @@ const groups=core.groups(students.map((s,i)=>({...core.row(s,s.targets[0],[],now
             return route.fulfill({contentType:local.endsWith('.html')?'text/html':local.endsWith('.css')?'text/css':local.endsWith('.js')?'text/javascript':'application/json',body:fs.readFileSync(local)});
         });
         await page.goto('https://reports.test/teacher_dashboard.html');
+        await page.waitForFunction(()=>document.getElementById('dashboardRefreshStatus').textContent.startsWith('Updated'));
         await page.locator('#filterTeacher').selectOption('Teacher A');
+        await page.locator('#filterClassTime').selectOption('Sun 10:40');
+        await page.locator('#filterName').fill('Student A');
+        await page.locator('#filterDateFrom').fill('2026-10-01');
+        await page.locator('#filterDateTo').fill('2026-10-20');
+        await page.evaluate(()=>sortTable('target'));
+        const addPractice=()=>{students[0].analytics.push({type:'session',sessionType:'study',eventId:'refresh'+students[0].analytics.length,timestamp:new Date(now).toISOString()});groups.flatMap(g=>g.rows).find(r=>r.name==='Student A').completed++;};
+        failRefresh=true;
+        await page.locator('#refreshDashboardBtn').click();
+        await page.waitForFunction(()=>document.getElementById('dashboardRefreshStatus').textContent.startsWith('Refresh failed'));
+        assert(await page.locator('#refreshDashboardBtn').isEnabled());
+        assert.equal(await page.locator('#studentsTableBody tr').count(),1);
+        assert((await page.locator('#studentsTableBody').textContent()).includes('0/10'));
+        addPractice();
+        const beforeRefresh=studentFetches,beforeCalendar=calendarFetches;
+        await page.evaluate(()=>Promise.all([refreshDashboardData(),refreshDashboardData()]));
+        assert.equal(studentFetches,beforeRefresh+1);assert.equal(calendarFetches,beforeCalendar+1);
+        assert((await page.locator('#studentsTableBody').textContent()).includes('1/10'));
+        assert.equal(await page.locator('#filterTeacher').inputValue(),'Teacher A');
+        assert.equal(await page.locator('#filterClassTime').inputValue(),'Sun 10:40');
+        assert.equal(await page.locator('#filterName').inputValue(),'Student A');
+        assert.equal(await page.locator('#filterDateFrom').inputValue(),'2026-10-01');
+        assert.equal(await page.locator('#filterDateTo').inputValue(),'2026-10-20');
+        assert.equal(await page.evaluate(()=>sortState.column),'target');
         await page.evaluate(()=>{const pick=TargetReportsCore.pickClosing;window.closingDraws=0;TargetReportsCore.pickClosing=()=>pick(()=>(window.closingDraws++%10+0.5)/10);});
         await page.getByRole('button',{name:'Export Target Reports',exact:true}).click();
         assert.equal(await page.locator('#targetReportTeacher').inputValue(),'Teacher A');
+        failRefresh=true;const beforeReports=reportFetches;
+        await page.getByRole('button',{name:'Generate reports',exact:true}).click();
+        await page.waitForFunction(()=>document.getElementById('targetReportStatus').textContent==='Could not refresh dashboard data. Please retry.');
+        assert.equal(reportFetches,beforeReports);assert(await page.locator('#generateTargetReports').isEnabled());
+        addPractice();const beforeGenerate=studentFetches;
         await page.getByRole('button',{name:'Generate reports',exact:true}).click();
         await page.waitForFunction(()=>document.getElementById('targetReportStatus').textContent==='Test fetch failed');
         assert(await page.locator('#generateTargetReports').isEnabled());
+        assert.equal(studentFetches,beforeGenerate+1);
+        assert((await page.locator('#studentsTableBody').textContent()).includes('2/10'));
+        addPractice();
         await page.getByRole('button',{name:'Generate reports',exact:true}).click();
         await page.waitForSelector('#targetReportPreview:not(.hidden)');
         assert.equal(await page.locator('#targetReportGroup option').count(),2);
-        const message=await page.locator('#targetReportMessage').inputValue();assert(message.includes('Student B 20/50'));assert(message.includes('Student A 0/10'));assert(!message.includes('PRIVATE'));
+        const message=await page.locator('#targetReportMessage').inputValue();assert(message.includes('Student B 20/50'));assert(message.includes('Student A 3/10'));assert(!message.includes('PRIVATE'));
+        assert((await page.locator('#studentsTableBody').textContent()).includes('3/10'));
         assert(message.endsWith(core.closings[0]));
         const colours=await page.evaluate(()=>{
             const stamp=Date.parse(targetReportState.generatedAt),day=86400000;

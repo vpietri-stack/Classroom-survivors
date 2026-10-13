@@ -92,7 +92,10 @@ body {
     display: flex;
     align-items: center;
     gap: 16px;
+    flex-wrap: wrap;
 }
+
+#dashboardRefreshStatus {color:var(--dash-text-dim);font-size:0.75rem;}
 
 .dash-logo-icon {
     font-size: 28px;

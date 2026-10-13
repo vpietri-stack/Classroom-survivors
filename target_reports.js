@@ -40,9 +40,11 @@ async function generateTargetReports() {
     if (!teacher) return reportStatus('Select a teacher first.');
     clearTargetReports(); const run=targetReportState.run;
     targetReportState.busy=true;const button=reportElement('generateTargetReports');button.disabled=true;button.textContent='Generating…';
-    reportStatus('Loading current targets and archived practice sessions…');
+    reportStatus('Refreshing dashboard data, targets and archived practice sessions…');
     try {
-        const res=await apiFetch(`${API_BASE}/getTargetReports?teacher=${encodeURIComponent(teacher)}`);
+        if (!await refreshDashboardData()) throw new Error('Could not refresh dashboard data. Please retry.');
+        if (run!==targetReportState.run) return;
+        const res=await apiFetch(`${API_BASE}/getTargetReports?teacher=${encodeURIComponent(teacher)}`,{cache:'no-store'});
         const data=await res.json();if (!res.ok) throw new Error(data.error || 'Could not generate reports.');
         if (run!==targetReportState.run) return;
         targetReportState.groups=data.groups.map(g=>({...g,generatedAt:data.generatedAt,closing:TargetReportsCore.pickClosing()}));targetReportState.generatedAt=data.generatedAt;targetReportState.index=0;

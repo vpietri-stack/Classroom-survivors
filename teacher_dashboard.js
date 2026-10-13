@@ -10,6 +10,7 @@ let currentStudent = null;   // Currently selected student for detail view
 let sortState = { column: 'name', direction: 'asc' };
 let exerciseSortState = { column: 'timestamp', direction: 'desc' };
 let isBM = false;            // Flag for Branch Manager role
+let dashboardRefreshPromise = null;
 
 // ----- INIT -----
 
@@ -54,17 +55,17 @@ async function checkTeacherAuth() {
 
     document.getElementById('teacherNameDisplay').innerText = teacher.name;
     if (typeof initAdminUI === 'function') initAdminUI();
-    loadAllStudents();
+    await refreshDashboardData();
 }
 
-async function loadAllStudents() {
+async function loadAllStudents({ preserveDisplay = false, throwOnError = false } = {}) {
     const tbody = document.getElementById('studentsTableBody');
-    tbody.innerHTML = `<tr><td colspan="6"><div class="loading-spinner"></div></td></tr>`;
+    if (!preserveDisplay) tbody.innerHTML = `<tr><td colspan="6"><div class="loading-spinner"></div></td></tr>`;
 
     try {
         const includeSecure = (isAdmin || isBM) ? '?includeSecure=true' : '';
         const url = `${API_BASE}/getStudents${includeSecure}`;
-        const res = await apiFetch(url);
+        const res = await apiFetch(url, {cache:'no-store'});
         if (!res.ok) throw new Error('Failed to fetch students');
         const data = await res.json();
         // Filter out teachers and admins from list
@@ -73,9 +74,32 @@ async function loadAllStudents() {
         populateClassTimeFilter();
         applyFilters();
         if (typeof loadClassCalendar === 'function') await loadClassCalendar();
+        return true;
     } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="7" class="no-results"><p>Error loading students: ${e.message}</p></td></tr>`;
+        if (throwOnError) throw e;
+        if (!preserveDisplay) tbody.textContent = `Error loading students: ${e.message}`;
+        return false;
     }
+}
+
+function refreshDashboardData() {
+    if (dashboardRefreshPromise) return dashboardRefreshPromise;
+    const button=document.getElementById('refreshDashboardBtn'),status=document.getElementById('dashboardRefreshStatus');
+    const label=button.innerHTML;
+    button.disabled=true;button.textContent='Refreshing…';status.textContent='Loading fresh data…';
+    dashboardRefreshPromise=(async()=>{
+        try {
+            await loadAllStudents({preserveDisplay:true,throwOnError:true});
+            status.textContent=`Updated ${new Date().toLocaleTimeString('en-GB',{timeZone:'Asia/Shanghai'})} (Beijing time)`;
+            return true;
+        } catch(err) {
+            status.textContent=`Refresh failed: ${err.message}. Please retry.`;
+            return false;
+        } finally {
+            button.disabled=false;button.innerHTML=label;dashboardRefreshPromise=null;
+        }
+    })();
+    return dashboardRefreshPromise;
 }
 
 // ----- FILTERS & TABLE -----

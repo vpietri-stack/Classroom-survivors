@@ -18,13 +18,15 @@ async function ensureCalendar(container, through, now = Date.now()) {
     const today = core.beijingDate(now);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(through) || !Number.isFinite(+new Date(through)) || through < core.START_DATE || through > core.beijingDate(now + 366 * core.DAY)) throw error('Calendar date must be between 12 October 2026 and one year ahead.');
     const end = core.beijingDate(Math.max(+new Date(through + 'T23:59:59+08:00'), now) + 35 * core.DAY);
-    const { resources: roster } = await container.items.query("SELECT c.id, c.teacher, c.classTime FROM c WHERE (c.role = 'student' OR NOT IS_DEFINED(c.role)) AND NOT IS_DEFINED(c.type)").fetchAll();
+    const { resources: roster } = await container.items.query("SELECT c.id, c.teacher, c.classTime, c.classGroups FROM c WHERE (c.role = 'student' OR NOT IS_DEFINED(c.role)) AND NOT IS_DEFINED(c.type)").fetchAll();
     const groups = new Map();
     for (const s of roster) {
-        if (!core.parseClassTime(s.classTime)) continue;
-        const key = core.groupKey(s.teacher, s.classTime);
-        if (!groups.has(key)) groups.set(key, { teacher: s.teacher, classTime: s.classTime, studentIds: [] });
-        groups.get(key).studentIds.push(s.id);
+        for (const g of core.memberships(s)) {
+            if (!core.parseClassTime(g.classTime)) continue;
+            const key = core.groupKey(g.teacher, g.classTime);
+            if (!groups.has(key)) groups.set(key, { ...g, studentIds: [] });
+            groups.get(key).studentIds.push(s.id);
+        }
     }
     const existing = await listEvents(container);
     for (const event of existing) {
@@ -45,8 +47,8 @@ async function ensureCalendar(container, through, now = Date.now()) {
                     try { await item(container,saved).patch([{op:'set',path:'/status',value:'scheduled'},{op:'set',path:'/studentIds',value:group.studentIds}], {accessCondition:{type:'IfMatch',condition:saved._etag}}); }
                     catch (err) { if (!conflict(err)) throw err; }
                 }
-                // Retain historic rosters and any manual edit. Future recurring rosters follow group membership.
-                if (!saved.manual && !saved.attendanceStarted && saved.status === 'scheduled' && +new Date(saved.startTime) > now && JSON.stringify(saved.studentIds) !== JSON.stringify(group.studentIds)) {
+                // Retain historic rosters and edited times. Future rosters follow group membership even after rescheduling.
+                if (!saved.attendanceStarted && saved.status === 'scheduled' && +new Date(saved.startTime) > now && JSON.stringify(saved.studentIds) !== JSON.stringify(group.studentIds)) {
                     try { await item(container, saved).patch([{ op: 'set', path: '/studentIds', value: group.studentIds }], { accessCondition: { type: 'IfMatch', condition: saved._etag } }); }
                     catch (err) { if (!conflict(err)) throw err; }
                 }
@@ -129,9 +131,9 @@ async function recordBatch(container, body, actor) {
     const results = [];
     for (const id of [...new Set(ids)]) {
         try {
-            // Per-student chronological entries make late recording deterministic.
+            // Chronology is independent for each of a student's groups.
             const student = await findStudent(container,id);
-            const pendingEarlier = events.find(e => e.status === 'scheduled' && e.studentIds.includes(id) && +new Date(e.endTime) <= Date.now() && +new Date(e.startTime) < +new Date(event.startTime) && !(student.attendance || []).some(r => r.classId === e.id));
+            const pendingEarlier = events.find(e => e.groupKey === event.groupKey && e.status === 'scheduled' && e.studentIds.includes(id) && +new Date(e.endTime) <= Date.now() && +new Date(e.startTime) < +new Date(event.startTime) && !(student.attendance || []).some(r => r.classId === e.id));
             if (!cancel && pendingEarlier) throw error('Record this student’s earlier class first.');
             const locked = cancel ? event : await lockEvent(container,event.id,false,event);
             results.push(await recordOne(container,locked,id,cancel ? 'cancelled' : body.status,nextClass,actor));

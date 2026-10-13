@@ -128,6 +128,10 @@ async function uiTests() {
     w.document.addEventListener=()=>{}; // Do not start a real login.
     w.eval('var API_BASE="/api"; var AVAILABLE_CONTENT={};');
     w.eval(['teacher_dashboard.js','geo_export.js','admin_dashboard.js','api/src/functions/shared/classCalendarCore.js','class_calendar.js'].map(file => fs.readFileSync(file,'utf8')).join('\n') + '\nallStudents=[{id:"a",fullName:"Student <script>",classTime:"Sun 16:30",teacher:"Teacher A",role:"student"}]; isAdmin=true; loadAllStudents=async()=>{}; window.testSetEvents=events=>{calendarEvents=events;calendarReady=true;};');
+    w.isUncountedShortLoss=core.shortLoss;
+    const archivedStudent={analytics:[],_fullAnalytics:practice(3)};
+    assert.equal(w.countTargetSessions(archivedStudent,new Date(at('11')),new Date(at('18'))),3);
+    assert.equal(w.countSessionsInRange(archivedStudent,new Date(at('11')),new Date(at('18'))),3);
     for (const [id,value] of Object.entries({bulkTargetClass:'Sun 16:30',bulkTargetStart:'2026-10-18T18:00',bulkTargetEnd:'2026-10-25T16:30',bulkTargetCount:'10',bulkContentClass:'Sun 16:30',bulkBook:'PU1',bulkUnit:'1',bulkPage:'2'})) {
         const el=w.document.getElementById(id);
         if (el.tagName === 'SELECT') el.innerHTML=`<option>${value}</option>`;
@@ -159,6 +163,67 @@ async function uiTests() {
     assert(!w.document.querySelector('#attendanceChecklist script'));
     w.Date.now=realNow;
     dom.window.close();
+}
+async function multipleGroupTests() {
+    const sundayKey=core.groupKey('Teacher A','Sun 16:30'), saturdayKey=core.groupKey('Teacher A','Sat 14:50');
+    const sat={id:'sat',startTime:at('10','16:20'),endTime:at('17','14:50'),targetSessions:10,manualOffset:1};
+    const selena={id:'selena',role:'student',teacher:'Teacher A',classTime:'Sat 14:50',classGroups:[{teacher:'Teacher A',classTime:'Sun 16:30'}],targets:[sat,oldTarget()],analytics:practice(9)};
+    assert.equal(core.memberships({...selena,classGroups:selena.classGroups.concat(selena.classGroups)}).length,2);
+    assert(core.belongsTo(selena,'Teacher A','Sun 16:30'));
+    assert.equal(core.targetGroupKey(selena,sat),saturdayKey);
+    assert.equal(core.targetGroupKey(selena,oldTarget()),sundayKey);
+    const ambiguous={...selena,classGroups:[{teacher:'Teacher A',classTime:'Sat 10:40'}]};
+    assert.equal(core.targetGroupKey(ambiguous,{...sat,endTime:at('17','00:00')}),null);
+    const early={id:'early',groupKey:sundayKey,teacher:'Teacher A',classTime:'Sun 16:30',startTime:at('12'),endTime:at('12','18:00')};
+    const earlyTargets=core.updateTargets(selena,early,'attended',{startTime:at('25')},[]);
+    assert.equal(earlyTargets.find(t=>t.id==='old').endTime,early.startTime);
+    assert.deepEqual(earlyTargets.find(t=>t.id==='sat'),sat);
+    const store=new Store([selena]);const originalNow=Date.now;
+    Date.now=()=>+new Date(at('19','12:00'));
+    try {
+        const events=await service.ensureCalendar(store,'2026-11-01');
+        const sun=events.find(e=>e.startTime===at('18')),satClass=events.find(e=>e.startTime===at('17','14:50'));
+        assert(sun.studentIds.includes('selena'));assert(satClass.studentIds.includes('selena'));
+        const sundayFirst=await service.recordBatch(store,{action:'record',eventId:sun.id,studentIds:['selena'],status:'attended'},'admin');
+        assert(sundayFirst.success); // Pending Saturday attendance must not block Sunday's independent target.
+        assert.deepEqual(store.docs.get('selena').targets[0],sat);
+        const sunTargets=copy(store.docs.get('selena').targets.filter(t=>core.targetGroupKey(selena,t)===sundayKey));
+        const saturdaySecond=await service.recordBatch(store,{action:'record',eventId:satClass.id,studentIds:['selena'],status:'missed'},'admin');
+        assert(saturdaySecond.success);
+        const current=store.docs.get('selena');
+        assert.equal(current.targets[0].targetSessions,20);assert.equal(current.targets[0].endTime,at('24','14:50'));
+        assert.deepEqual(current.targets.filter(t=>core.targetGroupKey(current,t)===sundayKey),sunTargets);
+        const cancelSat=events.find(e=>e.startTime===at('24','14:50'));
+        assert((await service.recordBatch(store,{action:'cancel',eventId:cancelSat.id},'admin')).success);
+        assert.equal(store.docs.get('selena').targets[0].endTime,at('31','14:50'));
+        assert.deepEqual(store.docs.get('selena').targets.filter(t=>core.targetGroupKey(current,t)===sundayKey),sunTargets);
+        await service.recordBatch(store,{action:'cancel',eventId:cancelSat.id},'admin');
+        assert.equal(store.docs.get('selena').targets[0].endTime,at('31','14:50'));
+        const stats=core.attendanceStats(store.docs.get('selena'),'2026-10-12','2026-10-31');
+        assert.equal(stats.recorded,2);assert.equal(stats.rate,50);
+
+        // Manual assignment and batch targets cannot erase a different group's overlapping period.
+        const assign=httpHandler('setTargets.js',store);
+        const result=await assign({json:async()=>({studentIds:['selena'],target:{startTime:at('11','18:00'),endTime:at('25'),targetSessions:30,groupKey:sundayKey}})},{error:()=>{}});
+        assert(result.jsonBody.results[0].success);
+        assert.equal(store.docs.get('selena').targets.find(t=>t.id==='sat').targetSessions,20);
+        const wrong=await assign({json:async()=>({studentIds:['selena'],target:{startTime:at('11','18:00'),endTime:at('25'),targetSessions:10,groupKey:core.groupKey('outsider','Sun 16:30')}})},{error:()=>{}});
+        assert(!wrong.jsonBody.results[0].success);
+
+        // Bind existing manual targets as additional memberships are saved; preserve their contents.
+        const legacyStore=new Store([{...selena,classGroups:[],attendance:[]}]);
+        const update=httpHandler('updateStudent.js',legacyStore);
+        const request=fields=>({json:async()=>({studentId:'selena',fields})});
+        assert.equal((await update(request({classGroups:selena.classGroups}),{error:()=>{}})).status,200);
+        const bound=legacyStore.docs.get('selena').targets;
+        assert.equal(bound[0].groupKey,saturdayKey);assert.equal(bound[1].groupKey,sundayKey);
+        assert.equal(bound[0].manualOffset,1);assert.equal(bound[1].endTime,oldTarget().endTime);
+        assert.equal((await update({json:async()=>({studentId:'selena',fields:{targets:[]},expectedTargets:[]})},{error:()=>{}})).status,409);
+        assert.equal((await update(request({classGroups:[{teacher:'Teacher A',classTime:'invalid'}]}),{error:()=>{}})).status,400);
+        assert.equal((await httpHandler('updateStudent.js',legacyStore,{token:{role:'student',sub:'selena'}})(request({classGroups:[]}),{error:()=>{}})).status,403);
+        assert.equal((await update(request({classGroups:[]}),{error:()=>{}})).status,200);
+        assert.equal(legacyStore.docs.get('selena').targets[1].groupKey,sundayKey); // Former group history remains identified.
+    } finally {Date.now=originalNow;}
 }
 function httpHandler(file,store,gate={token:{role:'admin',sub:'admin'}}) {
     let handler;
@@ -212,4 +277,4 @@ async function httpAndRosterTests() {
         assert.equal(store.docs.get('a').targets.length,1);
     } finally {Date.now=now;}
 }
-(async()=>{await coreAndServiceTests();await httpAndRosterTests();await uiTests();console.log('PASS: calendar recurrence, target transitions, archives, retries, cancellation, auth, rosters and dashboard controls');})().catch(e=>{console.error(e);process.exitCode=1;});
+(async()=>{await coreAndServiceTests();await httpAndRosterTests();await multipleGroupTests();await uiTests();console.log('PASS: calendar recurrence, separate group targets/attendance, migration, archives, retries, cancellation, auth, rosters and dashboard controls');})().catch(e=>{console.error(e);process.exitCode=1;});

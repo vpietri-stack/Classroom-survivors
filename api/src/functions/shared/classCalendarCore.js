@@ -20,6 +20,41 @@
     }
     function addDays(value, days) { return new Date(new Date(value).getTime() + days * DAY).toISOString(); }
     function groupKey(teacher, classTime) { return JSON.stringify([teacher || '', classTime || '']); }
+    // One account can attend several groups. The legacy fields remain its primary group.
+    function memberships(student) {
+        const groups = [{teacher: student.teacher || '', classTime: student.classTime || ''}, ...(student.classGroups || [])];
+        const unique = new Map();
+        for (const g of groups) {
+            const teacher = (g.teacher || '').trim(), classTime = (g.classTime || '').trim();
+            if (!teacher && !classTime && groups.length > 1) continue;
+            unique.set(groupKey(teacher, classTime), {teacher, classTime});
+        }
+        return [...unique.values()];
+    }
+    function belongsTo(student, teacher, classTime) {
+        return memberships(student).some(g => (!teacher || g.teacher === teacher) && (!classTime || g.classTime === classTime));
+    }
+    function targetGroupKey(student, target) {
+        if (target.groupKey) return target.groupKey;
+        const groups = memberships(student);
+        if (groups.length === 1) return groupKey(groups[0].teacher, groups[0].classTime);
+        // Legacy manual targets normally end at the next class. Only infer an unambiguous match.
+        const end = new Date(+new Date(target.endTime) + 8 * 3600000);
+        const candidates = groups.filter(g => {
+            const slot = parseClassTime(g.classTime);
+            return slot && slot.day === end.getUTCDay();
+        });
+        const exact = candidates.filter(g => {
+            const slot = parseClassTime(g.classTime);
+            return slot.hour === end.getUTCHours() && slot.minute === end.getUTCMinutes();
+        });
+        const match = exact.length === 1 ? exact[0] : candidates.length === 1 ? candidates[0] : null;
+        return match ? groupKey(match.teacher, match.classTime) : null;
+    }
+    function targetBelongsTo(student, target, key) {
+        // Accounts lacking any placement are retained for the old single-group API contract.
+        return targetGroupKey(student, target) === key || (!target.groupKey && !student.teacher && !student.classTime && !(student.classGroups || []).length);
+    }
     function parseClassTime(value) {
         const match = /^(Sun(?:day)?|Mon(?:day)?|Tue(?:sday)?|Wed(?:nesday)?|Thu(?:rsday)?|Fri(?:day)?|Sat(?:urday)?)\s+(\d{1,2}):(\d{2})$/i.exec((value || '').trim());
         if (!match || +match[2] > 23 || +match[3] > 59) return null;
@@ -67,21 +102,29 @@
     }
     function updateTargets(student, event, status, nextClass, events) {
         let targets = (student.targets || []).map(t => ({ ...t }));
-        const previous = previousTarget(targets, event);
+        const key = event.groupKey || groupKey(event.teacher, event.classTime);
+        const sameGroup = t => targetBelongsTo(student, t, key);
+        const previous = previousTarget(targets.filter(sameGroup), event);
         if (status === 'cancelled') {
-            if (previous) previous.endTime = addDays(previous.endTime, 7);
+            if (previous) { previous.groupKey = key; previous.endTime = addDays(previous.endTime, 7); }
             return targets;
         }
         if (!nextClass || +new Date(nextClass.startTime) <= +new Date(event.endTime)) throw new Error('Schedule a following class before recording attendance.');
         const extend = status === 'missed' && previous && countPractice(events, previous, +new Date(event.startTime)) >= previous.targetSessions;
         if (extend) {
+            previous.groupKey = key;
             previous.targetSessions += 10;
             previous.endTime = nextClass.startTime;
-            targets = targets.filter(t => t === previous || !(+new Date(t.startTime) >= +new Date(event.endTime) && +new Date(t.startTime) < +new Date(nextClass.startTime)));
+            targets = targets.filter(t => t === previous || !sameGroup(t) || !(+new Date(t.startTime) >= +new Date(event.endTime) && +new Date(t.startTime) < +new Date(nextClass.startTime)));
         } else {
             // Preserve the previous period as history, replace any preassigned overlapping next period.
-            targets = targets.filter(t => !(+new Date(t.startTime) >= +new Date(event.endTime) && +new Date(t.startTime) < +new Date(nextClass.startTime)));
-            targets.push({ id: `attendance_${event.id}`, startTime: event.endTime, endTime: nextClass.startTime, targetSessions: 10, manualOffset: 0 });
+            if (previous) {
+                previous.groupKey = key;
+                // An earlier reschedule must not leave the old period active over the new one.
+                if (+new Date(previous.endTime) > +new Date(event.startTime)) previous.endTime = event.startTime;
+            }
+            targets = targets.filter(t => !sameGroup(t) || !(+new Date(t.startTime) >= +new Date(event.endTime) && +new Date(t.startTime) < +new Date(nextClass.startTime)));
+            targets.push({ id: `attendance_${event.id}`, groupKey: key, startTime: event.endTime, endTime: nextClass.startTime, targetSessions: 10, manualOffset: 0 });
         }
         return targets;
     }
@@ -93,5 +136,5 @@
         const attended = records.filter(r => r.status === 'attended').length;
         return { attended, recorded: records.length, rate: records.length ? Math.round(attended / records.length * 100) : null, records };
     }
-    return { DAY, START_DATE, beijingDate, localInput, iso, addDays, groupKey, parseClassTime, occurrences, shortLoss, countPractice, previousTarget, updateTargets, attendanceStats };
+    return { DAY, START_DATE, beijingDate, localInput, iso, addDays, groupKey, memberships, belongsTo, targetGroupKey, targetBelongsTo, parseClassTime, occurrences, shortLoss, countPractice, previousTarget, updateTargets, attendanceStats };
 });

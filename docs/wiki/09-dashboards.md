@@ -121,6 +121,12 @@ Verification: `npm run test:calendar` tests recurrence, the target examples, arc
 
 ## Update discipline
 
+## Students attending multiple groups (13 October 2026)
+
+A student keeps one account and primary teacher/class time, with additional memberships editable under **Settings → Additional Class Groups**. Save Changes refreshes group filters and future calendar rosters. The main list keeps one row per student and shows each visible group's target/period on matching lines; a class filter shows only that group's figures. Bulk target/content selection includes secondary memberships. Attendance rates combine the student's recorded classes across groups.
+
+The Targets tab labels every period with a group, supports reassignment, and requires a group for new manual targets. When adding memberships, existing manual periods are matched to a unique group by their Beijing end weekday/time; unresolved historical periods remain untouched and can be assigned manually. Saved bindings survive rescheduling or removing a membership. Each attendance/cancellation updates only that group's targets. Practice is shared: the same session counts toward every overlapping target, with each target's own manual offset. Profile and roster target counters prefer merged archive history once loaded. Reports contain the student once in each assigned group with that group's chosen target, including memberships under another teacher.
+
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
 
 ## Target reports for WeChat

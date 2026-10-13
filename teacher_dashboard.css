@@ -1152,3 +1152,9 @@ body {
     .sr-popup-grid { grid-template-columns: 1fr; }
     .sr-state-toolbar { flex-direction: column; }
 }
+/* Multiple class memberships stay on one student profile. */
+.student-group-controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.student-group-controls select { flex:1; min-width:180px; }
+.student-group-chip { display:inline-flex; align-items:center; gap:8px; padding:4px 10px; margin:0 8px 8px 0; border:1px solid var(--dash-border); border-radius:8px; }
+.group-help { color:var(--dash-text-dim); font-size:0.82rem; margin:8px 0 16px; }
+.target-group-select { min-width:170px; font-size:0.8rem; }

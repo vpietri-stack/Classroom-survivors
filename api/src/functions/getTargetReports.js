@@ -3,18 +3,20 @@ const { validateApiKey } = require('./shared/validateApiKey');
 const { getContainer } = require('./shared/db');
 const auth = require('./shared/auth');
 const core = require('./shared/targetReportsCore');
+const calendar = require('./shared/classCalendarCore');
 
 async function buildReports(container, teacher, now = Date.now()) {
     // Project only report data; never return passwords, IDs, or exercise payloads.
     const {resources:students}=await container.items.query({
-        query:"SELECT c.id, c.fullName, c.name, c.login, c.avatar, c.teacher, c.classTime, c.targets, ARRAY(SELECT VALUE e FROM e IN c.analytics WHERE e.type = 'session') AS analytics FROM c WHERE c.teacher = @teacher AND (c.role = 'student' OR NOT IS_DEFINED(c.role)) AND NOT IS_DEFINED(c.type)",
-        parameters:[{name:'@teacher',value:teacher}]
+        query:"SELECT c.id, c.fullName, c.name, c.login, c.avatar, c.teacher, c.classTime, c.classGroups, c.targets, ARRAY(SELECT VALUE e FROM e IN c.analytics WHERE e.type = 'session') AS analytics FROM c WHERE (c.teacher = @teacher OR ARRAY_CONTAINS(c.classGroups, @membership, true)) AND (c.role = 'student' OR NOT IS_DEFINED(c.role)) AND NOT IS_DEFINED(c.type)",
+        parameters:[{name:'@teacher',value:teacher},{name:'@membership',value:{teacher}}]
     }).fetchAll();
-    const rows=new Array(students.length);
+    const tasks=students.flatMap(student=>calendar.memberships(student).filter(g=>g.teacher===teacher).map(group=>({student,group})));
+    const rows=new Array(tasks.length);
     let cursor=0;
     async function worker() {
-        while (cursor<students.length) {
-            const index=cursor++, student=students[index], target=core.selectTarget(student,now);
+        while (cursor<tasks.length) {
+            const index=cursor++, {student,group}=tasks[index], target=core.selectTarget(student,now,calendar.groupKey(group.teacher,group.classTime));
             let archived=[];
             if (target && +new Date(target.startTime)<=now) {
                 const {resources}=await container.items.query({
@@ -23,10 +25,10 @@ async function buildReports(container, teacher, now = Date.now()) {
                 },{partitionKey:student.id}).fetchAll();
                 archived=resources;
             }
-            rows[index]=core.row(student,target,[...(student.analytics || []),...archived],now);
+            rows[index]=core.row({...student,...group},target,[...(student.analytics || []),...archived],now);
         }
     }
-    await Promise.all(Array.from({length:Math.min(3,students.length)},worker));
+    await Promise.all(Array.from({length:Math.min(3,tasks.length)},worker));
     return {teacher,generatedAt:new Date(now).toISOString(),groups:core.groups(rows)};
 }
 async function handler(request,context) {

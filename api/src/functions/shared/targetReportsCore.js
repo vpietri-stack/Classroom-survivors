@@ -28,8 +28,8 @@
         const perDay=remaining/days;
         return {band:perDay<1?'green':perDay<=2?'yellow':perDay<=3?'orange':'red',perDay};
     }
-    function selectTarget(student, now) {
-        const targets = (student.targets || []).filter(t => Number.isFinite(+new Date(t.startTime)) && Number.isFinite(+new Date(t.endTime)) && Number.isFinite(Number(t.targetSessions)));
+    function selectTarget(student, now, key) {
+        const targets = (student.targets || []).filter(t => (!key || calendar.targetBelongsTo(student,t,key)) && Number.isFinite(+new Date(t.startTime)) && Number.isFinite(+new Date(t.endTime)) && Number.isFinite(Number(t.targetSessions)));
         return targets.find(t => +new Date(t.startTime) <= now && +new Date(t.endTime) >= now)
             || targets.filter(t => +new Date(t.endTime) < now).sort((a,b) => +new Date(b.endTime)-+new Date(a.endTime))[0]
             || targets.filter(t => +new Date(t.startTime) > now).sort((a,b) => +new Date(a.startTime)-+new Date(b.startTime))[0] || null;

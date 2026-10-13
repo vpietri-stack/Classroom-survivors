@@ -2,6 +2,7 @@ const { app } = require('@azure/functions');
 const { validateApiKey } = require('./shared/validateApiKey');
 const { getContainer } = require('./shared/db');
 const auth = require('./shared/auth');
+const calendar = require('./shared/classCalendarCore');
 
 const PRIV_ROLES = ['teacher', 'BM', 'admin'];
 // Self-service placement (2026-09-16, "Val PC 403"): the client auto-advance
@@ -41,8 +42,14 @@ app.http('updateStudent', {
             const allowedFields = [
                 'book', 'unit', 'page', 'classTime', 'password',
                 'needsPasswordChange', 'fullName', 'login', 'targets', 'teacher',
-                'vsPromoSeen'
+                'vsPromoSeen', 'classGroups'
             ];
+            if (fields.classGroups !== undefined) {
+                if (!Array.isArray(fields.classGroups) || fields.classGroups.length > 20 || fields.classGroups.some(g => !g || typeof g.teacher !== 'string' || typeof g.classTime !== 'string' || g.teacher.trim().length > 120 || !calendar.parseClassTime(g.classTime))) {
+                    return { status: 400, body: 'Choose valid additional class groups (maximum 20).' };
+                }
+                fields.classGroups = calendar.memberships({classGroups:fields.classGroups}).filter(g => g.classTime);
+            }
 
             const { resources: items } = await getContainer().items
                 .query({ query: 'SELECT * FROM c WHERE c.id = @id', parameters: [{ name: '@id', value: studentId }] })
@@ -50,11 +57,23 @@ app.http('updateStudent', {
             if (items.length === 0) return { status: 404, body: 'Student not found.' };
 
             const user = items[0];
+            if (body.expectedTargets !== undefined && JSON.stringify(body.expectedTargets) !== JSON.stringify(user.targets || [])) {
+                return { status: 409, body: 'Targets changed. Refresh the dashboard and retry.' };
+            }
+            if (fields.targets === undefined && ['teacher','classTime','classGroups'].some(k => fields[k] !== undefined) && user.targets) {
+                const next = {...user,...fields};
+                const source = calendar.memberships(next).length > calendar.memberships(user).length ? next : user;
+                // Bind existing periods before changing memberships; never alter their dates/counts.
+                fields.targets = user.targets.map(t => {
+                    const key = calendar.targetGroupKey(source,t);
+                    return key ? {...t,groupKey:key} : t;
+                });
+            }
             const changes = {};
 
             for (const key of allowedFields) {
                 if (fields[key] !== undefined) {
-                    if (user[key] !== fields[key]) {
+                    if (JSON.stringify(user[key]) !== JSON.stringify(fields[key])) {
                         changes[key] = { from: user[key], to: fields[key] };
                     }
                     // Store as-is (plaintext) so the teacher dashboard can display it.
@@ -63,10 +82,14 @@ app.http('updateStudent', {
             }
 
             // Patch only edited fields so a concurrent analytics/attendance save is preserved.
-            const operations = allowedFields.filter(key => fields[key] !== undefined)
+            // Keep membership and target bindings in the same patch; omit unchanged form fields.
+            const patchOrder = ['teacher','classTime','classGroups','targets',...allowedFields.filter(k => !['teacher','classTime','classGroups','targets'].includes(k))];
+            const operations = patchOrder.filter(key => changes[key])
                 .map(key => ({ op: 'set', path: '/' + key, value: fields[key] }));
             for (let i = 0; i < operations.length; i += 10) {
-                await getContainer().item(user.id, user.studentId === undefined ? undefined : user.studentId).patch(operations.slice(i, i + 10));
+                const result = await getContainer().item(user.id, user.studentId === undefined ? undefined : user.studentId).patch(operations.slice(i, i + 10),
+                    changes.targets || changes.classGroups || changes.teacher || changes.classTime ? {accessCondition:{type:'IfMatch',condition:user._etag}} : undefined);
+                if (result.resource) user._etag = result.resource._etag;
             }
 
             // Audit trail uses the verified token identity (ignore client creatorId).
@@ -90,6 +113,7 @@ app.http('updateStudent', {
                 jsonBody: { success: true, message: 'Student updated.', student: auth.publicUser(user) }
             };
         } catch (error) {
+            if (Number(error.code || error.statusCode) === 412) return { status: 409, body: 'Student changed. Refresh the dashboard and retry.' };
             context.error('updateStudent failed:', error);
             return { status: 500, body: 'Server error updating student.' };
         }

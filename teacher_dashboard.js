@@ -109,11 +109,8 @@ function populateClassTimeFilter() {
     const currentVal = select.value;
     const teacherFilter = document.getElementById('filterTeacher');
     const selectedTeacher = teacherFilter ? teacherFilter.value : '';
-    // Filter students by teacher first
-    const relevantStudents = selectedTeacher
-        ? allStudents.filter(s => s.teacher === selectedTeacher)
-        : allStudents;
-    const times = [...new Set(relevantStudents.map(s => s.classTime).filter(Boolean))].sort();
+    const times = [...new Set(allStudents.flatMap(s => ClassCalendarCore.memberships(s))
+        .filter(g => !selectedTeacher || g.teacher === selectedTeacher).map(g => g.classTime).filter(Boolean))].sort();
     select.innerHTML = '<option value="">All Classes</option>';
     times.forEach(t => {
         const opt = document.createElement('option');
@@ -132,7 +129,7 @@ function populateTeacherFilter() {
     const select = document.getElementById('filterTeacher');
     if (!select) return;
     const currentVal = select.value;
-    const teachers = [...new Set(allStudents.map(s => s.teacher).filter(Boolean))].sort();
+    const teachers = [...new Set(allStudents.flatMap(s => ClassCalendarCore.memberships(s).map(g => g.teacher)).filter(Boolean))].sort();
     select.innerHTML = '<option value="">All Teachers</option>';
     teachers.forEach(t => {
         const opt = document.createElement('option');
@@ -151,8 +148,7 @@ function applyFilters() {
     const dateTo = document.getElementById('filterDateTo').value;
 
     filteredStudents = allStudents.filter(s => {
-        if (teacherVal && s.teacher !== teacherVal) return false;
-        if (classTime && s.classTime !== classTime) return false;
+        if (!ClassCalendarCore.belongsTo(s, teacherVal, classTime)) return false;
         if (nameSearch && !(s.fullName || '').toLowerCase().includes(nameSearch)) return false;
         return true;
     });
@@ -375,12 +371,24 @@ function getSessionResult(session) {
 
 // ----- TARGET HELPERS (main table) -----
 
-function getStudentTargetInfo(student) {
+function dashboardGroupsForView(student) {
+    const teacher = document.getElementById('filterTeacher').value;
+    const time = document.getElementById('filterClassTime').value;
+    return ClassCalendarCore.memberships(student).filter(g => (!teacher || g.teacher === teacher) && (!time || g.classTime === time));
+}
+
+function getStudentTargetInfo(student, key) {
     if (!student.targets || student.targets.length === 0) return null;
     const now = new Date();
+    if (!key) {
+        const groups = dashboardGroupsForView(student);
+        const group = groups[0];
+        if (group) key = ClassCalendarCore.groupKey(group.teacher, group.classTime);
+    }
+    const targets = student.targets.filter(t => !key || ClassCalendarCore.targetBelongsTo(student,t,key));
 
     // 1. Active target
-    for (const t of student.targets) {
+    for (const t of targets) {
         const start = new Date(t.startTime);
         const end = new Date(t.endTime);
         if (now >= start && now <= end) {
@@ -390,7 +398,7 @@ function getStudentTargetInfo(student) {
     }
 
     // 2. Most recent past target
-    const past = student.targets
+    const past = targets
         .filter(t => new Date(t.endTime) < now)
         .sort((a, b) => new Date(b.endTime) - new Date(a.endTime));
     if (past.length > 0) {
@@ -402,7 +410,7 @@ function getStudentTargetInfo(student) {
     }
 
     // 3. Nearest upcoming target
-    const upcoming = student.targets
+    const upcoming = targets
         .filter(t => new Date(t.startTime) > now)
         .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
     if (upcoming.length > 0) {
@@ -413,8 +421,9 @@ function getStudentTargetInfo(student) {
 }
 
 function countTargetSessions(student, start, end) {
-    if (!student.analytics || !Array.isArray(student.analytics)) return 0;
-    return student.analytics.filter(e => {
+    const events = student._fullAnalytics || student.analytics;
+    if (!Array.isArray(events)) return 0;
+    return events.filter(e => {
         if (e.type !== 'session') return false;
         // Game-mode losses under 2 minutes don't count toward targets
         // (anti-cheat, from 27 Jul 2026 on — not retroactive). Shared helper
@@ -427,8 +436,8 @@ function countTargetSessions(student, start, end) {
     }).length;
 }
 
-function renderTargetCell(info) {
-    if (!info) return '<td style="color:var(--dash-text-dim)">—</td>';
+function renderTargetBadge(info) {
+    if (!info) return '<span style="color:var(--dash-text-dim)">—</span>';
     const { target, completed, status } = info;
     const total = target.targetSessions;
     let badgeClass, statusIcon;
@@ -436,14 +445,16 @@ function renderTargetCell(info) {
     else if (status === 'completed') { badgeClass = 'badge-complete'; statusIcon = ' ✓'; }
     else if (status === 'missed')    { badgeClass = 'badge-missed';   statusIcon = ' ✗'; }
     else                             { badgeClass = 'badge-upcoming'; statusIcon = ''; }
-    return `<td><span class="badge ${badgeClass}">${completed}/${total}${statusIcon}</span></td>`;
+    return `<span class="badge ${badgeClass}">${completed}/${total}${statusIcon}</span>`;
 }
+function renderTargetCell(info) { return `<td>${renderTargetBadge(info)}</td>`; }
 
-function renderPeriodCell(info) {
-    if (!info) return '<td style="color:var(--dash-text-dim)">—</td>';
+function renderTargetPeriod(info) {
+    if (!info) return '—';
     const fmt = d => d.toLocaleDateString('en-GB', { timeZone: 'Asia/Shanghai', day: 'numeric', month: 'short' });
-    return `<td style="font-size:0.82rem">${fmt(new Date(info.target.startTime))} → ${fmt(new Date(info.target.endTime))}</td>`;
+    return `${fmt(new Date(info.target.startTime))} → ${fmt(new Date(info.target.endTime))}`;
 }
+function renderPeriodCell(info) { return `<td style="font-size:0.82rem">${renderTargetPeriod(info)}</td>`; }
 
 // ----- RENDER STUDENTS TABLE -----
 
@@ -460,15 +471,16 @@ function renderStudentsTable(dateFrom, dateTo) {
 
     tbody.innerHTML = filteredStudents.map(s => {
         const avgMs = avgStudyDuration(s, dateFrom, dateTo);
-        const targetInfo = getStudentTargetInfo(s);
+        const groups = dashboardGroupsForView(s);
+        const infos = groups.map(g => getStudentTargetInfo(s, ClassCalendarCore.groupKey(g.teacher,g.classTime)));
         const pwCol = (isAdmin || isBM) ? `<td><span data-visible="false" style="font-size:0.82rem;color:var(--dash-text-dim)">••••••</span><button onclick="event.stopPropagation();toggleRowPw(this,'${(s.password||'').replace(/'/g,"\\'")}')" class="row-action-btn" style="margin-left:6px"><i class="fas fa-eye"></i></button></td>` : '';
 
         return `<tr class="clickable" onclick="openStudentDetail('${s.id}')">
             <td><div class="student-name-cell"><span class="cell-avatar">${_esc(s.avatar) || '👤'}</span>${_esc(s.fullName || s.login) || 'Unknown'}</div></td>
-            <td>${s.teacher || '—'}</td>
-            <td>${s.classTime || '—'}</td>
-            ${renderTargetCell(targetInfo)}
-            ${renderPeriodCell(targetInfo)}
+            <td>${groups.map(g => _esc(g.teacher) || '—').join('<br>')}</td>
+            <td>${groups.map(g => _esc(g.classTime) || '—').join('<br>')}</td>
+            <td>${infos.map(info => renderTargetBadge(info)).join('<br>')}</td>
+            <td style="font-size:0.82rem">${infos.map(info => renderTargetPeriod(info)).join('<br>')}</td>
             <td>${typeof attendanceRateCell === 'function' ? attendanceRateCell(s, dateFrom, dateTo) : '—'}</td>
             <td>${formatDuration(avgMs)}</td>
             ${pwCol}
@@ -488,7 +500,7 @@ async function openStudentDetail(studentId) {
     // Populate header
     document.getElementById('detailStudentAvatar').innerText = currentStudent.avatar || '👤';
     document.getElementById('detailStudentName').innerText = currentStudent.fullName || currentStudent.login;
-    document.getElementById('detailStudentClass').innerText = currentStudent.classTime || 'No class assigned';
+    document.getElementById('detailStudentClass').innerText = ClassCalendarCore.memberships(currentStudent).map(g => g.classTime).filter(Boolean).join(' · ') || 'No class assigned';
     document.getElementById('detailStudentBook').innerText = currentStudent.book
         ? `${currentStudent.book} U${currentStudent.unit} P${currentStudent.page}`
         : 'No content assigned';

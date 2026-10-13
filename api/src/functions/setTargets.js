@@ -2,6 +2,7 @@ const { app } = require('@azure/functions');
 const { validateApiKey } = require('./shared/validateApiKey');
 const { getContainer } = require('./shared/db');
 const auth = require('./shared/auth');
+const calendar = require('./shared/classCalendarCore');
 
 app.http('setTargets', {
     route: 'setTargets',
@@ -51,17 +52,28 @@ app.http('setTargets', {
 
                     const user = items[0];
                     if (!user.targets) user.targets = [];
+                    const memberships = calendar.memberships(user);
+                    let key = target.groupKey;
+                    if (!key && target.classTime) {
+                        const matches = memberships.filter(g => g.classTime === target.classTime && (!target.teacher || g.teacher === target.teacher));
+                        if (matches.length === 1) key = calendar.groupKey(matches[0].teacher, matches[0].classTime);
+                    } else if (!key) key = calendar.targetGroupKey(user, target);
+                    if (!key || !memberships.some(g => calendar.groupKey(g.teacher,g.classTime) === key)) {
+                        results.push({ studentId, success: false, error: 'Select a class group for this target.' });
+                        break;
+                    }
 
                     const targetId = `t_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
                     user.targets = user.targets.filter(t => {
                         const existStart = new Date(t.startTime).getTime();
                         const existEnd = new Date(t.endTime).getTime();
-                        return !(targetStart <= existStart && targetEnd >= existEnd);
+                        return !calendar.targetBelongsTo(user,t,key) || !(targetStart <= existStart && targetEnd >= existEnd);
                     });
 
                     user.targets.push({
                         id: targetId,
+                        groupKey: key,
                         startTime: target.startTime,
                         endTime: target.endTime,
                         targetSessions: target.targetSessions
@@ -71,7 +83,7 @@ app.http('setTargets', {
                         await container.item(user.id, user.studentId === undefined ? undefined : user.studentId).patch(
                             [{ op: 'set', path: '/targets', value: user.targets }],
                             { accessCondition: { type: 'IfMatch', condition: user._etag } });
-                        results.push({ studentId, success: true, targetId });
+                        results.push({ studentId, success: true, targetId, targets: user.targets });
                         break;
                     } catch (err) {
                         if (Number(err.code || err.statusCode) === 412 && attempt < 3) continue;

@@ -43,7 +43,7 @@ async function loadClassCalendar() {
         if (seq !== calendarLoadSeq) return;
         calendarEvents = data.events;
         calendarReady = true;
-        const unparsed = [...new Set(allStudents.map(s => s.classTime).filter(t => t && !ClassCalendarCore.parseClassTime(t)))];
+        const unparsed = [...new Set(allStudents.flatMap(s => ClassCalendarCore.memberships(s).map(g => g.classTime)).filter(t => t && !ClassCalendarCore.parseClassTime(t)))];
         message.textContent = unparsed.length ? `These class times need a weekday and time (for example Sun 16:30): ${unparsed.join(', ')}` : '';
         renderClassCalendar();
         applyFilters();

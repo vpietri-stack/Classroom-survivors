@@ -21,7 +21,7 @@ function openTargetReports() {
     }
     const select=reportElement('targetReportTeacher'); select.replaceChildren();
     select.add(new Option('Select a teacher',''));
-    [...new Set(allStudents.map(s=>s.teacher).filter(Boolean))].sort().forEach(t=>select.add(new Option(t,t)));
+    [...new Set(allStudents.flatMap(s=>ClassCalendarCore.memberships(s).map(g=>g.teacher)).filter(Boolean))].sort().forEach(t=>select.add(new Option(t,t)));
     select.value=reportElement('filterTeacher').value;
     reportElement('targetReportsModal').classList.remove('hidden'); clearTargetReports();
     select.focus();

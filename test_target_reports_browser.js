@@ -1,6 +1,7 @@
 const {chromium}=require('playwright-core');
 const fs=require('fs'),path=require('path'),os=require('os'),assert=require('assert/strict');
 const core=require('./api/src/functions/shared/targetReportsCore');
+const calendar=require('./api/src/functions/shared/classCalendarCore');
 const now=Date.parse('2026-10-13T12:00:00+08:00');
 const target={startTime:'2026-10-11T10:00:00Z',endTime:'2026-10-18T08:30:00Z',targetSessions:10};
 const students=['Student A','Student B','Student C'].map((fullName,i)=>({id:'s'+i,fullName,teacher:'Teacher A',classTime:i===2?'Sun 16:30':'Sun 10:40',avatar:'🐱',role:'student',targets:[i===1?{...target,startTime:'2026-09-13T10:00:00Z',targetSessions:50}:target],analytics:[],password:'PRIVATE'}));
@@ -24,6 +25,16 @@ const groups=core.groups(students.map((s,i)=>({...core.row(s,s.targets[0],[],now
                 return send(students);
             }
             if(url.pathname.endsWith('/classCalendar')) {calendarFetches++;return send({events:[]});}
+            if(url.pathname.endsWith('/getStudentArchive')) return send({archives:[]});
+            if(url.pathname.endsWith('/updateStudent')) {
+                const body=route.request().postDataJSON(),student=students.find(s=>s.id===body.studentId);
+                if(body.expectedTargets) assert.deepEqual(body.expectedTargets,student.targets);
+                const next={...student,...body.fields};
+                if(body.fields.classGroups) next.targets=student.targets.map(t=>({...t,groupKey:calendar.targetGroupKey(next,t)}));
+                Object.assign(student,next);
+                groups.splice(0,groups.length,...core.groups(students.flatMap(s=>calendar.memberships(s).map(g=>core.row({...s,...g},core.selectTarget(s,now,calendar.groupKey(g.teacher,g.classTime)),s.analytics,now)))));
+                return send({success:true,student});
+            }
             if(url.pathname.endsWith('/getTargetReports')) {
                 reportFetches++;
                 assert.equal(url.searchParams.get('teacher'),'Teacher A');
@@ -111,6 +122,40 @@ const groups=core.groups(students.map((s,i)=>({...core.row(s,s.targets[0],[],now
         await page.getByRole('button',{name:'Generate reports',exact:true}).click();
         await page.waitForFunction(()=>window.closingDraws===4);
         assert((await page.locator('#targetReportMessage').inputValue()).endsWith(core.closings[2]));
+        // A single profile gains another membership and keeps two independently labelled targets.
+        students.splice(0,students.length,
+            {id:'selena',fullName:'Selena',role:'student',teacher:'Teacher A',classTime:'Sat 14:50',classGroups:[],avatar:'🐱',analytics:students[0].analytics,
+                targets:[{...target,id:'sat',startTime:'2026-10-10T08:20:00Z',endTime:'2026-10-17T06:50:00Z',manualOffset:7},{...target,id:'sun',targetSessions:20}],password:'PRIVATE'},
+            {id:'other',fullName:'Sunday classmate',role:'student',teacher:'Teacher A',classTime:'Sun 16:30',targets:[],analytics:[]});
+        await page.evaluate(()=>document.getElementById('targetReportsModal').classList.add('hidden'));
+        await page.locator('#filterName').fill('');await page.locator('#filterClassTime').selectOption('');
+        await page.evaluate(()=>refreshDashboardData());
+        await page.locator('#studentsTableBody tr').filter({hasText:'Selena'}).click();
+        await page.getByRole('button',{name:'Settings',exact:true}).click();
+        await page.locator('#settingsAdditionalGroup').selectOption(calendar.groupKey('Teacher A','Sun 16:30'));
+        await page.getByRole('button',{name:'Add group',exact:true}).click();
+        await page.getByRole('button',{name:'Save Changes',exact:true}).click();
+        await page.waitForFunction(()=>document.getElementById('settingsSaveStatus').textContent.includes('Saved'));
+        assert((await page.locator('#detailStudentClass').textContent()).includes('Sat 14:50 · Sun 16:30'));
+        await page.getByRole('button',{name:'Targets',exact:true}).click();
+        assert.equal(await page.locator('#targetsTableBody tr').count(),2);
+        assert.equal(await page.locator('#targetsTableBody select').nth(0).inputValue(),calendar.groupKey('Teacher A','Sat 14:50'));
+        assert.equal(await page.locator('#targetsTableBody select').nth(1).inputValue(),calendar.groupKey('Teacher A','Sun 16:30'));
+        assert((await page.locator('#targetsTableBody').textContent()).includes('10 / 10'));
+        assert((await page.locator('#targetsTableBody').textContent()).includes('3 / 20'));
+        await page.locator('#targetsTableBody select').nth(1).selectOption(calendar.groupKey('Teacher A','Sun 16:30'));
+        await page.waitForFunction(()=>document.getElementById('targetSaveStatus').textContent.includes('group saved'));
+        await page.screenshot({path:'screenshot_multiple_group_targets.png',fullPage:true});
+        await page.evaluate(()=>backToDashboard());
+        await page.locator('#filterClassTime').selectOption('Sun 16:30');
+        const selenaRow=page.locator('#studentsTableBody tr').filter({hasText:'Selena'});
+        assert.equal(await selenaRow.count(),1);assert((await selenaRow.textContent()).includes('3/20'));assert(!(await selenaRow.textContent()).includes('10/10'));
+        await page.getByRole('button',{name:'Export Target Reports',exact:true}).click();
+        await page.getByRole('button',{name:'Generate reports',exact:true}).click();
+        await page.waitForSelector('#targetReportPreview:not(.hidden)');
+        assert((await page.locator('#targetReportMessage').inputValue()).includes('Selena 10/10'));
+        await page.getByRole('button',{name:'Next group →',exact:true}).click();
+        assert((await page.locator('#targetReportMessage').inputValue()).includes('Selena 3/20'));
         await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.querySelector('.report-columns').getBoundingClientRect().width<390),true);
         await page.screenshot({path:'screenshot_target_reports_mobile.png',fullPage:true});
         assert.deepEqual(errors,[]);

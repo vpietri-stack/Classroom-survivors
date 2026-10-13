@@ -1093,6 +1093,7 @@ function startMiniGame(type, context) {
     startMinigameCountdown(scene);
 
     try {
+        if ((type === 'scramble' || type === 'sentencematch') && window.NonSpellingFlow && NonSpellingFlow.startGame()) return;
         if (type === 'spelling') startSpellingGame();
         else if (type === 'wordrec') startWordRecGame();
         else if (type === 'scramble') startGrammarGame();
@@ -1107,6 +1108,7 @@ function startMiniGame(type, context) {
 }
 
 function claimReward(success) {
+    if (window.NonSpellingFlow) NonSpellingFlow.cleanupGame();
     // Stop countdown timer
     if (minigameCountdownInterval) {
         clearInterval(minigameCountdownInterval);
@@ -1655,12 +1657,14 @@ function checkWordRec(selected, target, btn) {
 
 // --- GRAMMAR ---
 
-function startGrammarGame() {
-    if (GRAMMAR_SENTENCES.length === 0) { handleMinigameSuccess('grammar'); return; }
+function startGrammarGame(selectedSentence) {
+    if (selectedSentence === undefined && GRAMMAR_SENTENCES.length === 0) { handleMinigameSuccess('grammar'); return; }
     startExerciseTracking();
 
     const { book, unit, page } = selectedClassContent;
-    let rawEntry = getGameItemSR(book, unit, page, 'sentences', srInSessionFailures, srInSessionSuccesses, srLastServedKey.sentences);
+    let rawEntry = selectedSentence === undefined
+        ? getGameItemSR(book, unit, page, 'sentences', srInSessionFailures, srInSessionSuccesses, srLastServedKey.sentences)
+        : selectedSentence;
 
     // SR lookup can return undefined or [] (empty spaced-repetition pool).
     // Normalize to a list of usable sentence strings, falling back to any
@@ -1979,12 +1983,12 @@ function checkGrammar() {
 // --- SENTENCE MATCH MINIGAME ---
 let gameModeSelectedBTile = null;
 
-function startSentenceMatchGame() {
+function startSentenceMatchGame(selectedPairs) {
     startExerciseTracking();
     const { book, unit, page } = selectedClassContent;
 
     let pairs = [];
-    const result = getGameSentencePairsSR(book, unit, page, srInSessionFailures, srInSessionSuccesses);
+    const result = selectedPairs ? { pairs: selectedPairs } : getGameSentencePairsSR(book, unit, page, srInSessionFailures, srInSessionSuccesses);
     
     if (result && result.pairs && result.pairs.length > 0) {
         pairs = result.pairs;

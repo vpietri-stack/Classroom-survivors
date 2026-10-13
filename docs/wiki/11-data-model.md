@@ -128,3 +128,11 @@ Each persisted class is a separate `role: classCalendar` document with `id = stu
 ## Update discipline
 
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
+
+## Preview non-spelling exercise identities (2026-10-13)
+
+Missing-word/find-fix outcomes use non-spelling:<type>:<book>:<unit>:<page>:<id>
+keys inside srState.sentences. They add independent histories without a new bucket
+or API schema. Old scramble string keys and matching a | b keys stay unchanged.
+New events are missingWord/findAndFix; itemDetails includes stable ID/key,
+curriculum location, sentences, authored answers and submitted response.

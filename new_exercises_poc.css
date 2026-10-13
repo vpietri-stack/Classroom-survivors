@@ -1,0 +1,4 @@
+/* Standalone preview chrome; exercise styles are shared with index.html. */
+body.exercise-poc { touch-action: pan-y; }
+.poc-status { position: fixed; bottom: max(8px, env(safe-area-inset-bottom)); left: 8px; z-index: 100; display: flex; gap: 7px; padding: 4px 7px; border-radius: 5px; background: #0f172acc; color: #cbd5e1; font: 11px/1.4 system-ui,sans-serif; pointer-events: none; }
+body.kid-friendly .poc-status #exercise-id, body.kid-friendly .poc-status #progress-label { color: #cbd5e1 !important; }

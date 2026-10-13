@@ -19,6 +19,7 @@ directly with a `?v=` cache-buster; files share state through the global JS name
 | Auth / sessions | `frontend_auth.js`, `teaching_content.js` (holds auth+analytics globals), `sw.js` |
 | Teaching content | `teaching_content.js`, `content_pu1/2/3.js`, `content_think0/1/2.js`, `content_test.js` |
 | Game modes | `vampire_survivors.js`, `gomoku.js`, `uno.js`, `tower_defense.js`, `game.js`, `study_mode.js`, `handwriting.js` |
+| Exercise POC | `new_exercises_poc.html/.css/.js` (standalone PU3 U9 p109 missing-word/find-fix trial), `serve_new_exercises_poc.js` (allowlisted local/LAN server) |
 | Speech stack | `sr_engine.js`, `speech_preload.js`, `speech_recorder.js`, `speech_engine.js`, `speech_scorer.js`, `speech_ui.js`, `speech_debug.js` |
 | ⏳ Research collections (temporary) | `speech_sample_capture.js` (audio, until 2026-10-19), `handwriting_sample_capture.js` (pen traces, until 2027-01-31) |
 | Dashboards | `teacher_dashboard.html/.js/.css`, `admin_dashboard.js`, `class_calendar.js/.css`; shared calendar rules in `api/src/functions/shared/classCalendarCore.js` |
@@ -229,3 +230,11 @@ Note: the `<head>` also loads `lib/tailwind.js?v=1` (~54), `fonts/fonts.css?v=1`
 ## Update discipline
 
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
+
+## Mixed exercise modules (preview, 2026-10-13)
+
+index.html loads non_spelling_content.js and non_spelling_widget.js after all
+curriculum packs, and non_spelling_flow.js after game.js. The flow calls the
+legacy Study renderers at runtime after study_mode.js is loaded. Widget CSS is
+non_spelling_exercises.css. The standalone POC controller/chrome share the same
+curriculum/widget/styles, rather than duplicating exercise implementations.

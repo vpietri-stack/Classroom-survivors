@@ -6,6 +6,77 @@
 
 Study Mode is the structured practice flow: 5 SR-selected words and 5 SR-selected sentences, drilled through five rounds of increasing production difficulty, plus three sub-rounds of sentence matching. Everything lives in one global `STUDY_STATE` and a set of top-level functions; there is no class.
 
+## New exercise POC (2026-10-13)
+
+`new_exercises_poc.html` is an independent test surface for PU3 Unit 9 page 109.
+Every load or New Set action samples two distinct missing-word boards from M1-M6,
+then two distinct find/fix boards from F1-F8 in the Study presentation; it then
+independently samples the same two-M/two-F pattern for the game presentation.
+Eight boards total, one shown at a time. Duplicates are excluded within each
+presentation; the same exercise can appear in both presentations.
+Its controller/chrome are `new_exercises_poc.js`/`.css`; the curriculum, widget
+and styling are shared with the real app through `non_spelling_content.js`,
+`non_spelling_widget.js` and `non_spelling_exercises.css`.
+It loads the actual production `style.css`, Tailwind, fonts and Font Awesome.
+The shells reproduce `index.html`'s `#studyModeOverlay`/`#study-game-area` and
+`#grammarGame .minigame-container`; the same widget is mounted into either shell.
+Study keys use `.study-letter-btn`, game keys use `.letter-bubble`, and actions
+use `.game-btn`. Both themes use the real theme styles and toggle.
+The POC defaults to kid-friendly when no theme preference exists, preserving an
+explicit saved dark/light choice. New sentence text uses the production exercise
+tile weight (700), compact raised answer fields and individual sentence cards.
+Static words wrap at word boundaries; short trailing clauses stay grouped to
+avoid isolated final words. Find/fix source words use `.study-word-tile` in Study
+and `.draggable` in Game. Phone keyboards use two balanced rows when needed;
+desktop keyboards remain on one row when space permits. Frozen keys retain their
+normal colour, while CLEAR/backspace are secondary controls in the warm theme.
+Feedback uses the existing word tiles' green/red gradients, raised edges and
+readable white lettering. Correct words have a small check badge; mixed answers
+colour individual letters and briefly shake. The compact raised bin has a drawn
+lid that opens when a word is selected, a removed-word chip and an undo action.
+After CHECK, the bin turns green/red with a check/cross beside its icon, grading
+word selection independently from replacement spelling. A correctly selected
+mistake stays neutral, is crossed out, then slides into the open bin; the lid
+closes with a small bounce. The 850ms animation ends before Study auto-advance,
+and reduced-motion mode removes the word immediately. A wrongly selected word
+stays visible beside the red bin. Feedback messages include an icon, and game success
+leaves clearance for the bouncing power-up button. New feedback motion honours
+the reduced-motion preference.
+Short phone screens reserve space for the floating theme control, condense
+spacing and use one keyboard row for four/five keys. The game reward scrolls
+into view when the card needs vertical scrolling.
+Player instructions, hints, grading messages, summary
+text and accessible control labels use Simplified Chinese in both presentations.
+Exercise titles and controls (CHECK, CLEAR, Bin, GET POWER UP) stay English in
+Study and Game, matching the main app's exercise UI. Navigation/retry actions
+remain Chinese, like the main app menus. The page is `zh-CN`, with English
+headings, exercise control labels and practice sentences marked `en`. Chinese UI
+text has explicit system font fallbacks; English exercise typography is retained.
+
+- Missing-word boards use the approved paired sentences and one target per blank.
+- Find/fix makes every word selectable; tap word then bin, or drag with mouse/touch.
+- Reusable keyboards contain only unique target letters, shuffled once per board,
+  with no filler letters. A wrong-word selection still shows the target keyboard.
+- CHECK grades letter position separately from the find/fix word selection.
+  Wrong answers freeze editing, reveal feedback for three seconds, then reset
+  the complete board, restoring the original binned word. CLEAR can reset sooner.
+- Empty boxes receive a nudge without grading. A later success keeps the first
+  failure in the in-memory test summary. Study success advances after 1.2 seconds;
+  game success shows the production-style GET POWER UP action, which advances
+  the POC rather than awarding a real game reward.
+- PC letter keys/Backspace/Enter work, and native phone keyboards never open.
+- This POC has no login, analytics, SR persistence, production game/auth script
+  loading, or changes to the curriculum packs. The visual assets are shared;
+  the real preview integration is described in the mixed-round section below.
+
+Run `node serve_new_exercises_poc.js` from the feature worktree. PC URL:
+`http://localhost:8123/new_exercises_poc.html`; a phone on the same router uses
+the PC's LAN address and port 8123. Ethernet plus Wi-Fi is supported. VPN LAN
+blocking or Windows inbound filtering can prevent access. The server only serves
+the POC files and allowlisted production visual assets, not arbitrary workspace files.
+Optional positional argument changes the port, e.g. `node serve_new_exercises_poc.js 8124`.
+The page also opens directly from disk on a PC.
+
 ## 🔴 The naming is off by one — trust code, not names
 
 The **function names are shifted by one round relative to the UI labels**. `startRoundC` implements UI "Round B", `startRoundD` implements UI "Round C", and so on. The internal round keys also skip `'B'` (`STUDY_ROUNDS = ['A','C','D','E','F']`, `study_mode.js ~1265`). All freeze flags and timers follow the *internal* key (`_roundCFrozen` guards UI Round B).
@@ -213,3 +284,34 @@ Both are in the `npm test` chain — see [Testing](12-testing.md). Related live 
 ## Update discipline
 
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
+
+## Mixed Round D on preview (2026-10-13)
+
+NON_SPELLING_ENABLED enables the new flow on preview and local/file development.
+The production URL retains the legacy flow until release. A/B/C keep existing
+recognition, word scramble and handwriting. Round D presents five boards chosen
+by NonSpellingContent.select: sentence scramble, sentence match, missing words
+and find/fix. At least three eligible types appear when available. Cooldown fills
+shortages, never just the variety quota. Future pages are excluded; nearer pages
+carry higher sampling weight. Matching boards use three unique pairs from one
+page and count once, while pairs retain their independent legacy SR outcomes.
+
+non_spelling_content.js adds nonSpellingExercises arrays from each page's legacy
+sentences/sentencePairs, retaining those arrays and all vocabulary for compatible
+readers. PU3 U9 p109 also receives the approved six M/eight F boards.
+non_spelling_flow.js dispatches the existing scramble/match renderers and the
+shared non_spelling_widget.js for typed boards; non_spelling_exercises.css scopes
+the approved styling. Internal E/F handlers remain compatible; F is one matching
+board inside the four-marker mixed round rather than a separate final round.
+
+Typed SR uses stable non-spelling:<type>:<book>:<unit>:<page>:<id> keys in the
+existing sentences bucket, preserving old history and the delta/merge API format.
+The first submitted outcome is recorded once; retry success cannot promote a
+failure. Five completed boards use the normal finalizer/flush. Exit retains
+observed results without incrementing the session count. Widgets remove their
+listeners/timers on advance/exit; old transition callbacks reject an abandoned
+or replaced mixed session.
+
+Due matching pairs remain reviewable even when cooldown partners are needed to
+fill the three-pair board. Those partially cooled boards may win on SR priority,
+but cannot be pulled solely to meet the type-variety quota.

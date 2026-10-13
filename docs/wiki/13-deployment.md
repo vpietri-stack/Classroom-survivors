@@ -217,3 +217,11 @@ The initial calendar deployment used synchronized stamp `2026-10-13a`; the targe
 Stamp `2026-10-13i` publishes the teacher-approved before/when/after lesson to both production and preview Pages. The release updates all three version stamps, the `content_pu3.js` / `translations.js` cache busters, and the teacher dashboard's auth/content cache busters. The existing preview-path API routing and isolated preview container are preserved; no account or target data are migrated. The lesson is applied separately on each remote's current main history so production does not merge/close draft PR #1 (which hosts the preview API). Deployment is performed from feature worktrees so other sessions' uncommitted changes in the shared main checkout remain untouched.
 
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
+
+## New exercise preview rollout (2026-10-13)
+
+The mixed round and typed challenges are runtime-fenced by NON_SPELLING_ENABLED
+to preview/local development. Publish this feature to the preview remote's main
+only. Production enablement and publishing require the later release request.
+The release integrator bumps the stamp trio together and cache-busts changed
+config/game/study scripts after merging the feature, once at preview ship time.

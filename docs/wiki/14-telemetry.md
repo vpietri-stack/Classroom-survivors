@@ -105,3 +105,11 @@ Full write-ups indexed in [Gotchas & History](15-gotchas-and-history.md). Summar
 ## Update discipline
 
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
+
+## Preview typed exercise events (2026-10-13)
+
+missingWord/findAndFix events use the normal bounded analytics queue and store
+curriculum location, stable ID/key, target sentences/answers and submitted response
+in itemDetails. First-check SR outcomes use namespaced keys in the existing
+sentences bucket, so extractSRDelta and the existing server merge work unchanged.
+Matching remains one presentation board with three independently queued pairs.

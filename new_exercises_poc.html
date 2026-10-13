@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>新练习预览 · Classroom Survivors</title>
+  <script src="lib/tailwind.js"></script>
+  <link rel="stylesheet" href="fonts/fonts.css">
+  <link rel="stylesheet" href="lib/fontawesome/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="non_spelling_exercises.css">
+  <link rel="stylesheet" href="new_exercises_poc.css">
+  <script defer src="non_spelling_content.js"></script>
+  <script defer src="non_spelling_widget.js"></script>
+  <script defer src="new_exercises_poc.js"></script>
+</head>
+<body class="exercise-poc kid-friendly">
+  <!-- Production Study Mode shell from index.html. -->
+  <div id="studyModeOverlay" class="overlay nse-mixed bg-gradient-to-br from-slate-900 to-slate-800 z-50 flex flex-col items-center overflow-y-auto">
+    <div class="w-full max-w-4xl flex flex-col items-center px-2 sm:px-4 py-2">
+      <div id="study-progress-indicator" class="w-full flex items-center justify-center gap-1 mb-2 px-4" aria-label="学习轮次进度"></div>
+      <h2 id="study-title" lang="en" class="text-xl sm:text-3xl text-yellow-400 font-bold mb-1 nse-heading"></h2>
+      <p id="study-instruction" class="text-base sm:text-lg text-gray-300 mb-3 text-center"></p>
+      <div id="study-game-area" class="w-full flex-grow flex flex-col items-center"></div>
+    </div>
+  </div>
+  <!-- Production grammar challenge shell from index.html. -->
+  <div id="grammarGame" class="overlay nse-typed hidden p-2 sm:p-4" style="z-index:50">
+    <div class="minigame-container flex flex-col gap-2">
+      <div class="text-yellow-500 font-bold text-lg sm:text-xl text-center animate-pulse"><span id="grammar-timer"></span></div>
+      <h3 id="game-title" lang="en" class="text-lg sm:text-2xl font-bold mb-0 text-indigo-700 text-center"></h3>
+      <div id="game-exercise-area"></div>
+    </div>
+  </div>
+  <!-- One widget, mounted in either production shell. -->
+  <div id="exercise-widget" class="non-spelling-exercises">
+    <div id="sentences" class="nse-sentences" lang="en"></div>
+    <button id="bin" class="nse-bin" type="button" hidden>
+      <span class="nse-bin-target" aria-hidden="true">
+        <svg class="nse-bin-icon" viewBox="0 0 40 44" fill="none">
+          <path class="nse-bin-handle" d="M15 9V6.5C15 5.1 16.1 4 17.5 4h5C23.9 4 25 5.1 25 6.5V9" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+          <path class="nse-bin-body" d="M9 14h22l-1.5 23.5a3.5 3.5 0 0 1-3.5-3.3H14a3.5 3.5 0 0 1-3.5-3.3L9 14Z"/>
+          <path class="nse-bin-grooves" d="m15.5 21 .7 12M20 21v12m4.5-12-.7 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <path class="nse-bin-lid" d="M6 11.5h28" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/>
+        </svg>
+        <i id="bin-mark" aria-hidden="true" hidden></i>
+      </span>
+      <span id="bin-label" lang="en">Bin</span>
+      <i id="bin-undo" class="fas fa-undo" aria-hidden="true" hidden></i>
+    </button>
+    <div id="keyboard" class="nse-keyboard" role="group" aria-label="可重复使用的字母键盘"></div>
+    <div id="actions" class="nse-actions">
+      <button id="check" lang="en" class="game-btn bg-green-500 py-3 px-8 flex-1 max-w-[160px]" type="button">CHECK</button>
+      <button id="clear" lang="en" class="game-btn bg-gray-500 py-3 px-8 flex-1 max-w-[160px]" type="button">CLEAR</button>
+      <button id="backspace" class="game-btn bg-gray-500 nse-backspace" type="button" aria-label="删除最后一个字母">⌫</button>
+    </div>
+    <p id="feedback" class="nse-feedback" role="status" aria-live="polite"></p>
+    <div id="result-action" class="mt-2 text-center" hidden><button id="next" lang="en" class="game-btn bg-green-500 text-2xl py-4 px-8" type="button">NEXT</button></div>
+    <div id="summary" class="nse-summary" hidden></div>
+  </div>
+  <button id="new-set" type="button" aria-label="换一组练习并重新开始" title="重新开始" class="fixed top-3 right-3 w-10 h-10 flex items-center justify-center rounded-full bg-gray-800/80 text-gray-400 hover:text-white hover:bg-gray-700 text-xl z-50 transition-colors"><i class="fas fa-times" aria-hidden="true"></i></button>
+  <button id="themeToggleBtn" class="theme-toggle-btn" type="button" aria-label="切换主题"><span id="themeToggleIcon">☀️</span></button>
+  <div class="poc-status" aria-live="polite"><span id="exercise-id"></span><span id="progress-label"></span></div>
+</body>
+</html>

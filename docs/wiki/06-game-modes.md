@@ -6,6 +6,16 @@
 
 `game.js` is the hub: it owns the game-selection submenu, the minigame dispatch, the reward plumbing (`claimReward`), the procedural-audio stack (`initAudio`, `osc`, all `synth*`, `playTTS` fallback chain), and the shared widget helpers (`fitAnswerArea`, `showTranslation`, `showVocabImage`).
 
+The standalone `new_exercises_poc.html` previews the planned missing-word and
+find/fix widgets inside the production grammar-challenge shell, after four Study
+previews. It shares `style.css`, `.minigame-container`, `.letter-bubble` and the
+GET POWER UP result action. Titles and exercise controls stay English, matching
+the main app. Instructions, feedback and navigation/retry copy use Simplified
+Chinese; practice content stays English. The reward
+action advances the test sequence only; it
+does not call `claimReward` or start a real game. See [Study Mode](05-study-mode.md)
+for the complete eight-exercise POC flow.
+
 ## Menu hierarchy & entry points
 
 ```mermaid
@@ -125,3 +135,15 @@ All Phaser games share ONE canvas. VS runs it in HiDPI (`enterHiDpi`, boot.js ~9
 ## Update discipline
 
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
+
+## Preview mixed non-spelling challenges (2026-10-13)
+
+On the NON_SPELLING_ENABLED path, startMiniGame routes scramble and matching
+slots through NonSpellingFlow.startGame. Its SR/page pool selects any of four
+supported types. Legacy choices use startGrammarGame(selectedSentence) or
+startSentenceMatchGame(selectedPairs). Typed boards mount the shared widget in
+the grammar shell, temporarily hiding and later restoring its legacy controls.
+First failures record immediately; eventual success joins the in-session success
+set. New analytics types are missingWord/findAndFix. Reward clicks use the real
+claimReward(true) bridge: CONTINUE for Gomoku/UNO, GET POWER UP elsewhere.
+Namespaced SR keys fit the existing API without a backend schema change.

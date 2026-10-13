@@ -72,7 +72,7 @@ function drawTargetReport(canvas,group) {
     ctx.fillStyle='#191c27';ctx.fillRect(0,0,width,height);
     ctx.font='600 22px Inter, Arial, sans-serif';ctx.fillStyle='#e7e9f2';ctx.fillText(`${group.teacher} · ${group.classTime || 'Unassigned class'}`,26,36);
     ctx.fillStyle='#212537';ctx.fillRect(0,54,width,52);ctx.fillStyle='#94a3bc';ctx.font='600 16px Inter, Arial, sans-serif';
-    const columns=[26,325,450,620,765];['STUDENT','TEACHER','CLASS TIME','TARGET','PERIOD (BEIJING)'].forEach((label,i)=>ctx.fillText(label,columns[i],86));
+    const columns=[26,325,450,620,765];['STUDENT','TEACHER','CLASS TIME','TARGET','PERIOD'].forEach((label,i)=>ctx.fillText(label,columns[i],86));
     function fit(text,x,y,maxWidth) {let size=19;do {ctx.font=`500 ${size}px Inter, Arial, sans-serif`;if(ctx.measureText(text).width<=maxWidth) break;} while(--size>11);ctx.fillText(text,x,y,maxWidth);}
     group.rows.forEach((r,i)=>{
         const top=header+i*rowHeight,y=top+44;ctx.fillStyle=i%2?'#1c1f2b':'#191c27';ctx.fillRect(0,top,width,rowHeight);

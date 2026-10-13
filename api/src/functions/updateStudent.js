@@ -62,7 +62,12 @@ app.http('updateStudent', {
                 }
             }
 
-            await getContainer().items.upsert(user);
+            // Patch only edited fields so a concurrent analytics/attendance save is preserved.
+            const operations = allowedFields.filter(key => fields[key] !== undefined)
+                .map(key => ({ op: 'set', path: '/' + key, value: fields[key] }));
+            for (let i = 0; i < operations.length; i += 10) {
+                await getContainer().item(user.id, user.studentId === undefined ? undefined : user.studentId).patch(operations.slice(i, i + 10));
+            }
 
             // Audit trail uses the verified token identity (ignore client creatorId).
             if (Object.keys(changes).length > 0) {

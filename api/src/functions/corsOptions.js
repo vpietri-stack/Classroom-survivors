@@ -10,6 +10,7 @@ const API_ROUTES = [
     'addStudent',
     'updateStudent',
     'setTargets',
+    'classCalendar',
     'manageBms',
     // Temporary speech-sample research collection (see docs/wiki/08-speech.md
     // §11.1). Both are called cross-origin from GitHub Pages with X-App-Key /

@@ -80,6 +80,12 @@ These exist because their contracts were broken in production; treat failures as
 - No test framework — plain `node` + `assert`, PASS/FAIL lines, non-zero exit on fail (that's what makes the `&&` chain a gate).
 - Playwright tests need real Chrome at the hardcoded path; jsdom tests need only `npm install` at root.
 
+## Calendar regression suite (12 October 2026)
+
+`npm run test:calendar` (also appended to `npm test`) runs `test_class_calendar.js`: pure schedule/target/rate rules, an in-memory Cosmos contract with snapshot reads and conditional patches, real HTTP handlers with stubbed auth/database dependencies, and jsdom running the real combined dashboard scripts. It covers 90-minute weekly classes, Beijing dates, the attended/missed target examples, manual offsets, deduplicated archived sessions, short losses, cancellation retry receipts, concurrency preserving analytics/attendance, legacy partition keys, role gating, roster changes, reschedule persistence, and repeat batch submissions including HTTP/network failures. It does not require a live database. `node test_class_calendar_browser.js` separately checks the real dashboard in Chrome against a fully intercepted mock API (no production traffic), including unchecked students remaining after a batch save, attendance rates, the profile and a mobile viewport. It writes the gitignored `screenshot_admin_calendar.png` for visual inspection.
+
+Backend HTTP integration still requires the private `api/test_auth.js` helper and isolated local Functions/Cosmos configuration; that helper is intentionally gitignored and is absent from a fresh worktree.
+
 ## Update discipline
 
 Any agent that adds/changes a test file, changes the `test` script chain, or changes a pinned contract must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.

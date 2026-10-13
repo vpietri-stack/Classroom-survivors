@@ -68,6 +68,10 @@ Context-rich incident documents. The wiki distills their conclusions; read the o
 
 The repo also contains one-off experiment/test scripts preserved for archaeology: `vs_transition_repro.js`, `vs_bat_check.js`, `vs_antiflee_check` family, `api/check_db*.js`, `api/test_flow.js` etc. They are not production code and not in the test gate; check [Vampire Survivors](07-vampire-survivors.md) and [Backend API](10-backend-api.md) indexes before deleting or imitating them.
 
+## Batch dashboard buttons stayed busy after success (12 October 2026)
+
+`submitBulkTargets` and `submitBulkContent` previously restored their disabled buttons only in their error handlers. Success closed the modal while retaining “Setting…”/“Applying…” and `disabled=true`, so reopening it required a page refresh. Restore controls in `finally` for both paths. Content updates must also check `res.ok`; a resolved fetch is not evidence the save succeeded. `test_class_calendar.js` covers repeated successes and failed saves against the real DOM controls.
+
 ## Update discipline
 
 Any agent that discovers a new cross-cutting gotcha, ships a fix for something documented here, or adds a root handoff doc must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.

@@ -509,6 +509,7 @@ async function submitBulkTargets() {
     if (ids.length === 0) { errEl.textContent = 'No students in this class'; errEl.classList.remove('hidden'); return; }
 
     const submitBtn = document.querySelector('button[onclick="submitBulkTargets()"]');
+    if (submitBtn && submitBtn.disabled) return;
     const originalHtml = submitBtn ? submitBtn.innerHTML : '';
     if (submitBtn) {
         submitBtn.disabled = true;
@@ -521,10 +522,14 @@ async function submitBulkTargets() {
             body: JSON.stringify({ studentIds: ids, target: { startTime: startVal+':00+08:00', endTime: endVal+':00+08:00', targetSessions: count } })
         });
         if (!res.ok) throw new Error(await res.text());
+        const result = await res.json();
+        const failed = (result.results || []).filter(r => !r.success);
+        if (failed.length) throw new Error(`${failed.length} student target(s) could not be saved. Please retry.`);
         closeModal('bulkTargetsModal');
         loadAllStudents();
     } catch(e) {
         errEl.textContent = 'Error: ' + e.message; errEl.classList.remove('hidden');
+    } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalHtml;
@@ -556,6 +561,7 @@ async function submitBulkContent() {
     if (students.length === 0) { errEl.textContent = 'No students in this class'; errEl.classList.remove('hidden'); return; }
 
     const submitBtn = document.querySelector('button[onclick="submitBulkContent()"]');
+    if (submitBtn && submitBtn.disabled) return;
     const originalHtml = submitBtn ? submitBtn.innerHTML : '';
     if (submitBtn) {
         submitBtn.disabled = true;
@@ -564,15 +570,17 @@ async function submitBulkContent() {
 
     try {
         for (const s of students) {
-            await apiFetch(`${API_BASE}/updateStudent`, {
+            const res = await apiFetch(`${API_BASE}/updateStudent`, {
                 method: 'POST', headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({ studentId: s.id, fields: { book, unit, page } })
             });
+            if (!res.ok) throw new Error(await res.text());
         }
         closeModal('bulkContentModal');
         loadAllStudents();
     } catch(e) {
         errEl.textContent = 'Error: ' + e.message; errEl.classList.remove('hidden');
+    } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalHtml;

@@ -200,6 +200,14 @@ Deployment request failed ... due to in progress deployment. Please cancel <sha>
 | Functions API | Azure Static Web Apps CI/CD workflow | `origin/main` (`api/` dir) | Minimal staged app; runtime feature flags from `config.js`. |
 | Whisper model + big assets | Not "deployed" — fetched at runtime | `models/`, `sprites/`, `audio_mp3/`, `music/`, `sfx/` | Downloaded via `asset_cache.js` mirror logic / speech engine raw URLs. |
 
+## Admin dashboard preview deployment (13 October 2026)
+
+The admin calendar preview is deployed from `admin-dashboard-update`, integrated with the current `preview/main`. Only the preview repository's `main` is updated; `origin/main` stays unchanged. A draft PR against `origin/main` triggers the existing Azure workflow's **PR environment**, providing a separate API hostname. The preview path in `config.js` is routed to that hostname; other paths retain the production API. Keep the draft PR open while this preview is needed (closing it removes the PR API environment).
+
+The PR API uses `COSMOS_DB_NAME=Val-EslApp`, `COSMOS_CONTAINER_NAME=Students-admin-dashboard-preview`, and `REQUIRE_AUTH=true`. The preview container shares the existing database throughput and contains a copy of account and analytics-archive documents, so attendance/target testing does not alter live Students records. Existing logins are available in the copy. Credentials are read through the authenticated Azure CLI and passed directly to the PR environment without printing them; the temporary local `api/.admin-dashboard-preview-settings.json` is gitignored. Do not overwrite this container on later preview deploys, because that would erase the user's test changes.
+
+Before deployment, the stamp trio and dashboard auth-script cache buster are synchronized to `2026-10-13a`. Validation includes the complete current frontend suite, the 26 private auth-integration assertions against `Val-EslApp-Test`, a real Functions/Cosmos calendar smoke test in that isolated database, and the Chrome dashboard smoke test. Verify both Pages assets/stamps and the PR environment's calendar endpoint before reporting the preview ready.
+
 ## Update discipline
 
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.

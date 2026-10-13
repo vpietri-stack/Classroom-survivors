@@ -105,6 +105,20 @@ The Settings tab's bottom `.admin-panel` ("Student Locations", `teacher_dashboar
 - `test_geo_export.js` (in `npm test`): covers `geo_export.js` — WGS→GCJ→BD conversion, the v2 CSV columns + `sharesCellWith` grouping, map-HTML data embedding, and the `_esc`/`_escJsArg` guards on `renderGeoList`'s innerHTML sinks.
 - **The rest of the dashboards have NO automated coverage** (neither `teacher_dashboard.js` beyond the two helpers nor `admin_dashboard.js` are unit-tested) — the jsdom suite loads `index.html`, not `teacher_dashboard.html`. Verify `admin_dashboard.js` edits with a `vm.runInContext` harness (mind the `let isBM`/`let isAdmin` double-declaration and the `AVAILABLE_CONTENT` stub) — method in the `classroom-survivors-dev` skill's `references/dashboard_testing.md`.
 
+## Class calendar and attendance (12 October 2026)
+
+`class_calendar.js`/`class_calendar.css` add an admin Class Calendar panel and a month view to the shared dashboard. `api/src/functions/shared/classCalendarCore.js` is the single shared browser/server implementation of Beijing-time scheduling, attendance rates and automatic target rules. Recurrence starts **2026-10-12**, groups are keyed by teacher plus classTime, and weekday/time labels such as `Sun 16:30` recur for 90 minutes. Unparseable labels are reported instead of guessed. Calendar reads materialize a bounded future horizon; persisted classes keep stable IDs and historic roster snapshots. Future unedited class rosters follow group membership. New groups introduced later start on their first calendar-load day, rather than generating an attendance backlog.
+
+The calendar follows the main teacher/class filters. Clicking a class opens rescheduling/cancellation controls. A reschedule changes one occurrence. Classes lock once attendance/cancellation starts. Cancellation extends each existing practice target period by seven days with the goal unchanged; cancellation receipts prevent repeated extensions. A cancelled class can retry unfinished target extensions after a partial failure.
+
+**Check attendance** refreshes roster/calendar data and lists only completed classes with unrecorded student attendance, selected by default. Attended/Missed applies to the checked students, oldest classes first. Successful rows disappear immediately, failed rows remain retryable. Each student must have their earlier pending classes recorded before a later class. Recording attendance and changing that student's targets is one ETag-protected Cosmos patch, with a class-ID receipt for retry safety. Attended, or missed without reaching the preceding practice target, creates 10 sessions from class end to the next scheduled class start. Missed after reaching the preceding target adds 10 to that target and preserves its original start, extending its end to the next class. Progress includes deduplicated archived sessions, manual offsets and the same short-loss exclusions as the game.
+
+The roster Attendance column uses its existing date-range controls; the profile Attendance tab uses the detail date filter. Rates = attended / recorded classes in the inclusive Beijing-date range; pending and cancelled classes are excluded. The profile also lists pending classes. Empty data shows “No records”, not 0%.
+
+Bulk targets/content buttons restore their original label and enabled state in `finally`, including successful submissions. Content requests now check HTTP failures; target submissions surface per-student failures instead of silently closing the modal.
+
+Verification: `npm run test:calendar` tests recurrence, the target examples, archive counts, cancellation/idempotency, ETag retry and both batch-button success/error paths against the real dashboard scripts.
+
 ## Update discipline
 
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.

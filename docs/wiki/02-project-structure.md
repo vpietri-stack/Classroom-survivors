@@ -21,7 +21,7 @@ directly with a `?v=` cache-buster; files share state through the global JS name
 | Game modes | `vampire_survivors.js`, `gomoku.js`, `uno.js`, `tower_defense.js`, `game.js`, `study_mode.js`, `handwriting.js` |
 | Speech stack | `sr_engine.js`, `speech_preload.js`, `speech_recorder.js`, `speech_engine.js`, `speech_scorer.js`, `speech_ui.js`, `speech_debug.js` |
 | ⏳ Research collections (temporary) | `speech_sample_capture.js` (audio, until 2026-10-19), `handwriting_sample_capture.js` (pen traces, until 2027-01-31) |
-| Dashboards | `teacher_dashboard.html/.js/.css`, `admin_dashboard.js` |
+| Dashboards | `teacher_dashboard.html/.js/.css`, `admin_dashboard.js`, `class_calendar.js/.css`; shared calendar rules in `api/src/functions/shared/classCalendarCore.js` |
 | Assets & media | `asset_cache.js`, `bgm.js`, `audio_mp3/`, `music/`, `sfx/`, `images/`, `sprites/`, `fonts/`, `models/` |
 | Self-hosted libs | `lib/` (tailwind.js, fontawesome, transformers.min.js, wasm), `phaser.min.js` |
 | Tests | `test_*.js` (root), `vs_*.js` (VS asset/test tools), `boot_refactor_test*.js` |

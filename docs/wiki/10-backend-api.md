@@ -104,6 +104,14 @@ Read-modify-write of the whole student doc; carries the hardest-won concurrency 
 
 One workflow: `azure-static-web-apps-brave-bush-0438ab000.yml` ("Azure Static Web Apps CI/CD"), triggered by push/PR to `main` (and historical `v2-login`). Job runs **only** on repo `vpietri-stack/Classroom-survivors` (the preview repo lacks the SWA token secret). Steps: checkout → stage minimal `swa_app/` (config + stub index) → inject `app-config.json` from secret `APP_CLIENT_KEY` → `Azure/static-web-apps-deploy@v1` with `app_location: swa_app`, `api_location: api`, `skip_app_build: true`. See [Deployment](13-deployment.md) for the full pipeline, branch model, and the GitHub Pages wedge.
 
+## Calendar endpoint (12 October 2026)
+
+`GET /classCalendar?through=YYYY-MM-DD` materializes weekly 90-minute classes from 2026-10-12 through a bounded future horizon and returns persisted events. `POST /classCalendar` supports `action: edit` (`eventId`, `etag`, ISO `startTime`, `endTime`), `action: record` (`eventId`, `studentIds`, `status: attended|missed`), and `action: cancel` (`eventId`). App-key and privileged-role gates match the existing dashboard API, including the existing legacy mode when auth enforcement is disabled. Its OPTIONS route is registered in `corsOptions.js`.
+
+Recording/cancelling returns per-student `results` with updated attendance and targets; successful records are idempotent by class ID. Calendar edits/locks and student attendance+target changes use conditional patches with bounded 412 retries. Practice counts for missed-class carry-over include analytics archives, with event deduplication and short-loss filtering. Classes cannot be edited after attendance/cancellation starts, and future attendance is rejected. Per-student chronological entry is enforced server-side. Calendar documents have `role: classCalendar` so the existing getStudents query excludes them.
+
+`updateStudent` now patches only whitelisted edited fields; `setTargets` conditionally patches targets and retries concurrency conflicts. These preserve concurrently written attendance/analytics rather than upserting a stale full student document. Legacy missing studentId partition keys remain supported.
+
 ## Update discipline
 
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.

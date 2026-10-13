@@ -72,6 +72,7 @@ async function loadAllStudents() {
         populateTeacherFilter();
         populateClassTimeFilter();
         applyFilters();
+        if (typeof loadClassCalendar === 'function') await loadClassCalendar();
     } catch (e) {
         tbody.innerHTML = `<tr><td colspan="7" class="no-results"><p>Error loading students: ${e.message}</p></td></tr>`;
     }
@@ -137,6 +138,7 @@ function applyFilters() {
 
     // Render
     renderStudentsTable(dateFrom, dateTo);
+    if (typeof renderClassCalendar === 'function') renderClassCalendar();
 }
 
 function sortFilteredStudents() {
@@ -443,6 +445,7 @@ function renderStudentsTable(dateFrom, dateTo) {
             <td>${s.classTime || '—'}</td>
             ${renderTargetCell(targetInfo)}
             ${renderPeriodCell(targetInfo)}
+            <td>${typeof attendanceRateCell === 'function' ? attendanceRateCell(s, dateFrom, dateTo) : '—'}</td>
             <td>${formatDuration(avgMs)}</td>
             ${pwCol}
         </tr>`;
@@ -536,7 +539,7 @@ function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
 
-    ['tabSessions','tabExercises','tabTest','tabSettings','tabTargets','tabSR','tabMap'].forEach(id => {
+    ['tabSessions','tabExercises','tabTest','tabSettings','tabTargets','tabSR','tabMap','tabAttendance'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
     });
@@ -545,7 +548,11 @@ function switchTab(tab) {
     const sessionDetail = document.getElementById('sessionDetailPanel');
     sessionDetail.classList.add('hidden');
 
-    if (tab === 'sessions') {
+    if (tab === 'attendance') {
+        document.getElementById('tabAttendance').classList.remove('hidden');
+        dateFilter.classList.remove('hidden');
+        renderStudentAttendance();
+    } else if (tab === 'sessions') {
         document.getElementById('tabSessions').classList.remove('hidden');
         dateFilter.classList.remove('hidden');
         renderSessions();
@@ -582,6 +589,7 @@ function applyDetailFilters() {
     const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
     if (activeTab === 'sessions') renderSessions();
     else if (activeTab === 'exercises') renderExercises();
+    else if (activeTab === 'attendance') renderStudentAttendance();
 }
 
 function clearDetailDates() {

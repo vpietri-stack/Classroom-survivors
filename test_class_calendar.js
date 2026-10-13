@@ -174,6 +174,11 @@ function httpHandler(file,store,gate={token:{role:'admin',sub:'admin'}}) {
     return handler;
 }
 async function httpAndRosterTests() {
+    const configSource=fs.readFileSync('config.js','utf8');
+    const apiFor=(hostname,pathname)=>vm.runInNewContext(configSource+'\nAPI_BASE_URL;', {window:{location:{hostname,pathname,search:'',protocol:'https:'}},URLSearchParams});
+    assert.equal(apiFor('vpietri-stack.github.io','/Classroom-survivors-preview/teacher_dashboard.html'),'https://brave-bush-0438ab000-1.eastasia.7.azurestaticapps.net/api');
+    assert.equal(apiFor('vpietri-stack.github.io','/Classroom-survivors/index.html'),'https://brave-bush-0438ab000.7.azurestaticapps.net/api');
+    assert.equal(apiFor('localhost','/teacher_dashboard.html'),'http://localhost:7074/api');
     const context={error:()=>{}};
     const store=new Store([{id:'a',role:'student',teacher:'Teacher A',classTime:'Sun 16:30',analytics:practice(1),attendance:[]}]);
     const request={method:'GET',query:{get:()=>null}};

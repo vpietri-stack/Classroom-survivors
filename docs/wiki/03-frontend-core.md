@@ -107,7 +107,7 @@ AVAILABLE_CONTENT["PU1"] = { "<unit>": [page, page, …] };   // ~1678 in conten
 |---|---|---|---|
 | PU1 | `content_pu1.js` (1689 ln) | 0–9 | PetrovisKids(?) level-1 book — see pack header comments |
 | PU2 | `content_pu2.js` (1475 ln) | 0–9 | |
-| PU3 | `content_pu3.js` (939 ln) | 0–9 | Unit 9 = "Adjectives" (p107), added 2026-10-02a |
+| PU3 | `content_pu3.js` | 0–9 | Unit 9: adjectives (p107) and before/when/after clauses (p109). Page 109 contains the teacher-approved 3 vocabulary items, 24 sentence scrambles and 12 two-clause matching pairs; all 24 sentence translations are in `translations.js`. |
 | Think0 | `content_think0.js` (755 ln) | 0–4 | Unit 4 = "City Life" (p45), added 2026-10-02a |
 | Think1 | `content_think1.js` (624 ln) | 0–7 | |
 | Think2 | `content_think2.js` (681 ln) | 0–12 | |

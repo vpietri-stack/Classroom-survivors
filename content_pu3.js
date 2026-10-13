@@ -921,6 +921,51 @@ TEACHING_CONTENT["PU3"] = {
                 { a: "Is the dog friendly?", b: "No, it's horrible!" },
                 { a: "Is your teacher pretty?", b: "Yes, she's very beautiful!" }
             ]
+        },
+        "109": {
+            vocab: [
+                "before", "when", "after"
+            ],
+            sentences: [
+                "I washed my hands before I ate lunch.",
+                "He put on his socks before he put on his shoes.",
+                "We bought tickets before we went into the cinema.",
+                "She checked her bag before her dad closed the door.",
+                "Before I went to bed, I cleaned my teeth.",
+                "Before the film started, we bought some popcorn.",
+                "I didn't play football before I finished my homework.",
+                "What did you do before you had dinner?",
+                "I watched TV after I did my homework.",
+                "She dried her hair after she had a shower.",
+                "They washed the bowls after they ate breakfast.",
+                "We went outside after the teacher opened the door.",
+                "After he got dressed, he had breakfast.",
+                "After we got off the bus, we walked to the museum.",
+                "She didn't watch TV after she got home.",
+                "What did you do after you got up?",
+                "I waved when I saw my friend.",
+                "She was happy when she opened her present.",
+                "He took photos when he got his new camera.",
+                "We went inside when it started to rain.",
+                "When the bell rang, the children stood up.",
+                "When I was six, I lived in Beijing.",
+                "He wasn't at home when his friend arrived.",
+                "What did you do when you arrived at school?"
+            ],
+            sentencePairs: [
+                { a: "Mia washed her hands", b: "before she ate lunch." },
+                { a: "Tom put on his helmet", b: "before he rode his bike." },
+                { a: "The children washed their bowls", b: "after they ate their cereal." },
+                { a: "I put my book away", b: "after I finished reading it." },
+                { a: "The dog wagged its tail", b: "when it saw its owner." },
+                { a: "Our class stopped talking", b: "when our teacher asked us to be quiet." },
+                { a: "Before the film started,", b: "we sat down in the cinema." },
+                { a: "Before the bus arrived,", b: "Dad joined the queue at the bus stop." },
+                { a: "After Anna had a shower,", b: "she dried her hair." },
+                { a: "After Grandpa planted the flowers,", b: "he watered them." },
+                { a: "When Lucy opened her birthday present,", b: "she was excited to see her new toy." },
+                { a: "When Sam heard the funny joke,", b: "he laughed." }
+            ]
         }
     },
 };
@@ -935,5 +980,5 @@ AVAILABLE_CONTENT["PU3"] = {
     "6": [69, 71, 73],
     "7": [83, 85, 87],
     "8": [95, 97, 98, 99],
-    "9": [107]
+    "9": [107, 109]
 };

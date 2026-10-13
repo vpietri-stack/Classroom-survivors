@@ -33,6 +33,7 @@ const groups=core.groups(students.map((s,i)=>({...core.row(s,s.targets[0],[],now
         });
         await page.goto('https://reports.test/teacher_dashboard.html');
         await page.locator('#filterTeacher').selectOption('Teacher A');
+        await page.evaluate(()=>{const pick=TargetReportsCore.pickClosing;window.closingDraws=0;TargetReportsCore.pickClosing=()=>pick(()=>(window.closingDraws++%10+0.5)/10);});
         await page.getByRole('button',{name:'Export Target Reports',exact:true}).click();
         assert.equal(await page.locator('#targetReportTeacher').inputValue(),'Teacher A');
         await page.getByRole('button',{name:'Generate reports',exact:true}).click();
@@ -42,6 +43,7 @@ const groups=core.groups(students.map((s,i)=>({...core.row(s,s.targets[0],[],now
         await page.waitForSelector('#targetReportPreview:not(.hidden)');
         assert.equal(await page.locator('#targetReportGroup option').count(),2);
         const message=await page.locator('#targetReportMessage').inputValue();assert(message.includes('Student B 20/50'));assert(message.includes('Student A 0/10'));assert(!message.includes('PRIVATE'));
+        assert(message.endsWith(core.closings[0]));
         await page.screenshot({path:'screenshot_target_reports.png',fullPage:true});
         await page.getByRole('button',{name:'Copy Image',exact:true}).click();
         await page.waitForFunction(()=>window.copied.length===1);
@@ -54,6 +56,13 @@ const groups=core.groups(students.map((s,i)=>({...core.row(s,s.targets[0],[],now
         const zip=await zipDownload;await zip.saveAs(path.join(os.tmpdir(),'target-reports-test.zip'));
         const pngDownload=page.waitForEvent('download');await page.getByRole('button',{name:'Download PNG',exact:true}).click();
         const png=await pngDownload;await png.saveAs(path.join(os.tmpdir(),'target-reports-test.png'));
+        assert.equal(await page.evaluate(()=>window.closingDraws),2); // Navigation/copy/download never rerolls.
+        const zipBytes=fs.readFileSync(path.join(os.tmpdir(),'target-reports-test.zip'));
+        assert(zipBytes.includes(Buffer.from(message+'\nExtra reminder','utf8')));
+        assert(zipBytes.includes(Buffer.from(core.closings[1],'utf8'))); // Unopened groups retain their assigned closing in ZIP.
+        await page.getByRole('button',{name:'Generate reports',exact:true}).click();
+        await page.waitForFunction(()=>window.closingDraws===4);
+        assert((await page.locator('#targetReportMessage').inputValue()).endsWith(core.closings[2]));
         await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.querySelector('.report-columns').getBoundingClientRect().width<390),true);
         await page.screenshot({path:'screenshot_target_reports_mobile.png',fullPage:true});
         assert.deepEqual(errors,[]);

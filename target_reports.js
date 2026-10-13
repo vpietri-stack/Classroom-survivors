@@ -45,7 +45,7 @@ async function generateTargetReports() {
         const res=await apiFetch(`${API_BASE}/getTargetReports?teacher=${encodeURIComponent(teacher)}`);
         const data=await res.json();if (!res.ok) throw new Error(data.error || 'Could not generate reports.');
         if (run!==targetReportState.run) return;
-        targetReportState.groups=data.groups;targetReportState.generatedAt=data.generatedAt;targetReportState.index=0;
+        targetReportState.groups=data.groups.map(g=>({...g,closing:TargetReportsCore.pickClosing()}));targetReportState.generatedAt=data.generatedAt;targetReportState.index=0;
         if (!data.groups.length) return reportStatus('No student groups found for this teacher.');
         const select=reportElement('targetReportGroup');select.replaceChildren();
         data.groups.forEach((g,i)=>select.add(new Option(g.classTime || 'Unassigned class',String(i))));

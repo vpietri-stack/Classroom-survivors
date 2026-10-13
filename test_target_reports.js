@@ -22,6 +22,11 @@ assert(message.includes('2026/09/13 - 2026/10/18'));
 assert(message.includes('No target 未设置目标'));
 assert(!message.includes(student.password));
 assert.equal((message.match(/打卡记录/g)||[]).length,1);
+assert.equal(core.closings.length,10);
+assert.equal(new Set(core.closings).size,10);
+for(let i=0;i<10;i++) assert.equal(core.pickClosing(()=>(i+0.5)/10),core.closings[i]);
+assert.equal(core.pickClosing(()=>0),core.pickClosing(()=>0)); // Repeats are allowed.
+assert(core.message({...core.groups(rows)[0],closing:core.closings[8]}).endsWith(core.closings[8]));
 assert.equal(core.groups([{...rows[0],classTime:'Sun 10:40'},{...rows[0],classTime:'Fri 19:00'}])[0].classTime,'Fri 19:00');
 
 (async()=>{

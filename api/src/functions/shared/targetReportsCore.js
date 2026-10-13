@@ -4,6 +4,19 @@
     else root.TargetReportsCore = factory(root.ClassCalendarCore);
 })(typeof globalThis !== 'undefined' ? globalThis : this, function(calendar) {
     'use strict';
+    const closings = Object.freeze([
+        '记得！每天练一点，比偶尔一次练很多更好！',
+        '每天一点点，进步看得见！别等到最后一天才集中练习哦！',
+        '练习不用一次做很多，每天坚持一点就很棒！',
+        '把练习分到每天，让进步成为习惯！',
+        '今天练一点，明天再练一点，慢慢积累就是大进步！',
+        '每天给英语留一点时间，比偶尔突击更好哦！',
+        '不用一口气完成所有练习，每天一点点，轻松向目标前进！',
+        '小练习，大积累！每天坚持一点，比攒到一起做更好！',
+        '记得每天来练一练！少量、经常，比偶尔一次练很多更好！',
+        '让英语成为每天的小习惯，而不是最后一天的大任务！'
+    ]);
+    function pickClosing(random = Math.random) { return closings[Math.floor(random() * closings.length)]; }
     function selectTarget(student, now) {
         const targets = (student.targets || []).filter(t => Number.isFinite(+new Date(t.startTime)) && Number.isFinite(+new Date(t.endTime)) && Number.isFinite(Number(t.targetSessions)));
         return targets.find(t => +new Date(t.startTime) <= now && +new Date(t.endTime) >= now)
@@ -38,7 +51,7 @@
             periods.get(key).push(row);
         }
         const sections=[...periods.entries()].sort((a,b)=>(+new Date(b[1][0].startTime) || 0)-(+new Date(a[1][0].startTime) || 0)).map(([range,rows],i)=> range + (i===0 ? '\n\n打卡记录:\n（一周内累计完成10次练习，下次课的课堂积分翻倍）' : '') + '\n\n' + rows.map(r=>`${r.name} ${r.goal===null ? '未设置目标' : `${r.completed}/${r.goal}`}`).join('\n'));
-        return sections.join('\n\n') + '\n\n记得！\n每天一点点总比一次过多好！';
+        return sections.join('\n\n') + '\n\n' + (group.closing || closings[0]);
     }
-    return {selectTarget,row,groups,date,period,message};
+    return {selectTarget,row,groups,date,period,message,closings,pickClosing};
 });

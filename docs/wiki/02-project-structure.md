@@ -21,7 +21,7 @@ directly with a `?v=` cache-buster; files share state through the global JS name
 | Game modes | `vampire_survivors.js`, `gomoku.js`, `uno.js`, `tower_defense.js`, `game.js`, `study_mode.js`, `handwriting.js` |
 | Speech stack | `sr_engine.js`, `speech_preload.js`, `speech_recorder.js`, `speech_engine.js`, `speech_scorer.js`, `speech_ui.js`, `speech_debug.js` |
 | ⏳ Research collections (temporary) | `speech_sample_capture.js` (audio, until 2026-10-19), `handwriting_sample_capture.js` (pen traces, until 2027-01-31) |
-| Dashboards | `teacher_dashboard.html/.js/.css`, `admin_dashboard.js` |
+| Dashboards | `teacher_dashboard.html/.js/.css`, `admin_dashboard.js`, `class_calendar.js/.css`; shared calendar rules in `api/src/functions/shared/classCalendarCore.js` |
 | Assets & media | `asset_cache.js`, `bgm.js`, `audio_mp3/`, `music/`, `sfx/`, `images/`, `sprites/`, `fonts/`, `models/` |
 | Self-hosted libs | `lib/` (tailwind.js, fontawesome, transformers.min.js, wasm), `phaser.min.js` |
 | Tests | `test_*.js` (root), `vs_*.js` (VS asset/test tools), `boot_refactor_test*.js` |
@@ -37,7 +37,7 @@ directly with a `?v=` cache-buster; files share state through the global JS name
 | File | ~Lines | Role |
 |---|---|---|
 | `index.html` | 900 | Entry page: all overlays/menus (auth screens, dashboard, minigame containers), Tailwind via self-hosted `lib/tailwind.js`, loads Phaser then every game/auth script (load order below). Also holds the School Defense 3D menu-gate inline script (~888). |
-| `config.js` | 69 | Central API config: `API_BASE_URL` (localhost:7074 in dev, else the Azure SWA Functions URL), `getAppKey()` (fetches git-ignored `app-config.json`), runtime `TD_ENABLED` / `THREE_TD_ENABLED` gating (preview-path or localhost/file:// only; `?td=`/`?3d=` overrides). |
+| `config.js` | 69 | Central API config: `API_BASE_URL` (localhost:7074 in dev, the admin preview PR API under `/Classroom-survivors-preview/`, otherwise production SWA), `getAppKey()` (fetches git-ignored `app-config.json`), runtime `TD_ENABLED` / `THREE_TD_ENABLED` gating (preview-path or localhost/file:// only; `?td=`/`?3d=` overrides). |
 | `boot.js` | 123 | Owns the shared Phaser `config` object, `let game`, `let activeGameMode`, `registerScene()`, and the VS HiDPI helpers `enterHiDpi()`/`exitHiDpi()`. |
 | `class_config.js` | 144 | `CLASS_CONFIG`: weekday → time-slot → {students, content {book,unit,page}}; `CLASS_DAYS` order. Used to auto-resolve a student's content from their classTime. |
 | `style.css` | 1568 | All UI styles: `.study-*`, `.draggable`, `.drop-zone`, `.letter-bubble`, `.sentence-slot`, TD HUD inline extensions in `index.html`. |

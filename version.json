@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-28a",
-  "deployedAt": "2026-09-28",
-  "notes": "Teacher dashboard gains a Map tab: embedded Leaflet map on key-less Gaode (AMap) GCJ-02 raster tiles showing every student with location data as one dot (name + days tooltip), click-to-drop candidate campus pins persisted in teacher localStorage (csGeoCampusPins), per-campus straight-line ranking (avg/median km, within 3/5 km) and per-student rows with key-less uri.amap.com driving-directions deep links (Gaode routing API needs a real-name-verified key, which is unobtainable here). Leaflet 1.9.4 vendored at lib/leaflet/. Pure builders (buildStudentPoints/haversineKm/rankCampuses/gaodeDriveUrl/pin persistence) covered by test_geo_map.js (17 assertions, VM-blob pattern)."
+  "version": "2026-10-13g",
+  "deployedAt": "2026-10-13",
+  "notes": "Preview admin dashboard: multiple class memberships on one profile, independent group targets and attendance, shared practice progress, and reports for every assigned group."
 }

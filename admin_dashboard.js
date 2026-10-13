@@ -4,6 +4,7 @@
 // ============================================================
 
 let isAdmin = false;
+let settingsClassGroups = [];
 
 function initAdminUI() {
     const savedUsers = JSON.parse(localStorage.getItem('savedUsers') || '[]');
@@ -93,7 +94,8 @@ function populatePageSelect(selId, book, unit, currentVal) {
 function populateClassTimeSelect(selId, currentVal, includeCustom) {
     const sel = document.getElementById(selId);
     sel.innerHTML = '<option value="">— None —</option>';
-    const times = [...new Set(allStudents.map(s => s.classTime).filter(Boolean))].sort();
+    const times = [...new Set(allStudents.flatMap(s => ClassCalendarCore.memberships(s).map(g => g.classTime)).filter(Boolean))].sort();
+    if (currentVal && !times.includes(currentVal)) times.push(currentVal);
     times.forEach(t => {
         sel.innerHTML += `<option value="${t}" ${t===currentVal?'selected':''}>${t}</option>`;
     });
@@ -155,6 +157,8 @@ function populateSettingsTab() {
     document.getElementById('settingsTeacherCustom').classList.add('hidden');
     document.getElementById('settingsTeacherCustom').value = '';
     populateClassTimeSelect('settingsClassTime', currentStudent.classTime || '', false);
+    settingsClassGroups = ClassCalendarCore.memberships(currentStudent).filter(g => ClassCalendarCore.groupKey(g.teacher,g.classTime) !== ClassCalendarCore.groupKey(currentStudent.teacher,currentStudent.classTime));
+    renderSettingsClassGroups();
     populateBookSelect('settingsBook', currentStudent.book || '');
     populateUnitSelect('settingsUnit', currentStudent.book || '', currentStudent.unit || '');
     populatePageSelect('settingsPage', currentStudent.book || '', currentStudent.unit || '', currentStudent.page || '');
@@ -162,6 +166,28 @@ function populateSettingsTab() {
     document.getElementById('settingsPwIcon').className = 'fas fa-eye';
     document.getElementById('settingsNeedsPwChange').checked = !!currentStudent.needsPasswordChange;
 }
+
+function renderSettingsClassGroups() {
+    const select = document.getElementById('settingsAdditionalGroup');
+    select.replaceChildren(new Option('Choose another group', ''));
+    const groups = new Map(allStudents.flatMap(s => ClassCalendarCore.memberships(s)).filter(g => ClassCalendarCore.parseClassTime(g.classTime))
+        .map(g => [ClassCalendarCore.groupKey(g.teacher,g.classTime),g]));
+    for (const [key,g] of [...groups].sort((a,b) => a[0].localeCompare(b[0]))) {
+        if (settingsClassGroups.some(s => ClassCalendarCore.groupKey(s.teacher,s.classTime) === key)) continue;
+        if (key === ClassCalendarCore.groupKey(currentStudent.teacher,currentStudent.classTime)) continue;
+        select.add(new Option(`${g.teacher || 'No teacher'} · ${g.classTime}`,key));
+    }
+    document.getElementById('settingsClassGroupsList').innerHTML = settingsClassGroups.map((g,i) =>
+        `<div class="student-group-chip">${_esc(g.teacher) || 'No teacher'} · ${_esc(g.classTime)} <button type="button" class="row-action-btn" onclick="removeStudentClassGroup(${i})" aria-label="Remove ${_esc(g.classTime)}">×</button></div>`).join('');
+}
+function addStudentClassGroup() {
+    const key = document.getElementById('settingsAdditionalGroup').value;
+    if (!key) return;
+    const [teacher,classTime] = JSON.parse(key);
+    settingsClassGroups.push({teacher,classTime});
+    renderSettingsClassGroups();
+}
+function removeStudentClassGroup(index) { settingsClassGroups.splice(index,1); renderSettingsClassGroups(); }
 
 function onSettingsTeacherChange() {
     const val = document.getElementById('settingsTeacher').value;
@@ -186,6 +212,7 @@ async function saveStudentSettings() {
         fullName: document.getElementById('settingsFullName').value.trim(),
         teacher: teacher,
         classTime: document.getElementById('settingsClassTime').value,
+        classGroups: settingsClassGroups.filter(g => ClassCalendarCore.groupKey(g.teacher,g.classTime) !== ClassCalendarCore.groupKey(teacher,document.getElementById('settingsClassTime').value)),
         book: document.getElementById('settingsBook').value,
         unit: document.getElementById('settingsUnit').value,
         page: document.getElementById('settingsPage').value,
@@ -204,10 +231,13 @@ async function saveStudentSettings() {
         const data = await res.json();
         // Update local data
         Object.assign(currentStudent, fields);
+        Object.assign(currentStudent, data.student);
         document.getElementById('detailStudentName').textContent = fields.fullName;
-        document.getElementById('detailStudentClass').textContent = fields.classTime || 'No class';
+        document.getElementById('detailStudentClass').textContent = ClassCalendarCore.memberships(currentStudent).map(g => g.classTime).filter(Boolean).join(' · ') || 'No class';
         document.getElementById('detailStudentBook').textContent = fields.book ? `${fields.book} U${fields.unit} P${fields.page}` : 'No content';
         showStatus('settingsSaveStatus', '✓ Saved!', false);
+        populateTeacherFilter(); populateClassTimeFilter(); applyFilters();
+        if (typeof loadClassCalendar === 'function') await loadClassCalendar();
     } catch(e) {
         showStatus('settingsSaveStatus', 'Error: ' + e.message, true);
     } finally {
@@ -221,6 +251,12 @@ async function saveStudentSettings() {
 // --- Targets Tab ---
 function renderTargetsTab() {
     if (!currentStudent) return;
+    const groups = ClassCalendarCore.memberships(currentStudent);
+    const groupSelect = document.getElementById('targetGroup');
+    const selectedGroup = groupSelect.value;
+    groupSelect.replaceChildren();
+    groups.forEach(g => groupSelect.add(new Option(`${g.teacher || 'No teacher'} · ${g.classTime || 'No class'}`,ClassCalendarCore.groupKey(g.teacher,g.classTime))));
+    if (groups.some(g => ClassCalendarCore.groupKey(g.teacher,g.classTime) === selectedGroup)) groupSelect.value = selectedGroup;
     const targets = currentStudent.targets || [];
     const tbody = document.getElementById('targetsTableBody');
     const noMsg = document.getElementById('noTargetsMsg');
@@ -244,6 +280,7 @@ function renderTargetsTab() {
         const endStr = formatBeijingDT(end);
         const offsetNote = offset > 0 ? ` <span style="color:#f59e0b;font-size:0.75rem" title="Includes ${offset} manually added session(s)">(+${offset} manual)</span>` : '';
         return `<tr>
+            <td>${targetGroupSelect(t,i,groups)}</td>
             <td style="font-size:0.8rem">${startStr}<br>→ ${endStr}</td>
             <td>${t.targetSessions}</td>
             <td><strong>${completed}</strong> / ${t.targetSessions} (${pct}%)${offsetNote}</td>
@@ -256,9 +293,32 @@ function renderTargetsTab() {
     }).join('');
 }
 
+function targetGroupSelect(target, index, groups) {
+    const key = ClassCalendarCore.targetGroupKey(currentStudent,target);
+    const options = new Map(groups.map(g => [ClassCalendarCore.groupKey(g.teacher,g.classTime), `${g.teacher || 'No teacher'} · ${g.classTime || 'No class'}`]));
+    if (key && !options.has(key)) {
+        try { const g = JSON.parse(key); options.set(key, `${g[0] || 'No teacher'} · ${g[1] || 'No class'} (former group)`); } catch (_) {}
+    }
+    return `<select class="form-input target-group-select" onchange="assignTargetGroup(${index},this.value)"><option value="">Choose group</option>${[...options].map(([value,label]) => `<option value="${_esc(value)}" ${value===key?'selected':''}>${_esc(label)}</option>`).join('')}</select>`;
+}
+async function assignTargetGroup(index,key) {
+    if (!currentStudent || !key) { renderTargetsTab(); return; }
+    const before = JSON.parse(JSON.stringify(currentStudent.targets));
+    const targets = before.map((t,i) => i===index ? {...t,groupKey:key} : t);
+    try {
+        const res = await apiFetch(`${API_BASE}/updateStudent`, {method:'POST',headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({studentId:currentStudent.id,fields:{targets},expectedTargets:before})});
+        if (!res.ok) throw new Error(await res.text());
+        currentStudent.targets = targets;
+        renderTargetsTab(); applyFilters();
+        showStatus('targetSaveStatus','✓ Target group saved!',false);
+    } catch (e) { renderTargetsTab(); showStatus('targetSaveStatus','Error: '+e.message,true); }
+}
+
 function countSessionsInRange(student, start, end) {
-    if (!student.analytics || !Array.isArray(student.analytics)) return 0;
-    return student.analytics.filter(e => {
+    const events = student._fullAnalytics || student.analytics;
+    if (!Array.isArray(events)) return 0;
+    return events.filter(e => {
         if (e.type !== 'session') return false;
         // Game-mode losses under 2 minutes don't count toward targets
         // (anti-cheat, from 27 Jul 2026 on — not retroactive). Shared helper
@@ -278,6 +338,7 @@ async function addTargetForStudent() {
     const startVal = document.getElementById('targetStart').value;
     const endVal = document.getElementById('targetEnd').value;
     const count = parseInt(document.getElementById('targetCount').value);
+    const groupKey = document.getElementById('targetGroup').value;
     if (!startVal || !endVal || !count) { showStatus('targetSaveStatus', 'Fill all fields', true); return; }
 
     const addBtn = document.querySelector('button[onclick="addTargetForStudent()"]');
@@ -294,14 +355,15 @@ async function addTargetForStudent() {
     try {
         const res = await apiFetch(`${API_BASE}/setTargets`, {
             method: 'POST', headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({ studentIds: [currentStudent.id], target: { startTime, endTime, targetSessions: count } })
+            body: JSON.stringify({ studentIds: [currentStudent.id], target: { startTime, endTime, targetSessions: count, groupKey } })
         });
         if (!res.ok) throw new Error(await res.text());
         const data = await res.json();
-        // Update local
-        if (!currentStudent.targets) currentStudent.targets = [];
-        currentStudent.targets.push({ id: data.results[0].targetId, startTime, endTime, targetSessions: count });
+        const result = data.results[0];
+        if (!result.success) throw new Error(result.error || 'Could not save target.');
+        currentStudent.targets = result.targets;
         renderTargetsTab();
+        applyFilters();
         showStatus('targetSaveStatus', '✓ Target added!', false);
     } catch(e) {
         showStatus('targetSaveStatus', 'Error: ' + e.message, true);
@@ -322,13 +384,15 @@ async function deleteTarget(idx, clickedBtn) {
         clickedBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
     }
 
+    const expectedTargets = JSON.parse(JSON.stringify(currentStudent.targets));
     const removedTarget = currentStudent.targets[idx];
     currentStudent.targets.splice(idx, 1);
     try {
-        await apiFetch(`${API_BASE}/updateStudent`, {
+        const res = await apiFetch(`${API_BASE}/updateStudent`, {
             method: 'POST', headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({ studentId: currentStudent.id, fields: { targets: currentStudent.targets } })
+            body: JSON.stringify({ studentId: currentStudent.id, fields: { targets: currentStudent.targets }, expectedTargets })
         });
+        if (!res.ok) throw new Error(await res.text());
         renderTargetsTab();
     } catch(e) { 
         console.warn('Failed to delete target', e);
@@ -365,13 +429,14 @@ async function adjustTargetOffset(idx) {
         return;
     }
 
+    const expectedTargets = JSON.parse(JSON.stringify(currentStudent.targets));
     const newOffset = newTotal - recorded;
     target.manualOffset = newOffset;
 
     try {
         const res = await apiFetch(`${API_BASE}/updateStudent`, {
             method: 'POST', headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({ studentId: currentStudent.id, fields: { targets: currentStudent.targets } })
+            body: JSON.stringify({ studentId: currentStudent.id, fields: { targets: currentStudent.targets }, expectedTargets })
         });
         if (!res.ok) throw new Error(await res.text());
         renderTargetsTab();
@@ -400,7 +465,7 @@ function openAddStudentModal() {
 
 function populateTeacherSelect(selId, currentVal) {
     const sel = document.getElementById(selId);
-    const teachers = [...new Set(allStudents.map(s => s.teacher).filter(Boolean))].sort();
+    const teachers = [...new Set(allStudents.flatMap(s => ClassCalendarCore.memberships(s).map(g => g.teacher)).filter(Boolean))].sort();
     // Ensure 'Val' is always present
     if (!teachers.includes('Val')) teachers.unshift('Val');
     sel.innerHTML = '<option value="">— Select Teacher —</option>';
@@ -480,7 +545,7 @@ function previewBulkStudents(classSelId, previewId) {
     const preview = document.getElementById(previewId);
     if (!classTime) { preview.innerHTML = ''; return; }
     const currentTeacher = document.getElementById('filterTeacher') ? document.getElementById('filterTeacher').value : '';
-    const students = allStudents.filter(s => s.classTime === classTime && s.role !== 'BM' && s.role !== 'admin' && (!currentTeacher || s.teacher === currentTeacher));
+    const students = allStudents.filter(s => ClassCalendarCore.belongsTo(s,currentTeacher,classTime) && s.role !== 'BM' && s.role !== 'admin');
     preview.innerHTML = `<div class="bulk-preview-label">Will apply to ${students.length} student(s):</div>` +
         students.map(s => `<span class="bulk-chip">${_esc(s.avatar) || '👤'} ${_esc(s.fullName || s.login)}</span>`).join('');
 }
@@ -505,10 +570,11 @@ async function submitBulkTargets() {
     if (!classTime || !startVal || !endVal || !count) { errEl.textContent = 'Fill all fields'; errEl.classList.remove('hidden'); return; }
 
     const currentTeacher = document.getElementById('filterTeacher') ? document.getElementById('filterTeacher').value : '';
-    const ids = allStudents.filter(s => s.classTime === classTime && s.role !== 'BM' && s.role !== 'admin' && (!currentTeacher || s.teacher === currentTeacher)).map(s => s.id);
+    const ids = allStudents.filter(s => ClassCalendarCore.belongsTo(s,currentTeacher,classTime) && s.role !== 'BM' && s.role !== 'admin').map(s => s.id);
     if (ids.length === 0) { errEl.textContent = 'No students in this class'; errEl.classList.remove('hidden'); return; }
 
     const submitBtn = document.querySelector('button[onclick="submitBulkTargets()"]');
+    if (submitBtn && submitBtn.disabled) return;
     const originalHtml = submitBtn ? submitBtn.innerHTML : '';
     if (submitBtn) {
         submitBtn.disabled = true;
@@ -518,13 +584,17 @@ async function submitBulkTargets() {
     try {
         const res = await apiFetch(`${API_BASE}/setTargets`, {
             method: 'POST', headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({ studentIds: ids, target: { startTime: startVal+':00+08:00', endTime: endVal+':00+08:00', targetSessions: count } })
+            body: JSON.stringify({ studentIds: ids, target: { startTime: startVal+':00+08:00', endTime: endVal+':00+08:00', targetSessions: count, classTime, teacher: currentTeacher } })
         });
         if (!res.ok) throw new Error(await res.text());
+        const result = await res.json();
+        const failed = (result.results || []).filter(r => !r.success);
+        if (failed.length) throw new Error(`${failed.length} student target(s) could not be saved. Please retry.`);
         closeModal('bulkTargetsModal');
         loadAllStudents();
     } catch(e) {
         errEl.textContent = 'Error: ' + e.message; errEl.classList.remove('hidden');
+    } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalHtml;
@@ -552,10 +622,11 @@ async function submitBulkContent() {
     if (!classTime || !book || !unit || !page) { errEl.textContent = 'Fill all fields'; errEl.classList.remove('hidden'); return; }
 
     const currentTeacher = document.getElementById('filterTeacher') ? document.getElementById('filterTeacher').value : '';
-    const students = allStudents.filter(s => s.classTime === classTime && s.role !== 'BM' && s.role !== 'admin' && (!currentTeacher || s.teacher === currentTeacher));
+    const students = allStudents.filter(s => ClassCalendarCore.belongsTo(s,currentTeacher,classTime) && s.role !== 'BM' && s.role !== 'admin');
     if (students.length === 0) { errEl.textContent = 'No students in this class'; errEl.classList.remove('hidden'); return; }
 
     const submitBtn = document.querySelector('button[onclick="submitBulkContent()"]');
+    if (submitBtn && submitBtn.disabled) return;
     const originalHtml = submitBtn ? submitBtn.innerHTML : '';
     if (submitBtn) {
         submitBtn.disabled = true;
@@ -564,15 +635,17 @@ async function submitBulkContent() {
 
     try {
         for (const s of students) {
-            await apiFetch(`${API_BASE}/updateStudent`, {
+            const res = await apiFetch(`${API_BASE}/updateStudent`, {
                 method: 'POST', headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({ studentId: s.id, fields: { book, unit, page } })
             });
+            if (!res.ok) throw new Error(await res.text());
         }
         closeModal('bulkContentModal');
         loadAllStudents();
     } catch(e) {
         errEl.textContent = 'Error: ' + e.message; errEl.classList.remove('hidden');
+    } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalHtml;

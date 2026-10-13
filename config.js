@@ -8,7 +8,9 @@ const API_BASE_URL = (
     window.location.hostname === '127.0.0.1'
 )
     ? 'http://localhost:7074/api'
-    : 'https://brave-bush-0438ab000.7.azurestaticapps.net/api';
+    : /^\/Classroom-survivors-preview(?:\/|$)/i.test(window.location.pathname)
+        ? 'https://brave-bush-0438ab000-1.eastasia.7.azurestaticapps.net/api'
+        : 'https://brave-bush-0438ab000.7.azurestaticapps.net/api';
 
 // ============================================================
 // APP KEY (client-side)

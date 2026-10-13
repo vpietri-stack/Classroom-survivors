@@ -1,0 +1,31 @@
+.calendar-panel { margin: 0 0 24px; padding: 20px; border: 1px solid var(--dash-border); border-radius: 14px; background: var(--dash-bg-card, #191c27); }
+.calendar-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+.calendar-toolbar h2 { font-size: 1.2rem; font-weight: 700; }
+.calendar-toolbar p, .calendar-help, .calendar-subtitle { font-size: .8rem; color: var(--dash-text-dim); }
+.calendar-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.calendar-weekday { text-align: center; padding: 8px; color: var(--dash-text-dim); font-size: .8rem; }
+.calendar-day { min-height: 110px; background: var(--dash-bg, #10121a); border: 1px solid var(--dash-border); border-radius: 6px; padding: 6px; }
+.calendar-empty { opacity: .3; }
+.calendar-today { border-color: #7773ff; }
+.calendar-day-label { display: block; font-size: .8rem; margin-bottom: 5px; }
+.calendar-event { display: flex; flex-direction: column; text-align: left; width: 100%; border: 1px solid #6560e3; border-radius: 6px; background: #363163; color: #ebeaff; padding: 6px; font-size: .75rem; margin-bottom: 5px; cursor: pointer; overflow-wrap: anywhere; }
+.calendar-event:hover { background: #49417f; }
+.calendar-event small { color: #c1bdec; }
+.calendar-cancelled { opacity: .65; border-color: #645b64; background: #342b36; }
+.calendar-cancelled strong { text-decoration: line-through; }
+.calendar-help { margin-top: 12px; }
+.attendance-summary { padding: 18px 0; color: var(--dash-text-dim); }
+.attendance-modal { max-width: 760px; }
+.attendance-class-heading { font-size: .9rem; font-weight: 600; margin: 20px 0 8px; padding-bottom: 8px; border-bottom: 1px solid var(--dash-border); }
+.attendance-check-row { display: flex; align-items: center; gap: 10px; padding: 10px 6px; cursor: pointer; }
+.attendance-check-row input { width: 20px; height: 20px; accent-color: #6c63ff; }
+#calendarMessage, #calendarEditMessage, #attendanceMessage { margin: 12px 0; font-size: .9rem; color: var(--dash-text-dim); overflow-wrap: anywhere; }
+#calendarEditModal .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+@media (max-width: 700px) {
+    .calendar-panel { padding: 12px; overflow-x: auto; }
+    .calendar-grid { min-width: 650px; }
+    .calendar-controls { gap: 6px; }
+    .calendar-toolbar { align-items: flex-start; }
+    .attendance-modal .modal-footer { flex-wrap: wrap; }
+}

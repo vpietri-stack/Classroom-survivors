@@ -104,6 +104,22 @@ Read-modify-write of the whole student doc; carries the hardest-won concurrency 
 
 One workflow: `azure-static-web-apps-brave-bush-0438ab000.yml` ("Azure Static Web Apps CI/CD"), triggered by push/PR to `main` (and historical `v2-login`). Job runs **only** on repo `vpietri-stack/Classroom-survivors` (the preview repo lacks the SWA token secret). Steps: checkout → stage minimal `swa_app/` (config + stub index) → inject `app-config.json` from secret `APP_CLIENT_KEY` → `Azure/static-web-apps-deploy@v1` with `app_location: swa_app`, `api_location: api`, `skip_app_build: true`. See [Deployment](13-deployment.md) for the full pipeline, branch model, and the GitHub Pages wedge.
 
+## Calendar endpoint (12 October 2026)
+
+`GET /classCalendar?through=YYYY-MM-DD` materializes weekly 90-minute classes from 2026-10-12 through a bounded future horizon and returns persisted events. `POST /classCalendar` supports `action: edit` (`eventId`, `etag`, ISO `startTime`, `endTime`), `action: record` (`eventId`, `studentIds`, `status: attended|missed`), and `action: cancel` (`eventId`). App-key and privileged-role gates match the existing dashboard API, including the existing legacy mode when auth enforcement is disabled. Its OPTIONS route is registered in `corsOptions.js`.
+
+Recording/cancelling returns per-student `results` with updated attendance and targets; successful records are idempotent by class ID. Calendar edits/locks and student attendance+target changes use conditional patches with bounded 412 retries. Practice counts for missed-class carry-over include analytics archives, with event deduplication and short-loss filtering. Classes cannot be edited after attendance/cancellation starts, and future attendance is rejected. Per-student chronological entry is enforced server-side. Calendar documents have `role: classCalendar` so the existing getStudents query excludes them.
+
+`updateStudent` now patches only whitelisted edited fields; `setTargets` conditionally patches targets and retries concurrency conflicts. These preserve concurrently written attendance/analytics rather than upserting a stale full student document. Legacy missing studentId partition keys remain supported.
+
 ## Update discipline
 
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
+
+## Target report export
+
+When an attended/missed-unmet class was rescheduled earlier, recording attendance closes the preceding target at the actual class start if its old deadline would overlap the new period. The other group's periods remain unchanged.
+
+Multi-group support: `updateStudent` accepts validated `classGroups` (up to 20 `{teacher,classTime}` memberships). Membership edits bind existing targets where their group can be determined, without changing periods/goals/offsets. Target writes use conditional patches; manual edits can supply `expectedTargets` and get 409 when their snapshot is stale. `setTargets` accepts `target.groupKey`, or `target.teacher`/`target.classTime` for batches, verifies membership and replaces contained periods only within that group. Successful results include the updated targets array. Calendar generation projects all memberships; future rosters update even for rescheduled classes while times and historical rosters remain preserved. Earlier pending attendance is enforced per student **and group**. The report query includes primary and secondary teachers, then expands one row per deduplicated membership and selects only that group's target.
+
+`GET /getTargetReports?teacher=...` is a read-only admin/BM endpoint (legacy no-token mode follows REQUIRE_AUTH). The teacher is required and parameterized. It returns `{teacher, generatedAt, groups:[{teacher,classTime,rows:[{name,avatar,teacher,classTime,completed,goal,startTime,endTime}]}]}`. No credentials, account IDs, or analytics arrays leave the endpoint. Counts include archived sessions from the student partition and the shared calendar count rules; query failures return 500 and never an incomplete successful report. It has a registered CORS preflight and `Cache-Control: no-store`.

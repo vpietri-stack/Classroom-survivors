@@ -80,6 +80,22 @@ These exist because their contracts were broken in production; treat failures as
 - No test framework — plain `node` + `assert`, PASS/FAIL lines, non-zero exit on fail (that's what makes the `&&` chain a gate).
 - Playwright tests need real Chrome at the hardcoded path; jsdom tests need only `npm install` at root.
 
+## Calendar regression suite (12 October 2026)
+
+`npm run test:calendar` (also appended to `npm test`) runs `test_class_calendar.js`: pure schedule/target/rate rules, an in-memory Cosmos contract with snapshot reads and conditional patches, real HTTP handlers with stubbed auth/database dependencies, and jsdom running the real combined dashboard scripts. It covers 90-minute weekly classes, Beijing dates, the attended/missed target examples, manual offsets, deduplicated archived sessions, short losses, cancellation retry receipts, concurrency preserving analytics/attendance, legacy partition keys, role gating, roster changes, reschedule persistence, and repeat batch submissions including HTTP/network failures. It does not require a live database. `node test_class_calendar_browser.js` separately checks the real dashboard in Chrome against a fully intercepted mock API (no production traffic), including unchecked students remaining after a batch save, attendance rates, the profile and a mobile viewport. It writes the gitignored `screenshot_admin_calendar.png` for visual inspection.
+
+Backend HTTP integration still requires the private `api/test_auth.js` helper and isolated local Functions/Cosmos configuration; that helper is intentionally gitignored and is absent from a fresh worktree.
+
 ## Update discipline
 
 Any agent that adds/changes a test file, changes the `test` script chain, or changes a pinned contract must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
+
+## Target report coverage
+
+`test_target_reports.js` covers period choice, archive/live dedup, offsets, short losses, server cutoff, mixed-period messages, safe fields, error propagation and authorization. `test_target_reports_browser.js` runs the real dashboard in Chrome with an isolated API and exercises teacher selection, failed-fetch retry, PNG/text clipboard payloads, editable messages across navigation, ZIP/PNG downloads and mobile layout. Reminder coverage verifies all ten choices, allowed repeats, one draw per group per generation, stable copying/navigation/ZIP content, and fresh draws on regeneration. Both run in `npm test`. Browser artifacts use ignored `screenshot_*.png` names; downloads are written to the OS temp directory.
+
+Target-report pace coverage checks all four thresholds (including exact 1/2/3), completed/over-target/expired/unset targets, fractional days and upcoming windows. Chrome verifies real canvas pixels for all bands and that report colours remain identical after time advances and the user navigates away and back.
+
+Chrome report tests also cover manual dashboard refresh, failed-refresh retention and retry, coalesced concurrent refreshes, calendar reload, filter/sort preservation, and generation refreshing visible progress before report creation. A failed dashboard refresh must not request/export reports.
+
+Multi-group coverage checks membership deduplication, unambiguous legacy-target binding, ambiguous periods remaining unassigned, independent attendance chronology, cancellation/carry-over isolation, cross-group overlap preservation in batch/manual targets, stale target edits, student-role denial, shared practice counts with independent offsets, and secondary-teacher reports. Chrome edits one profile to add a second group, verifies group-labelled existing targets, saves a target binding, checks the filtered roster, and confirms distinct counts in both generated group messages.

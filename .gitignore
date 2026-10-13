@@ -14,6 +14,7 @@ api/auth_test.log
 # secret (APP_CLIENT_KEY). Local dev without this file sends '' and the API
 # accepts it (dev fallback in validateApiKey.js).
 app-config.json
+api/.admin-dashboard-preview-settings.json
 student list.csv
 /reference books PDFs
 

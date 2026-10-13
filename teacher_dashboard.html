@@ -8,7 +8,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="teacher_dashboard.css">
+    <link rel="stylesheet" href="teacher_dashboard.css?v=2026-10-13h">
+    <link rel="stylesheet" href="class_calendar.css?v=2026-10-12a">
+    <link rel="stylesheet" href="target_reports.css?v=2026-10-13h">
     <link rel="stylesheet" href="lib/leaflet/leaflet.css?v=2026-09-28a">
 </head>
 <body>
@@ -21,6 +23,8 @@
                 <h1 id="dashboardTitle" class="dash-title">Teacher Dashboard</h1>
             </div>
             <div class="dash-header-right">
+                <button id="refreshDashboardBtn" onclick="refreshDashboardData()" class="dash-action-btn"><i class="fas fa-sync-alt"></i> Refresh Data</button>
+                <span id="dashboardRefreshStatus" role="status" aria-live="polite"></span>
                 <button id="addStudentBtn" onclick="openAddStudentModal()" class="dash-action-btn bm-or-admin-only hidden">
                     <i class="fas fa-user-plus"></i> Add Student
                 </button>
@@ -70,9 +74,26 @@
 
         <!-- Bulk Actions Bar (admin only) -->
         <div id="bulkActionsBar" class="bulk-actions-bar admin-only hidden">
+            <button onclick="toggleClassCalendar()" class="dash-action-btn"><i class="fas fa-calendar-alt"></i> Class Calendar</button>
             <button onclick="openBulkTargetsModal()" class="dash-action-btn"><i class="fas fa-bullseye"></i> Set Targets</button>
             <button onclick="openBulkContentModal()" class="dash-action-btn"><i class="fas fa-book"></i> Edit Content</button>
+            <button onclick="openTargetReports()" class="dash-action-btn"><i class="fas fa-file-export"></i> Export Target Reports</button>
         </div>
+
+        <section id="classCalendarPanel" class="calendar-panel hidden" aria-label="Class calendar">
+            <div class="calendar-toolbar">
+                <div><h2>Class calendar</h2><p>Beijing time · Weekly classes are 90 minutes · Scheduling starts 12 Oct 2026</p></div>
+                <div class="calendar-controls">
+                    <button onclick="changeCalendarMonth(-1)" class="dash-action-btn" aria-label="Previous month">‹</button>
+                    <input id="calendarMonth" type="month" min="2026-10" class="filter-date" onchange="loadClassCalendar()" aria-label="Calendar month">
+                    <button onclick="changeCalendarMonth(1)" class="dash-action-btn" aria-label="Next month">›</button>
+                    <button onclick="openAttendanceChecklist()" class="dash-action-btn primary">Check attendance <span id="attendancePendingCount"></span></button>
+                </div>
+            </div>
+            <p id="calendarMessage" role="status"></p>
+            <div id="classCalendarGrid" class="calendar-grid"></div>
+            <p class="calendar-help">Select a class to reschedule or cancel it. Attendance becomes available after class ends. Teacher and class filters above also apply here.</p>
+        </section>
 
         <!-- Student Table -->
         <div class="dash-table-wrap">
@@ -84,6 +105,7 @@
                         <th class="sortable" onclick="sortTable('classTime')">Class Time <i class="fas fa-sort sort-icon"></i></th>
                         <th class="sortable" onclick="sortTable('target')">Target <i class="fas fa-sort sort-icon"></i></th>
                         <th>Period</th>
+                        <th>Attendance <span class="calendar-subtitle">(date range)</span></th>
                         <th class="sortable" onclick="sortTable('avgStudy')">Avg Study <i class="fas fa-sort sort-icon"></i></th>
                         <th class="bm-or-admin-col hidden">Password</th>
                     </tr>
@@ -115,6 +137,7 @@
 
         <!-- Tab Bar -->
         <div class="detail-tabs">
+            <button class="tab-btn" data-tab="attendance" onclick="switchTab('attendance')"><i class="fas fa-calendar-check"></i> Attendance</button>
             <button class="tab-btn active" data-tab="sessions" onclick="switchTab('sessions')"><i class="fas fa-history"></i> Sessions</button>
             <button class="tab-btn" data-tab="exercises" onclick="switchTab('exercises')"><i class="fas fa-dumbbell"></i> Exercises</button>
             <button class="tab-btn" data-tab="sr" onclick="switchTab('sr')"><i class="fas fa-brain"></i> SR State</button>
@@ -136,6 +159,10 @@
         </div>
 
         <!-- SESSIONS TAB -->
+        <div id="tabAttendance" class="tab-content hidden">
+            <div id="studentAttendanceSummary" class="attendance-summary"></div>
+            <div class="dash-table-wrap"><table class="dash-table"><thead><tr><th>Class time (Beijing)</th><th>Group</th><th>Attendance</th></tr></thead><tbody id="studentAttendanceBody"></tbody></table></div>
+        </div>
         <div id="tabSessions" class="tab-content">
             <div class="dash-table-wrap">
                 <table class="dash-table" id="sessionsTable">
@@ -207,12 +234,17 @@
                             <button type="button" onclick="copyLogin()" class="pw-toggle-btn" title="Copy login"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
-                    <div class="form-field"><label>Teacher</label>
+                    <div class="form-field"><label>Primary Teacher</label>
                         <select id="settingsTeacher" class="form-input" onchange="onSettingsTeacherChange()"></select>
                         <input type="text" id="settingsTeacherCustom" class="form-input hidden" placeholder="New teacher name..." style="margin-top:6px;">
                     </div>
-                    <div class="form-field"><label>Class Time</label>
+                    <div class="form-field"><label>Primary Class Time</label>
                         <select id="settingsClassTime" class="form-input"></select>
+                    </div>
+                    <div class="form-field full-width"><label>Additional Class Groups</label>
+                        <div id="settingsClassGroupsList"></div>
+                        <div class="student-group-controls"><select id="settingsAdditionalGroup" class="form-input"></select><button type="button" class="dash-action-btn" onclick="addStudentClassGroup()">Add group</button></div>
+                        <p class="group-help">Students appear in every assigned group. Attendance and targets are separate for each group; practice counts toward overlapping targets.</p>
                     </div>
                     <div class="form-field"><label>Book</label><select id="settingsBook" onchange="onSettingsBookChange()" class="form-input"></select></div>
                     <div class="form-field"><label>Unit</label><select id="settingsUnit" onchange="onSettingsUnitChange()" class="form-input"></select></div>
@@ -273,12 +305,14 @@
             <div class="admin-panel">
                 <h3 class="panel-title"><i class="fas fa-bullseye"></i> Session Targets</h3>
                 <div class="dash-table-wrap" style="margin-bottom:20px;">
-                    <table class="dash-table compact"><thead><tr><th>Period</th><th>Target</th><th>Completed</th><th>Status</th><th></th></tr></thead>
+                    <table class="dash-table compact"><thead><tr><th>Group</th><th>Period</th><th>Target</th><th>Completed</th><th>Status</th><th></th></tr></thead>
                     <tbody id="targetsTableBody"></tbody></table>
                     <div id="noTargetsMsg" class="no-results hidden"><i class="fas fa-bullseye"></i><p>No targets set.</p></div>
                 </div>
                 <h4 class="panel-subtitle">Add New Target</h4>
+                <p class="group-help">Choose the group for each target. Existing targets are matched by their end date where possible; choose a group manually if needed.</p>
                 <div class="admin-form-grid">
+                    <div class="form-field"><label>Class Group</label><select id="targetGroup" class="form-input"></select></div>
                     <div class="form-field"><label>Start (Beijing Time)</label><input type="datetime-local" id="targetStart" class="form-input"></div>
                     <div class="form-field"><label>End (Beijing Time)</label><input type="datetime-local" id="targetEnd" class="form-input"></div>
                     <div class="form-field"><label>Target Sessions</label><input type="number" id="targetCount" min="1" value="10" class="form-input"></div>
@@ -493,12 +527,35 @@
     </div>
 
     <!-- Scripts -->
-    <script src="config.js?v=2026-08-01a"></script>
+    <div id="attendanceModal" class="modal-overlay hidden">
+        <div class="modal-box attendance-modal">
+            <div class="modal-header"><h2>Check attendance</h2><button onclick="closeModal('attendanceModal')" class="modal-close" aria-label="Close attendance">&times;</button></div>
+            <div class="modal-body">
+                <p>Completed classes with unrecorded attendance · Beijing time. Students are selected by default. Earlier classes are saved first.</p>
+                <div class="calendar-controls"><button onclick="selectAttendance(true)" class="dash-action-btn">Select all</button><button onclick="selectAttendance(false)" class="dash-action-btn">Uncheck all</button></div>
+                <p id="attendanceMessage" role="status"></p>
+                <div id="attendanceChecklist"></div>
+            </div>
+            <div class="modal-footer"><button id="attendanceAttendedBtn" onclick="saveCheckedAttendance('attended')" class="dash-action-btn primary">Attended the class</button><button id="attendanceMissedBtn" onclick="saveCheckedAttendance('missed')" class="dash-action-btn">Missed the class</button></div>
+        </div>
+    </div>
+    <div id="calendarEditModal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <div class="modal-header"><h2 id="calendarEditTitle">Edit class</h2><button onclick="closeModal('calendarEditModal')" class="modal-close" aria-label="Close class editor">&times;</button></div>
+            <div class="modal-body">
+                <div class="form-group"><label for="calendarEditStart">Start (Beijing time)</label><input id="calendarEditStart" type="datetime-local" class="filter-date"></div>
+                <div class="form-group"><label for="calendarEditEnd">End (Beijing time)</label><input id="calendarEditEnd" type="datetime-local" class="filter-date"></div>
+                <p id="calendarEditInfo"></p><p id="calendarEditMessage" role="status"></p>
+            </div>
+            <div class="modal-footer"><button id="calendarCancelBtn" onclick="saveCalendarEdit(true)" class="dash-action-btn">Cancel class · extend targets</button><button id="calendarSaveBtn" onclick="saveCalendarEdit(false)" class="dash-action-btn primary">Save class time</button></div>
+        </div>
+    </div>
+    <script src="config.js?v=2026-10-13h"></script>
     <!-- frontend_auth.js carries APP_VERSION (Rule 1's stamp). WeChat iOS has no SW
          revalidation here, so a stale buster means a stale APP_VERSION and the
          version watchdog raises a FALSE red banner on the teacher's page. Keep this
          ?v= equal to version.json; the sibling busters above/below are cache-only. -->
-    <script src="frontend_auth.js?v=2026-09-28a"></script>
+    <script src="frontend_auth.js?v=2026-10-13h"></script>
     <script>var TEACHING_CONTENT = {}; var AVAILABLE_CONTENT = {};</script>
     <script src="content_pu1.js?v=2026-08-01a"></script>
     <script src="content_pu2.js?v=2026-08-01a"></script>
@@ -507,10 +564,14 @@
     <script src="content_think1.js?v=2026-08-01a"></script>
     <script src="content_think2.js?v=2026-08-01a"></script>
     <script src="content_test.js?v=2026-08-01a"></script>
-    <script src="teacher_dashboard.js?v=2026-10-05a"></script>
+    <script src="teacher_dashboard.js?v=2026-10-13h"></script>
     <script src="geo_export.js?v=2026-09-26a"></script>
     <script src="lib/leaflet/leaflet.js?v=2026-09-28a"></script>
     <script src="geo_map.js?v=2026-09-29a"></script>
-    <script src="admin_dashboard.js?v=2026-09-27a"></script>
+    <script src="admin_dashboard.js?v=2026-10-13h"></script>
+    <script src="api/src/functions/shared/classCalendarCore.js?v=2026-10-13h"></script>
+    <script src="class_calendar.js?v=2026-10-13h"></script>
+    <script src="api/src/functions/shared/targetReportsCore.js?v=2026-10-13h"></script>
+    <script src="target_reports.js?v=2026-10-13h"></script>
 </body>
 </html>

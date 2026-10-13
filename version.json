@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-13d",
+  "version": "2026-10-13e",
   "deployedAt": "2026-10-13",
   "notes": "Preview admin dashboard: export fresh per-teacher target reports as matching PNG images and Chinese WeChat messages, with group navigation and ZIP downloads. Separate preview API and student-data copy."
 }

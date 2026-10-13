@@ -28,6 +28,19 @@ for(let i=0;i<10;i++) assert.equal(core.pickClosing(()=>(i+0.5)/10),core.closing
 assert.equal(core.pickClosing(()=>0),core.pickClosing(()=>0)); // Repeats are allowed.
 assert(core.message({...core.groups(rows)[0],closing:core.closings[8]}).endsWith(core.closings[8]));
 assert.equal(core.groups([{...rows[0],classTime:'Sun 10:40'},{...rows[0],classTime:'Fri 19:00'}])[0].classTime,'Fri 19:00');
+const day=86400000;
+const paceRow={goal:10,completed:0,startTime:new Date(now-day).toISOString(),endTime:new Date(now+2*day).toISOString()};
+for (const [remaining,band] of [[1,'green'],[2,'yellow'],[4,'yellow'],[5,'orange'],[6,'orange'],[7,'red']]) {
+    const pace=core.pace({...paceRow,completed:10-remaining},now);
+    assert.equal(pace.band,band);assert.equal(pace.perDay,remaining/2);
+}
+assert.equal(core.pace({...paceRow,completed:10},now).band,'green');
+assert.equal(core.pace({...paceRow,completed:12,endTime:new Date(now-day).toISOString()},now).band,'green');
+assert.equal(core.pace({...paceRow,endTime:new Date(now).toISOString()},now).overdue,true);
+assert.equal(core.pace({...paceRow,endTime:new Date(now+day/2).toISOString(),completed:8},now).perDay,4);
+assert.equal(core.pace({...paceRow,startTime:new Date(now+day).toISOString(),endTime:new Date(now+11*day).toISOString()},now).perDay,1);
+assert.equal(core.pace({goal:null,completed:null},now).band,'unset');
+assert.equal(core.pace({...paceRow,endTime:'invalid'},now).band,'unset');
 
 (async()=>{
     let calls=0;

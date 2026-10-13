@@ -17,6 +17,17 @@
         '让英语成为每天的小习惯，而不是最后一天的大任务！'
     ]);
     function pickClosing(random = Math.random) { return closings[Math.floor(random() * closings.length)]; }
+    function pace(row, now) {
+        if (row.goal == null || row.completed == null || !Number.isFinite(Number(row.goal)) || !Number.isFinite(Number(row.completed))) return {band:'unset',perDay:null};
+        const remaining=Math.max(0,Number(row.goal)-Number(row.completed));
+        if (!remaining) return {band:'green',perDay:0,complete:true};
+        const start=+new Date(row.startTime),end=+new Date(row.endTime);
+        if (!Number.isFinite(start) || !Number.isFinite(end) || end<=start || !Number.isFinite(now)) return {band:'unset',perDay:null};
+        const days=(end-Math.max(now,start))/calendar.DAY;
+        if (days<=0) return {band:'red',perDay:Infinity,overdue:true};
+        const perDay=remaining/days;
+        return {band:perDay<1?'green':perDay<=2?'yellow':perDay<=3?'orange':'red',perDay};
+    }
     function selectTarget(student, now) {
         const targets = (student.targets || []).filter(t => Number.isFinite(+new Date(t.startTime)) && Number.isFinite(+new Date(t.endTime)) && Number.isFinite(Number(t.targetSessions)));
         return targets.find(t => +new Date(t.startTime) <= now && +new Date(t.endTime) >= now)
@@ -53,5 +64,5 @@
         const sections=[...periods.entries()].sort((a,b)=>(+new Date(b[1][0].startTime) || 0)-(+new Date(a[1][0].startTime) || 0)).map(([range,rows],i)=> range + (i===0 ? '\n\n打卡记录:\n（一周内累计完成10次练习，下次课的课堂积分翻倍）' : '') + '\n\n' + rows.map(r=>`${r.name} ${r.goal===null ? '未设置目标' : `${r.completed}/${r.goal}`}`).join('\n'));
         return sections.join('\n\n') + '\n\n' + (group.closing || closings[0]);
     }
-    return {selectTarget,row,groups,date,period,message,closings,pickClosing};
+    return {selectTarget,row,groups,date,period,message,closings,pickClosing,pace};
 });

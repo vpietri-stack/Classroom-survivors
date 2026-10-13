@@ -44,6 +44,15 @@ const groups=core.groups(students.map((s,i)=>({...core.row(s,s.targets[0],[],now
         assert.equal(await page.locator('#targetReportGroup option').count(),2);
         const message=await page.locator('#targetReportMessage').inputValue();assert(message.includes('Student B 20/50'));assert(message.includes('Student A 0/10'));assert(!message.includes('PRIVATE'));
         assert(message.endsWith(core.closings[0]));
+        const colours=await page.evaluate(()=>{
+            const stamp=Date.parse(targetReportState.generatedAt),day=86400000;
+            const rows=[1,2,5,7,null].map(remaining=>({name:'Pace fixture',teacher:'Teacher A',classTime:'Sun 10:40',avatar:'🐱',goal:remaining===null?null:10,completed:remaining===null?null:10-remaining,startTime:new Date(stamp-day).toISOString(),endTime:new Date(stamp+2*day).toISOString()}));
+            const canvas=drawTargetReport(document.createElement('canvas'),{teacher:'Teacher A',classTime:'Sun 10:40',generatedAt:targetReportState.generatedAt,rows});
+            return rows.map((r,i)=>Array.from(canvas.getContext('2d').getImageData(4,(106+i*76+10)*2,1,1).data).slice(0,3));
+        });
+        assert.deepEqual(colours,[[101,217,155],[242,210,103],[255,149,101],[255,119,127],[165,173,189]]);
+        const initialImage=await page.locator('#targetReportCanvas').evaluate(c=>c.toDataURL());
+        await page.clock.setFixedTime(new Date(now+86400000)); // Existing reports keep their generation-time colours.
         await page.screenshot({path:'screenshot_target_reports.png',fullPage:true});
         await page.getByRole('button',{name:'Copy Image',exact:true}).click();
         await page.waitForFunction(()=>window.copied.length===1);
@@ -52,6 +61,7 @@ const groups=core.groups(students.map((s,i)=>({...core.row(s,s.targets[0],[],now
         await page.locator('#targetReportMessage').fill(message+'\nExtra reminder');
         await page.getByRole('button',{name:'Next group →',exact:true}).click();assert((await page.locator('#targetReportMessage').inputValue()).includes('Student C 0/10'));
         await page.getByRole('button',{name:'← Previous group',exact:true}).click();assert((await page.locator('#targetReportMessage').inputValue()).endsWith('Extra reminder'));
+        assert.equal(await page.locator('#targetReportCanvas').evaluate(c=>c.toDataURL()),initialImage);
         const zipDownload=page.waitForEvent('download');await page.getByRole('button',{name:'Download all (ZIP)',exact:true}).click();
         const zip=await zipDownload;await zip.saveAs(path.join(os.tmpdir(),'target-reports-test.zip'));
         const pngDownload=page.waitForEvent('download');await page.getByRole('button',{name:'Download PNG',exact:true}).click();

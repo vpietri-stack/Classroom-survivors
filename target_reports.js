@@ -45,7 +45,7 @@ async function generateTargetReports() {
         const res=await apiFetch(`${API_BASE}/getTargetReports?teacher=${encodeURIComponent(teacher)}`);
         const data=await res.json();if (!res.ok) throw new Error(data.error || 'Could not generate reports.');
         if (run!==targetReportState.run) return;
-        targetReportState.groups=data.groups.map(g=>({...g,closing:TargetReportsCore.pickClosing()}));targetReportState.generatedAt=data.generatedAt;targetReportState.index=0;
+        targetReportState.groups=data.groups.map(g=>({...g,generatedAt:data.generatedAt,closing:TargetReportsCore.pickClosing()}));targetReportState.generatedAt=data.generatedAt;targetReportState.index=0;
         if (!data.groups.length) return reportStatus('No student groups found for this teacher.');
         const select=reportElement('targetReportGroup');select.replaceChildren();
         data.groups.forEach((g,i)=>select.add(new Option(g.classTime || 'Unassigned class',String(i))));
@@ -67,7 +67,9 @@ function renderTargetReport() {
     drawTargetReport(reportElement('targetReportCanvas'),g);
 }
 function drawTargetReport(canvas,group) {
-    const width=1100, rowHeight=76, header=106, height=header+group.rows.length*rowHeight+28;
+    const width=1100, rowHeight=76, header=106, footer=92, height=header+group.rows.length*rowHeight+footer;
+    const palette={green:{text:'#65d99b',tint:'#1b2c29',badge:'#24463a'},yellow:{text:'#f2d267',tint:'#302d23',badge:'#4a4127'},orange:{text:'#ff9565',tint:'#332825',badge:'#50352b'},red:{text:'#ff777f',tint:'#32242b',badge:'#4e2b36'},unset:{text:'#a5adbd',tint:'#1c1f2b',badge:'#303547'}};
+    const snapshot=Date.parse(group.generatedAt || targetReportState.generatedAt);
     canvas.width=width*2;canvas.height=height*2;const ctx=canvas.getContext('2d');ctx.scale(2,2);
     ctx.fillStyle='#191c27';ctx.fillRect(0,0,width,height);
     ctx.font='600 22px Inter, Arial, sans-serif';ctx.fillStyle='#e7e9f2';ctx.fillText(`${group.teacher} · ${group.classTime || 'Unassigned class'}`,26,36);
@@ -75,16 +77,25 @@ function drawTargetReport(canvas,group) {
     const columns=[26,325,450,620,765];['STUDENT','TEACHER','CLASS TIME','TARGET','PERIOD'].forEach((label,i)=>ctx.fillText(label,columns[i],86));
     function fit(text,x,y,maxWidth) {let size=19;do {ctx.font=`500 ${size}px Inter, Arial, sans-serif`;if(ctx.measureText(text).width<=maxWidth) break;} while(--size>11);ctx.fillText(text,x,y,maxWidth);}
     group.rows.forEach((r,i)=>{
-        const top=header+i*rowHeight,y=top+44;ctx.fillStyle=i%2?'#1c1f2b':'#191c27';ctx.fillRect(0,top,width,rowHeight);
+        const pace=TargetReportsCore.pace(r,snapshot),colour=palette[pace.band];
+        const top=header+i*rowHeight,y=top+44;ctx.fillStyle=colour.tint;ctx.fillRect(0,top,width,rowHeight);
+        ctx.fillStyle=colour.text;ctx.fillRect(0,top,5,rowHeight);
         ctx.strokeStyle='#303547';ctx.beginPath();ctx.moveTo(0,top);ctx.lineTo(width,top);ctx.stroke();
         ctx.fillStyle='#ececf5';ctx.font='26px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
         // Avatar values are text only; never fetch arbitrary student-provided URLs.
         const avatar=(r.avatar || '👤');ctx.fillText(avatar.length<=12 && !avatar.includes('<') ? avatar : '👤',26,y);
-        ctx.fillStyle='#8c87ff';fit(r.name,73,y,235);ctx.fillStyle='#ececf5';fit(r.teacher,325,y,112);fit(r.classTime || '—',450,y,155);
-        ctx.fillStyle='#292848';ctx.fillRect(612,top+21,128,34);ctx.fillStyle='#aaa5ff';fit(r.goal===null?'—':`${r.completed}/${r.goal}`,627,y-1,108);
+        ctx.fillStyle=colour.text;fit(r.name,73,y,235);ctx.fillStyle='#ececf5';fit(r.teacher,325,y,112);fit(r.classTime || '—',450,y,155);
+        ctx.fillStyle=colour.badge;ctx.fillRect(612,top+13,128,52);ctx.fillStyle=colour.text;fit(r.goal===null?'—':`${r.completed}/${r.goal}`,627,top+35,108);
+        ctx.font='500 14px Inter, Arial, sans-serif';
+        const paceLabel=pace.complete?'已完成':pace.overdue?'已到期':pace.perDay===null?'未设置目标':`${pace.perDay<0.01?'<0.01':'≈'+pace.perDay.toFixed(2)} /day`;
+        ctx.fillText(paceLabel,627,top+56,108);
         ctx.fillStyle='#e2e5ef';fit(r.startTime?TargetReportsCore.date(r.startTime)+' →':'No target',765,top+32,300);
         if(r.endTime) fit(TargetReportsCore.date(r.endTime),765,top+57,300);
     });
+    const bottom=header+group.rows.length*rowHeight;
+    ctx.fillStyle='#191c27';ctx.fillRect(0,bottom,width,footer);ctx.fillStyle='#c0c8d7';ctx.font='500 16px Inter, Arial, sans-serif';ctx.fillText('每天还需练习（次/天）：',26,bottom+32);
+    ['green','yellow','orange','red'].forEach((band,i)=>{const x=250+i*192;ctx.fillStyle=palette[band].text;ctx.fillRect(x,bottom+18,14,14);ctx.fillText(['< 1','1 – 2','> 2 – 3','> 3'][i],x+24,bottom+32);});
+    ctx.fillStyle='#94a3bc';ctx.font='500 15px Inter, Arial, sans-serif';ctx.fillText('已完成：绿色 · 未完成且已到期：红色 · 未设置目标：灰色',26,bottom+66);
     return canvas;
 }
 function targetReportFilename(group) {return `${group.teacher}-${group.classTime || 'unassigned'}-${ClassCalendarCore.beijingDate(targetReportState.generatedAt)}`.replace(/[<>:"/\\|?*\x00-\x1f]/g,'-');}

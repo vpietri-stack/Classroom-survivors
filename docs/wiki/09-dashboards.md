@@ -122,3 +122,9 @@ Verification: `npm run test:calendar` tests recurrence, the target examples, arc
 ## Update discipline
 
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
+
+## Target reports for WeChat
+
+`target_reports.js` / `target_reports.css` add the admin **Export Target Reports** action. Select one teacher and generate a fresh snapshot of all their groups, independent of the roster’s class/name/date filters. The read-only `getTargetReports` endpoint chooses each student’s current target, otherwise the latest ended target, otherwise the nearest upcoming target (matching roster selection). It counts live and archived practice sessions with event deduplication, manual offsets, short-loss exclusions, and a single server cutoff. Archive reads project only sessions in the selected period, use the student partition, and run at most three at a time. Any fetch failure rejects the entire export instead of silently producing incomplete counts. Responses expose only the five intended report columns and generation time.
+
+One snapshot feeds a high-resolution dark table PNG and a Chinese message via the shared `targetReportsCore.js`. Messages separate differing Beijing-date target periods and retain explicit zero counts and unset-target labels. Group navigation preserves edited message drafts. Copy Image uses PNG ClipboardItem (download fallback); Copy Message uses the text clipboard with selection fallback. Download all produces a local ZIP of numbered PNG/text pairs, without a third-party renderer or service. Groups without a class time are marked unassigned for review. No WeChat messages are sent by this feature.

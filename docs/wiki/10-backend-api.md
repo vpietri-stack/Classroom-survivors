@@ -115,3 +115,7 @@ Recording/cancelling returns per-student `results` with updated attendance and t
 ## Update discipline
 
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
+
+## Target report export
+
+`GET /getTargetReports?teacher=...` is a read-only admin/BM endpoint (legacy no-token mode follows REQUIRE_AUTH). The teacher is required and parameterized. It returns `{teacher, generatedAt, groups:[{teacher,classTime,rows:[{name,avatar,teacher,classTime,completed,goal,startTime,endTime}]}]}`. No credentials, account IDs, or analytics arrays leave the endpoint. Counts include archived sessions from the student partition and the shared calendar count rules; query failures return 500 and never an incomplete successful report. It has a registered CORS preflight and `Cache-Control: no-store`.

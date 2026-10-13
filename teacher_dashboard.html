@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="teacher_dashboard.css">
     <link rel="stylesheet" href="class_calendar.css?v=2026-10-12a">
+    <link rel="stylesheet" href="target_reports.css?v=2026-10-13b">
     <link rel="stylesheet" href="lib/leaflet/leaflet.css?v=2026-09-28a">
 </head>
 <body>
@@ -74,6 +75,7 @@
             <button onclick="toggleClassCalendar()" class="dash-action-btn"><i class="fas fa-calendar-alt"></i> Class Calendar</button>
             <button onclick="openBulkTargetsModal()" class="dash-action-btn"><i class="fas fa-bullseye"></i> Set Targets</button>
             <button onclick="openBulkContentModal()" class="dash-action-btn"><i class="fas fa-book"></i> Edit Content</button>
+            <button onclick="openTargetReports()" class="dash-action-btn"><i class="fas fa-file-export"></i> Export Target Reports</button>
         </div>
 
         <section id="classCalendarPanel" class="calendar-panel hidden" aria-label="Class calendar">
@@ -539,12 +541,12 @@
             <div class="modal-footer"><button id="calendarCancelBtn" onclick="saveCalendarEdit(true)" class="dash-action-btn">Cancel class · extend targets</button><button id="calendarSaveBtn" onclick="saveCalendarEdit(false)" class="dash-action-btn primary">Save class time</button></div>
         </div>
     </div>
-    <script src="config.js?v=2026-10-13a"></script>
+    <script src="config.js?v=2026-10-13b"></script>
     <!-- frontend_auth.js carries APP_VERSION (Rule 1's stamp). WeChat iOS has no SW
          revalidation here, so a stale buster means a stale APP_VERSION and the
          version watchdog raises a FALSE red banner on the teacher's page. Keep this
          ?v= equal to version.json; the sibling busters above/below are cache-only. -->
-    <script src="frontend_auth.js?v=2026-10-13a"></script>
+    <script src="frontend_auth.js?v=2026-10-13b"></script>
     <script>var TEACHING_CONTENT = {}; var AVAILABLE_CONTENT = {};</script>
     <script src="content_pu1.js?v=2026-08-01a"></script>
     <script src="content_pu2.js?v=2026-08-01a"></script>
@@ -560,5 +562,7 @@
     <script src="admin_dashboard.js?v=2026-10-12a"></script>
     <script src="api/src/functions/shared/classCalendarCore.js?v=2026-10-12a"></script>
     <script src="class_calendar.js?v=2026-10-12a"></script>
+    <script src="api/src/functions/shared/targetReportsCore.js?v=2026-10-13b"></script>
+    <script src="target_reports.js?v=2026-10-13b"></script>
 </body>
 </html>

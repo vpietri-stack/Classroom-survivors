@@ -89,3 +89,7 @@ Backend HTTP integration still requires the private `api/test_auth.js` helper an
 ## Update discipline
 
 Any agent that adds/changes a test file, changes the `test` script chain, or changes a pinned contract must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
+
+## Target report coverage
+
+`test_target_reports.js` covers period choice, archive/live dedup, offsets, short losses, server cutoff, mixed-period messages, safe fields, error propagation and authorization. `test_target_reports_browser.js` runs the real dashboard in Chrome with an isolated API and exercises teacher selection, failed-fetch retry, PNG/text clipboard payloads, editable messages across navigation, ZIP/PNG downloads and mobile layout. Both run in `npm test`. Browser artifacts use ignored `screenshot_*.png` names; downloads are written to the OS temp directory.

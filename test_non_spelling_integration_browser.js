@@ -137,7 +137,8 @@ async function waitBoard(page, index) { await page.waitForFunction(i => STUDY_ST
         await page.evaluate(() => { startGrammarGame('I washed my hands before I ate lunch.'); });
         ok(await page.locator('#sentence-container').isVisible() && await page.locator('#grammar-actions').isVisible(), 'legacy grammar UI is restored after typed challenges');
         const approved = await page.evaluate(() => {
-            const items = TEACHING_CONTENT.PU3['1']['16'].nonSpellingExercises.filter(e => e.id);
+            const items = Object.entries({ '1': '16', '2': '28' }).flatMap(([unit, page]) =>
+                TEACHING_CONTENT.PU3[unit][page].nonSpellingExercises.filter(e => e.id).map(e => ({ ...e, unit })));
             const host = document.querySelector('#grammarGame .minigame-container');
             host.replaceChildren();
             document.getElementById('grammarGame').classList.add('nse-typed');
@@ -164,12 +165,12 @@ async function waitBoard(page, index) { await page.waitForFunction(i => STUDY_ST
                 await enter(item.answer);
             }
             await click(page, '#check');
-            ok(await page.evaluate(() => NonSpellingWidget.getState().solved), 'approved Unit 1 ' + item.id + ' solves through the real widget');
-            ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Unit 1 ' + item.id + ' fits the 319px phone');
+            ok(await page.evaluate(() => NonSpellingWidget.getState().solved), 'approved Unit ' + item.unit + ' ' + item.id + ' solves through the real widget');
+            ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Unit ' + item.unit + ' ' + item.id + ' fits the 319px phone');
         }
         await page.evaluate(item => {
             NonSpellingWidget.mount(document.querySelector('#grammarGame .minigame-container'), item, { presentation: 'game', onCheck() {}, onNext() {} });
-        }, approved.find(e => e.id === 'M19'));
+        }, approved.find(e => e.unit === '1' && e.id === 'M19'));
         await click(page, '[data-box="0"]');
         await page.keyboard.type('couldn');
         await page.evaluate(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: '’', bubbles: true })));

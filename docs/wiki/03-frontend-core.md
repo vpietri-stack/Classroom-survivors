@@ -303,4 +303,6 @@ Approved PU3 Unit 1 additions (2026-10-14) use the existing page 16 entry:
 20 missing-word boards and 22 find/fix boards, with the approved ID gaps retained.
 Catalog lookup is scoped by book/unit/page; the Unit 9 catalog remains the POC
 source. Reused M/F IDs cannot collide across pages because SR keys include that
-scope. Unit 2 has no newly authored boards until the teacher approves its draft.
+scope. Approved Unit 2 additions use page 28: 16 missing-word and 20 find/fix
+boards, including the revised M2 pancakes sentence and F9/F11 relative clauses.
+Unit 3 remains suggestions only until approved.

@@ -225,3 +225,9 @@ to preview/local development. Publish this feature to the preview remote's main
 only. Production enablement and publishing require the later release request.
 The release integrator bumps the stamp trio together and cache-busts changed
 config/game/study scripts after merging the feature, once at preview ship time.
+
+Approved Unit 2 content is published to preview only as `2026-10-14c`, including
+the 16 missing-word and 20 find/fix boards under page 28. The synchronized stamp
+trio and the curriculum script cache buster are updated together; the dashboard
+auth link also loads the current shared version. Production remains a separate
+release and preview retains its existing isolated API/data.

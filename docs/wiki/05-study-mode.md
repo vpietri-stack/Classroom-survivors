@@ -322,3 +322,10 @@ in statements, replacing the rejected yes/no drills. The target-only reusable
 keyboard includes an apostrophe for contractions; physical straight/curly
 apostrophes both enter the same ASCII character used by the authored answers.
 Vocabulary, legacy sentences/pairs and Unit 9 content are retained unchanged.
+
+PU3 Unit 2 page 28 contains the 16 missing-word and 20 find/fix boards approved
+on 2026-10-14. M2 pairs the café where breakfast happens with the pancakes which
+were eaten. F9/F11 retain the approved teacher/tree-house relative clauses.
+Three-blank boards M4/M5 grade all three targets before advancing. Earlier Unit 1
+material remains available for weighted SR review, without making Unit 2 eligible
+during Unit 1. Unit 3 content is awaiting teacher review.

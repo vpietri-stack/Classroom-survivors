@@ -140,7 +140,10 @@ Unit 1 expansion coverage checks 20/22 authored counts, exact page placement,
 exclusion of rejected boards, unique scoped SR IDs and no future-page leakage.
 The browser integration solves all 42 approved boards at 319px width, including
 capitalized original mistakes, contractions via physical/on-screen keys, and
-smart-apostrophe normalization. Unit 2 remains unauthored pending approval.
+smart-apostrophe normalization. Unit 2 coverage adds 16/20 authored counts,
+the three specifically edited M2/F9/F11 sentences, page-scoped keys and future
+exclusion. Chrome solves all 36 Unit 2 boards, including three-blank boards,
+at 319px width alongside all 42 Unit 1 boards. Unit 3 remains unauthored.
 Forced game fixtures cool all original sentence pairs, including leftovers from
 random three-pair grouping, so a regrouped fresh board cannot displace the
 intended typed exercise. Fixture IDs also include the authored unit/page scope.

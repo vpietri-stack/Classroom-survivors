@@ -134,3 +134,7 @@ body.kid-friendly #clear, body.kid-friendly #backspace { background: #fff7ef !im
   .nse-feedback { margin-top: 8px; }
   #next { font-size: 1.15rem; padding: 12px 18px; }
 }
+
+/* Keep the pronoun and its editable contraction ending together. */
+.nse-contraction { display: inline-flex; align-items: center; gap: 2px; white-space: nowrap; }
+#exercise-widget .nse-contraction .nse-answer { min-width: 64px; }

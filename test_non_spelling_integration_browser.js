@@ -137,7 +137,7 @@ async function waitBoard(page, index) { await page.waitForFunction(i => STUDY_ST
         await page.evaluate(() => { startGrammarGame('I washed my hands before I ate lunch.'); });
         ok(await page.locator('#sentence-container').isVisible() && await page.locator('#grammar-actions').isVisible(), 'legacy grammar UI is restored after typed challenges');
         const approved = await page.evaluate(() => {
-            const items = [['1', '16'], ['2', '28'], ['3', '40'], ['4', '54'], ['5', '57'], ['5', '59'], ['5', '66'], ['6', '69'], ['6', '71'], ['6', '73'], ['7', '83'], ['7', '85'], ['7', '87']].flatMap(([unit, page]) =>
+            const items = [['1', '16'], ['2', '28'], ['3', '40'], ['4', '54'], ['5', '57'], ['5', '59'], ['5', '66'], ['6', '69'], ['6', '71'], ['6', '73'], ['7', '83'], ['7', '85'], ['7', '87'], ['8', '95'], ['8', '97'], ['8', '98'], ['8', '99']].flatMap(([unit, page]) =>
                 TEACHING_CONTENT.PU3[unit][page].nonSpellingExercises.filter(e => e.id).map(e => ({ ...e, unit, page })));
             const host = document.querySelector('#grammarGame .minigame-container');
             host.replaceChildren();
@@ -167,6 +167,28 @@ async function waitBoard(page, index) { await page.waitForFunction(i => STUDY_ST
             await click(page, '#check');
             ok(await page.evaluate(() => NonSpellingWidget.getState().solved), 'approved Unit ' + item.unit + ' ' + item.id + ' solves through the real widget');
             ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Unit ' + item.unit + ' ' + item.id + ' fits the 319px phone');
+        }
+        for (const presentation of ['study', 'game']) {
+            for (const id of ['M5', 'M6']) {
+                const item = approved.find(e => e.unit === '8' && e.id === id);
+                await page.evaluate(({ item, presentation }) => {
+                    document.getElementById('studyModeOverlay').classList.toggle('hidden', presentation !== 'study');
+                    document.getElementById('grammarGame').classList.toggle('hidden', presentation === 'study');
+                    const host = presentation === 'study' ? document.getElementById('study-game-area') : document.querySelector('#grammarGame .minigame-container');
+                    NonSpellingWidget.mount(host, item, { presentation, onCheck() {}, onNext() {} });
+                }, { item, presentation });
+                ok(await page.locator('.nse-contraction').count() === 2, presentation + ' ' + id + ' attaches both contraction blanks');
+                ok(await page.locator('.nse-contraction').evaluateAll(groups => groups.every(group => {
+                    const [pronoun, box] = group.children;
+                    const a = pronoun.getBoundingClientRect(), b = box.getBoundingClientRect();
+                    return Math.abs(b.left - a.right - 2) < 1 && a.top < b.bottom && b.top < a.bottom;
+                })), presentation + ' ' + id + ' keeps each pronoun beside its ending');
+                await fillMissing(page, item.answers);
+                await click(page, '#check');
+                ok(await page.evaluate(() => NonSpellingWidget.getState().solved), presentation + ' ' + id + ' accepts apostrophe endings from on-screen keys');
+                ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), presentation + ' contraction board fits 319px');
+                await page.screenshot({ path: path.join(screenshots, 'phone-' + presentation + '-contraction-' + id + '.png'), fullPage: true });
+            }
         }
         const hinted = approved.find(e => e.unit === '4' && e.id === 'M1');
         for (const presentation of ['study', 'game']) {

@@ -150,7 +150,16 @@
         }
         tokens.forEach(token => {
           if (token === '___') {
-            row.appendChild(answerBox(blank, exercise.answers[blank]));
+            const box = answerBox(blank, exercise.answers[blank]);
+            const previous = row.lastElementChild;
+            if (exercise.answers[blank].startsWith("'") && previous && previous.classList.contains('nse-fixed-word')) {
+              // A contraction is one visual word, even on a narrow phone.
+              if (row.lastChild.nodeType === Node.TEXT_NODE) row.lastChild.remove();
+              const group = document.createElement('span');
+              group.className = 'nse-contraction';
+              group.append(previous, box);
+              row.appendChild(group);
+            } else row.appendChild(box);
             if (blank === activeBox && !locked) row.classList.add('nse-active');
             blank++;
           } else {

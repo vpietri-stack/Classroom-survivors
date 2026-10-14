@@ -158,3 +158,5 @@ Unit 5 coverage checks exact per-page 3/4, 4/6 and 9/10 counts, prefix hints, di
 Unit 6 tests enforce the 26/34 totals, per-page counts, future-page exclusion, unique SR keys and specifically approved content edits. Chrome solves all 259 Unit 1-6 authored boards at 319px, including CTRL shortcuts as sentence text, contractions, long vocabulary repair sentences and locked initials. Unit 7 remains review-only.
 
 Unit 7 tests enforce 26/32 totals, per-page placement, future exclusion, mixed hinted/unhinted M5 blanks and the approved unhinted if/when additions. Chrome solves all 317 Unit 1-7 authored boards at 319px, including the 12-letter photographer target and longer contextual connector exercises. Unit 8 remains review-only.
+
+Unit 8 tests enforce 23/32 totals, page placement, future exclusion, M10 removal, contracted M5/M6 answers, the edited M15 wording and three-blank M16. Chrome solves all 372 Unit 1-8 authored boards at 319px. Dedicated Study/game checks verify both contraction endings remain beside their pronouns, accept on-screen apostrophes, solve correctly and fit the phone viewport.

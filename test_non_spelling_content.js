@@ -103,9 +103,28 @@ for (const [id, wrong, answer] of [['F29','when','if'],['F30','if','when'],['F31
 assert.equal(new Set([...unit1, ...unit2, ...unit3, ...unit4, ...unit5, ...unit6, ...unit7].map(e => e.key)).size, 317, 'all approved boards retain scoped keys');
 assert.equal(new Set(unit7.filter(e => e.answer).map(e => e.sentence)).size, 32, 'no duplicate Unit 7 fixes');
 assert.ok(!content.buildPool('PU3', 6, 73).entries.some(e => e.item.unit === '7'), 'Unit 7 stays out of Unit 6');
-assert.equal(vm.runInContext("TEACHING_CONTENT.PU3['8']['99'].nonSpellingExercises.some(e => e.id)", sandbox), false, 'Unit 8 remains a proposal');
+const unit8 = content.buildPool('PU3', 8, 99).entries.filter(e => e.item.id && e.item.unit === '8').map(e => e.item);
+assert.equal(unit8.filter(e => e.answers).length, 23, 'Unit 8 has 23 approved missing boards');
+assert.equal(unit8.filter(e => e.answer).length, 32, 'Unit 8 has 32 approved fixes');
+for (const [page, missing, fixes] of [['95', 4, 4], ['97', 8, 10], ['98', 6, 10], ['99', 5, 8]]) {
+    assert.equal(unit8.filter(e => e.page === page && e.answers).length, missing, page + ' missing count');
+    assert.equal(unit8.filter(e => e.page === page && e.answer).length, fixes, page + ' fix count');
+    assert.ok(!content.buildPool('PU3', 8, page).entries.some(e => e.item.unit === '8' && Number(e.item.page) > Number(page)), 'later Unit 8 pages never appear early');
+}
+assert.equal(unit8.filter(e => e.prefixes).length, 17, 'Unit 8 preserves approved initial hints');
+assert.ok(!unit8.some(e => e.id === 'M10'), 'rejected umbrella/rain board is omitted');
+assert.deepEqual(Array.from(unit8.find(e => e.id === 'M5').answers), ["'m", "'s"]);
+assert.deepEqual(Array.from(unit8.find(e => e.id === 'M6').answers), ["'re", "'s"]);
+assert.ok(unit8.find(e => e.id === 'M5').sentences[0].startsWith('I___'), 'contraction slot attaches to its pronoun');
+assert.deepEqual(Array.from(unit8.find(e => e.id === 'M15').sentences), ['We go to the ___', 'to get ___.']);
+const postBoard = unit8.find(e => e.id === 'M16');
+assert.deepEqual(Array.from(postBoard.sentences), ['We buy ___ at the ___ ___.']);
+assert.deepEqual(Array.from(postBoard.answers), ['stamps', 'post', 'office']);
+assert.equal(new Set([...unit1, ...unit2, ...unit3, ...unit4, ...unit5, ...unit6, ...unit7, ...unit8].map(e => e.key)).size, 372, 'all approved boards retain scoped keys');
+assert.equal(new Set(unit8.filter(e => e.answer).map(e => e.sentence)).size, 32, 'no duplicate Unit 8 fixes');
+assert.ok(!content.buildPool('PU3', 7, 87).entries.some(e => e.item.unit === '8'), 'Unit 8 stays out of Unit 7');
 assert.ok(!unit1.some(e => ['M6', 'M9', 'M10', 'F9', 'F10'].includes(e.id)), 'rejected boards remain excluded');
-for (const item of [...unit1, ...unit2, ...unit3, ...unit4, ...unit5, ...unit6, ...unit7]) {
+for (const item of [...unit1, ...unit2, ...unit3, ...unit4, ...unit5, ...unit6, ...unit7, ...unit8]) {
     if (item.answers) assert.equal(item.sentences.join(' ').split('___').length - 1, item.answers.length, item.id + ' has one target per blank');
     else if (Number.isInteger(item.wrongIndex)) assert.equal(item.sentence.split(' ')[item.wrongIndex].replace(/[.,!?]+$/, '').toLowerCase(), item.wrongWord, item.id + ' explicitly identifies its repeated wrong token');
     else assert.equal(item.sentence.split(' ').filter(word => word.replace(/[.,!?]+$/, '').toLowerCase() === item.wrongWord).length, 1, item.id + ' identifies exactly one wrong token');

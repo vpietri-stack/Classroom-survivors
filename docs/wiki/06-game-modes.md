@@ -149,3 +149,5 @@ claimReward(true) bridge: CONTINUE for Gomoku/UNO, GET POWER UP elsewhere.
 Namespaced SR keys fit the existing API without a backend schema change.
 
 The shared typed widget also supports locked first-letter prefixes in game challenges. Key banks use only remaining suffix letters, while full-word grading and the reward bridge remain unchanged. PU3 Unit 4 page 54 supplies 16 M/20 F boards.
+
+The shared typed widget renders apostrophe-led contraction answers beside their pronoun as one nonwrapping group in both Study and game shells. Compact ending boxes preserve phone spacing; full-word blanks and existing reward behavior are unchanged.

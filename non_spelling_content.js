@@ -425,7 +425,88 @@
             ]
         }
     };
-    const pageCatalogs = { 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:9:109': catalog };
+    const unit8Catalogs = {
+        95: {
+            missing: [
+                {"id": "M1", "sentences": ["On a compass, N means ___.", "On a compass, S means ___."], "answers": ["north", "south"], "prefixes": ["n", "s"]},
+                {"id": "M2", "sentences": ["The sun rises in the ___.", "The sun sets in the ___."], "answers": ["east", "west"], "prefixes": ["e", "w"]},
+                {"id": "M3", "sentences": ["Don't turn left or right. Go ___ on.", "The opposite of left is ___."], "answers": ["straight", "right"], "prefixes": ["s", "r"]},
+                {"id": "M4", "sentences": ["In China, people drive on the ___ side of the road.", "In the UK, people drive on the ___ side."], "answers": ["right", "left"], "prefixes": ["r", "l"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "On a compass, N means south.", "wrongWord": "south", "answer": "north"},
+                {"id": "F2", "sentence": "The sun rises in the west.", "wrongWord": "west", "answer": "east"},
+                {"id": "F3", "sentence": "The opposite of left is straight.", "wrongWord": "straight", "answer": "right"},
+                {"id": "F4", "sentence": "In China, people drive on the left side of the road.", "wrongWord": "left", "answer": "right"}
+            ]
+        },
+        97: {
+            missing: [
+                {"id": "M5", "sentences": ["I___ going to visit a museum tomorrow.", "She___ going to come with me."], "answers": ["'m", "'s"]},
+                {"id": "M6", "sentences": ["We___ going to have a picnic.", "It___ going to be sunny."], "answers": ["'re", "'s"]},
+                {"id": "M7", "sentences": ["We're ___ to visit a museum.", "She's going ___ take the bus."], "answers": ["going", "to"]},
+                {"id": "M8", "sentences": ["___ she going to visit the museum?", "___ they going to come too?"], "answers": ["is", "are"]},
+                {"id": "M9", "sentences": ["She's going to ___ a museum tomorrow.", "We're going to ___ a play at the theatre."], "answers": ["visit", "watch"], "prefixes": ["v", "w"]},
+                {"id": "M11", "sentences": ["I'm staying at home. I'm ___ going to the park.", "She's staying at home too. She ___ going to the park."], "answers": ["not", "isn't"]},
+                {"id": "M12", "sentences": ["I ___ the museum yesterday.", "I'm going to ___ it again tomorrow."], "answers": ["visited", "visit"], "prefixes": ["v", "v"]},
+                {"id": "M13", "sentences": ["We ___ football yesterday.", "We're going to ___ again tomorrow."], "answers": ["played", "play"], "prefixes": ["p", "p"]}
+            ],
+            fix: [
+                {"id": "F5", "sentence": "I is going to visit a museum tomorrow.", "wrongWord": "is", "answer": "am"},
+                {"id": "F6", "sentence": "She are going to catch the bus.", "wrongWord": "are", "answer": "is"},
+                {"id": "F7", "sentence": "They is going to play football.", "wrongWord": "is", "answer": "are"},
+                {"id": "F8", "sentence": "We're go to have lunch in the park.", "wrongWord": "go", "answer": "going"},
+                {"id": "F9", "sentence": "He's going for take his umbrella.", "wrongWord": "for", "answer": "to"},
+                {"id": "F10", "sentence": "She's going to visiting a museum.", "wrongWord": "visiting", "answer": "visit"},
+                {"id": "F11", "sentence": "What is they going to do tomorrow?", "wrongWord": "is", "answer": "are"},
+                {"id": "F12", "sentence": "Are he going to take the bus?", "wrongWord": "are", "answer": "is"},
+                {"id": "F13", "sentence": "They don't going to swim today.", "wrongWord": "don't", "answer": "aren't"},
+                {"id": "F14", "sentence": "I'm going to took my umbrella.", "wrongWord": "took", "answer": "take"}
+            ]
+        },
+        98: {
+            missing: [
+                {"id": "M14", "sentences": ["We catch a plane at the ___.", "We book a room at a ___."], "answers": ["airport", "hotel"], "prefixes": ["a", "h"]},
+                {"id": "M15", "sentences": ["We go to the ___", "to get ___."], "answers": ["bank", "money"], "prefixes": ["b", "m"]},
+                {"id": "M16", "sentences": ["We buy ___ at the ___ ___."], "answers": ["stamps", "post", "office"], "prefixes": ["s", "p", "o"]},
+                {"id": "M17", "sentences": ["We buy medicine at the ___.", "We watch plays at the ___."], "answers": ["chemist's", "theatre"], "prefixes": ["c", "t"]},
+                {"id": "M18", "sentences": ["We can see old objects at a ___.", "My brother studies engineering at ___."], "answers": ["museum", "university"], "prefixes": ["m", "u"]},
+                {"id": "M19", "sentences": ["We pay for meals at a ___.", "Houses, schools and hotels are ___."], "answers": ["restaurant", "buildings"], "prefixes": ["r", "b"]}
+            ],
+            fix: [
+                {"id": "F15", "sentence": "We catch our plane at the museum.", "wrongWord": "museum", "answer": "airport"},
+                {"id": "F16", "sentence": "We get money from the theatre.", "wrongWord": "theatre", "answer": "bank"},
+                {"id": "F17", "sentence": "We buy stamps at the post museum.", "wrongWord": "museum", "answer": "office"},
+                {"id": "F18", "sentence": "We buy medicine at the bank.", "wrongWord": "bank", "answer": "chemist's"},
+                {"id": "F19", "sentence": "We watch plays at the airport.", "wrongWord": "airport", "answer": "theatre"},
+                {"id": "F20", "sentence": "We can see ancient objects in a restaurant.", "wrongWord": "restaurant", "answer": "museum"},
+                {"id": "F21", "sentence": "My brother studies engineering at a hotel.", "wrongWord": "hotel", "answer": "university"},
+                {"id": "F22", "sentence": "We booked a room at a bank for our holiday.", "wrongWord": "bank", "answer": "hotel"},
+                {"id": "F23", "sentence": "We paid for our meal at the museum.", "wrongWord": "museum", "answer": "restaurant"},
+                {"id": "F24", "sentence": "We put money on letters before we post them.", "wrongWord": "money", "answer": "stamps"}
+            ]
+        },
+        99: {
+            missing: [
+                {"id": "M20", "sentences": ["He opened the door and went ___ the house.", "She left the car. She got ___ ___ it."], "answers": ["into", "out", "of"], "prefixes": ["i", "o", "o"]},
+                {"id": "M21", "sentences": ["We drove ___ the tunnel.", "The bird flew ___ the roof."], "answers": ["through", "over"], "prefixes": ["t", "o"]},
+                {"id": "M22", "sentences": ["Walk ___ the bridge to the other side.", "We didn't enter the bank. We walked ___ it."], "answers": ["across", "past"], "prefixes": ["a", "p"]},
+                {"id": "M23", "sentences": ["Don't go through the flower bed. Walk ___ it.", "Go into the park ___ the gate."], "answers": ["round", "through"], "prefixes": ["r", "t"]},
+                {"id": "M24", "sentences": ["She got out ___ the car.", "We're going ___ the hotel."], "answers": ["of", "to"]}
+            ],
+            fix: [
+                {"id": "F25", "sentence": "Inside the tunnel, we drove over the mountain.", "wrongWord": "over", "answer": "through"},
+                {"id": "F26", "sentence": "We didn't enter the bank. We walked into it and kept going.", "wrongWord": "into", "answer": "past"},
+                {"id": "F27", "sentence": "She left the car. She got out to it.", "wrongWord": "to", "answer": "of"},
+                {"id": "F28", "sentence": "We opened the door and walked onto the room.", "wrongWord": "onto", "answer": "into"},
+                {"id": "F29", "sentence": "He used the bridge to walk through the river.", "wrongWord": "through", "answer": "across"},
+                {"id": "F30", "sentence": "The bird flew through the house, high above its roof.", "wrongWord": "through", "answer": "over"},
+                {"id": "F31", "sentence": "Keep outside the flower bed. Walk through it.", "wrongWord": "through", "answer": "round"},
+                {"id": "F32", "sentence": "She got into of the car and walked away.", "wrongWord": "into", "answer": "out"}
+            ]
+        }
+    };
+    const pageCatalogs = { 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:109': catalog };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

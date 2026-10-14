@@ -72,6 +72,10 @@ The repo also contains one-off experiment/test scripts preserved for archaeology
 
 `submitBulkTargets` and `submitBulkContent` previously restored their disabled buttons only in their error handlers. Success closed the modal while retaining “Setting…”/“Applying…” and `disabled=true`, so reopening it required a page refresh. Restore controls in `finally` for both paths. Content updates must also check `res.ok`; a resolved fetch is not evidence the save succeeded. `test_class_calendar.js` covers repeated successes and failed saves against the real DOM controls.
 
+## Mixed Study picker crashed on unauthored PU1 pages (14 October 2026)
+
+The page registry advertised PU1 Unit 2 pages 24/25 without teaching-content objects. The new mixed picker dereferenced each page during earlier-page review, so one missing historical page blocked every later PU1 Study session (and could also block game challenges). Legacy SR selection already guarded this lookup. Keep the same book/unit/page guard in the mixed picker, skip missing entries, and preserve absolute indexes for page weighting. test_non_spelling_startup.js checks all advertised pages and the real Study button at desktop/phone widths. Do not invent exercises or remove page assignments to work around a sparse registry.
+
 ## Update discipline
 
 Any agent that discovers a new cross-cutting gotcha, ships a fix for something documented here, or adds a root handoff doc must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.

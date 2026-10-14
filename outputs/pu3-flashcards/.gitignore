@@ -1,0 +1,6 @@
+# Local originals index and visual QA screenshots; originals remain in Codex.
+sources.local.json
+extra-sources.local.json
+review-*.png
+build-report.json
+extra-build-report.json

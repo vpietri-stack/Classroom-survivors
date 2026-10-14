@@ -285,10 +285,10 @@ Both are in the `npm test` chain — see [Testing](12-testing.md). Related live 
 
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
 
-## Mixed Round D on preview (2026-10-13)
+## Mixed Round D
 
-NON_SPELLING_ENABLED enables the new flow on production (released 2026-10-14),
-preview and local/file development. A/B/C keep existing
+NON_SPELLING_ENABLED enables the released flow on production, preview and local/file development.
+The nonspelling=0 diagnostic override retains the legacy flow. A/B/C keep existing
 recognition, word scramble and handwriting. Round D presents five boards chosen
 by NonSpellingContent.select: sentence scramble, sentence match, missing words
 and find/fix. At least three eligible types appear when available. Cooldown fills
@@ -316,4 +316,39 @@ Due matching pairs remain reviewable even when cooldown partners are needed to
 fill the three-pair board. Those partially cooled boards may win on SR priority,
 but cannot be pulled solely to meet the type-variety quota.
 
+PU3 Unit 1 page 16 now contains the 20 missing-word and 22 find/fix boards approved
+on 2026-10-14. Past/present ability boards contrast could/couldn't with can/can't
+in statements, replacing the rejected yes/no drills. The target-only reusable
+keyboard includes an apostrophe for contractions; physical straight/curly
+apostrophes both enter the same ASCII character used by the authored answers.
+Vocabulary, legacy sentences/pairs and Unit 9 content are retained unchanged.
+
+PU3 Unit 2 page 28 contains the 16 missing-word and 20 find/fix boards approved
+on 2026-10-14. M2 pairs the café where breakfast happens with the pancakes which
+were eaten. F9/F11 retain the approved teacher/tree-house relative clauses.
+Three-blank boards M4/M5 grade all three targets before advancing. Earlier Unit 1
+material remains available for weighted SR review, without making Unit 2 eligible
+during Unit 1.
+
+PU3 Unit 3 page 40 adds the approved 22 M/27 F boards. M22 has four blanks across
+three rows, including two blanks in one row. F27 duplicates F8 and is excluded.
+F28 uses two sentences without the rejected conjunction. When the wrong token
+also occurs correctly elsewhere, optional wrongIndex pins the intended token;
+the widget checks both its position and spelling rather than accepting any
+occurrence of the same word. Earlier authored boards keep their existing SR IDs.
+
+PU3 Unit 4 page 54 adds 16 M/20 F boards. Optional per-blank prefixes lock the first letter on M1-M8, M10-M13 and M15. The keyboard derives from remaining suffixes (so catch retains its second c); grading compares full words. CLEAR, backspace and retry resets preserve prefixes, and prefixes alone cannot submit. Other boards retain full blanks.
+
+PU3 Unit 5 adds 16 M/20 F boards across the existing entries: page 57 has 3 M/4 F clothing boards; page 59 has 4 M/6 F made-of boards; page 66 has 9 M/10 F materials, properties and suggestion boards. Thirteen M boards retain locked initials. Earlier pages cannot sample later-page content, and legacy vocabulary/sentences/pairs remain unchanged.
+
+PU3 Unit 6 adds 26 M/34 F boards across pages 69 (6 M/6 F), 71 (4 M/6 F) and 73 (16 M/22 F). The approved additions include locked initials, should/should-not and good-at/base-verb contrasts, familiar wifi-password context, CTRL+C/CTRL+V, and the edited laptop/apps/wifi/dictionary repairs. Legacy vocabulary and sentence arrays remain unchanged.
+
+PU3 Unit 7 adds 26 M/32 F boards across pages 83 (5 M/10 F), 85 (10 M/12 F) and 87 (11 M/10 F). Jobs, conditional verb forms, personality and appearance use the approved text. M23-M26 and F29-F32 practise the intended if/when distinction with embedded context. M5 demonstrates a board with only its first blank hinted; the article blank stays empty. No legacy vocabulary or arrays change.
+
+PU3 Unit 8 adds 23 M/32 F boards across pages 95 (4 M/4 F), 97 (8 M/10 F), 98 (6 M/10 F) and 99 (5 M/8 F). M10 is excluded. M5/M6 accept apostrophe endings attached to their pronouns in a nonwrapping compact group. M15 uses the approved bank/money wording and M16 is one three-blank stamps/post/office sentence. M20 splits out of into two boxes. Legacy vocabulary and arrays are unchanged.
+
+PU3 Unit 9 pages 107/110/111 add 24 M/36 F boards (8/10, 8/12 and 8/14 respectively). Pages 110/111 also supply holiday vocabulary and -ed/-ing feelings, scrambles and matching pairs to native Study/game selection. All new M blanks have locked initials. The teacher-approved poopoo wording, sent tense and varied matching pronouns are retained. Page 109 is unchanged.
+
 Study startup fix (2026-10-14): AVAILABLE_CONTENT can list pages that have no TEACHING_CONTENT entry (currently PU1 Unit 2 pages 24/25). The mixed non-spelling pool now skips missing books/units/pages just as the legacy SR picker does. Original absolute page indexes remain intact, so proximity weighting, earlier-page review, cooldown and future-page exclusion retain their behavior. Missing current pages may still review earlier loaded material; a wholly unloaded book returns an empty pool. This guard applies to Study and game challenges.
+
+Production promotion 2026-10-15a enables the complete approved PU3 Units 1-9 catalog (432 additional M/F boards plus the original 14 page-109 boards) with the preview-tested prefix/contraction widget and 48 flashcards. The already-live production mixed-flow gate and existing SR identities are preserved. The page-availability correction from 2026-10-14m is included.

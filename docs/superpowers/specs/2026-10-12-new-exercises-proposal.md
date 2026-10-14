@@ -2,7 +2,8 @@
 
 Date: 2026-10-12 (Asia/Shanghai)
 
-Status: standalone missing-word/find-fix POC and shared Study/game preview implemented on 2026-10-13; user-approved production release enabled on 2026-10-14.
+Status: standalone missing-word/find-fix POC implemented on 2026-10-13; shared Study/game integration implemented for preview on 2026-10-13; production
+rollout remains pending.
 Worktree: `D:/coding/html games/Classroom-survivors-wt/New exercises`.
 Branch: `new-exercises`, created from production `origin/main` at `ff22e18`.
 
@@ -326,6 +327,6 @@ contains five SR/page-weighted boards with at least three eligible types;
 cooldown fills shortages without forcing variety. Matching counts once with
 three independently tracked pairs. New typed outcomes use namespaced keys in
 the existing sentences SR bucket. Vocabulary and legacy SR identities remain
-unchanged. The runtime gate enables production, preview and development after
-the approved 2026-10-14 release. Required pool and real-app browser checks cover
+unchanged. The runtime gate limits the feature to preview/development pending
+the later production release. Required pool and real-app browser checks cover
 selection, progression, first-failure retention, wire deltas and reward plumbing.

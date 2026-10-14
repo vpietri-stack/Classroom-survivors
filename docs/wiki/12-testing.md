@@ -136,6 +136,35 @@ npm run test:non-spelling. Screenshots go to the OS temp folder
 classroom-non-spelling-integrated. The legacy widget regression loads new scripts
 in index order with ?nonspelling=0 to retain its original round scope.
 
+Unit 1 expansion coverage checks 20/22 authored counts, exact page placement,
+exclusion of rejected boards, unique scoped SR IDs and no future-page leakage.
+The browser integration solves all 42 approved boards at 319px width, including
+capitalized original mistakes, contractions via physical/on-screen keys, and
+smart-apostrophe normalization. Unit 2 coverage adds 16/20 authored counts,
+the three specifically edited M2/F9/F11 sentences, page-scoped keys and future
+exclusion. Chrome solves all 36 Unit 2 boards, including three-blank boards,
+at 319px width alongside all 42 Unit 1 boards. Unit 3 adds count/dedup checks for
+22 M/27 F boards and a four-blank board. Chrome solves all 49 additions at 319px,
+and F28 must reject replacing an already-correct "the" even when "than" is spelled
+correctly, then accept its intended final token. Unit 4 coverage is described below.
+Forced game fixtures cool all original sentence pairs, including leftovers from
+random three-pair grouping, so a regrouped fresh board cannot displace the
+intended typed exercise. Fixture IDs also include the authored unit/page scope.
+
+Unit 4 adds 16 M/20 F boards and Chrome now solves all 163 Unit 1-4 authored boards at 319px. Study/game prefix tests cover suffix-only physical and on-screen input, immutable initials, empty submissions, CLEAR/backspace, failure feedback and timed reset, plus the second c in catch.
+
+Unit 5 coverage checks exact per-page 3/4, 4/6 and 9/10 counts, prefix hints, distinct scoped keys, and future-page exclusion. Chrome solves all 199 Unit 1-5 authored boards at 319px, including the hinted apostrophe in let's. Unit 6 remains review-only.
+
+Unit 6 tests enforce the 26/34 totals, per-page counts, future-page exclusion, unique SR keys and specifically approved content edits. Chrome solves all 259 Unit 1-6 authored boards at 319px, including CTRL shortcuts as sentence text, contractions, long vocabulary repair sentences and locked initials. Unit 7 remains review-only.
+
+Unit 7 tests enforce 26/32 totals, per-page placement, future exclusion, mixed hinted/unhinted M5 blanks and the approved unhinted if/when additions. Chrome solves all 317 Unit 1-7 authored boards at 319px, including the 12-letter photographer target and longer contextual connector exercises. Unit 8 remains review-only.
+
+Unit 8 tests enforce 23/32 totals, page placement, future exclusion, M10 removal, contracted M5/M6 answers, the edited M15 wording and three-blank M16. Chrome solves all 372 Unit 1-8 authored boards at 319px. Dedicated Study/game checks verify both contraction endings remain beside their pronouns, accept on-screen apostrophes, solve correctly and fit the phone viewport.
+
+Unit 9 tests enforce page counts/availability, first-letter hints, the single-row Chinese New Year board, approved edits, future-page exclusion and exact Chinese translation coverage for 31 vocabulary entries plus 22 sentence scrambles. Chrome solves all 432 Unit 1-9 added boards at 319px and checks the real app translation lookup. Original page 109 fixtures remain covered separately.
+
 test_non_spelling_startup.js reproduces the PU1 pages 24/25 crash, exercises selection on every available page of every loaded book, and covers synthetic missing book/unit/page entries without collapsing proximity indexes. Chrome presses the real Study button on PU1 U2 pages 23/24/25/26 and U9 page 111 at desktop and 319px, then renders the mixed round. External HTTP/API/model traffic is blocked. The regression runs in both npm test and npm run test:non-spelling.
 
-The production browser fixture cools every raw sentence pair, including leftover pairs omitted by one random board grouping, before forcing an authored game challenge. This removes accidental fresh matching boards without changing runtime selection or SR behavior.
+The startup regression now asserts that every advertised real page has content, the exact corrected PU1/PU2 page lists, PU2 p47 selection and future-page exclusion at p46. Missing PU1 pages 24/25 are reintroduced only inside isolated test contexts to retain the crash regression. Real Study-button tests include PU2 p47 on desktop and 319px.
+
+Production promotion 2026-10-15a runs the complete preview-expanded suite against the production gate/config, including all 432 newly authored boards, original page-109 fixtures, immutable initials/contractions, 48 image assets and corrected PU1/PU2 availability. Production-enabled, unrelated-site exclusion and nonspelling=0 assertions are retained from the production test footer.

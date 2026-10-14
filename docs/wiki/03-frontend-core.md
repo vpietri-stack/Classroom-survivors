@@ -107,7 +107,7 @@ AVAILABLE_CONTENT["PU1"] = { "<unit>": [page, page, …] };   // ~1678 in conten
 |---|---|---|---|
 | PU1 | `content_pu1.js` (1689 ln) | 0–9 | PetrovisKids(?) level-1 book — see pack header comments |
 | PU2 | `content_pu2.js` (1475 ln) | 0–9 | |
-| PU3 | `content_pu3.js` | 0–9 | Unit 9: adjectives (p107) and before/when/after clauses (p109). Page 109 contains the teacher-approved 3 vocabulary items, 24 sentence scrambles and 12 two-clause matching pairs; all 24 sentence translations are in `translations.js`. |
+| PU3 | `content_pu3.js` | 0–9 | Unit 9: adjectives (p107), before/when/after clauses (p109), holidays (p110) and -ed/-ing feelings (p111). Page 109 contains the teacher-approved 3 vocabulary items, 24 sentence scrambles and 12 two-clause matching pairs; all 24 sentence translations are in `translations.js`. |
 | Think0 | `content_think0.js` (755 ln) | 0–4 | Unit 4 = "City Life" (p45), added 2026-10-02a |
 | Think1 | `content_think1.js` (624 ln) | 0–7 | |
 | Think2 | `content_think2.js` (681 ln) | 0–12 | |
@@ -151,6 +151,30 @@ violation shows up as a student getting a correct answer marked wrong.
   `build_calendar.js`. The teacher's rule for those: the picture may contain text, but never
   the word the pupil is meant to recognise — so `monday.png` shows a starred card where
   "Mon" would be, and the other six cards name themselves.
+
+PU3 flashcard authoring (2026-10-14) adds 35 formerly missing image filenames:
+15 built-in image_gen illustrations and 20 canvas diagrams. The complete set,
+prompts, intended distinctions and visual review are in
+[`outputs/pu3-flashcards/index.html`](../../outputs/pu3-flashcards/index.html),
+[`manifest.json`](../../outputs/pu3-flashcards/manifest.json) and
+[`QA.md`](../../outputs/pu3-flashcards/QA.md). `build_pu3_flashcards.js` reproduces
+the diagrams and optimizes locally retained imagegen originals with the bundled
+authoring-only sharp package. Every final PNG is strictly below 100,000 bytes;
+all cards were visually checked at 80px and 140px. Frequency percentages are
+explicitly approximate visual examples, not fixed definitions of often/sometimes.
+No target English word or Chinese translation appears inside the cards.
+This asset authoring step does not change curriculum/SR keys or release stamps.
+
+The teacher-requested follow-up adds 13 more cards (9 built-in image_gen
+illustrations/edits and 4 canvas diagrams): six question words, could/couldn't,
+language, information/topic and want/need. The original 35 PNGs remain byte-identical.
+The same gallery now has New 13 / First 35 / All 48 filters, with the new batch
+shown by default. [`extra-manifest.json`](../../outputs/pu3-flashcards/extra-manifest.json)
+and [`extra-QA.md`](../../outputs/pu3-flashcards/extra-QA.md) record prompts and
+the visual review. `build_pu3_flashcards_extra.js` preserves the original images
+and reproduces the second batch; run it after the original builder when rebuilding
+both. Greeting text is French/Spanish/Japanese, without English/Chinese translations.
+These authoring additions remain separate from publication and release stamps.
 
 `class_config.js:6–74` carries a comment block mapping every book/unit to page-number lists —
 this mirrors `AVAILABLE_CONTENT`.
@@ -292,9 +316,26 @@ sentencePairs and every vocab array remain intact. PU3 U9 p109 M1–M6/F1–F8 a
 authored in this shared module and also drive the POC. Stable IDs must change when
 an item's learning target changes; type/book/unit/page/ID forms its SR identity.
 
-NON_SPELLING_ENABLED in config enables production (released 2026-10-14), preview,
-localhost/private LAN and file development. ?nonspelling=0 checks the old flow.
+NON_SPELLING_ENABLED in config enables preview, localhost/private LAN and file
+development, keeping production off. Preview ?nonspelling=0 checks the old flow.
 
 Due matching pairs remain reviewable even when cooldown partners are needed to
 fill the three-pair board. Those partially cooled boards may win on SR priority,
 but cannot be pulled solely to meet the type-variety quota.
+
+Approved PU3 Unit 1 additions (2026-10-14) use the existing page 16 entry:
+20 missing-word boards and 22 find/fix boards, with the approved ID gaps retained.
+Catalog lookup is scoped by book/unit/page; the Unit 9 catalog remains the POC
+source. Reused M/F IDs cannot collide across pages because SR keys include that
+scope. Approved Unit 2 additions use page 28: 16 missing-word and 20 find/fix
+boards, including the revised M2 pancakes sentence and F9/F11 relative clauses.
+Approved Unit 3 additions use page 40: 22 missing-word and 27 distinct find/fix
+boards. F27 is omitted because it duplicated F8; F28 removes the rejected "but"
+and explicitly identifies the final "the" by its zero-based wrongIndex.
+Unit 4 remains suggestions only until approved.
+
+PU3 Unit 9 additions (preview 2026-10-14j) keep page 107 legacy content and page 109 intact. Page 107 adds 8 M/10 F; new pages 110/111 add 17/14 vocabulary entries, 10/12 sentence scrambles, 8/7 matching pairs and 8 M/12 F plus 8 M/14 F. All 24 M boards retain first-letter hints, including the single-sentence two-blank Chinese New Year board. Shared exact-key vocabulary translations are reused; 11 missing vocabulary keys and all 22 scramble translations are added without duplicate keys. The teacher approved expanding the shared over translation from 越过 to 越过；结束了 to cover the Unit 9 meaning.
+
+Preview registry correction (2026-10-14m): PU1 Unit 2 availability is [19,20,21,22,23,26], removing nonexistent pages 24/25. PU2 Unit 4 is [45,46,47,54], exposing the already-authored page 47. Corresponding class_config.js documentation and pack cache busters are updated; teaching arrays, translations and student assignments are unchanged.
+
+Production promotion 2026-10-15a publishes both flashcard batches (48 PNGs, each below 100,000 bytes), all approved PU3 curriculum/translations and the PU1/PU2 availability corrections. Runtime content and image bytes match validated preview b63a306; production keeps its enabled mixed-flow gate and API routing.

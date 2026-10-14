@@ -212,12 +212,6 @@ The initial calendar deployment used synchronized stamp `2026-10-13a`; the targe
 
 ## Update discipline
 
-## Admin dashboard production release (13 October 2026)
-
-The reviewed dashboard is promoted with synchronized stamp `2026-10-13h` from a squash release based on the current `origin/main`. Production continues to use its existing `Val-EslApp/Students` container and existing authentication/capture settings. Preview retains its isolated PR API and `Students-admin-dashboard-preview` data; preview attendance, cancellations and edited targets are not copied into live accounts. Selena's additional Sunday 16:30 membership is saved to her live account through `updateStudent`, which binds determinable existing targets without changing dates, goals or manual offsets. Calendar occurrences start on 12 October 2026 as configured.
-
-The release is pushed to production `origin/main`; the reviewed preview remains at `2026-10-13g` on `preview/main`, backed by the original draft PR #1. This deliberately preserves the isolated preview API and its test data: the squash release does not merge/close its source branch. The shared main checkout belongs to other sessions and is not switched or rewritten by this release. Verify the production Pages stamp/assets, both production Actions deploys, the live calendar/report API and Selena's presence in both reports before reporting completion.
-
 ## PU3 Unit 9 page 109 release (13 October 2026)
 
 Stamp `2026-10-13i` publishes the teacher-approved before/when/after lesson to both production and preview Pages. The release updates all three version stamps, the `content_pu3.js` / `translations.js` cache busters, and the teacher dashboard's auth/content cache busters. The existing preview-path API routing and isolated preview container are preserved; no account or target data are migrated. The lesson is applied separately on each remote's current main history so production does not merge/close draft PR #1 (which hosts the preview API). Deployment is performed from feature worktrees so other sessions' uncommitted changes in the shared main checkout remain untouched.
@@ -226,18 +220,38 @@ Any agent that changes code covered by this page must update this page in the sa
 
 ## New exercise preview rollout (2026-10-13)
 
-The mixed round and typed challenges were initially runtime-fenced by
-NON_SPELLING_ENABLED to preview/local development. The user approved production
-on 2026-10-14 after preview testing; the live URL now enables the same flow.
+The mixed round and typed challenges are runtime-fenced by NON_SPELLING_ENABLED
+to preview/local development. Publish this feature to the preview remote's main
+only. Production enablement and publishing require the later release request.
 The release integrator bumps the stamp trio together and cache-busts changed
 config/game/study scripts after merging the feature, once at preview ship time.
 
-Production release `2026-10-14a` applies the tested exercise feature on current
-origin/main, enables the live URL gate, and synchronizes the three stamps and
-changed asset cache busters. Production/preview histories remain separate to
-preserve the open PR API environment; do not merge or close draft PR #1. No API
-schema, student-account migration or preview-container overwrite is required.
-The teacher dashboard's auth/config script cache busters also use the release
-stamp so its version watchdog loads the current shared authentication script.
+Approved Unit 2 content is published to preview only as `2026-10-14c`, including
+the 16 missing-word and 20 find/fix boards under page 28. The synchronized stamp
+trio and the curriculum script cache buster are updated together; the dashboard
+auth link also loads the current shared version. Production remains a separate
+release and preview retains its existing isolated API/data.
+
+Unit 3 preview release `2026-10-14d` adds 22 M/27 F boards to page 40, retaining
+Units 1/2/9. Curriculum and widget cache busters advance with the synchronized
+stamp trio and dashboard auth link. Production is not part of this deployment.
+
+Unit 4 preview release 2026-10-14e adds 16 M/20 F boards to page 54 and locked first-letter support in the shared Study/game widget. Curriculum/widget cache busters and the stamp trio advance together. Unit 5 remains review-only; production and isolated preview data are unchanged.
+
+Unit 5 preview release 2026-10-14f publishes the approved 16 M/20 F boards across pages 57, 59 and 66. The curriculum cache buster advances with all three version stamps and the dashboard auth link. Existing preview API/data and production are unchanged. Unit 6 is still a content proposal.
+
+Unit 6 preview release 2026-10-14g publishes the approved 26 M/34 F boards across pages 69, 71 and 73, including the teacher edits to M11/M21/M25 and F23/F25/F26/F27/F30. Curriculum cache busting, the stamp trio and dashboard auth link advance together. No production or backend/data changes are included; Unit 7 remains a proposal.
+
+Unit 7 preview release 2026-10-14h publishes the approved 26 M/32 F boards across pages 83, 85 and 87, including M23-M26 and F29-F32 for if/when. Curriculum cache busting, the stamp trio and dashboard auth link advance together. Production and existing preview API/data are unchanged; Unit 8 remains a proposal.
+
+Unit 8 preview release 2026-10-14i publishes the approved 23 M/32 F boards on pages 95, 97, 98 and 99. It includes attached contraction rendering, M10 removal and the edited M15/M16. Curriculum/widget/CSS cache busters advance with the stamp trio and dashboard auth link. Production and existing preview API/data are unchanged.
+
+Unit 9 preview release 2026-10-14j adds the approved page 107 M/F items and new pages 110/111 vocabulary, sentence scrambles, pairs and M/F items. Changed content/translation cache busters, the stamp trio and dashboard auth/content links advance together. Page 109, production and existing preview API/data remain unchanged.
 
 The 2026-10-14k startup hotfix guards missing curriculum entries in non_spelling_content.js. Its cache buster and the version/auth/index stamp trio advance together, including the dashboard auth URL. The production hotfix is based on production main; preview receives the same guard on its own main. PU3 curriculum proposals/assets and the isolated preview backend are not promoted by this fix.
+
+Preview release 2026-10-14l publishes the 48 approved PU3 flashcard PNGs and the combined review gallery at outputs/pu3-flashcards/index.html. Every final PNG is below 100,000 bytes. All three version stamps and the dashboard auth URL advance together; the previously deployed Study startup guard remains intact. These are new asset filenames, so existing cached image versions need no invalidation. Production and the isolated preview API/data remain unchanged.
+
+Preview-only 2026-10-14m corrects PU1 U2 and PU2 U4 availability. Both changed book-pack cache busters advance in the student page and dashboard; the stamp trio and dashboard auth link remain synchronized. Existing 48 PU3 flashcards and the missing-page guard are retained. Production is not updated by this release.
+
+Production release 2026-10-15a promotes the validated preview b63a306 content and 48 flashcards, including the 2026-10-14m registry correction (PU1 Unit 2 removes pages 24/25; PU2 Unit 4 exposes page 47). It is built on origin/main without merging preview history or closing the isolated preview API PR. Production config/API routing, the already-enabled mixed exercise gate and dashboard cache busters are retained. New curriculum/widget/CSS/translation cache busters and all version stamps advance together. Existing students, SR keys, backend/data and page 109 content remain intact. Production Pages and Azure deployment plus served-file checks are required before completion.

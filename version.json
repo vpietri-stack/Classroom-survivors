@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-14k",
-  "deployedAt": "2026-10-14",
-  "notes": "Fix Study/game non-spelling startup when an available curriculum page has no authored content, including PU1 Unit 2 pages 24/25. No curriculum changes."
+  "version": "2026-10-15a",
+  "deployedAt": "2026-10-15",
+  "notes": "Production: publish approved PU3 Units 1-9 exercises and 48 flashcards; promote 2026-10-14m PU1/PU2 page corrections and retain missing-page startup guard."
 }

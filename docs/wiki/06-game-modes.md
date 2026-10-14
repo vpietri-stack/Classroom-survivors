@@ -138,8 +138,7 @@ Any agent that changes code covered by this page must update this page in the sa
 
 ## Preview mixed non-spelling challenges (2026-10-13)
 
-Released on production on 2026-10-14 after preview testing. On the
-NON_SPELLING_ENABLED path, startMiniGame routes scramble and matching
+On the NON_SPELLING_ENABLED path, startMiniGame routes scramble and matching
 slots through NonSpellingFlow.startGame. Its SR/page pool selects any of four
 supported types. Legacy choices use startGrammarGame(selectedSentence) or
 startSentenceMatchGame(selectedPairs). Typed boards mount the shared widget in
@@ -148,3 +147,7 @@ First failures record immediately; eventual success joins the in-session success
 set. New analytics types are missingWord/findAndFix. Reward clicks use the real
 claimReward(true) bridge: CONTINUE for Gomoku/UNO, GET POWER UP elsewhere.
 Namespaced SR keys fit the existing API without a backend schema change.
+
+The shared typed widget also supports locked first-letter prefixes in game challenges. Key banks use only remaining suffix letters, while full-word grading and the reward bridge remain unchanged. PU3 Unit 4 page 54 supplies 16 M/20 F boards.
+
+The shared typed widget renders apostrophe-led contraction answers beside their pronoun as one nonwrapping group in both Study and game shells. Compact ending boxes preserve phone spacing; full-word blanks and existing reward behavior are unchanged.

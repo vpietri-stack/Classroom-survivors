@@ -638,7 +638,10 @@
                 priority: status || priority(key, bucket), score: Math.random() * weight, varietyEligible });
         };
         for (const p of pages.slice(0, activeIndex + 1).reverse()) {
-            const content = TEACHING_CONTENT[p.book][p.unit][p.page];
+            // Availability can include not-yet-authored pages. Match the legacy
+            // SR picker's guard; retain absIndex gaps for proximity weighting.
+            const content = TEACHING_CONTENT[p.book] && TEACHING_CONTENT[p.book][p.unit] && TEACHING_CONTENT[p.book][p.unit][p.page];
+            if (!content) continue;
             for (const item of content.nonSpellingExercises || []) {
                 if (item.type === 'sentence-scramble') {
                     const sentence = Array.isArray(item.sentence) ? item.sentence[0] : item.sentence;

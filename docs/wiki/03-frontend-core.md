@@ -298,3 +298,9 @@ development, keeping production off. Preview ?nonspelling=0 checks the old flow.
 Due matching pairs remain reviewable even when cooldown partners are needed to
 fill the three-pair board. Those partially cooled boards may win on SR priority,
 but cannot be pulled solely to meet the type-variety quota.
+
+Approved PU3 Unit 1 additions (2026-10-14) use the existing page 16 entry:
+20 missing-word boards and 22 find/fix boards, with the approved ID gaps retained.
+Catalog lookup is scoped by book/unit/page; the Unit 9 catalog remains the POC
+source. Reused M/F IDs cannot collide across pages because SR keys include that
+scope. Unit 2 has no newly authored boards until the teacher approves its draft.

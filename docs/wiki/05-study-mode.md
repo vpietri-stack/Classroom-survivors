@@ -315,3 +315,10 @@ or replaced mixed session.
 Due matching pairs remain reviewable even when cooldown partners are needed to
 fill the three-pair board. Those partially cooled boards may win on SR priority,
 but cannot be pulled solely to meet the type-variety quota.
+
+PU3 Unit 1 page 16 now contains the 20 missing-word and 22 find/fix boards approved
+on 2026-10-14. Past/present ability boards contrast could/couldn't with can/can't
+in statements, replacing the rejected yes/no drills. The target-only reusable
+keyboard includes an apostrophe for contractions; physical straight/curly
+apostrophes both enter the same ASCII character used by the authored answers.
+Vocabulary, legacy sentences/pairs and Unit 9 content are retained unchanged.

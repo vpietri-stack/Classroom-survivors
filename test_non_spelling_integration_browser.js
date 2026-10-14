@@ -129,6 +129,46 @@ async function waitBoard(page, index) { await page.waitForFunction(i => STUDY_ST
         ok(await page.evaluate(() => window.__rewards.length === 2 && !document.getElementById('exercise-widget')), 'second typed challenge resumes the game without leaking controls');
         await page.evaluate(() => { startGrammarGame('I washed my hands before I ate lunch.'); });
         ok(await page.locator('#sentence-container').isVisible() && await page.locator('#grammar-actions').isVisible(), 'legacy grammar UI is restored after typed challenges');
+        const approved = await page.evaluate(() => {
+            const items = TEACHING_CONTENT.PU3['1']['16'].nonSpellingExercises.filter(e => e.id);
+            const host = document.querySelector('#grammarGame .minigame-container');
+            host.replaceChildren();
+            document.getElementById('grammarGame').classList.add('nse-typed');
+            return items;
+        });
+        for (const item of approved) {
+            await page.evaluate(item => {
+                NonSpellingWidget.mount(document.querySelector('#grammarGame .minigame-container'), item, { presentation: 'game', onCheck() {}, onNext() {} });
+            }, item);
+            const enter = async answer => {
+                // Exercise both physical typing and the on-screen apostrophe key.
+                if (item.id === 'M20' || item.id === 'F21') await type(page, answer);
+                else await page.keyboard.type(answer);
+            };
+            if (item.answers) {
+                for (const [index, answer] of item.answers.entries()) {
+                    await click(page, '[data-box="' + index + '"]');
+                    await enter(answer);
+                }
+            } else {
+                const index = item.sentence.split(' ').findIndex(word => word.replace(/[.,!?]+$/, '').toLowerCase() === item.wrongWord);
+                await click(page, '[data-word="' + index + '"]');
+                await click(page, '#bin');
+                await enter(item.answer);
+            }
+            await click(page, '#check');
+            ok(await page.evaluate(() => NonSpellingWidget.getState().solved), 'approved Unit 1 ' + item.id + ' solves through the real widget');
+            ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Unit 1 ' + item.id + ' fits the 319px phone');
+        }
+        await page.evaluate(item => {
+            NonSpellingWidget.mount(document.querySelector('#grammarGame .minigame-container'), item, { presentation: 'game', onCheck() {}, onNext() {} });
+        }, approved.find(e => e.id === 'M19'));
+        await click(page, '[data-box="0"]');
+        await page.keyboard.type('couldn');
+        await page.evaluate(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: '’', bubbles: true })));
+        await page.keyboard.type('t');
+        ok(await page.evaluate(() => NonSpellingWidget.getState().input[0] === "couldn't"), 'smart apostrophe input uses the same contracted answer as the on-screen keyboard');
+        await page.evaluate(() => NonSpellingWidget.destroy());
         ok(errors.length === 0, 'no real-app browser script errors: ' + errors.join('; '));
         console.log(assertions + ' real-app integration checks passed.');
     } finally { await browser.close(); }

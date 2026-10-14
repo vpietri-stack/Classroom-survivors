@@ -135,3 +135,9 @@ no student or production data accessed. Both are in npm test and may be run with
 npm run test:non-spelling. Screenshots go to the OS temp folder
 classroom-non-spelling-integrated. The legacy widget regression loads new scripts
 in index order with ?nonspelling=0 to retain its original round scope.
+
+Unit 1 expansion coverage checks 20/22 authored counts, exact page placement,
+exclusion of rejected boards, unique scoped SR IDs and no future-page leakage.
+The browser integration solves all 42 approved boards at 319px width, including
+capitalized original mistakes, contractions via physical/on-screen keys, and
+smart-apostrophe normalization. Unit 2 remains unauthored pending approval.

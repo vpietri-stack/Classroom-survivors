@@ -221,7 +221,7 @@
       }
       const key = makeButton('key ' + (exercise.presentation === 'study' ? 'study-letter-btn' : 'letter-bubble'), letter, () => typeLetter(letter));
       key.dataset.letter = letter;
-      key.setAttribute('aria-label', '字母 ' + letter);
+      key.setAttribute('aria-label', letter === "'" ? '撇号' : '字母 ' + letter);
       key.disabled = locked;
       keyRow.appendChild(key);
     });
@@ -429,8 +429,8 @@
       if (solved) next(); else check();
     } else if (event.key === 'Backspace') {
       event.preventDefault(); backspace();
-    } else if (/^[a-z]$/i.test(event.key) && letters.includes(event.key.toLowerCase())) {
-      event.preventDefault(); typeLetter(event.key.toLowerCase());
+    } else if (/^[a-z'’]$/i.test(event.key) && letters.includes(event.key.replace(/’/g, "'").toLowerCase())) {
+      event.preventDefault(); typeLetter(event.key.replace(/’/g, "'").toLowerCase());
     } else if (current().type === 'missing' && (event.key === 'ArrowRight' || event.key === 'ArrowLeft')) {
       event.preventDefault();
       chooseBox((activeBox + (event.key === 'ArrowRight' ? 1 : input.length - 1)) % input.length);

@@ -19,8 +19,25 @@ const before = vocabSnapshot();
 vm.runInContext(fs.readFileSync('non_spelling_content.js', 'utf8'), sandbox);
 const content = sandbox.NonSpellingContent;
 assert.equal(vocabSnapshot(), before, 'normalization never changes vocabulary');
-assert.equal(content.buildPool('PU3', 9, 107).entries.some(e => ['missing-word', 'find-fix'].includes(e.item.type)), false, 'page 109 exercises never leak into earlier pages');
-assert.equal(content.buildPool('PU3', 9, 109).entries.filter(e => e.item.id).length, 14, 'six missing-word and eight fix items belong to PU3 p109');
+assert.equal(content.buildPool('PU3', 9, 107).entries.some(e => e.item.page === '109'), false, 'page 109 exercises never leak into earlier pages');
+assert.equal(content.buildPool('PU3', 9, 109).entries.filter(e => e.item.id && e.item.page === '109').length, 14, 'six missing-word and eight fix items belong to PU3 p109');
+const unit1 = content.buildPool('PU3', 1, 16).entries.filter(e => e.item.id).map(e => e.item);
+assert.equal(unit1.filter(e => e.type === 'missing-word').length, 20, 'all twenty approved Unit 1 missing boards belong to page 16');
+assert.equal(unit1.filter(e => e.type === 'find-fix').length, 22, 'all twenty-two approved Unit 1 fixes belong to page 16');
+assert.ok(unit1.every(e => e.unit === '1' && e.page === '16'), 'Unit 1 authored items have the exact approved placement');
+assert.equal(new Set(unit1.map(e => e.key)).size, 42, 'reused page-local M/F IDs retain distinct SR keys');
+assert.equal(content.buildPool('PU3', 0, 5).entries.some(e => e.item.id), false, 'Unit 1 content never appears before Unit 1');
+assert.equal(vm.runInContext("TEACHING_CONTENT.PU3['2']['28'].nonSpellingExercises.some(e => e.id)", sandbox), false, 'Unit 2 is still suggestions only');
+assert.ok(!unit1.some(e => ['M6', 'M9', 'M10', 'F9', 'F10'].includes(e.id)), 'rejected boards remain excluded');
+for (const item of unit1) {
+    if (item.answers) assert.equal(item.sentences.join(' ').split('___').length - 1, item.answers.length, item.id + ' has one target per blank');
+    else assert.equal(item.sentence.split(' ').filter(word => word.replace(/[.,!?]+$/, '').toLowerCase() === item.wrongWord).length, 1, item.id + ' identifies exactly one wrong token');
+}
+for (let sample = 0; sample < 100; sample++) {
+    const picked = content.select('PU3', 1, 16, 5);
+    assert.equal(picked.length, 5);
+    assert.ok(new Set(picked.map(e => e.type)).size >= 3, 'Unit 1 selects a varied five-board round');
+}
 for (let sample = 0; sample < 400; sample++) {
     const picked = content.select('PU3', 9, 109, 5);
     assert.equal(picked.length, 5);

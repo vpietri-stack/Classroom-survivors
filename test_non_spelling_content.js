@@ -45,9 +45,18 @@ assert.ok(!fixes3.find(e => e.id === 'F28').sentence.includes('but'), 'F28 omits
 assert.equal(unit3.find(e => e.id === 'M22').answers.length, 4, 'M22 retains four blanks');
 assert.equal(new Set([...unit1, ...unit2, ...unit3].map(e => e.key)).size, 127, 'all three units retain scoped SR keys');
 assert.ok(unit3.every(e => e.page === '40'), 'Unit 3 belongs to page 40');
-assert.equal(vm.runInContext("TEACHING_CONTENT.PU3['4']['54'].nonSpellingExercises.some(e => e.id)", sandbox), false, 'Unit 4 remains unauthored');
+const unit4 = content.buildPool('PU3', 4, 54).entries.filter(e => e.item.id && e.item.unit === '4').map(e => e.item);
+assert.equal(unit4.filter(e => e.answers).length, 16, 'Unit 4 has 16 approved missing boards');
+assert.equal(unit4.filter(e => e.answer).length, 20, 'Unit 4 has 20 approved fixes');
+assert.ok(unit4.every(e => e.page === '54'), 'Unit 4 stays under page 54');
+assert.equal(unit4.filter(e => e.prefixes).length, 13, 'only the 13 requested boards prefill letters');
+for (const item of unit4.filter(e => e.prefixes)) assert.deepEqual(item.prefixes, item.answers.map(a => a[0]));
+assert.equal(unit4.find(e => e.id === 'F14').wrongWord, 'then', 'F14 avoids the ambiguous as repair');
+assert.equal(new Set([...unit1, ...unit2, ...unit3, ...unit4].map(e => e.key)).size, 163, 'four units retain scoped keys');
+assert.equal(content.buildPool('PU3', 3, 40).entries.some(e => e.item.unit === '4'), false, 'Unit 4 cannot appear early');
+assert.equal(vm.runInContext("TEACHING_CONTENT.PU3['5']['66'].nonSpellingExercises.some(e => e.id)", sandbox), false, 'Unit 5 remains a proposal');
 assert.ok(!unit1.some(e => ['M6', 'M9', 'M10', 'F9', 'F10'].includes(e.id)), 'rejected boards remain excluded');
-for (const item of [...unit1, ...unit2, ...unit3]) {
+for (const item of [...unit1, ...unit2, ...unit3, ...unit4]) {
     if (item.answers) assert.equal(item.sentences.join(' ').split('___').length - 1, item.answers.length, item.id + ' has one target per blank');
     else if (Number.isInteger(item.wrongIndex)) assert.equal(item.sentence.split(' ')[item.wrongIndex].replace(/[.,!?]+$/, '').toLowerCase(), item.wrongWord, item.id + ' explicitly identifies its repeated wrong token');
     else assert.equal(item.sentence.split(' ').filter(word => word.replace(/[.,!?]+$/, '').toLowerCase() === item.wrongWord).length, 1, item.id + ' identifies exactly one wrong token');

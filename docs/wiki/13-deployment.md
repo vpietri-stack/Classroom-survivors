@@ -235,3 +235,5 @@ release and preview retains its existing isolated API/data.
 Unit 3 preview release `2026-10-14d` adds 22 M/27 F boards to page 40, retaining
 Units 1/2/9. Curriculum and widget cache busters advance with the synchronized
 stamp trio and dashboard auth link. Production is not part of this deployment.
+
+Unit 4 preview release 2026-10-14e adds 16 M/20 F boards to page 54 and locked first-letter support in the shared Study/game widget. Curriculum/widget cache busters and the stamp trio advance together. Unit 5 remains review-only; production and isolated preview data are unchanged.

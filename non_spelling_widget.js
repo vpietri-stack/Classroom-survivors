@@ -20,6 +20,7 @@
     return copy;
   }
   function current() { return session[cursor]; }
+  function prefix(index) { return current().type === 'missing' ? (current().prefixes || [])[index] || '' : ''; }
   function makeButton(className, label, handler) {
     const button = document.createElement('button');
     button.type = 'button';
@@ -52,7 +53,7 @@
   function resetAnswer() {
     cancelTimer();
     clearDrag();
-    input = current().type === 'missing' ? current().answers.map(() => '') : [''];
+    input = current().type === 'missing' ? current().answers.map((_, index) => prefix(index)) : [''];
     activeBox = 0;
     selectedWord = binnedWord = null;
     verdict = null;
@@ -63,7 +64,7 @@
   function startExercise() {
     const exercise = current();
     const targets = exercise.type === 'missing' ? exercise.answers : [exercise.answer];
-    letters = shuffle([...new Set(targets.join('').toLowerCase())]);
+    letters = shuffle([...new Set(targets.map((target, index) => target.slice(prefix(index).length)).join('').toLowerCase())]);
     $('summary').hidden = true;
     $('sentences').hidden = false;
     $('actions').hidden = false;
@@ -114,8 +115,15 @@
         const span = document.createElement('span');
         span.className = 'letter';
         span.textContent = input[index][i] || '−';
-        if (verdict) span.classList.add(input[index][i] === target[i] ? 'correct' : 'wrong');
+        if (i < prefix(index).length) span.classList.add('nse-prefilled');
+        else if (verdict) span.classList.add(input[index][i] === target[i] ? 'correct' : 'wrong');
         button.appendChild(span);
+      }
+      if (!verdict && prefix(index) && input[index].length === prefix(index).length) {
+        const placeholder = document.createElement('span');
+        placeholder.className = 'nse-empty';
+        placeholder.setAttribute('aria-hidden', 'true');
+        button.appendChild(placeholder);
       }
     }
     if (verdict) {
@@ -225,7 +233,7 @@
       key.disabled = locked;
       keyRow.appendChild(key);
     });
-    $('backspace').disabled = locked || !showKeyboard || !input[activeBox];
+    $('backspace').disabled = locked || !showKeyboard || input[activeBox].length <= prefix(activeBox).length;
     $('clear').disabled = solved;
     $('check').hidden = solved;
     $('check').disabled = locked;
@@ -243,6 +251,7 @@
   }
   function backspace() {
     if (locked || (current().type === 'fix' && binnedWord === null)) return;
+    if (input[activeBox].length <= prefix(activeBox).length) return;
     input[activeBox] = input[activeBox].slice(0, -1);
     message('');
     render();
@@ -306,7 +315,7 @@
     if (locked || cursor >= session.length) return;
     const exercise = current();
     if (exercise.type === 'fix' && binnedWord === null) return message('请先把一个单词放入垃圾桶。');
-    if (input.some(value => !value)) return message('请先填好所有空格。');
+    if (input.some((value, index) => value.length <= prefix(index).length)) return message('请先填好所有空格。');
     exercise.attempts++;
     if (exercise.type === 'missing') {
       verdict = { spelling: input.every((value, index) => value === exercise.answers[index]) };

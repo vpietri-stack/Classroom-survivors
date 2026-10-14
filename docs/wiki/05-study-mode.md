@@ -336,3 +336,5 @@ F28 uses two sentences without the rejected conjunction. When the wrong token
 also occurs correctly elsewhere, optional wrongIndex pins the intended token;
 the widget checks both its position and spelling rather than accepting any
 occurrence of the same word. Earlier authored boards keep their existing SR IDs.
+
+PU3 Unit 4 page 54 adds 16 M/20 F boards. Optional per-blank prefixes lock the first letter on M1-M8, M10-M13 and M15. The keyboard derives from remaining suffixes (so catch retains its second c); grading compares full words. CLEAR, backspace and retry resets preserve prefixes, and prefixes alone cannot submit. Other boards retain full blanks.

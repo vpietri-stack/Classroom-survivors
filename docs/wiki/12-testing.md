@@ -146,7 +146,9 @@ exclusion. Chrome solves all 36 Unit 2 boards, including three-blank boards,
 at 319px width alongside all 42 Unit 1 boards. Unit 3 adds count/dedup checks for
 22 M/27 F boards and a four-blank board. Chrome solves all 49 additions at 319px,
 and F28 must reject replacing an already-correct "the" even when "than" is spelled
-correctly, then accept its intended final token. Unit 4 remains unauthored.
+correctly, then accept its intended final token. Unit 4 coverage is described below.
 Forced game fixtures cool all original sentence pairs, including leftovers from
 random three-pair grouping, so a regrouped fresh board cannot displace the
 intended typed exercise. Fixture IDs also include the authored unit/page scope.
+
+Unit 4 adds 16 M/20 F boards and Chrome now solves all 163 Unit 1-4 authored boards at 319px. Study/game prefix tests cover suffix-only physical and on-screen input, immutable initials, empty submissions, CLEAR/backspace, failure feedback and timed reset, plus the second c in catch.

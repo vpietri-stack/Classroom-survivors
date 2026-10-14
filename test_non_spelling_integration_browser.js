@@ -137,7 +137,7 @@ async function waitBoard(page, index) { await page.waitForFunction(i => STUDY_ST
         await page.evaluate(() => { startGrammarGame('I washed my hands before I ate lunch.'); });
         ok(await page.locator('#sentence-container').isVisible() && await page.locator('#grammar-actions').isVisible(), 'legacy grammar UI is restored after typed challenges');
         const approved = await page.evaluate(() => {
-            const items = Object.entries({ '1': '16', '2': '28', '3': '40' }).flatMap(([unit, page]) =>
+            const items = Object.entries({ '1': '16', '2': '28', '3': '40', '4': '54' }).flatMap(([unit, page]) =>
                 TEACHING_CONTENT.PU3[unit][page].nonSpellingExercises.filter(e => e.id).map(e => ({ ...e, unit })));
             const host = document.querySelector('#grammarGame .minigame-container');
             host.replaceChildren();
@@ -156,7 +156,7 @@ async function waitBoard(page, index) { await page.waitForFunction(i => STUDY_ST
             if (item.answers) {
                 for (const [index, answer] of item.answers.entries()) {
                     await click(page, '[data-box="' + index + '"]');
-                    await enter(answer);
+                    await enter(answer.slice((item.prefixes || [])[index]?.length || 0));
                 }
             } else {
                 const index = Number.isInteger(item.wrongIndex) ? item.wrongIndex : item.sentence.split(' ').findIndex(word => word.replace(/[.,!?]+$/, '').toLowerCase() === item.wrongWord);
@@ -168,6 +168,37 @@ async function waitBoard(page, index) { await page.waitForFunction(i => STUDY_ST
             ok(await page.evaluate(() => NonSpellingWidget.getState().solved), 'approved Unit ' + item.unit + ' ' + item.id + ' solves through the real widget');
             ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Unit ' + item.unit + ' ' + item.id + ' fits the 319px phone');
         }
+        const hinted = approved.find(e => e.unit === '4' && e.id === 'M1');
+        for (const presentation of ['study', 'game']) {
+            await page.evaluate(({ item, presentation }) => {
+                document.getElementById('studyModeOverlay').classList.toggle('hidden', presentation !== 'study');
+                document.getElementById('grammarGame').classList.toggle('hidden', presentation === 'study');
+                const host = presentation === 'study' ? document.getElementById('study-game-area') : document.querySelector('#grammarGame .minigame-container');
+                NonSpellingWidget.mount(host, item, { presentation, onCheck() {}, onNext() {} });
+            }, { item: hinted, presentation });
+            ok(await page.evaluate(() => NonSpellingWidget.getState().input.join(',') === 'b,b'), presentation + ' starts with both locked initials');
+            ok(await page.locator('[data-letter="b"]').count() === 0, presentation + ' keyboard excludes the prefilled b');
+            await click(page, '#check');
+            ok(await page.evaluate(() => !NonSpellingWidget.getState().locked), presentation + ' initials alone are not a submitted answer');
+            await page.keyboard.press('Backspace');
+            ok(await page.evaluate(() => NonSpellingWidget.getState().input[0] === 'b'), presentation + ' backspace preserves the initial');
+            await type(page, 'ae'); await page.keyboard.press('Backspace');
+            await click(page, '#clear');
+            ok(await page.evaluate(() => NonSpellingWidget.getState().input.join(',') === 'b,b'), presentation + ' CLEAR restores both initials');
+            await type(page, 'aa'); await click(page, '[data-box="1"]'); await type(page, 'aa'); await click(page, '#check');
+            ok(await page.locator('.nse-prefilled.wrong').count() === 0 && await page.locator('.letter.wrong').count() > 0, presentation + ' wrong feedback grades only entered letters');
+            await page.waitForTimeout(3100);
+            ok(await page.evaluate(() => NonSpellingWidget.getState().input.join(',') === 'b,b'), presentation + ' retry reset preserves both initials');
+            await click(page, '[data-box="0"]'); await type(page, 'eautiful');
+            await click(page, '[data-box="1"]'); await type(page, 'eautifully');
+            await page.screenshot({ path: path.join(screenshots, 'phone-' + presentation + '-prefix.png'), fullPage: true });
+            await click(page, '#check');
+            ok(await page.evaluate(() => NonSpellingWidget.getState().solved), presentation + ' suffix-only entry solves full words');
+        }
+        await page.evaluate(item => {
+            NonSpellingWidget.mount(document.querySelector('#grammarGame .minigame-container'), item, { presentation: 'game', onCheck() {}, onNext() {} });
+        }, approved.find(e => e.unit === '4' && e.id === 'M12'));
+        ok(await page.locator('[data-letter="c"]').count() === 1, 'catch retains c for its second occurrence');
         const repeatedArticle = approved.find(e => e.unit === '3' && e.id === 'F28');
         await page.evaluate(item => {
             NonSpellingWidget.mount(document.querySelector('#grammarGame .minigame-container'), item, { presentation: 'game', onCheck() {}, onNext() {} });

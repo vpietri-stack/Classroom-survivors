@@ -169,7 +169,49 @@
             { id: 'F28', sentence: 'This is the most dangerous of all the sports. That sport is more dangerous the swimming.', wrongWord: 'the', wrongIndex: 14, answer: 'than' }
         ]
     };
-    const pageCatalogs = { 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:9:109': catalog };
+    const unit4Catalog = {
+        missing: [
+            {"id": "M1", "sentences": ["She's a ___ singer.", "She sings ___."], "answers": ["beautiful", "beautifully"], "prefixes": ["b", "b"]},
+            {"id": "M2", "sentences": ["He speaks more ___ than me.", "He's a ___ boy."], "answers": ["quietly", "quiet"], "prefixes": ["q", "q"]},
+            {"id": "M3", "sentences": ["She's a ___ climber.", "She climbs more ___ than me."], "answers": ["careful", "carefully"], "prefixes": ["c", "c"]},
+            {"id": "M4", "sentences": ["He's a ___ walker.", "He walks more ___ than me."], "answers": ["slow", "slowly"], "prefixes": ["s", "s"]},
+            {"id": "M5", "sentences": ["She runs more ___ than me.", "She's a ___ runner."], "answers": ["quickly", "quick"], "prefixes": ["q", "q"]},
+            {"id": "M6", "sentences": ["He's a ___ footballer.", "He plays football ___."], "answers": ["good", "well"], "prefixes": ["g", "w"]},
+            {"id": "M7", "sentences": ["He's a very ___ runner.", "He runs ___ than me."], "answers": ["fast", "faster"], "prefixes": ["f", "f"]},
+            {"id": "M8", "sentences": ["He works ___ than me.", "He's a very ___ worker."], "answers": ["harder", "hard"], "prefixes": ["h", "h"]},
+            {"id": "M9", "sentences": ["She sings ___ beautifully than me.", "He runs more quickly ___ me."], "answers": ["more", "than"]},
+            {"id": "M10", "sentences": ["Jim climbs ___ than Tom.", "Tom works more ___ than Jim."], "answers": ["better", "carefully"], "prefixes": ["b", "c"]},
+            {"id": "M11", "sentences": ["We played very ___ today.", "They played ___ than us."], "answers": ["well", "worse"], "prefixes": ["w", "w"]},
+            {"id": "M12", "sentences": ["I didn't ___ the ball yesterday.", "My brother ___ it."], "answers": ["catch", "caught"], "prefixes": ["c", "c"]},
+            {"id": "M13", "sentences": ["I didn't ___ the ball.", "My sister ___ it."], "answers": ["throw", "threw"], "prefixes": ["t", "t"]},
+            {"id": "M14", "sentences": ["Birds can ___ high in the sky.", "Yesterday, they ___ over our house."], "answers": ["fly", "flew"]},
+            {"id": "M15", "sentences": ["I can ___ new songs quickly.", "Last year, I ___ to play the piano."], "answers": ["learn", "learnt"], "prefixes": ["l", "l"]},
+            {"id": "M16", "sentences": ["My sister dances as beautifully ___ my mum.", "I dance more slowly ___ my brother."], "answers": ["as", "than"]}
+        ],
+        fix: [
+            {"id": "F1", "sentence": "She sings beautiful.", "wrongWord": "beautiful", "answer": "beautifully"},
+            {"id": "F2", "sentence": "He is a quietly boy.", "wrongWord": "quietly", "answer": "quiet"},
+            {"id": "F3", "sentence": "She's a loudly singer.", "wrongWord": "loudly", "answer": "loud"},
+            {"id": "F4", "sentence": "He is a slowly walker.", "wrongWord": "slowly", "answer": "slow"},
+            {"id": "F5", "sentence": "He's a quickly runner.", "wrongWord": "quickly", "answer": "quick"},
+            {"id": "F6", "sentence": "He is a carefully driver.", "wrongWord": "carefully", "answer": "careful"},
+            {"id": "F7", "sentence": "She plays tennis good.", "wrongWord": "good", "answer": "well"},
+            {"id": "F8", "sentence": "He runs fastly.", "wrongWord": "fastly", "answer": "fast"},
+            {"id": "F9", "sentence": "He works hard than me.", "wrongWord": "hard", "answer": "harder"},
+            {"id": "F10", "sentence": "He can run more fast than me.", "wrongWord": "fast", "answer": "quickly"},
+            {"id": "F11", "sentence": "She climbs more careful than me.", "wrongWord": "careful", "answer": "carefully"},
+            {"id": "F12", "sentence": "She sings more beautiful than me.", "wrongWord": "beautiful", "answer": "beautifully"},
+            {"id": "F13", "sentence": "He plays football well than me.", "wrongWord": "well", "answer": "better"},
+            {"id": "F14", "sentence": "She dances more beautifully then me.", "wrongWord": "then", "answer": "than"},
+            {"id": "F15", "sentence": "He can run quickly than me.", "wrongWord": "quickly", "answer": "faster"},
+            {"id": "F16", "sentence": "They play tennis badly than us.", "wrongWord": "badly", "answer": "worse"},
+            {"id": "F17", "sentence": "We didn't caught any fish.", "wrongWord": "caught", "answer": "catch"},
+            {"id": "F18", "sentence": "Did she threw the ball?", "wrongWord": "threw", "answer": "throw"},
+            {"id": "F19", "sentence": "The birds flyed over the lake yesterday.", "wrongWord": "flyed", "answer": "flew"},
+            {"id": "F20", "sentence": "We learn to dance last week.", "wrongWord": "learn", "answer": "learnt"}
+        ]
+    };
+    const pageCatalogs = { 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:9:109': catalog };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

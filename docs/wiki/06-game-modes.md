@@ -147,3 +147,5 @@ First failures record immediately; eventual success joins the in-session success
 set. New analytics types are missingWord/findAndFix. Reward clicks use the real
 claimReward(true) bridge: CONTINUE for Gomoku/UNO, GET POWER UP elsewhere.
 Namespaced SR keys fit the existing API without a backend schema change.
+
+The shared typed widget also supports locked first-letter prefixes in game challenges. Key banks use only remaining suffix letters, while full-word grading and the reward bridge remain unchanged. PU3 Unit 4 page 54 supplies 16 M/20 F boards.

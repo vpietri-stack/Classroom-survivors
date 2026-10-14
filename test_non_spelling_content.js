@@ -54,9 +54,21 @@ for (const item of unit4.filter(e => e.prefixes)) assert.deepEqual(item.prefixes
 assert.equal(unit4.find(e => e.id === 'F14').wrongWord, 'then', 'F14 avoids the ambiguous as repair');
 assert.equal(new Set([...unit1, ...unit2, ...unit3, ...unit4].map(e => e.key)).size, 163, 'four units retain scoped keys');
 assert.equal(content.buildPool('PU3', 3, 40).entries.some(e => e.item.unit === '4'), false, 'Unit 4 cannot appear early');
-assert.equal(vm.runInContext("TEACHING_CONTENT.PU3['5']['66'].nonSpellingExercises.some(e => e.id)", sandbox), false, 'Unit 5 remains a proposal');
+const unit5 = content.buildPool('PU3', 5, 66).entries.filter(e => e.item.id && e.item.unit === '5').map(e => e.item);
+assert.equal(unit5.filter(e => e.answers).length, 16, 'Unit 5 has 16 approved missing boards');
+assert.equal(unit5.filter(e => e.answer).length, 20, 'Unit 5 has 20 approved fixes');
+for (const [page, missing, fixes] of [['57', 3, 4], ['59', 4, 6], ['66', 9, 10]]) {
+    assert.equal(unit5.filter(e => e.page === page && e.answers).length, missing, page + ' missing count');
+    assert.equal(unit5.filter(e => e.page === page && e.answer).length, fixes, page + ' fix count');
+    assert.ok(!content.buildPool('PU3', 5, page).entries.some(e => e.item.unit === '5' && Number(e.item.page) > Number(page)), 'later Unit 5 pages never appear early');
+}
+assert.equal(unit5.filter(e => e.prefixes).length, 13, 'Unit 5 preserves the approved initial hints');
+assert.equal(new Set(unit5.filter(e => e.answer).map(e => e.sentence)).size, 20, 'no duplicate Unit 5 fixes');
+assert.equal(new Set([...unit1, ...unit2, ...unit3, ...unit4, ...unit5].map(e => e.key)).size, 199, 'all approved boards retain scoped keys');
+assert.ok(!content.buildPool('PU3', 4, 54).entries.some(e => e.item.unit === '5'), 'Unit 5 stays out of Unit 4');
+assert.equal(vm.runInContext("TEACHING_CONTENT.PU3['6']['73'].nonSpellingExercises.some(e => e.id)", sandbox), false, 'Unit 6 remains a proposal');
 assert.ok(!unit1.some(e => ['M6', 'M9', 'M10', 'F9', 'F10'].includes(e.id)), 'rejected boards remain excluded');
-for (const item of [...unit1, ...unit2, ...unit3, ...unit4]) {
+for (const item of [...unit1, ...unit2, ...unit3, ...unit4, ...unit5]) {
     if (item.answers) assert.equal(item.sentences.join(' ').split('___').length - 1, item.answers.length, item.id + ' has one target per blank');
     else if (Number.isInteger(item.wrongIndex)) assert.equal(item.sentence.split(' ')[item.wrongIndex].replace(/[.,!?]+$/, '').toLowerCase(), item.wrongWord, item.id + ' explicitly identifies its repeated wrong token');
     else assert.equal(item.sentence.split(' ').filter(word => word.replace(/[.,!?]+$/, '').toLowerCase() === item.wrongWord).length, 1, item.id + ' identifies exactly one wrong token');

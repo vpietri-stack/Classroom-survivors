@@ -137,8 +137,8 @@ async function waitBoard(page, index) { await page.waitForFunction(i => STUDY_ST
         await page.evaluate(() => { startGrammarGame('I washed my hands before I ate lunch.'); });
         ok(await page.locator('#sentence-container').isVisible() && await page.locator('#grammar-actions').isVisible(), 'legacy grammar UI is restored after typed challenges');
         const approved = await page.evaluate(() => {
-            const items = Object.entries({ '1': '16', '2': '28', '3': '40', '4': '54' }).flatMap(([unit, page]) =>
-                TEACHING_CONTENT.PU3[unit][page].nonSpellingExercises.filter(e => e.id).map(e => ({ ...e, unit })));
+            const items = [['1', '16'], ['2', '28'], ['3', '40'], ['4', '54'], ['5', '57'], ['5', '59'], ['5', '66']].flatMap(([unit, page]) =>
+                TEACHING_CONTENT.PU3[unit][page].nonSpellingExercises.filter(e => e.id).map(e => ({ ...e, unit, page })));
             const host = document.querySelector('#grammarGame .minigame-container');
             host.replaceChildren();
             document.getElementById('grammarGame').classList.add('nse-typed');

@@ -237,3 +237,5 @@ Units 1/2/9. Curriculum and widget cache busters advance with the synchronized
 stamp trio and dashboard auth link. Production is not part of this deployment.
 
 Unit 4 preview release 2026-10-14e adds 16 M/20 F boards to page 54 and locked first-letter support in the shared Study/game widget. Curriculum/widget cache busters and the stamp trio advance together. Unit 5 remains review-only; production and isolated preview data are unchanged.
+
+Unit 5 preview release 2026-10-14f publishes the approved 16 M/20 F boards across pages 57, 59 and 66. The curriculum cache buster advances with all three version stamps and the dashboard auth link. Existing preview API/data and production are unchanged. Unit 6 is still a content proposal.

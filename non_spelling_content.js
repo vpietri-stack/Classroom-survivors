@@ -211,7 +211,63 @@
             {"id": "F20", "sentence": "We learn to dance last week.", "wrongWord": "learn", "answer": "learnt"}
         ]
     };
-    const pageCatalogs = { 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:9:109': catalog };
+    const unit5Catalogs = {
+        57: {
+            missing: [
+                {"id": "M1", "sentences": ["Her shirt has stripes. It's ___.", "His hat has spots. It's ___."], "answers": ["striped", "spotted"], "prefixes": ["s", "s"]},
+                {"id": "M2", "sentences": ["Her spotted dress has yellow ___.", "His striped trousers have blue ___."], "answers": ["spots", "stripes"], "prefixes": ["s", "s"]},
+                {"id": "M3", "sentences": ["This blue is very pale. It's ___ blue.", "This blue is almost black. It's ___ blue."], "answers": ["light", "dark"], "prefixes": ["l", "d"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "He's wearing a stripes shirt.", "wrongWord": "stripes", "answer": "striped"},
+                {"id": "F2", "sentence": "Her dress has white spotted.", "wrongWord": "spotted", "answer": "spots"},
+                {"id": "F3", "sentence": "She's wear a bright orange jacket.", "wrongWord": "wear", "answer": "wearing"},
+                {"id": "F4", "sentence": "His trousers is dark blue.", "wrongWord": "is", "answer": "are"}
+            ]
+        },
+        59: {
+            missing: [
+                {"id": "M4", "sentences": ["The helmet ___ made of gold.", "The wings ___ made of paper."], "answers": ["is", "are"]},
+                {"id": "M5", "sentences": ["What ___ your watch made of?", "What ___ these bowls made of?"], "answers": ["is", "are"]},
+                {"id": "M6", "sentences": ["The boots are ___ of rubber.", "The diary is made ___ paper."], "answers": ["made", "of"]},
+                {"id": "M7", "sentences": ["This book has pages made of ___.", "These boots are made of ___."], "answers": ["paper", "rubber"], "prefixes": ["p", "r"]}
+            ],
+            fix: [
+                {"id": "F5", "sentence": "The helmet are made of gold.", "wrongWord": "are", "answer": "is"},
+                {"id": "F6", "sentence": "The wings is made of paper.", "wrongWord": "is", "answer": "are"},
+                {"id": "F7", "sentence": "The boots are make of rubber.", "wrongWord": "make", "answer": "made"},
+                {"id": "F8", "sentence": "The diary is made for paper.", "wrongWord": "for", "answer": "of"},
+                {"id": "F9", "sentence": "What does your watch made of?", "wrongWord": "does", "answer": "is"},
+                {"id": "F10", "sentence": "What is the bowls made of?", "wrongWord": "is", "answer": "are"}
+            ]
+        },
+        66: {
+            missing: [
+                {"id": "M8", "sentences": ["This table is made of ___.", "This warm scarf is made of ___."], "answers": ["wood", "wool"], "prefixes": ["w", "w"]},
+                {"id": "M9", "sentences": ["We can see through this window. It's made of ___.", "These scissors are made of ___."], "answers": ["glass", "metal"], "prefixes": ["g", "m"]},
+                {"id": "M10", "sentences": ["We read books made of ___.", "Let's make a crown from brown ___."], "answers": ["paper", "card"], "prefixes": ["p", "c"]},
+                {"id": "M11", "sentences": ["___ we make some props?", "___ paint the sky blue."], "answers": ["shall", "let's"], "prefixes": ["s", "l"]},
+                {"id": "M12", "sentences": ["We ___ use yellow plastic for the sun.", "What ___ we use for the clouds?"], "answers": ["could", "shall"], "prefixes": ["c", "s"]},
+                {"id": "M13", "sentences": ["Let's ___ a crown.", "We could ___ silver card."], "answers": ["make", "use"], "prefixes": ["m", "u"]},
+                {"id": "M14", "sentences": ["Shall we ___ some costumes?", "Let's ___ them bright colours."], "answers": ["design", "paint"], "prefixes": ["d", "p"]},
+                {"id": "M15", "sentences": ["This ruler bends easily. It is ___.", "This wooden table doesn't bend. It is ___."], "answers": ["flexible", "rigid"], "prefixes": ["f", "r"]},
+                {"id": "M16", "sentences": ["This box is hard to lift. It's ___.", "This empty paper bag is easy to lift. It's ___."], "answers": ["heavy", "light"], "prefixes": ["h", "l"]}
+            ],
+            fix: [
+                {"id": "F11", "sentence": "Shall we making some props?", "wrongWord": "making", "answer": "make"},
+                {"id": "F12", "sentence": "Let's paints the sky blue.", "wrongWord": "paints", "answer": "paint"},
+                {"id": "F13", "sentence": "We could using blue paper.", "wrongWord": "using", "answer": "use"},
+                {"id": "F14", "sentence": "What shall we used for the clouds?", "wrongWord": "used", "answer": "use"},
+                {"id": "F15", "sentence": "Shall we designs some costumes?", "wrongWord": "designs", "answer": "design"},
+                {"id": "F16", "sentence": "We could went to the cinema.", "wrongWord": "went", "answer": "go"},
+                {"id": "F17", "sentence": "Let's buying some silver card.", "wrongWord": "buying", "answer": "buy"},
+                {"id": "F18", "sentence": "Gold is very heavily.", "wrongWord": "heavily", "answer": "heavy"},
+                {"id": "F19", "sentence": "This ruler bends easily. It is rigid.", "wrongWord": "rigid", "answer": "flexible"},
+                {"id": "F20", "sentence": "This stone doesn't feel smooth. It feels roughly.", "wrongWord": "roughly", "answer": "rough"}
+            ]
+        }
+    };
+    const pageCatalogs = { 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:9:109': catalog };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

@@ -328,4 +328,11 @@ on 2026-10-14. M2 pairs the café where breakfast happens with the pancakes whic
 were eaten. F9/F11 retain the approved teacher/tree-house relative clauses.
 Three-blank boards M4/M5 grade all three targets before advancing. Earlier Unit 1
 material remains available for weighted SR review, without making Unit 2 eligible
-during Unit 1. Unit 3 content is awaiting teacher review.
+during Unit 1.
+
+PU3 Unit 3 page 40 adds the approved 22 M/27 F boards. M22 has four blanks across
+three rows, including two blanks in one row. F27 duplicates F8 and is excluded.
+F28 uses two sentences without the rejected conjunction. When the wrong token
+also occurs correctly elsewhere, optional wrongIndex pins the intended token;
+the widget checks both its position and spelling rather than accepting any
+occurrence of the same word. Earlier authored boards keep their existing SR IDs.

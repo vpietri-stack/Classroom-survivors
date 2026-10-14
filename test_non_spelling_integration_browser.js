@@ -137,7 +137,7 @@ async function waitBoard(page, index) { await page.waitForFunction(i => STUDY_ST
         await page.evaluate(() => { startGrammarGame('I washed my hands before I ate lunch.'); });
         ok(await page.locator('#sentence-container').isVisible() && await page.locator('#grammar-actions').isVisible(), 'legacy grammar UI is restored after typed challenges');
         const approved = await page.evaluate(() => {
-            const items = Object.entries({ '1': '16', '2': '28' }).flatMap(([unit, page]) =>
+            const items = Object.entries({ '1': '16', '2': '28', '3': '40' }).flatMap(([unit, page]) =>
                 TEACHING_CONTENT.PU3[unit][page].nonSpellingExercises.filter(e => e.id).map(e => ({ ...e, unit })));
             const host = document.querySelector('#grammarGame .minigame-container');
             host.replaceChildren();
@@ -159,7 +159,7 @@ async function waitBoard(page, index) { await page.waitForFunction(i => STUDY_ST
                     await enter(answer);
                 }
             } else {
-                const index = item.sentence.split(' ').findIndex(word => word.replace(/[.,!?]+$/, '').toLowerCase() === item.wrongWord);
+                const index = Number.isInteger(item.wrongIndex) ? item.wrongIndex : item.sentence.split(' ').findIndex(word => word.replace(/[.,!?]+$/, '').toLowerCase() === item.wrongWord);
                 await click(page, '[data-word="' + index + '"]');
                 await click(page, '#bin');
                 await enter(item.answer);
@@ -168,6 +168,14 @@ async function waitBoard(page, index) { await page.waitForFunction(i => STUDY_ST
             ok(await page.evaluate(() => NonSpellingWidget.getState().solved), 'approved Unit ' + item.unit + ' ' + item.id + ' solves through the real widget');
             ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Unit ' + item.unit + ' ' + item.id + ' fits the 319px phone');
         }
+        const repeatedArticle = approved.find(e => e.unit === '3' && e.id === 'F28');
+        await page.evaluate(item => {
+            NonSpellingWidget.mount(document.querySelector('#grammarGame .minigame-container'), item, { presentation: 'game', onCheck() {}, onNext() {} });
+        }, repeatedArticle);
+        await fillFix(page, 2, 'than'); await click(page, '#check');
+        ok(await page.locator('#bin.word-wrong').count() === 1 && await page.locator('.nse-answer.spelling-correct').count() === 1, 'F28 rejects replacing an already-correct the while recognizing correct spelling');
+        await click(page, '#clear'); await fillFix(page, repeatedArticle.wrongIndex, 'than'); await click(page, '#check');
+        ok(await page.evaluate(() => NonSpellingWidget.getState().solved), 'F28 accepts only its intended final the');
         await page.evaluate(item => {
             NonSpellingWidget.mount(document.querySelector('#grammarGame .minigame-container'), item, { presentation: 'game', onCheck() {}, onNext() {} });
         }, approved.find(e => e.unit === '1' && e.id === 'M19'));

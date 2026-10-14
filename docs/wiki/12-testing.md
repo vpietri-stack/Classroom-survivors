@@ -143,7 +143,10 @@ capitalized original mistakes, contractions via physical/on-screen keys, and
 smart-apostrophe normalization. Unit 2 coverage adds 16/20 authored counts,
 the three specifically edited M2/F9/F11 sentences, page-scoped keys and future
 exclusion. Chrome solves all 36 Unit 2 boards, including three-blank boards,
-at 319px width alongside all 42 Unit 1 boards. Unit 3 remains unauthored.
+at 319px width alongside all 42 Unit 1 boards. Unit 3 adds count/dedup checks for
+22 M/27 F boards and a four-blank board. Chrome solves all 49 additions at 319px,
+and F28 must reject replacing an already-correct "the" even when "than" is spelled
+correctly, then accept its intended final token. Unit 4 remains unauthored.
 Forced game fixtures cool all original sentence pairs, including leftovers from
 random three-pair grouping, so a regrouped fresh board cannot displace the
 intended typed exercise. Fixture IDs also include the authored unit/page scope.

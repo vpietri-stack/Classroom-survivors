@@ -305,4 +305,7 @@ Catalog lookup is scoped by book/unit/page; the Unit 9 catalog remains the POC
 source. Reused M/F IDs cannot collide across pages because SR keys include that
 scope. Approved Unit 2 additions use page 28: 16 missing-word and 20 find/fix
 boards, including the revised M2 pancakes sentence and F9/F11 relative clauses.
-Unit 3 remains suggestions only until approved.
+Approved Unit 3 additions use page 40: 22 missing-word and 27 distinct find/fix
+boards. F27 is omitted because it duplicated F8; F28 removes the rejected "but"
+and explicitly identifies the final "the" by its zero-based wrongIndex.
+Unit 4 remains suggestions only until approved.

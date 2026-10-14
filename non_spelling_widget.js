@@ -311,7 +311,8 @@
     if (exercise.type === 'missing') {
       verdict = { spelling: input.every((value, index) => value === exercise.answers[index]) };
     } else {
-      verdict = { word: plainWord(exercise.sentence.split(' ')[binnedWord]) === exercise.wrongWord, spelling: input[0] === exercise.answer };
+      const correctPosition = !Number.isInteger(exercise.wrongIndex) || binnedWord === exercise.wrongIndex;
+      verdict = { word: correctPosition && plainWord(exercise.sentence.split(' ')[binnedWord]) === exercise.wrongWord, spelling: input[0] === exercise.answer };
     }
     solved = verdict.spelling && (exercise.type === 'missing' || verdict.word);
     locked = true;

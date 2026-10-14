@@ -35,10 +35,21 @@ assert.equal(new Set([...unit1, ...unit2].map(e => e.key)).size, 78, 'Unit 1 and
 assert.equal(unit2.find(e => e.id === 'M2').sentences[1], 'These are the pancakes ___ we ate.', 'M2 retains the approved pancakes replacement');
 assert.equal(unit2.find(e => e.id === 'F9').sentence, "He's the teacher who teaches me English last year.");
 assert.equal(unit2.find(e => e.id === 'F11').sentence, 'This is the tree house which they build last summer.');
-assert.equal(vm.runInContext("TEACHING_CONTENT.PU3['3']['40'].nonSpellingExercises.some(e => e.id)", sandbox), false, 'Unit 3 is still suggestions only');
+const unit3 = content.buildPool('PU3', 3, 40).entries.filter(e => e.item.id && e.item.unit === '3').map(e => e.item);
+assert.equal(unit3.filter(e => e.type === 'missing-word').length, 22, 'Unit 3 has the approved 22 missing boards');
+const fixes3 = unit3.filter(e => e.type === 'find-fix');
+assert.equal(fixes3.length, 27, 'Unit 3 has the approved 27 distinct fixes');
+assert.equal(new Set(fixes3.map(e => e.sentence)).size, 27, 'no duplicate fix sentences');
+assert.ok(!fixes3.some(e => e.id === 'F27'), 'F27 duplicate remains excluded');
+assert.ok(!fixes3.find(e => e.id === 'F28').sentence.includes('but'), 'F28 omits the rejected conjunction');
+assert.equal(unit3.find(e => e.id === 'M22').answers.length, 4, 'M22 retains four blanks');
+assert.equal(new Set([...unit1, ...unit2, ...unit3].map(e => e.key)).size, 127, 'all three units retain scoped SR keys');
+assert.ok(unit3.every(e => e.page === '40'), 'Unit 3 belongs to page 40');
+assert.equal(vm.runInContext("TEACHING_CONTENT.PU3['4']['54'].nonSpellingExercises.some(e => e.id)", sandbox), false, 'Unit 4 remains unauthored');
 assert.ok(!unit1.some(e => ['M6', 'M9', 'M10', 'F9', 'F10'].includes(e.id)), 'rejected boards remain excluded');
-for (const item of [...unit1, ...unit2]) {
+for (const item of [...unit1, ...unit2, ...unit3]) {
     if (item.answers) assert.equal(item.sentences.join(' ').split('___').length - 1, item.answers.length, item.id + ' has one target per blank');
+    else if (Number.isInteger(item.wrongIndex)) assert.equal(item.sentence.split(' ')[item.wrongIndex].replace(/[.,!?]+$/, '').toLowerCase(), item.wrongWord, item.id + ' explicitly identifies its repeated wrong token');
     else assert.equal(item.sentence.split(' ').filter(word => word.replace(/[.,!?]+$/, '').toLowerCase() === item.wrongWord).length, 1, item.id + ' identifies exactly one wrong token');
 }
 for (let sample = 0; sample < 100; sample++) {
@@ -48,6 +59,9 @@ for (let sample = 0; sample < 100; sample++) {
     const next = content.select('PU3', 2, 28, 5);
     assert.equal(next.length, 5);
     assert.ok(new Set(next.map(e => e.type)).size >= 3, 'Unit 2 selects a varied five-board round');
+    const third = content.select('PU3', 3, 40, 5);
+    assert.equal(third.length, 5);
+    assert.ok(new Set(third.map(e => e.type)).size >= 3, 'Unit 3 selects a varied five-board round');
 }
 for (let sample = 0; sample < 400; sample++) {
     const picked = content.select('PU3', 9, 109, 5);

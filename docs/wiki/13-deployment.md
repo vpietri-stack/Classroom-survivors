@@ -231,3 +231,7 @@ the 16 missing-word and 20 find/fix boards under page 28. The synchronized stamp
 trio and the curriculum script cache buster are updated together; the dashboard
 auth link also loads the current shared version. Production remains a separate
 release and preview retains its existing isolated API/data.
+
+Unit 3 preview release `2026-10-14d` adds 22 M/27 F boards to page 40, retaining
+Units 1/2/9. Curriculum and widget cache busters advance with the synchronized
+stamp trio and dashboard auth link. Production is not part of this deployment.

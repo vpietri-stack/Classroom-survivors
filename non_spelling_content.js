@@ -113,7 +113,63 @@
             { id: 'F20', sentence: 'Grandpa telled me a story last night.', wrongWord: 'telled', answer: 'told' }
         ]
     };
-    const pageCatalogs = { 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:9:109': catalog };
+    const unit3Catalog = {
+        missing: [
+            { id: 'M1', sentences: ['Jenny is ___ than Jim.', 'Jenny is the ___ of the three children.'], answers: ['taller', 'tallest'] },
+            { id: 'M2', sentences: ['Ivan is the ___ of all the acrobats.', 'Ivan is ___ than Jim.'], answers: ['strongest', 'stronger'] },
+            { id: 'M3', sentences: ['My sister runs ___ than me.', 'She is the ___ runner in our whole school.'], answers: ['faster', 'fastest'] },
+            { id: 'M4', sentences: ['This is the ___ of the three boxes.', 'This box is ___ than that one.'], answers: ['biggest', 'bigger'] },
+            { id: 'M5', sentences: ['This mouse is ___ than that mouse.', 'This is the ___ of the three mice.'], answers: ['smaller', 'smallest'] },
+            { id: 'M6', sentences: ['This is the ___ dangerous of all these sports.', 'This sport is ___ dangerous than tennis.'], answers: ['most', 'more'] },
+            { id: 'M7', sentences: ['My drawing is ___ than yours.', 'This is the ___ of all my drawings.'], answers: ['better', 'best'] },
+            { id: 'M8', sentences: ['This is the ___ of the three films.', 'This film is ___ than that one.'], answers: ['worst', 'worse'] },
+            { id: 'M9', sentences: ['Jim is as tall ___ Jenny.', 'Ivan is taller ___ Jim.'], answers: ['as', 'than'] },
+            { id: 'M10', sentences: ['Jenny is taller than Jim, so Jim is ___ as tall as Jenny.', "I'm ___ tall as my brother."], answers: ['not', 'as'] },
+            { id: 'M11', sentences: ['I want ___ play football.', 'She ___ to play tennis.'], answers: ['to', 'wants'] },
+            { id: 'M12', sentences: ['He ___ to see a doctor.', 'We need ___ do our homework.'], answers: ['needs', 'to'] },
+            { id: 'M13', sentences: ['I ___ to go to the party.', 'My sister ___ to go too.'], answers: ['want', 'wants'] },
+            { id: 'M14', sentences: ['Tom ___ to finish his homework.', 'They ___ to finish theirs.'], answers: ['needs', 'need'] },
+            { id: 'M15', sentences: ['Your arm bends at your ___.', 'Your leg bends at your ___.'], answers: ['elbow', 'knee'] },
+            { id: 'M16', sentences: ['We wear shoes on our ___.', 'We wear gloves on our ___.'], answers: ['feet', 'hands'] },
+            { id: 'M17', sentences: ['Ivan is ___ strongest man in the circus.', 'Ivan is stronger ___ Jim.'], answers: ['the', 'than'] },
+            { id: 'M18', sentences: ['Jenny is taller ___ Jim.', 'Jenny is ___ tallest of the three children.'], answers: ['than', 'the'] },
+            { id: 'M19', sentences: ['Jim is ___ tall as Jenny.', 'Ivan is ___ strongest of all the acrobats.'], answers: ['as', 'the'] },
+            { id: 'M20', sentences: ['My bag is heavier ___ yours.', "Your bag isn't as heavy ___ mine."], answers: ['than', 'as'] },
+            { id: 'M21', sentences: ['This is ___ biggest of the three boxes.', 'This box is bigger ___ that one.', 'This box is ___ big as yours.'], answers: ['the', 'than', 'as'] },
+            { id: 'M22', sentences: ['My brother is ___ tall ___ me.', 'My sister is taller ___ me.', 'She is ___ tallest of the three of us.'], answers: ['as', 'as', 'than', 'the'] }
+        ],
+        fix: [
+            { id: 'F1', sentence: 'Jenny is tallest than Jim.', wrongWord: 'tallest', answer: 'taller' },
+            { id: 'F2', sentence: 'Ivan is the stronger of all the acrobats.', wrongWord: 'stronger', answer: 'strongest' },
+            { id: 'F3', sentence: 'This box is big than that one.', wrongWord: 'big', answer: 'bigger' },
+            { id: 'F4', sentence: 'This is the smaller of all the boxes.', wrongWord: 'smaller', answer: 'smallest' },
+            { id: 'F5', sentence: 'This animal is most dangerous than that one.', wrongWord: 'most', answer: 'more' },
+            { id: 'F6', sentence: 'This is the more beautiful of all the flowers.', wrongWord: 'more', answer: 'most' },
+            { id: 'F7', sentence: 'Jim is as tall than Jenny.', wrongWord: 'than', answer: 'as' },
+            { id: 'F8', sentence: "I'm not than strong as Ivan.", wrongWord: 'than', answer: 'as' },
+            { id: 'F9', sentence: 'My drawing is good than yours.', wrongWord: 'good', answer: 'better' },
+            { id: 'F10', sentence: 'This is the worse of all my drawings.', wrongWord: 'worse', answer: 'worst' },
+            { id: 'F11', sentence: 'I want to playing football.', wrongWord: 'playing', answer: 'play' },
+            { id: 'F12', sentence: 'She needs to resting her ankle.', wrongWord: 'resting', answer: 'rest' },
+            { id: 'F13', sentence: 'He want to go to the party.', wrongWord: 'want', answer: 'wants' },
+            { id: 'F14', sentence: 'They needs to do their homework.', wrongWord: 'needs', answer: 'need' },
+            { id: 'F15', sentence: 'I need for see a doctor.', wrongWord: 'for', answer: 'to' },
+            { id: 'F16', sentence: "She doesn't wants to go to the party.", wrongWord: 'wants', answer: 'want' },
+            { id: 'F17', sentence: 'I hurt both my knee.', wrongWord: 'knee', answer: 'knees' },
+            { id: 'F18', sentence: 'My fingers hurts.', wrongWord: 'hurts', answer: 'hurt' },
+            { id: 'F19', sentence: "I've got a sore throats.", wrongWord: 'throats', answer: 'throat' },
+            { id: 'F20', sentence: "I've got a headache, but I wants to play football.", wrongWord: 'wants', answer: 'want' },
+            { id: 'F21', sentence: 'Ivan is than strongest man in the circus.', wrongWord: 'than', answer: 'the' },
+            { id: 'F22', sentence: 'Jenny is taller the Jim.', wrongWord: 'the', answer: 'than' },
+            { id: 'F23', sentence: 'Jim is the tall as Jenny.', wrongWord: 'the', answer: 'as' },
+            { id: 'F24', sentence: 'My bag is as heavy than yours.', wrongWord: 'than', answer: 'as' },
+            { id: 'F25', sentence: 'This is as biggest of the three boxes.', wrongWord: 'as', answer: 'the' },
+            { id: 'F26', sentence: 'This box is bigger as that one.', wrongWord: 'as', answer: 'than' },
+            // F27 duplicated F8 and was explicitly excluded by the teacher.
+            { id: 'F28', sentence: 'This is the most dangerous of all the sports. That sport is more dangerous the swimming.', wrongWord: 'the', wrongIndex: 14, answer: 'than' }
+        ]
+    };
+    const pageCatalogs = { 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:9:109': catalog };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-14a",
+  "version": "2026-10-14k",
   "deployedAt": "2026-10-14",
-  "notes": "Released mixed five-board Study Round D and missing-word/find-fix game challenges, with approved PU3 Unit 9 page 109 exercises."
+  "notes": "Fix Study/game non-spelling startup when an available curriculum page has no authored content, including PU1 Unit 2 pages 24/25. No curriculum changes."
 }

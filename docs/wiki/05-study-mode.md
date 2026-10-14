@@ -315,3 +315,5 @@ or replaced mixed session.
 Due matching pairs remain reviewable even when cooldown partners are needed to
 fill the three-pair board. Those partially cooled boards may win on SR priority,
 but cannot be pulled solely to meet the type-variety quota.
+
+Study startup fix (2026-10-14): AVAILABLE_CONTENT can list pages that have no TEACHING_CONTENT entry (currently PU1 Unit 2 pages 24/25). The mixed non-spelling pool now skips missing books/units/pages just as the legacy SR picker does. Original absolute page indexes remain intact, so proximity weighting, earlier-page review, cooldown and future-page exclusion retain their behavior. Missing current pages may still review earlier loaded material; a wholly unloaded book returns an empty pool. This guard applies to Study and game challenges.

@@ -104,7 +104,14 @@ async function waitBoard(page, index) { await page.waitForFunction(i => STUDY_ST
                 for (const e of entries) {
                     for (const key of e.item.pairs ? e.item.pairs.map(itemKey) : [e.key]) srState[e.item.srType][key] = { dueAfterSession: 999, lastResult: 'success' };
                 }
-                const chosen = entries.find(e => e.item.id === id).item;
+                // Random grouping may omit leftover pairs from this pool. Cool
+                // every raw pair so regrouping cannot create a fresh board.
+                for (const pages of Object.values(TEACHING_CONTENT.PU3)) {
+                    for (const content of Object.values(pages)) {
+                        for (const pair of content.sentencePairs || []) srState.sentencePairs[itemKey(pair)] = { dueAfterSession: 999, lastResult: 'success' };
+                    }
+                }
+                const chosen = entries.find(e => e.item.id === id && e.item.unit === '9' && e.item.page === '109').item;
                 srState.sentences[chosen.key] = { dueAfterSession: 0, lastResult: 'failure' };
                 authActiveUser.srState = srState;
                 startMiniGame('scramble', 'gomoku');

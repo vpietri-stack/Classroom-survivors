@@ -239,3 +239,5 @@ preserve the open PR API environment; do not merge or close draft PR #1. No API
 schema, student-account migration or preview-container overwrite is required.
 The teacher dashboard's auth/config script cache busters also use the release
 stamp so its version watchdog loads the current shared authentication script.
+
+The 2026-10-14k startup hotfix guards missing curriculum entries in non_spelling_content.js. Its cache buster and the version/auth/index stamp trio advance together, including the dashboard auth URL. The production hotfix is based on production main; preview receives the same guard on its own main. PU3 curriculum proposals/assets and the isolated preview backend are not promoted by this fix.

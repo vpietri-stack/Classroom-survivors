@@ -135,3 +135,7 @@ no student or production data accessed. Both are in npm test and may be run with
 npm run test:non-spelling. Screenshots go to the OS temp folder
 classroom-non-spelling-integrated. The legacy widget regression loads new scripts
 in index order with ?nonspelling=0 to retain its original round scope.
+
+test_non_spelling_startup.js reproduces the PU1 pages 24/25 crash, exercises selection on every available page of every loaded book, and covers synthetic missing book/unit/page entries without collapsing proximity indexes. Chrome presses the real Study button on PU1 U2 pages 23/24/25/26 and U9 page 111 at desktop and 319px, then renders the mixed round. External HTTP/API/model traffic is blocked. The regression runs in both npm test and npm run test:non-spelling.
+
+The production browser fixture cools every raw sentence pair, including leftover pairs omitted by one random board grouping, before forcing an authored game challenge. This removes accidental fresh matching boards without changing runtime selection or SR behavior.

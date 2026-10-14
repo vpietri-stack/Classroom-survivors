@@ -152,6 +152,19 @@ violation shows up as a student getting a correct answer marked wrong.
   the word the pupil is meant to recognise — so `monday.png` shows a starred card where
   "Mon" would be, and the other six cards name themselves.
 
+PU3 flashcard authoring (2026-10-14) adds 35 formerly missing image filenames:
+15 built-in image_gen illustrations and 20 canvas diagrams. The complete set,
+prompts, intended distinctions and visual review are in
+[`outputs/pu3-flashcards/index.html`](../../outputs/pu3-flashcards/index.html),
+[`manifest.json`](../../outputs/pu3-flashcards/manifest.json) and
+[`QA.md`](../../outputs/pu3-flashcards/QA.md). `build_pu3_flashcards.js` reproduces
+the diagrams and optimizes locally retained imagegen originals with the bundled
+authoring-only sharp package. Every final PNG is strictly below 100,000 bytes;
+all cards were visually checked at 80px and 140px. Frequency percentages are
+explicitly approximate visual examples, not fixed definitions of often/sometimes.
+No target English word or Chinese translation appears inside the cards.
+This asset authoring step does not change curriculum/SR keys or release stamps.
+
 `class_config.js:6–74` carries a comment block mapping every book/unit to page-number lists —
 this mirrors `AVAILABLE_CONTENT`.
 

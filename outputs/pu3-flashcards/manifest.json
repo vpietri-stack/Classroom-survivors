@@ -1,0 +1,297 @@
+[
+  {
+    "word": "plastic",
+    "filename": "plastic.png",
+    "bytes": 85507,
+    "size": 448,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. Asset: one square vocabulary flashcard illustration for Chinese ESL pupils aged about ten. Premium friendly textbook cartoon: bold smooth dark-brown outlines, simple flat warm colors with only gentle shading, clean pure white background, generous margins. Single unmistakable concept, large shapes readable at 80px, no border, no letters, no words, no watermark, no collage.\nPrimary request: Show THREE visibly PLASTIC everyday containers together: a transparent blue-tinted water bottle with screw cap, a colored lightweight food tub with lid, and a lightly squashed clear plastic cup. Large close-up, subtle shine and molded ridges communicate the material common to all three. No food, recycling sign, glass, or metal.",
+    "rationale": "Several molded plastic containers indicate the shared material, not just bottle."
+  },
+  {
+    "word": "tent",
+    "filename": "tent.png",
+    "bytes": 97633,
+    "size": 512,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. Asset: one square vocabulary flashcard illustration for Chinese ESL pupils aged about ten. Premium friendly textbook cartoon: bold smooth dark-brown outlines, simple flat warm colors with only gentle shading, clean pure white background, generous margins. Single unmistakable concept, large shapes readable at 80px, no border, no letters, no words, no watermark, no collage.\nPrimary request: Show one classic colorful camping tent, pitched with its poles, guy ropes and pegs, door flap open with dark interior. Entire tent visible, 3/4 view, a tiny grass patch only. No people, furniture, mountains, trees or other camping equipment.",
+    "rationale": "Poles, pegs and open flap identify a camping tent."
+  },
+  {
+    "word": "pyjamas",
+    "filename": "pyjamas.png",
+    "bytes": 97533,
+    "size": 448,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. Asset: one square vocabulary flashcard illustration for Chinese ESL pupils aged about ten. Premium friendly textbook cartoon: bold smooth dark-brown outlines, simple flat warm colors with only gentle shading, clean pure white background, generous margins. Single unmistakable concept, large shapes readable at 80px, no border, no letters, no words, no watermark, no collage.\nPrimary request: Show one matching set of children's bedtime clothes, a long-sleeved button-front pajama top and full-length trousers, laid out clearly side by side, blue fabric with large crescent-moon and star patterns. No person, dressing gown, slippers or bed. The bedtime moon pattern distinguishes these from ordinary clothes.",
+    "rationale": "Matching top/trousers with moon motifs distinguish bedtime clothing."
+  },
+  {
+    "word": "suitcase",
+    "filename": "suitcase.png",
+    "bytes": 92121,
+    "size": 448,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. Asset: one square vocabulary flashcard illustration for Chinese ESL pupils aged about ten. Premium friendly textbook cartoon: bold smooth dark-brown outlines, simple flat warm colors with only gentle shading, clean pure white background, generous margins. Single unmistakable concept, large shapes readable at 80px, no border, no letters, no words, no watermark, no collage.\nPrimary request: Show one sturdy bright teal wheeled travel suitcase in 3/4 view, closed, large telescopic handle fully extended and two wheels very visible, zipper edge. No person, backpack, additional luggage, stickers, writing or travel scenery.",
+    "rationale": "Wheels and extended handle distinguish travel luggage from a backpack."
+  },
+  {
+    "word": "sandcastle",
+    "filename": "sandcastle.png",
+    "bytes": 99228,
+    "size": 448,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. Asset: one square vocabulary flashcard illustration for Chinese ESL pupils aged about ten. Premium friendly textbook cartoon: bold smooth dark-brown outlines, simple flat warm colors with only gentle shading, clean pure white background, generous margins. Single unmistakable concept, large shapes readable at 80px, no border, no letters, no words, no watermark, no collage.\nPrimary request: One large unmistakable sandcastle with two turret towers and a little flag, built on a small sandy patch; a small tipped bucket and spade beside it explain that it is made of sand. No sea, people, medieval stone, scenery or words.",
+    "rationale": "Bucket, spade and loose sand distinguish it from a stone castle."
+  },
+  {
+    "word": "postcard",
+    "filename": "postcard.png",
+    "bytes": 89769,
+    "size": 512,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. Asset: one square vocabulary flashcard illustration for Chinese ESL pupils aged about ten. Premium friendly textbook cartoon: bold smooth dark-brown outlines, simple flat warm colors with only gentle shading, clean pure white background, generous margins. Single unmistakable concept, large shapes readable at 80px, no border, no letters, no words, no watermark, no collage.\nPrimary request: A SINGLE stiff rectangular holiday postcard, its picture side showing a sunny beach. Behind it, the flipped view of the SAME card shows the plain white back divided into a short-message area, three address lines and a tiny postage-stamp corner. A postcard, NOT an envelope or a photo. No readable words. The two views form one tight simple icon, generous margins.",
+    "rationale": "Picture side plus address side distinguish a postcard from a photograph/envelope."
+  },
+  {
+    "word": "stamp",
+    "filename": "stamp.png",
+    "bytes": 84180,
+    "size": 448,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. Asset: one square vocabulary flashcard illustration for Chinese ESL pupils aged about ten. Premium friendly textbook cartoon: bold smooth dark-brown outlines, simple flat warm colors with only gentle shading, clean pure white background, generous margins. Single unmistakable concept, large shapes readable at 80px, no border, no letters, no words, no watermark, no collage.\nPrimary request: One single large POSTAGE STAMP with a scalloped perforated rectangular edge and a tiny simple bird picture inside, orange and blue. Beside its lower corner only a SMALL plain envelope with a matching tiny stamp applied in its top right corner, demonstrating that the main object is used to post letters. Main stamp occupies 75 percent of composition. No readable words, numbers, money, ink stamper, postcard or passport.",
+    "rationale": "Perforated edge and a small stamped envelope show postal use."
+  },
+  {
+    "word": "pack",
+    "filename": "pack.png",
+    "bytes": 80585,
+    "size": 448,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. Asset: one square vocabulary flashcard illustration for Chinese ESL pupils aged about ten. Premium friendly textbook cartoon: bold smooth dark-brown outlines, simple flat warm colors with only gentle shading, clean pure white background, generous margins. Single unmistakable concept, large shapes readable at 80px, no border, no letters, no words, no watermark, no collage.\nPrimary request: A Chinese schoolchild aged ten deliberately PUTTING a folded shirt DOWN INTO an OPEN travel suitcase already containing neat folded clothes. Close simple 3/4 composition: suitcase and child's two hands with shirt are dominant, a short clear downward orange arrow from shirt into suitcase reinforces packing rather than unpacking. A pair of socks waits beside the suitcase. No room clutter, holiday scenery or other people. Child is smiling naturally, not a tiny figure.",
+    "rationale": "Downward arrow and clothes entering a suitcase distinguish packing from unpacking."
+  },
+  {
+    "word": "tour",
+    "filename": "tour.png",
+    "bytes": 79264,
+    "size": 448,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. Asset: one square vocabulary flashcard illustration for Chinese ESL pupils aged about ten. Premium friendly textbook cartoon: bold smooth dark-brown outlines, simple flat warm colors with only gentle shading, clean pure white background, generous margins. Single unmistakable concept, large shapes readable at 80px, no border, no letters, no words, no watermark, no collage.\nPrimary request: Show a small cheerful CIRCUS touring bus driving on a curved dotted route linking THREE separate small cities, each with its own red-and-yellow circus tent. Three tent stops and directional arrows make repeated performances in different places clear, not a single bus ride or beach holiday. The large bus has a bold circus-tent pictogram on its side, NO writing. Very simple diagrammatic scene with large recognizable symbols on white.",
+    "rationale": "Circus bus visits several cities; distinct from a single holiday destination."
+  },
+  {
+    "word": "holiday",
+    "filename": "holiday.png",
+    "bytes": 84745,
+    "size": 448,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. Asset: one square vocabulary flashcard illustration for Chinese ESL pupils aged about ten. Premium friendly textbook cartoon: bold smooth dark-brown outlines, simple flat warm colors with only gentle shading, clean pure white background, generous margins. Single unmistakable concept, large shapes readable at 80px, no border, no letters, no words, no watermark, no collage.\nPrimary request: Show a Chinese family of three relaxing together on a sunny sandy beach beside a large beach umbrella, with a wheeled suitcase resting nearby. One child builds a little sand mound while the parents sit happily. The family vacation is the subject, not an isolated suitcase or beach. Keep scene compact, sunny sea in one simple blue strip, no hotel, text, crowd or tiny details.",
+    "rationale": "Family leisure at the seaside plus luggage provide holiday context."
+  },
+  {
+    "word": "forget",
+    "filename": "forget.png",
+    "bytes": 87807,
+    "size": 512,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. Asset: one square vocabulary flashcard illustration for Chinese ESL pupils aged about ten. Premium friendly textbook cartoon: bold smooth dark-brown outlines, simple flat warm colors with only gentle shading, clean pure white background, generous margins. Single unmistakable concept, large shapes readable at 80px, no border, no letters, no words, no watermark, no collage.\nPrimary request: A simple TWO-PART visual story on white: left, a red school backpack sits conspicuously LEFT BEHIND just inside a small home doorway; right, the same ten-year-old Chinese boy has arrived at a school entrance WITHOUT HIS BAG and looks puzzled, palm on forehead, an EMPTY thought bubble with just one large question mark above him. Small grey arrow from home to school connects the two moments. Backpack at home and bagless puzzled child are both LARGE. No other missing items, no book, no language, no extra people.",
+    "rationale": "Bag left at home, child at school without it; distinct from remembering before leaving."
+  },
+  {
+    "word": "remember",
+    "filename": "remember.png",
+    "bytes": 99337,
+    "size": 512,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. Asset: one square vocabulary flashcard illustration for Chinese ESL pupils aged about ten. Premium friendly textbook cartoon: bold smooth dark-brown outlines, simple flat warm colors with only gentle shading, clean pure white background, generous margins. Single unmistakable concept, large shapes readable at 80px, no border, no letters, no words, no watermark, no collage.\nPrimary request: One simple compact scene on white: a ten-year-old Chinese boy at his HOME DOOR on his way to school suddenly recalls his red backpack; a large thought bubble above him contains that SAME red backpack and a green tick. He turns back and reaches to PICK UP the matching red backpack by the door. Happy relieved expression and one small lightbulb spark make remembering clear. Focus on recalling the bag before leaving, not packing clothes, not studying, not a beach trip. No writing.",
+    "rationale": "Recalled bag in thought bubble and collection at the door show successful recall."
+  },
+  {
+    "word": "frightening",
+    "filename": "frightening.png",
+    "bytes": 95681,
+    "size": 448,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. Asset: one square vocabulary flashcard illustration for Chinese ESL pupils aged about ten. Premium friendly textbook cartoon: bold smooth dark-brown outlines, simple flat warm colors with only gentle shading, clean pure white background, generous margins. Single unmistakable concept, large shapes readable at 80px, no border, no letters, no words, no watermark, no collage.\nPrimary request: A large visibly scary barking dog is the dominant subject, occupying 75 percent of the square: bristling fur, lowered brows, open mouth with visible cartoon teeth, stiff alert posture, sharp barking motion lines. A SMALL child at the far side recoils behind a fence so we understand the dog CAUSES fear. Friendly textbook style, not horrific, no blood or attack. The dog, not the child's feeling, is the focus. Sparse white backdrop.",
+    "rationale": "The threatening dog is dominant; the child only explains its effect."
+  },
+  {
+    "word": "surprising",
+    "filename": "surprising.png",
+    "bytes": 99984,
+    "size": 512,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. Asset: one square vocabulary flashcard illustration for Chinese ESL pupils aged about ten. Premium friendly textbook cartoon: bold smooth dark-brown outlines, simple flat warm colors with only gentle shading, clean pure white background, generous margins. Single unmistakable concept, large shapes readable at 80px, no border, no letters, no words, no watermark, no collage.\nPrimary request: Show a large gift box whose lid has just popped off unexpectedly, with a cheerful yellow duck toy on a spring bursting out and bold motion rays. A small Chinese child at one edge leans back with round eyes and hands raised in unexpected surprise. The extraordinary POPPING-OUT event is dominant, not the child's face, not ordinary wrapped presents, not fear. No clown, no scary elements, no words, no question marks. Strong simple silhouette.",
+    "rationale": "An unexpected pop-out event is dominant; the child explains its effect."
+  },
+  {
+    "word": "worrying",
+    "filename": "worrying.png",
+    "bytes": 77133,
+    "size": 448,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. Asset: one square vocabulary flashcard illustration for Chinese ESL pupils aged about ten. Premium friendly textbook cartoon: bold smooth dark-brown outlines, simple flat warm colors with only gentle shading, clean pure white background, generous margins. Single unmistakable concept, large shapes readable at 80px, no border, no letters, no words, no watermark, no collage.\nPrimary request: SIMPLE large close composition for 'worrying', the CAUSE of concern. Only THREE readable elements: upper right a dark storm cloud with a few raindrops and a red warning triangle; lower right a small blue boat still tied safely at a jetty on calm water, with a broad dotted arrow from the approaching cloud toward the boat; left a LARGE Chinese father from waist up occupying 40% of the picture, looking up at that cloud with knitted eyebrows and hand on chin, visibly concerned that the coming storm could spoil the planned boat trip. Father face must remain readable at 80px. PURE WHITE background, tiny calm-water patch under boat only. No children, no extra family, no panoramic sky, no massive waves, no boat sinking, no words. The cloud and warning linked to his concern must distinguish this from a neutral weather picture.",
+    "rationale": "Approaching storm threatens a future trip; concern about what may happen."
+  },
+  {
+    "word": "often",
+    "filename": "often.png",
+    "bytes": 7651,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "Seven opportunities with larger apple symbols. 1×/2× indicate exact repetition; approximate percentages illustrate often/sometimes, not fixed definitions."
+  },
+  {
+    "word": "sometimes",
+    "filename": "sometimes.png",
+    "bytes": 7589,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "Seven opportunities with larger apple symbols. 1×/2× indicate exact repetition; approximate percentages illustrate often/sometimes, not fixed definitions."
+  },
+  {
+    "word": "never",
+    "filename": "never.png",
+    "bytes": 4718,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "Seven opportunities with larger apple symbols. 1×/2× indicate exact repetition; approximate percentages illustrate often/sometimes, not fixed definitions."
+  },
+  {
+    "word": "once",
+    "filename": "once.png",
+    "bytes": 5255,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "Seven opportunities with larger apple symbols. 1×/2× indicate exact repetition; approximate percentages illustrate often/sometimes, not fixed definitions."
+  },
+  {
+    "word": "twice",
+    "filename": "twice.png",
+    "bytes": 6561,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "Seven opportunities with larger apple symbols. 1×/2× indicate exact repetition; approximate percentages illustrate often/sometimes, not fixed definitions."
+  },
+  {
+    "word": "before",
+    "filename": "before.png",
+    "bytes": 6660,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "Same whole-apple → bitten-apple timeline; red frame identifies the earlier/later state. Revised to avoid an hourglass-like core."
+  },
+  {
+    "word": "after",
+    "filename": "after.png",
+    "bytes": 6869,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "Same whole-apple → bitten-apple timeline; red frame identifies the earlier/later state. Revised to avoid an hourglass-like core."
+  },
+  {
+    "word": "yesterday",
+    "filename": "yesterday.png",
+    "bytes": 6868,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "Past date/week outlined relative to TODAY; moon distinguishes last night from yesterday."
+  },
+  {
+    "word": "last night",
+    "filename": "last-night.png",
+    "bytes": 6480,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "Past date/week outlined relative to TODAY; moon distinguishes last night from yesterday."
+  },
+  {
+    "word": "last week",
+    "filename": "last-week.png",
+    "bytes": 7674,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "Past date/week outlined relative to TODAY; moon distinguishes last night from yesterday."
+  },
+  {
+    "word": "better",
+    "filename": "better.png",
+    "bytes": 5664,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "Same house-drawing task: rough versus accurate, with one versus three stars. Red frame chooses the quality."
+  },
+  {
+    "word": "worse",
+    "filename": "worse.png",
+    "bytes": 5658,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "Same house-drawing task: rough versus accurate, with one versus three stars. Red frame chooses the quality."
+  },
+  {
+    "word": "more",
+    "filename": "more.png",
+    "bytes": 6592,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "More compares two piles; most/least compare three. Highlighted pile encodes the target without printing it."
+  },
+  {
+    "word": "most",
+    "filename": "most.png",
+    "bytes": 7001,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "More compares two piles; most/least compare three. Highlighted pile encodes the target without printing it."
+  },
+  {
+    "word": "least",
+    "filename": "least.png",
+    "bytes": 6725,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "More compares two piles; most/least compare three. Highlighted pile encodes the target without printing it."
+  },
+  {
+    "word": "one of the",
+    "filename": "one-of-the.png",
+    "bytes": 6307,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "One highlighted apple remains inside a group of six identical apples; not the largest or a separate object."
+  },
+  {
+    "word": "timetable",
+    "filename": "timetable.png",
+    "bytes": 8435,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "School subjects against weekdays and lesson times; subject icons distinguish it from a plain calendar."
+  },
+  {
+    "word": "as",
+    "filename": "as.png",
+    "bytes": 1646,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "Two rulers share a baseline: equal heights for as, visibly unequal heights for not as."
+  },
+  {
+    "word": "not as",
+    "filename": "not-as.png",
+    "bytes": 2130,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "Two rulers share a baseline: equal heights for as, visibly unequal heights for not as."
+  },
+  {
+    "word": "made of",
+    "filename": "made-of.png",
+    "bytes": 3390,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "Wood/chair and metal/spoon pairs use dotted material callouts. No transformation arrows that suggest make/build."
+  }
+]

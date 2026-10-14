@@ -137,13 +137,18 @@ async function waitBoard(page, index) { await page.waitForFunction(i => STUDY_ST
         await page.evaluate(() => { startGrammarGame('I washed my hands before I ate lunch.'); });
         ok(await page.locator('#sentence-container').isVisible() && await page.locator('#grammar-actions').isVisible(), 'legacy grammar UI is restored after typed challenges');
         const approved = await page.evaluate(() => {
-            const items = [['1', '16'], ['2', '28'], ['3', '40'], ['4', '54'], ['5', '57'], ['5', '59'], ['5', '66'], ['6', '69'], ['6', '71'], ['6', '73'], ['7', '83'], ['7', '85'], ['7', '87'], ['8', '95'], ['8', '97'], ['8', '98'], ['8', '99']].flatMap(([unit, page]) =>
+            const items = [['1', '16'], ['2', '28'], ['3', '40'], ['4', '54'], ['5', '57'], ['5', '59'], ['5', '66'], ['6', '69'], ['6', '71'], ['6', '73'], ['7', '83'], ['7', '85'], ['7', '87'], ['8', '95'], ['8', '97'], ['8', '98'], ['8', '99'], ['9', '107'], ['9', '110'], ['9', '111']].flatMap(([unit, page]) =>
                 TEACHING_CONTENT.PU3[unit][page].nonSpellingExercises.filter(e => e.id).map(e => ({ ...e, unit, page })));
             const host = document.querySelector('#grammarGame .minigame-container');
             host.replaceChildren();
             document.getElementById('grammarGame').classList.add('nse-typed');
             return items;
         });
+        const translationCoverage = await page.evaluate(() => ['110', '111'].map(page => {
+            const data = TEACHING_CONTENT.PU3[9][page];
+            return [...data.vocab, ...data.sentences].every(text => /[\u4e00-\u9fff]/u.test(getLocalTranslation(text)));
+        }));
+        ok(translationCoverage.every(Boolean), 'real app exact-key lookup translates every new Unit 9 vocabulary and scramble item');
         for (const item of approved) {
             await page.evaluate(item => {
                 NonSpellingWidget.mount(document.querySelector('#grammarGame .minigame-container'), item, { presentation: 'game', onCheck() {}, onNext() {} });

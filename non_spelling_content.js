@@ -506,7 +506,89 @@
             ]
         }
     };
-    const pageCatalogs = { 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:109': catalog };
+    // Approved Unit 9 additions; page 109 retains its original catalog above.
+    const unit9Catalogs = {
+        "107": {
+            missing: [
+                {"id": "M1", "sentences": ["It's a ___ elephant.", "It's a ___ mouse."], "answers": ["huge", "little"], "prefixes": ["h", "l"]},
+                {"id": "M2", "sentences": ["Everyone is shouting. The room is ___.", "Everyone is whispering. The room is ___."], "answers": ["noisy", "quiet"], "prefixes": ["n", "q"]},
+                {"id": "M3", "sentences": ["There's poopoo in my soup. It tastes ___.", "This food tastes very good. It's ___."], "answers": ["horrible", "excellent"], "prefixes": ["h", "e"]},
+                {"id": "M4", "sentences": ["I won the prize! I'm so ___.", "Nobody is with him. He's ___."], "answers": ["lucky", "alone"], "prefixes": ["l", "a"]},
+                {"id": "M5", "sentences": ["Chinese New Year is a ___ day, when we eat ___ food."], "answers": ["special", "excellent"], "prefixes": ["s", "e"]},
+                {"id": "M6", "sentences": ["\"Enormous\" means the same as ___.", "\"___\" means the same as fantastic."], "answers": ["huge", "brilliant"], "prefixes": ["h", "b"]},
+                {"id": "M7", "sentences": ["The test isn't easy. It's ___.", "The teacher was happy with my work. She was ___."], "answers": ["difficult", "pleased"], "prefixes": ["d", "p"]},
+                {"id": "M8", "sentences": ["There isn't any light. The room is ___.", "This animal looks very unusual. It's ___."], "answers": ["dark", "strange"], "prefixes": ["d", "s"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "This elephant is enormous. It's little.", "wrongWord": "little", "answer": "huge"},
+                {"id": "F2", "sentence": "This mouse is very small. It's huge.", "wrongWord": "huge", "answer": "little"},
+                {"id": "F3", "sentence": "Everyone is shouting. The room is quiet.", "wrongWord": "quiet", "answer": "noisy"},
+                {"id": "F4", "sentence": "Nobody is with me. I'm together.", "wrongWord": "together", "answer": "alone"},
+                {"id": "F5", "sentence": "This poopoo soup tastes amazing.", "wrongWord": "amazing", "answer": "horrible"},
+                {"id": "F6", "sentence": "My birthday's a normal day for me!", "wrongWord": "normal", "answer": "special"},
+                {"id": "F7", "sentence": "\"Enormous\" means small.", "wrongWord": "small", "answer": "huge"},
+                {"id": "F8", "sentence": "\"Fantastic\" means terrible.", "wrongWord": "terrible", "answer": "brilliant"},
+                {"id": "F9", "sentence": "The test was very hard. It was easy.", "wrongWord": "easy", "answer": "difficult"},
+                {"id": "F10", "sentence": "The teacher was happy with my work. She was sad.", "wrongWord": "sad", "answer": "pleased"}
+            ]
+        },
+        "110": {
+            missing: [
+                {"id": "M1", "sentences": ["I put on my ___ before going to bed.", "I wear ___ on my feet when I play tennis."], "answers": ["pyjamas", "trainers"], "prefixes": ["p", "t"]},
+                {"id": "M2", "sentences": ["We sleep in a ___ when we go camping.", "We build ___ with sand on the beach."], "answers": ["tent", "sandcastles"], "prefixes": ["t", "s"]},
+                {"id": "M3", "sentences": ["I put my clothes in a ___ before going on a trip.", "I carry my ___ on my back."], "answers": ["suitcase", "rucksack"], "prefixes": ["s", "r"]},
+                {"id": "M4", "sentences": ["We sent a ___ to Grandma from our holiday.", "We put a ___ on it before posting it."], "answers": ["postcard", "stamp"], "prefixes": ["p", "s"]},
+                {"id": "M5", "sentences": ["The ___ from the top of the hill was beautiful.", "The circus is travelling from city to city on a ___."], "answers": ["view", "tour"], "prefixes": ["v", "t"]},
+                {"id": "M6", "sentences": ["I'm going to ___ my suitcase tonight.", "We're going on ___ tomorrow."], "answers": ["pack", "holiday"], "prefixes": ["p", "h"]},
+                {"id": "M7", "sentences": ["I'll put on my ___.", "Let's make a sandcastle on the ___."], "answers": ["sunglasses", "beach"], "prefixes": ["s", "b"]},
+                {"id": "M8", "sentences": ["Don't ___ to pack your trainers.", "Please ___ to put a stamp on the postcard."], "answers": ["forget", "remember"], "prefixes": ["f", "r"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "I wear my trainers in bed.", "wrongWord": "trainers", "answer": "pyjamas"},
+                {"id": "F2", "sentence": "I put on my pyjamas before I play football.", "wrongWord": "pyjamas", "answer": "trainers"},
+                {"id": "F3", "sentence": "We sleep in a stamp when we go camping.", "wrongWord": "stamp", "answer": "tent"},
+                {"id": "F4", "sentence": "We use sand to make postcards on the beach.", "wrongWord": "postcards", "answer": "sandcastles"},
+                {"id": "F5", "sentence": "My suitcase has shoulder straps. I carry it on my back.", "wrongWord": "suitcase", "answer": "rucksack"},
+                {"id": "F6", "sentence": "I pack my holiday clothes in my postcard.", "wrongWord": "postcard", "answer": "suitcase"},
+                {"id": "F7", "sentence": "Don't forget to put a tent on the postcard before you send it.", "wrongWord": "tent", "answer": "stamp"},
+                {"id": "F8", "sentence": "This suitcase is a card with a holiday picture and a short message.", "wrongWord": "suitcase", "answer": "postcard"},
+                {"id": "F9", "sentence": "We climbed the hill to enjoy the stamp of the sea.", "wrongWord": "stamp", "answer": "view"},
+                {"id": "F10", "sentence": "The tour has finished. It's under.", "wrongWord": "under", "answer": "over"},
+                {"id": "F11", "sentence": "Please forget to put a stamp on the postcard before you post it.", "wrongWord": "forget", "answer": "remember"},
+                {"id": "F12", "sentence": "I need to make my suitcase before we leave for our holiday.", "wrongWord": "make", "answer": "pack"}
+            ]
+        },
+        "111": {
+            missing: [
+                {"id": "M1", "sentences": ["The lesson was ___.", "I felt ___ during the lesson."], "answers": ["boring", "bored"], "prefixes": ["b", "b"]},
+                {"id": "M2", "sentences": ["I'm ___ about our holiday.", "Our holiday plans sound ___."], "answers": ["excited", "exciting"], "prefixes": ["e", "e"]},
+                {"id": "M3", "sentences": ["The huge dog looked ___.", "The little girl felt ___."], "answers": ["frightening", "frightened"], "prefixes": ["f", "f"]},
+                {"id": "M4", "sentences": ["I'm ___ in dinosaurs.", "This dinosaur book is ___."], "answers": ["interested", "interesting"], "prefixes": ["i", "i"]},
+                {"id": "M5", "sentences": ["The unexpected present was ___.", "I was ___ when I opened it."], "answers": ["surprising", "surprised"], "prefixes": ["s", "s"]},
+                {"id": "M6", "sentences": ["We felt ___ after the walk.", "The long walk was ___."], "answers": ["tired", "tiring"], "prefixes": ["t", "t"]},
+                {"id": "M7", "sentences": ["The news about the storm was ___.", "Dad felt ___ about our boat trip."], "answers": ["worrying", "worried"], "prefixes": ["w", "w"]},
+                {"id": "M8", "sentences": ["I wasn't ___ of the dog because it was friendly.", "The huge shark in the film looked ___."], "answers": ["frightened", "frightening"], "prefixes": ["f", "f"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "The lesson was bored.", "wrongWord": "bored", "answer": "boring"},
+                {"id": "F2", "sentence": "The lesson made me feel boring.", "wrongWord": "boring", "answer": "bored"},
+                {"id": "F3", "sentence": "We're exciting about our holiday.", "wrongWord": "exciting", "answer": "excited"},
+                {"id": "F4", "sentence": "The roller coaster was excited.", "wrongWord": "excited", "answer": "exciting"},
+                {"id": "F5", "sentence": "The dog's loud barking was frightened.", "wrongWord": "frightened", "answer": "frightening"},
+                {"id": "F6", "sentence": "She was frightening of the dog.", "wrongWord": "frightening", "answer": "frightened"},
+                {"id": "F7", "sentence": "I'm interesting in dinosaurs.", "wrongWord": "interesting", "answer": "interested"},
+                {"id": "F8", "sentence": "This book about dinosaurs is interested.", "wrongWord": "interested", "answer": "interesting"},
+                {"id": "F9", "sentence": "I was surprising by the unexpected present.", "wrongWord": "surprising", "answer": "surprised"},
+                {"id": "F10", "sentence": "The unexpected present was surprised.", "wrongWord": "surprised", "answer": "surprising"},
+                {"id": "F11", "sentence": "The long walk made us feel tiring.", "wrongWord": "tiring", "answer": "tired"},
+                {"id": "F12", "sentence": "The long walk was tired.", "wrongWord": "tired", "answer": "tiring"},
+                {"id": "F13", "sentence": "The exam made me feel worrying.", "wrongWord": "worrying", "answer": "worried"},
+                {"id": "F14", "sentence": "The news about the storm was worried.", "wrongWord": "worried", "answer": "worrying"}
+            ]
+        }
+    };
+
+    const pageCatalogs = { 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

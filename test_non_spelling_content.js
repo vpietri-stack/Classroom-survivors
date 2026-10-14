@@ -124,7 +124,40 @@ assert.equal(new Set([...unit1, ...unit2, ...unit3, ...unit4, ...unit5, ...unit6
 assert.equal(new Set(unit8.filter(e => e.answer).map(e => e.sentence)).size, 32, 'no duplicate Unit 8 fixes');
 assert.ok(!content.buildPool('PU3', 7, 87).entries.some(e => e.item.unit === '8'), 'Unit 8 stays out of Unit 7');
 assert.ok(!unit1.some(e => ['M6', 'M9', 'M10', 'F9', 'F10'].includes(e.id)), 'rejected boards remain excluded');
-for (const item of [...unit1, ...unit2, ...unit3, ...unit4, ...unit5, ...unit6, ...unit7, ...unit8]) {
+// Unit 9 additions retain page 109's original six M/eight F catalog.
+const unit9 = content.buildPool('PU3', 9, 111).entries.filter(e => e.item.id && e.item.unit === '9' && e.item.page !== '109').map(e => e.item);
+assert.equal(unit9.length, 60);
+assert.equal(new Set([...unit1, ...unit2, ...unit3, ...unit4, ...unit5, ...unit6, ...unit7, ...unit8, ...unit9].map(e => e.key)).size, 432);
+vm.runInContext(fs.readFileSync('translations.js', 'utf8'), sandbox);
+const translations = vm.runInContext('LOCAL_TRANSLATIONS', sandbox);
+assert.equal(translations.over, '越过；结束了', 'approved shared entry covers both meanings');
+assert.deepEqual(Array.from(vm.runInContext('AVAILABLE_CONTENT.PU3[9]', sandbox)), [107, 109, 110, 111]);
+for (const [page, missing, fix, vocab, scrambles, pairs] of [[107, 8, 10, null, null, null], [110, 8, 12, 17, 10, 8], [111, 8, 14, 14, 12, 7]]) {
+    const data = vm.runInContext('TEACHING_CONTENT.PU3[9][' + page + ']', sandbox);
+    assert.equal(data.nonSpellingExercises.filter(e => e.type === 'missing-word').length, missing);
+    assert.equal(data.nonSpellingExercises.filter(e => e.type === 'find-fix').length, fix);
+    assert.equal(new Set(data.nonSpellingExercises.filter(e => e.type === 'find-fix').map(e => e.sentence)).size, fix);
+    if (vocab !== null) {
+        assert.equal(data.vocab.length, vocab);
+        assert.equal(data.sentences.length, scrambles);
+        assert.equal(data.sentencePairs.length, pairs);
+        for (const text of [...data.vocab, ...data.sentences]) assert.match(translations[text] || '', /[\u4e00-\u9fff]/u, 'exact translation exists: ' + text);
+    }
+    for (const item of data.nonSpellingExercises.filter(e => e.answers)) assert.deepEqual(Array.from(item.prefixes), Array.from(item.answers, a => a[0]), 'approved first-letter hints retained');
+}
+const newYear = unit9.find(e => e.page === '107' && e.id === 'M5');
+assert.equal(newYear.sentences.length, 1);
+assert.deepEqual(Array.from(newYear.answers), ['special', 'excellent']);
+assert.equal(unit9.find(e => e.page === '107' && e.id === 'F5').sentence, 'This poopoo soup tastes amazing.');
+assert.equal(unit9.find(e => e.page === '110' && e.id === 'M4').sentences[0], 'We sent a ___ to Grandma from our holiday.');
+assert.equal(unit9.find(e => e.page === '110' && e.id === 'F6').sentence, 'I pack my holiday clothes in my postcard.');
+assert.ok(!content.buildPool('PU3', 9, 109).entries.some(e => Number(e.item.page) > 109), 'new holiday/feelings pages do not leak into page 109');
+for (let i = 0; i < 50; i++) {
+    const round = content.select('PU3', 9, 111, 5);
+    assert.equal(round.length, 5);
+    assert.ok(new Set(round.map(e => e.type)).size >= 3);
+}
+for (const item of [...unit1, ...unit2, ...unit3, ...unit4, ...unit5, ...unit6, ...unit7, ...unit8, ...unit9]) {
     if (item.answers) assert.equal(item.sentences.join(' ').split('___').length - 1, item.answers.length, item.id + ' has one target per blank');
     else if (Number.isInteger(item.wrongIndex)) assert.equal(item.sentence.split(' ')[item.wrongIndex].replace(/[.,!?]+$/, '').toLowerCase(), item.wrongWord, item.id + ' explicitly identifies its repeated wrong token');
     else assert.equal(item.sentence.split(' ').filter(word => word.replace(/[.,!?]+$/, '').toLowerCase() === item.wrongWord).length, 1, item.id + ' identifies exactly one wrong token');

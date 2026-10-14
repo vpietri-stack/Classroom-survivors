@@ -107,7 +107,7 @@ AVAILABLE_CONTENT["PU1"] = { "<unit>": [page, page, …] };   // ~1678 in conten
 |---|---|---|---|
 | PU1 | `content_pu1.js` (1689 ln) | 0–9 | PetrovisKids(?) level-1 book — see pack header comments |
 | PU2 | `content_pu2.js` (1475 ln) | 0–9 | |
-| PU3 | `content_pu3.js` | 0–9 | Unit 9: adjectives (p107) and before/when/after clauses (p109). Page 109 contains the teacher-approved 3 vocabulary items, 24 sentence scrambles and 12 two-clause matching pairs; all 24 sentence translations are in `translations.js`. |
+| PU3 | `content_pu3.js` | 0–9 | Unit 9: adjectives (p107), before/when/after clauses (p109), holidays (p110) and -ed/-ing feelings (p111). Page 109 contains the teacher-approved 3 vocabulary items, 24 sentence scrambles and 12 two-clause matching pairs; all 24 sentence translations are in `translations.js`. |
 | Think0 | `content_think0.js` (755 ln) | 0–4 | Unit 4 = "City Life" (p45), added 2026-10-02a |
 | Think1 | `content_think1.js` (624 ln) | 0–7 | |
 | Think2 | `content_think2.js` (681 ln) | 0–12 | |
@@ -309,3 +309,5 @@ Approved Unit 3 additions use page 40: 22 missing-word and 27 distinct find/fix
 boards. F27 is omitted because it duplicated F8; F28 removes the rejected "but"
 and explicitly identifies the final "the" by its zero-based wrongIndex.
 Unit 4 remains suggestions only until approved.
+
+PU3 Unit 9 additions (preview 2026-10-14j) keep page 107 legacy content and page 109 intact. Page 107 adds 8 M/10 F; new pages 110/111 add 17/14 vocabulary entries, 10/12 sentence scrambles, 8/7 matching pairs and 8 M/12 F plus 8 M/14 F. All 24 M boards retain first-letter hints, including the single-sentence two-blank Chinese New Year board. Shared exact-key vocabulary translations are reused; 11 missing vocabulary keys and all 22 scramble translations are added without duplicate keys. The teacher approved expanding the shared over translation from 越过 to 越过；结束了 to cover the Unit 9 meaning.

@@ -966,6 +966,135 @@ TEACHING_CONTENT["PU3"] = {
                 { a: "When Lucy opened her birthday present,", b: "she was excited to see her new toy." },
                 { a: "When Sam heard the funny joke,", b: "he laughed." }
             ]
+        },
+        "110": {
+            "vocab": [
+                "tour",
+                "tent",
+                "pyjamas",
+                "trainers",
+                "suitcase",
+                "rucksack",
+                "sandcastle",
+                "postcard",
+                "view",
+                "stamp",
+                "pack",
+                "holiday",
+                "beach",
+                "sunglasses",
+                "over",
+                "forget",
+                "remember"
+            ],
+            "sentences": [
+                "I'm going to pack my suitcase.",
+                "I wear my pyjamas in bed.",
+                "Put your trainers in your rucksack.",
+                "We're going to sleep in a tent.",
+                "We made sandcastles on the beach.",
+                "I sent a postcard to Grandma.",
+                "Put a stamp on the postcard.",
+                "The view from the hill was beautiful.",
+                "This year's tour is over.",
+                "Don't forget to pack your sunglasses."
+            ],
+            "sentencePairs": [
+                {
+                    "a": "I packed my pyjamas",
+                    "b": "because I need something to wear in bed."
+                },
+                {
+                    "a": "She took her trainers",
+                    "b": "because she plans to play tennis."
+                },
+                {
+                    "a": "We packed our tent",
+                    "b": "because we're going to sleep at the campsite."
+                },
+                {
+                    "a": "He sent Grandma a postcard",
+                    "b": "because he wanted to tell her about his holiday."
+                },
+                {
+                    "a": "Before Dad posted the letter,",
+                    "b": "he put a stamp on the envelope."
+                },
+                {
+                    "a": "They climbed the hill",
+                    "b": "because they wanted to enjoy the view from the top."
+                },
+                {
+                    "a": "The bucket was full of sand,",
+                    "b": "so it was ready for making a sandcastle."
+                },
+                {
+                    "a": "You packed your sunglasses",
+                    "b": "because you knew the sun would be very bright."
+                }
+            ]
+        },
+        "111": {
+            "vocab": [
+                "bored",
+                "boring",
+                "excited",
+                "exciting",
+                "frightened",
+                "frightening",
+                "interested",
+                "interesting",
+                "surprised",
+                "surprising",
+                "tired",
+                "tiring",
+                "worried",
+                "worrying"
+            ],
+            "sentences": [
+                "The film was boring, so I felt bored.",
+                "I felt excited about our holiday.",
+                "The roller coaster was exciting.",
+                "The huge dog looked frightening.",
+                "She was frightened of the dog.",
+                "I'm interested in learning about animals.",
+                "This book about animals is interesting.",
+                "The unexpected present was surprising.",
+                "I was surprised when I opened it.",
+                "The long walk was tiring.",
+                "We felt tired after the walk.",
+                "I'm worried about tomorrow's exam."
+            ],
+            "sentencePairs": [
+                {
+                    "a": "The lesson was boring,",
+                    "b": "so the pupils felt bored."
+                },
+                {
+                    "a": "The roller coaster was exciting,",
+                    "b": "so Tom felt excited about riding it."
+                },
+                {
+                    "a": "The huge dog looked frightening,",
+                    "b": "so the little girl felt frightened."
+                },
+                {
+                    "a": "The talk about space was interesting,",
+                    "b": "so I felt interested and asked about the planets."
+                },
+                {
+                    "a": "The unexpected present was surprising,",
+                    "b": "so Maya felt surprised when she opened it."
+                },
+                {
+                    "a": "The long walk was tiring,",
+                    "b": "so we felt tired at the end."
+                },
+                {
+                    "a": "The news about tomorrow's storm was worrying,",
+                    "b": "so Dad felt worried about our boat trip."
+                }
+            ]
         }
     },
 };
@@ -980,5 +1109,5 @@ AVAILABLE_CONTENT["PU3"] = {
     "6": [69, 71, 73],
     "7": [83, 85, 87],
     "8": [95, 97, 98, 99],
-    "9": [107, 109]
+    "9": [107, 109, 110, 111]
 };

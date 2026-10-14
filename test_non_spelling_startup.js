@@ -18,6 +18,7 @@ for (const file of ['sr_engine.js', 'teaching_content.js', 'content_pu1.js', 'co
 let checked = 0;
 for (const book of vm.runInContext('Object.keys(AVAILABLE_CONTENT)', sandbox)) {
     for (const page of sandbox.getSortedPagesForBook(book)) {
+        assert.ok(vm.runInContext('TEACHING_CONTENT[' + JSON.stringify(page.book) + '][' + JSON.stringify(page.unit) + ']?.[' + JSON.stringify(page.page) + ']', sandbox), 'advertised real page must have content: ' + book + ' U' + page.unit + ' p' + page.page);
         let round;
         assert.doesNotThrow(() => { round = sandbox.NonSpellingContent.select(book, page.unit, page.page, 5); }, book + ' U' + page.unit + ' p' + page.page + ' must not crash on a missing earlier page');
         assert.ok(round.length <= 5);
@@ -25,6 +26,13 @@ for (const book of vm.runInContext('Object.keys(AVAILABLE_CONTENT)', sandbox)) {
         checked++;
     }
 }
+assert.deepEqual(Array.from(vm.runInContext('AVAILABLE_CONTENT.PU1[2]', sandbox)), [19,20,21,22,23,26]);
+assert.deepEqual(Array.from(vm.runInContext('AVAILABLE_CONTENT.PU2[4]', sandbox)), [45,46,47,54]);
+assert.equal(sandbox.NonSpellingContent.select('PU2', 4, 47, 5).length, 5);
+assert.ok(sandbox.NonSpellingContent.buildPool('PU2',4,47).entries.some(e => e.item.page === '47'), 'newly advertised page participates in selection');
+assert.ok(!sandbox.NonSpellingContent.buildPool('PU2',4,46).entries.some(e => e.item.page === '47'), 'page 47 remains excluded from earlier study');
+// Keep the original crash case as an isolated fixture, not a selectable page.
+vm.runInContext('AVAILABLE_CONTENT.PU1[2].push(24,25);', sandbox);
 const affected = sandbox.NonSpellingContent.buildPool('PU1', 2, 26);
 assert.equal(sandbox.NonSpellingContent.select('PU1', 2, 26, 5).length, 5);
 assert.ok(!affected.entries.some(e => ['24', '25'].includes(e.item.page)));
@@ -62,17 +70,21 @@ console.log('PASS: non-spelling selection starts safely on all ' + checked + ' l
             apiFetch = async () => ({ ok: true, status: 200, json: async () => ({success:true}) });
             authActiveUser = { id: 'study-start-regression', role: 'student', sessionCount: 3, srState: {vocab:{},sentences:{},sentencePairs:{}}, targets: [] };
             selectedStudent = 'Test pupil';
+            if(AVAILABLE_CONTENT.PU1[2].includes(24)||AVAILABLE_CONTENT.PU1[2].includes(25))throw Error('removed pages still selectable');
+            if(!AVAILABLE_CONTENT.PU2[4].includes(47))throw Error('PU2 page 47 not selectable');
+            // Exercise sparse availability defensively in this test context only.
+            AVAILABLE_CONTENT.PU1[2].push(24,25);
         });
         for (const width of [1102, 319]) {
             await page.setViewportSize({width,height:892});
-            for (const [unit, number] of [['2','23'],['2','24'],['2','25'],['2','26'],['9','111']]) {
-                await page.evaluate(({unit,number}) => {
+            for (const [book, unit, number] of [['PU1','2','23'],['PU1','2','24'],['PU1','2','25'],['PU1','2','26'],['PU1','9','111'],['PU2','4','47']]) {
+                await page.evaluate(({book,unit,number}) => {
                     if(STUDY_STATE.active) exitStudyMode();
-                    selectedClassContent = {book:'PU1',unit,page:number};
+                    selectedClassContent = {book,unit,page:number};
                     document.getElementById('startScreen').classList.remove('hidden');
-                }, {unit,number});
+                }, {book,unit,number});
                 await page.locator('#startScreen button[onclick="initStudyMode()"]').click({force:true});
-                assert.ok(await page.evaluate(() => STUDY_STATE.active && STUDY_STATE.round === 'A' && STUDY_STATE.words.length === 5 && STUDY_STATE.nonSpellingExercises.length === 5), 'Study button starts PU1 U'+unit+' p'+number+' at '+width+'px');
+                assert.ok(await page.evaluate(() => STUDY_STATE.active && STUDY_STATE.round === 'A' && STUDY_STATE.words.length === 5 && STUDY_STATE.nonSpellingExercises.length === 5), 'Study button starts '+book+' U'+unit+' p'+number+' at '+width+'px');
                 assert.ok(await page.locator('#studyModeOverlay').isVisible());
                 await page.evaluate(() => startRoundE());
                 assert.ok(await page.evaluate(() => STUDY_STATE._mixedActive && ['E','F'].includes(STUDY_STATE.round)), 'mixed round renders on affected PU1 page');

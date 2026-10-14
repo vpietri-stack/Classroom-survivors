@@ -241,3 +241,5 @@ Unit 4 preview release 2026-10-14e adds 16 M/20 F boards to page 54 and locked f
 Unit 5 preview release 2026-10-14f publishes the approved 16 M/20 F boards across pages 57, 59 and 66. The curriculum cache buster advances with all three version stamps and the dashboard auth link. Existing preview API/data and production are unchanged. Unit 6 is still a content proposal.
 
 Unit 6 preview release 2026-10-14g publishes the approved 26 M/34 F boards across pages 69, 71 and 73, including the teacher edits to M11/M21/M25 and F23/F25/F26/F27/F30. Curriculum cache busting, the stamp trio and dashboard auth link advance together. No production or backend/data changes are included; Unit 7 remains a proposal.
+
+Unit 7 preview release 2026-10-14h publishes the approved 26 M/32 F boards across pages 83, 85 and 87, including M23-M26 and F29-F32 for if/when. Curriculum cache busting, the stamp trio and dashboard auth link advance together. Production and existing preview API/data are unchanged; Unit 8 remains a proposal.

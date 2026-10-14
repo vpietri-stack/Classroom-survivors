@@ -342,3 +342,5 @@ PU3 Unit 4 page 54 adds 16 M/20 F boards. Optional per-blank prefixes lock the f
 PU3 Unit 5 adds 16 M/20 F boards across the existing entries: page 57 has 3 M/4 F clothing boards; page 59 has 4 M/6 F made-of boards; page 66 has 9 M/10 F materials, properties and suggestion boards. Thirteen M boards retain locked initials. Earlier pages cannot sample later-page content, and legacy vocabulary/sentences/pairs remain unchanged.
 
 PU3 Unit 6 adds 26 M/34 F boards across pages 69 (6 M/6 F), 71 (4 M/6 F) and 73 (16 M/22 F). The approved additions include locked initials, should/should-not and good-at/base-verb contrasts, familiar wifi-password context, CTRL+C/CTRL+V, and the edited laptop/apps/wifi/dictionary repairs. Legacy vocabulary and sentence arrays remain unchanged.
+
+PU3 Unit 7 adds 26 M/32 F boards across pages 83 (5 M/10 F), 85 (10 M/12 F) and 87 (11 M/10 F). Jobs, conditional verb forms, personality and appearance use the approved text. M23-M26 and F29-F32 practise the intended if/when distinction with embedded context. M5 demonstrates a board with only its first blank hinted; the article blank stays empty. No legacy vocabulary or arrays change.

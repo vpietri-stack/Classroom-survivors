@@ -347,7 +347,85 @@
             ]
         }
     };
-    const pageCatalogs = { 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:9:109': catalog };
+    const unit7Catalogs = {
+        83: {
+            missing: [
+                {"id": "M1", "sentences": ["He prepares food in a restaurant kitchen. He's a ___.", "She brings meals to the customers' tables. She's a ___."], "answers": ["cook", "waiter"], "prefixes": ["c", "w"]},
+                {"id": "M2", "sentences": ["He drives a bus. He's a ___.", "Her job is taking wedding photos. She's a ___."], "answers": ["driver", "photographer"], "prefixes": ["d", "p"]},
+                {"id": "M3", "sentences": ["He paints pictures. He's an ___.", "She creates new clothes. She's a ___."], "answers": ["artist", "designer"], "prefixes": ["a", "d"]},
+                {"id": "M4", "sentences": ["He writes news stories. He's a ___.", "She sings at concerts. She's a ___."], "answers": ["journalist", "singer"], "prefixes": ["j", "s"]},
+                {"id": "M5", "sentences": ["He's an ___ in a film.", "She wants to be ___ artist."], "answers": ["actor", "an"], "prefixes": ["a", ""]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "A waiter cooks the food in a restaurant kitchen.", "wrongWord": "waiter", "answer": "cook"},
+                {"id": "F2", "sentence": "A cook brings meals to the customers' tables.", "wrongWord": "cook", "answer": "waiter"},
+                {"id": "F3", "sentence": "A singer drives a bus.", "wrongWord": "singer", "answer": "driver"},
+                {"id": "F4", "sentence": "His job is taking wedding photos. He's a driver.", "wrongWord": "driver", "answer": "photographer"},
+                {"id": "F5", "sentence": "His job is designing clothes. He's a cook.", "wrongWord": "cook", "answer": "designer"},
+                {"id": "F6", "sentence": "Her job is writing news stories. She's a waiter.", "wrongWord": "waiter", "answer": "journalist"},
+                {"id": "F7", "sentence": "He's an artist who performs different characters in films.", "wrongWord": "artist", "answer": "actor"},
+                {"id": "F8", "sentence": "She's a driver who sings on stage for her job.", "wrongWord": "driver", "answer": "singer"},
+                {"id": "F9", "sentence": "Her job is painting pictures. She's an actor.", "wrongWord": "actor", "answer": "artist"},
+                {"id": "F10", "sentence": "She wants to be a artist.", "wrongWord": "a", "answer": "an"}
+            ]
+        },
+        85: {
+            missing: [
+                {"id": "M6", "sentences": ["When she ___ up, she wants to be a journalist.", "When they ___ up, they want to be artists."], "answers": ["grows", "grow"], "prefixes": ["g", "g"]},
+                {"id": "M7", "sentences": ["If he ___ the competition, he gets a prize.", "If they ___ the competition, they get a prize."], "answers": ["wins", "win"], "prefixes": ["w", "w"]},
+                {"id": "M8", "sentences": ["If I ___ eat breakfast, I'm hungry at ten.", "If she ___ eat breakfast, she's hungry at ten."], "answers": ["don't", "doesn't"]},
+                {"id": "M9", "sentences": ["When the teacher ___ speaking, we listen.", "When the teachers ___ speaking, we listen."], "answers": ["is", "are"]},
+                {"id": "M10", "sentences": ["If she ___ her homework early, she can play.", "If we ___ our homework early, we can play."], "answers": ["finishes", "finish"], "prefixes": ["f", "f"]},
+                {"id": "M11", "sentences": ["If you want ___ be a cook, practise cooking.", "When she grows ___, she wants to be a journalist."], "answers": ["to", "up"]},
+                {"id": "M23", "sentences": ["I might win the competition. ___ I win, I get a prize.", "I want to be a photographer ___ I grow up."], "answers": ["if", "when"]},
+                {"id": "M24", "sentences": ["Our lesson finishes at four. ___ it finishes, we go home.", "I might need help. ___ I do, I ask my teacher."], "answers": ["when", "if"]},
+                {"id": "M25", "sentences": ["Maybe we can buy tickets online. ___ we can, we don't need to queue.", "The show starts at seven tonight. ___ it starts, we stop talking."], "answers": ["if", "when"]},
+                {"id": "M26", "sentences": ["My birthday is tomorrow. ___ I wake up, I can open my presents.", "I'm not sure I can finish today. ___ I finish, I can play outside."], "answers": ["when", "if"]}
+            ],
+            fix: [
+                {"id": "F11", "sentence": "When she grow up, she wants to be a journalist.", "wrongWord": "grow", "answer": "grows"},
+                {"id": "F12", "sentence": "If he win the competition, he gets a prize.", "wrongWord": "win", "answer": "wins"},
+                {"id": "F13", "sentence": "If she don't eat breakfast, she feels hungry.", "wrongWord": "don't", "answer": "doesn't"},
+                {"id": "F14", "sentence": "When the teacher are speaking, we listen.", "wrongWord": "are", "answer": "is"},
+                {"id": "F15", "sentence": "If you wants to be a cook, practise cooking.", "wrongWord": "wants", "answer": "want"},
+                {"id": "F16", "sentence": "When they finishes work, they go home.", "wrongWord": "finishes", "answer": "finish"},
+                {"id": "F17", "sentence": "If I haven't got a pen, I asks a friend for one.", "wrongWord": "asks", "answer": "ask"},
+                {"id": "F18", "sentence": "If the restaurant has a good cook, people eats there.", "wrongWord": "eats", "answer": "eat"},
+                {"id": "F29", "sentence": "I might win the competition, but I might not. When I win, I get a prize.", "wrongWord": "when", "answer": "if"},
+                {"id": "F30", "sentence": "Our lesson finishes at four. If it finishes, we go home.", "wrongWord": "if", "answer": "when"},
+                {"id": "F31", "sentence": "I want to be a photographer if I grow up.", "wrongWord": "if", "answer": "when"},
+                {"id": "F32", "sentence": "I'm not sure I can finish today. When I finish today, I can play outside.", "wrongWord": "when", "answer": "if"}
+            ]
+        },
+        87: {
+            missing: [
+                {"id": "M12", "sentences": ["He helps his neighbours. He's ___.", "She laughs at people when they need help. She's ___."], "answers": ["kind", "unkind"], "prefixes": ["k", "u"]},
+                {"id": "M13", "sentences": ["She smiles and says hello to everyone. She's ___.", "He won't speak to new people or say hello. He's ___."], "answers": ["friendly", "unfriendly"], "prefixes": ["f", "u"]},
+                {"id": "M14", "sentences": ["She learns quickly and solves difficult problems. She's ___.", "He never wants to work. He's ___."], "answers": ["clever", "lazy"], "prefixes": ["c", "l"]},
+                {"id": "M15", "sentences": ["She helps people even when it's dangerous. She's ___.", "Everyone wants to be his friend. He's ___."], "answers": ["brave", "popular"], "prefixes": ["b", "p"]},
+                {"id": "M16", "sentences": ["His lessons are never boring. They're ___.", "His jokes make us laugh. He's ___."], "answers": ["interesting", "funny"], "prefixes": ["i", "f"]},
+                {"id": "M17", "sentences": ["This puppy is beautiful and sweet. It's ___.", "This film makes me want to sleep. It's ___."], "answers": ["lovely", "boring"], "prefixes": ["l", "b"]},
+                {"id": "M18", "sentences": ["What ___ your uncle like? He's kind.", "What ___ your uncle look like? He's tall."], "answers": ["is", "does"]},
+                {"id": "M19", "sentences": ["What ___ your parents like? They're friendly.", "What ___ your parents look like? They've got dark hair."], "answers": ["are", "do"]},
+                {"id": "M20", "sentences": ["What does she ___ like? She's tall and thin.", "What is she ___? She's brave."], "answers": ["look", "like"]},
+                {"id": "M21", "sentences": ["He ___ like his dad. They've both got curly hair.", "They ___ like their mum. They've all got blue eyes."], "answers": ["looks", "look"], "prefixes": ["l", "l"]},
+                {"id": "M22", "sentences": ["My sister ___ got long brown hair.", "My brothers ___ got short black hair."], "answers": ["has", "have"]}
+            ],
+            fix: [
+                {"id": "F19", "sentence": "He always helps people. He's unkind.", "wrongWord": "unkind", "answer": "kind"},
+                {"id": "F20", "sentence": "She smiles and says hello to everyone. She's unfriendly.", "wrongWord": "unfriendly", "answer": "friendly"},
+                {"id": "F21", "sentence": "He never wants to work. He's brave.", "wrongWord": "brave", "answer": "lazy"},
+                {"id": "F22", "sentence": "He helps people even when it's dangerous. He's lazy.", "wrongWord": "lazy", "answer": "brave"},
+                {"id": "F23", "sentence": "Everyone wants to be her friend. She's unpopular.", "wrongWord": "unpopular", "answer": "popular"},
+                {"id": "F24", "sentence": "What does your uncle like? He's kind and friendly.", "wrongWord": "does", "answer": "is"},
+                {"id": "F25", "sentence": "What is your brother look like? He's tall.", "wrongWord": "is", "answer": "does"},
+                {"id": "F26", "sentence": "What does your parents look like? They've got grey hair.", "wrongWord": "does", "answer": "do"},
+                {"id": "F27", "sentence": "What is your parents like? They're kind.", "wrongWord": "is", "answer": "are"},
+                {"id": "F28", "sentence": "He look like his dad. They've both got curly hair.", "wrongWord": "look", "answer": "looks"}
+            ]
+        }
+    };
+    const pageCatalogs = { 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:9:109': catalog };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

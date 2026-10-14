@@ -1,0 +1,115 @@
+[
+  {
+    "word": "who",
+    "filename": "who.png",
+    "bytes": 95306,
+    "size": 448,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. One square ESL vocabulary flashcard for pupils aged about ten in China. Friendly premium textbook cartoon, thick smooth dark-brown outlines, simple clean warm flat colors with gentle shading, pure white background, large shapes, very little clutter, readable at 80 pixels. No English or Chinese words, no target word, no watermark, generous margins. A question mark is an intentional symbol, not a label.\nPrimary request: The meaning is a question about a PERSON'S IDENTITY, not choosing an object. Three simple large human head-and-shoulder silhouettes (one taller adult, one shorter child, one adult with tied hair), muted blue-gray. The central person's blank face contains one huge dark question mark. No other objects, no arrows, no location, no clock. Make the human silhouettes unmistakable at small size.",
+    "rationale": "Human identities with a question mark on a blank face; distinguishes person from thing/place/time."
+  },
+  {
+    "word": "what",
+    "filename": "what.png",
+    "bytes": 82260,
+    "size": 512,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. One square ESL vocabulary flashcard for pupils aged about ten in China. Friendly premium textbook cartoon, thick smooth dark-brown outlines, simple clean warm flat colors with gentle shading, pure white background, large shapes, very little clutter, readable at 80 pixels. No English or Chinese words, no target word, no watermark, generous margins. A question mark is an intentional symbol, not a label.\nPrimary request: The meaning is asking WHAT AN UNKNOWN THING IS. One large open mystery cardboard box at center, a huge question mark floating above its opening. Around the opening are three DIFFERENT simple object pictograms, a ball, a book, a toy car, emerging faintly as imagined possibilities. No people silhouettes, clocks, maps, matching-color choices, pointing hand, or arrow selecting a particular item. The unknown object is the question.",
+    "rationale": "Unknown thing in a mystery box; miscellaneous possible objects, with no choice being selected."
+  },
+  {
+    "word": "when",
+    "filename": "when.png",
+    "bytes": 6667,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "A question on a calendar plus a clock asks about time; distinct from a map/location question."
+  },
+  {
+    "word": "where",
+    "filename": "where.png",
+    "bytes": 80401,
+    "size": 448,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. One square ESL vocabulary flashcard for pupils aged about ten in China. Friendly premium textbook cartoon, thick smooth dark-brown outlines, simple clean warm flat colors with gentle shading, pure white background, large shapes, very little clutter, readable at 80 pixels. No English or Chinese words, no target word, no watermark, generous margins. A question mark is an intentional symbol, not a label.\nPrimary request: The meaning is asking about LOCATION. One large simple folded street map with a river and two roads; a prominent RED location pin rises from it, with one huge dark question mark inside the pin. No readable street names, numbers, clocks, people, globes or tourism scenery. The map and question pin together dominate, not a compass or travel bus.",
+    "rationale": "Question-mark location pin on a folded map; location rather than time or identity."
+  },
+  {
+    "word": "which",
+    "filename": "which.png",
+    "bytes": 96255,
+    "size": 512,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. One square ESL vocabulary flashcard for pupils aged about ten in China. Friendly premium textbook cartoon, thick smooth dark-brown outlines, simple clean warm flat colors with gentle shading, pure white background, large shapes, very little clutter, readable at 80 pixels. No English or Chinese words, no target word, no watermark, generous margins. A question mark is an intentional symbol, not a label.\nPrimary request: The meaning is CHOOSING ONE FROM A SET. Three large IDENTICAL-SHAPE school backpacks neatly side by side, one red, one yellow, one blue. Above them a simple white outlined hand with pointing index finger hesitates between the three, with one big question mark above the hand and a curved bracket grouping the options. Do not actually select or tick an answer. No mystery box, miscellaneous objects, people identities, calendar, writing or location pin.",
+    "rationale": "A hand hesitates among three matching backpacks; a choice from a known set, unlike what."
+  },
+  {
+    "word": "why",
+    "filename": "why.png",
+    "bytes": 99550,
+    "size": 512,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. One square ESL vocabulary flashcard for pupils aged about ten in China. Friendly premium textbook cartoon, thick smooth dark-brown outlines, simple clean warm flat colors with gentle shading, pure white background, large shapes, very little clutter, readable at 80 pixels. No English or Chinese words, no target word, no watermark, generous margins. A question mark is an intentional symbol, not a label.\nPrimary request: Show a question asking for a REASON, a cause-and-effect puzzle. A ten-year-old Chinese child looks puzzled at a puddle of spilled water on a tabletop; a tipped water bottle beside it is the visible CAUSE. The child raises one palm and looks from puddle toward the tipped bottle. One very large question mark sits between the tipped bottle and the resulting puddle, with a simple curved arrow joining bottle to puddle. Cause and effect dominate, not the child's identity or any choice among items. Only bottle, puddle, child and question mark on white. No broken glass, words, map, clock, multiple choices.",
+    "rationale": "Tipped bottle causes a puddle; question mark and cause→effect arrow focus on the reason."
+  },
+  {
+    "word": "could",
+    "filename": "could.png",
+    "bytes": 91535,
+    "size": 448,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. One square ESL vocabulary flashcard for pupils aged about ten in China. Friendly premium textbook cartoon, thick smooth dark-brown outlines, simple clean warm flat colors with gentle shading, pure white background, large shapes, very little clutter, readable at 80 pixels. No English or Chinese words, no target word, no watermark, generous margins. A question mark is an intentional symbol, not a label.\nPrimary request: PAST ABILITY through reminiscence. One cheerful elderly Chinese man, gray hair, gray moustache, distinctive ROUND BLUE GLASSES and red scarf, chest-up at lower left. A HUGE cloud-shaped memory bubble above him occupies 70 percent of the square. Inside that bubble, the SAME PERSON aged seven, black hair, identical round blue glasses and red scarf, successfully RIDES A TWO-WHEELED GREEN BICYCLE, both feet on pedals, smiling confidently. A bold GREEN TICK beside the childhood action. The memory bubble has a very light warm sepia tint and two small thought dots leading to the elderly man, making this a remembered past, not a current ability or a child standing beside a grandparent. Full bicycle and wheels readable at 80px; no scenery or writing.",
+    "rationale": "Older character remembers the same younger self cycling successfully; memory bubble plus green tick."
+  },
+  {
+    "word": "couldn't",
+    "filename": "couldn't.png",
+    "bytes": 97395,
+    "size": 448,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. One square ESL vocabulary flashcard for pupils aged about ten in China. Friendly premium textbook cartoon, thick smooth dark-brown outlines, simple clean warm flat colors with gentle shading, pure white background, large shapes, very little clutter, readable at 80 pixels. No English or Chinese words, no target word, no watermark, generous margins. A question mark is an intentional symbol, not a label.\nPrimary request: Use the attached flashcard as the EDIT TARGET. Create its matching negative PAST-ABILITY card. Preserve exactly the elderly man's face, gray hair, blue glasses, red scarf, lower-left pose, white background, memory-bubble shape, warm tint and cartoon style. Change ONLY what is inside his memory: same young version with black hair, blue glasses and red scarf, same two-wheeled green bicycle, but he CANNOT BALANCE and CANNOT RIDE it yet. He sits awkwardly, one or both feet planted on the ground, bicycle visibly tilting, wobble marks, mildly frustrated face; no injury, no crash, no motion suggesting successful riding. Replace the green tick with a LARGE RED CROSS. No written labels. This must contrast clearly with the successful-riding reference at 80px.",
+    "rationale": "Same older/younger characters and bicycle; remembered difficulty balancing, feet down and red cross."
+  },
+  {
+    "word": "language",
+    "filename": "language.png",
+    "bytes": 8722,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "Speech bubbles say hello in French, Spanish and Japanese; no English or Chinese greetings, target word or translation."
+  },
+  {
+    "word": "information",
+    "filename": "information.png",
+    "bytes": 8180,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "A recognisable blue information symbol and a facts display with distance, time and weather. Supports the abstract idea of useful facts."
+  },
+  {
+    "word": "topic",
+    "filename": "topic.png",
+    "bytes": 10378,
+    "size": 512,
+    "method": "canvas diagram",
+    "rationale": "A selected subject (space, among animals/sport) is repeated in both speakers’ bubbles: the thing their conversation is about."
+  },
+  {
+    "word": "want",
+    "filename": "want.png",
+    "bytes": 89850,
+    "size": 448,
+    "method": "built-in image_gen",
+    "prompt": "Use case: scientific-educational. One square ESL vocabulary flashcard for pupils aged about ten in China. Friendly premium textbook cartoon, thick smooth dark-brown outlines, simple clean warm flat colors with gentle shading, pure white background, large shapes, very little clutter, readable at 80 pixels. No English or Chinese words, no target word, no watermark, generous margins. A question mark is an intentional symbol, not a label.\nPrimary request: A PAIRED-CONTRAST flashcard with two equal large panels side by side, pure white background and rounded corners. Both panels show the SAME ten-year-old Chinese girl, ponytail and teal T-shirt. LEFT: healthy comfortable girl smiles and daydreams about an optional bright toy robot; a large robot in a thought bubble with a red HEART shows desire. RIGHT: girl is hot and visibly THIRSTY with sweat drops and dry mouth, holds an EMPTY water bottle and reaches for a glass of water; a large EXCLAMATION mark shows urgent necessity. A thick RED rounded rectangular frame highlights ONLY THE LEFT PANEL, the desire for a toy. Right panel has a light gray frame. No food, money, words or labels. Large faces and large symbols, simple flat drawing, readable at 80px overall.",
+    "rationale": "Optional desire for a toy is highlighted; essential water is shown beside it for contrast."
+  },
+  {
+    "word": "need",
+    "filename": "need.png",
+    "bytes": 89013,
+    "size": 448,
+    "method": "built-in image_gen",
+    "prompt": "Use case: precise-object-edit. Use the attached flashcard as the edit target. Create the matching NEED card from the paired WANT card. Preserve EXACTLY both illustrations, the same girl, all colors, both facial expressions, robot thought bubble with heart, thirsty girl with empty bottle and full glass, exclamation mark, panel positions, white background and square proportions. Change ONLY the two frame colors: the LEFT panel frame becomes light gray; the RIGHT panel frame becomes thick RED. The RIGHT panel showing an essential need for water is now highlighted, while the optional desire for a toy stays unhighlighted. Do not add any text, word, translation or symbol. Do not swap or redraw the panels.",
+    "rationale": "Essential water for a thirsty child is highlighted; optional toy desire remains beside it."
+  }
+]

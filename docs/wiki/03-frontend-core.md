@@ -165,6 +165,17 @@ explicitly approximate visual examples, not fixed definitions of often/sometimes
 No target English word or Chinese translation appears inside the cards.
 This asset authoring step does not change curriculum/SR keys or release stamps.
 
+The teacher-requested follow-up adds 13 more cards (9 built-in image_gen
+illustrations/edits and 4 canvas diagrams): six question words, could/couldn't,
+language, information/topic and want/need. The original 35 PNGs remain byte-identical.
+The same gallery now has New 13 / First 35 / All 48 filters, with the new batch
+shown by default. [`extra-manifest.json`](../../outputs/pu3-flashcards/extra-manifest.json)
+and [`extra-QA.md`](../../outputs/pu3-flashcards/extra-QA.md) record prompts and
+the visual review. `build_pu3_flashcards_extra.js` preserves the original images
+and reproduces the second batch; run it after the original builder when rebuilding
+both. Greeting text is French/Spanish/Japanese, without English/Chinese translations.
+These authoring additions remain separate from publication and release stamps.
+
 `class_config.js:6–74` carries a comment block mapping every book/unit to page-number lists —
 this mirrors `AVAILABLE_CONTENT`.
 

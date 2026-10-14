@@ -70,6 +70,27 @@ These exist because their contracts were broken in production; treat failures as
 
 ## Out-of-chain test families (not in `npm test`)
 
+- `test_new_exercises_poc_browser.js` — standalone POC browser checks. Run
+  `node test_new_exercises_poc_browser.js` to use the local HTML file, or pass a
+  served URL as its first argument. Uses installed Chrome and Playwright. Covers
+  two-M-then-two-F sampling in Study followed by the same pattern in Game, with no
+  duplicates within a presentation, reusable keys, empty-check nudges,
+  per-position grading, first-failure retention, full reset, independent find/fix
+  selection/spelling feedback, bin dragging, stale-timer cancellation, complete
+  eight-board touch-only sessions, 320px layout and landscape. It also compares
+  shell styles against the real index.html markup, verifies game reward actions
+  and Study auto-advance, and checks green/red feedback in the kid-friendly theme.
+  It also checks the default kid-friendly appearance, sentence font weight and
+  balanced phone keyboard rows, raised feedback gradients with readable white
+  letters, completion badges, independent bin check/cross states beside the icon,
+  green/red bin colours, neutral crossed-out words swallowed on correct selection,
+  word visibility after animation/reset and reduced-motion removal, compact bin
+  touch targets, undo, reduced-motion feedback and reward clearance on short
+  phones. Desktop/dark checks seed a dark
+  preference so styling comparisons use the same theme as their reference.
+  Screenshots go to the OS temp
+  directory under `classroom-new-exercises-poc`; no production APIs are contacted.
+
 - **`vs_*` tests** (device matrix, hitbox, boss, timer, DPR, charselect, uno-transition, promo lifecycle, …): standalone Playwright/Node scripts run ad-hoc via `node vs_<name>_test.js`. They are NOT part of the required gate — the full picture is in [Vampire Survivors](07-vampire-survivors.md). When touching VS code, run the relevant ones manually.
 - **`api/` forensics & regression scripts** (`test_scorer_regression.js`, `tune_scorer.js`, `whatif_scorer.js`, …): operator tools, some requiring live DB access; never wire them into the required gate. See [Backend API](10-backend-api.md).
 
@@ -99,3 +120,18 @@ Target-report pace coverage checks all four thresholds (including exact 1/2/3), 
 Chrome report tests also cover manual dashboard refresh, failed-refresh retention and retry, coalesced concurrent refreshes, calendar reload, filter/sort preservation, and generation refreshing visible progress before report creation. A failed dashboard refresh must not request/export reports.
 
 Multi-group coverage checks membership deduplication, unambiguous legacy-target binding, ambiguous periods remaining unassigned, independent attendance chronology, cancellation/carry-over isolation, cross-group overlap preservation in batch/manual targets, stale target edits, student-role denial, shared practice counts with independent offsets, and secondary-teacher reports. Chrome edits one profile to add a second group, verifies group-labelled existing targets, saves a target binding, checks the filtered roster, and confirms distinct counts in both generated group messages.
+
+## Required mixed-exercise checks (2026-10-13)
+
+test_non_spelling_content.js samples 400 rounds, checking variety, unique boards
+and pairs, cooldown shortage fallback, future-page exclusion, proximity, unchanged
+vocab, compatible SR deltas and preview/production gating.
+test_non_spelling_integration_browser.js loads the actual index and all scripts,
+covering five-board Study completion, native scramble/match dispatch, independent
+typed grading, first-failure persistence, partial exit, stale timers, API wire
+deltas, real claimReward bridging and restoration of legacy UI. Remote service
+and model requests are blocked; API replies use a fake account/ack fixture, with
+no student or production data accessed. Both are in npm test and may be run with
+npm run test:non-spelling. Screenshots go to the OS temp folder
+classroom-non-spelling-integrated. The legacy widget regression loads new scripts
+in index order with ?nonspelling=0 to retain its original round scope.

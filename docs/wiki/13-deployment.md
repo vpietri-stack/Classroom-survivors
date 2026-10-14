@@ -223,3 +223,19 @@ The release is pushed to production `origin/main`; the reviewed preview remains 
 Stamp `2026-10-13i` publishes the teacher-approved before/when/after lesson to both production and preview Pages. The release updates all three version stamps, the `content_pu3.js` / `translations.js` cache busters, and the teacher dashboard's auth/content cache busters. The existing preview-path API routing and isolated preview container are preserved; no account or target data are migrated. The lesson is applied separately on each remote's current main history so production does not merge/close draft PR #1 (which hosts the preview API). Deployment is performed from feature worktrees so other sessions' uncommitted changes in the shared main checkout remain untouched.
 
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
+
+## New exercise preview rollout (2026-10-13)
+
+The mixed round and typed challenges were initially runtime-fenced by
+NON_SPELLING_ENABLED to preview/local development. The user approved production
+on 2026-10-14 after preview testing; the live URL now enables the same flow.
+The release integrator bumps the stamp trio together and cache-busts changed
+config/game/study scripts after merging the feature, once at preview ship time.
+
+Production release `2026-10-14a` applies the tested exercise feature on current
+origin/main, enables the live URL gate, and synchronizes the three stamps and
+changed asset cache busters. Production/preview histories remain separate to
+preserve the open PR API environment; do not merge or close draft PR #1. No API
+schema, student-account migration or preview-container overwrite is required.
+The teacher dashboard's auth/config script cache busters also use the release
+stamp so its version watchdog loads the current shared authentication script.

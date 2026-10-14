@@ -282,3 +282,19 @@ Offline coverage tool for the hand-recorded `audio_mp3/` corpus
 ## Update discipline
 
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
+
+## Preview non-spelling curriculum (2026-10-13)
+
+After packs load, non_spelling_content.js normalizes every page into a
+nonSpellingExercises array: individual sentence-scramble entries, a sentence-match
+group of pairs and any authored missing-word/find-fix boards. Legacy sentences,
+sentencePairs and every vocab array remain intact. PU3 U9 p109 M1–M6/F1–F8 are
+authored in this shared module and also drive the POC. Stable IDs must change when
+an item's learning target changes; type/book/unit/page/ID forms its SR identity.
+
+NON_SPELLING_ENABLED in config enables production (released 2026-10-14), preview,
+localhost/private LAN and file development. ?nonspelling=0 checks the old flow.
+
+Due matching pairs remain reviewable even when cooldown partners are needed to
+fill the three-pair board. Those partially cooled boards may win on SR priority,
+but cannot be pulled solely to meet the type-variety quota.

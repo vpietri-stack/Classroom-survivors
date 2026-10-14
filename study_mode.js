@@ -27,6 +27,7 @@ function showStudyNotice(msg) {
 
 // Entry point
 function initStudyMode() {
+    if (window.NonSpellingFlow) NonSpellingFlow.cleanupStudy();
     // Determine book/unit/page from current selection
     let book = "PU1", unit = "0", page = "5";
     if (typeof selectedClassContent !== 'undefined' && selectedClassContent) {
@@ -37,10 +38,12 @@ function initStudyMode() {
 
     // Get Spaced Repetition Content (SR-aware)
     const SR_WORDS = getStudyContentSR(book, unit, page, 'vocab', 5);
-    const SR_SENTENCES = getStudyContentSR(book, unit, page, 'sentences', 5);
+    const mixed = window.NonSpellingFlow ? NonSpellingFlow.prepareStudy(book, unit, page) : null;
+    const SR_SENTENCES = mixed ? [] : getStudyContentSR(book, unit, page, 'sentences', 5);
+    const sentenceCount = mixed ? mixed.length : SR_SENTENCES.length;
 
-    if (SR_WORDS.length < 5 || SR_SENTENCES.length < 5) {
-        if (SR_WORDS.length === 0 || SR_SENTENCES.length === 0) {
+    if (SR_WORDS.length < 5 || sentenceCount < 5) {
+        if (SR_WORDS.length === 0 || sentenceCount === 0) {
             showStudyNotice("Not enough content for Study Mode on this page yet.");
             return;
         }
@@ -60,6 +63,8 @@ function initStudyMode() {
     // Pick exactly 5 (SR logic already tries to do this, but let's be sure)
     STUDY_STATE.words = SR_WORDS.slice(0, 5);
     STUDY_STATE.sentences = SR_SENTENCES.slice(0, 5);
+    STUDY_STATE.nonSpellingExercises = mixed;
+    STUDY_STATE._mixedActive = false;
 
     // Hide Start Screen
     document.getElementById('startScreen').classList.add('hidden');
@@ -702,6 +707,7 @@ function hwCaptureEndWord() {
 
 // --- ROUND D: Sentence Scramble ---
 function startRoundE() {
+    if (STUDY_STATE.nonSpellingExercises && window.NonSpellingFlow) { NonSpellingFlow.beginStudy(); return; }
     STUDY_STATE.round = 'E';
     STUDY_STATE.currentSentenceIndex = 0;
     updateStudyUI("Round D: Sentence Scramble", "Order the words.");
@@ -711,7 +717,8 @@ function startRoundE() {
 
 function nextRoundESentence() {
     if (STUDY_STATE.currentSentenceIndex >= STUDY_STATE.sentences.length) {
-        startRoundF();
+        if (STUDY_STATE._mixedActive) NonSpellingFlow.advanceStudy();
+        else startRoundF();
         return;
     }
 
@@ -871,7 +878,9 @@ function checkRoundE() {
         srStudyResults.push({ type: 'sentences', key: itemKey(STUDY_STATE.sentences[STUDY_STATE.currentSentenceIndex]), firstAttempt: exerciseAttempts === 1 });
         queueExerciseEvent('sentenceScramble', 'study', STUDY_STATE.sentences[STUDY_STATE.currentSentenceIndex]);
 
+        const mixedSession = STUDY_STATE._mixedActive ? STUDY_STATE.startTime : null;
         const advance = () => {
+            if (mixedSession !== null && (!STUDY_STATE.active || STUDY_STATE.startTime !== mixedSession)) return;
             STUDY_STATE.currentSentenceIndex++;
             startExerciseTracking();
             STUDY_STATE.isTransitioning = false;
@@ -1082,6 +1091,7 @@ function returnTileToDock(tile) {
 }
 
 function checkRoundF() {
+    const mixedSession = STUDY_STATE._mixedActive ? STUDY_STATE.startTime : null;
     if (STUDY_STATE.isTransitioning) return;
     const pairs = STUDY_STATE.sentencePairs;
     const slots = document.querySelectorAll('.sentence-b-slot');
@@ -1144,10 +1154,14 @@ function checkRoundF() {
         playHappySound();
         // Note: The individual pairs were already queued during the check above.
         setTimeout(() => {
-            STUDY_STATE.subRound++;
-            startExerciseTracking();
+            if (mixedSession !== null && (!STUDY_STATE.active || STUDY_STATE.startTime !== mixedSession)) return;
             STUDY_STATE.isTransitioning = false;
-            nextRoundFSubRound();
+            if (mixedSession !== null) NonSpellingFlow.advanceStudy();
+            else {
+                STUDY_STATE.subRound++;
+                startExerciseTracking();
+                nextRoundFSubRound();
+            }
         }, 1500);
     } else {
         STUDY_STATE.isTransitioning = true;
@@ -1163,6 +1177,7 @@ function checkRoundF() {
 
         // Reset after 2 seconds
         setTimeout(() => {
+            if (mixedSession !== null && (!STUDY_STATE.active || STUDY_STATE.startTime !== mixedSession)) return;
             resetRoundF();
             STUDY_STATE.isTransitioning = false;
         }, 2000);
@@ -1187,6 +1202,7 @@ function resetRoundF() {
 
 
 async function finishStudySession() {
+    if (window.NonSpellingFlow) NonSpellingFlow.cleanupStudy();
     const durationMs = Date.now() - STUDY_STATE.startTime;
     const durationSec = Math.floor(durationMs / 1000);
     const mm = Math.floor(durationSec / 60);
@@ -1237,6 +1253,7 @@ async function finishStudySession() {
 }
 
 function exitStudyMode() {
+    if (window.NonSpellingFlow) NonSpellingFlow.cleanupStudy();
     // Abandoning mid-session must not lose observed results (failures are
     // recorded at the first wrong check). Partial sessions don't advance the
     // session counter; the completed case is handled by finishStudySession.
@@ -1271,8 +1288,10 @@ function updateStudyUI(title, subtitle) {
 }
 
 function updateStudyProgress() {
-    const currentRound = STUDY_STATE.round;
-    const currentIdx = STUDY_ROUNDS.indexOf(currentRound);
+    const mixed = !!STUDY_STATE.nonSpellingExercises;
+    const rounds = mixed ? STUDY_ROUNDS.slice(0, 4) : STUDY_ROUNDS;
+    const currentRound = mixed && STUDY_STATE.round === 'F' ? 'E' : STUDY_STATE.round;
+    const currentIdx = rounds.indexOf(currentRound);
     let bar = document.getElementById('study-progress-indicator');
     if (!bar) {
         bar = document.createElement('div');
@@ -1283,10 +1302,10 @@ function updateStudyProgress() {
             titleEl.parentElement.insertBefore(bar, titleEl);
         }
     }
-    bar.innerHTML = STUDY_ROUNDS.map((r, i) => {
+    bar.innerHTML = rounds.map((r, i) => {
         const isActive = i === currentIdx;
         const isDone = i < currentIdx;
-        const label = STUDY_ROUND_LABELS[r] || r;
+        const label = mixed && r === 'E' ? 'Non-spelling' : STUDY_ROUND_LABELS[r] || r;
         let classes = 'flex-1 h-2 rounded-full transition-all duration-300';
         if (isDone) classes += ' bg-green-400';
         else if (isActive) classes += ' bg-yellow-400 animate-pulse';

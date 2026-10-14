@@ -23,10 +23,11 @@ const order = [
   'translations.js', 'config.js', 'sr_engine.js', 'frontend_auth.js',
   'teaching_content.js', 'content_pu1.js', 'content_pu2.js', 'content_pu3.js',
   'content_think0.js', 'content_think1.js', 'content_think2.js', 'content_test.js',
-  'class_config.js', 'game.js', 'handwriting.js', 'study_mode.js'
+  'non_spelling_content.js', 'non_spelling_widget.js',
+  'class_config.js', 'game.js', 'non_spelling_flow.js', 'handwriting.js', 'study_mode.js'
 ];
 
-const dom = new JSDOM(html, { runScripts: 'outside-only', pretendToBeVisual: true, url: 'https://localhost/' });
+const dom = new JSDOM(html, { runScripts: 'outside-only', pretendToBeVisual: true, url: 'https://localhost/?nonspelling=0' });
 const { window } = dom;
 const document = window.document;
 

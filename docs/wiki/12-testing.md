@@ -141,3 +141,6 @@ exclusion of rejected boards, unique scoped SR IDs and no future-page leakage.
 The browser integration solves all 42 approved boards at 319px width, including
 capitalized original mistakes, contractions via physical/on-screen keys, and
 smart-apostrophe normalization. Unit 2 remains unauthored pending approval.
+Forced game fixtures cool all original sentence pairs, including leftovers from
+random three-pair grouping, so a regrouped fresh board cannot displace the
+intended typed exercise. Fixture IDs also include the authored unit/page scope.

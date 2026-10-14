@@ -154,3 +154,5 @@ intended typed exercise. Fixture IDs also include the authored unit/page scope.
 Unit 4 adds 16 M/20 F boards and Chrome now solves all 163 Unit 1-4 authored boards at 319px. Study/game prefix tests cover suffix-only physical and on-screen input, immutable initials, empty submissions, CLEAR/backspace, failure feedback and timed reset, plus the second c in catch.
 
 Unit 5 coverage checks exact per-page 3/4, 4/6 and 9/10 counts, prefix hints, distinct scoped keys, and future-page exclusion. Chrome solves all 199 Unit 1-5 authored boards at 319px, including the hinted apostrophe in let's. Unit 6 remains review-only.
+
+Unit 6 tests enforce the 26/34 totals, per-page counts, future-page exclusion, unique SR keys and specifically approved content edits. Chrome solves all 259 Unit 1-6 authored boards at 319px, including CTRL shortcuts as sentence text, contractions, long vocabulary repair sentences and locked initials. Unit 7 remains review-only.

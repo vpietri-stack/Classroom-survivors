@@ -267,7 +267,87 @@
             ]
         }
     };
-    const pageCatalogs = { 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:9:109': catalog };
+    const unit6Catalogs = {
+        69: {
+            missing: [
+                {"id": "M1", "sentences": ["We learn about countries and maps in ___.", "We learn about the past in ___."], "answers": ["geography", "history"], "prefixes": ["g", "h"]},
+                {"id": "M2", "sentences": ["We work with numbers in ___.", "We sing and play instruments in ___."], "answers": ["maths", "music"], "prefixes": ["m", "m"]},
+                {"id": "M3", "sentences": ["We draw and paint in ___.", "We do experiments in ___."], "answers": ["art", "science"], "prefixes": ["a", "s"]},
+                {"id": "M4", "sentences": ["We've got geography ___ nine o'clock.", "We've got science ___ Monday."], "answers": ["at", "on"]},
+                {"id": "M5", "sentences": ["We've got art ___ the morning.", "Lunch starts ___ half past twelve."], "answers": ["in", "at"]},
+                {"id": "M6", "sentences": ["Maths is at nine, ___ our ten o'clock break.", "Art is at eleven, ___ our ten o'clock break."], "answers": ["before", "after"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "We've got science in nine o'clock.", "wrongWord": "in", "answer": "at"},
+                {"id": "F2", "sentence": "We've got history at Monday.", "wrongWord": "at", "answer": "on"},
+                {"id": "F3", "sentence": "We've got art on the morning.", "wrongWord": "on", "answer": "in"},
+                {"id": "F4", "sentence": "Break starts at half to ten.", "wrongWord": "to", "answer": "past"},
+                {"id": "F5", "sentence": "She's got two maths class today.", "wrongWord": "class", "answer": "classes"},
+                {"id": "F6", "sentence": "What have they get at nine o'clock?", "wrongWord": "get", "answer": "got"}
+            ]
+        },
+        71: {
+            missing: [
+                {"id": "M7", "sentences": ["You ___ listen carefully to your teacher.", "You ___ copy in exams."], "answers": ["should", "shouldn't"], "prefixes": ["s", "s"]},
+                {"id": "M8", "sentences": ["Your friend needs help. You ___ help her.", "You've got an exam tomorrow. You ___ go to bed late."], "answers": ["should", "shouldn't"], "prefixes": ["s", "s"]},
+                {"id": "M9", "sentences": ["You ___ talk when the teacher is speaking.", "You ___ put your hand up to ask a question."], "answers": ["shouldn't", "should"], "prefixes": ["s", "s"]},
+                {"id": "M10", "sentences": ["You should ___ carefully to your teacher.", "You should ___ your homework before you play."], "answers": ["listen", "finish"], "prefixes": ["l", "f"]}
+            ],
+            fix: [
+                {"id": "F7", "sentence": "You shouldn't listen carefully to your teacher.", "wrongWord": "shouldn't", "answer": "should"},
+                {"id": "F8", "sentence": "You should copy other students' answers in exams.", "wrongWord": "should", "answer": "shouldn't"},
+                {"id": "F9", "sentence": "You should goes to bed early before an exam.", "wrongWord": "goes", "answer": "go"},
+                {"id": "F10", "sentence": "You shouldn't eating in class.", "wrongWord": "eating", "answer": "eat"},
+                {"id": "F11", "sentence": "She should finishes her homework before she plays.", "wrongWord": "finishes", "answer": "finish"},
+                {"id": "F12", "sentence": "Should we helps our friends?", "wrongWord": "helps", "answer": "help"}
+            ]
+        },
+        73: {
+            missing: [
+                {"id": "M11", "sentences": ["You should ___ the guitar every day to get good.", "I'm good at ___ the guitar."], "answers": ["play", "playing"], "prefixes": ["p", "p"]},
+                {"id": "M12", "sentences": ["She's good at ___ pictures.", "She can ___ very well."], "answers": ["drawing", "draw"], "prefixes": ["d", "d"]},
+                {"id": "M13", "sentences": ["I can ___ across the pool.", "I'm good at ___."], "answers": ["swim", "swimming"], "prefixes": ["s", "s"]},
+                {"id": "M14", "sentences": ["She's good ___ maths.", "We should listen ___ our teacher."], "answers": ["at", "to"]},
+                {"id": "M15", "sentences": ["Katy is good at ___ poems.", "She should ___ one for the project."], "answers": ["writing", "write"], "prefixes": ["w", "w"]},
+                {"id": "M16", "sentences": ["He's good at ___ photos.", "He can ___ a photo for our project."], "answers": ["taking", "take"], "prefixes": ["t", "t"]},
+                {"id": "M17", "sentences": ["Use a ___ to find what a word means.", "We can find information on this ___."], "answers": ["dictionary", "website"], "prefixes": ["d", "w"]},
+                {"id": "M18", "sentences": ["Use ___ to cut the paper.", "Use ___ to stick it together."], "answers": ["scissors", "glue"], "prefixes": ["s", "g"]},
+                {"id": "M19", "sentences": ["This portable computer is a ___.", "The pictures appear on its ___."], "answers": ["laptop", "screen"], "prefixes": ["l", "s"]},
+                {"id": "M20", "sentences": ["This ___ helps me learn English on my phone.", "I carry my books on my back in a ___."], "answers": ["app", "rucksack"], "prefixes": ["a", "r"]},
+                {"id": "M21", "sentences": ["What's the ___ password? I want to go online.", "We can find information on the ___."], "answers": ["wifi", "internet"], "prefixes": ["w", "i"]},
+                {"id": "M22", "sentences": ["A ___ has pages we can visit on the Internet.", "An online ___ tells us what words mean."], "answers": ["website", "dictionary"], "prefixes": ["w", "d"]},
+                {"id": "M23", "sentences": ["We read an e-book on a ___.", "We turn the pages of a paper ___."], "answers": ["screen", "book"], "prefixes": ["s", "b"]},
+                {"id": "M24", "sentences": ["Use scissors to ___ the paper.", "Use glue to ___ the pieces together."], "answers": ["cut", "stick"], "prefixes": ["c", "s"]},
+                {"id": "M25", "sentences": ["On a computer, CTRL + C makes a ___ of the selected text.", "You can then use CTRL + V to ___ it where you want."], "answers": ["copy", "paste"], "prefixes": ["c", "p"]},
+                {"id": "M26", "sentences": ["Put unwanted paper in the ___.", "Keep the paper you need in your ___."], "answers": ["bin", "rucksack"], "prefixes": ["b", "r"]}
+            ],
+            fix: [
+                {"id": "F13", "sentence": "She's good in maths.", "wrongWord": "in", "answer": "at"},
+                {"id": "F14", "sentence": "I'm good at draw pictures.", "wrongWord": "draw", "answer": "drawing"},
+                {"id": "F15", "sentence": "He's good at swim.", "wrongWord": "swim", "answer": "swimming"},
+                {"id": "F16", "sentence": "They're good at take photos.", "wrongWord": "take", "answer": "taking"},
+                {"id": "F17", "sentence": "Katy is good at write poems.", "wrongWord": "write", "answer": "writing"},
+                {"id": "F18", "sentence": "She is good at plays the guitar.", "wrongWord": "plays", "answer": "playing"},
+                {"id": "F19", "sentence": "I can swimming, and I'm good at it.", "wrongWord": "swimming", "answer": "swim"},
+                {"id": "F20", "sentence": "He should practising every day to get better at music.", "wrongWord": "practising", "answer": "practise"},
+                {"id": "F21", "sentence": "You should use a online dictionary.", "wrongWord": "a", "answer": "an"},
+                {"id": "F22", "sentence": "The bin is in the laptop screen.", "wrongWord": "in", "answer": "on"},
+                {"id": "F23", "sentence": "I use my dictionary to go on the Internet and do my homework. It's a small computer.", "wrongWord": "dictionary", "answer": "laptop"},
+                {"id": "F24", "sentence": "This app help me learn English.", "wrongWord": "help", "answer": "helps"},
+                {"id": "F25", "sentence": "I've got three useful glues on my laptop.", "wrongWord": "glues", "answer": "apps"},
+                {"id": "F26", "sentence": "We can find information in the Internet.", "wrongWord": "in", "answer": "on"},
+                {"id": "F27", "sentence": "This laptop can connect to hifi.", "wrongWord": "hifi", "answer": "wifi"},
+                {"id": "F28", "sentence": "The words appear in the screen.", "wrongWord": "in", "answer": "on"},
+                {"id": "F29", "sentence": "This website have lots of information about animals.", "wrongWord": "have", "answer": "has"},
+                {"id": "F30", "sentence": "I use an online bin to check new words.", "wrongWord": "bin", "answer": "dictionary"},
+                {"id": "F31", "sentence": "My rucksack have two big pockets.", "wrongWord": "have", "answer": "has"},
+                {"id": "F32", "sentence": "You can reads an e-book on your laptop.", "wrongWord": "reads", "answer": "read"},
+                {"id": "F33", "sentence": "Use scissors to cutting the paper.", "wrongWord": "cutting", "answer": "cut"},
+                {"id": "F34", "sentence": "You should past the copied text into your project.", "wrongWord": "past", "answer": "paste"}
+            ]
+        }
+    };
+    const pageCatalogs = { 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:9:109': catalog };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

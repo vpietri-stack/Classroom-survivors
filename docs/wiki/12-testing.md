@@ -170,3 +170,5 @@ The startup regression now asserts that every advertised real page has content, 
 PU2 Unit 1 coverage enforces the approved 22 M/24 F totals and per-page counts, excluded planet items, school-clothes/rocks edits, prefix validity, unique SR keys and future-page exclusion. Chrome solves each of the 46 boards through the real widget at 319px, alongside the existing PU3 coverage.
 
 PU2 Unit 2 tests cover the 24/28 totals, page placement, approved weekday wording/answers, locked initials, unique SR keys, future-page exclusion and the Tuesday/Monday matching correction. Chrome solves all 52 additional boards at 319px alongside PU2 Unit 1 and PU3.
+
+PU2 Unit 3 tests enforce the 24/27 totals and page placement, M16 helmet dialogue, F5 exclusion, edited F22 sentence, prefix validity, scoped SR keys and future-page exclusion. Chrome solves all 51 additional boards through the real widget at 319px alongside earlier PU2/PU3 boards.

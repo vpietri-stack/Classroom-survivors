@@ -742,7 +742,80 @@
         }
     };
 
-    const pageCatalogs = { 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
+    // PU2 Unit 3: approved boards, with M16/F22 edits and F5 omitted.
+    const pu2Unit3Catalogs = {
+        31: {
+            missing: [
+                {"id": "M1", "sentences": ["A ___ makes food in a restaurant.", "A ___ grows food on a farm."], "answers": ["cook", "farmer"], "prefixes": ["c", "f"]},
+                {"id": "M2", "sentences": ["A ___ checks and repairs teeth.", "A ___ helps sick people."], "answers": ["dentist", "doctor"], "prefixes": ["d", "d"]},
+                {"id": "M3", "sentences": ["A ___ makes people laugh.", "A ___ helps doctors in a hospital."], "answers": ["clown", "nurse"], "prefixes": ["c", "n"]},
+                {"id": "M4", "sentences": ["A ___ ___ acts in films.", "A ___ ___ sings songs."], "answers": ["film", "star", "pop", "star"], "prefixes": ["f", "s", "p", "s"]},
+                {"id": "M5", "sentences": ["The ___ is sailing his ship.", "He's looking for ___."], "answers": ["pirate", "treasure"], "prefixes": ["p", "t"]},
+                {"id": "M6", "sentences": ["I'm wearing a pirate ___ at the party.", "This birthday ___ is for Grandpa."], "answers": ["costume", "present"], "prefixes": ["c", "p"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "A dentist grows food on a farm.", "wrongWord": "dentist", "answer": "farmer"},
+                {"id": "F2", "sentence": "A farmer checks your teeth.", "wrongWord": "farmer", "answer": "dentist"},
+                {"id": "F3", "sentence": "A clown cooks food in a restaurant.", "wrongWord": "clown", "answer": "cook"},
+                {"id": "F4", "sentence": "A pirate makes people laugh at the circus.", "wrongWord": "pirate", "answer": "clown"},
+                {"id": "F6", "sentence": "I'm wearing a pirate toothbrush for the party.", "wrongWord": "toothbrush", "answer": "costume"}
+            ]
+        },
+        33: {
+            missing: [
+                {"id": "M7", "sentences": ["The farmer ___ food every year.", "Now he's ___ carrots."], "answers": ["grows", "growing"], "prefixes": ["g", "g"]},
+                {"id": "M8", "sentences": ["The doctor ___ sick people every day.", "Now she's ___ a child."], "answers": ["helps", "helping"], "prefixes": ["h", "h"]},
+                {"id": "M9", "sentences": ["He's a cook. He ___ meals every day.", "Now he's ___ dinner."], "answers": ["cooks", "cooking"], "prefixes": ["c", "c"]},
+                {"id": "M10", "sentences": ["The pop star ___ songs every day.", "Now she's ___ on stage."], "answers": ["sings", "singing"], "prefixes": ["s", "s"]},
+                {"id": "M11", "sentences": ["What ___ she do? She's a farmer.", "What ___ she doing now? She's driving a tractor."], "answers": ["does", "is"]},
+                {"id": "M12", "sentences": ["What ___ they do? They're dentists.", "What ___ they doing now? They're helping a child."], "answers": ["do", "are"]},
+                {"id": "M13", "sentences": ["He doesn't ___ at the weekend.", "It's Monday. He's ___ now."], "answers": ["work", "working"], "prefixes": ["w", "w"]},
+                {"id": "M14", "sentences": ["I don't ___ to the radio every day.", "I'm ___ to it now."], "answers": ["listen", "listening"], "prefixes": ["l", "l"]}
+            ],
+            fix: [
+                {"id": "F7", "sentence": "The farmer grow food every day.", "wrongWord": "grow", "answer": "grows"},
+                {"id": "F8", "sentence": "The farmer is grow food now.", "wrongWord": "grow", "answer": "growing"},
+                {"id": "F9", "sentence": "The doctor help sick people every day.", "wrongWord": "help", "answer": "helps"},
+                {"id": "F10", "sentence": "The doctor is help a child now.", "wrongWord": "help", "answer": "helping"},
+                {"id": "F11", "sentence": "The cook make dinner every evening.", "wrongWord": "make", "answer": "makes"},
+                {"id": "F12", "sentence": "The cook is make dinner now.", "wrongWord": "make", "answer": "making"},
+                {"id": "F13", "sentence": "What does she doing? She's a dentist.", "wrongWord": "doing", "answer": "do"},
+                {"id": "F14", "sentence": "What is he do now? He's cooking dinner.", "wrongWord": "do", "answer": "doing"},
+                {"id": "F15", "sentence": "She doesn't works at the weekend.", "wrongWord": "works", "answer": "work"},
+                {"id": "F16", "sentence": "Are the dentists work now?", "wrongWord": "work", "answer": "working"}
+            ]
+        },
+        40: {
+            missing: [
+                {"id": "M15", "sentences": ["___ are you happy?", "___ it's my birthday."], "answers": ["why", "because"]},
+                {"id": "M16", "sentences": ["___ are you wearing a helmet?", "___ I'm riding my bike."], "answers": ["why", "because"]},
+                {"id": "M17", "sentences": ["Why are you ___ your hands? Because I'm going to eat.", "Why are you ___ a book? Because I like stories."], "answers": ["washing", "reading"], "prefixes": ["w", "r"]},
+                {"id": "M18", "sentences": ["Why ___ he wearing a helmet? Because he's riding a bike.", "Why ___ they wearing costumes? Because they're going to a party."], "answers": ["is", "are"]},
+                {"id": "M19", "sentences": ["Her hair has lots of curls. It's ___.", "His hair has no curls. It's ___."], "answers": ["curly", "straight"], "prefixes": ["c", "s"]},
+                {"id": "M20", "sentences": ["He's got a ___ on his chin.", "He's got a ___ under his nose."], "answers": ["beard", "moustache"], "prefixes": ["b", "m"]},
+                {"id": "M21", "sentences": ["Her hair is yellow. It's ___.", "He isn't fat. He's ___."], "answers": ["blonde", "thin"], "prefixes": ["b", "t"]},
+                {"id": "M22", "sentences": ["Firefighters work at a ___ ___.", "Doctors and nurses work in a ___."], "answers": ["fire", "station", "hospital"], "prefixes": ["f", "s", "h"]},
+                {"id": "M23", "sentences": ["A ___ ___ helps keep people safe.", "Police officers work at a police ___."], "answers": ["police", "officer", "station"], "prefixes": ["p", "o", "s"]},
+                {"id": "M24", "sentences": ["A teacher works in a ___.", "A ___ helps sick animals."], "answers": ["school", "vet"], "prefixes": ["s", "v"]}
+            ],
+            fix: [
+                {"id": "F17", "sentence": "Where are you wearing a costume? Because I'm going to a party.", "wrongWord": "where", "answer": "why"},
+                {"id": "F18", "sentence": "I'm wearing a helmet why I'm riding my bike.", "wrongWord": "why", "answer": "because"},
+                {"id": "F19", "sentence": "Why does she wearing a costume?", "wrongWord": "does", "answer": "is"},
+                {"id": "F20", "sentence": "Why is the children laughing?", "wrongWord": "is", "answer": "are"},
+                {"id": "F21", "sentence": "Her hair has lots of curls. It's straight.", "wrongWord": "straight", "answer": "curly"},
+                {"id": "F22", "sentence": "His hair hasn't got any curls. It's curly.", "wrongWord": "curly", "answer": "straight"},
+                {"id": "F23", "sentence": "He's got a beard above his mouth, under his nose.", "wrongWord": "beard", "answer": "moustache"},
+                {"id": "F24", "sentence": "He's got a moustache on his chin.", "wrongWord": "moustache", "answer": "beard"},
+                {"id": "F25", "sentence": "A school is a place where doctors help sick people.", "wrongWord": "school", "answer": "hospital"},
+                {"id": "F26", "sentence": "Firefighters work at a police station.", "wrongWord": "police", "answer": "fire"},
+                {"id": "F27", "sentence": "Police officers work at a fire station.", "wrongWord": "fire", "answer": "police"},
+                {"id": "F28", "sentence": "A dentist helps sick animals at the zoo.", "wrongWord": "dentist", "answer": "vet"}
+            ]
+        }
+    };
+
+    const pageCatalogs = { 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

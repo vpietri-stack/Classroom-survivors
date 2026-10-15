@@ -257,3 +257,5 @@ Preview-only 2026-10-14m corrects PU1 U2 and PU2 U4 availability. Both changed b
 Preview release 2026-10-15a publishes only the approved PU2 Unit 1 22 M/24 F boards. The non-spelling curriculum cache buster advances with the synchronized stamp trio and dashboard auth link. Production and isolated preview API/data remain unchanged; PU2 Unit 2 is still a review-only proposal.
 
 Preview release 2026-10-15b publishes the approved PU2 Unit 2 typed boards and Tuesday/Monday pair correction. The book-pack and non-spelling curriculum cache busters advance with the synchronized stamp trio and dashboard auth link. Production and isolated preview API/data are unchanged; Unit 3 remains review-only.
+
+Preview release 2026-10-15c publishes the approved PU2 Unit 3 typed boards. The non-spelling curriculum cache buster advances with the synchronized stamp trio and dashboard auth link. Production and isolated preview API/data are unchanged; Unit 4 remains review-only.

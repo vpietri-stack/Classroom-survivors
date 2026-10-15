@@ -261,3 +261,5 @@ Preview release 2026-10-15b publishes the approved PU2 Unit 2 typed boards and T
 Preview release 2026-10-15c publishes the approved PU2 Unit 3 typed boards. The non-spelling curriculum cache buster advances with the synchronized stamp trio and dashboard auth link. Production and isolated preview API/data are unchanged; Unit 4 remains review-only.
 
 Preview release 2026-10-15d publishes the approved PU2 Unit 4 30 M/40 F typed boards, including than and floor/roof practice. The shared curriculum cache buster advances with the synchronized stamp trio and dashboard auth link. Production and isolated preview API/data are unchanged; Unit 5 remains review-only.
+
+Preview release 2026-10-15e publishes approved PU2 Unit 5 boards with teacher annotations applied. The curriculum cache buster, version/auth/index stamps and dashboard auth URL advance together. Production and preview API/data remain unchanged; Unit 6 is review-only.

@@ -913,7 +913,91 @@
         }
     };
 
-    const pageCatalogs = { 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
+    // PU2 Unit 5: teacher-approved animals, superlatives, actions and diet boards.
+    const pu2Unit5Catalogs = {
+        57: {
+            missing: [
+                {"id": "M1", "sentences": ["The black-and-white bear that eats bamboo is a ___.", "The black-and-white bird that swims but can't fly is a ___."], "answers": ["panda", "penguin"], "prefixes": ["p", "p"]},
+                {"id": "M2", "sentences": ["A ___ is a big cat with long hair.", "A ___ has long ears and hops on land."], "answers": ["lion", "rabbit"], "prefixes": ["l", "r"]},
+                {"id": "M3", "sentences": ["A ___ can fly, but it isn't a bird.", "A ___ is a colourful bird that can sometimes speak."], "answers": ["bat", "parrot"], "prefixes": ["b", "p"]},
+                {"id": "M4", "sentences": ["A ___ carries its baby in a pouch.", "A blue ___ is the biggest animal in the sea."], "answers": ["kangaroo", "whale"], "prefixes": ["k", "w"]},
+                {"id": "M5", "sentences": ["A ___ is a clever sea animal with a long nose.", "A ___ is a large animal that can climb trees and eat fish."], "answers": ["dolphin", "bear"], "prefixes": ["d", "b"]},
+                {"id": "M6", "sentences": ["We visit a ___ ___ to see wild animals.", "A ___ has bars to keep an animal inside."], "answers": ["wildlife", "park", "cage"], "prefixes": ["w", "p", "c"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "The black-and-white bear that eats bamboo is a penguin.", "wrongWord": "penguin", "answer": "panda"},
+                {"id": "F2", "sentence": "The black-and-white bird that swims but can't fly is a panda.", "wrongWord": "panda", "answer": "penguin"},
+                {"id": "F3", "sentence": "The big cat with long hair is a rabbit.", "wrongWord": "rabbit", "answer": "lion"},
+                {"id": "F4", "sentence": "The biggest animal in the sea is a dolphin.", "wrongWord": "dolphin", "answer": "whale"},
+                {"id": "F5", "sentence": "The colourful bird that can sometimes speak is a bat.", "wrongWord": "bat", "answer": "parrot"},
+                {"id": "F6", "sentence": "The lion is behind the bars of its suitcase.", "wrongWord": "suitcase", "answer": "cage"},
+                {"id": "F7", "sentence": "A dolphin carries its baby in a pouch and jumps on two strong back legs.", "wrongWord": "dolphin", "answer": "kangaroo"},
+                {"id": "F8", "sentence": "A whale is a small animal with long ears that hops on land.", "wrongWord": "whale", "answer": "rabbit"}
+            ]
+        },
+        60: {
+            missing: [
+                {"id": "M7", "sentences": ["Grandma is 70, Mum is 40 and I'm 8. Grandma is the ___.", "I'm the ___."], "answers": ["oldest", "youngest"], "prefixes": ["o", "y"]},
+                {"id": "M8", "sentences": ["Tom is taller than Jim and Ben. Tom is the ___ of the three.", "Ben is shorter than Tom and Jim. Ben is the ___."], "answers": ["tallest", "shortest"], "prefixes": ["t", "s"]},
+                {"id": "M9", "sentences": ["The red ball is bigger than the other two. It's the ___.", "The blue ball is smaller than the other two. It's the ___."], "answers": ["biggest", "smallest"], "prefixes": ["b", "s"]},
+                {"id": "M10", "sentences": ["This kitten is pretty. I think it's the ___ of all.", "These boots are dirty. They're the ___ of all."], "answers": ["prettiest", "dirtiest"], "prefixes": ["p", "d"]},
+                {"id": "M11", "sentences": ["This clown is funny. I think he's the ___ of all.", "Today I'm happier than ever. It's the ___ day of my life!"], "answers": ["funniest", "happiest"], "prefixes": ["f", "h"]},
+                {"id": "M12", "sentences": ["All three cats are fat, but this one is the ___.", "All three dogs are thin, but this one is the ___."], "answers": ["fattest", "thinnest"], "prefixes": ["f", "t"]},
+                {"id": "M13", "sentences": ["This picture is good. I think it's the ___ of all.", "That picture is bad. I think it's the ___ of all."], "answers": ["best", "worst"], "prefixes": ["b", "w"]},
+                {"id": "M14", "sentences": ["My brother is ___ tallest person in our family.", "He is taller ___ me."], "answers": ["the", "than"]},
+                {"id": "M15", "sentences": ["This bag is bigger ___ yours.", "It's ___ biggest bag in the shop."], "answers": ["than", "the"]},
+                {"id": "M16", "sentences": ["Tom is the ___ runner in our class. No one can run as fast as him.", "My snail is the ___ of the three. The other two move faster."], "answers": ["fastest", "slowest"], "prefixes": ["f", "s"]},
+                {"id": "M17", "sentences": ["Bears can ___ trees.", "Look! That bear is ___ a tree."], "answers": ["climb", "climbing"], "prefixes": ["c", "c"]},
+                {"id": "M18", "sentences": ["Bats can ___.", "Look! Those bats are ___ above the trees."], "answers": ["fly", "flying"], "prefixes": ["f", "f"]},
+                {"id": "M19", "sentences": ["Rabbits can ___ behind rocks.", "Look! That rabbit is ___ behind a rock."], "answers": ["hide", "hiding"], "prefixes": ["h", "h"]},
+                {"id": "M20", "sentences": ["Lions can ___ fast.", "Look! That lion is ___ after its food."], "answers": ["run", "running"], "prefixes": ["r", "r"]},
+                {"id": "M21", "sentences": ["Keep your book in your bag so you don't ___ it.", "Look! A leaf is ___ from the tree."], "answers": ["lose", "falling"], "prefixes": ["l", "f"]},
+                {"id": "M22", "sentences": ["Look! The snail is ___ very slowly.", "The penguin is ___ on the ice."], "answers": ["moving", "walking"], "prefixes": ["m", "w"]}
+            ],
+            fix: [
+                {"id": "F9", "sentence": "My baby sister is the younger person in our family.", "wrongWord": "younger", "answer": "youngest"},
+                {"id": "F10", "sentence": "Giraffes are the taller animals in the world.", "wrongWord": "taller", "answer": "tallest"},
+                {"id": "F11", "sentence": "This ball is bigger than the other two. It's the bigger of the three.", "wrongWord": "bigger", "answer": "biggest", "wrongIndex": 10},
+                {"id": "F12", "sentence": "This is the prettyest kitten of all.", "wrongWord": "prettyest", "answer": "prettiest"},
+                {"id": "F13", "sentence": "I think this clown is the funnyest of all.", "wrongWord": "funnyest", "answer": "funniest"},
+                {"id": "F14", "sentence": "These are the dirtyest boots in the cupboard.", "wrongWord": "dirtyest", "answer": "dirtiest"},
+                {"id": "F15", "sentence": "This is the thinest dog of the three.", "wrongWord": "thinest", "answer": "thinnest"},
+                {"id": "F16", "sentence": "That is the fatest cat of the three.", "wrongWord": "fatest", "answer": "fattest"},
+                {"id": "F17", "sentence": "This is the goodest picture in the competition.", "wrongWord": "goodest", "answer": "best"},
+                {"id": "F18", "sentence": "That was the baddest day of my holiday.", "wrongWord": "baddest", "answer": "worst"},
+                {"id": "F19", "sentence": "My brother is than tallest person in our family.", "wrongWord": "than", "answer": "the"},
+                {"id": "F20", "sentence": "The blue whale is a biggest animal in the world.", "wrongWord": "a", "answer": "the"},
+                {"id": "F21", "sentence": "This whale is bigger the that dolphin.", "wrongWord": "the", "answer": "than"},
+                {"id": "F22", "sentence": "Of these three rabbits, this one is taller.", "wrongWord": "taller", "answer": "tallest"},
+                {"id": "F23", "sentence": "Bears can climbing trees.", "wrongWord": "climbing", "answer": "climb"},
+                {"id": "F24", "sentence": "Look! The lion is run after its food.", "wrongWord": "run", "answer": "running"},
+                {"id": "F25", "sentence": "The rabbits are hide behind the rocks.", "wrongWord": "hide", "answer": "hiding"},
+                {"id": "F26", "sentence": "Look! The bat is fly above the tree.", "wrongWord": "fly", "answer": "flying"}
+            ]
+        },
+        62: {
+            missing: [
+                {"id": "M23", "sentences": ["The plane is higher than the tree. It's ___ the tree.", "The snail is lower than the flower. It's ___ the flower."], "answers": ["above", "below"]},
+                {"id": "M24", "sentences": ["The zoo is across the road from the park. It's ___ the park.", "My house is only a minute's walk from school. It's ___ the school."], "answers": ["opposite", "near"], "prefixes": ["o", "n"]},
+                {"id": "M25", "sentences": ["Animals that eat only ___ and ___ are carnivores.", "Wolves, polar bears and penguins are ___."], "answers": ["meat", "fish", "carnivores"], "prefixes": ["m", "f", "c"]},
+                {"id": "M26", "sentences": ["Animals that eat both ___ and ___ are omnivores.", "People, pigs and dogs are ___."], "answers": ["meat", "plants", "omnivores"], "prefixes": ["m", "p", "o"]},
+                {"id": "M27", "sentences": ["Animals that only eat ___ are herbivores.", "Rabbits, pandas, and cows are ___."], "answers": ["plants", "herbivores"], "prefixes": ["p", "h"]},
+                {"id": "M28", "sentences": ["Brown ___ eat meat and plants. They're omnivores.", "___ ___ only eat meat and fish. They're carnivores."], "answers": ["bears", "polar", "bears"], "prefixes": ["b", "p", "b"]}
+            ],
+            fix: [
+                {"id": "F27", "sentence": "The snail is lower than the flower. It's above the flower.", "wrongWord": "above", "answer": "below"},
+                {"id": "F28", "sentence": "The kite is higher than the roof. It's below the roof.", "wrongWord": "below", "answer": "above"},
+                {"id": "F29", "sentence": "The zoo is across the road from the park. It's between the park.", "wrongWord": "between", "answer": "opposite"},
+                {"id": "F30", "sentence": "The school is next to my house. It's opposite my house.", "wrongWord": "opposite", "answer": "near"},
+                {"id": "F31", "sentence": "Lions eat plants. They're carnivores.", "wrongWord": "plants", "answer": "meat"},
+                {"id": "F32", "sentence": "Rabbits eat meat. They're herbivores.", "wrongWord": "meat", "answer": "plants"},
+                {"id": "F33", "sentence": "People eat both meat and poopoo. We're omnivores.", "wrongWord": "poopoo", "answer": "plants"},
+                {"id": "F34", "sentence": "Carnivores only eat plants and fish.", "wrongWord": "plants", "answer": "meat"}
+            ]
+        }
+    };
+
+    const pageCatalogs = { 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

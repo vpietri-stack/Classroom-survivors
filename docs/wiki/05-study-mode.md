@@ -360,3 +360,5 @@ PU2 Unit 3 adds 24 M/27 F boards on pages 31 (6 M/5 F), 33 (8 M/10 F), and 40 (1
 PU2 Unit 4 adds 30 M/40 F boards on pages 45 (4 M/6 F), 46 (4 M/4 F), 47 (7 M/12 F), and 54 (15 M/18 F). M25/M26 have three blanks; M27 has four blanks including is/shorter/than on its second row. M28-M30 and F37-F40 explicitly distinguish floor/roof without initial hints. F19-F23 pin wrongIndex 5 to the final possessive token, rejecting an already-correct earlier occurrence. Existing family/comparative/home arrays and all earlier units are unchanged.
 
 The shared typed widget retains its twelve-character minimum input allowance, expanding it to the target length for longer words such as granddaughter (13 letters). Both physical and on-screen keyboards can complete these targets in Study and game challenges.
+
+PU2 Unit 5 adds 28 M/34 F boards on pages 57 (6/8), 60 (16/18) and 62 (6/8). Teacher edits use long hair/speak, meat/fish/plants diet blanks, named animal groups, brown/polar bears, and the approved poopoo repair. F11 targets the final bigger token (wrongIndex 10). Prefixes remain locked; legacy arrays and earlier units remain unchanged.

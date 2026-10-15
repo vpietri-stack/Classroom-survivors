@@ -362,3 +362,5 @@ PU2 Unit 4 adds 30 M/40 F boards on pages 45 (4 M/6 F), 46 (4 M/4 F), 47 (7 M/12
 The shared typed widget retains its twelve-character minimum input allowance, expanding it to the target length for longer words such as granddaughter (13 letters). Both physical and on-screen keyboards can complete these targets in Study and game challenges.
 
 PU2 Unit 5 adds 28 M/34 F boards on pages 57 (6/8), 60 (16/18) and 62 (6/8). Teacher edits use long hair/speak, meat/fish/plants diet blanks, named animal groups, brown/polar bears, and the approved poopoo repair. F11 targets the final bigger token (wrongIndex 10). Prefixes remain locked; legacy arrays and earlier units remain unchanged.
+
+PU2 Unit 6 adds 23 M/29 F boards on existing pages 78 (19/23) and 81 (4/6). Fog boards M5/F5 are excluded without renumbering IDs. M13 contrasts was with the whole-word contraction it's; M14 contrasts were with we're. Full contraction blanks include apostrophe keys, while vocabulary initials stay locked. F25/F26 pin the final possessive token. Legacy arrays and earlier units remain unchanged.

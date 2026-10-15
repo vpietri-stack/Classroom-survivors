@@ -176,3 +176,5 @@ PU2 Unit 3 tests enforce the 24/27 totals and page placement, M16 helmet dialogu
 PU2 Unit 4 coverage checks 30 M/40 F totals and per-page placement, approved M25-M27 blanks/answers, floor/roof boards without prefixes, final-token F19-F23 repairs, valid prefixes, distinct SR keys, future-page exclusion and varied rounds. Chrome solves all 70 additions at 319px through the real widget alongside existing PU2/PU3 content.
 
 PU2 Unit 5 coverage checks 28 M/34 F and per-page totals, revised animal/diet wording and answers, initial hints, intended repeated-token repair, unique scoped identities, future-page exclusion and round variety. All 62 additions are solved in Chrome through the real widget at 319px alongside previous boards.
+
+PU2 Unit 6 coverage checks 23 M/29 F and per-page totals, excluded M5/F5, exact edited M13/M14 wording/full contractions, prefix validity, repeated possessive targets, unique scoped identities, future-page exclusion and round variety. Chrome solves all 52 additions at 319px alongside previous boards.

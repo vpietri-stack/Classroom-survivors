@@ -997,7 +997,75 @@
         }
     };
 
-    const pageCatalogs = { 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
+    // PU2 Unit 6: approved weather, clothes, past be and review boards.
+    const pu2Unit6Catalogs = {
+        78: {
+            missing: [
+                {"id": "M1", "sentences": ["There's a ___ in the sky.", "It's a ___ day."], "answers": ["cloud", "cloudy"], "prefixes": ["c", "c"]},
+                {"id": "M2", "sentences": ["There's ___ on the window.", "It's a ___ day."], "answers": ["rain", "rainy"], "prefixes": ["r", "r"]},
+                {"id": "M3", "sentences": ["There's ___ on the ground.", "It's a cold, ___ day."], "answers": ["snow", "snowy"], "prefixes": ["s", "s"]},
+                {"id": "M4", "sentences": ["The ___ is blowing the trees.", "It's a ___ day."], "answers": ["wind", "windy"], "prefixes": ["w", "w"]},
+                {"id": "M6", "sentences": ["The ___ is shining.", "It's a hot, ___ day."], "answers": ["sun", "sunny"], "prefixes": ["s", "s"]},
+                {"id": "M7", "sentences": ["After the rain, I can see a ___ with lots of colours.", "I use an ___ to keep the rain off me."], "answers": ["rainbow", "umbrella"], "prefixes": ["r", "u"]},
+                {"id": "M8", "sentences": ["I wear a ___ around my neck when it's cold.", "I wear ___ on my hands."], "answers": ["scarf", "gloves"], "prefixes": ["s", "g"]},
+                {"id": "M9", "sentences": ["I wear ___ on my feet when it's wet.", "I wear a ___ to keep my clothes dry in the rain."], "answers": ["boots", "raincoat"], "prefixes": ["b", "r"]},
+                {"id": "M10", "sentences": ["I wear a ___ over my shirt when it's cold.", "I wear a ___ on my head."], "answers": ["sweater", "hat"], "prefixes": ["s", "h"]},
+                {"id": "M11", "sentences": ["I ___ at home yesterday.", "We ___ at the park last week."], "answers": ["was", "were"]},
+                {"id": "M12", "sentences": ["She ___ cold last night.", "They ___ tired yesterday."], "answers": ["was", "were"]},
+                {"id": "M13", "sentences": ["It ___ cold yesterday.", "___ hot today."], "answers": ["was", "it's"]},
+                {"id": "M14", "sentences": ["We ___ on holiday last week.", "___ at school today."], "answers": ["were", "we're"]},
+                {"id": "M15", "sentences": ["I ___ at school yesterday. I was at home.", "We ___ at the park. We were at the cinema."], "answers": ["wasn't", "weren't"]},
+                {"id": "M16", "sentences": ["He ___ hungry. He didn't want any food.", "They ___ cold. They wanted to take off their coats."], "answers": ["wasn't", "weren't"]},
+                {"id": "M17", "sentences": ["There ___ a rainbow yesterday.", "There ___ lots of clouds yesterday morning."], "answers": ["was", "were"]},
+                {"id": "M18", "sentences": ["There ___ a scarf on the chair last night.", "There ___ two gloves next to it."], "answers": ["was", "were"]},
+                {"id": "M19", "sentences": ["The room was empty. There ___ a coat in it.", "There ___ any boots either."], "answers": ["wasn't", "weren't"]},
+                {"id": "M20", "sentences": ["Where ___ you yesterday?", "What ___ the weather like last week?"], "answers": ["were", "was"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "It's cloud today.", "wrongWord": "cloud", "answer": "cloudy"},
+                {"id": "F2", "sentence": "There's a lot of rainy on the window.", "wrongWord": "rainy", "answer": "rain"},
+                {"id": "F3", "sentence": "It was snow yesterday.", "wrongWord": "snow", "answer": "snowy"},
+                {"id": "F4", "sentence": "The windy is blowing.", "wrongWord": "windy", "answer": "wind"},
+                {"id": "F6", "sentence": "The sunny is shining.", "wrongWord": "sunny", "answer": "sun"},
+                {"id": "F7", "sentence": "There's a colourful umbrella in the sky after the rain.", "wrongWord": "umbrella", "answer": "rainbow"},
+                {"id": "F8", "sentence": "I wear a scarf on each hand when it's cold.", "wrongWord": "scarf", "answer": "glove"},
+                {"id": "F9", "sentence": "I put my gloves around my neck to keep it warm.", "wrongWord": "gloves", "answer": "scarf"},
+                {"id": "F10", "sentence": "I wear a coat on my head.", "wrongWord": "coat", "answer": "hat"},
+                {"id": "F11", "sentence": "These gloves keep my feet dry in the rain.", "wrongWord": "gloves", "answer": "boots"},
+                {"id": "F12", "sentence": "Yesterday I am at home.", "wrongWord": "am", "answer": "was"},
+                {"id": "F13", "sentence": "Last week we are on holiday.", "wrongWord": "are", "answer": "were"},
+                {"id": "F14", "sentence": "She were cold last night.", "wrongWord": "were", "answer": "was"},
+                {"id": "F15", "sentence": "They was at the park yesterday.", "wrongWord": "was", "answer": "were"},
+                {"id": "F16", "sentence": "It is sunny yesterday.", "wrongWord": "is", "answer": "was"},
+                {"id": "F17", "sentence": "I was at school right now.", "wrongWord": "was", "answer": "am"},
+                {"id": "F18", "sentence": "We were at school right now.", "wrongWord": "were", "answer": "are"},
+                {"id": "F19", "sentence": "I weren't at school yesterday. I was at home.", "wrongWord": "weren't", "answer": "wasn't"},
+                {"id": "F20", "sentence": "They wasn't at the park. They were at the cinema.", "wrongWord": "wasn't", "answer": "weren't"},
+                {"id": "F21", "sentence": "There were a scarf on the chair last night.", "wrongWord": "were", "answer": "was"},
+                {"id": "F22", "sentence": "There was two boots by the door yesterday.", "wrongWord": "was", "answer": "were"},
+                {"id": "F23", "sentence": "The room was empty. There wasn't any coats in it.", "wrongWord": "wasn't", "answer": "weren't"},
+                {"id": "F24", "sentence": "Where was you yesterday?", "wrongWord": "was", "answer": "were"}
+            ]
+        },
+        81: {
+            missing: [
+                {"id": "M21", "sentences": ["This is my coat. It's ___.", "Those are your gloves. They're ___."], "answers": ["mine", "yours"]},
+                {"id": "M22", "sentences": ["My scarf is longer ___ yours.", "It's ___ longest scarf in our family."], "answers": ["than", "the"]},
+                {"id": "M23", "sentences": ["I'm ten. My cousin is eight. I'm ___ than my cousin.", "My baby sister is the ___ in our family."], "answers": ["older", "youngest"], "prefixes": ["o", "y"]},
+                {"id": "M24", "sentences": ["The plane is higher than the clouds. It's ___ them.", "The river is lower than the bridge. It's ___ it."], "answers": ["above", "below"]}
+            ],
+            fix: [
+                {"id": "F25", "sentence": "This is my coat. It's my.", "wrongWord": "my", "answer": "mine", "wrongIndex": 5},
+                {"id": "F26", "sentence": "These are her gloves. They're her.", "wrongWord": "her", "answer": "hers", "wrongIndex": 5},
+                {"id": "F27", "sentence": "My scarf is longer that yours.", "wrongWord": "that", "answer": "than"},
+                {"id": "F28", "sentence": "This is than longest scarf in the shop.", "wrongWord": "than", "answer": "the"},
+                {"id": "F29", "sentence": "Of the three children, my baby brother is the younger.", "wrongWord": "younger", "answer": "youngest"},
+                {"id": "F30", "sentence": "The kite is higher than the tree. It's below the tree.", "wrongWord": "below", "answer": "above"}
+            ]
+        }
+    };
+
+    const pageCatalogs = { 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

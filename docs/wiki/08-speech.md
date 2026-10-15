@@ -98,7 +98,7 @@ Chunking is per-audioprocess-chunk in memory (no MediaRecorder fallback path is 
 
 ## 5. Scoring (`speech_scorer.js`)
 
-Pure client-side, engine-agnostic. Decision is **OR of three paths** ("variant D", field-tuned 2026-07-27 on 272 real classroom attempts, replayed via `api/tune_scorer.js`):
+Pure client-side, engine-agnostic. Decision is **OR of three paths** ("variant D", field-tuned 2026-07-27 on 272 real student practice attempts, replayed via `api/tune_scorer.js`):
 
 ```
 pass if  charAcc >= minAccuracy  OR  WER <= maxWER  OR  phoneticRatio >= phonPass

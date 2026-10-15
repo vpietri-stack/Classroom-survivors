@@ -3,6 +3,10 @@
 Prepared 2026-10-15. This feature changes research intake, not recognition or
 grading. Production stays unchanged until this feature is published.
 
+Students use the app independently or with parents at home for review and
+practice. The pilot observes that normal home use; it is not a scheduled
+classroom activity or a request for families to practise simultaneously.
+
 ## Fixed limits
 
 | Control | Limit |
@@ -89,7 +93,7 @@ the three app stamps at release; speech sub-resource counters are advanced here.
 - Three synthetic progress writes during the probe completed in 731–743 ms,
   versus 1,081–1,090 ms immediately beforehand. This tiny sample over the
   operator's network establishes neither an improvement nor production headroom.
-  Azure's production monitoring endpoint was unavailable; a normal-class pilot
+  Azure's production monitoring endpoint was unavailable; a home-practice pilot
   remains required before expanding the cohort.
 - Every uniquely named probe record was removed, and the test container's
   original indexing policy was restored and independently verified. Production
@@ -100,13 +104,18 @@ the three app stamps at release; speech sub-resource counters are advanced here.
 1. Publish frontend/API with expanded intake disabled. Verify the served client
    includes `/reserveSpeechSample`, the API route exists, and CORS is registered.
 2. Verify the audio index exclusion. Then pilot with only the original approved
-   IDs and the enable switch set to `true`.
-3. Compare read-only status snapshots before/during/after a normal class. It
-   reports recent research charge/duration and the last progress save's
+   IDs and the enable switch set to `true`. Let those students continue normal
+   practice at home over one or two evenings, within the existing collection
+   window. Include different devices and connections where available.
+3. Compare read-only status snapshots before and throughout those home-practice
+   periods, including naturally busy evening periods. Status reports recent
+   research charge/duration and the last progress save's
    `serverSaveMs`/`progressWriteRu`. The latter excludes network time and the
    diagnostic upsert; one last-value record is not a historical p95.
-4. Check normal student save/delivery behavior. If progress slows or repeated
-   throttling appears, disable research; do not raise RU/s to preserve samples.
+4. Check normal practice and save/delivery behavior, including slower home
+   connections. Research timeouts or dropped clips are acceptable; interrupted
+   practice or lost progress are not. If progress slows or repeated throttling
+   appears, disable research; do not raise RU/s to preserve samples.
 5. After an acceptable pilot, add only the newly approved student IDs. Keep the
    existing closing date. A synthetic probe cannot certify production peak load.
 

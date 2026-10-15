@@ -178,3 +178,5 @@ PU2 Unit 4 coverage checks 30 M/40 F totals and per-page placement, approved M25
 PU2 Unit 5 coverage checks 28 M/34 F and per-page totals, revised animal/diet wording and answers, initial hints, intended repeated-token repair, unique scoped identities, future-page exclusion and round variety. All 62 additions are solved in Chrome through the real widget at 319px alongside previous boards.
 
 PU2 Unit 6 coverage checks 23 M/29 F and per-page totals, excluded M5/F5, exact edited M13/M14 wording/full contractions, prefix validity, repeated possessive targets, unique scoped identities, future-page exclusion and round variety. Chrome solves all 52 additions at 319px alongside previous boards.
+
+PU2 Unit 7 coverage checks 28 M/36 F and per-page totals, M1 exact edited wording/answers and two-letter prefixes, prefix validity, unique scoped identities, future-page exclusion and round variety. Chrome solves all 64 additions at 319px alongside previous boards.

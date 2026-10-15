@@ -1065,7 +1065,93 @@
         }
     };
 
-    const pageCatalogs = { 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
+    // PU2 Unit 7: approved food, irregular/regular past and did/base-verb boards.
+    const pu2Unit7Catalogs = {
+        83: {
+            missing: [
+                {"id": "M1", "sentences": ["I've got some bread and some ___.", "I can make a ___ ___."], "answers": ["cheese", "cheese", "sandwich"], "prefixes": ["ch", "ch", "s"]},
+                {"id": "M2", "sentences": ["Carrots, onions and potatoes are ___.", "We can cook them in water to make vegetable ___."], "answers": ["vegetables", "soup"], "prefixes": ["v", "s"]},
+                {"id": "M3", "sentences": ["I eat soup from a ___.", "I eat pasta from a ___."], "answers": ["bowl", "plate"], "prefixes": ["b", "p"]},
+                {"id": "M4", "sentences": ["I drink hot chocolate from a ___.", "I drink lemonade from a ___."], "answers": ["cup", "glass"], "prefixes": ["c", "g"]},
+                {"id": "M5", "sentences": ["We keep lemonade in a ___.", "We make ___ with lemons, water and sugar."], "answers": ["bottle", "lemonade"], "prefixes": ["b", "l"]},
+                {"id": "M6", "sentences": ["I put cheese between two pieces of bread to make a ___.", "I mix lettuce and tomatoes to make a ___."], "answers": ["sandwich", "salad"], "prefixes": ["s", "s"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "We make a sandwich with two pieces of paper.", "wrongWord": "paper", "answer": "bread"},
+                {"id": "F2", "sentence": "Carrots, onions and potatoes are drinks.", "wrongWord": "drinks", "answer": "vegetables"},
+                {"id": "F3", "sentence": "A bottle is a deep, round dish for soup.", "wrongWord": "bottle", "answer": "bowl"},
+                {"id": "F4", "sentence": "A plate is a small container with a handle for hot drinks.", "wrongWord": "plate", "answer": "cup"},
+                {"id": "F5", "sentence": "The drink made from lemons is called soup.", "wrongWord": "soup", "answer": "lemonade"},
+                {"id": "F6", "sentence": "There are three bottle of lemonade on the table.", "wrongWord": "bottle", "answer": "bottles"},
+                {"id": "F7", "sentence": "There is two cups of hot chocolate.", "wrongWord": "is", "answer": "are"},
+                {"id": "F8", "sentence": "I'd like a glass of lemonades.", "wrongWord": "lemonades", "answer": "lemonade"}
+            ]
+        },
+        85: {
+            missing: [
+                {"id": "M7", "sentences": ["I usually ___ to school by bus.", "Yesterday I ___ to school by car."], "answers": ["go", "went"], "prefixes": ["g", "w"]},
+                {"id": "M8", "sentences": ["I usually ___ milk with breakfast.", "Yesterday I ___ orange juice."], "answers": ["drink", "drank"], "prefixes": ["d", "d"]},
+                {"id": "M9", "sentences": ["I usually ___ bread for breakfast.", "Yesterday I ___ some cake."], "answers": ["eat", "ate"], "prefixes": ["e", "a"]},
+                {"id": "M10", "sentences": ["We usually ___ sandwiches for lunch.", "Yesterday we ___ soup."], "answers": ["have", "had"], "prefixes": ["h", "h"]},
+                {"id": "M11", "sentences": ["I often ___ lunch with Dad.", "Yesterday we ___ a pasta salad."], "answers": ["make", "made"], "prefixes": ["m", "m"]},
+                {"id": "M12", "sentences": ["I usually ___ my homework after school.", "Yesterday I ___ it before dinner."], "answers": ["do", "did"], "prefixes": ["d", "d"]},
+                {"id": "M13", "sentences": ["I usually ___ my lunch to school.", "Yesterday I ___ a cheese sandwich."], "answers": ["bring", "brought"], "prefixes": ["b", "b"]},
+                {"id": "M14", "sentences": ["We usually ___ vegetables from the shop.", "Yesterday we ___ some carrots."], "answers": ["get", "got"], "prefixes": ["g", "g"]},
+                {"id": "M15", "sentences": ["Yesterday I ___ a parrot in the garden.", "I ___ some food in its bowl."], "answers": ["saw", "put"], "prefixes": ["s", "p"]},
+                {"id": "M16", "sentences": ["___ you make soup yesterday?", "I ___ make any soup. I only made a sandwich."], "answers": ["did", "didn't"]}
+            ],
+            fix: [
+                {"id": "F9", "sentence": "Yesterday I goed to the shop.", "wrongWord": "goed", "answer": "went"},
+                {"id": "F10", "sentence": "She drinked orange juice yesterday.", "wrongWord": "drinked", "answer": "drank"},
+                {"id": "F11", "sentence": "We eated pasta for dinner last night.", "wrongWord": "eated", "answer": "ate"},
+                {"id": "F12", "sentence": "They haved lunch at school yesterday.", "wrongWord": "haved", "answer": "had"},
+                {"id": "F13", "sentence": "Dad maked vegetable soup yesterday.", "wrongWord": "maked", "answer": "made"},
+                {"id": "F14", "sentence": "I doed my homework last night.", "wrongWord": "doed", "answer": "did"},
+                {"id": "F15", "sentence": "Yesterday I bringed my lunch to school.", "wrongWord": "bringed", "answer": "brought"},
+                {"id": "F16", "sentence": "Yesterday we getted some vegetables from the shop.", "wrongWord": "getted", "answer": "got"},
+                {"id": "F17", "sentence": "I seed a parrot in the garden yesterday.", "wrongWord": "seed", "answer": "saw"},
+                {"id": "F18", "sentence": "She putted strawberries on the cake.", "wrongWord": "putted", "answer": "put"},
+                {"id": "F19", "sentence": "Did you went to the shop yesterday?", "wrongWord": "went", "answer": "go"},
+                {"id": "F20", "sentence": "I didn't ate the soup.", "wrongWord": "ate", "answer": "eat"}
+            ]
+        },
+        87: {
+            missing: [
+                {"id": "M17", "sentences": ["I ___ my hands before meals.", "Yesterday I ___ them before dinner."], "answers": ["wash", "washed"], "prefixes": ["w", "w"]},
+                {"id": "M18", "sentences": ["I often ___ dinner with Dad.", "Yesterday we ___ pasta."], "answers": ["cook", "cooked"], "prefixes": ["c", "c"]},
+                {"id": "M19", "sentences": ["We usually ___ eggs for breakfast.", "Yesterday Dad ___ onions."], "answers": ["fry", "fried"], "prefixes": ["f", "f"]},
+                {"id": "M20", "sentences": ["Can you ___ these bags?", "I ___ them yesterday."], "answers": ["carry", "carried"], "prefixes": ["c", "c"]},
+                {"id": "M21", "sentences": ["I always ___ when the traffic light is red.", "Yesterday I ___ at a red light."], "answers": ["stop", "stopped"], "prefixes": ["s", "s"]},
+                {"id": "M22", "sentences": ["Be careful! Don't ___ that plate.", "Yesterday I ___ a plate and it broke."], "answers": ["drop", "dropped"], "prefixes": ["d", "d"]},
+                {"id": "M23", "sentences": ["I ___ cooking with my friends.", "I ___ our cooking lesson yesterday."], "answers": ["like", "liked"], "prefixes": ["l", "l"]},
+                {"id": "M24", "sentences": ["I always ___ for photos.", "Yesterday I ___ at Dad's camera."], "answers": ["smile", "smiled"], "prefixes": ["s", "s"]},
+                {"id": "M25", "sentences": ["I sometimes ___ when a film is sad.", "Yesterday I ___ at the end of a sad film."], "answers": ["cry", "cried"], "prefixes": ["c", "c"]},
+                {"id": "M26", "sentences": ["We ___ pasta in water.", "Yesterday we ___ it for ten minutes."], "answers": ["boil", "boiled"], "prefixes": ["b", "b"]},
+                {"id": "M27", "sentences": ["___ you cook the pasta yesterday?", "I ___ cook any pasta. I only made soup."], "answers": ["did", "didn't"]},
+                {"id": "M28", "sentences": ["Where ___ you cook yesterday?", "What ___ you cooking now?"], "answers": ["did", "are"]}
+            ],
+            fix: [
+                {"id": "F21", "sentence": "Yesterday we wash our hands before dinner.", "wrongWord": "wash", "answer": "washed"},
+                {"id": "F22", "sentence": "Yesterday Dad cook pasta for lunch.", "wrongWord": "cook", "answer": "cooked"},
+                {"id": "F23", "sentence": "He fryed the onions yesterday.", "wrongWord": "fryed", "answer": "fried"},
+                {"id": "F24", "sentence": "I carryed the shopping bags yesterday.", "wrongWord": "carryed", "answer": "carried"},
+                {"id": "F25", "sentence": "The rain stoped at four o'clock yesterday.", "wrongWord": "stoped", "answer": "stopped"},
+                {"id": "F26", "sentence": "He droped his favourite plate yesterday.", "wrongWord": "droped", "answer": "dropped"},
+                {"id": "F27", "sentence": "I likeed our cooking lesson yesterday.", "wrongWord": "likeed", "answer": "liked"},
+                {"id": "F28", "sentence": "Sally smileed at the camera.", "wrongWord": "smileed", "answer": "smiled"},
+                {"id": "F29", "sentence": "I cryed at the end of the sad film.", "wrongWord": "cryed", "answer": "cried"},
+                {"id": "F30", "sentence": "Yesterday we boil the potatoes for lunch.", "wrongWord": "boil", "answer": "boiled"},
+                {"id": "F31", "sentence": "I inviteed my friends to my party last week.", "wrongWord": "inviteed", "answer": "invited"},
+                {"id": "F32", "sentence": "The film was funny. We laugh a lot last night.", "wrongWord": "laugh", "answer": "laughed"},
+                {"id": "F33", "sentence": "Did you cooked the vegetables?", "wrongWord": "cooked", "answer": "cook"},
+                {"id": "F34", "sentence": "We didn't washed the carrots.", "wrongWord": "washed", "answer": "wash"},
+                {"id": "F35", "sentence": "She didn't carried the bags.", "wrongWord": "carried", "answer": "carry"},
+                {"id": "F36", "sentence": "What did you fried for dinner?", "wrongWord": "fried", "answer": "fry"}
+            ]
+        }
+    };
+
+    const pageCatalogs = { 'PU2:7:83': pu2Unit7Catalogs[83], 'PU2:7:85': pu2Unit7Catalogs[85], 'PU2:7:87': pu2Unit7Catalogs[87], 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

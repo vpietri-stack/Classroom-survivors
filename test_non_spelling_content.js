@@ -338,7 +338,32 @@ for (const item of pu2Unit6.filter(e => e.prefixes)) {
     item.prefixes.forEach((prefix, i) => assert.ok(item.answers[i].startsWith(prefix)));
 }
 assert.equal(new Set(pu2Unit6.filter(e => e.answer).map(e => e.sentence)).size, 29);
-for (const item of [...unit1, ...unit2, ...unit3, ...unit4, ...unit5, ...unit6, ...unit7, ...unit8, ...unit9, ...pu2Unit1, ...pu2Unit2, ...pu2Unit3, ...pu2Unit4, ...pu2Unit5, ...pu2Unit6]) {
+const pu2Unit7 = content.buildPool('PU2', 7, 87).entries.filter(e => e.item.id && e.item.unit === '7').map(e => e.item);
+assert.equal(pu2Unit7.filter(e => e.answers).length, 28);
+assert.equal(pu2Unit7.filter(e => e.answer).length, 36);
+assert.equal(new Set([...pu2Unit1, ...pu2Unit2, ...pu2Unit3, ...pu2Unit4, ...pu2Unit5, ...pu2Unit6, ...pu2Unit7].map(e => e.key)).size, 397);
+for (const [page, missing, fix] of [[83,6,8],[85,10,12],[87,12,16]]) {
+    const items = pu2Unit7.filter(e => e.page === String(page));
+    assert.equal(items.filter(e => e.answers).length, missing);
+    assert.equal(items.filter(e => e.answer).length, fix);
+    assert.ok(!content.buildPool('PU2', 7, page).entries.some(e => e.item.unit === '7' && Number(e.item.page) > page));
+    for (let sample = 0; sample < 20; sample++) {
+        const picked = content.select('PU2', 7, page, 5);
+        assert.equal(picked.length, 5);
+        assert.ok(new Set(picked.map(e => e.type)).size >= 3);
+    }
+}
+assert.ok(!content.buildPool('PU2', 6, 81).entries.some(e => e.item.unit === '7'));
+const pu2Unit7M1 = pu2Unit7.find(e => e.id === 'M1');
+assert.deepEqual(Array.from(pu2Unit7M1.sentences), ["I've got some bread and some ___.", 'I can make a ___ ___.']);
+assert.deepEqual(Array.from(pu2Unit7M1.answers), ['cheese','cheese','sandwich']);
+assert.deepEqual(Array.from(pu2Unit7M1.prefixes), ['ch','ch','s']);
+for (const item of pu2Unit7.filter(e => e.prefixes)) {
+    assert.equal(item.prefixes.length, item.answers.length);
+    item.prefixes.forEach((prefix, i) => assert.ok(item.answers[i].startsWith(prefix)));
+}
+assert.equal(new Set(pu2Unit7.filter(e => e.answer).map(e => e.sentence)).size, 36);
+for (const item of [...unit1, ...unit2, ...unit3, ...unit4, ...unit5, ...unit6, ...unit7, ...unit8, ...unit9, ...pu2Unit1, ...pu2Unit2, ...pu2Unit3, ...pu2Unit4, ...pu2Unit5, ...pu2Unit6, ...pu2Unit7]) {
     if (item.answers) assert.equal(item.sentences.join(' ').split('___').length - 1, item.answers.length, item.id + ' has one target per blank');
     else if (Number.isInteger(item.wrongIndex)) assert.equal(item.sentence.split(' ')[item.wrongIndex].replace(/[.,!?]+$/, '').toLowerCase(), item.wrongWord, item.id + ' explicitly identifies its repeated wrong token');
     else assert.equal(item.sentence.split(' ').filter(word => word.replace(/[.,!?]+$/, '').toLowerCase() === item.wrongWord).length, 1, item.id + ' identifies exactly one wrong token');

@@ -815,7 +815,105 @@
         }
     };
 
-    const pageCatalogs = { 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
+    // PU2 Unit 4: approved family, comparative, possession and home boards.
+    const pu2Unit4Catalogs = {
+        45: {
+            missing: [
+                {"id": "M1", "sentences": ["My mum's sister is my ___.", "My dad's brother is my ___."], "answers": ["aunt", "uncle"], "prefixes": ["a", "u"]},
+                {"id": "M2", "sentences": ["My aunt's daughter is my ___.", "My mum and dad are my ___."], "answers": ["cousin", "parents"], "prefixes": ["c", "p"]},
+                {"id": "M3", "sentences": ["My brother is my parents' ___.", "My sister is my parents' ___."], "answers": ["son", "daughter"], "prefixes": ["s", "d"]},
+                {"id": "M4", "sentences": ["I'm a boy. I'm my grandparents' ___.", "My sister is their ___."], "answers": ["grandson", "granddaughter"], "prefixes": ["g", "g"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "My mum's sister is my uncle.", "wrongWord": "uncle", "answer": "aunt"},
+                {"id": "F2", "sentence": "My dad's brother is my aunt.", "wrongWord": "aunt", "answer": "uncle"},
+                {"id": "F3", "sentence": "My aunt's daughter is my sister.", "wrongWord": "sister", "answer": "cousin"},
+                {"id": "F4", "sentence": "My brother is my parents' daughter.", "wrongWord": "daughter", "answer": "son"},
+                {"id": "F5", "sentence": "My sister is my grandparents' grandson.", "wrongWord": "grandson", "answer": "granddaughter"},
+                {"id": "F6", "sentence": "My grandma and grandpa are my parents.", "wrongWord": "parents", "answer": "grandparents"}
+            ]
+        },
+        46: {
+            missing: [
+                {"id": "M5", "sentences": ["I'm ten. My cousin's eight. I'm ___ than my cousin.", "My cousin's ___ than me."], "answers": ["older", "younger"], "prefixes": ["o", "y"]},
+                {"id": "M6", "sentences": ["Dad is tall and I'm short. Dad is ___ than me.", "I'm ___ than Dad."], "answers": ["taller", "shorter"], "prefixes": ["t", "s"]},
+                {"id": "M7", "sentences": ["An elephant is ___ than a mouse.", "A mouse is ___ than an elephant."], "answers": ["bigger", "smaller"], "prefixes": ["b", "s"]},
+                {"id": "M8", "sentences": ["My hair is long. Your hair is short. My hair is ___ than your hair.", "Your hair is ___ than my hair."], "answers": ["longer", "shorter"], "prefixes": ["l", "s"]}
+            ],
+            fix: [
+                {"id": "F7", "sentence": "I'm ten and my cousin's eight. I'm younger than my cousin.", "wrongWord": "younger", "answer": "older"},
+                {"id": "F8", "sentence": "Dad is tall and I'm short. Dad is shorter than me.", "wrongWord": "shorter", "answer": "taller"},
+                {"id": "F9", "sentence": "An elephant is smaller than a mouse.", "wrongWord": "smaller", "answer": "bigger"},
+                {"id": "F10", "sentence": "Your hair is short and mine is long. My hair is shorter than yours.", "wrongWord": "shorter", "answer": "longer"}
+            ]
+        },
+        47: {
+            missing: [
+                {"id": "M9", "sentences": ["My cat is thin. Your cat is even ___.", "My dog is fat. Your dog is even ___."], "answers": ["thinner", "fatter"], "prefixes": ["t", "f"]},
+                {"id": "M10", "sentences": ["I'm happy. My sister is even ___.", "That puppy is naughty. This one is even ___."], "answers": ["happier", "naughtier"], "prefixes": ["h", "n"]},
+                {"id": "M11", "sentences": ["Your bike is good. Mine is even ___.", "This bike is bad. That one is even ___."], "answers": ["better", "worse"], "prefixes": ["b", "w"]},
+                {"id": "M12", "sentences": ["My brother is older ___ me.", "Your house ___ bigger than my house."], "answers": ["than", "is"]},
+                {"id": "M25", "sentences": ["My sister is taller ___ me.", "My brother ___ younger ___ me."], "answers": ["than", "is", "than"]},
+                {"id": "M26", "sentences": ["This bag is ___ than that bag.", "That bag ___ smaller ___ this bag."], "answers": ["bigger", "is", "than"]},
+                {"id": "M27", "sentences": ["My hair is longer ___ yours.", "Your hair ___ ___ ___ mine."], "answers": ["than", "is", "shorter", "than"]}
+            ],
+            fix: [
+                {"id": "F11", "sentence": "This dog is biger than that dog.", "wrongWord": "biger", "answer": "bigger"},
+                {"id": "F12", "sentence": "That kitten is thiner than this kitten.", "wrongWord": "thiner", "answer": "thinner"},
+                {"id": "F13", "sentence": "He looks happyer than his brother.", "wrongWord": "happyer", "answer": "happier"},
+                {"id": "F14", "sentence": "This puppy is naughtyer than that puppy.", "wrongWord": "naughtyer", "answer": "naughtier"},
+                {"id": "F15", "sentence": "My new bike is gooder than my old one.", "wrongWord": "gooder", "answer": "better"},
+                {"id": "F16", "sentence": "Today's weather is badder than yesterday's.", "wrongWord": "badder", "answer": "worse"},
+                {"id": "F17", "sentence": "My sister is taller that me.", "wrongWord": "that", "answer": "than"},
+                {"id": "F18", "sentence": "Their house are bigger than our house.", "wrongWord": "are", "answer": "is"},
+                {"id": "F33", "sentence": "My sister is taller then me.", "wrongWord": "then", "answer": "than"},
+                {"id": "F34", "sentence": "This bag is bigger as that bag.", "wrongWord": "as", "answer": "than"},
+                {"id": "F35", "sentence": "My brother is younger to me.", "wrongWord": "to", "answer": "than"},
+                {"id": "F36", "sentence": "My hair is longer of your hair.", "wrongWord": "of", "answer": "than"}
+            ]
+        },
+        54: {
+            missing: [
+                {"id": "M13", "sentences": ["This is my book. It's ___.", "This is your bag. It's ___."], "answers": ["mine", "yours"]},
+                {"id": "M14", "sentences": ["This is his bike. It's ___.", "This is her doll. It's ___."], "answers": ["his", "hers"]},
+                {"id": "M15", "sentences": ["This is our house. It's ___.", "This is their car. It's ___."], "answers": ["ours", "theirs"]},
+                {"id": "M16", "sentences": ["My ruler is long. Your ruler is short. My ruler is longer than ___.", "Your ruler is shorter than ___."], "answers": ["yours", "mine"]},
+                {"id": "M17", "sentences": ["Her bag is bigger than my bag. Her bag is bigger than ___.", "His bike is newer than her bike. His bike is newer than ___."], "answers": ["mine", "hers"]},
+                {"id": "M18", "sentences": ["Your garden is smaller than our garden. Yours is smaller than ___.", "Our house is bigger than their house. Ours is bigger than ___."], "answers": ["ours", "theirs"]},
+                {"id": "M19", "sentences": ["We park our car in the ___.", "We grow flowers in the ___."], "answers": ["garage", "garden"], "prefixes": ["g", "g"]},
+                {"id": "M20", "sentences": ["The ___ is the top of the house.", "The ___ is below the ground floor."], "answers": ["roof", "basement"], "prefixes": ["r", "b"]},
+                {"id": "M21", "sentences": ["We walk up the ___.", "We can take the ___ instead."], "answers": ["stairs", "lift"], "prefixes": ["s", "l"]},
+                {"id": "M22", "sentences": ["Mum is on the first floor. I'm on the ground floor.", "Mum is ___ and I'm ___."], "answers": ["upstairs", "downstairs"], "prefixes": ["u", "d"]},
+                {"id": "M23", "sentences": ["The floor above the ground floor is the ___ floor.", "The floor above the first floor is the ___ floor."], "answers": ["first", "second"], "prefixes": ["f", "s"]},
+                {"id": "M24", "sentences": ["Our flat's got a ___. We can stand outside on it.", "We live on the floor above the second floor. It's the ___ floor."], "answers": ["balcony", "third"], "prefixes": ["b", "t"]},
+                {"id": "M28", "sentences": ["We walk on the ___ inside the house.", "The ___ covers the top of the house."], "answers": ["floor", "roof"]},
+                {"id": "M29", "sentences": ["Our flat is on the second ___.", "There's a bird on the ___ of our house."], "answers": ["floor", "roof"]},
+                {"id": "M30", "sentences": ["The ___ above the first floor is the second floor.", "Rain falls on the ___ at the top of the house."], "answers": ["floor", "roof"]}
+            ],
+            fix: [
+                {"id": "F19", "sentence": "This is my book. It's my.", "wrongWord": "my", "answer": "mine", "wrongIndex": 5},
+                {"id": "F20", "sentence": "This is your bag. It's your.", "wrongWord": "your", "answer": "yours", "wrongIndex": 5},
+                {"id": "F21", "sentence": "This is her doll. It's her.", "wrongWord": "her", "answer": "hers", "wrongIndex": 5},
+                {"id": "F22", "sentence": "This is our house. It's our.", "wrongWord": "our", "answer": "ours", "wrongIndex": 5},
+                {"id": "F23", "sentence": "This is their car. It's their.", "wrongWord": "their", "answer": "theirs", "wrongIndex": 5},
+                {"id": "F24", "sentence": "This is his bike. It's he's.", "wrongWord": "he's", "answer": "his"},
+                {"id": "F25", "sentence": "My ruler is longer than your.", "wrongWord": "your", "answer": "yours"},
+                {"id": "F26", "sentence": "Her bag is bigger than my.", "wrongWord": "my", "answer": "mine"},
+                {"id": "F27", "sentence": "The room where we park our car is the kitchen.", "wrongWord": "kitchen", "answer": "garage"},
+                {"id": "F28", "sentence": "The part on top of the house is the basement.", "wrongWord": "basement", "answer": "roof"},
+                {"id": "F29", "sentence": "The room below the ground floor is the roof.", "wrongWord": "roof", "answer": "basement"},
+                {"id": "F30", "sentence": "We walk up the lift to get to the next floor.", "wrongWord": "lift", "answer": "stairs"},
+                {"id": "F31", "sentence": "The floor above the ground floor is the third floor.", "wrongWord": "third", "answer": "first"},
+                {"id": "F32", "sentence": "My flat has a basement where I can stand outside above the street.", "wrongWord": "basement", "answer": "balcony"},
+                {"id": "F37", "sentence": "Our flat is on the second roof.", "wrongWord": "roof", "answer": "floor"},
+                {"id": "F38", "sentence": "The bird is sitting on the floor at the top of the house.", "wrongWord": "floor", "answer": "roof"},
+                {"id": "F39", "sentence": "My bedroom is upstairs, on the first roof.", "wrongWord": "roof", "answer": "floor"},
+                {"id": "F40", "sentence": "The roof inside my bedroom is covered with a carpet.", "wrongWord": "roof", "answer": "floor"}
+            ]
+        }
+    };
+
+    const pageCatalogs = { 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

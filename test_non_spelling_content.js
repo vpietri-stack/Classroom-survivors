@@ -157,7 +157,33 @@ for (let i = 0; i < 50; i++) {
     assert.equal(round.length, 5);
     assert.ok(new Set(round.map(e => e.type)).size >= 3);
 }
-for (const item of [...unit1, ...unit2, ...unit3, ...unit4, ...unit5, ...unit6, ...unit7, ...unit8, ...unit9]) {
+// PU2 Unit 1 uses its existing page progression and the exact approved exclusions.
+const pu2Unit1 = content.buildPool('PU2', 1, 16).entries.filter(e => e.item.id && e.item.unit === '1').map(e => e.item);
+assert.equal(pu2Unit1.filter(e => e.answers).length, 22);
+assert.equal(pu2Unit1.filter(e => e.answer).length, 24);
+assert.equal(new Set(pu2Unit1.map(e => e.key)).size, 46, 'PU2 keys stay distinct from PU3 and each other');
+for (const [page, missing, fix] of [[7,5,5],[9,6,7],[10,7,8],[16,4,4]]) {
+    const items = pu2Unit1.filter(e => e.page === String(page));
+    assert.equal(items.filter(e => e.answers).length, missing);
+    assert.equal(items.filter(e => e.answer).length, fix);
+    const pool = content.buildPool('PU2', 1, page);
+    assert.ok(!pool.entries.some(e => Number(e.item.page) > page), 'later PU2 pages stay excluded');
+    for (let sample = 0; sample < 20; sample++) {
+        const picked = content.select('PU2', 1, page, 5);
+        assert.equal(picked.length, 5);
+        assert.ok(new Set(picked.map(e => e.type)).size >= 3);
+    }
+}
+assert.ok(!content.buildPool('PU2', 0, 5).entries.some(e => e.item.id), 'Unit 1 cannot appear in starter');
+assert.equal(pu2Unit1.find(e => e.id === 'M13').sentences[1], 'Then I get my school clothes and I get ___.');
+assert.equal(pu2Unit1.find(e => e.id === 'F3').sentence, 'The cows are eating rocks in the field.');
+assert.ok(!pu2Unit1.some(e => ['M23','M24','F25','F26','F27','F28'].includes(e.id)), 'planet items are excluded');
+assert.equal(new Set(pu2Unit1.filter(e => e.answer).map(e => e.sentence)).size, 24);
+for (const item of pu2Unit1.filter(e => e.prefixes)) {
+    assert.equal(item.prefixes.length, item.answers.length);
+    item.prefixes.forEach((prefix, i) => assert.ok(item.answers[i].startsWith(prefix)));
+}
+for (const item of [...unit1, ...unit2, ...unit3, ...unit4, ...unit5, ...unit6, ...unit7, ...unit8, ...unit9, ...pu2Unit1]) {
     if (item.answers) assert.equal(item.sentences.join(' ').split('___').length - 1, item.answers.length, item.id + ' has one target per blank');
     else if (Number.isInteger(item.wrongIndex)) assert.equal(item.sentence.split(' ')[item.wrongIndex].replace(/[.,!?]+$/, '').toLowerCase(), item.wrongWord, item.id + ' explicitly identifies its repeated wrong token');
     else assert.equal(item.sentence.split(' ').filter(word => word.replace(/[.,!?]+$/, '').toLowerCase() === item.wrongWord).length, 1, item.id + ' identifies exactly one wrong token');

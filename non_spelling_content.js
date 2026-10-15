@@ -588,7 +588,81 @@
         }
     };
 
-    const pageCatalogs = { 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
+    // PU2 Unit 1: teacher-approved boards, grouped by the existing app pages.
+    const pu2Unit1Catalogs = {
+        7: {
+            missing: [
+                {"id": "M1", "sentences": ["The cows are eating grass in the ___.", "There are lots of trees in the ___."], "answers": ["field", "forest"], "prefixes": ["f", "f"]},
+                {"id": "M2", "sentences": ["Jane is fishing in the ___.", "There's a boat on the ___."], "answers": ["river", "lake"], "prefixes": ["r", "l"]},
+                {"id": "M3", "sentences": ["Grandpa is driving his ___ on the farm.", "We're climbing a very high ___."], "answers": ["tractor", "mountain"], "prefixes": ["t", "m"]},
+                {"id": "M4", "sentences": ["There's one red ___ on the tree.", "There are lots of brown ___ under it."], "answers": ["leaf", "leaves"], "prefixes": ["l", "l"]},
+                {"id": "M5", "sentences": ["The cows are eating the green ___.", "The dog is digging a hole in the ___."], "answers": ["grass", "ground"], "prefixes": ["g", "g"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "Grandpa is driving his boat across the field.", "wrongWord": "boat", "answer": "tractor"},
+                {"id": "F2", "sentence": "A forest is a place with lots of cars.", "wrongWord": "cars", "answer": "trees"},
+                {"id": "F3", "sentence": "The cows are eating rocks in the field.", "wrongWord": "rocks", "answer": "grass"},
+                {"id": "F4", "sentence": "A river is a very high place. You can climb it.", "wrongWord": "river", "answer": "mountain"},
+                {"id": "F5", "sentence": "There are lots of leaf under the tree.", "wrongWord": "leaf", "answer": "leaves"}
+            ]
+        },
+        9: {
+            missing: [
+                {"id": "M6", "sentences": ["A baby cat is a ___.", "A baby dog is a ___."], "answers": ["kitten", "puppy"], "prefixes": ["k", "p"]},
+                {"id": "M7", "sentences": ["The kitten ___ sleeping now.", "The puppies ___ playing with a ball."], "answers": ["is", "are"]},
+                {"id": "M8", "sentences": ["I ___ doing my homework now.", "We ___ cleaning our shoes."], "answers": ["am", "are"]},
+                {"id": "M9", "sentences": ["___ she reading a book?", "___ the children playing outside?"], "answers": ["is", "are"]},
+                {"id": "M10", "sentences": ["Mum is ___ a photo.", "Grandpa is ___ his tractor."], "answers": ["taking", "driving"], "prefixes": ["t", "d"]},
+                {"id": "M11", "sentences": ["It's cold outside. I'm putting ___ my coat.", "I'm going to bed. I'm taking ___ my shoes."], "answers": ["on", "off"]}
+            ],
+            fix: [
+                {"id": "F6", "sentence": "Mum are taking a photo now.", "wrongWord": "are", "answer": "is"},
+                {"id": "F7", "sentence": "The children is playing outside.", "wrongWord": "is", "answer": "are"},
+                {"id": "F8", "sentence": "I'm wash my hands now.", "wrongWord": "wash", "answer": "washing"},
+                {"id": "F9", "sentence": "Grandpa is drive his tractor.", "wrongWord": "drive", "answer": "driving"},
+                {"id": "F10", "sentence": "We're take off our boots.", "wrongWord": "take", "answer": "taking"},
+                {"id": "F11", "sentence": "The puppy is play with a ball.", "wrongWord": "play", "answer": "playing"},
+                {"id": "F12", "sentence": "Are she reading a book?", "wrongWord": "are", "answer": "is"}
+            ]
+        },
+        10: {
+            missing: [
+                {"id": "M12", "sentences": ["I put ___ on my toothbrush.", "Then I clean my ___."], "answers": ["toothpaste", "teeth"], "prefixes": ["t", "t"]},
+                {"id": "M13", "sentences": ["After my shower, I use a ___ to get dry.", "Then I get my school clothes and I get ___."], "answers": ["towel", "dressed"], "prefixes": ["t", "d"]},
+                {"id": "M14", "sentences": ["My brother ___ up at seven every morning.", "He ___ breakfast at eight."], "answers": ["gets", "has"], "prefixes": ["g", "h"]},
+                {"id": "M15", "sentences": ["My mum ___ up at seven every morning.", "My sister ___ her hands before lunch."], "answers": ["wakes", "washes"], "prefixes": ["w", "w"]},
+                {"id": "M16", "sentences": ["What time ___ you get up?", "What time ___ your sister get up?"], "answers": ["do", "does"]},
+                {"id": "M17", "sentences": ["___ your parents have breakfast at home?", "___ your brother have lunch at school?"], "answers": ["do", "does"]},
+                {"id": "M18", "sentences": ["I get up ___ seven o'clock.", "I have a shower ___ the evening."], "answers": ["at", "in"]}
+            ],
+            fix: [
+                {"id": "F13", "sentence": "My dad have a shower every evening.", "wrongWord": "have", "answer": "has"},
+                {"id": "F14", "sentence": "I gets dressed every morning.", "wrongWord": "gets", "answer": "get"},
+                {"id": "F15", "sentence": "My mum wake up at seven every day.", "wrongWord": "wake", "answer": "wakes"},
+                {"id": "F16", "sentence": "My sister wash her hands before lunch every day.", "wrongWord": "wash", "answer": "washes"},
+                {"id": "F17", "sentence": "What time do your brother get up?", "wrongWord": "do", "answer": "does"},
+                {"id": "F18", "sentence": "Does your sister has breakfast at home?", "wrongWord": "has", "answer": "have"},
+                {"id": "F19", "sentence": "I get up in seven o'clock.", "wrongWord": "in", "answer": "at"},
+                {"id": "F20", "sentence": "I put a towel on my toothbrush to clean my teeth.", "wrongWord": "towel", "answer": "toothpaste"}
+            ]
+        },
+        16: {
+            missing: [
+                {"id": "M19", "sentences": ["I ___ breakfast at eight every day.", "Now I'm ___ a shower."], "answers": ["have", "having"], "prefixes": ["h", "h"]},
+                {"id": "M20", "sentences": ["She ___ her face every morning.", "Now she's ___ her hands."], "answers": ["washes", "washing"], "prefixes": ["w", "w"]},
+                {"id": "M21", "sentences": ["They ___ in the field every day.", "Now they're ___ in the forest."], "answers": ["play", "playing"], "prefixes": ["p", "p"]},
+                {"id": "M22", "sentences": ["What time ___ he get up every day?", "What ___ he doing now?"], "answers": ["does", "is"]}
+            ],
+            fix: [
+                {"id": "F21", "sentence": "Every morning, he getting up at seven.", "wrongWord": "getting", "answer": "gets"},
+                {"id": "F22", "sentence": "Mum has a shower every morning. Now she's have breakfast.", "wrongWord": "have", "answer": "having"},
+                {"id": "F23", "sentence": "The children walk to school every day. Today they're ride their bikes.", "wrongWord": "ride", "answer": "riding"},
+                {"id": "F24", "sentence": "Every evening, they cleaning their teeth before bed.", "wrongWord": "cleaning", "answer": "clean"}
+            ]
+        }
+    };
+
+    const pageCatalogs = { 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

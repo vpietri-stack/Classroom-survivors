@@ -253,3 +253,5 @@ The 2026-10-14k startup hotfix guards missing curriculum entries in non_spelling
 Preview release 2026-10-14l publishes the 48 approved PU3 flashcard PNGs and the combined review gallery at outputs/pu3-flashcards/index.html. Every final PNG is below 100,000 bytes. All three version stamps and the dashboard auth URL advance together; the previously deployed Study startup guard remains intact. These are new asset filenames, so existing cached image versions need no invalidation. Production and the isolated preview API/data remain unchanged.
 
 Preview-only 2026-10-14m corrects PU1 U2 and PU2 U4 availability. Both changed book-pack cache busters advance in the student page and dashboard; the stamp trio and dashboard auth link remain synchronized. Existing 48 PU3 flashcards and the missing-page guard are retained. Production is not updated by this release.
+
+Preview release 2026-10-15a publishes only the approved PU2 Unit 1 22 M/24 F boards. The non-spelling curriculum cache buster advances with the synchronized stamp trio and dashboard auth link. Production and isolated preview API/data remain unchanged; PU2 Unit 2 is still a review-only proposal.

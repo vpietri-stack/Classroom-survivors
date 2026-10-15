@@ -662,7 +662,87 @@
         }
     };
 
-    const pageCatalogs = { 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
+    // PU2 Unit 2: approved wording and locked initials.
+    const pu2Unit2Catalogs = {
+        19: {
+            missing: [
+                {"id": "M1", "sentences": ["Sunday comes after ___.", "Sunday comes before ___."], "answers": ["saturday", "monday"]},
+                {"id": "M2", "sentences": ["___ comes between Tuesday and Thursday.", "___ comes between Wednesday and Friday."], "answers": ["wednesday", "thursday"]},
+                {"id": "M3", "sentences": ["Thursday comes before ___.", "Wednesday comes after ___."], "answers": ["friday", "tuesday"]},
+                {"id": "M4", "sentences": ["Saturday comes before ___.", "Saturday and Sunday are the ___."], "answers": ["sunday", "weekend"]},
+                {"id": "M5", "sentences": ["Monday comes ___ Tuesday.", "Tuesday comes ___ Monday."], "answers": ["before", "after"]},
+                {"id": "M6", "sentences": ["Wednesday comes ___ Tuesday and Thursday.", "Friday comes ___ Saturday."], "answers": ["between", "before"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "Tuesday comes before Monday.", "wrongWord": "before", "answer": "after"},
+                {"id": "F2", "sentence": "Wednesday comes after Thursday.", "wrongWord": "after", "answer": "before"},
+                {"id": "F3", "sentence": "Friday comes between Tuesday and Thursday.", "wrongWord": "friday", "answer": "wednesday"},
+                {"id": "F4", "sentence": "Saturday and Sunday are the weekday.", "wrongWord": "weekday", "answer": "weekend"},
+                {"id": "F5", "sentence": "We go to school at Mondays.", "wrongWord": "at", "answer": "on"},
+                {"id": "F6", "sentence": "The day before Sunday is Friday.", "wrongWord": "friday", "answer": "saturday"},
+                {"id": "F7", "sentence": "There are seven days in a weekend.", "wrongWord": "weekend", "answer": "week"}
+            ]
+        },
+        21: {
+            missing: [
+                {"id": "M7", "sentences": ["I clean my teeth every morning. I ___ clean them in the morning.", "I don't eat fish at all. I ___ eat fish."], "answers": ["always", "never"], "prefixes": ["a", "n"]},
+                {"id": "M8", "sentences": ["I play tennis most weekends. I ___ play tennis.", "I play football on some weekends. I ___ play football."], "answers": ["often", "sometimes"], "prefixes": ["o", "s"]},
+                {"id": "M9", "sentences": ["How ___ do you swim? Twice a week.", "Do you ___ go skating? Yes, sometimes."], "answers": ["often", "ever"]},
+                {"id": "M10", "sentences": ["I swim on Mondays and Thursdays. That's ___ a week.", "I have one English lesson every week. That's ___ a week."], "answers": ["twice", "once"], "prefixes": ["t", "o"]},
+                {"id": "M11", "sentences": ["She cleans her teeth every morning and every evening. That's twice a ___.", "He plays football only on Sundays. That's once a ___."], "answers": ["day", "week"], "prefixes": ["d", "w"]},
+                {"id": "M12", "sentences": ["How often ___ you read comics?", "How often ___ your sister go swimming?"], "answers": ["do", "does"]}
+            ],
+            fix: [
+                {"id": "F8", "sentence": "I never clean my teeth in the morning. I do it every morning!", "wrongWord": "never", "answer": "always"},
+                {"id": "F9", "sentence": "I always eat fish. I don't eat it at all.", "wrongWord": "always", "answer": "never"},
+                {"id": "F10", "sentence": "I swim on Mondays and Thursdays. That's once a week.", "wrongWord": "once", "answer": "twice"},
+                {"id": "F11", "sentence": "I have one English lesson every week. That's twice a week.", "wrongWord": "twice", "answer": "once"},
+                {"id": "F12", "sentence": "How many do you go swimming? Twice a week.", "wrongWord": "many", "answer": "often"},
+                {"id": "F13", "sentence": "Does she often plays tennis?", "wrongWord": "plays", "answer": "play"},
+                {"id": "F14", "sentence": "Do he ever go skating?", "wrongWord": "do", "answer": "does"}
+            ]
+        },
+        22: {
+            missing: [
+                {"id": "M13", "sentences": ["I ___ to music in the car.", "I ___ films at the cinema."], "answers": ["listen", "watch"], "prefixes": ["l", "w"]},
+                {"id": "M14", "sentences": ["I ___ a comic before bed.", "I ___ an email to Grandma every week."], "answers": ["read", "write"], "prefixes": ["r", "w"]},
+                {"id": "M15", "sentences": ["We go ___ to buy food.", "I put on my skates and go ___ in the park."], "answers": ["shopping", "skating"], "prefixes": ["s", "s"]},
+                {"id": "M16", "sentences": ["She often ___ to music.", "He sometimes ___ DVDs."], "answers": ["listens", "watches"], "prefixes": ["l", "w"]},
+                {"id": "M17", "sentences": ["She doesn't ___ DVDs.", "He doesn't ___ to CDs."], "answers": ["watch", "listen"], "prefixes": ["w", "l"]},
+                {"id": "M18", "sentences": ["I listen ___ a CD.", "I write ___ email to my cousin."], "answers": ["to", "an"]}
+            ],
+            fix: [
+                {"id": "F15", "sentence": "I always listen at music in the car.", "wrongWord": "at", "answer": "to"},
+                {"id": "F16", "sentence": "She often watch films on Friday evenings.", "wrongWord": "watch", "answer": "watches"},
+                {"id": "F17", "sentence": "Every Saturday, Dad write an email to Grandma.", "wrongWord": "write", "answer": "writes"},
+                {"id": "F18", "sentence": "I eat an email to Grandma every week.", "wrongWord": "eat", "answer": "write"},
+                {"id": "F19", "sentence": "We go swimming at the supermarket to buy food.", "wrongWord": "swimming", "answer": "shopping"},
+                {"id": "F20", "sentence": "She doesn't watches DVDs.", "wrongWord": "watches", "answer": "watch"}
+            ]
+        },
+        25: {
+            missing: [
+                {"id": "M19", "sentences": ["We ___ listen to the teacher.", "We ___ kick our classmates."], "answers": ["must", "mustn't"], "prefixes": ["m", "m"]},
+                {"id": "M20", "sentences": ["You ___ skate in the road.", "You ___ wear a helmet when you ride a bike."], "answers": ["mustn't", "must"], "prefixes": ["m", "m"]},
+                {"id": "M21", "sentences": ["You must ___ a helmet when you ride a bike.", "You mustn't ___ in the road."], "answers": ["wear", "skate"], "prefixes": ["w", "s"]},
+                {"id": "M22", "sentences": ["I wear a ___ to protect my head.", "I wear ___ to protect my hands."], "answers": ["helmet", "gloves"], "prefixes": ["h", "g"]},
+                {"id": "M23", "sentences": ["I wear ___ to protect my eyes in the pool.", "I wear ___ ___ to protect my knees when I skate."], "answers": ["goggles", "knee", "pads"], "prefixes": ["g", "k", "p"]},
+                {"id": "M24", "sentences": ["My helmet protects my ___.", "My gloves protect my ___."], "answers": ["head", "hands"], "prefixes": ["h", "h"]}
+            ],
+            fix: [
+                {"id": "F21", "sentence": "We mustn't listen to the teacher.", "wrongWord": "mustn't", "answer": "must"},
+                {"id": "F22", "sentence": "You must kick your classmates.", "wrongWord": "must", "answer": "mustn't"},
+                {"id": "F23", "sentence": "He must wears a helmet when he rides his bike.", "wrongWord": "wears", "answer": "wear"},
+                {"id": "F24", "sentence": "You mustn't skating in the road.", "wrongWord": "skating", "answer": "skate"},
+                {"id": "F25", "sentence": "I wear goggles to protect my head when I ride my bike.", "wrongWord": "goggles", "answer": "helmet"},
+                {"id": "F26", "sentence": "I wear gloves to protect my eyes when I swim.", "wrongWord": "gloves", "answer": "goggles"},
+                {"id": "F27", "sentence": "I wear knee pads to protect my hands when I skate.", "wrongWord": "hands", "answer": "knees"},
+                {"id": "F28", "sentence": "I wear goggles on my hands to keep them warm.", "wrongWord": "goggles", "answer": "gloves"}
+            ]
+        }
+    };
+
+    const pageCatalogs = { 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

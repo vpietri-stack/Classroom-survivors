@@ -255,3 +255,5 @@ Preview release 2026-10-14l publishes the 48 approved PU3 flashcard PNGs and the
 Preview-only 2026-10-14m corrects PU1 U2 and PU2 U4 availability. Both changed book-pack cache busters advance in the student page and dashboard; the stamp trio and dashboard auth link remain synchronized. Existing 48 PU3 flashcards and the missing-page guard are retained. Production is not updated by this release.
 
 Preview release 2026-10-15a publishes only the approved PU2 Unit 1 22 M/24 F boards. The non-spelling curriculum cache buster advances with the synchronized stamp trio and dashboard auth link. Production and isolated preview API/data remain unchanged; PU2 Unit 2 is still a review-only proposal.
+
+Preview release 2026-10-15b publishes the approved PU2 Unit 2 typed boards and Tuesday/Monday pair correction. The book-pack and non-spelling curriculum cache busters advance with the synchronized stamp trio and dashboard auth link. Production and isolated preview API/data are unchanged; Unit 3 remains review-only.

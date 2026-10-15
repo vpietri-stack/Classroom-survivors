@@ -139,8 +139,8 @@ async function waitBoard(page, index) { await page.waitForFunction(i => STUDY_ST
         const approved = await page.evaluate(() => {
             const items = [['1', '16'], ['2', '28'], ['3', '40'], ['4', '54'], ['5', '57'], ['5', '59'], ['5', '66'], ['6', '69'], ['6', '71'], ['6', '73'], ['7', '83'], ['7', '85'], ['7', '87'], ['8', '95'], ['8', '97'], ['8', '98'], ['8', '99'], ['9', '107'], ['9', '110'], ['9', '111']].flatMap(([unit, page]) =>
                 TEACHING_CONTENT.PU3[unit][page].nonSpellingExercises.filter(e => e.id).map(e => ({ ...e, book: 'PU3', unit, page })));
-            for (const page of ['7', '9', '10', '16']) {
-                items.push(...TEACHING_CONTENT.PU2[1][page].nonSpellingExercises.filter(e => e.id).map(e => ({ ...e, book: 'PU2', unit: '1', page })));
+            for (const [unit, pages] of [['1', ['7', '9', '10', '16']], ['2', ['19', '21', '22', '25']]]) {
+                for (const page of pages) items.push(...TEACHING_CONTENT.PU2[unit][page].nonSpellingExercises.filter(e => e.id).map(e => ({ ...e, book: 'PU2', unit, page })));
             }
             const host = document.querySelector('#grammarGame .minigame-container');
             host.replaceChildren();

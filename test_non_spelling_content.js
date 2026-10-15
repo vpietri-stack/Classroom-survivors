@@ -183,7 +183,38 @@ for (const item of pu2Unit1.filter(e => e.prefixes)) {
     assert.equal(item.prefixes.length, item.answers.length);
     item.prefixes.forEach((prefix, i) => assert.ok(item.answers[i].startsWith(prefix)));
 }
-for (const item of [...unit1, ...unit2, ...unit3, ...unit4, ...unit5, ...unit6, ...unit7, ...unit8, ...unit9, ...pu2Unit1]) {
+const pu2Unit2 = content.buildPool('PU2', 2, 25).entries.filter(e => e.item.id && e.item.unit === '2').map(e => e.item);
+assert.equal(pu2Unit2.filter(e => e.answers).length, 24);
+assert.equal(pu2Unit2.filter(e => e.answer).length, 28);
+assert.equal(new Set([...pu2Unit1, ...pu2Unit2].map(e => e.key)).size, 98);
+for (const [page, missing, fix] of [[19,6,7],[21,6,7],[22,6,6],[25,6,8]]) {
+    const items = pu2Unit2.filter(e => e.page === String(page));
+    assert.equal(items.filter(e => e.answers).length, missing);
+    assert.equal(items.filter(e => e.answer).length, fix);
+    assert.ok(!content.buildPool('PU2', 2, page).entries.some(e => e.item.unit === '2' && Number(e.item.page) > page));
+    for (let sample = 0; sample < 20; sample++) {
+        const picked = content.select('PU2', 2, page, 5);
+        assert.equal(picked.length, 5);
+        assert.ok(new Set(picked.map(e => e.type)).size >= 3);
+    }
+}
+assert.ok(!content.buildPool('PU2', 1, 16).entries.some(e => e.item.unit === '2'));
+assert.deepEqual(Array.from(pu2Unit2.find(e => e.id === 'M1').sentences), ['Sunday comes after ___.', 'Sunday comes before ___.']);
+assert.deepEqual(Array.from(pu2Unit2.find(e => e.id === 'M1').answers), ['saturday', 'monday']);
+assert.deepEqual(Array.from(pu2Unit2.find(e => e.id === 'M3').sentences), ['Thursday comes before ___.', 'Wednesday comes after ___.']);
+assert.deepEqual(Array.from(pu2Unit2.find(e => e.id === 'M3').answers), ['friday', 'tuesday']);
+assert.equal(pu2Unit2.find(e => e.id === 'M4').sentences[0], 'Saturday comes before ___.');
+for (const [id, prefixes] of [['M10',['t','o']], ['M11',['d','w']], ['M19',['m','m']], ['M20',['m','m']]]) {
+    assert.deepEqual(Array.from(pu2Unit2.find(e => e.id === id).prefixes), prefixes);
+}
+for (const item of pu2Unit2.filter(e => e.prefixes)) {
+    assert.equal(item.prefixes.length, item.answers.length);
+    item.prefixes.forEach((prefix, i) => assert.ok(item.answers[i].startsWith(prefix)));
+}
+assert.equal(new Set(pu2Unit2.filter(e => e.answer).map(e => e.sentence)).size, 28);
+assert.ok(vm.runInContext("TEACHING_CONTENT.PU2[2][19].sentencePairs.some(p => p.a === 'Tuesday comes after' && p.b === 'Monday.')", sandbox));
+assert.ok(!vm.runInContext("TEACHING_CONTENT.PU2[2][19].sentencePairs.some(p => p.a === 'Tuesday comes before' && p.b === 'Monday.')", sandbox));
+for (const item of [...unit1, ...unit2, ...unit3, ...unit4, ...unit5, ...unit6, ...unit7, ...unit8, ...unit9, ...pu2Unit1, ...pu2Unit2]) {
     if (item.answers) assert.equal(item.sentences.join(' ').split('___').length - 1, item.answers.length, item.id + ' has one target per blank');
     else if (Number.isInteger(item.wrongIndex)) assert.equal(item.sentence.split(' ')[item.wrongIndex].replace(/[.,!?]+$/, '').toLowerCase(), item.wrongWord, item.id + ' explicitly identifies its repeated wrong token');
     else assert.equal(item.sentence.split(' ').filter(word => word.replace(/[.,!?]+$/, '').toLowerCase() === item.wrongWord).length, 1, item.id + ' identifies exactly one wrong token');

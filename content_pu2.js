@@ -464,7 +464,7 @@ TEACHING_CONTENT["PU2"] = {
                 { a: "Saturday and Sunday are", b: "the weekend." },
                 { a: "Friday comes after", b: "Thursday." },
                 { a: "Monday comes after", b: "Sunday." },
-                { a: "Tuesday comes before", b: "Monday." },
+                { a: "Tuesday comes after", b: "Monday." },
                 { a: "Sunday comes after", b: "Saturday." }
             ]
         },

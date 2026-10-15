@@ -168,3 +168,5 @@ test_non_spelling_startup.js reproduces the PU1 pages 24/25 crash, exercises sel
 The startup regression now asserts that every advertised real page has content, the exact corrected PU1/PU2 page lists, PU2 p47 selection and future-page exclusion at p46. Missing PU1 pages 24/25 are reintroduced only inside isolated test contexts to retain the crash regression. Real Study-button tests include PU2 p47 on desktop and 319px.
 
 PU2 Unit 1 coverage enforces the approved 22 M/24 F totals and per-page counts, excluded planet items, school-clothes/rocks edits, prefix validity, unique SR keys and future-page exclusion. Chrome solves each of the 46 boards through the real widget at 319px, alongside the existing PU3 coverage.
+
+PU2 Unit 2 tests cover the 24/28 totals, page placement, approved weekday wording/answers, locked initials, unique SR keys, future-page exclusion and the Tuesday/Monday matching correction. Chrome solves all 52 additional boards at 319px alongside PU2 Unit 1 and PU3.

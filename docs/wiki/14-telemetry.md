@@ -102,6 +102,18 @@ Full write-ups indexed in [Gotchas & History](15-gotchas-and-history.md). Summar
 - **Cross-partition reads:** never `container.item(id, id)` for legacy docs; enumerate ids then per-doc queries. See [Data Model](11-data-model.md).
 - Forensics scripts under `api/` (`analyze_speech.js`, `analyze_devices.js`, `deep_dive_speech.js`) implement variants of these probes against live data — treat as production-touching.
 
+
+## Speech collection observation (prepared 2026-10-15)
+
+The existing delivery diagnostic's last accepted progress request additionally
+records `serverSaveMs` (before the diagnostic upsert, excluding network time)
+and `progressWriteRu`. No extra diagnostic write is added. Research control
+statistics record the latest audio write charge/duration, outcome and accepted
+counts/bytes. Read-only `api/speech_collection_ops.js status` reports these
+without downloading audio or printing student identity. Last values are not
+historical latency percentiles; retain private before/during/after snapshots
+for the staged pilot. See [runbook](../speech-collection-rollout.md).
+
 ## Update discipline
 
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.

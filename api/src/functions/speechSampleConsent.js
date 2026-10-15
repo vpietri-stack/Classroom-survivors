@@ -6,8 +6,8 @@ const policy = require('./shared/speechSamples');
 // Tells the signed-in client whether it may record and upload speech samples.
 //
 // This exists so that audio NEVER leaves a non-consented child's device: the
-// client asks once after login and stays completely inert unless the answer is
-// yes. Consent could not simply be enforced by rejecting the upload, because by
+// client refreshes consent at most every minute and stays inert unless the answer
+// is yes. Consent could not simply be enforced by rejecting the upload, because by
 // then the recording would already have been encoded and sent.
 //
 // The consent list itself lives in the SPEECH_SAMPLE_CONSENTED_IDS app setting,
@@ -26,14 +26,15 @@ app.http('speechSampleConsent', {
             const token = authGate.token;
 
             const endsAt = policy.captureEndsAt();
-            const open = policy.withinCaptureWindow();
+            const open = policy.captureEnabled() && policy.maxSamples() > 0 && policy.withinCaptureWindow();
             // No token means no identity means no consent — never a bare `false`
             // that a caller might mistake for "checked and declined".
             const consented = open && !!(token && policy.isConsented(token.sub));
 
             return {
                 status: 200,
-                jsonBody: { consented, open, endsAt },
+                headers: { 'Cache-Control': 'no-store' },
+                jsonBody: { consented, open, endsAt, maxSamples: policy.maxSamples(), maxWavBytes: policy.MAX_WAV_BYTES },
             };
         } catch (error) {
             context.error('speechSampleConsent failed:', error);

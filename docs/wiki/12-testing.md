@@ -107,6 +107,18 @@ These exist because their contracts were broken in production; treat failures as
 
 Backend HTTP integration still requires the private `api/test_auth.js` helper and isolated local Functions/Cosmos configuration; that helper is intentionally gitignored and is absent from a fresh worktree.
 
+
+## Speech collection validation (2026-10-15)
+
+`test_speech_collection_runtime.js` covers 100 competing reservations, atomic
+quota races, duplicate requests, account switching, consent refresh, skipped
+acknowledgements and hung-network cleanup. `test_speech_capture_browser.js`
+drives actual Record/Stop UI in Chrome using synthetic WAVs and checks rejected
+clips without changing grading rungs. Both run in root `npm test`. The optional
+real-Cosmos operator probe refuses production and cleans up only its own uniquely
+named records. It measures test-container behavior, not production peak load.
+See [runbook](../speech-collection-rollout.md).
+
 ## Update discipline
 
 Any agent that adds/changes a test file, changes the `test` script chain, or changes a pinned contract must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.

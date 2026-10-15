@@ -276,6 +276,8 @@ app.http('saveAnalytics', {
     methods: ['POST'],
     authLevel: 'anonymous',
     handler: async (request, context) => {
+        const saveStartedAt = Date.now();
+        let progressWriteRu = null;
         try {
             if (!validateApiKey(request)) return { status: 403, body: 'Forbidden.' };
 
@@ -393,9 +395,10 @@ app.http('saveAnalytics', {
                 await maybeArchiveAnalytics(container, user, context);
 
                 try {
-                    await (pkValue !== undefined
+                    const progressWrite = await (pkValue !== undefined
                         ? container.item(studentId, pkValue).replace(user, { accessCondition: { type: 'IfMatch', condition: etag } })
                         : container.item(studentId).replace(user, { accessCondition: { type: 'IfMatch', condition: etag } }));
+                    progressWriteRu = Number(progressWrite && progressWrite.requestCharge) || null;
                     break; // won the race — done
                 } catch (replaceErr) {
                     const status = replaceErr && (replaceErr.code || replaceErr.statusCode);
@@ -424,6 +427,8 @@ app.http('saveAnalytics', {
                     // requests never reach the function (edge/network loss).
                     recent: [{
                         ts: new Date().toISOString(),
+                        serverSaveMs: Date.now() - saveStartedAt,
+                        progressWriteRu,
                         studentId, added, total: events.length,
                         ua: ua.slice(0, 120),
                         transport: request.headers.get('x-auth-token') ? 'header' : 'body'

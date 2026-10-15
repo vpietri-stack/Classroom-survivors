@@ -112,6 +112,18 @@ Recording/cancelling returns per-student `results` with updated attendance and t
 
 `updateStudent` now patches only whitelisted edited fields; `setTargets` conditionally patches targets and retries concurrency conflicts. These preserve concurrently written attendance/analytics rather than upserting a stale full student document. Legacy missing studentId partition keys remain supported.
 
+
+## Speech collection preparation (2026-10-15)
+
+`POST reserveSpeechSample` is an app-key/token protected small request. It
+requires the exact consented identity, enabled switch, open window and a global
+reservation. It returns an owner/sample-bound nonce or a quiet skip before audio
+is encoded. `saveSpeechSample` requires that nonce and matching body/token owner.
+`GET speechSampleConsent` additionally returns `maxSamples` and `maxWavBytes`.
+New settings: `SPEECH_SAMPLE_CAPTURE_ENABLED` (off unless exactly true) and
+`SPEECH_SAMPLE_MAX_PER_STUDENT` (1-30, default 30, invalid closes intake).
+See [rollout](../speech-collection-rollout.md) for deployment and pilot checks.
+
 ## Update discipline
 
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.

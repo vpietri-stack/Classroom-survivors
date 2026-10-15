@@ -19,11 +19,33 @@
 // same day to close at the start of 2026-10-19 China time. Override with
 // SPEECH_SAMPLE_CAPTURE_ENDS (any Date.parse-able instant) to close early.
 const DEFAULT_CAPTURE_ENDS = '2026-10-19T00:00:00+08:00';
+const MAX_SAMPLES_PER_STUDENT = 30;
+const MAX_WAV_BYTES = 300_000;
+const MAX_WAV_BASE64_CHARS = 400_000;
+const LEASE_MS = 15_000;
+const MIN_UPLOAD_GAP_MS = 2_000;
+const TARGET_RU_PER_SECOND = 100;
+const RESERVATION_OVERHEAD_RU = 20;
+
+// Deliberate, fail-closed launch/kill switch. Consent alone does not turn on
+// the expanded collector. No account list is ever bundled into the game.
+function captureEnabled() {
+    return process.env.SPEECH_SAMPLE_CAPTURE_ENABLED === 'true';
+}
+
+function maxSamples() {
+    const raw = process.env.SPEECH_SAMPLE_MAX_PER_STUDENT;
+    if (raw === undefined || raw === '') return MAX_SAMPLES_PER_STUDENT;
+    const n = Number(raw);
+    return Number.isInteger(n) && n >= 1 && n <= MAX_SAMPLES_PER_STUDENT ? n : 0;
+}
 
 function captureEndsAt() {
     const raw = process.env.SPEECH_SAMPLE_CAPTURE_ENDS || DEFAULT_CAPTURE_ENDS;
     const t = Date.parse(raw);
-    return Number.isFinite(t) ? t : Date.parse(DEFAULT_CAPTURE_ENDS);
+    // An invalid override closes collection; extending the consented window
+    // requires a deliberate code/release change, not just an app setting.
+    return Number.isFinite(t) ? Math.min(t, Date.parse(DEFAULT_CAPTURE_ENDS)) : 0;
 }
 
 function withinCaptureWindow(nowMs = Date.now()) {
@@ -53,4 +75,13 @@ module.exports = {
     withinCaptureWindow,
     consentedIds,
     isConsented,
+    captureEnabled,
+    maxSamples,
+    MAX_SAMPLES_PER_STUDENT,
+    MAX_WAV_BYTES,
+    MAX_WAV_BASE64_CHARS,
+    LEASE_MS,
+    MIN_UPLOAD_GAP_MS,
+    TARGET_RU_PER_SECOND,
+    RESERVATION_OVERHEAD_RU,
 };

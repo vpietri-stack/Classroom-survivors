@@ -11,9 +11,8 @@
  * Needs api/local.settings.json with COSMOS_ENDPOINT / COSMOS_KEY.
  * Output is gitignored: these are children's voices and must never be committed.
  *
- * The manifest is the label file for offline experiments — target is the ground
- * truth, transcript/pass/accuracy are what the SHIPPED scorer decided, so a
- * candidate model or scoring change can be compared against the same audio.
+ * Target is the expected prompt, not a human transcription. Label what was
+ * actually said and teacher acceptability separately before evaluating models.
  */
 const fs = require('fs');
 const path = require('path');
@@ -62,24 +61,25 @@ function csvField(v) {
     fs.mkdirSync(wavDir, { recursive: true });
 
     const q = ONLY_STUDENT
-        ? { query: 'SELECT * FROM c WHERE c.studentId = @sid ORDER BY c.capturedAt', parameters: [{ name: '@sid', value: ONLY_STUDENT }] }
-        : { query: 'SELECT * FROM c ORDER BY c.capturedAt' };
-    const { resources } = await container.items.query(q, { maxItemCount: 200 }).fetchAll();
-    if (!resources.length) {
-        console.log('No samples stored yet in ' + dbName + '/' + containerName + '.');
-        console.log('Capture opens when the SPEECH_SAMPLE_CONSENTED_IDS app setting is populated.');
-        return;
-    }
-    const rows = LIMIT ? resources.slice(0, LIMIT) : resources;
+        ? { query: "SELECT * FROM c WHERE c.studentId = @sid AND (NOT IS_DEFINED(c.type) OR c.type = 'speech_sample')", parameters: [{ name: '@sid', value: ONLY_STUDENT }] }
+        : { query: "SELECT * FROM c WHERE NOT IS_DEFINED(c.type) OR c.type = 'speech_sample'" };
+    // Stream a few clips at a time. fetchAll() would put gigabytes of children's
+    // audio into RAM after expansion, and --limit must limit the actual reads.
+    const iterator = container.items.query(q, { maxItemCount: LIMIT > 0 ? Math.min(10, LIMIT) : 10 });
 
     const COLS = ['file', 'id', 'studentId', 'student', 'capturedAt', 'capturedAtIso', 'target', 'transcript',
         'pass', 'accuracy', 'phoneticRatio', 'attempt', 'book', 'mode', 'audioMs', 'durMs', 'peak',
-        'sampleRate', 'transcribeMs', 'blobBytes', 'details', 'ua'];
+        'sampleRate', 'transcribeMs', 'blobBytes', 'details', 'ua', 'outcome', 'schemaVersion',
+        'humanTranscript', 'teacherAcceptable'];
     const lines = [COLS.join(',')];
 
-    let written = 0, skipped = 0, totalBytes = 0;
+    let written = 0, skipped = 0, totalBytes = 0, visited = 0;
     const perStudent = new Map();
-    for (const r of rows) {
+    outer: while ((!LIMIT || written < LIMIT) && iterator.hasMoreResults()) {
+      const { resources: rows } = await iterator.fetchNext();
+      for (const r of rows) {
+        if (LIMIT && written >= LIMIT) break outer;
+        visited++;
         if (!r.wavBase64) { skipped++; continue; }
         let buf;
         try { buf = Buffer.from(String(r.wavBase64), 'base64'); } catch (_) { skipped++; continue; }
@@ -87,7 +87,7 @@ function csvField(v) {
 
         const n = perStudent.get(r.studentId) || 0;
         perStudent.set(r.studentId, n + 1);
-        const fname = `${slug(r.studentId, 34)}__${String(n).padStart(3, '0')}__${slug(r.target, 34)}.wav`;
+        const fname = `${slug(r.studentId, 34)}__${slug(r.id, 80)}.wav`;
         fs.writeFileSync(path.join(wavDir, fname), buf);
         written++; totalBytes += buf.length;
 
@@ -95,13 +95,15 @@ function csvField(v) {
             fname, r.id, r.studentId, r.student, r.capturedAt,
             r.capturedAt ? new Date(r.capturedAt).toISOString() : '',
             r.target, r.transcript, r.pass, r.accuracy, r.phoneticRatio, r.attempt, r.book, r.mode,
-            r.audioMs, r.durMs, r.peak, r.sampleRate, r.transcribeMs, buf.length, r.details, r.ua
+            r.audioMs, r.durMs, r.peak, r.sampleRate, r.transcribeMs, buf.length, r.details, r.ua,
+            r.outcome || 'graded', r.schemaVersion || 1, '', ''
         ].map(csvField).join(','));
+      }
     }
 
     fs.writeFileSync(path.join(OUT, 'manifest.csv'), lines.join('\n') + '\n');
 
-    console.log(`Samples in Cosmos      : ${resources.length}`);
+    console.log(`Sample records read    : ${visited}`);
     console.log(`Written to ${path.relative(process.cwd(), OUT) || OUT}`);
     console.log(`  WAV files            : ${written}  (${(totalBytes / 1048576).toFixed(1)} MB)`);
     console.log(`  skipped (no/invalid) : ${skipped}`);

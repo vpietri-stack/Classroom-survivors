@@ -8,6 +8,7 @@ const { CosmosClient } = require('@azure/cosmos');
 let _client = null;
 let _container = null;
 let _samplesContainer = null;
+let _samplesClient = null;
 let _handwritingContainer = null;
 
 function getClient() {
@@ -39,7 +40,17 @@ function getSamplesContainer() {
     if (!_samplesContainer) {
         const dbName = process.env.COSMOS_DB_NAME || 'Val-EslApp';
         const containerName = process.env.COSMOS_SPEECH_SAMPLES_CONTAINER || 'speech_samples';
-        _samplesContainer = getClient().database(dbName).container(containerName);
+        // Research is disposable. Do not hold workers in long SDK retry loops
+        // while the normal progress client is trying to save a child's work.
+        if (!_samplesClient) _samplesClient = new CosmosClient({
+            endpoint: process.env.COSMOS_ENDPOINT,
+            key: process.env.COSMOS_KEY,
+            connectionPolicy: {
+                requestTimeout: 4000,
+                retryOptions: { maxRetryAttemptCount: 0, maxWaitTimeInSeconds: 0 },
+            },
+        });
+        _samplesContainer = _samplesClient.database(dbName).container(containerName);
     }
     return _samplesContainer;
 }

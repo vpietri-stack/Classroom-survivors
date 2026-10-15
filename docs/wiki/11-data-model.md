@@ -125,6 +125,18 @@ Students gain optional `attendance: [{classId, startTime, endTime, classTime, te
 
 Each persisted class is a separate `role: classCalendar` document with `id = studentId = class_<32 hex characters>`, a teacher/classTime `groupKey`, `startTime`, `endTime`, a roster snapshot `studentIds`, `status: scheduled|cancelled|retired`, optional `manual`, and `attendanceStarted`. Generated IDs hash the group plus the original Beijing date, so rescheduling and calendar reloads cannot create duplicate classes. Calendar documents are excluded from roster queries by their role. Separate class documents bound item size and allow independent ETag-protected edits; future unedited rosters update on calendar load, historic rosters remain snapshots. Future defaults for groups with no remaining students are retired and hidden; they do not create absences or cancellation target extensions.
 
+
+## Speech research documents (prepared 2026-10-15)
+
+The existing `speech_samples` container holds three document types. Audio clips
+use `type: speech_sample`, `schemaVersion: 2`, stable `sampleId`, and `outcome`
+(graded/too_short/too_quiet/hallucination/empty). Ungraded `pass` and score values
+are null. Legacy untyped clips remain readable and count toward the cap.
+`speech_sample_quota` documents share the student's partition and are updated
+in the same transaction as a clip create. One `speech_sample_control` document
+in a reserved non-student partition coordinates short leases, cooldowns, and
+bounded last-write statistics. Export/count code must exclude control records.
+
 ## Update discipline
 
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.

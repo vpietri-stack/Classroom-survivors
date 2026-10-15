@@ -17,6 +17,7 @@ const API_ROUTES = [
     // §11.1). Both are called cross-origin from GitHub Pages with X-App-Key /
     // X-Auth-Token, so they need preflight or the browser blocks them.
     'speechSampleConsent',
+    'reserveSpeechSample',
     'saveSpeechSample',
     // Handwriting-trace research collection (see docs/wiki/05-study-mode.md).
     // Same cross-origin situation, so the same preflight requirement.

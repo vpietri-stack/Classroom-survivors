@@ -588,7 +588,762 @@
         }
     };
 
-    const pageCatalogs = { 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
+    // PU2 Unit 1: teacher-approved boards, grouped by the existing app pages.
+    const pu2Unit1Catalogs = {
+        7: {
+            missing: [
+                {"id": "M1", "sentences": ["The cows are eating grass in the ___.", "There are lots of trees in the ___."], "answers": ["field", "forest"], "prefixes": ["f", "f"]},
+                {"id": "M2", "sentences": ["Jane is fishing in the ___.", "There's a boat on the ___."], "answers": ["river", "lake"], "prefixes": ["r", "l"]},
+                {"id": "M3", "sentences": ["Grandpa is driving his ___ on the farm.", "We're climbing a very high ___."], "answers": ["tractor", "mountain"], "prefixes": ["t", "m"]},
+                {"id": "M4", "sentences": ["There's one red ___ on the tree.", "There are lots of brown ___ under it."], "answers": ["leaf", "leaves"], "prefixes": ["l", "l"]},
+                {"id": "M5", "sentences": ["The cows are eating the green ___.", "The dog is digging a hole in the ___."], "answers": ["grass", "ground"], "prefixes": ["g", "g"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "Grandpa is driving his boat across the field.", "wrongWord": "boat", "answer": "tractor"},
+                {"id": "F2", "sentence": "A forest is a place with lots of cars.", "wrongWord": "cars", "answer": "trees"},
+                {"id": "F3", "sentence": "The cows are eating rocks in the field.", "wrongWord": "rocks", "answer": "grass"},
+                {"id": "F4", "sentence": "A river is a very high place. You can climb it.", "wrongWord": "river", "answer": "mountain"},
+                {"id": "F5", "sentence": "There are lots of leaf under the tree.", "wrongWord": "leaf", "answer": "leaves"}
+            ]
+        },
+        9: {
+            missing: [
+                {"id": "M6", "sentences": ["A baby cat is a ___.", "A baby dog is a ___."], "answers": ["kitten", "puppy"], "prefixes": ["k", "p"]},
+                {"id": "M7", "sentences": ["The kitten ___ sleeping now.", "The puppies ___ playing with a ball."], "answers": ["is", "are"]},
+                {"id": "M8", "sentences": ["I ___ doing my homework now.", "We ___ cleaning our shoes."], "answers": ["am", "are"]},
+                {"id": "M9", "sentences": ["___ she reading a book?", "___ the children playing outside?"], "answers": ["is", "are"]},
+                {"id": "M10", "sentences": ["Mum is ___ a photo.", "Grandpa is ___ his tractor."], "answers": ["taking", "driving"], "prefixes": ["t", "d"]},
+                {"id": "M11", "sentences": ["It's cold outside. I'm putting ___ my coat.", "I'm going to bed. I'm taking ___ my shoes."], "answers": ["on", "off"]}
+            ],
+            fix: [
+                {"id": "F6", "sentence": "Mum are taking a photo now.", "wrongWord": "are", "answer": "is"},
+                {"id": "F7", "sentence": "The children is playing outside.", "wrongWord": "is", "answer": "are"},
+                {"id": "F8", "sentence": "I'm wash my hands now.", "wrongWord": "wash", "answer": "washing"},
+                {"id": "F9", "sentence": "Grandpa is drive his tractor.", "wrongWord": "drive", "answer": "driving"},
+                {"id": "F10", "sentence": "We're take off our boots.", "wrongWord": "take", "answer": "taking"},
+                {"id": "F11", "sentence": "The puppy is play with a ball.", "wrongWord": "play", "answer": "playing"},
+                {"id": "F12", "sentence": "Are she reading a book?", "wrongWord": "are", "answer": "is"}
+            ]
+        },
+        10: {
+            missing: [
+                {"id": "M12", "sentences": ["I put ___ on my toothbrush.", "Then I clean my ___."], "answers": ["toothpaste", "teeth"], "prefixes": ["t", "t"]},
+                {"id": "M13", "sentences": ["After my shower, I use a ___ to get dry.", "Then I get my school clothes and I get ___."], "answers": ["towel", "dressed"], "prefixes": ["t", "d"]},
+                {"id": "M14", "sentences": ["My brother ___ up at seven every morning.", "He ___ breakfast at eight."], "answers": ["gets", "has"], "prefixes": ["g", "h"]},
+                {"id": "M15", "sentences": ["My mum ___ up at seven every morning.", "My sister ___ her hands before lunch."], "answers": ["wakes", "washes"], "prefixes": ["w", "w"]},
+                {"id": "M16", "sentences": ["What time ___ you get up?", "What time ___ your sister get up?"], "answers": ["do", "does"]},
+                {"id": "M17", "sentences": ["___ your parents have breakfast at home?", "___ your brother have lunch at school?"], "answers": ["do", "does"]},
+                {"id": "M18", "sentences": ["I get up ___ seven o'clock.", "I have a shower ___ the evening."], "answers": ["at", "in"]}
+            ],
+            fix: [
+                {"id": "F13", "sentence": "My dad have a shower every evening.", "wrongWord": "have", "answer": "has"},
+                {"id": "F14", "sentence": "I gets dressed every morning.", "wrongWord": "gets", "answer": "get"},
+                {"id": "F15", "sentence": "My mum wake up at seven every day.", "wrongWord": "wake", "answer": "wakes"},
+                {"id": "F16", "sentence": "My sister wash her hands before lunch every day.", "wrongWord": "wash", "answer": "washes"},
+                {"id": "F17", "sentence": "What time do your brother get up?", "wrongWord": "do", "answer": "does"},
+                {"id": "F18", "sentence": "Does your sister has breakfast at home?", "wrongWord": "has", "answer": "have"},
+                {"id": "F19", "sentence": "I get up in seven o'clock.", "wrongWord": "in", "answer": "at"},
+                {"id": "F20", "sentence": "I put a towel on my toothbrush to clean my teeth.", "wrongWord": "towel", "answer": "toothpaste"}
+            ]
+        },
+        16: {
+            missing: [
+                {"id": "M19", "sentences": ["I ___ breakfast at eight every day.", "Now I'm ___ a shower."], "answers": ["have", "having"], "prefixes": ["h", "h"]},
+                {"id": "M20", "sentences": ["She ___ her face every morning.", "Now she's ___ her hands."], "answers": ["washes", "washing"], "prefixes": ["w", "w"]},
+                {"id": "M21", "sentences": ["They ___ in the field every day.", "Now they're ___ in the forest."], "answers": ["play", "playing"], "prefixes": ["p", "p"]},
+                {"id": "M22", "sentences": ["What time ___ he get up every day?", "What ___ he doing now?"], "answers": ["does", "is"]}
+            ],
+            fix: [
+                {"id": "F21", "sentence": "Every morning, he getting up at seven.", "wrongWord": "getting", "answer": "gets"},
+                {"id": "F22", "sentence": "Mum has a shower every morning. Now she's have breakfast.", "wrongWord": "have", "answer": "having"},
+                {"id": "F23", "sentence": "The children walk to school every day. Today they're ride their bikes.", "wrongWord": "ride", "answer": "riding"},
+                {"id": "F24", "sentence": "Every evening, they cleaning their teeth before bed.", "wrongWord": "cleaning", "answer": "clean"}
+            ]
+        }
+    };
+
+    // PU2 Unit 2: approved wording and locked initials.
+    const pu2Unit2Catalogs = {
+        19: {
+            missing: [
+                {"id": "M1", "sentences": ["Sunday comes after ___.", "Sunday comes before ___."], "answers": ["saturday", "monday"]},
+                {"id": "M2", "sentences": ["___ comes between Tuesday and Thursday.", "___ comes between Wednesday and Friday."], "answers": ["wednesday", "thursday"]},
+                {"id": "M3", "sentences": ["Thursday comes before ___.", "Wednesday comes after ___."], "answers": ["friday", "tuesday"]},
+                {"id": "M4", "sentences": ["Saturday comes before ___.", "Saturday and Sunday are the ___."], "answers": ["sunday", "weekend"]},
+                {"id": "M5", "sentences": ["Monday comes ___ Tuesday.", "Tuesday comes ___ Monday."], "answers": ["before", "after"]},
+                {"id": "M6", "sentences": ["Wednesday comes ___ Tuesday and Thursday.", "Friday comes ___ Saturday."], "answers": ["between", "before"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "Tuesday comes before Monday.", "wrongWord": "before", "answer": "after"},
+                {"id": "F2", "sentence": "Wednesday comes after Thursday.", "wrongWord": "after", "answer": "before"},
+                {"id": "F3", "sentence": "Friday comes between Tuesday and Thursday.", "wrongWord": "friday", "answer": "wednesday"},
+                {"id": "F4", "sentence": "Saturday and Sunday are the weekday.", "wrongWord": "weekday", "answer": "weekend"},
+                {"id": "F5", "sentence": "We go to school at Mondays.", "wrongWord": "at", "answer": "on"},
+                {"id": "F6", "sentence": "The day before Sunday is Friday.", "wrongWord": "friday", "answer": "saturday"},
+                {"id": "F7", "sentence": "There are seven days in a weekend.", "wrongWord": "weekend", "answer": "week"}
+            ]
+        },
+        21: {
+            missing: [
+                {"id": "M7", "sentences": ["I clean my teeth every morning. I ___ clean them in the morning.", "I don't eat fish at all. I ___ eat fish."], "answers": ["always", "never"], "prefixes": ["a", "n"]},
+                {"id": "M8", "sentences": ["I play tennis most weekends. I ___ play tennis.", "I play football on some weekends. I ___ play football."], "answers": ["often", "sometimes"], "prefixes": ["o", "s"]},
+                {"id": "M9", "sentences": ["How ___ do you swim? Twice a week.", "Do you ___ go skating? Yes, sometimes."], "answers": ["often", "ever"]},
+                {"id": "M10", "sentences": ["I swim on Mondays and Thursdays. That's ___ a week.", "I have one English lesson every week. That's ___ a week."], "answers": ["twice", "once"], "prefixes": ["t", "o"]},
+                {"id": "M11", "sentences": ["She cleans her teeth every morning and every evening. That's twice a ___.", "He plays football only on Sundays. That's once a ___."], "answers": ["day", "week"], "prefixes": ["d", "w"]},
+                {"id": "M12", "sentences": ["How often ___ you read comics?", "How often ___ your sister go swimming?"], "answers": ["do", "does"]}
+            ],
+            fix: [
+                {"id": "F8", "sentence": "I never clean my teeth in the morning. I do it every morning!", "wrongWord": "never", "answer": "always"},
+                {"id": "F9", "sentence": "I always eat fish. I don't eat it at all.", "wrongWord": "always", "answer": "never"},
+                {"id": "F10", "sentence": "I swim on Mondays and Thursdays. That's once a week.", "wrongWord": "once", "answer": "twice"},
+                {"id": "F11", "sentence": "I have one English lesson every week. That's twice a week.", "wrongWord": "twice", "answer": "once"},
+                {"id": "F12", "sentence": "How many do you go swimming? Twice a week.", "wrongWord": "many", "answer": "often"},
+                {"id": "F13", "sentence": "Does she often plays tennis?", "wrongWord": "plays", "answer": "play"},
+                {"id": "F14", "sentence": "Do he ever go skating?", "wrongWord": "do", "answer": "does"}
+            ]
+        },
+        22: {
+            missing: [
+                {"id": "M13", "sentences": ["I ___ to music in the car.", "I ___ films at the cinema."], "answers": ["listen", "watch"], "prefixes": ["l", "w"]},
+                {"id": "M14", "sentences": ["I ___ a comic before bed.", "I ___ an email to Grandma every week."], "answers": ["read", "write"], "prefixes": ["r", "w"]},
+                {"id": "M15", "sentences": ["We go ___ to buy food.", "I put on my skates and go ___ in the park."], "answers": ["shopping", "skating"], "prefixes": ["s", "s"]},
+                {"id": "M16", "sentences": ["She often ___ to music.", "He sometimes ___ DVDs."], "answers": ["listens", "watches"], "prefixes": ["l", "w"]},
+                {"id": "M17", "sentences": ["She doesn't ___ DVDs.", "He doesn't ___ to CDs."], "answers": ["watch", "listen"], "prefixes": ["w", "l"]},
+                {"id": "M18", "sentences": ["I listen ___ a CD.", "I write ___ email to my cousin."], "answers": ["to", "an"]}
+            ],
+            fix: [
+                {"id": "F15", "sentence": "I always listen at music in the car.", "wrongWord": "at", "answer": "to"},
+                {"id": "F16", "sentence": "She often watch films on Friday evenings.", "wrongWord": "watch", "answer": "watches"},
+                {"id": "F17", "sentence": "Every Saturday, Dad write an email to Grandma.", "wrongWord": "write", "answer": "writes"},
+                {"id": "F18", "sentence": "I eat an email to Grandma every week.", "wrongWord": "eat", "answer": "write"},
+                {"id": "F19", "sentence": "We go swimming at the supermarket to buy food.", "wrongWord": "swimming", "answer": "shopping"},
+                {"id": "F20", "sentence": "She doesn't watches DVDs.", "wrongWord": "watches", "answer": "watch"}
+            ]
+        },
+        25: {
+            missing: [
+                {"id": "M19", "sentences": ["We ___ listen to the teacher.", "We ___ kick our classmates."], "answers": ["must", "mustn't"], "prefixes": ["m", "m"]},
+                {"id": "M20", "sentences": ["You ___ skate in the road.", "You ___ wear a helmet when you ride a bike."], "answers": ["mustn't", "must"], "prefixes": ["m", "m"]},
+                {"id": "M21", "sentences": ["You must ___ a helmet when you ride a bike.", "You mustn't ___ in the road."], "answers": ["wear", "skate"], "prefixes": ["w", "s"]},
+                {"id": "M22", "sentences": ["I wear a ___ to protect my head.", "I wear ___ to protect my hands."], "answers": ["helmet", "gloves"], "prefixes": ["h", "g"]},
+                {"id": "M23", "sentences": ["I wear ___ to protect my eyes in the pool.", "I wear ___ ___ to protect my knees when I skate."], "answers": ["goggles", "knee", "pads"], "prefixes": ["g", "k", "p"]},
+                {"id": "M24", "sentences": ["My helmet protects my ___.", "My gloves protect my ___."], "answers": ["head", "hands"], "prefixes": ["h", "h"]}
+            ],
+            fix: [
+                {"id": "F21", "sentence": "We mustn't listen to the teacher.", "wrongWord": "mustn't", "answer": "must"},
+                {"id": "F22", "sentence": "You must kick your classmates.", "wrongWord": "must", "answer": "mustn't"},
+                {"id": "F23", "sentence": "He must wears a helmet when he rides his bike.", "wrongWord": "wears", "answer": "wear"},
+                {"id": "F24", "sentence": "You mustn't skating in the road.", "wrongWord": "skating", "answer": "skate"},
+                {"id": "F25", "sentence": "I wear goggles to protect my head when I ride my bike.", "wrongWord": "goggles", "answer": "helmet"},
+                {"id": "F26", "sentence": "I wear gloves to protect my eyes when I swim.", "wrongWord": "gloves", "answer": "goggles"},
+                {"id": "F27", "sentence": "I wear knee pads to protect my hands when I skate.", "wrongWord": "hands", "answer": "knees"},
+                {"id": "F28", "sentence": "I wear goggles on my hands to keep them warm.", "wrongWord": "goggles", "answer": "gloves"}
+            ]
+        }
+    };
+
+    // PU2 Unit 3: approved boards, with M16/F22 edits and F5 omitted.
+    const pu2Unit3Catalogs = {
+        31: {
+            missing: [
+                {"id": "M1", "sentences": ["A ___ makes food in a restaurant.", "A ___ grows food on a farm."], "answers": ["cook", "farmer"], "prefixes": ["c", "f"]},
+                {"id": "M2", "sentences": ["A ___ checks and repairs teeth.", "A ___ helps sick people."], "answers": ["dentist", "doctor"], "prefixes": ["d", "d"]},
+                {"id": "M3", "sentences": ["A ___ makes people laugh.", "A ___ helps doctors in a hospital."], "answers": ["clown", "nurse"], "prefixes": ["c", "n"]},
+                {"id": "M4", "sentences": ["A ___ ___ acts in films.", "A ___ ___ sings songs."], "answers": ["film", "star", "pop", "star"], "prefixes": ["f", "s", "p", "s"]},
+                {"id": "M5", "sentences": ["The ___ is sailing his ship.", "He's looking for ___."], "answers": ["pirate", "treasure"], "prefixes": ["p", "t"]},
+                {"id": "M6", "sentences": ["I'm wearing a pirate ___ at the party.", "This birthday ___ is for Grandpa."], "answers": ["costume", "present"], "prefixes": ["c", "p"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "A dentist grows food on a farm.", "wrongWord": "dentist", "answer": "farmer"},
+                {"id": "F2", "sentence": "A farmer checks your teeth.", "wrongWord": "farmer", "answer": "dentist"},
+                {"id": "F3", "sentence": "A clown cooks food in a restaurant.", "wrongWord": "clown", "answer": "cook"},
+                {"id": "F4", "sentence": "A pirate makes people laugh at the circus.", "wrongWord": "pirate", "answer": "clown"},
+                {"id": "F6", "sentence": "I'm wearing a pirate toothbrush for the party.", "wrongWord": "toothbrush", "answer": "costume"}
+            ]
+        },
+        33: {
+            missing: [
+                {"id": "M7", "sentences": ["The farmer ___ food every year.", "Now he's ___ carrots."], "answers": ["grows", "growing"], "prefixes": ["g", "g"]},
+                {"id": "M8", "sentences": ["The doctor ___ sick people every day.", "Now she's ___ a child."], "answers": ["helps", "helping"], "prefixes": ["h", "h"]},
+                {"id": "M9", "sentences": ["He's a cook. He ___ meals every day.", "Now he's ___ dinner."], "answers": ["cooks", "cooking"], "prefixes": ["c", "c"]},
+                {"id": "M10", "sentences": ["The pop star ___ songs every day.", "Now she's ___ on stage."], "answers": ["sings", "singing"], "prefixes": ["s", "s"]},
+                {"id": "M11", "sentences": ["What ___ she do? She's a farmer.", "What ___ she doing now? She's driving a tractor."], "answers": ["does", "is"]},
+                {"id": "M12", "sentences": ["What ___ they do? They're dentists.", "What ___ they doing now? They're helping a child."], "answers": ["do", "are"]},
+                {"id": "M13", "sentences": ["He doesn't ___ at the weekend.", "It's Monday. He's ___ now."], "answers": ["work", "working"], "prefixes": ["w", "w"]},
+                {"id": "M14", "sentences": ["I don't ___ to the radio every day.", "I'm ___ to it now."], "answers": ["listen", "listening"], "prefixes": ["l", "l"]}
+            ],
+            fix: [
+                {"id": "F7", "sentence": "The farmer grow food every day.", "wrongWord": "grow", "answer": "grows"},
+                {"id": "F8", "sentence": "The farmer is grow food now.", "wrongWord": "grow", "answer": "growing"},
+                {"id": "F9", "sentence": "The doctor help sick people every day.", "wrongWord": "help", "answer": "helps"},
+                {"id": "F10", "sentence": "The doctor is help a child now.", "wrongWord": "help", "answer": "helping"},
+                {"id": "F11", "sentence": "The cook make dinner every evening.", "wrongWord": "make", "answer": "makes"},
+                {"id": "F12", "sentence": "The cook is make dinner now.", "wrongWord": "make", "answer": "making"},
+                {"id": "F13", "sentence": "What does she doing? She's a dentist.", "wrongWord": "doing", "answer": "do"},
+                {"id": "F14", "sentence": "What is he do now? He's cooking dinner.", "wrongWord": "do", "answer": "doing"},
+                {"id": "F15", "sentence": "She doesn't works at the weekend.", "wrongWord": "works", "answer": "work"},
+                {"id": "F16", "sentence": "Are the dentists work now?", "wrongWord": "work", "answer": "working"}
+            ]
+        },
+        40: {
+            missing: [
+                {"id": "M15", "sentences": ["___ are you happy?", "___ it's my birthday."], "answers": ["why", "because"]},
+                {"id": "M16", "sentences": ["___ are you wearing a helmet?", "___ I'm riding my bike."], "answers": ["why", "because"]},
+                {"id": "M17", "sentences": ["Why are you ___ your hands? Because I'm going to eat.", "Why are you ___ a book? Because I like stories."], "answers": ["washing", "reading"], "prefixes": ["w", "r"]},
+                {"id": "M18", "sentences": ["Why ___ he wearing a helmet? Because he's riding a bike.", "Why ___ they wearing costumes? Because they're going to a party."], "answers": ["is", "are"]},
+                {"id": "M19", "sentences": ["Her hair has lots of curls. It's ___.", "His hair has no curls. It's ___."], "answers": ["curly", "straight"], "prefixes": ["c", "s"]},
+                {"id": "M20", "sentences": ["He's got a ___ on his chin.", "He's got a ___ under his nose."], "answers": ["beard", "moustache"], "prefixes": ["b", "m"]},
+                {"id": "M21", "sentences": ["Her hair is yellow. It's ___.", "He isn't fat. He's ___."], "answers": ["blonde", "thin"], "prefixes": ["b", "t"]},
+                {"id": "M22", "sentences": ["Firefighters work at a ___ ___.", "Doctors and nurses work in a ___."], "answers": ["fire", "station", "hospital"], "prefixes": ["f", "s", "h"]},
+                {"id": "M23", "sentences": ["A ___ ___ helps keep people safe.", "Police officers work at a police ___."], "answers": ["police", "officer", "station"], "prefixes": ["p", "o", "s"]},
+                {"id": "M24", "sentences": ["A teacher works in a ___.", "A ___ helps sick animals."], "answers": ["school", "vet"], "prefixes": ["s", "v"]}
+            ],
+            fix: [
+                {"id": "F17", "sentence": "Where are you wearing a costume? Because I'm going to a party.", "wrongWord": "where", "answer": "why"},
+                {"id": "F18", "sentence": "I'm wearing a helmet why I'm riding my bike.", "wrongWord": "why", "answer": "because"},
+                {"id": "F19", "sentence": "Why does she wearing a costume?", "wrongWord": "does", "answer": "is"},
+                {"id": "F20", "sentence": "Why is the children laughing?", "wrongWord": "is", "answer": "are"},
+                {"id": "F21", "sentence": "Her hair has lots of curls. It's straight.", "wrongWord": "straight", "answer": "curly"},
+                {"id": "F22", "sentence": "His hair hasn't got any curls. It's curly.", "wrongWord": "curly", "answer": "straight"},
+                {"id": "F23", "sentence": "He's got a beard above his mouth, under his nose.", "wrongWord": "beard", "answer": "moustache"},
+                {"id": "F24", "sentence": "He's got a moustache on his chin.", "wrongWord": "moustache", "answer": "beard"},
+                {"id": "F25", "sentence": "A school is a place where doctors help sick people.", "wrongWord": "school", "answer": "hospital"},
+                {"id": "F26", "sentence": "Firefighters work at a police station.", "wrongWord": "police", "answer": "fire"},
+                {"id": "F27", "sentence": "Police officers work at a fire station.", "wrongWord": "fire", "answer": "police"},
+                {"id": "F28", "sentence": "A dentist helps sick animals at the zoo.", "wrongWord": "dentist", "answer": "vet"}
+            ]
+        }
+    };
+
+    // PU2 Unit 4: approved family, comparative, possession and home boards.
+    const pu2Unit4Catalogs = {
+        45: {
+            missing: [
+                {"id": "M1", "sentences": ["My mum's sister is my ___.", "My dad's brother is my ___."], "answers": ["aunt", "uncle"], "prefixes": ["a", "u"]},
+                {"id": "M2", "sentences": ["My aunt's daughter is my ___.", "My mum and dad are my ___."], "answers": ["cousin", "parents"], "prefixes": ["c", "p"]},
+                {"id": "M3", "sentences": ["My brother is my parents' ___.", "My sister is my parents' ___."], "answers": ["son", "daughter"], "prefixes": ["s", "d"]},
+                {"id": "M4", "sentences": ["I'm a boy. I'm my grandparents' ___.", "My sister is their ___."], "answers": ["grandson", "granddaughter"], "prefixes": ["g", "g"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "My mum's sister is my uncle.", "wrongWord": "uncle", "answer": "aunt"},
+                {"id": "F2", "sentence": "My dad's brother is my aunt.", "wrongWord": "aunt", "answer": "uncle"},
+                {"id": "F3", "sentence": "My aunt's daughter is my sister.", "wrongWord": "sister", "answer": "cousin"},
+                {"id": "F4", "sentence": "My brother is my parents' daughter.", "wrongWord": "daughter", "answer": "son"},
+                {"id": "F5", "sentence": "My sister is my grandparents' grandson.", "wrongWord": "grandson", "answer": "granddaughter"},
+                {"id": "F6", "sentence": "My grandma and grandpa are my parents.", "wrongWord": "parents", "answer": "grandparents"}
+            ]
+        },
+        46: {
+            missing: [
+                {"id": "M5", "sentences": ["I'm ten. My cousin's eight. I'm ___ than my cousin.", "My cousin's ___ than me."], "answers": ["older", "younger"], "prefixes": ["o", "y"]},
+                {"id": "M6", "sentences": ["Dad is tall and I'm short. Dad is ___ than me.", "I'm ___ than Dad."], "answers": ["taller", "shorter"], "prefixes": ["t", "s"]},
+                {"id": "M7", "sentences": ["An elephant is ___ than a mouse.", "A mouse is ___ than an elephant."], "answers": ["bigger", "smaller"], "prefixes": ["b", "s"]},
+                {"id": "M8", "sentences": ["My hair is long. Your hair is short. My hair is ___ than your hair.", "Your hair is ___ than my hair."], "answers": ["longer", "shorter"], "prefixes": ["l", "s"]}
+            ],
+            fix: [
+                {"id": "F7", "sentence": "I'm ten and my cousin's eight. I'm younger than my cousin.", "wrongWord": "younger", "answer": "older"},
+                {"id": "F8", "sentence": "Dad is tall and I'm short. Dad is shorter than me.", "wrongWord": "shorter", "answer": "taller"},
+                {"id": "F9", "sentence": "An elephant is smaller than a mouse.", "wrongWord": "smaller", "answer": "bigger"},
+                {"id": "F10", "sentence": "Your hair is short and mine is long. My hair is shorter than yours.", "wrongWord": "shorter", "answer": "longer"}
+            ]
+        },
+        47: {
+            missing: [
+                {"id": "M9", "sentences": ["My cat is thin. Your cat is even ___.", "My dog is fat. Your dog is even ___."], "answers": ["thinner", "fatter"], "prefixes": ["t", "f"]},
+                {"id": "M10", "sentences": ["I'm happy. My sister is even ___.", "That puppy is naughty. This one is even ___."], "answers": ["happier", "naughtier"], "prefixes": ["h", "n"]},
+                {"id": "M11", "sentences": ["Your bike is good. Mine is even ___.", "This bike is bad. That one is even ___."], "answers": ["better", "worse"], "prefixes": ["b", "w"]},
+                {"id": "M12", "sentences": ["My brother is older ___ me.", "Your house ___ bigger than my house."], "answers": ["than", "is"]},
+                {"id": "M25", "sentences": ["My sister is taller ___ me.", "My brother ___ younger ___ me."], "answers": ["than", "is", "than"]},
+                {"id": "M26", "sentences": ["This bag is ___ than that bag.", "That bag ___ smaller ___ this bag."], "answers": ["bigger", "is", "than"]},
+                {"id": "M27", "sentences": ["My hair is longer ___ yours.", "Your hair ___ ___ ___ mine."], "answers": ["than", "is", "shorter", "than"]}
+            ],
+            fix: [
+                {"id": "F11", "sentence": "This dog is biger than that dog.", "wrongWord": "biger", "answer": "bigger"},
+                {"id": "F12", "sentence": "That kitten is thiner than this kitten.", "wrongWord": "thiner", "answer": "thinner"},
+                {"id": "F13", "sentence": "He looks happyer than his brother.", "wrongWord": "happyer", "answer": "happier"},
+                {"id": "F14", "sentence": "This puppy is naughtyer than that puppy.", "wrongWord": "naughtyer", "answer": "naughtier"},
+                {"id": "F15", "sentence": "My new bike is gooder than my old one.", "wrongWord": "gooder", "answer": "better"},
+                {"id": "F16", "sentence": "Today's weather is badder than yesterday's.", "wrongWord": "badder", "answer": "worse"},
+                {"id": "F17", "sentence": "My sister is taller that me.", "wrongWord": "that", "answer": "than"},
+                {"id": "F18", "sentence": "Their house are bigger than our house.", "wrongWord": "are", "answer": "is"},
+                {"id": "F33", "sentence": "My sister is taller then me.", "wrongWord": "then", "answer": "than"},
+                {"id": "F34", "sentence": "This bag is bigger as that bag.", "wrongWord": "as", "answer": "than"},
+                {"id": "F35", "sentence": "My brother is younger to me.", "wrongWord": "to", "answer": "than"},
+                {"id": "F36", "sentence": "My hair is longer of your hair.", "wrongWord": "of", "answer": "than"}
+            ]
+        },
+        54: {
+            missing: [
+                {"id": "M13", "sentences": ["This is my book. It's ___.", "This is your bag. It's ___."], "answers": ["mine", "yours"]},
+                {"id": "M14", "sentences": ["This is his bike. It's ___.", "This is her doll. It's ___."], "answers": ["his", "hers"]},
+                {"id": "M15", "sentences": ["This is our house. It's ___.", "This is their car. It's ___."], "answers": ["ours", "theirs"]},
+                {"id": "M16", "sentences": ["My ruler is long. Your ruler is short. My ruler is longer than ___.", "Your ruler is shorter than ___."], "answers": ["yours", "mine"]},
+                {"id": "M17", "sentences": ["Her bag is bigger than my bag. Her bag is bigger than ___.", "His bike is newer than her bike. His bike is newer than ___."], "answers": ["mine", "hers"]},
+                {"id": "M18", "sentences": ["Your garden is smaller than our garden. Yours is smaller than ___.", "Our house is bigger than their house. Ours is bigger than ___."], "answers": ["ours", "theirs"]},
+                {"id": "M19", "sentences": ["We park our car in the ___.", "We grow flowers in the ___."], "answers": ["garage", "garden"], "prefixes": ["g", "g"]},
+                {"id": "M20", "sentences": ["The ___ is the top of the house.", "The ___ is below the ground floor."], "answers": ["roof", "basement"], "prefixes": ["r", "b"]},
+                {"id": "M21", "sentences": ["We walk up the ___.", "We can take the ___ instead."], "answers": ["stairs", "lift"], "prefixes": ["s", "l"]},
+                {"id": "M22", "sentences": ["Mum is on the first floor. I'm on the ground floor.", "Mum is ___ and I'm ___."], "answers": ["upstairs", "downstairs"], "prefixes": ["u", "d"]},
+                {"id": "M23", "sentences": ["The floor above the ground floor is the ___ floor.", "The floor above the first floor is the ___ floor."], "answers": ["first", "second"], "prefixes": ["f", "s"]},
+                {"id": "M24", "sentences": ["Our flat's got a ___. We can stand outside on it.", "We live on the floor above the second floor. It's the ___ floor."], "answers": ["balcony", "third"], "prefixes": ["b", "t"]},
+                {"id": "M28", "sentences": ["We walk on the ___ inside the house.", "The ___ covers the top of the house."], "answers": ["floor", "roof"]},
+                {"id": "M29", "sentences": ["Our flat is on the second ___.", "There's a bird on the ___ of our house."], "answers": ["floor", "roof"]},
+                {"id": "M30", "sentences": ["The ___ above the first floor is the second floor.", "Rain falls on the ___ at the top of the house."], "answers": ["floor", "roof"]}
+            ],
+            fix: [
+                {"id": "F19", "sentence": "This is my book. It's my.", "wrongWord": "my", "answer": "mine", "wrongIndex": 5},
+                {"id": "F20", "sentence": "This is your bag. It's your.", "wrongWord": "your", "answer": "yours", "wrongIndex": 5},
+                {"id": "F21", "sentence": "This is her doll. It's her.", "wrongWord": "her", "answer": "hers", "wrongIndex": 5},
+                {"id": "F22", "sentence": "This is our house. It's our.", "wrongWord": "our", "answer": "ours", "wrongIndex": 5},
+                {"id": "F23", "sentence": "This is their car. It's their.", "wrongWord": "their", "answer": "theirs", "wrongIndex": 5},
+                {"id": "F24", "sentence": "This is his bike. It's he's.", "wrongWord": "he's", "answer": "his"},
+                {"id": "F25", "sentence": "My ruler is longer than your.", "wrongWord": "your", "answer": "yours"},
+                {"id": "F26", "sentence": "Her bag is bigger than my.", "wrongWord": "my", "answer": "mine"},
+                {"id": "F27", "sentence": "The room where we park our car is the kitchen.", "wrongWord": "kitchen", "answer": "garage"},
+                {"id": "F28", "sentence": "The part on top of the house is the basement.", "wrongWord": "basement", "answer": "roof"},
+                {"id": "F29", "sentence": "The room below the ground floor is the roof.", "wrongWord": "roof", "answer": "basement"},
+                {"id": "F30", "sentence": "We walk up the lift to get to the next floor.", "wrongWord": "lift", "answer": "stairs"},
+                {"id": "F31", "sentence": "The floor above the ground floor is the third floor.", "wrongWord": "third", "answer": "first"},
+                {"id": "F32", "sentence": "My flat has a basement where I can stand outside above the street.", "wrongWord": "basement", "answer": "balcony"},
+                {"id": "F37", "sentence": "Our flat is on the second roof.", "wrongWord": "roof", "answer": "floor"},
+                {"id": "F38", "sentence": "The bird is sitting on the floor at the top of the house.", "wrongWord": "floor", "answer": "roof"},
+                {"id": "F39", "sentence": "My bedroom is upstairs, on the first roof.", "wrongWord": "roof", "answer": "floor"},
+                {"id": "F40", "sentence": "The roof inside my bedroom is covered with a carpet.", "wrongWord": "roof", "answer": "floor"}
+            ]
+        }
+    };
+
+    // PU2 Unit 5: teacher-approved animals, superlatives, actions and diet boards.
+    const pu2Unit5Catalogs = {
+        57: {
+            missing: [
+                {"id": "M1", "sentences": ["The black-and-white bear that eats bamboo is a ___.", "The black-and-white bird that swims but can't fly is a ___."], "answers": ["panda", "penguin"], "prefixes": ["p", "p"]},
+                {"id": "M2", "sentences": ["A ___ is a big cat with long hair.", "A ___ has long ears and hops on land."], "answers": ["lion", "rabbit"], "prefixes": ["l", "r"]},
+                {"id": "M3", "sentences": ["A ___ can fly, but it isn't a bird.", "A ___ is a colourful bird that can sometimes speak."], "answers": ["bat", "parrot"], "prefixes": ["b", "p"]},
+                {"id": "M4", "sentences": ["A ___ carries its baby in a pouch.", "A blue ___ is the biggest animal in the sea."], "answers": ["kangaroo", "whale"], "prefixes": ["k", "w"]},
+                {"id": "M5", "sentences": ["A ___ is a clever sea animal with a long nose.", "A ___ is a large animal that can climb trees and eat fish."], "answers": ["dolphin", "bear"], "prefixes": ["d", "b"]},
+                {"id": "M6", "sentences": ["We visit a ___ ___ to see wild animals.", "A ___ has bars to keep an animal inside."], "answers": ["wildlife", "park", "cage"], "prefixes": ["w", "p", "c"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "The black-and-white bear that eats bamboo is a penguin.", "wrongWord": "penguin", "answer": "panda"},
+                {"id": "F2", "sentence": "The black-and-white bird that swims but can't fly is a panda.", "wrongWord": "panda", "answer": "penguin"},
+                {"id": "F3", "sentence": "The big cat with long hair is a rabbit.", "wrongWord": "rabbit", "answer": "lion"},
+                {"id": "F4", "sentence": "The biggest animal in the sea is a dolphin.", "wrongWord": "dolphin", "answer": "whale"},
+                {"id": "F5", "sentence": "The colourful bird that can sometimes speak is a bat.", "wrongWord": "bat", "answer": "parrot"},
+                {"id": "F6", "sentence": "The lion is behind the bars of its suitcase.", "wrongWord": "suitcase", "answer": "cage"},
+                {"id": "F7", "sentence": "A dolphin carries its baby in a pouch and jumps on two strong back legs.", "wrongWord": "dolphin", "answer": "kangaroo"},
+                {"id": "F8", "sentence": "A whale is a small animal with long ears that hops on land.", "wrongWord": "whale", "answer": "rabbit"}
+            ]
+        },
+        60: {
+            missing: [
+                {"id": "M7", "sentences": ["Grandma is 70, Mum is 40 and I'm 8. Grandma is the ___.", "I'm the ___."], "answers": ["oldest", "youngest"], "prefixes": ["o", "y"]},
+                {"id": "M8", "sentences": ["Tom is taller than Jim and Ben. Tom is the ___ of the three.", "Ben is shorter than Tom and Jim. Ben is the ___."], "answers": ["tallest", "shortest"], "prefixes": ["t", "s"]},
+                {"id": "M9", "sentences": ["The red ball is bigger than the other two. It's the ___.", "The blue ball is smaller than the other two. It's the ___."], "answers": ["biggest", "smallest"], "prefixes": ["b", "s"]},
+                {"id": "M10", "sentences": ["This kitten is pretty. I think it's the ___ of all.", "These boots are dirty. They're the ___ of all."], "answers": ["prettiest", "dirtiest"], "prefixes": ["p", "d"]},
+                {"id": "M11", "sentences": ["This clown is funny. I think he's the ___ of all.", "Today I'm happier than ever. It's the ___ day of my life!"], "answers": ["funniest", "happiest"], "prefixes": ["f", "h"]},
+                {"id": "M12", "sentences": ["All three cats are fat, but this one is the ___.", "All three dogs are thin, but this one is the ___."], "answers": ["fattest", "thinnest"], "prefixes": ["f", "t"]},
+                {"id": "M13", "sentences": ["This picture is good. I think it's the ___ of all.", "That picture is bad. I think it's the ___ of all."], "answers": ["best", "worst"], "prefixes": ["b", "w"]},
+                {"id": "M14", "sentences": ["My brother is ___ tallest person in our family.", "He is taller ___ me."], "answers": ["the", "than"]},
+                {"id": "M15", "sentences": ["This bag is bigger ___ yours.", "It's ___ biggest bag in the shop."], "answers": ["than", "the"]},
+                {"id": "M16", "sentences": ["Tom is the ___ runner in our class. No one can run as fast as him.", "My snail is the ___ of the three. The other two move faster."], "answers": ["fastest", "slowest"], "prefixes": ["f", "s"]},
+                {"id": "M17", "sentences": ["Bears can ___ trees.", "Look! That bear is ___ a tree."], "answers": ["climb", "climbing"], "prefixes": ["c", "c"]},
+                {"id": "M18", "sentences": ["Bats can ___.", "Look! Those bats are ___ above the trees."], "answers": ["fly", "flying"], "prefixes": ["f", "f"]},
+                {"id": "M19", "sentences": ["Rabbits can ___ behind rocks.", "Look! That rabbit is ___ behind a rock."], "answers": ["hide", "hiding"], "prefixes": ["h", "h"]},
+                {"id": "M20", "sentences": ["Lions can ___ fast.", "Look! That lion is ___ after its food."], "answers": ["run", "running"], "prefixes": ["r", "r"]},
+                {"id": "M21", "sentences": ["Keep your book in your bag so you don't ___ it.", "Look! A leaf is ___ from the tree."], "answers": ["lose", "falling"], "prefixes": ["l", "f"]},
+                {"id": "M22", "sentences": ["Look! The snail is ___ very slowly.", "The penguin is ___ on the ice."], "answers": ["moving", "walking"], "prefixes": ["m", "w"]}
+            ],
+            fix: [
+                {"id": "F9", "sentence": "My baby sister is the younger person in our family.", "wrongWord": "younger", "answer": "youngest"},
+                {"id": "F10", "sentence": "Giraffes are the taller animals in the world.", "wrongWord": "taller", "answer": "tallest"},
+                {"id": "F11", "sentence": "This ball is bigger than the other two. It's the bigger of the three.", "wrongWord": "bigger", "answer": "biggest", "wrongIndex": 10},
+                {"id": "F12", "sentence": "This is the prettyest kitten of all.", "wrongWord": "prettyest", "answer": "prettiest"},
+                {"id": "F13", "sentence": "I think this clown is the funnyest of all.", "wrongWord": "funnyest", "answer": "funniest"},
+                {"id": "F14", "sentence": "These are the dirtyest boots in the cupboard.", "wrongWord": "dirtyest", "answer": "dirtiest"},
+                {"id": "F15", "sentence": "This is the thinest dog of the three.", "wrongWord": "thinest", "answer": "thinnest"},
+                {"id": "F16", "sentence": "That is the fatest cat of the three.", "wrongWord": "fatest", "answer": "fattest"},
+                {"id": "F17", "sentence": "This is the goodest picture in the competition.", "wrongWord": "goodest", "answer": "best"},
+                {"id": "F18", "sentence": "That was the baddest day of my holiday.", "wrongWord": "baddest", "answer": "worst"},
+                {"id": "F19", "sentence": "My brother is than tallest person in our family.", "wrongWord": "than", "answer": "the"},
+                {"id": "F20", "sentence": "The blue whale is a biggest animal in the world.", "wrongWord": "a", "answer": "the"},
+                {"id": "F21", "sentence": "This whale is bigger the that dolphin.", "wrongWord": "the", "answer": "than"},
+                {"id": "F22", "sentence": "Of these three rabbits, this one is taller.", "wrongWord": "taller", "answer": "tallest"},
+                {"id": "F23", "sentence": "Bears can climbing trees.", "wrongWord": "climbing", "answer": "climb"},
+                {"id": "F24", "sentence": "Look! The lion is run after its food.", "wrongWord": "run", "answer": "running"},
+                {"id": "F25", "sentence": "The rabbits are hide behind the rocks.", "wrongWord": "hide", "answer": "hiding"},
+                {"id": "F26", "sentence": "Look! The bat is fly above the tree.", "wrongWord": "fly", "answer": "flying"}
+            ]
+        },
+        62: {
+            missing: [
+                {"id": "M23", "sentences": ["The plane is higher than the tree. It's ___ the tree.", "The snail is lower than the flower. It's ___ the flower."], "answers": ["above", "below"]},
+                {"id": "M24", "sentences": ["The zoo is across the road from the park. It's ___ the park.", "My house is only a minute's walk from school. It's ___ the school."], "answers": ["opposite", "near"], "prefixes": ["o", "n"]},
+                {"id": "M25", "sentences": ["Animals that eat only ___ and ___ are carnivores.", "Wolves, polar bears and penguins are ___."], "answers": ["meat", "fish", "carnivores"], "prefixes": ["m", "f", "c"]},
+                {"id": "M26", "sentences": ["Animals that eat both ___ and ___ are omnivores.", "People, pigs and dogs are ___."], "answers": ["meat", "plants", "omnivores"], "prefixes": ["m", "p", "o"]},
+                {"id": "M27", "sentences": ["Animals that only eat ___ are herbivores.", "Rabbits, pandas, and cows are ___."], "answers": ["plants", "herbivores"], "prefixes": ["p", "h"]},
+                {"id": "M28", "sentences": ["Brown ___ eat meat and plants. They're omnivores.", "___ ___ only eat meat and fish. They're carnivores."], "answers": ["bears", "polar", "bears"], "prefixes": ["b", "p", "b"]}
+            ],
+            fix: [
+                {"id": "F27", "sentence": "The snail is lower than the flower. It's above the flower.", "wrongWord": "above", "answer": "below"},
+                {"id": "F28", "sentence": "The kite is higher than the roof. It's below the roof.", "wrongWord": "below", "answer": "above"},
+                {"id": "F29", "sentence": "The zoo is across the road from the park. It's between the park.", "wrongWord": "between", "answer": "opposite"},
+                {"id": "F30", "sentence": "The school is next to my house. It's opposite my house.", "wrongWord": "opposite", "answer": "near"},
+                {"id": "F31", "sentence": "Lions eat plants. They're carnivores.", "wrongWord": "plants", "answer": "meat"},
+                {"id": "F32", "sentence": "Rabbits eat meat. They're herbivores.", "wrongWord": "meat", "answer": "plants"},
+                {"id": "F33", "sentence": "People eat both meat and poopoo. We're omnivores.", "wrongWord": "poopoo", "answer": "plants"},
+                {"id": "F34", "sentence": "Carnivores only eat plants and fish.", "wrongWord": "plants", "answer": "meat"}
+            ]
+        }
+    };
+
+    // PU2 Unit 6: approved weather, clothes, past be and review boards.
+    const pu2Unit6Catalogs = {
+        78: {
+            missing: [
+                {"id": "M1", "sentences": ["There's a ___ in the sky.", "It's a ___ day."], "answers": ["cloud", "cloudy"], "prefixes": ["c", "c"]},
+                {"id": "M2", "sentences": ["There's ___ on the window.", "It's a ___ day."], "answers": ["rain", "rainy"], "prefixes": ["r", "r"]},
+                {"id": "M3", "sentences": ["There's ___ on the ground.", "It's a cold, ___ day."], "answers": ["snow", "snowy"], "prefixes": ["s", "s"]},
+                {"id": "M4", "sentences": ["The ___ is blowing the trees.", "It's a ___ day."], "answers": ["wind", "windy"], "prefixes": ["w", "w"]},
+                {"id": "M6", "sentences": ["The ___ is shining.", "It's a hot, ___ day."], "answers": ["sun", "sunny"], "prefixes": ["s", "s"]},
+                {"id": "M7", "sentences": ["After the rain, I can see a ___ with lots of colours.", "I use an ___ to keep the rain off me."], "answers": ["rainbow", "umbrella"], "prefixes": ["r", "u"]},
+                {"id": "M8", "sentences": ["I wear a ___ around my neck when it's cold.", "I wear ___ on my hands."], "answers": ["scarf", "gloves"], "prefixes": ["s", "g"]},
+                {"id": "M9", "sentences": ["I wear ___ on my feet when it's wet.", "I wear a ___ to keep my clothes dry in the rain."], "answers": ["boots", "raincoat"], "prefixes": ["b", "r"]},
+                {"id": "M10", "sentences": ["I wear a ___ over my shirt when it's cold.", "I wear a ___ on my head."], "answers": ["sweater", "hat"], "prefixes": ["s", "h"]},
+                {"id": "M11", "sentences": ["I ___ at home yesterday.", "We ___ at the park last week."], "answers": ["was", "were"]},
+                {"id": "M12", "sentences": ["She ___ cold last night.", "They ___ tired yesterday."], "answers": ["was", "were"]},
+                {"id": "M13", "sentences": ["It ___ cold yesterday.", "___ hot today."], "answers": ["was", "it's"]},
+                {"id": "M14", "sentences": ["We ___ on holiday last week.", "___ at school today."], "answers": ["were", "we're"]},
+                {"id": "M15", "sentences": ["I ___ at school yesterday. I was at home.", "We ___ at the park. We were at the cinema."], "answers": ["wasn't", "weren't"]},
+                {"id": "M16", "sentences": ["He ___ hungry. He didn't want any food.", "They ___ cold. They wanted to take off their coats."], "answers": ["wasn't", "weren't"]},
+                {"id": "M17", "sentences": ["There ___ a rainbow yesterday.", "There ___ lots of clouds yesterday morning."], "answers": ["was", "were"]},
+                {"id": "M18", "sentences": ["There ___ a scarf on the chair last night.", "There ___ two gloves next to it."], "answers": ["was", "were"]},
+                {"id": "M19", "sentences": ["The room was empty. There ___ a coat in it.", "There ___ any boots either."], "answers": ["wasn't", "weren't"]},
+                {"id": "M20", "sentences": ["Where ___ you yesterday?", "What ___ the weather like last week?"], "answers": ["were", "was"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "It's cloud today.", "wrongWord": "cloud", "answer": "cloudy"},
+                {"id": "F2", "sentence": "There's a lot of rainy on the window.", "wrongWord": "rainy", "answer": "rain"},
+                {"id": "F3", "sentence": "It was snow yesterday.", "wrongWord": "snow", "answer": "snowy"},
+                {"id": "F4", "sentence": "The windy is blowing.", "wrongWord": "windy", "answer": "wind"},
+                {"id": "F6", "sentence": "The sunny is shining.", "wrongWord": "sunny", "answer": "sun"},
+                {"id": "F7", "sentence": "There's a colourful umbrella in the sky after the rain.", "wrongWord": "umbrella", "answer": "rainbow"},
+                {"id": "F8", "sentence": "I wear a scarf on each hand when it's cold.", "wrongWord": "scarf", "answer": "glove"},
+                {"id": "F9", "sentence": "I put my gloves around my neck to keep it warm.", "wrongWord": "gloves", "answer": "scarf"},
+                {"id": "F10", "sentence": "I wear a coat on my head.", "wrongWord": "coat", "answer": "hat"},
+                {"id": "F11", "sentence": "These gloves keep my feet dry in the rain.", "wrongWord": "gloves", "answer": "boots"},
+                {"id": "F12", "sentence": "Yesterday I am at home.", "wrongWord": "am", "answer": "was"},
+                {"id": "F13", "sentence": "Last week we are on holiday.", "wrongWord": "are", "answer": "were"},
+                {"id": "F14", "sentence": "She were cold last night.", "wrongWord": "were", "answer": "was"},
+                {"id": "F15", "sentence": "They was at the park yesterday.", "wrongWord": "was", "answer": "were"},
+                {"id": "F16", "sentence": "It is sunny yesterday.", "wrongWord": "is", "answer": "was"},
+                {"id": "F17", "sentence": "I was at school right now.", "wrongWord": "was", "answer": "am"},
+                {"id": "F18", "sentence": "We were at school right now.", "wrongWord": "were", "answer": "are"},
+                {"id": "F19", "sentence": "I weren't at school yesterday. I was at home.", "wrongWord": "weren't", "answer": "wasn't"},
+                {"id": "F20", "sentence": "They wasn't at the park. They were at the cinema.", "wrongWord": "wasn't", "answer": "weren't"},
+                {"id": "F21", "sentence": "There were a scarf on the chair last night.", "wrongWord": "were", "answer": "was"},
+                {"id": "F22", "sentence": "There was two boots by the door yesterday.", "wrongWord": "was", "answer": "were"},
+                {"id": "F23", "sentence": "The room was empty. There wasn't any coats in it.", "wrongWord": "wasn't", "answer": "weren't"},
+                {"id": "F24", "sentence": "Where was you yesterday?", "wrongWord": "was", "answer": "were"}
+            ]
+        },
+        81: {
+            missing: [
+                {"id": "M21", "sentences": ["This is my coat. It's ___.", "Those are your gloves. They're ___."], "answers": ["mine", "yours"]},
+                {"id": "M22", "sentences": ["My scarf is longer ___ yours.", "It's ___ longest scarf in our family."], "answers": ["than", "the"]},
+                {"id": "M23", "sentences": ["I'm ten. My cousin is eight. I'm ___ than my cousin.", "My baby sister is the ___ in our family."], "answers": ["older", "youngest"], "prefixes": ["o", "y"]},
+                {"id": "M24", "sentences": ["The plane is higher than the clouds. It's ___ them.", "The river is lower than the bridge. It's ___ it."], "answers": ["above", "below"]}
+            ],
+            fix: [
+                {"id": "F25", "sentence": "This is my coat. It's my.", "wrongWord": "my", "answer": "mine", "wrongIndex": 5},
+                {"id": "F26", "sentence": "These are her gloves. They're her.", "wrongWord": "her", "answer": "hers", "wrongIndex": 5},
+                {"id": "F27", "sentence": "My scarf is longer that yours.", "wrongWord": "that", "answer": "than"},
+                {"id": "F28", "sentence": "This is than longest scarf in the shop.", "wrongWord": "than", "answer": "the"},
+                {"id": "F29", "sentence": "Of the three children, my baby brother is the younger.", "wrongWord": "younger", "answer": "youngest"},
+                {"id": "F30", "sentence": "The kite is higher than the tree. It's below the tree.", "wrongWord": "below", "answer": "above"}
+            ]
+        }
+    };
+
+    // PU2 Unit 7: approved food, irregular/regular past and did/base-verb boards.
+    const pu2Unit7Catalogs = {
+        83: {
+            missing: [
+                {"id": "M1", "sentences": ["I've got some bread and some ___.", "I can make a ___ ___."], "answers": ["cheese", "cheese", "sandwich"], "prefixes": ["ch", "ch", "s"]},
+                {"id": "M2", "sentences": ["Carrots, onions and potatoes are ___.", "We can cook them in water to make vegetable ___."], "answers": ["vegetables", "soup"], "prefixes": ["v", "s"]},
+                {"id": "M3", "sentences": ["I eat soup from a ___.", "I eat pasta from a ___."], "answers": ["bowl", "plate"], "prefixes": ["b", "p"]},
+                {"id": "M4", "sentences": ["I drink hot chocolate from a ___.", "I drink lemonade from a ___."], "answers": ["cup", "glass"], "prefixes": ["c", "g"]},
+                {"id": "M5", "sentences": ["We keep lemonade in a ___.", "We make ___ with lemons, water and sugar."], "answers": ["bottle", "lemonade"], "prefixes": ["b", "l"]},
+                {"id": "M6", "sentences": ["I put cheese between two pieces of bread to make a ___.", "I mix lettuce and tomatoes to make a ___."], "answers": ["sandwich", "salad"], "prefixes": ["s", "s"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "We make a sandwich with two pieces of paper.", "wrongWord": "paper", "answer": "bread"},
+                {"id": "F2", "sentence": "Carrots, onions and potatoes are drinks.", "wrongWord": "drinks", "answer": "vegetables"},
+                {"id": "F3", "sentence": "A bottle is a deep, round dish for soup.", "wrongWord": "bottle", "answer": "bowl"},
+                {"id": "F4", "sentence": "A plate is a small container with a handle for hot drinks.", "wrongWord": "plate", "answer": "cup"},
+                {"id": "F5", "sentence": "The drink made from lemons is called soup.", "wrongWord": "soup", "answer": "lemonade"},
+                {"id": "F6", "sentence": "There are three bottle of lemonade on the table.", "wrongWord": "bottle", "answer": "bottles"},
+                {"id": "F7", "sentence": "There is two cups of hot chocolate.", "wrongWord": "is", "answer": "are"},
+                {"id": "F8", "sentence": "I'd like a glass of lemonades.", "wrongWord": "lemonades", "answer": "lemonade"}
+            ]
+        },
+        85: {
+            missing: [
+                {"id": "M7", "sentences": ["I usually ___ to school by bus.", "Yesterday I ___ to school by car."], "answers": ["go", "went"], "prefixes": ["g", "w"]},
+                {"id": "M8", "sentences": ["I usually ___ milk with breakfast.", "Yesterday I ___ orange juice."], "answers": ["drink", "drank"], "prefixes": ["d", "d"]},
+                {"id": "M9", "sentences": ["I usually ___ bread for breakfast.", "Yesterday I ___ some cake."], "answers": ["eat", "ate"], "prefixes": ["e", "a"]},
+                {"id": "M10", "sentences": ["We usually ___ sandwiches for lunch.", "Yesterday we ___ soup."], "answers": ["have", "had"], "prefixes": ["h", "h"]},
+                {"id": "M11", "sentences": ["I often ___ lunch with Dad.", "Yesterday we ___ a pasta salad."], "answers": ["make", "made"], "prefixes": ["m", "m"]},
+                {"id": "M12", "sentences": ["I usually ___ my homework after school.", "Yesterday I ___ it before dinner."], "answers": ["do", "did"], "prefixes": ["d", "d"]},
+                {"id": "M13", "sentences": ["I usually ___ my lunch to school.", "Yesterday I ___ a cheese sandwich."], "answers": ["bring", "brought"], "prefixes": ["b", "b"]},
+                {"id": "M14", "sentences": ["We usually ___ vegetables from the shop.", "Yesterday we ___ some carrots."], "answers": ["get", "got"], "prefixes": ["g", "g"]},
+                {"id": "M15", "sentences": ["Yesterday I ___ a parrot in the garden.", "I ___ some food in its bowl."], "answers": ["saw", "put"], "prefixes": ["s", "p"]},
+                {"id": "M16", "sentences": ["___ you make soup yesterday?", "I ___ make any soup. I only made a sandwich."], "answers": ["did", "didn't"]}
+            ],
+            fix: [
+                {"id": "F9", "sentence": "Yesterday I goed to the shop.", "wrongWord": "goed", "answer": "went"},
+                {"id": "F10", "sentence": "She drinked orange juice yesterday.", "wrongWord": "drinked", "answer": "drank"},
+                {"id": "F11", "sentence": "We eated pasta for dinner last night.", "wrongWord": "eated", "answer": "ate"},
+                {"id": "F12", "sentence": "They haved lunch at school yesterday.", "wrongWord": "haved", "answer": "had"},
+                {"id": "F13", "sentence": "Dad maked vegetable soup yesterday.", "wrongWord": "maked", "answer": "made"},
+                {"id": "F14", "sentence": "I doed my homework last night.", "wrongWord": "doed", "answer": "did"},
+                {"id": "F15", "sentence": "Yesterday I bringed my lunch to school.", "wrongWord": "bringed", "answer": "brought"},
+                {"id": "F16", "sentence": "Yesterday we getted some vegetables from the shop.", "wrongWord": "getted", "answer": "got"},
+                {"id": "F17", "sentence": "I seed a parrot in the garden yesterday.", "wrongWord": "seed", "answer": "saw"},
+                {"id": "F18", "sentence": "She putted strawberries on the cake.", "wrongWord": "putted", "answer": "put"},
+                {"id": "F19", "sentence": "Did you went to the shop yesterday?", "wrongWord": "went", "answer": "go"},
+                {"id": "F20", "sentence": "I didn't ate the soup.", "wrongWord": "ate", "answer": "eat"}
+            ]
+        },
+        87: {
+            missing: [
+                {"id": "M17", "sentences": ["I ___ my hands before meals.", "Yesterday I ___ them before dinner."], "answers": ["wash", "washed"], "prefixes": ["w", "w"]},
+                {"id": "M18", "sentences": ["I often ___ dinner with Dad.", "Yesterday we ___ pasta."], "answers": ["cook", "cooked"], "prefixes": ["c", "c"]},
+                {"id": "M19", "sentences": ["We usually ___ eggs for breakfast.", "Yesterday Dad ___ onions."], "answers": ["fry", "fried"], "prefixes": ["f", "f"]},
+                {"id": "M20", "sentences": ["Can you ___ these bags?", "I ___ them yesterday."], "answers": ["carry", "carried"], "prefixes": ["c", "c"]},
+                {"id": "M21", "sentences": ["I always ___ when the traffic light is red.", "Yesterday I ___ at a red light."], "answers": ["stop", "stopped"], "prefixes": ["s", "s"]},
+                {"id": "M22", "sentences": ["Be careful! Don't ___ that plate.", "Yesterday I ___ a plate and it broke."], "answers": ["drop", "dropped"], "prefixes": ["d", "d"]},
+                {"id": "M23", "sentences": ["I ___ cooking with my friends.", "I ___ our cooking lesson yesterday."], "answers": ["like", "liked"], "prefixes": ["l", "l"]},
+                {"id": "M24", "sentences": ["I always ___ for photos.", "Yesterday I ___ at Dad's camera."], "answers": ["smile", "smiled"], "prefixes": ["s", "s"]},
+                {"id": "M25", "sentences": ["I sometimes ___ when a film is sad.", "Yesterday I ___ at the end of a sad film."], "answers": ["cry", "cried"], "prefixes": ["c", "c"]},
+                {"id": "M26", "sentences": ["We ___ pasta in water.", "Yesterday we ___ it for ten minutes."], "answers": ["boil", "boiled"], "prefixes": ["b", "b"]},
+                {"id": "M27", "sentences": ["___ you cook the pasta yesterday?", "I ___ cook any pasta. I only made soup."], "answers": ["did", "didn't"]},
+                {"id": "M28", "sentences": ["Where ___ you cook yesterday?", "What ___ you cooking now?"], "answers": ["did", "are"]}
+            ],
+            fix: [
+                {"id": "F21", "sentence": "Yesterday we wash our hands before dinner.", "wrongWord": "wash", "answer": "washed"},
+                {"id": "F22", "sentence": "Yesterday Dad cook pasta for lunch.", "wrongWord": "cook", "answer": "cooked"},
+                {"id": "F23", "sentence": "He fryed the onions yesterday.", "wrongWord": "fryed", "answer": "fried"},
+                {"id": "F24", "sentence": "I carryed the shopping bags yesterday.", "wrongWord": "carryed", "answer": "carried"},
+                {"id": "F25", "sentence": "The rain stoped at four o'clock yesterday.", "wrongWord": "stoped", "answer": "stopped"},
+                {"id": "F26", "sentence": "He droped his favourite plate yesterday.", "wrongWord": "droped", "answer": "dropped"},
+                {"id": "F27", "sentence": "I likeed our cooking lesson yesterday.", "wrongWord": "likeed", "answer": "liked"},
+                {"id": "F28", "sentence": "Sally smileed at the camera.", "wrongWord": "smileed", "answer": "smiled"},
+                {"id": "F29", "sentence": "I cryed at the end of the sad film.", "wrongWord": "cryed", "answer": "cried"},
+                {"id": "F30", "sentence": "Yesterday we boil the potatoes for lunch.", "wrongWord": "boil", "answer": "boiled"},
+                {"id": "F31", "sentence": "I inviteed my friends to my party last week.", "wrongWord": "inviteed", "answer": "invited"},
+                {"id": "F32", "sentence": "The film was funny. We laugh a lot last night.", "wrongWord": "laugh", "answer": "laughed"},
+                {"id": "F33", "sentence": "Did you cooked the vegetables?", "wrongWord": "cooked", "answer": "cook"},
+                {"id": "F34", "sentence": "We didn't washed the carrots.", "wrongWord": "washed", "answer": "wash"},
+                {"id": "F35", "sentence": "She didn't carried the bags.", "wrongWord": "carried", "answer": "carry"},
+                {"id": "F36", "sentence": "What did you fried for dinner?", "wrongWord": "fried", "answer": "fry"}
+            ]
+        }
+    };
+
+    // PU2 Unit 8: teacher-approved town, irregular past, obligation and safety boards.
+    const pu2Unit8Catalogs = {
+        95: {
+            missing: [
+                {"id": "M1", "sentences": ["We leave our car in a ___ ___.", "We catch a train at the ___ ___."], "answers": ["car", "park", "train", "station"], "prefixes": ["c", "p", "t", "s"]},
+                {"id": "M2", "sentences": ["We buy a ___ before we get on the train.", "We use a ___ to know where to go."], "answers": ["ticket", "map"], "prefixes": ["t", "m"]},
+                {"id": "M3", "sentences": ["The ___ has lots of exciting rides.", "My favourite ___ goes up and down very fast."], "answers": ["funfair", "ride"], "prefixes": ["f", "r"]},
+                {"id": "M4", "sentences": ["The shops in the middle of town are in the ___ ___.", "Cars travel along the ___."], "answers": ["city", "centre", "road"], "prefixes": ["c", "c", "r"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "We leave our car in the car station.", "wrongWord": "station", "answer": "park"},
+                {"id": "F2", "sentence": "We catch a train at the train park.", "wrongWord": "park", "answer": "station"},
+                {"id": "F3", "sentence": "We have to buy a sandwich to get on the train.", "wrongWord": "sandwich", "answer": "ticket"},
+                {"id": "F4", "sentence": "We use a menu to know where to go.", "wrongWord": "menu", "answer": "map"},
+                {"id": "F5", "sentence": "The city centre is the part in the middle of the countryside.", "wrongWord": "countryside", "answer": "city"},
+                {"id": "F6", "sentence": "We went on the exciting roads at the funfair.", "wrongWord": "roads", "answer": "rides"}
+            ]
+        },
+        96: {
+            missing: [
+                {"id": "M5", "sentences": ["Yesterday Dad ___ two train tickets.", "He cooked his lunch at home, then ___ it on the train."], "answers": ["bought", "brought"], "prefixes": ["b", "b"]},
+                {"id": "M6", "sentences": ["She ___ the red hat yesterday because red is her favourite colour.", "Dad ___ us to the beach yesterday."], "answers": ["chose", "drove"], "prefixes": ["c", "d"]},
+                {"id": "M7", "sentences": ["I ___ my hat yesterday and couldn't find it,", "but then I ___ it this morning, under the bed."], "answers": ["lost", "found"], "prefixes": ["l", "f"]},
+                {"id": "M8", "sentences": ["Grandma ___ me a present for my birthday yesterday.", "She and Grandpa ___ behind the sofa and said 'Surprise!' when I came in."], "answers": ["gave", "hid"], "prefixes": ["g", "h"]},
+                {"id": "M9", "sentences": ["We ___ our bikes to the park yesterday.", "I ___ my new helmet."], "answers": ["rode", "wore"], "prefixes": ["r", "w"]},
+                {"id": "M10", "sentences": ["Yesterday I ___ next to Mum on the bus.", "My brother ___ very tired so he ___ next to us."], "answers": ["sat", "was", "slept"], "prefixes": ["s", "w", "s"]},
+                {"id": "M11", "sentences": ["Yesterday I ___ near the door while Grandpa ___ us a story.", "Dad ___ a photo of us."], "answers": ["stood", "told", "took"], "prefixes": ["s", "t", "t"]}
+            ],
+            fix: [
+                {"id": "F7", "sentence": "Dad buyed two train tickets yesterday.", "wrongWord": "buyed", "answer": "bought"},
+                {"id": "F8", "sentence": "He bringed our lunch from home.", "wrongWord": "bringed", "answer": "brought"},
+                {"id": "F9", "sentence": "She choosed the red hat yesterday.", "wrongWord": "choosed", "answer": "chose"},
+                {"id": "F10", "sentence": "Dad drived us to the beach yesterday.", "wrongWord": "drived", "answer": "drove"},
+                {"id": "F11", "sentence": "I finded my scarf under the bed.", "wrongWord": "finded", "answer": "found"},
+                {"id": "F12", "sentence": "Grandma gived me a new sweater.", "wrongWord": "gived", "answer": "gave"},
+                {"id": "F13", "sentence": "The rabbit hided behind a tree.", "wrongWord": "hided", "answer": "hid"},
+                {"id": "F14", "sentence": "I losed my hat yesterday.", "wrongWord": "losed", "answer": "lost"},
+                {"id": "F15", "sentence": "We rided our bikes to the park yesterday.", "wrongWord": "rided", "answer": "rode"},
+                {"id": "F16", "sentence": "I weared my new helmet yesterday.", "wrongWord": "weared", "answer": "wore"}
+            ]
+        },
+        97: {
+            missing: [
+                {"id": "M12", "sentences": ["Yesterday my cousin ___ to our house.", "She ___ a picture for me."], "answers": ["came", "drew"], "prefixes": ["c", "d"]},
+                {"id": "M13", "sentences": ["How many photos did you ___?", "I ___ five photos yesterday."], "answers": ["take", "took"], "prefixes": ["t", "t"]},
+                {"id": "M14", "sentences": ["Which ice cream did she ___?", "She ___ chocolate."], "answers": ["choose", "chose"], "prefixes": ["c", "c"]},
+                {"id": "M15", "sentences": ["What time did Jim ___ the fish?", "He ___ them at eight o'clock."], "answers": ["feed", "fed"], "prefixes": ["f", "f"]},
+                {"id": "M16", "sentences": ["Where did the rabbit ___?", "It ___ in the garden."], "answers": ["sleep", "slept"], "prefixes": ["s", "s"]}
+            ],
+            fix: [
+                {"id": "F17", "sentence": "I drawed a picture for Grandma yesterday.", "wrongWord": "drawed", "answer": "drew"},
+                {"id": "F18", "sentence": "My cousin comed to our house yesterday.", "wrongWord": "comed", "answer": "came"},
+                {"id": "F19", "sentence": "How many photos did you took?", "wrongWord": "took", "answer": "take"},
+                {"id": "F20", "sentence": "Which ice cream did she chose?", "wrongWord": "chose", "answer": "choose"},
+                {"id": "F21", "sentence": "What time did Jim fed the fish?", "wrongWord": "fed", "answer": "feed"},
+                {"id": "F22", "sentence": "Where did the rabbit slept?", "wrongWord": "slept", "answer": "sleep"}
+            ]
+        },
+        98: {
+            missing: [
+                {"id": "M17", "sentences": ["We borrow books from the ___.", "We watch films at the ___."], "answers": ["library", "cinema"], "prefixes": ["l", "c"]},
+                {"id": "M18", "sentences": ["Doctors and nurses work at a ___.", "We buy fresh fruit and vegetables at the ___."], "answers": ["hospital", "market"], "prefixes": ["h", "m"]},
+                {"id": "M19", "sentences": ["We buy food and other things at the ___.", "We buy clothes in the shops at the ___ ___."], "answers": ["supermarket", "shopping", "centre"], "prefixes": ["s", "s", "c"]},
+                {"id": "M20", "sentences": ["We play indoor sports at the ___ ___.", "We swim at the ___ ___."], "answers": ["sports", "centre", "swimming", "pool"], "prefixes": ["s", "c", "s", "p"]},
+                {"id": "M21", "sentences": ["We wait for a bus at the ___ ___.", "We can have a drink and a snack at a ___."], "answers": ["bus", "station", "cafe"], "prefixes": ["b", "s", "c"]},
+                {"id": "M22", "sentences": ["We sat in the town ___, an open place with buildings around it.", "We bought some fruit at the ___."], "answers": ["square", "market"], "prefixes": ["s", "m"]}
+            ],
+            fix: [
+                {"id": "F23", "sentence": "We borrow books from the hospital.", "wrongWord": "hospital", "answer": "library"},
+                {"id": "F24", "sentence": "We watch films on a big screen at the library.", "wrongWord": "library", "answer": "cinema"},
+                {"id": "F25", "sentence": "Doctors and nurses help sick people at the cinema.", "wrongWord": "cinema", "answer": "hospital"},
+                {"id": "F26", "sentence": "We buy clothes from the shops in the swimming centre.", "wrongWord": "swimming", "answer": "shopping"},
+                {"id": "F27", "sentence": "We swim in the shopping pool.", "wrongWord": "shopping", "answer": "swimming"},
+                {"id": "F28", "sentence": "A place with courts for playing sports is a shopping centre.", "wrongWord": "shopping", "answer": "sports"},
+                {"id": "F29", "sentence": "We can catch a bus at the bus park.", "wrongWord": "park", "answer": "station"},
+                {"id": "F30", "sentence": "We buy fresh vegetables from stalls at the library.", "wrongWord": "library", "answer": "market"}
+            ]
+        },
+        104: {
+            missing: [
+                {"id": "M23", "sentences": ["I ___ to do my homework.", "She ___ to clean her bedroom."], "answers": ["have", "has"]},
+                {"id": "M24", "sentences": ["My brother ___ ___ wear glasses.", "I ___ ___ wear them too."], "answers": ["has", "to", "have", "to"]},
+                {"id": "M25", "sentences": ["___ you have to make your bed?", "___ she have to help at home?"], "answers": ["do", "does"]},
+                {"id": "M26", "sentences": ["You ___ have to buy a ticket. Entry is free.", "He ___ have to wash the plates. They're already clean."], "answers": ["don't", "doesn't"]},
+                {"id": "M27", "sentences": ["We walk on the ___ beside the road.", "We put rubbish in a ___ ___."], "answers": ["pavement", "litter", "bin"], "prefixes": ["p", "l", "b"]},
+                {"id": "M28", "sentences": ["Drivers stop when the traffic light is ___.", "They can go when it turns ___."], "answers": ["red", "green"], "prefixes": ["r", "g"]},
+                {"id": "M29", "sentences": ["We cross at a pedestrian ___.", "We wait for the green ___."], "answers": ["crossing", "light"], "prefixes": ["c", "l"]}
+            ],
+            fix: [
+                {"id": "F31", "sentence": "I has to do my homework.", "wrongWord": "has", "answer": "have"},
+                {"id": "F32", "sentence": "She have to clean her bedroom.", "wrongWord": "have", "answer": "has"},
+                {"id": "F33", "sentence": "Do he have to wear glasses?", "wrongWord": "do", "answer": "does"},
+                {"id": "F34", "sentence": "Does she has to help at home?", "wrongWord": "has", "answer": "have"},
+                {"id": "F35", "sentence": "He don't have to buy a ticket. It's free.", "wrongWord": "don't", "answer": "doesn't"},
+                {"id": "F36", "sentence": "We doesn't have to go to school on Sundays.", "wrongWord": "doesn't", "answer": "don't"},
+                {"id": "F37", "sentence": "My brother has to wears glasses.", "wrongWord": "wears", "answer": "wear"},
+                {"id": "F38", "sentence": "Put your rubbish in the litter bag.", "wrongWord": "bag", "answer": "bin"},
+                {"id": "F39", "sentence": "Drivers must stop when the traffic light turns green.", "wrongWord": "green", "answer": "red"}
+            ]
+        }
+    };
+
+    // PU2 Unit 9: approved opinions, comparison patterns and cumulative review.
+    const pu2Unit9Catalogs = {
+        107: {
+            missing: [
+                {"id": "M1", "sentences": ["I need some water. I'm ___.", "I want something to eat. I'm ___."], "answers": ["thirsty", "hungry"], "prefixes": ["t", "h"]},
+                {"id": "M2", "sentences": ["I need to sleep. I'm ___.", "Everyone suddenly shouted \"Happy birthday!\" I was very ___."], "answers": ["tired", "surprised"], "prefixes": ["t", "s"]},
+                {"id": "M3", "sentences": ["I'm ___ of the dark.", "I'm ___ of big, angry dogs."], "answers": ["afraid", "frightened"], "prefixes": ["a", "f"]},
+                {"id": "M4", "sentences": ["Nothing happened in the film. It was ___.", "The ride was fast and fun. It was ___."], "answers": ["boring", "exciting"], "prefixes": ["b", "e"]},
+                {"id": "M5", "sentences": ["I got every answer right. The test was ___.", "I couldn't answer any questions. It was ___."], "answers": ["easy", "difficult"], "prefixes": ["e", "d"]},
+                {"id": "M6", "sentences": ["Playing football in the road is ___.", "I wear a helmet ___ skateboarding can be dangerous."], "answers": ["dangerous", "because"], "prefixes": ["d", "b"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "I need some water because I'm hungry.", "wrongWord": "hungry", "answer": "thirsty"},
+                {"id": "F2", "sentence": "I want something to eat because I'm thirsty.", "wrongWord": "thirsty", "answer": "hungry"},
+                {"id": "F3", "sentence": "I need to sleep because I'm surprised.", "wrongWord": "surprised", "answer": "tired"},
+                {"id": "F4", "sentence": "Everyone shouted \"Happy birthday!\" I didn't know about the party. I was tired.", "wrongWord": "tired", "answer": "surprised"},
+                {"id": "F5", "sentence": "The film was exciting. Nothing happened and nobody enjoyed it.", "wrongWord": "exciting", "answer": "boring"},
+                {"id": "F6", "sentence": "The ride was boring. Everyone thought it was so much fun!", "wrongWord": "boring", "answer": "exciting"},
+                {"id": "F7", "sentence": "The test was easy. Everyone got 0/100.", "wrongWord": "easy", "answer": "difficult"},
+                {"id": "F8", "sentence": "Fighting bears is very safe. You can get badly hurt doing it.", "wrongWord": "safe", "answer": "dangerous"}
+            ]
+        },
+        109: {
+            missing: [
+                {"id": "M7", "sentences": ["I think this dress is ___ beautiful ___ that one.", "This skirt is shorter ___ that one."], "answers": ["more", "than", "than"]},
+                {"id": "M8", "sentences": ["I think the circus is ___ ___ than the farm.", "I think this film is more ___ ___ that one."], "answers": ["more", "exciting", "boring", "than"], "prefixes": ["", "e", "b", ""]},
+                {"id": "M9", "sentences": ["I think climbing is ___ ___ than walking.", "I think tigers are more ___ ___ rabbits."], "answers": ["more", "difficult", "dangerous", "than"], "prefixes": ["", "d", "d", ""]},
+                {"id": "M10", "sentences": ["This test is easy, but yesterday's test ___ ___.", "I'm hungry, but my brother ___ ___ ___ me."], "answers": ["was", "easier", "is", "hungrier", "than"], "prefixes": ["w", "e", "", "h", "t"]},
+                {"id": "M11", "sentences": ["I'm thirsty, but she's even ___ ___ me.", "I was tired, but Dad ___ ___ tired ___ me."], "answers": ["thirstier", "than", "was", "more", "than"], "prefixes": ["t", "t", "", "", ""]},
+                {"id": "M12", "sentences": ["This bag is big, but that one is ___.", "This book is good, but that one is ___."], "answers": ["bigger", "better"], "prefixes": ["b", "b"]},
+                {"id": "M13", "sentences": ["This game ___ ___ exciting ___ that one."], "answers": ["is", "more", "than"], "prefixes": ["", "m", "t"]},
+                {"id": "M14", "sentences": ["Today's lesson ___ ___ interesting ___ yesterday's lesson.", "Yesterday's lesson ___ ___ ___ ___ today's."], "answers": ["is", "more", "than", "was", "more", "boring", "than"], "prefixes": ["", "", "", "w", "", "b", ""]}
+            ],
+            fix: [
+                {"id": "F9", "sentence": "This dress is more beautifuler than that one.", "wrongWord": "beautifuler", "answer": "beautiful"},
+                {"id": "F10", "sentence": "The circus is most exciting than the farm.", "wrongWord": "most", "answer": "more"},
+                {"id": "F11", "sentence": "This game is more interesting then that one.", "wrongWord": "then", "answer": "than"},
+                {"id": "F12", "sentence": "I think climbing is more difficult of walking.", "wrongWord": "of", "answer": "than"},
+                {"id": "F13", "sentence": "This question is easyer than that one.", "wrongWord": "easyer", "answer": "easier"},
+                {"id": "F14", "sentence": "I was hungryer than my brother.", "wrongWord": "hungryer", "answer": "hungrier"},
+                {"id": "F15", "sentence": "She was thirstyer than me.", "wrongWord": "thirstyer", "answer": "thirstier"},
+                {"id": "F16", "sentence": "This bag is biger than mine.", "wrongWord": "biger", "answer": "bigger"},
+                {"id": "F17", "sentence": "This book is gooder than that one.", "wrongWord": "gooder", "answer": "better"},
+                {"id": "F18", "sentence": "My brother are more tired than me.", "wrongWord": "are", "answer": "is"}
+            ]
+        },
+        116: {
+            missing: [
+                {"id": "M15", "sentences": ["Of these three dresses, this is ___ ___ beautiful.", "I think it's ___ most beautiful dress in the shop."], "answers": ["the", "most", "the"]},
+                {"id": "M16", "sentences": ["This film is more exciting ___ that one.", "It's ___ ___ exciting film of all."], "answers": ["than", "the", "most"]},
+                {"id": "M17", "sentences": ["This is ___ ___ ___ ___ beautiful cities in the world.", "It's one of ___ ___ exciting places to visit."], "answers": ["one", "of", "the", "most", "the", "most"], "prefixes": ["o", "o", "", "m", "", ""]},
+                {"id": "M18", "sentences": ["She's one of ___ ___ famous singers in the world.", "This is ___ ___ ___ ___ dangerous animals in the zoo."], "answers": ["the", "most", "one", "of", "the", "most"], "prefixes": ["", "m", "o", "o", "", ""]},
+                {"id": "M19", "sentences": ["This question is ___ difficult than that one.", "It's the ___ difficult question in the test."], "answers": ["more", "most"]},
+                {"id": "M20", "sentences": ["The first film was more interesting ___ the second.", "The third film was ___ most interesting of all."], "answers": ["than", "the"]},
+                {"id": "M21", "sentences": ["In my family, my brother is the most ___ of spiders.", "Mum was the most ___ when we shouted \"Surprise!\""], "answers": ["frightened", "surprised"], "prefixes": ["f", "s"]},
+                {"id": "M22", "sentences": ["I think this is the most ___ garden in town.", "He's a ___ singer. Lots of people know his songs."], "answers": ["beautiful", "famous"], "prefixes": ["b", "f"]}
+            ],
+            fix: [
+                {"id": "F19", "sentence": "Of these five dresses, this is the more beautiful.", "wrongWord": "more", "answer": "most"},
+                {"id": "F20", "sentence": "This is an most exciting ride in the park.", "wrongWord": "an", "answer": "the"},
+                {"id": "F21", "sentence": "It's one in the most beautiful cities.", "wrongWord": "in", "answer": "of"},
+                {"id": "F24", "sentence": "Of these three rides, this is the more exciting.", "wrongWord": "more", "answer": "most"},
+                {"id": "F25", "sentence": "In my family, my brother is the most frightening of spiders.", "wrongWord": "frightening", "answer": "frightened"},
+                {"id": "F26", "sentence": "Mum was the most surprise at her secret birthday party.", "wrongWord": "surprise", "answer": "surprised"},
+                {"id": "F27", "sentence": "Of these three books, this is the most interested.", "wrongWord": "interested", "answer": "interesting"},
+                {"id": "F28", "sentence": "It's one of the most exciting ride in the park.", "wrongWord": "ride", "answer": "rides"}
+            ]
+        },
+        119: {
+            missing: [
+                {"id": "M23", "sentences": ["Yesterday Dad ___ soup.", "He ___ the onions first."], "answers": ["made", "fried"], "prefixes": ["m", "f"]},
+                {"id": "M24", "sentences": ["Did you ___ a train ticket?", "I ___ one yesterday."], "answers": ["buy", "bought"], "prefixes": ["b", "b"]},
+                {"id": "M25", "sentences": ["She ___ to wear glasses.", "___ she have to wear them at school?"], "answers": ["has", "does"]},
+                {"id": "M26", "sentences": ["I ___ have to cook dinner. Dad is cooking it.", "She ___ have to wash the plates. They're already clean."], "answers": ["don't", "doesn't"]},
+                {"id": "M27", "sentences": ["Yesterday we ___ to the market.", "We ___ some fresh vegetables."], "answers": ["went", "bought"], "prefixes": ["w", "b"]},
+                {"id": "M28", "sentences": ["This ride is ___ exciting than the others.", "It's ___ most exciting ride at the funfair."], "answers": ["more", "the"]}
+            ],
+            fix: [
+                {"id": "F29", "sentence": "Yesterday Dad maked soup.", "wrongWord": "maked", "answer": "made"},
+                {"id": "F30", "sentence": "He fryed the onions first.", "wrongWord": "fryed", "answer": "fried"},
+                {"id": "F31", "sentence": "Did you bought a ticket?", "wrongWord": "bought", "answer": "buy"},
+                {"id": "F32", "sentence": "She have to wear glasses.", "wrongWord": "have", "answer": "has"},
+                {"id": "F33", "sentence": "Does he has to wash the plates?", "wrongWord": "has", "answer": "have"},
+                {"id": "F34", "sentence": "This game is most exciting than that one.", "wrongWord": "most", "answer": "more"},
+                {"id": "F35", "sentence": "It's one of the most beautiful place in town.", "wrongWord": "place", "answer": "places"},
+                {"id": "F36", "sentence": "This is than most interesting book in the library.", "wrongWord": "than", "answer": "the"}
+            ]
+        }
+    };
+
+    const pageCatalogs = { 'PU2:9:107': pu2Unit9Catalogs[107], 'PU2:9:109': pu2Unit9Catalogs[109], 'PU2:9:116': pu2Unit9Catalogs[116], 'PU2:9:119': pu2Unit9Catalogs[119], 'PU2:8:95': pu2Unit8Catalogs[95], 'PU2:8:96': pu2Unit8Catalogs[96], 'PU2:8:97': pu2Unit8Catalogs[97], 'PU2:8:98': pu2Unit8Catalogs[98], 'PU2:8:104': pu2Unit8Catalogs[104], 'PU2:7:83': pu2Unit7Catalogs[83], 'PU2:7:85': pu2Unit7Catalogs[85], 'PU2:7:87': pu2Unit7Catalogs[87], 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

@@ -210,6 +210,28 @@ Draft PR #1 provides `https://brave-bush-0438ab000-1.eastasia.7.azurestaticapps.
 
 The initial calendar deployment used synchronized stamp `2026-10-13a`; the target-report follow-up uses `2026-10-13b` and the image-heading adjustment uses `2026-10-13c`, and randomized report closings use `2026-10-13d`, and target-pace image colours use `2026-10-13e`, and manual/automatic dashboard refresh uses `2026-10-13f`. Reuse the same PR API and preview container for follow-up deployments. Validation includes the complete current frontend suite, the 26 private auth-integration assertions against `Val-EslApp-Test`, a real Functions/Cosmos calendar smoke test in that isolated database, and the Chrome dashboard smoke test. Verify both Pages assets/stamps and the PR environment's calendar endpoint before reporting the preview ready. Target-report validation also includes real isolated-Cosmos projection/JOIN counts, Chrome clipboard/navigation/download checks, ZIP CRC/UTF-8 verification, and the deployed report endpoint/UI.
 
+
+## Speech research preparation (2026-10-15)
+
+Follow the [speech collection rollout](../speech-collection-rollout.md).
+Frontend and API changes must both be published before enabling expanded intake.
+The explicit enable switch defaults off; consent remains a private allowlist.
+Index preparation defaults to dry-run, backs up before an explicit apply, and
+never provisions database throughput. Keep the normal production approval and
+stamp discipline. A preview Pages push alone cannot validate the new API.
+
+### Wider speech collection release (2026-10-16)
+
+Release `2026-10-16c` integrates the bounded collector with current production
+curriculum. The teacher confirmed consent for all current users and authorized
+publication/activation. The several days of home collection already provide
+the initial pilot; validate the new safeguards without restarting it. Snapshot
+current student account IDs privately, publish with capture disabled, apply and
+verify only the audio index exclusion, then enable the exact approved list.
+Future accounts are not automatically consented. Keep the 30-recording cap,
+October 18 closing date, existing service tiers and throughput. Publish preview
+separately from its current history, preserving its isolated API/container.
+
 ## Update discipline
 
 ## PU3 Unit 9 page 109 release (13 October 2026)

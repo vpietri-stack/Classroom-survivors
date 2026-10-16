@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-16b",
+  "version": "2026-10-16c",
   "deployedAt": "2026-10-16",
-  "notes": "Production: promote all approved PU2 Units 1-9 (236 missing-word boards, 291 find-fix exercises), Tuesday/Monday correction and longer answer support."
+  "notes": "Production: bounded consented speech collection for existing student accounts; 30 recordings per child, coordinated uploads, October 18 closing date."
 }

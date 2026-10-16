@@ -122,6 +122,7 @@
     let state = 'idle'; // 'idle' | 'recording' | 'busy'
     let safetyTimer = null;
     let recStartTs = 0; // for telemetry: how long the student actually spoke
+    let recordingOwnerId = null;
 
     function updateUI() {
       if (state === 'recording') {
@@ -148,6 +149,8 @@
 
     function startRecording() {
       if (state !== 'idle') return;
+      try { recordingOwnerId = typeof authActiveUser !== 'undefined' && authActiveUser ? authActiveUser.id : null; }
+      catch (_) { recordingOwnerId = null; }
       if (!global.Recorder.isSupported()) {
         if (opts.onError) opts.onError(new Error('Microphone unavailable. Allow mic access in your browser/WeChat settings.'));
         else alert('Microphone unavailable. Allow mic access in your browser/WeChat settings.');
@@ -190,12 +193,12 @@
         return wavStats(blob).then(function (stats) {
           if (stats && stats.durMs < MIN_SPEECH_MS) {
             toIdle();
-            if (opts.onGated) opts.onGated('too_short', { audioMs: audioMs, durMs: Math.round(stats.durMs), peak: stats.peak });
+            if (opts.onGated) opts.onGated('too_short', { audioMs: audioMs, durMs: Math.round(stats.durMs), peak: stats.peak, blob: blob, sampleRate: stats.sampleRate, ownerId: recordingOwnerId });
             return;
           }
           if (stats && stats.peak < MIN_PEAK_AMP) {
             toIdle();
-            if (opts.onGated) opts.onGated('too_quiet', { audioMs: audioMs, durMs: Math.round(stats.durMs), peak: stats.peak });
+            if (opts.onGated) opts.onGated('too_quiet', { audioMs: audioMs, durMs: Math.round(stats.durMs), peak: stats.peak, blob: blob, sampleRate: stats.sampleRate, ownerId: recordingOwnerId });
             return;
           }
           const t0 = Date.now();
@@ -213,6 +216,7 @@
               // and the engine resamples). Consumed only by the temporary
               // speech-sample research collection; ignored otherwise.
               blob: blob,
+              ownerId: recordingOwnerId,
               sampleRate: stats ? stats.sampleRate : null
             });
           });
@@ -452,12 +456,27 @@
       }
     };
     
+    function captureSample(text, meta, result, outcome, attempt) {
+      if (!global.SpeechSampleCapture || typeof global.SpeechSampleCapture.maybeCapture !== 'function') return;
+      try { global.SpeechSampleCapture.maybeCapture({
+        blob: meta && meta.blob, ownerId: meta && meta.ownerId,
+        target: target, transcript: text || '', outcome: outcome,
+        student: (function () { try { return authActiveUser && authActiveUser.name || ''; } catch (_) { return ''; } })(),
+        pass: result ? !!result.pass : null,
+        accuracy: result ? result.accuracy : null, phoneticRatio: result ? result.phoneticRatio : null,
+        attempt: attempt, level: level, book: book, mode: mode,
+        audioMs: meta && meta.audioMs, durMs: meta && meta.durMs, peak: meta && meta.peak,
+        sampleRate: meta && meta.sampleRate, transcribeMs: meta && meta.transcribeMs,
+        details: result && result.details || '', ua: UA, capturedAt: Date.now(),
+      }); } catch (_) { /* research must never interrupt the exercise */ }
+    }
     const recBtn = makeRecordButton({
       idleText: '\uD83C\uDF99\uFE0F \u70b9\u51fb\u8bf4\u8bdd',
       onResult: function (text, meta) {
         // Junk transcript (Whisper hallucination): coach, don't grade. Not a
         // fail — the recording itself was fine, the kid just needs to be louder.
         if (isHallucination(text)) {
+          captureSample(text, meta, null, 'hallucination', gradedTries + 1);
           logSpeechEvent('gated', mode, {
             target: target, level: level, reason: 'hallucination', transcript: (text || '').slice(0, 60),
             audioMs: meta && meta.audioMs, ua: UA
@@ -506,32 +525,7 @@
         // returns immediately, so it cannot slow the attempt or throw into it.
         // Remove this block with speech_sample_capture.js once the calibration
         // set is built.
-        if (global.SpeechSampleCapture && typeof global.SpeechSampleCapture.maybeCapture === 'function') {
-          global.SpeechSampleCapture.maybeCapture({
-            blob: meta && meta.blob,
-            student: (function () {
-              try { return (typeof authActiveUser !== 'undefined' && authActiveUser && authActiveUser.name) || ''; }
-              catch (_) { return ''; }
-            })(),
-            target: target,
-            transcript: text || '',
-            pass: !!res.pass,
-            accuracy: res.accuracy,
-            phoneticRatio: res.phoneticRatio,
-            attempt: tryNo,
-            level: level,
-            book: book,
-            mode: mode,
-            audioMs: meta && typeof meta.audioMs === 'number' ? meta.audioMs : null,
-            durMs: meta && typeof meta.durMs === 'number' ? meta.durMs : null,
-            peak: meta && typeof meta.peak === 'number' ? meta.peak : null,
-            sampleRate: meta && typeof meta.sampleRate === 'number' ? meta.sampleRate : null,
-            transcribeMs: meta && typeof meta.transcribeMs === 'number' ? meta.transcribeMs : null,
-            details: res.details || '',
-            ua: UA,
-            capturedAt: Date.now()
-          });
-        }
+        captureSample(text, meta, res, 'graded', tryNo);
         if (res.pass) {
           // Passed: pure celebration — deliberately NO score and NO transcript.
           // A lower-level student passing at 70% under their book's leniency
@@ -580,6 +574,7 @@
       },
       // Junk audio caught BEFORE transcription: instant, specific coaching.
       onGated: function (reason, meta) {
+        captureSample('', meta, null, reason, gradedTries + 1);
         logSpeechEvent('gated', mode, {
           target: target, level: level, reason: reason,
           audioMs: meta && meta.audioMs, durMs: meta && meta.durMs,

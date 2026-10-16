@@ -74,12 +74,14 @@ eq(policy.withinCaptureWindow(defaultEnd - 1), true, 'open just before the deadl
 eq(policy.withinCaptureWindow(defaultEnd), false, 'closed exactly AT the deadline');
 eq(policy.withinCaptureWindow(defaultEnd + 1), false, 'closed after the deadline');
 eq(policy.withinCaptureWindow(Date.parse('2020-01-01T00:00:00Z')), true, 'open well before the deadline');
-check(Date.now() < defaultEnd, 'the default deadline is still in the future (bump it deliberately if this fails)');
+eq(policy.captureEnabled(), false, 'expanded collection defaults OFF');
 
 setEnv('aaa', '2026-01-01T00:00:00+08:00');
 eq(policy.withinCaptureWindow(), false, 'an override can close collection early');
 setEnv('aaa', 'not-a-date');
-eq(policy.captureEndsAt(), Date.parse(policy.DEFAULT_CAPTURE_ENDS), 'an unparseable override falls back to the default');
+eq(policy.captureEndsAt(), 0, 'an unparseable override closes collection');
+setEnv('aaa', '2030-01-01T00:00:00Z');
+eq(policy.captureEndsAt(), defaultEnd, 'an app setting cannot extend the consented window');
 
 // ---------------------------------------------------------------------------
 // 2. Endpoint sanitizers + the size guard
@@ -103,7 +105,7 @@ eq(ep.cleanNumber(Infinity, 0, 1), null, 'cleanNumber rejects Infinity');
 
 console.log('\n=== base64 WAV guard ===');
 const RIFF_HEADER = Buffer.from('RIFF....WAVEfmt ', 'latin1').toString('base64');
-const longEnough = RIFF_HEADER + 'A'.repeat(120);
+const longEnough = Buffer.concat([Buffer.from('RIFF....WAVEfmt ', 'latin1'), Buffer.alloc(120)]).toString('base64');
 eq(ep.looksLikeWavBase64(longEnough), true, 'accepts base64 that decodes to a RIFF header');
 eq(ep.looksLikeWavBase64(Buffer.from('NOT A WAV FILE AT ALL, no really', 'latin1').toString('base64') + 'A'.repeat(120)),
     false, 'rejects base64 that is not a WAV');
@@ -121,7 +123,7 @@ check(worstCaseB64 > ep.MAX_WAV_BASE64_CHARS,
     'the cap genuinely rejects the worst case (' + worstCaseB64 + ' chars > cap ' + ep.MAX_WAV_BASE64_CHARS + ')');
 check(ep.MAX_WAV_BASE64_CHARS < 2 * 1024 * 1024 - 65536,
     'the cap leaves room for metadata under the 2 MB item limit');
-eq(ep.MAX_SAMPLES_PER_STUDENT, 60, 'per-student sample cap');
+eq(ep.MAX_SAMPLES_PER_STUDENT, 30, 'per-student sample cap');
 
 // ---------------------------------------------------------------------------
 // 3. Client-side decision (loaded in a VM — the module is browser-only)
@@ -155,7 +157,7 @@ eq(cap.decideCapture(Object.assign({}, good, { blobSize: 5 * 1024 * 1024 })).ok,
 eq(cap.decideCapture(Object.assign({}, good, { blobSize: 5 * 1024 * 1024 })).reason, 'too_large', 'names the size reason');
 eq(cap.decideCapture(Object.assign({}, good, { sentCount: 60 })).ok, false, 'refuses once the cap is reached');
 eq(cap.decideCapture(Object.assign({}, good, { sentCount: 61 })).ok, false, 'refuses past the cap');
-eq(cap.decideCapture(Object.assign({}, good, { sentCount: 59 })).ok, true, 'still captures just under the cap');
+eq(cap.decideCapture(Object.assign({}, good, { sentCount: 29 })).ok, true, 'still captures just under the cap');
 eq(cap.decideCapture(undefined).ok, false, 'refuses an undefined input');
 eq(cap.decideCapture({}).ok, false, 'refuses an empty input');
 eq(cap.decideCapture(Object.assign({}, good, { endsAt: 'garbage' })).ok, true,
@@ -164,9 +166,8 @@ eq(cap.decideCapture(Object.assign({}, good, { endsAt: 'garbage' })).ok, true,
 console.log('\n=== client never records without asking the server first ===');
 check(/ensureConsent/.test(captureSrc) && /maybeCapture/.test(captureSrc),
     'maybeCapture path references ensureConsent');
-const maybeIdx = captureSrc.indexOf('function maybeCapture');
-const ensureIdx = captureSrc.indexOf('ensureConsent(function', maybeIdx);
-check(maybeIdx > 0 && ensureIdx > maybeIdx, 'maybeCapture calls ensureConsent before queueing anything');
+// Runtime tests verify consent before encoding/upload. The bounded in-memory
+// queue may retain the recorder's existing blob during the small consent check.
 check(!/consentedIds|CONSENTED_IDS/.test(captureSrc), 'the consent list is NOT embedded in client code (repo is public)');
 
 console.log('\n=== recordings cannot be committed ===');
@@ -180,6 +181,7 @@ check(/speech_sample_capture\.js\?v=\d+/.test(html), 'index.html loads speech_sa
 const ui = fs.readFileSync(path.join(ROOT, 'speech_ui.js'), 'utf8');
 check(/SpeechSampleCapture/.test(ui), 'speech_ui.js hands the recording to the capture module');
 check(/blob: blob/.test(ui), 'the record button passes the WAV blob through onResult meta');
+check(/'reserveSpeechSample'/.test(fs.readFileSync(path.join(ROOT, 'api/src/functions/corsOptions.js'), 'utf8')), 'small reservations support CORS');
 
 console.log('\n=== both endpoints are registered for CORS preflight ===');
 // Called cross-origin from GitHub Pages with X-App-Key / X-Auth-Token, so a

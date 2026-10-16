@@ -253,7 +253,8 @@
   }
   function typeLetter(letter) {
     if (locked || !letters.includes(letter) || (current().type === 'fix' && binnedWord === null)) return;
-    if (input[activeBox].length >= 12) return;
+    const target = current().type === 'missing' ? current().answers[activeBox] : current().answer;
+    if (input[activeBox].length >= Math.max(12, target.length)) return;
     input[activeBox] += letter;
     message('');
     render();

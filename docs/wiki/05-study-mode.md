@@ -352,3 +352,24 @@ PU3 Unit 9 pages 107/110/111 add 24 M/36 F boards (8/10, 8/12 and 8/14 respectiv
 Study startup fix (2026-10-14): AVAILABLE_CONTENT can list pages that have no TEACHING_CONTENT entry (currently PU1 Unit 2 pages 24/25). The mixed non-spelling pool now skips missing books/units/pages just as the legacy SR picker does. Original absolute page indexes remain intact, so proximity weighting, earlier-page review, cooldown and future-page exclusion retain their behavior. Missing current pages may still review earlier loaded material; a wholly unloaded book returns an empty pool. This guard applies to Study and game challenges.
 
 Production promotion 2026-10-15a enables the complete approved PU3 Units 1-9 catalog (432 additional M/F boards plus the original 14 page-109 boards) with the preview-tested prefix/contraction widget and 48 flashcards. The already-live production mixed-flow gate and existing SR identities are preserved. The page-availability correction from 2026-10-14m is included.
+
+
+PU2 Unit 1 adds 22 M/24 F boards across the existing pages 7 (5 M/5 F), 9 (6 M/7 F), 10 (7 M/8 F), and 16 (4 M/4 F). Countryside vocabulary, present continuous, daily routines and present simple/continuous contrasts use the approved restricted keyboards and initial hints. M13 includes the school-clothes wording; F3 uses rocks. The rejected planet boards M23/M24 and F25-F28 are excluded. Legacy vocabulary, scrambles, pairs and PU3 content are unchanged.
+
+PU2 Unit 2 adds 24 M/28 F boards on pages 19 (6 M/7 F), 21 (6 M/7 F), 22 (6 M/6 F), and 25 (6 M/8 F). M1/M3/M4 use the approved comes-before/after wording. M10/M11 prefill t/o and d/w; M19/M20 prefill m in must/must-not. The page 19 legacy matching pair now correctly states Tuesday comes after Monday. All other legacy content and earlier typed boards remain unchanged.
+
+PU2 Unit 3 adds 24 M/27 F boards on pages 31 (6 M/5 F), 33 (8 M/10 F), and 40 (10 M/12 F). Jobs, present simple/continuous, why/because, appearance and workplaces use restricted keyboards and approved initial hints. M16 uses the helmet question/answer; F5 is omitted, retaining the remaining stable IDs; F22 uses has-not-got-any-curls wording. Legacy content, page 43 review and earlier typed boards remain unchanged.
+
+PU2 Unit 4 adds 30 M/40 F boards on pages 45 (4 M/6 F), 46 (4 M/4 F), 47 (7 M/12 F), and 54 (15 M/18 F). M25/M26 have three blanks; M27 has four blanks including is/shorter/than on its second row. M28-M30 and F37-F40 explicitly distinguish floor/roof without initial hints. F19-F23 pin wrongIndex 5 to the final possessive token, rejecting an already-correct earlier occurrence. Existing family/comparative/home arrays and all earlier units are unchanged.
+
+The shared typed widget retains its twelve-character minimum input allowance, expanding it to the target length for longer words such as granddaughter (13 letters). Both physical and on-screen keyboards can complete these targets in Study and game challenges.
+
+PU2 Unit 5 adds 28 M/34 F boards on pages 57 (6/8), 60 (16/18) and 62 (6/8). Teacher edits use long hair/speak, meat/fish/plants diet blanks, named animal groups, brown/polar bears, and the approved poopoo repair. F11 targets the final bigger token (wrongIndex 10). Prefixes remain locked; legacy arrays and earlier units remain unchanged.
+
+PU2 Unit 6 adds 23 M/29 F boards on existing pages 78 (19/23) and 81 (4/6). Fog boards M5/F5 are excluded without renumbering IDs. M13 contrasts was with the whole-word contraction it's; M14 contrasts were with we're. Full contraction blanks include apostrophe keys, while vocabulary initials stay locked. F25/F26 pin the final possessive token. Legacy arrays and earlier units remain unchanged.
+
+PU2 Unit 7 adds 28 M/36 F boards on existing pages 83 (6/8), 85 (10/12) and 87 (12/16). M1 uses the approved bread/cheese/sandwich wording, three blanks and locked ch/ch/s hints. Other boards practise food/containers, present-versus-past verbs, regular spelling patterns and did/did-not with the base verb. Legacy arrays and earlier units remain unchanged.
+
+PU2 Unit 8 adds 29 M/39 F boards on existing pages 95 (4/6), 96 (7/10), 97 (5/6), 98 (6/8) and 104 (7/9). All twelve teacher notes are incorporated: map wording; lunch brought onto the train; lost/found and birthday/gave/hid pairs; sat/was/slept; pedestrian already written; station/park/ticket repairs; M30/F40 omitted. M8 uses grammatical subject wording She and Grandpa. Legacy arrays and earlier units remain unchanged.
+
+PU2 Unit 9 adds 28 M/34 F boards on pages 107 (6/8), 109 (8/10), 116 (8/8), 119 (6/8). All sixteen teacher notes are applied: angry dogs, extra grammar blanks, single-row M13, boring contrast, one-of-the-most chunks, revised F6-F8 and excluded F22/F23. Requested boards now have up to seven blanks with mixed locked prefixes. M8 retains film (correcting firm); M17 retains the necessary is after This. Legacy arrays and earlier units remain unchanged.

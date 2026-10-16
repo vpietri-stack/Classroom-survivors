@@ -180,3 +180,22 @@ test_non_spelling_startup.js reproduces the PU1 pages 24/25 crash, exercises sel
 The startup regression now asserts that every advertised real page has content, the exact corrected PU1/PU2 page lists, PU2 p47 selection and future-page exclusion at p46. Missing PU1 pages 24/25 are reintroduced only inside isolated test contexts to retain the crash regression. Real Study-button tests include PU2 p47 on desktop and 319px.
 
 Production promotion 2026-10-15a runs the complete preview-expanded suite against the production gate/config, including all 432 newly authored boards, original page-109 fixtures, immutable initials/contractions, 48 image assets and corrected PU1/PU2 availability. Production-enabled, unrelated-site exclusion and nonspelling=0 assertions are retained from the production test footer.
+
+
+PU2 Unit 1 coverage enforces the approved 22 M/24 F totals and per-page counts, excluded planet items, school-clothes/rocks edits, prefix validity, unique SR keys and future-page exclusion. Chrome solves each of the 46 boards through the real widget at 319px, alongside the existing PU3 coverage.
+
+PU2 Unit 2 tests cover the 24/28 totals, page placement, approved weekday wording/answers, locked initials, unique SR keys, future-page exclusion and the Tuesday/Monday matching correction. Chrome solves all 52 additional boards at 319px alongside PU2 Unit 1 and PU3.
+
+PU2 Unit 3 tests enforce the 24/27 totals and page placement, M16 helmet dialogue, F5 exclusion, edited F22 sentence, prefix validity, scoped SR keys and future-page exclusion. Chrome solves all 51 additional boards through the real widget at 319px alongside earlier PU2/PU3 boards.
+
+PU2 Unit 4 coverage checks 30 M/40 F totals and per-page placement, approved M25-M27 blanks/answers, floor/roof boards without prefixes, final-token F19-F23 repairs, valid prefixes, distinct SR keys, future-page exclusion and varied rounds. Chrome solves all 70 additions at 319px through the real widget alongside existing PU2/PU3 content.
+
+PU2 Unit 5 coverage checks 28 M/34 F and per-page totals, revised animal/diet wording and answers, initial hints, intended repeated-token repair, unique scoped identities, future-page exclusion and round variety. All 62 additions are solved in Chrome through the real widget at 319px alongside previous boards.
+
+PU2 Unit 6 coverage checks 23 M/29 F and per-page totals, excluded M5/F5, exact edited M13/M14 wording/full contractions, prefix validity, repeated possessive targets, unique scoped identities, future-page exclusion and round variety. Chrome solves all 52 additions at 319px alongside previous boards.
+
+PU2 Unit 7 coverage checks 28 M/36 F and per-page totals, M1 exact edited wording/answers and two-letter prefixes, prefix validity, unique scoped identities, future-page exclusion and round variety. Chrome solves all 64 additions at 319px alongside previous boards.
+
+PU2 Unit 8 coverage checks 29 M/39 F and per-page totals, all edited sentences/answers/prefixes, excluded M30/F40, unique scoped identities, future-page exclusion and varied rounds. Chrome solves all 68 additions at 319px alongside previous boards.
+
+PU2 Unit 9 coverage checks 28 M/34 F, per-page totals, exact edited grammar targets/prefixes, seven-blank M14, single-sentence M13, revised feedback prompts, excluded F22/F23, unique identities, future-page exclusion and varied rounds. Chrome solves all 62 additions at 319px alongside earlier PU2/PU3 content.

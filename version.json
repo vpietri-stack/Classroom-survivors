@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-15a",
-  "deployedAt": "2026-10-15",
-  "notes": "Production: publish approved PU3 Units 1-9 exercises and 48 flashcards; promote 2026-10-14m PU1/PU2 page corrections and retain missing-page startup guard."
+  "version": "2026-10-16b",
+  "deployedAt": "2026-10-16",
+  "notes": "Production: promote all approved PU2 Units 1-9 (236 missing-word boards, 291 find-fix exercises), Tuesday/Monday correction and longer answer support."
 }

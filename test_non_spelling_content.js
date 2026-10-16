@@ -157,7 +157,303 @@ for (let i = 0; i < 50; i++) {
     assert.equal(round.length, 5);
     assert.ok(new Set(round.map(e => e.type)).size >= 3);
 }
-for (const item of [...unit1, ...unit2, ...unit3, ...unit4, ...unit5, ...unit6, ...unit7, ...unit8, ...unit9]) {
+// PU2 Unit 1 uses its existing page progression and the exact approved exclusions.
+const pu2Unit1 = content.buildPool('PU2', 1, 16).entries.filter(e => e.item.id && e.item.unit === '1').map(e => e.item);
+assert.equal(pu2Unit1.filter(e => e.answers).length, 22);
+assert.equal(pu2Unit1.filter(e => e.answer).length, 24);
+assert.equal(new Set(pu2Unit1.map(e => e.key)).size, 46, 'PU2 keys stay distinct from PU3 and each other');
+for (const [page, missing, fix] of [[7,5,5],[9,6,7],[10,7,8],[16,4,4]]) {
+    const items = pu2Unit1.filter(e => e.page === String(page));
+    assert.equal(items.filter(e => e.answers).length, missing);
+    assert.equal(items.filter(e => e.answer).length, fix);
+    const pool = content.buildPool('PU2', 1, page);
+    assert.ok(!pool.entries.some(e => Number(e.item.page) > page), 'later PU2 pages stay excluded');
+    for (let sample = 0; sample < 20; sample++) {
+        const picked = content.select('PU2', 1, page, 5);
+        assert.equal(picked.length, 5);
+        assert.ok(new Set(picked.map(e => e.type)).size >= 3);
+    }
+}
+assert.ok(!content.buildPool('PU2', 0, 5).entries.some(e => e.item.id), 'Unit 1 cannot appear in starter');
+assert.equal(pu2Unit1.find(e => e.id === 'M13').sentences[1], 'Then I get my school clothes and I get ___.');
+assert.equal(pu2Unit1.find(e => e.id === 'F3').sentence, 'The cows are eating rocks in the field.');
+assert.ok(!pu2Unit1.some(e => ['M23','M24','F25','F26','F27','F28'].includes(e.id)), 'planet items are excluded');
+assert.equal(new Set(pu2Unit1.filter(e => e.answer).map(e => e.sentence)).size, 24);
+for (const item of pu2Unit1.filter(e => e.prefixes)) {
+    assert.equal(item.prefixes.length, item.answers.length);
+    item.prefixes.forEach((prefix, i) => assert.ok(item.answers[i].startsWith(prefix)));
+}
+const pu2Unit2 = content.buildPool('PU2', 2, 25).entries.filter(e => e.item.id && e.item.unit === '2').map(e => e.item);
+assert.equal(pu2Unit2.filter(e => e.answers).length, 24);
+assert.equal(pu2Unit2.filter(e => e.answer).length, 28);
+assert.equal(new Set([...pu2Unit1, ...pu2Unit2].map(e => e.key)).size, 98);
+for (const [page, missing, fix] of [[19,6,7],[21,6,7],[22,6,6],[25,6,8]]) {
+    const items = pu2Unit2.filter(e => e.page === String(page));
+    assert.equal(items.filter(e => e.answers).length, missing);
+    assert.equal(items.filter(e => e.answer).length, fix);
+    assert.ok(!content.buildPool('PU2', 2, page).entries.some(e => e.item.unit === '2' && Number(e.item.page) > page));
+    for (let sample = 0; sample < 20; sample++) {
+        const picked = content.select('PU2', 2, page, 5);
+        assert.equal(picked.length, 5);
+        assert.ok(new Set(picked.map(e => e.type)).size >= 3);
+    }
+}
+assert.ok(!content.buildPool('PU2', 1, 16).entries.some(e => e.item.unit === '2'));
+assert.deepEqual(Array.from(pu2Unit2.find(e => e.id === 'M1').sentences), ['Sunday comes after ___.', 'Sunday comes before ___.']);
+assert.deepEqual(Array.from(pu2Unit2.find(e => e.id === 'M1').answers), ['saturday', 'monday']);
+assert.deepEqual(Array.from(pu2Unit2.find(e => e.id === 'M3').sentences), ['Thursday comes before ___.', 'Wednesday comes after ___.']);
+assert.deepEqual(Array.from(pu2Unit2.find(e => e.id === 'M3').answers), ['friday', 'tuesday']);
+assert.equal(pu2Unit2.find(e => e.id === 'M4').sentences[0], 'Saturday comes before ___.');
+for (const [id, prefixes] of [['M10',['t','o']], ['M11',['d','w']], ['M19',['m','m']], ['M20',['m','m']]]) {
+    assert.deepEqual(Array.from(pu2Unit2.find(e => e.id === id).prefixes), prefixes);
+}
+for (const item of pu2Unit2.filter(e => e.prefixes)) {
+    assert.equal(item.prefixes.length, item.answers.length);
+    item.prefixes.forEach((prefix, i) => assert.ok(item.answers[i].startsWith(prefix)));
+}
+assert.equal(new Set(pu2Unit2.filter(e => e.answer).map(e => e.sentence)).size, 28);
+assert.ok(vm.runInContext("TEACHING_CONTENT.PU2[2][19].sentencePairs.some(p => p.a === 'Tuesday comes after' && p.b === 'Monday.')", sandbox));
+assert.ok(!vm.runInContext("TEACHING_CONTENT.PU2[2][19].sentencePairs.some(p => p.a === 'Tuesday comes before' && p.b === 'Monday.')", sandbox));
+const pu2Unit3 = content.buildPool('PU2', 3, 40).entries.filter(e => e.item.id && e.item.unit === '3').map(e => e.item);
+assert.equal(pu2Unit3.filter(e => e.answers).length, 24);
+assert.equal(pu2Unit3.filter(e => e.answer).length, 27);
+assert.equal(new Set([...pu2Unit1, ...pu2Unit2, ...pu2Unit3].map(e => e.key)).size, 149);
+for (const [page, missing, fix] of [[31,6,5],[33,8,10],[40,10,12]]) {
+    const items = pu2Unit3.filter(e => e.page === String(page));
+    assert.equal(items.filter(e => e.answers).length, missing);
+    assert.equal(items.filter(e => e.answer).length, fix);
+    assert.ok(!content.buildPool('PU2', 3, page).entries.some(e => e.item.unit === '3' && Number(e.item.page) > page));
+    for (let sample = 0; sample < 20; sample++) {
+        const picked = content.select('PU2', 3, page, 5);
+        assert.equal(picked.length, 5);
+        assert.ok(new Set(picked.map(e => e.type)).size >= 3);
+    }
+}
+assert.ok(!content.buildPool('PU2', 2, 25).entries.some(e => e.item.unit === '3'));
+assert.deepEqual(Array.from(pu2Unit3.find(e => e.id === 'M16').sentences), ['___ are you wearing a helmet?', "___ I'm riding my bike."]);
+assert.deepEqual(Array.from(pu2Unit3.find(e => e.id === 'M16').answers), ['why','because']);
+assert.ok(!pu2Unit3.some(e => e.id === 'F5'));
+assert.equal(pu2Unit3.find(e => e.id === 'F22').sentence, "His hair hasn't got any curls. It's curly.");
+assert.equal(pu2Unit3.find(e => e.id === 'F22').answer, 'straight');
+for (const item of pu2Unit3.filter(e => e.prefixes)) {
+    assert.equal(item.prefixes.length, item.answers.length);
+    item.prefixes.forEach((prefix, i) => assert.ok(item.answers[i].startsWith(prefix)));
+}
+assert.equal(new Set(pu2Unit3.filter(e => e.answer).map(e => e.sentence)).size, 27);
+const pu2Unit4 = content.buildPool('PU2', 4, 54).entries.filter(e => e.item.id && e.item.unit === '4').map(e => e.item);
+assert.equal(pu2Unit4.filter(e => e.answers).length, 30);
+assert.equal(pu2Unit4.filter(e => e.answer).length, 40);
+assert.equal(new Set([...pu2Unit1, ...pu2Unit2, ...pu2Unit3, ...pu2Unit4].map(e => e.key)).size, 219);
+for (const [page, missing, fix] of [[45,4,6],[46,4,4],[47,7,12],[54,15,18]]) {
+    const items = pu2Unit4.filter(e => e.page === String(page));
+    assert.equal(items.filter(e => e.answers).length, missing);
+    assert.equal(items.filter(e => e.answer).length, fix);
+    assert.ok(!content.buildPool('PU2', 4, page).entries.some(e => e.item.unit === '4' && Number(e.item.page) > page));
+    for (let sample = 0; sample < 20; sample++) {
+        const picked = content.select('PU2', 4, page, 5);
+        assert.equal(picked.length, 5);
+        assert.ok(new Set(picked.map(e => e.type)).size >= 3);
+    }
+}
+assert.ok(!content.buildPool('PU2', 3, 43).entries.some(e => e.item.unit === '4'));
+for (const [id, answers] of [['M25',['than','is','than']], ['M26',['bigger','is','than']], ['M27',['than','is','shorter','than']]]) {
+    assert.deepEqual(Array.from(pu2Unit4.find(e => e.id === id).answers), answers);
+    assert.equal(pu2Unit4.find(e => e.id === id).prefixes, undefined);
+}
+assert.deepEqual(Array.from(pu2Unit4.find(e => e.id === 'M27').sentences), ['My hair is longer ___ yours.', 'Your hair ___ ___ ___ mine.']);
+for (const id of ['M28','M29','M30']) {
+    assert.deepEqual(Array.from(pu2Unit4.find(e => e.id === id).answers), ['floor','roof']);
+    assert.equal(pu2Unit4.find(e => e.id === id).prefixes, undefined);
+}
+for (const id of ['F19','F20','F21','F22','F23']) assert.equal(pu2Unit4.find(e => e.id === id).wrongIndex, 5);
+for (const item of pu2Unit4.filter(e => e.prefixes)) {
+    assert.equal(item.prefixes.length, item.answers.length);
+    item.prefixes.forEach((prefix, i) => assert.ok(item.answers[i].startsWith(prefix)));
+}
+assert.equal(new Set(pu2Unit4.filter(e => e.answer).map(e => e.sentence)).size, 40);
+const pu2Unit5 = content.buildPool('PU2', 5, 62).entries.filter(e => e.item.id && e.item.unit === '5').map(e => e.item);
+assert.equal(pu2Unit5.filter(e => e.answers).length, 28);
+assert.equal(pu2Unit5.filter(e => e.answer).length, 34);
+assert.equal(new Set([...pu2Unit1, ...pu2Unit2, ...pu2Unit3, ...pu2Unit4, ...pu2Unit5].map(e => e.key)).size, 281);
+for (const [page, missing, fix] of [[57,6,8],[60,16,18],[62,6,8]]) {
+    const items = pu2Unit5.filter(e => e.page === String(page));
+    assert.equal(items.filter(e => e.answers).length, missing);
+    assert.equal(items.filter(e => e.answer).length, fix);
+    assert.ok(!content.buildPool('PU2', 5, page).entries.some(e => e.item.unit === '5' && Number(e.item.page) > page));
+    for (let sample = 0; sample < 20; sample++) {
+        const picked = content.select('PU2', 5, page, 5);
+        assert.equal(picked.length, 5);
+        assert.ok(new Set(picked.map(e => e.type)).size >= 3);
+    }
+}
+assert.ok(!content.buildPool('PU2', 4, 54).entries.some(e => e.item.unit === '5'));
+for (const [id, answers] of [['M25',['meat','fish','carnivores']], ['M26',['meat','plants','omnivores']], ['M27',['plants','herbivores']], ['M28',['bears','polar','bears']]]) {
+    assert.deepEqual(Array.from(pu2Unit5.find(e => e.id === id).answers), answers);
+}
+assert.equal(pu2Unit5.find(e => e.id === 'M2').sentences[0], 'A ___ is a big cat with long hair.');
+assert.equal(pu2Unit5.find(e => e.id === 'M3').sentences[1], 'A ___ is a colourful bird that can sometimes speak.');
+assert.equal(pu2Unit5.find(e => e.id === 'F11').wrongIndex, 10);
+for (const [id, sentence, answer] of [
+    ['F31', "Lions eat plants. They're carnivores.", 'meat'],
+    ['F32', "Rabbits eat meat. They're herbivores.", 'plants'],
+    ['F33', "People eat both meat and poopoo. We're omnivores.", 'plants']
+]) {
+    assert.equal(pu2Unit5.find(e => e.id === id).sentence, sentence);
+    assert.equal(pu2Unit5.find(e => e.id === id).answer, answer);
+}
+for (const item of pu2Unit5.filter(e => e.prefixes)) {
+    assert.equal(item.prefixes.length, item.answers.length);
+    item.prefixes.forEach((prefix, i) => assert.ok(item.answers[i].startsWith(prefix)));
+}
+assert.equal(new Set(pu2Unit5.filter(e => e.answer).map(e => e.sentence)).size, 34);
+const pu2Unit6 = content.buildPool('PU2', 6, 81).entries.filter(e => e.item.id && e.item.unit === '6').map(e => e.item);
+assert.equal(pu2Unit6.filter(e => e.answers).length, 23);
+assert.equal(pu2Unit6.filter(e => e.answer).length, 29);
+assert.ok(!pu2Unit6.some(e => e.id === 'M5' || e.id === 'F5'));
+assert.equal(new Set([...pu2Unit1, ...pu2Unit2, ...pu2Unit3, ...pu2Unit4, ...pu2Unit5, ...pu2Unit6].map(e => e.key)).size, 333);
+for (const [page, missing, fix] of [[78,19,23],[81,4,6]]) {
+    const items = pu2Unit6.filter(e => e.page === String(page));
+    assert.equal(items.filter(e => e.answers).length, missing);
+    assert.equal(items.filter(e => e.answer).length, fix);
+    assert.ok(!content.buildPool('PU2', 6, page).entries.some(e => e.item.unit === '6' && Number(e.item.page) > page));
+    for (let sample = 0; sample < 20; sample++) {
+        const picked = content.select('PU2', 6, page, 5);
+        assert.equal(picked.length, 5);
+        assert.ok(new Set(picked.map(e => e.type)).size >= 3);
+    }
+}
+assert.ok(!content.buildPool('PU2', 5, 62).entries.some(e => e.item.unit === '6'));
+for (const [id, sentences, answers] of [
+    ['M13', ['It ___ cold yesterday.','___ hot today.'], ['was',"it's"]],
+    ['M14', ['We ___ on holiday last week.','___ at school today.'], ['were',"we're"]]
+]) {
+    const item = pu2Unit6.find(e => e.id === id);
+    assert.deepEqual(Array.from(item.sentences), sentences);
+    assert.deepEqual(Array.from(item.answers), answers);
+    assert.equal(item.prefixes, undefined);
+}
+for (const id of ['F25','F26']) assert.equal(pu2Unit6.find(e => e.id === id).wrongIndex, 5);
+for (const item of pu2Unit6.filter(e => e.prefixes)) {
+    assert.equal(item.prefixes.length, item.answers.length);
+    item.prefixes.forEach((prefix, i) => assert.ok(item.answers[i].startsWith(prefix)));
+}
+assert.equal(new Set(pu2Unit6.filter(e => e.answer).map(e => e.sentence)).size, 29);
+const pu2Unit7 = content.buildPool('PU2', 7, 87).entries.filter(e => e.item.id && e.item.unit === '7').map(e => e.item);
+assert.equal(pu2Unit7.filter(e => e.answers).length, 28);
+assert.equal(pu2Unit7.filter(e => e.answer).length, 36);
+assert.equal(new Set([...pu2Unit1, ...pu2Unit2, ...pu2Unit3, ...pu2Unit4, ...pu2Unit5, ...pu2Unit6, ...pu2Unit7].map(e => e.key)).size, 397);
+for (const [page, missing, fix] of [[83,6,8],[85,10,12],[87,12,16]]) {
+    const items = pu2Unit7.filter(e => e.page === String(page));
+    assert.equal(items.filter(e => e.answers).length, missing);
+    assert.equal(items.filter(e => e.answer).length, fix);
+    assert.ok(!content.buildPool('PU2', 7, page).entries.some(e => e.item.unit === '7' && Number(e.item.page) > page));
+    for (let sample = 0; sample < 20; sample++) {
+        const picked = content.select('PU2', 7, page, 5);
+        assert.equal(picked.length, 5);
+        assert.ok(new Set(picked.map(e => e.type)).size >= 3);
+    }
+}
+assert.ok(!content.buildPool('PU2', 6, 81).entries.some(e => e.item.unit === '7'));
+const pu2Unit7M1 = pu2Unit7.find(e => e.id === 'M1');
+assert.deepEqual(Array.from(pu2Unit7M1.sentences), ["I've got some bread and some ___.", 'I can make a ___ ___.']);
+assert.deepEqual(Array.from(pu2Unit7M1.answers), ['cheese','cheese','sandwich']);
+assert.deepEqual(Array.from(pu2Unit7M1.prefixes), ['ch','ch','s']);
+for (const item of pu2Unit7.filter(e => e.prefixes)) {
+    assert.equal(item.prefixes.length, item.answers.length);
+    item.prefixes.forEach((prefix, i) => assert.ok(item.answers[i].startsWith(prefix)));
+}
+assert.equal(new Set(pu2Unit7.filter(e => e.answer).map(e => e.sentence)).size, 36);
+const pu2Unit8 = content.buildPool('PU2', 8, 104).entries.filter(e => e.item.id && e.item.unit === '8').map(e => e.item);
+assert.equal(pu2Unit8.filter(e => e.answers).length, 29);
+assert.equal(pu2Unit8.filter(e => e.answer).length, 39);
+assert.ok(!pu2Unit8.some(e => e.id === 'M30' || e.id === 'F40'));
+assert.equal(new Set([...pu2Unit1, ...pu2Unit2, ...pu2Unit3, ...pu2Unit4, ...pu2Unit5, ...pu2Unit6, ...pu2Unit7, ...pu2Unit8].map(e => e.key)).size, 465);
+for (const [page, missing, fix] of [[95,4,6],[96,7,10],[97,5,6],[98,6,8],[104,7,9]]) {
+    const items = pu2Unit8.filter(e => e.page === String(page));
+    assert.equal(items.filter(e => e.answers).length, missing);
+    assert.equal(items.filter(e => e.answer).length, fix);
+    assert.ok(!content.buildPool('PU2', 8, page).entries.some(e => e.item.unit === '8' && Number(e.item.page) > page));
+    for (let sample = 0; sample < 20; sample++) {
+        const picked = content.select('PU2', 8, page, 5);
+        assert.equal(picked.length, 5);
+        assert.ok(new Set(picked.map(e => e.type)).size >= 3);
+    }
+}
+assert.ok(!content.buildPool('PU2', 7, 93).entries.some(e => e.item.unit === '8'));
+for (const [id, answers, prefixes] of [
+    ['M7',['lost','found'],['l','f']], ['M8',['gave','hid'],['g','h']],
+    ['M10',['sat','was','slept'],['s','w','s']], ['M29',['crossing','light'],['c','l']]
+]) {
+    const item = pu2Unit8.find(e => e.id === id);
+    assert.deepEqual(Array.from(item.answers), answers);
+    assert.deepEqual(Array.from(item.prefixes), prefixes);
+}
+assert.equal(pu2Unit8.find(e => e.id === 'M2').sentences[1], 'We use a ___ to know where to go.');
+assert.equal(pu2Unit8.find(e => e.id === 'M5').sentences[1], 'He cooked his lunch at home, then ___ it on the train.');
+assert.equal(pu2Unit8.find(e => e.id === 'M8').sentences[1], "She and Grandpa ___ behind the sofa and said 'Surprise!' when I came in.");
+for (const [id, sentence, wrong, answer] of [
+    ['F1','We leave our car in the car station.','station','park'],
+    ['F2','We catch a train at the train park.','park','station'],
+    ['F3','We have to buy a sandwich to get on the train.','sandwich','ticket'],
+    ['F4','We use a menu to know where to go.','menu','map'],
+    ['F29','We can catch a bus at the bus park.','park','station']
+]) {
+    const item = pu2Unit8.find(e => e.id === id);
+    assert.equal(item.sentence, sentence); assert.equal(item.wrongWord, wrong); assert.equal(item.answer, answer);
+}
+for (const item of pu2Unit8.filter(e => e.prefixes)) {
+    assert.equal(item.prefixes.length, item.answers.length);
+    item.prefixes.forEach((prefix, i) => assert.ok(item.answers[i].startsWith(prefix)));
+}
+assert.equal(new Set(pu2Unit8.filter(e => e.answer).map(e => e.sentence)).size, 39);
+const pu2Unit9 = content.buildPool('PU2', 9, 119).entries.filter(e => e.item.id && e.item.unit === '9').map(e => e.item);
+assert.equal(pu2Unit9.filter(e => e.answers).length, 28);
+assert.equal(pu2Unit9.filter(e => e.answer).length, 34);
+assert.ok(!pu2Unit9.some(e => e.id === 'F22' || e.id === 'F23'));
+assert.equal(new Set([...pu2Unit1, ...pu2Unit2, ...pu2Unit3, ...pu2Unit4, ...pu2Unit5, ...pu2Unit6, ...pu2Unit7, ...pu2Unit8, ...pu2Unit9].map(e => e.key)).size, 527);
+for (const [page, missing, fix] of [[107,6,8],[109,8,10],[116,8,8],[119,6,8]]) {
+    const items = pu2Unit9.filter(e => e.page === String(page));
+    assert.equal(items.filter(e => e.answers).length, missing);
+    assert.equal(items.filter(e => e.answer).length, fix);
+    assert.ok(!content.buildPool('PU2', 9, page).entries.some(e => e.item.unit === '9' && Number(e.item.page) > page));
+    for (let sample = 0; sample < 20; sample++) {
+        const picked = content.select('PU2', 9, page, 5);
+        assert.equal(picked.length, 5);
+        assert.ok(new Set(picked.map(e => e.type)).size >= 3);
+    }
+}
+assert.ok(!content.buildPool('PU2', 8, 104).entries.some(e => e.item.unit === '9'));
+for (const [id, answers, prefixes] of [
+    ['M8',['more','exciting','boring','than'],['','e','b','']],
+    ['M9',['more','difficult','dangerous','than'],['','d','d','']],
+    ['M10',['was','easier','is','hungrier','than'],['w','e','','h','t']],
+    ['M11',['thirstier','than','was','more','than'],['t','t','','','']],
+    ['M13',['is','more','than'],['','m','t']],
+    ['M14',['is','more','than','was','more','boring','than'],['','','','w','','b','']],
+    ['M17',['one','of','the','most','the','most'],['o','o','','m','','']],
+    ['M18',['the','most','one','of','the','most'],['','m','o','o','','']]
+]) {
+    const item = pu2Unit9.find(e => e.id === id);
+    assert.deepEqual(Array.from(item.answers), answers);
+    assert.deepEqual(Array.from(item.prefixes), prefixes);
+}
+assert.equal(pu2Unit9.find(e => e.id === 'M3').sentences[1], "I'm ___ of big, angry dogs.");
+assert.deepEqual(Array.from(pu2Unit9.find(e => e.id === 'M13').sentences), ['This game ___ ___ exciting ___ that one.']);
+assert.equal(pu2Unit9.find(e => e.id === 'M17').sentences[0], 'This is ___ ___ ___ ___ beautiful cities in the world.');
+for (const [id, sentence, answer] of [
+    ['F6','The ride was boring. Everyone thought it was so much fun!','exciting'],
+    ['F7','The test was easy. Everyone got 0/100.','difficult'],
+    ['F8','Fighting bears is very safe. You can get badly hurt doing it.','dangerous']
+]) {
+    assert.equal(pu2Unit9.find(e => e.id === id).sentence, sentence);
+    assert.equal(pu2Unit9.find(e => e.id === id).answer, answer);
+}
+for (const item of pu2Unit9.filter(e => e.prefixes)) {
+    assert.equal(item.prefixes.length, item.answers.length);
+    item.prefixes.forEach((prefix, i) => assert.ok(item.answers[i].startsWith(prefix)));
+}
+assert.equal(new Set(pu2Unit9.filter(e => e.answer).map(e => e.sentence)).size, 34);
+for (const item of [...unit1, ...unit2, ...unit3, ...unit4, ...unit5, ...unit6, ...unit7, ...unit8, ...unit9, ...pu2Unit1, ...pu2Unit2, ...pu2Unit3, ...pu2Unit4, ...pu2Unit5, ...pu2Unit6, ...pu2Unit7, ...pu2Unit8, ...pu2Unit9]) {
     if (item.answers) assert.equal(item.sentences.join(' ').split('___').length - 1, item.answers.length, item.id + ' has one target per blank');
     else if (Number.isInteger(item.wrongIndex)) assert.equal(item.sentence.split(' ')[item.wrongIndex].replace(/[.,!?]+$/, '').toLowerCase(), item.wrongWord, item.id + ' explicitly identifies its repeated wrong token');
     else assert.equal(item.sentence.split(' ').filter(word => word.replace(/[.,!?]+$/, '').toLowerCase() === item.wrongWord).length, 1, item.id + ' identifies exactly one wrong token');

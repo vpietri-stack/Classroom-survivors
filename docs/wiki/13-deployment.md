@@ -265,3 +265,24 @@ Preview release 2026-10-14l publishes the 48 approved PU3 flashcard PNGs and the
 Preview-only 2026-10-14m corrects PU1 U2 and PU2 U4 availability. Both changed book-pack cache busters advance in the student page and dashboard; the stamp trio and dashboard auth link remain synchronized. Existing 48 PU3 flashcards and the missing-page guard are retained. Production is not updated by this release.
 
 Production release 2026-10-15a promotes the validated preview b63a306 content and 48 flashcards, including the 2026-10-14m registry correction (PU1 Unit 2 removes pages 24/25; PU2 Unit 4 exposes page 47). It is built on origin/main without merging preview history or closing the isolated preview API PR. Production config/API routing, the already-enabled mixed exercise gate and dashboard cache busters are retained. New curriculum/widget/CSS/translation cache busters and all version stamps advance together. Existing students, SR keys, backend/data and page 109 content remain intact. Production Pages and Azure deployment plus served-file checks are required before completion.
+
+
+Preview release 2026-10-15a publishes only the approved PU2 Unit 1 22 M/24 F boards. The non-spelling curriculum cache buster advances with the synchronized stamp trio and dashboard auth link. Production and isolated preview API/data remain unchanged; PU2 Unit 2 is still a review-only proposal.
+
+Preview release 2026-10-15b publishes the approved PU2 Unit 2 typed boards and Tuesday/Monday pair correction. The book-pack and non-spelling curriculum cache busters advance with the synchronized stamp trio and dashboard auth link. Production and isolated preview API/data are unchanged; Unit 3 remains review-only.
+
+Preview release 2026-10-15c publishes the approved PU2 Unit 3 typed boards. The non-spelling curriculum cache buster advances with the synchronized stamp trio and dashboard auth link. Production and isolated preview API/data are unchanged; Unit 4 remains review-only.
+
+Preview release 2026-10-15d publishes the approved PU2 Unit 4 30 M/40 F typed boards, including than and floor/roof practice. The shared curriculum cache buster advances with the synchronized stamp trio and dashboard auth link. Production and isolated preview API/data are unchanged; Unit 5 remains review-only.
+
+Preview release 2026-10-15e publishes approved PU2 Unit 5 boards with teacher annotations applied. The curriculum cache buster, version/auth/index stamps and dashboard auth URL advance together. Production and preview API/data remain unchanged; Unit 6 is review-only.
+
+Preview release 2026-10-15f publishes approved PU2 Unit 6 boards, removing M5/F5 and applying the M13/M14 contraction edits. The curriculum cache buster and synchronized version/auth/index/dashboard stamps advance together. Production and preview API/data remain unchanged; Unit 7 is review-only.
+
+Preview release 2026-10-15g publishes approved PU2 Unit 7 boards with the teacher's M1 cheese-sandwich edit. The curriculum cache buster and synchronized version/auth/index/dashboard stamps advance together. Production and preview API/data remain unchanged; Unit 8 is review-only.
+
+Preview release 2026-10-16a publishes approved PU2 Unit 8 boards with the teacher's twelve annotations applied. The curriculum cache buster and synchronized version/auth/index/dashboard stamps advance together. Production and preview API/data remain unchanged; Unit 9 is review-only.
+
+Preview release 2026-10-16b publishes approved PU2 Unit 9 with all teacher annotations, expanded grammar blanks and F22/F23 omitted. The curriculum cache buster and synchronized version/auth/index/dashboard stamps advance together. All nine PU2 units are prepared for the explicitly authorized production promotion using a separate production-based worktree.
+
+Production release 2026-10-16b promotes all approved PU2 Units 1-9: 236 missing-word boards and 291 find-fix exercises, the Tuesday/Monday pair fix and answer-length support for granddaughter. It is based on current origin/main in a separate production worktree, preserving production API/config and all prior PU3 content/images. Curriculum/widget and synchronized auth/version/index/dashboard stamps advance together. Preview is verified before pushing origin/main; production Pages and Azure workflows plus hosted-file checks are then verified independently.

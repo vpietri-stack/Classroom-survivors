@@ -19,21 +19,21 @@ TEACHING_CONTENT["PU3"] = {
                 'why', 'because',
                 'aunt', 'uncle', 'cousin', 'daughter', 'son', 'granddaughter', 'grandson', 'grandparents', 'parents',
                 'balcony', 'basement', 'downstairs', 'upstairs', 'lift', 'roof', 'stairs', 'first floor', 'second floor', 'third floor', 'garage', 'garden',
-                'mine', 'yours', 'his', 'hers', 'ours', 'theirs', 'than',
+                "I - my - mine", "you - your - yours", "he - his - his", "she - her - hers", "we - our - ours", "they - their - theirs", 'than',
                 'old - older than', 'young - younger than', 'big - bigger than', 'small - smaller than', 'tall - taller than', 'short - shorter than', 'good - better than', 'bad - worse than', 'clean - cleaner than', 'clever - cleverer than', 'long - longer than', 'new - newer than', 'nice - nicer than', 'quiet - quieter than', 'straight - straighter than', 'curly - curlier than', 'dirty - dirtier than', 'funny - funnier than', 'happy - happier than', 'naughty - naughtier than', 'pretty - prettier than', 'silly - sillier than', 'ugly - uglier than', 'fat - fatter than', 'sad - sadder than', 'thin - thinner than',
                 'bat', 'bear', 'dolphin', 'kangaroo', 'lion', 'panda', 'parrot', 'penguin', 'rabbit', 'whale', 'shark',
                 'cage', 'above', 'below', 'near', 'opposite',
                 'good - the best', 'bad - the worst', 'most', 'least', 'big - the biggest', 'small - the smallest', 'tall - the tallest', 'short - the shortest', 'fast - the fastest', 'slow - the slowest', 'clean - the cleanest', 'clever - the cleverest', 'long - the longest', 'new - the newest', 'nice - the nicest', 'quiet - the quietest', 'straight - the straightest', 'young - the youngest', 'curly - the curliest', 'dirty - the dirtiest', 'funny - the funniest', 'happy - the happiest', 'naughty - the naughtiest', 'pretty - the prettiest', 'silly - the silliest', 'ugly - the ugliest', 'fat - the fattest', 'sad - the saddest', 'thin - the thinnest', 'quick - the quickest', 'brave - the bravest',
                 'cloud', 'cloudy', 'rainbow', 'rain', 'rainy', 'snow', 'snowy', 'sun', 'sunny', 'wind', 'windy', 'fog', 'foggy', 'hot', 'cold',
                 'boots', 'coat', 'scarf', 'sweater', 'gloves', 'hat', 'raincoat', 'umbrella',
-                "wasn't", "weren't", 'yesterday', 'last night', 'last week',
+                "am not - wasn't", "isn't - wasn't", "aren't - weren't", 'yesterday', 'last night', 'last week',
                 'beans', 'cheese', 'chicken', 'eggs', 'flour', 'fruit', 'meat', 'pasta', 'peas', 'pepper', 'potatoes', 'rice', 'salt', 'soup', 'sugar', 'vegetables',
                 'boil - boiling', 'boil - boiled', 'buy - buying', 'buy - bought', 'carry - carrying', 'carry - carried', 'catch - catching', 'catch - caught', 'climb - climbing', 'climb - climbed', 'come - coming', 'come - came', 'cook - cooking', 'cook - cooked', 'cry - crying', 'cry - cried', 'cut - cutting', 'cut - cut', 'dance - dancing', 'dance - danced', 'do - doing', 'do - did', 'draw - drawing', 'draw - drew', 'drink - drinking', 'drink - drank', 'drop - dropping', 'drop - dropped', 'eat - eating', 'eat - ate', 'fall - falling', 'fall - fell', 'find - finding', 'find - found', 'fly - flying', 'fly - flew', 'fry - frying', 'fry - fried', 'get - getting', 'get - got', 'give - giving', 'give - gave', 'go - going', 'go - went', 'have - having', 'have - had', 'help - helping', 'help - helped', 'hide - hiding', 'hide - hid', 'hop - hopping', 'hop - hopped', 'jump - jumping', 'jump - jumped', 'kick - kicking', 'kick - kicked', 'like - liking', 'like - liked', 'look - looking', 'look - looked', 'lose - losing', 'lose - lost', 'make - making', 'make - made', 'play - playing', 'play - played', 'ride - riding', 'ride - rode', 'run - running', 'run - ran', 'see - seeing', 'see - saw', 'smile - smiling', 'smile - smiled', 'start - starting', 'start - started', 'stop - stopping', 'stop - stopped', 'swim - swimming', 'swim - swam', 'take - taking', 'take - took', 'walk - walking', 'walk - walked', 'wash - washing', 'wash - washed', 'wear - wearing', 'wear - wore',
                 'is - was', 'am - was', 'are - were',
                 'bus station', 'café', 'cinema', 'hospital', 'library', 'market', 'shopping centre', 'sports centre', 'supermarket', 'swimming pool', 'zoo',
                 'car park', 'litter bin', 'pavement', 'square', 'traffic lights', 'ticket',
                 'have to',
-                'afraid - more afraid', 'afraid - the most afraid', 'angry - angrier than', 'angry - the angriest', 'boring - more boring', 'boring - the most boring', 'busy - busier than', 'busy - the busiest', 'dangerous - more dangerous', 'dangerous - the most dangerous', 'difficult - more difficult', 'difficult - the most difficult', 'easy - easier than', 'easy - the easiest', 'exciting - more exciting', 'exciting - the most exciting', 'frightened - more frightened', 'frightened - the most frightened', 'hungry - hungrier than', 'hungry - the hungriest', 'interesting - more interesting', 'interesting - the most interesting', 'surprised - more surprised', 'surprised - the most surprised', 'thirsty - thirstier than', 'thirsty - the thirstiest', 'tired - more tired', 'tired - the most tired', 'beautiful - more beautiful', 'beautiful - the most beautiful', 'famous - more famous', 'famous - the most famous',
+                "afraid - more afraid than", 'afraid - the most afraid', 'angry - angrier than', 'angry - the angriest', "boring - more boring than", 'boring - the most boring', 'busy - busier than', 'busy - the busiest', "dangerous - more dangerous than", 'dangerous - the most dangerous', "difficult - more difficult than", 'difficult - the most difficult', 'easy - easier than', 'easy - the easiest', "exciting - more exciting than", 'exciting - the most exciting', "frightened - more frightened than", 'frightened - the most frightened', 'hungry - hungrier than', 'hungry - the hungriest', "interesting - more interesting than", 'interesting - the most interesting', "surprised - more surprised than", 'surprised - the most surprised', 'thirsty - thirstier than', 'thirsty - the thirstiest', "tired - more tired than", 'tired - the most tired', "beautiful - more beautiful than", 'beautiful - the most beautiful', "famous - more famous than", 'famous - the most famous',
                 'more', 'one of the'
             ],
             sentences: [
@@ -263,7 +263,7 @@ TEACHING_CONTENT["PU3"] = {
                 'who', 'what', 'when', 'where', 'which', 'why', 'how',
 
                 // Past ability
-                'was', 'were', 'could', "couldn't"
+                "am - was", "is - was", "are - were", "can - could", "can't - couldn't"
             ],
             sentences: [
                 "What time is it? It's three o'clock.",
@@ -310,8 +310,8 @@ TEACHING_CONTENT["PU3"] = {
                 'pancakes', 'coffee', 'tea', 'soup', 'rice', 'salad',
 
                 // Past simple irregular verbs
-                'build built', 'grow up grew up', 'teach taught', 'see saw',
-                'drive drove', 'give gave', 'write wrote', 'tell told', 'take took', 'have had',
+                "build - built", "grow up - grew up", "teach - taught", "see - saw",
+                "drive - drove", "give - gave", "write - wrote", "tell - told", "take - took", "have - had",
 
                 // Relative clause words
                 'who', 'which', 'where', 'when',
@@ -365,9 +365,9 @@ TEACHING_CONTENT["PU3"] = {
                 'stomach-ache', 'sore throat', 'cold',
 
                 // Comparatives and superlatives
-                'stronger', 'strongest', 'taller', 'tallest', 'faster', 'fastest',
-                'bigger', 'biggest', 'smaller', 'smallest',
-                'more dangerous', 'most dangerous', 'more beautiful', 'most beautiful',
+                "strong - stronger than", "strong - the strongest", "tall - taller than", "tall - the tallest", "fast - faster than", "fast - the fastest",
+                "big - bigger than", "big - the biggest", "small - smaller than", "small - the smallest",
+                "dangerous - more dangerous than", "dangerous - the most dangerous", "beautiful - more beautiful than", "beautiful - the most beautiful",
 
                 // Equality
                 'as', 'not as',
@@ -433,7 +433,7 @@ TEACHING_CONTENT["PU3"] = {
                 'carefully', 'beautifully', 'hard', 'fast',
 
                 // Comparative adverbs
-                'better', 'worse', 'more quickly', 'more slowly', 'more carefully'
+                "well - better than", "badly - worse than", "quickly - more quickly than", "slowly - more slowly than", "carefully - more carefully than"
             ],
             sentences: [
                 "We mustn't talk loudly.",
@@ -504,7 +504,7 @@ TEACHING_CONTENT["PU3"] = {
         },
         "59": {
             vocab: [
-                'rubber', 'made of', 'recycle', 'eraser', 'painted', 'cut', 'watch', 'diary', 'bowl', 'boots'
+                'rubber', 'made of', 'recycle', 'eraser', "paint - painted", 'cut', 'watch', 'diary', 'bowl', 'boots'
             ],
             sentences: [
                 "What is new tree made of?",
@@ -542,7 +542,7 @@ TEACHING_CONTENT["PU3"] = {
                 'paper', 'rubber', 'card', 'glass', 'metal', 'plastic', 'wood', 'wool',
 
                 // Suggestions
-                'shall', 'could', "let's",
+                'shall', "can - could", "let's",
 
                 // Other
                 'design', 'prop', 'made of', 'use'
@@ -627,7 +627,7 @@ TEACHING_CONTENT["PU3"] = {
             vocab: [
                 'Turkey', 'market', 'stone', 'sea',
                 'project', 'research', 'information', 'geography', 'history', 'art', 'exam', 'study', 'topic', 'homework',
-                'fishing', 'sailing', 'windsurfing',
+                "fish - fishing", "sail - sailing", "windsurf - windsurfing",
                 'should', "shouldn't", 'listen', 'help', 'finish', 'stay', 'lunch', 'break', 'problem', 'question'
             ],
             sentences: [

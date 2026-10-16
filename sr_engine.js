@@ -40,6 +40,219 @@ const SR_NEW_CONTENT_RATIO = 0.2;
 // teacher dashboard can surface these items later.
 const SR_LEECH_LAPSES = 4;
 
+// Exact legacy vocabulary labels, retained so renamed items keep their SR history.
+const VOCAB_SR_LEGACY_KEYS = Object.freeze({
+    "you - your": ["your"],
+    "i - my": ["my"],
+    "get - got": ["get got","got"],
+    "he - his": ["his"],
+    "she - her": ["her"],
+    "they - their": ["their"],
+    "ride - riding": ["riding"],
+    "swim - swimming": ["swimming"],
+    "watch - watching": ["watching"],
+    "clean - cleaning": ["clean cleaning","cleaning"],
+    "play - playing": ["play playing","playing"],
+    "paint - painting": ["painting"],
+    "do - doing": ["do doing","doing"],
+    "eat - eating": ["eat eating","eating"],
+    "ride a bike - riding a bike": ["riding a bike"],
+    "watch tv - watching tv": ["watching tv"],
+    "skateboard - skateboarding": ["skateboarding"],
+    "run - running": ["running"],
+    "jump - jumping": ["jumping"],
+    "smile - smiling": ["smiling"],
+    "listen to music - listening to music": ["listening to music"],
+    "fish - fishing": ["fishing"],
+    "fly - flying": ["flying"],
+    "take - taking": ["take taking","taking"],
+    "collect - collecting": ["collecting"],
+    "i - me": ["me"],
+    "dig - digging": ["digging"],
+    "wash - washing": ["wash washing"],
+    "look - looking": ["look looking"],
+    "drink - drinking": ["drink drinking"],
+    "sleep - sleeping": ["sleep sleeping"],
+    "walk - walking": ["walk walking"],
+    "put on - putting on": ["put on putting on"],
+    "take off - taking off": ["take off taking off"],
+    "drive - driving": ["drive driving"],
+    "read - reading": ["read reading"],
+    "talk - talking": ["talk talking"],
+    "sing - singing": ["sing singing"],
+    "go - going": ["going"],
+    "get - getting": ["getting"],
+    "have - having": ["having"],
+    "kick - kicking": ["kicking"],
+    "big - bigger than": ["bigger"],
+    "clean - cleaner than": ["cleaner"],
+    "fat - fatter than": ["fatter"],
+    "funny - funnier than": ["funnier"],
+    "long - longer than": ["longer"],
+    "nice - nicer than": ["nicer"],
+    "old - older than": ["older"],
+    "pretty - prettier than": ["prettier"],
+    "short - shorter than": ["shorter"],
+    "small - smaller than": ["smaller"],
+    "tall - taller than": ["taller"],
+    "thin - thinner than": ["thinner"],
+    "young - younger than": ["younger"],
+    "good - better than": ["better"],
+    "bad - worse than": ["worse"],
+    "i - my - mine": ["mine"],
+    "you - your - yours": ["yours"],
+    "he - his - his": ["his"],
+    "she - her - hers": ["hers"],
+    "we - our - ours": ["ours"],
+    "they - their - theirs": ["theirs"],
+    "am - was": ["was"],
+    "is - was": ["was"],
+    "are - were": ["were"],
+    "am not - wasn't": ["wasn't"],
+    "isn't - wasn't": ["wasn't"],
+    "aren't - weren't": ["weren't"],
+    "good - the best": ["the best"],
+    "bad - the worst": ["the worst"],
+    "big - the biggest": ["biggest"],
+    "small - the smallest": ["smallest"],
+    "tall - the tallest": ["tallest"],
+    "short - the shortest": ["shortest"],
+    "fast - the fastest": ["fastest"],
+    "slow - the slowest": ["slowest"],
+    "bring - brought": ["bring brought"],
+    "do - did": ["do did"],
+    "drink - drank": ["drink drank"],
+    "eat - ate": ["eat ate"],
+    "go - went": ["go went"],
+    "have - had": ["have had"],
+    "make - made": ["make made"],
+    "put - put": ["put","put put"],
+    "see - saw": ["see saw"],
+    "boil - boiled": ["boil boiled"],
+    "cook - cooked": ["cook cooked"],
+    "cut - cut": ["cut","cut cut"],
+    "fry - fried": ["fry fried"],
+    "carry - carried": ["carry carried"],
+    "drop - dropped": ["drop dropped"],
+    "wash - washed": ["wash washed"],
+    "cry - cried": ["cry cried"],
+    "dance - danced": ["dance danced"],
+    "help - helped": ["help helped"],
+    "like - liked": ["like liked"],
+    "look - looked": ["look looked"],
+    "play - played": ["play played"],
+    "start - started": ["start started"],
+    "stop - stopped": ["stop stopped"],
+    "smile - smiled": ["smile smiled"],
+    "clap - clapped": ["clap clapped"],
+    "invite - invited": ["invite invited"],
+    "laugh - laughed": ["laugh laughed"],
+    "buy - bought": ["buy bought"],
+    "choose - chose": ["choose chose"],
+    "drive - drove": ["drive drove"],
+    "find - found": ["find found"],
+    "give - gave": ["give gave"],
+    "hide - hid": ["hide hid"],
+    "lose - lost": ["lose lost"],
+    "ride - rode": ["ride rode"],
+    "sit - sat": ["sit sat"],
+    "sleep - slept": ["sleep slept"],
+    "stand - stood": ["stand stood"],
+    "tell - told": ["tell told"],
+    "take - took": ["take took"],
+    "wear - wore": ["wear wore"],
+    "draw - drew": ["draw drew"],
+    "feed - fed": ["feed fed"],
+    "catch - caught": ["catch caught"],
+    "come - came": ["come came"],
+    "afraid - more afraid than": ["afraid - more afraid"],
+    "boring - more boring than": ["boring - more boring"],
+    "dangerous - more dangerous than": ["dangerous - more dangerous","more dangerous"],
+    "difficult - more difficult than": ["difficult - more difficult"],
+    "exciting - more exciting than": ["exciting - more exciting"],
+    "frightened - more frightened than": ["frightened - more frightened"],
+    "interesting - more interesting than": ["interesting - more interesting"],
+    "surprised - more surprised than": ["surprised - more surprised"],
+    "tired - more tired than": ["tired - more tired"],
+    "beautiful - more beautiful than": ["beautiful - more beautiful","more beautiful"],
+    "famous - more famous than": ["famous - more famous"],
+    "can - could": ["could"],
+    "can't - couldn't": ["couldn't"],
+    "build - built": ["build built"],
+    "grow up - grew up": ["grow up grew up"],
+    "teach - taught": ["teach taught"],
+    "write - wrote": ["write wrote"],
+    "strong - stronger than": ["stronger"],
+    "strong - the strongest": ["strongest"],
+    "fast - faster than": ["faster"],
+    "dangerous - the most dangerous": ["most dangerous"],
+    "beautiful - the most beautiful": ["most beautiful"],
+    "well - better than": ["better"],
+    "badly - worse than": ["worse"],
+    "quickly - more quickly than": ["more quickly"],
+    "slowly - more slowly than": ["more slowly"],
+    "carefully - more carefully than": ["more carefully"],
+    "paint - painted": ["painted"],
+    "sail - sailing": ["sailing"],
+    "windsurf - windsurfing": ["windsurfing"],
+    "arrive - arrived": ["arrive arrived"],
+    "ask - asked": ["ask asked"],
+    "decide - decided": ["decide decided"],
+    "hate - hated": ["hate hated"],
+    "live - lived": ["live lived"],
+    "love - loved": ["love loved"],
+    "move - moved": ["move moved"],
+    "phone - phoned": ["phone phoned"],
+    "stay - stayed": ["stay stayed"],
+    "study - studied": ["study studied"],
+    "tidy - tidied": ["tidy tidied"],
+    "visit - visited": ["visit visited"],
+    "want - wanted": ["want wanted"],
+    "watch - watched": ["watch watched"],
+    "work - worked": ["work worked"],
+    "become - became": ["become became"],
+    "feel - felt": ["feel felt"],
+    "fly - flew": ["fly flew"],
+    "know - knew": ["know knew"],
+    "leave - left": ["leave left"],
+    "meet - met": ["meet met"],
+    "read - read": ["read"],
+    "run - ran": ["run ran"],
+    "say - said": ["say said"],
+    "send - sent": ["send sent"],
+    "speak - spoke": ["speak spoke"],
+    "think - thought": ["think thought"],
+    "win - won": ["win won"],
+});
+
+// Latest session wins. A canonical record wins ties so a new answer cannot be
+// shadowed by an old alias during another practice run on the same SR day.
+// If only legacy labels tie, prefer their failure over hiding a missed item.
+function getVocabSRRecord(bucket, key) {
+    const aliases = Object.prototype.hasOwnProperty.call(VOCAB_SR_LEGACY_KEYS, key)
+        ? VOCAB_SR_LEGACY_KEYS[key] : [];
+    if (!aliases.length) return bucket && bucket[key];
+    const keys = [key, ...aliases];
+    const records = keys.map(k => ({ key: k, value: bucket && bucket[k] }))
+        .filter(r => r.value && typeof r.value === 'object');
+    if (!records.length) return undefined;
+    const session = r => Number.isFinite(r.value.lastSession) ? r.value.lastSession : -1;
+    records.sort((a, b) => session(b) - session(a)
+        || Number(b.key === key) - Number(a.key === key)
+        || Number(b.value.lastResult === 'failure') - Number(a.value.lastResult === 'failure')
+        || a.key.localeCompare(b.key));
+    const result = { ...records[0].value };
+    // Never sum lapses: two old labels may describe the same failed attempt.
+    result.lapses = Math.max(0, ...records.map(r => Number(r.value.lapses) || 0));
+    if (result.lastResult === 'failure') {
+        result.priorInterval = Math.max(0, ...records.map(r => Math.max(
+            Number(r.value.priorInterval) || 0,
+            r.value.lastResult === 'success' ? Number(r.value.interval) || 0 : 0
+        )));
+    }
+    return result;
+}
+
 /**
  * Priority groups (lower = higher priority):
  *   0  failed during THIS game session (in-memory inSessionFailures set)
@@ -66,7 +279,7 @@ function getSRPriority(key, srTypeState, currentSession, inSessionFailures, inSe
         return { group: 5, dueAfterSession: null };
     }
 
-    const entry = srTypeState && srTypeState[key];
+    const entry = getVocabSRRecord(srTypeState, key);
     if (!entry) {
         return { group: 3, dueAfterSession: null };
     }
@@ -369,7 +582,9 @@ function updateSRStateForSession(srState, sessionResults, currentSession) {
     (sessionResults || []).forEach(({ type, key, firstAttempt }) => {
         if (!type || !key || !newState[type]) return;
 
-        const existing = newState[type][key];
+        const existing = type === 'vocab'
+            ? getVocabSRRecord(newState.vocab, key)
+            : newState[type][key];
 
         if (firstAttempt) {
             const prevResult = existing && existing.lastResult;

@@ -1,7 +1,7 @@
 TEACHING_CONTENT["PU1"] = {
     "0": {
         "5": {
-            vocab: ["what's", 'your', 'name', "I'm", 'how', 'old', 'are', 'you',
+            vocab: ["what's", "you - your", 'name', "I'm", 'how', 'old', 'are', 'you',
                 'hello', 'hi',
                 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
                 'red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink', 'grey', 'black', 'white', 'brown'
@@ -59,7 +59,7 @@ TEACHING_CONTENT["PU1"] = {
             ]
         },
         "8": {
-            vocab: ['school', 'classroom', 'rubber', 'pencil', 'teacher', 'bag', 'crayon', 'desk', 'chair', 'book', 'pen', 'pencil case', 'the', 'is', 'in', "where's", 'on', 'under', 'next to', 'my', "it's", "they're"],
+            vocab: ['school', 'classroom', 'rubber', 'pencil', 'teacher', 'bag', 'crayon', 'desk', 'chair', 'book', 'pen', 'pencil case', 'the', 'is', 'in', "where's", 'on', 'under', 'next to', "I - my", "it's", "they're"],
             sentences: [
                 "Where's the bag? It's on the desk.",
                 "Where's the pencil? It's under the desk.",
@@ -190,7 +190,7 @@ TEACHING_CONTENT["PU1"] = {
                 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'a', 'an', 'the',
 
                 // Question Words & Possessives
-                "what's", "where's", 'your', 'my',
+                "what's", "where's", "you - your", "I - my",
 
                 // Positions & Demonstratives
                 'in', 'on', 'under', 'next to', 'this', 'these', 'is', "isn't", 'are', "aren't"
@@ -302,7 +302,7 @@ TEACHING_CONTENT["PU1"] = {
             ]
         },
         "20": {
-            vocab: ['mum', 'are', 'these', 'animal', 'my', 'family', 'no', 'they', "aren't", 'your', 'is', 'sister', "isn't", 'friend', 'look', 'at', 'he', 'brother', 'understand', "who's", 'this', 'girl', 'boy', "they're"],
+            vocab: ['mum', 'are', 'these', 'animal', "I - my", 'family', 'no', 'they', "aren't", "you - your", 'is', 'sister', "isn't", 'friend', 'look', 'at', 'he', 'brother', 'understand', "who's", 'this', 'girl', 'boy', "they're"],
             sentences: [
                 "Mum, are these animals my family?",
                 "They aren't your family.",
@@ -325,7 +325,7 @@ TEACHING_CONTENT["PU1"] = {
             ]
         },
         "21": {
-            vocab: ['who', 'is', 'she', 'he', "she's", "he's", 'a', 'girl', 'boy', 'this', 'Dad', 'Mum', 'my', 'father', 'mother', 'brother', 'Grandpa', 'grandfather'],
+            vocab: ['who', 'is', 'she', 'he', "she's", "he's", 'a', 'girl', 'boy', 'this', 'Dad', 'Mum', "I - my", 'father', 'mother', 'brother', 'Grandpa', 'grandfather'],
             sentences: [
                 "Who's she? She's Jenny.",
                 "Who's he? He's Jim.",
@@ -346,7 +346,7 @@ TEACHING_CONTENT["PU1"] = {
             ]
         },
         "22": {
-            vocab: ['head', 'ear', 'eyes', 'mouth', 'nose', 'hair', 'face', 'tail', 'hand', 'arm', 'leg', 'foot', 'feet', 'body', 'move', 'your', 'and', 'put', 'arms', 'up', 'touch', 'ears', 'close', 'open', 'clap', 'hands'],
+            vocab: ['head', 'ear', 'eyes', 'mouth', 'nose', 'hair', 'face', 'tail', 'hand', 'arm', 'leg', 'foot', 'feet', 'body', 'move', "you - your", 'and', 'put', 'arms', 'up', 'touch', 'ears', 'close', 'open', 'clap', 'hands'],
             sentences: [
                 "Move your body, Jenny.",
                 "Move your tail, Cameron.",
@@ -366,7 +366,7 @@ TEACHING_CONTENT["PU1"] = {
             ]
         },
         "23": {
-            vocab: ["I've got", "haven't got", 'brown', 'hair', 'black', 'blue', 'eyes', 'green', 'have', 'you', 'got', 'red', 'yes', 'no', 'brother', 'sister', 'twin', 'family', 'grey', 'face', 'ears', 'tail', 'pink', 'mouth', 'purple', 'head', 'orange', 'body', 'feet', 'yellow', 'legs', 'robot', 'hands', 'nose'],
+            vocab: ["I've got", "haven't got", 'brown', 'hair', 'black', 'blue', 'eyes', 'green', 'have', 'you', "get - got", 'red', 'yes', 'no', 'brother', 'sister', 'twin', 'family', 'grey', 'face', 'ears', 'tail', 'pink', 'mouth', 'purple', 'head', 'orange', 'body', 'feet', 'yellow', 'legs', 'robot', 'hands', 'nose'],
             sentences: [
                 "I've got brown hair.",
                 "I haven't got black hair.",
@@ -554,7 +554,7 @@ TEACHING_CONTENT["PU1"] = {
             ]
         },
         "32": {
-            vocab: ['big', 'small', 'long', 'short', 'old', 'young', 'nice', 'horse', 'spider', 'cat', 'brother', 'sister', 'friend', 'tail', 'new', 'too', 'now', 'sorry', 'ok', 'not', 'are', 'is', "isn't", "aren't", "I'm", "you're", "he's", "she's", "they're", 'a', 'at', 'my'],
+            vocab: ['big', 'small', 'long', 'short', 'old', 'young', 'nice', 'horse', 'spider', 'cat', 'brother', 'sister', 'friend', 'tail', 'new', 'too', 'now', 'sorry', 'ok', 'not', 'are', 'is', "isn't", "aren't", "I'm", "you're", "he's", "she's", "they're", 'a', 'at', "I - my"],
             sentences: [
                 "He's a small spider.",
                 "Harry's big.",
@@ -612,7 +612,7 @@ TEACHING_CONTENT["PU1"] = {
             ]
         },
         "34": {
-            vocab: ['funny', 'dog', 'brown', 'nose', 'long', 'tail', 'sad', 'black', 'happy', 'park', 'beautiful', 'ugly', 'pink', 'short', 'angry', 'cat', 'spider', 'nice', 'donkey', 'sheep', 'duck', 'goat', 'family', 'grandfather', 'mother', 'brother', 'grandmother', 'father', 'sister', 'pet', "she's", "he's", "I've got", "we're", "it's", "they're", 'have', 'got', 'with', 'in', 'the', 'an', 'and', 'this', 'is', 'my', 'yes', 'no'],
+            vocab: ['funny', 'dog', 'brown', 'nose', 'long', 'tail', 'sad', 'black', 'happy', 'park', 'beautiful', 'ugly', 'pink', 'short', 'angry', 'cat', 'spider', 'nice', 'donkey', 'sheep', 'duck', 'goat', 'family', 'grandfather', 'mother', 'brother', 'grandmother', 'father', 'sister', 'pet', "she's", "he's", "I've got", "we're", "it's", "they're", 'have', "get - got", 'with', 'in', 'the', 'an', 'and', 'this', 'is', "I - my", 'yes', 'no'],
             sentences: [
                 "I've got a happy dog.",
                 "She's a beautiful dog.",
@@ -637,7 +637,7 @@ TEACHING_CONTENT["PU1"] = {
             ]
         },
         "35": {
-            vocab: ['duck', "it's", 'got', 'long', 'ears', "hasn't", 'small', 'feet', 'has', 'it', 'a', 'face', 'yes', 'no', 'of', 'an', 'animal', 'for', 'your', 'to', 'my', 'has', 'big', 'body', 'short', 'tail', 'with', 'animal', 'is', 'beautiful', "isn't", 'donkey'],
+            vocab: ['duck', "it's", "get - got", 'long', 'ears', "hasn't", 'small', 'feet', 'has', 'it', 'a', 'face', 'yes', 'no', 'of', 'an', 'animal', 'for', "you - your", 'to', "I - my", 'has', 'big', 'body', 'short', 'tail', 'with', 'animal', 'is', 'beautiful', "isn't", 'donkey'],
             sentences: [
                 "It's got long ears.",
                 "It hasn't got small feet.",
@@ -742,7 +742,7 @@ TEACHING_CONTENT["PU1"] = {
                 'in', 'next to', 'on', 'under',
 
                 // --- DETERMINERS & PRONOUNS ---
-                'this', 'that', 'these', 'those', 'my', 'your',
+                'this', 'that', 'these', 'those', "I - my", "you - your",
 
                 // --- Question words ---
                 'what', "what's", 'where', "where's", 'who', "who's",
@@ -1266,7 +1266,7 @@ TEACHING_CONTENT["PU1"] = {
                 'Yes, I do', "No, I don't", "I don't like",
                 'I want', 'you want', 'we want', 'they want', 'he wants', 'she wants',
                 "I don't want", "you don't want", "we don't want", "they don't want", "he doesn't want", "she doesn't want",
-                'can', "can't", 'there is', 'there are', 'his', 'her', 'their', 'my', 'your', 'please', 'thanks'
+                'can', "can't", 'there is', 'there are', "he - his", "she - her", "they - their", "I - my", "you - your", 'please', 'thanks'
             ],
             sentences: [
                 "Mum likes burgers.",
@@ -1376,8 +1376,8 @@ TEACHING_CONTENT["PU1"] = {
         },
         "84": {
             vocab: [
-                'riding', 'swimming', 'watching', 'cleaning', 'playing', 'painting', 'doing', 'eat eating', 'feet', 'Tom',
-                'what', 'doing', 'is', 'she', 'are', 'you', "I'm", "they're", "isn't", "not"
+                "ride - riding", "swim - swimming", "watch - watching", "clean - cleaning", "play - playing", "paint - painting", "do - doing", "eat - eating", 'feet', 'Tom',
+                'what',  'is', 'she', 'are', 'you', "I'm", "they're", "isn't", "not"
             ],
             sentences: [
                 "What are you doing?",
@@ -1400,18 +1400,18 @@ TEACHING_CONTENT["PU1"] = {
         },
         "92": {
             vocab: [
-                "play", "playing", "football", "basketball", "tennis", "hockey", "badminton", "baseball", "music",
+                "play", "play - playing", "football", "basketball", "tennis", "hockey", "badminton", "baseball", "music",
                 "tennis racket", "baseball bat", "hockey stick", "badminton racket",
                 "guitar", "piano",
-                "ride a bike", "riding a bike",
-                "swim", "swimming",
-                "watch TV", "watching TV",
-                "skateboard", "skateboarding",
-                "run", "running",
-                "jump", "jumping",
-                "eat", "eat eating",
-                "smile", "smiling",
-                "listen to music", "listening to music",
+                "ride a bike", "ride a bike - riding a bike",
+                "swim", "swim - swimming",
+                "watch TV", "watch TV - watching TV",
+                "skateboard", "skateboard - skateboarding",
+                "run", "run - running",
+                "jump", "jump - jumping",
+                "eat", "eat - eating",
+                "smile", "smile - smiling",
+                "listen to music", "listen to music - listening to music",
                 "he is", "he isn't", "she is", "she isn't", "it is", "it isn't",
                 "I am", "I'm", "I'm not",
                 "you are", "you aren't", "we are", "we aren't", "they are", "they aren't",
@@ -1629,7 +1629,7 @@ TEACHING_CONTENT["PU1"] = {
             ]
         },
         "110": {
-            vocab: ['shell', 'sea', 'beach', 'sand', 'boat', 'sun', 'camera', 'sunglasses', 'fish', 'take a photo', 'jellyfish', 'fishing'],
+            vocab: ['shell', 'sea', 'beach', 'sand', 'boat', 'sun', 'camera', 'sunglasses', 'fish', 'take a photo', 'jellyfish', "fish - fishing"],
             sentences: [
                 "At the beach, we can play on the sand.",
                 "At the beach, we can swim in the sea.",
@@ -1651,7 +1651,7 @@ TEACHING_CONTENT["PU1"] = {
             ]
         },
         "111": {
-            vocab: ['flying', 'kite', 'taking', 'photos', 'swimming', 'playing', 'sand', 'collecting', 'shells', 'like', 'enjoy', 'so', 'do', 'I', 'me', 'too'],
+            vocab: ["fly - flying", 'kite', "take - taking", 'photos', "swim - swimming", "play - playing", 'sand', "collect - collecting", 'shells', 'like', 'enjoy', 'so', 'do', 'I', "I - me", 'too'],
             sentences: [
                 "I like flying my kite.",
                 "I enjoy taking photos.",

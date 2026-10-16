@@ -1151,7 +1151,109 @@
         }
     };
 
-    const pageCatalogs = { 'PU2:7:83': pu2Unit7Catalogs[83], 'PU2:7:85': pu2Unit7Catalogs[85], 'PU2:7:87': pu2Unit7Catalogs[87], 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
+    // PU2 Unit 8: teacher-approved town, irregular past, obligation and safety boards.
+    const pu2Unit8Catalogs = {
+        95: {
+            missing: [
+                {"id": "M1", "sentences": ["We leave our car in a ___ ___.", "We catch a train at the ___ ___."], "answers": ["car", "park", "train", "station"], "prefixes": ["c", "p", "t", "s"]},
+                {"id": "M2", "sentences": ["We buy a ___ before we get on the train.", "We use a ___ to know where to go."], "answers": ["ticket", "map"], "prefixes": ["t", "m"]},
+                {"id": "M3", "sentences": ["The ___ has lots of exciting rides.", "My favourite ___ goes up and down very fast."], "answers": ["funfair", "ride"], "prefixes": ["f", "r"]},
+                {"id": "M4", "sentences": ["The shops in the middle of town are in the ___ ___.", "Cars travel along the ___."], "answers": ["city", "centre", "road"], "prefixes": ["c", "c", "r"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "We leave our car in the car station.", "wrongWord": "station", "answer": "park"},
+                {"id": "F2", "sentence": "We catch a train at the train park.", "wrongWord": "park", "answer": "station"},
+                {"id": "F3", "sentence": "We have to buy a sandwich to get on the train.", "wrongWord": "sandwich", "answer": "ticket"},
+                {"id": "F4", "sentence": "We use a menu to know where to go.", "wrongWord": "menu", "answer": "map"},
+                {"id": "F5", "sentence": "The city centre is the part in the middle of the countryside.", "wrongWord": "countryside", "answer": "city"},
+                {"id": "F6", "sentence": "We went on the exciting roads at the funfair.", "wrongWord": "roads", "answer": "rides"}
+            ]
+        },
+        96: {
+            missing: [
+                {"id": "M5", "sentences": ["Yesterday Dad ___ two train tickets.", "He cooked his lunch at home, then ___ it on the train."], "answers": ["bought", "brought"], "prefixes": ["b", "b"]},
+                {"id": "M6", "sentences": ["She ___ the red hat yesterday because red is her favourite colour.", "Dad ___ us to the beach yesterday."], "answers": ["chose", "drove"], "prefixes": ["c", "d"]},
+                {"id": "M7", "sentences": ["I ___ my hat yesterday and couldn't find it,", "but then I ___ it this morning, under the bed."], "answers": ["lost", "found"], "prefixes": ["l", "f"]},
+                {"id": "M8", "sentences": ["Grandma ___ me a present for my birthday yesterday.", "She and Grandpa ___ behind the sofa and said 'Surprise!' when I came in."], "answers": ["gave", "hid"], "prefixes": ["g", "h"]},
+                {"id": "M9", "sentences": ["We ___ our bikes to the park yesterday.", "I ___ my new helmet."], "answers": ["rode", "wore"], "prefixes": ["r", "w"]},
+                {"id": "M10", "sentences": ["Yesterday I ___ next to Mum on the bus.", "My brother ___ very tired so he ___ next to us."], "answers": ["sat", "was", "slept"], "prefixes": ["s", "w", "s"]},
+                {"id": "M11", "sentences": ["Yesterday I ___ near the door while Grandpa ___ us a story.", "Dad ___ a photo of us."], "answers": ["stood", "told", "took"], "prefixes": ["s", "t", "t"]}
+            ],
+            fix: [
+                {"id": "F7", "sentence": "Dad buyed two train tickets yesterday.", "wrongWord": "buyed", "answer": "bought"},
+                {"id": "F8", "sentence": "He bringed our lunch from home.", "wrongWord": "bringed", "answer": "brought"},
+                {"id": "F9", "sentence": "She choosed the red hat yesterday.", "wrongWord": "choosed", "answer": "chose"},
+                {"id": "F10", "sentence": "Dad drived us to the beach yesterday.", "wrongWord": "drived", "answer": "drove"},
+                {"id": "F11", "sentence": "I finded my scarf under the bed.", "wrongWord": "finded", "answer": "found"},
+                {"id": "F12", "sentence": "Grandma gived me a new sweater.", "wrongWord": "gived", "answer": "gave"},
+                {"id": "F13", "sentence": "The rabbit hided behind a tree.", "wrongWord": "hided", "answer": "hid"},
+                {"id": "F14", "sentence": "I losed my hat yesterday.", "wrongWord": "losed", "answer": "lost"},
+                {"id": "F15", "sentence": "We rided our bikes to the park yesterday.", "wrongWord": "rided", "answer": "rode"},
+                {"id": "F16", "sentence": "I weared my new helmet yesterday.", "wrongWord": "weared", "answer": "wore"}
+            ]
+        },
+        97: {
+            missing: [
+                {"id": "M12", "sentences": ["Yesterday my cousin ___ to our house.", "She ___ a picture for me."], "answers": ["came", "drew"], "prefixes": ["c", "d"]},
+                {"id": "M13", "sentences": ["How many photos did you ___?", "I ___ five photos yesterday."], "answers": ["take", "took"], "prefixes": ["t", "t"]},
+                {"id": "M14", "sentences": ["Which ice cream did she ___?", "She ___ chocolate."], "answers": ["choose", "chose"], "prefixes": ["c", "c"]},
+                {"id": "M15", "sentences": ["What time did Jim ___ the fish?", "He ___ them at eight o'clock."], "answers": ["feed", "fed"], "prefixes": ["f", "f"]},
+                {"id": "M16", "sentences": ["Where did the rabbit ___?", "It ___ in the garden."], "answers": ["sleep", "slept"], "prefixes": ["s", "s"]}
+            ],
+            fix: [
+                {"id": "F17", "sentence": "I drawed a picture for Grandma yesterday.", "wrongWord": "drawed", "answer": "drew"},
+                {"id": "F18", "sentence": "My cousin comed to our house yesterday.", "wrongWord": "comed", "answer": "came"},
+                {"id": "F19", "sentence": "How many photos did you took?", "wrongWord": "took", "answer": "take"},
+                {"id": "F20", "sentence": "Which ice cream did she chose?", "wrongWord": "chose", "answer": "choose"},
+                {"id": "F21", "sentence": "What time did Jim fed the fish?", "wrongWord": "fed", "answer": "feed"},
+                {"id": "F22", "sentence": "Where did the rabbit slept?", "wrongWord": "slept", "answer": "sleep"}
+            ]
+        },
+        98: {
+            missing: [
+                {"id": "M17", "sentences": ["We borrow books from the ___.", "We watch films at the ___."], "answers": ["library", "cinema"], "prefixes": ["l", "c"]},
+                {"id": "M18", "sentences": ["Doctors and nurses work at a ___.", "We buy fresh fruit and vegetables at the ___."], "answers": ["hospital", "market"], "prefixes": ["h", "m"]},
+                {"id": "M19", "sentences": ["We buy food and other things at the ___.", "We buy clothes in the shops at the ___ ___."], "answers": ["supermarket", "shopping", "centre"], "prefixes": ["s", "s", "c"]},
+                {"id": "M20", "sentences": ["We play indoor sports at the ___ ___.", "We swim at the ___ ___."], "answers": ["sports", "centre", "swimming", "pool"], "prefixes": ["s", "c", "s", "p"]},
+                {"id": "M21", "sentences": ["We wait for a bus at the ___ ___.", "We can have a drink and a snack at a ___."], "answers": ["bus", "station", "cafe"], "prefixes": ["b", "s", "c"]},
+                {"id": "M22", "sentences": ["We sat in the town ___, an open place with buildings around it.", "We bought some fruit at the ___."], "answers": ["square", "market"], "prefixes": ["s", "m"]}
+            ],
+            fix: [
+                {"id": "F23", "sentence": "We borrow books from the hospital.", "wrongWord": "hospital", "answer": "library"},
+                {"id": "F24", "sentence": "We watch films on a big screen at the library.", "wrongWord": "library", "answer": "cinema"},
+                {"id": "F25", "sentence": "Doctors and nurses help sick people at the cinema.", "wrongWord": "cinema", "answer": "hospital"},
+                {"id": "F26", "sentence": "We buy clothes from the shops in the swimming centre.", "wrongWord": "swimming", "answer": "shopping"},
+                {"id": "F27", "sentence": "We swim in the shopping pool.", "wrongWord": "shopping", "answer": "swimming"},
+                {"id": "F28", "sentence": "A place with courts for playing sports is a shopping centre.", "wrongWord": "shopping", "answer": "sports"},
+                {"id": "F29", "sentence": "We can catch a bus at the bus park.", "wrongWord": "park", "answer": "station"},
+                {"id": "F30", "sentence": "We buy fresh vegetables from stalls at the library.", "wrongWord": "library", "answer": "market"}
+            ]
+        },
+        104: {
+            missing: [
+                {"id": "M23", "sentences": ["I ___ to do my homework.", "She ___ to clean her bedroom."], "answers": ["have", "has"]},
+                {"id": "M24", "sentences": ["My brother ___ ___ wear glasses.", "I ___ ___ wear them too."], "answers": ["has", "to", "have", "to"]},
+                {"id": "M25", "sentences": ["___ you have to make your bed?", "___ she have to help at home?"], "answers": ["do", "does"]},
+                {"id": "M26", "sentences": ["You ___ have to buy a ticket. Entry is free.", "He ___ have to wash the plates. They're already clean."], "answers": ["don't", "doesn't"]},
+                {"id": "M27", "sentences": ["We walk on the ___ beside the road.", "We put rubbish in a ___ ___."], "answers": ["pavement", "litter", "bin"], "prefixes": ["p", "l", "b"]},
+                {"id": "M28", "sentences": ["Drivers stop when the traffic light is ___.", "They can go when it turns ___."], "answers": ["red", "green"], "prefixes": ["r", "g"]},
+                {"id": "M29", "sentences": ["We cross at a pedestrian ___.", "We wait for the green ___."], "answers": ["crossing", "light"], "prefixes": ["c", "l"]}
+            ],
+            fix: [
+                {"id": "F31", "sentence": "I has to do my homework.", "wrongWord": "has", "answer": "have"},
+                {"id": "F32", "sentence": "She have to clean her bedroom.", "wrongWord": "have", "answer": "has"},
+                {"id": "F33", "sentence": "Do he have to wear glasses?", "wrongWord": "do", "answer": "does"},
+                {"id": "F34", "sentence": "Does she has to help at home?", "wrongWord": "has", "answer": "have"},
+                {"id": "F35", "sentence": "He don't have to buy a ticket. It's free.", "wrongWord": "don't", "answer": "doesn't"},
+                {"id": "F36", "sentence": "We doesn't have to go to school on Sundays.", "wrongWord": "doesn't", "answer": "don't"},
+                {"id": "F37", "sentence": "My brother has to wears glasses.", "wrongWord": "wears", "answer": "wear"},
+                {"id": "F38", "sentence": "Put your rubbish in the litter bag.", "wrongWord": "bag", "answer": "bin"},
+                {"id": "F39", "sentence": "Drivers must stop when the traffic light turns green.", "wrongWord": "green", "answer": "red"}
+            ]
+        }
+    };
+
+    const pageCatalogs = { 'PU2:8:95': pu2Unit8Catalogs[95], 'PU2:8:96': pu2Unit8Catalogs[96], 'PU2:8:97': pu2Unit8Catalogs[97], 'PU2:8:98': pu2Unit8Catalogs[98], 'PU2:8:104': pu2Unit8Catalogs[104], 'PU2:7:83': pu2Unit7Catalogs[83], 'PU2:7:85': pu2Unit7Catalogs[85], 'PU2:7:87': pu2Unit7Catalogs[87], 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

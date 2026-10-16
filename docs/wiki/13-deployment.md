@@ -267,3 +267,5 @@ Preview release 2026-10-15e publishes approved PU2 Unit 5 boards with teacher an
 Preview release 2026-10-15f publishes approved PU2 Unit 6 boards, removing M5/F5 and applying the M13/M14 contraction edits. The curriculum cache buster and synchronized version/auth/index/dashboard stamps advance together. Production and preview API/data remain unchanged; Unit 7 is review-only.
 
 Preview release 2026-10-15g publishes approved PU2 Unit 7 boards with the teacher's M1 cheese-sandwich edit. The curriculum cache buster and synchronized version/auth/index/dashboard stamps advance together. Production and preview API/data remain unchanged; Unit 8 is review-only.
+
+Preview release 2026-10-16a publishes approved PU2 Unit 8 boards with the teacher's twelve annotations applied. The curriculum cache buster and synchronized version/auth/index/dashboard stamps advance together. Production and preview API/data remain unchanged; Unit 9 is review-only.

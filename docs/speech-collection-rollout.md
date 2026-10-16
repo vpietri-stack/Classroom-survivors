@@ -1,7 +1,9 @@
 # Speech collection: preparation and staged launch
 
-Prepared 2026-10-15. This feature changes research intake, not recognition or
-grading. Production stays unchanged until this feature is published.
+Prepared 2026-10-15; wider collection authorized 2026-10-16 after the teacher
+confirmed consent from all current users. This feature changes research intake,
+not recognition or grading. The consent list is a snapshot of current student
+accounts; future accounts are not automatically enrolled.
 
 Students use the app independently or with parents at home for review and
 practice. The pilot observes that normal home use; it is not a scheduled
@@ -93,8 +95,9 @@ the three app stamps at release; speech sub-resource counters are advanced here.
 - Three synthetic progress writes during the probe completed in 731–743 ms,
   versus 1,081–1,090 ms immediately beforehand. This tiny sample over the
   operator's network establishes neither an improvement nor production headroom.
-  Azure's production monitoring endpoint was unavailable; a home-practice pilot
-  remains required before expanding the cohort.
+  Azure's production monitoring endpoint was unavailable. The existing several
+  days of consented home use already constitute the initial pilot; deployment
+  validation checks the new safeguards without restarting that pilot.
 - Every uniquely named probe record was removed, and the test container's
   original indexing policy was restored and independently verified. Production
   settings, consent IDs, indexing and throughput were not changed.
@@ -103,11 +106,14 @@ the three app stamps at release; speech sub-resource counters are advanced here.
 
 1. Publish frontend/API with expanded intake disabled. Verify the served client
    includes `/reserveSpeechSample`, the API route exists, and CORS is registered.
-2. Verify the audio index exclusion. Then pilot with only the original approved
-   IDs and the enable switch set to `true`. Let those students continue normal
-   practice at home over one or two evenings, within the existing collection
-   window. Include different devices and connections where available.
-3. Compare read-only status snapshots before and throughout those home-practice
+2. Verify the audio index exclusion and deployed default-off/consent/size gates.
+   The existing consented group has already supplied the home-practice pilot.
+   Validate the new reservation/upload path using synthetic audio in the
+   existing isolated test environment; do not add a synthetic child or audio
+   to production to test it.
+3. On the teacher's expansion approval, privately snapshot all current student
+   account IDs into the exact consent allowlist and enable capture. Keep the
+   hard cap and existing closing date. Compare status before and throughout home-practice
    periods, including naturally busy evening periods. Status reports recent
    research charge/duration and the last progress save's
    `serverSaveMs`/`progressWriteRu`. The latter excludes network time and the
@@ -116,8 +122,10 @@ the three app stamps at release; speech sub-resource counters are advanced here.
    connections. Research timeouts or dropped clips are acceptable; interrupted
    practice or lost progress are not. If progress slows or repeated throttling
    appears, disable research; do not raise RU/s to preserve samples.
-5. After an acceptable pilot, add only the newly approved student IDs. Keep the
-   existing closing date. A synthetic probe cannot certify production peak load.
+5. Verify the deployed consent response for every enrolled identity, exclusion
+   of an unlisted synthetic identity, and unchanged throughput. Future accounts
+   need separate consent and an explicit list update. A synthetic probe cannot
+   certify production peak load; retain the kill switch for live follow-up.
 
 ## Evaluation and removal
 

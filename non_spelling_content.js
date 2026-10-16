@@ -1253,7 +1253,97 @@
         }
     };
 
-    const pageCatalogs = { 'PU2:8:95': pu2Unit8Catalogs[95], 'PU2:8:96': pu2Unit8Catalogs[96], 'PU2:8:97': pu2Unit8Catalogs[97], 'PU2:8:98': pu2Unit8Catalogs[98], 'PU2:8:104': pu2Unit8Catalogs[104], 'PU2:7:83': pu2Unit7Catalogs[83], 'PU2:7:85': pu2Unit7Catalogs[85], 'PU2:7:87': pu2Unit7Catalogs[87], 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
+    // PU2 Unit 9: approved opinions, comparison patterns and cumulative review.
+    const pu2Unit9Catalogs = {
+        107: {
+            missing: [
+                {"id": "M1", "sentences": ["I need some water. I'm ___.", "I want something to eat. I'm ___."], "answers": ["thirsty", "hungry"], "prefixes": ["t", "h"]},
+                {"id": "M2", "sentences": ["I need to sleep. I'm ___.", "Everyone suddenly shouted \"Happy birthday!\" I was very ___."], "answers": ["tired", "surprised"], "prefixes": ["t", "s"]},
+                {"id": "M3", "sentences": ["I'm ___ of the dark.", "I'm ___ of big, angry dogs."], "answers": ["afraid", "frightened"], "prefixes": ["a", "f"]},
+                {"id": "M4", "sentences": ["Nothing happened in the film. It was ___.", "The ride was fast and fun. It was ___."], "answers": ["boring", "exciting"], "prefixes": ["b", "e"]},
+                {"id": "M5", "sentences": ["I got every answer right. The test was ___.", "I couldn't answer any questions. It was ___."], "answers": ["easy", "difficult"], "prefixes": ["e", "d"]},
+                {"id": "M6", "sentences": ["Playing football in the road is ___.", "I wear a helmet ___ skateboarding can be dangerous."], "answers": ["dangerous", "because"], "prefixes": ["d", "b"]}
+            ],
+            fix: [
+                {"id": "F1", "sentence": "I need some water because I'm hungry.", "wrongWord": "hungry", "answer": "thirsty"},
+                {"id": "F2", "sentence": "I want something to eat because I'm thirsty.", "wrongWord": "thirsty", "answer": "hungry"},
+                {"id": "F3", "sentence": "I need to sleep because I'm surprised.", "wrongWord": "surprised", "answer": "tired"},
+                {"id": "F4", "sentence": "Everyone shouted \"Happy birthday!\" I didn't know about the party. I was tired.", "wrongWord": "tired", "answer": "surprised"},
+                {"id": "F5", "sentence": "The film was exciting. Nothing happened and nobody enjoyed it.", "wrongWord": "exciting", "answer": "boring"},
+                {"id": "F6", "sentence": "The ride was boring. Everyone thought it was so much fun!", "wrongWord": "boring", "answer": "exciting"},
+                {"id": "F7", "sentence": "The test was easy. Everyone got 0/100.", "wrongWord": "easy", "answer": "difficult"},
+                {"id": "F8", "sentence": "Fighting bears is very safe. You can get badly hurt doing it.", "wrongWord": "safe", "answer": "dangerous"}
+            ]
+        },
+        109: {
+            missing: [
+                {"id": "M7", "sentences": ["I think this dress is ___ beautiful ___ that one.", "This skirt is shorter ___ that one."], "answers": ["more", "than", "than"]},
+                {"id": "M8", "sentences": ["I think the circus is ___ ___ than the farm.", "I think this film is more ___ ___ that one."], "answers": ["more", "exciting", "boring", "than"], "prefixes": ["", "e", "b", ""]},
+                {"id": "M9", "sentences": ["I think climbing is ___ ___ than walking.", "I think tigers are more ___ ___ rabbits."], "answers": ["more", "difficult", "dangerous", "than"], "prefixes": ["", "d", "d", ""]},
+                {"id": "M10", "sentences": ["This test is easy, but yesterday's test ___ ___.", "I'm hungry, but my brother ___ ___ ___ me."], "answers": ["was", "easier", "is", "hungrier", "than"], "prefixes": ["w", "e", "", "h", "t"]},
+                {"id": "M11", "sentences": ["I'm thirsty, but she's even ___ ___ me.", "I was tired, but Dad ___ ___ tired ___ me."], "answers": ["thirstier", "than", "was", "more", "than"], "prefixes": ["t", "t", "", "", ""]},
+                {"id": "M12", "sentences": ["This bag is big, but that one is ___.", "This book is good, but that one is ___."], "answers": ["bigger", "better"], "prefixes": ["b", "b"]},
+                {"id": "M13", "sentences": ["This game ___ ___ exciting ___ that one."], "answers": ["is", "more", "than"], "prefixes": ["", "m", "t"]},
+                {"id": "M14", "sentences": ["Today's lesson ___ ___ interesting ___ yesterday's lesson.", "Yesterday's lesson ___ ___ ___ ___ today's."], "answers": ["is", "more", "than", "was", "more", "boring", "than"], "prefixes": ["", "", "", "w", "", "b", ""]}
+            ],
+            fix: [
+                {"id": "F9", "sentence": "This dress is more beautifuler than that one.", "wrongWord": "beautifuler", "answer": "beautiful"},
+                {"id": "F10", "sentence": "The circus is most exciting than the farm.", "wrongWord": "most", "answer": "more"},
+                {"id": "F11", "sentence": "This game is more interesting then that one.", "wrongWord": "then", "answer": "than"},
+                {"id": "F12", "sentence": "I think climbing is more difficult of walking.", "wrongWord": "of", "answer": "than"},
+                {"id": "F13", "sentence": "This question is easyer than that one.", "wrongWord": "easyer", "answer": "easier"},
+                {"id": "F14", "sentence": "I was hungryer than my brother.", "wrongWord": "hungryer", "answer": "hungrier"},
+                {"id": "F15", "sentence": "She was thirstyer than me.", "wrongWord": "thirstyer", "answer": "thirstier"},
+                {"id": "F16", "sentence": "This bag is biger than mine.", "wrongWord": "biger", "answer": "bigger"},
+                {"id": "F17", "sentence": "This book is gooder than that one.", "wrongWord": "gooder", "answer": "better"},
+                {"id": "F18", "sentence": "My brother are more tired than me.", "wrongWord": "are", "answer": "is"}
+            ]
+        },
+        116: {
+            missing: [
+                {"id": "M15", "sentences": ["Of these three dresses, this is ___ ___ beautiful.", "I think it's ___ most beautiful dress in the shop."], "answers": ["the", "most", "the"]},
+                {"id": "M16", "sentences": ["This film is more exciting ___ that one.", "It's ___ ___ exciting film of all."], "answers": ["than", "the", "most"]},
+                {"id": "M17", "sentences": ["This is ___ ___ ___ ___ beautiful cities in the world.", "It's one of ___ ___ exciting places to visit."], "answers": ["one", "of", "the", "most", "the", "most"], "prefixes": ["o", "o", "", "m", "", ""]},
+                {"id": "M18", "sentences": ["She's one of ___ ___ famous singers in the world.", "This is ___ ___ ___ ___ dangerous animals in the zoo."], "answers": ["the", "most", "one", "of", "the", "most"], "prefixes": ["", "m", "o", "o", "", ""]},
+                {"id": "M19", "sentences": ["This question is ___ difficult than that one.", "It's the ___ difficult question in the test."], "answers": ["more", "most"]},
+                {"id": "M20", "sentences": ["The first film was more interesting ___ the second.", "The third film was ___ most interesting of all."], "answers": ["than", "the"]},
+                {"id": "M21", "sentences": ["In my family, my brother is the most ___ of spiders.", "Mum was the most ___ when we shouted \"Surprise!\""], "answers": ["frightened", "surprised"], "prefixes": ["f", "s"]},
+                {"id": "M22", "sentences": ["I think this is the most ___ garden in town.", "He's a ___ singer. Lots of people know his songs."], "answers": ["beautiful", "famous"], "prefixes": ["b", "f"]}
+            ],
+            fix: [
+                {"id": "F19", "sentence": "Of these five dresses, this is the more beautiful.", "wrongWord": "more", "answer": "most"},
+                {"id": "F20", "sentence": "This is an most exciting ride in the park.", "wrongWord": "an", "answer": "the"},
+                {"id": "F21", "sentence": "It's one in the most beautiful cities.", "wrongWord": "in", "answer": "of"},
+                {"id": "F24", "sentence": "Of these three rides, this is the more exciting.", "wrongWord": "more", "answer": "most"},
+                {"id": "F25", "sentence": "In my family, my brother is the most frightening of spiders.", "wrongWord": "frightening", "answer": "frightened"},
+                {"id": "F26", "sentence": "Mum was the most surprise at her secret birthday party.", "wrongWord": "surprise", "answer": "surprised"},
+                {"id": "F27", "sentence": "Of these three books, this is the most interested.", "wrongWord": "interested", "answer": "interesting"},
+                {"id": "F28", "sentence": "It's one of the most exciting ride in the park.", "wrongWord": "ride", "answer": "rides"}
+            ]
+        },
+        119: {
+            missing: [
+                {"id": "M23", "sentences": ["Yesterday Dad ___ soup.", "He ___ the onions first."], "answers": ["made", "fried"], "prefixes": ["m", "f"]},
+                {"id": "M24", "sentences": ["Did you ___ a train ticket?", "I ___ one yesterday."], "answers": ["buy", "bought"], "prefixes": ["b", "b"]},
+                {"id": "M25", "sentences": ["She ___ to wear glasses.", "___ she have to wear them at school?"], "answers": ["has", "does"]},
+                {"id": "M26", "sentences": ["I ___ have to cook dinner. Dad is cooking it.", "She ___ have to wash the plates. They're already clean."], "answers": ["don't", "doesn't"]},
+                {"id": "M27", "sentences": ["Yesterday we ___ to the market.", "We ___ some fresh vegetables."], "answers": ["went", "bought"], "prefixes": ["w", "b"]},
+                {"id": "M28", "sentences": ["This ride is ___ exciting than the others.", "It's ___ most exciting ride at the funfair."], "answers": ["more", "the"]}
+            ],
+            fix: [
+                {"id": "F29", "sentence": "Yesterday Dad maked soup.", "wrongWord": "maked", "answer": "made"},
+                {"id": "F30", "sentence": "He fryed the onions first.", "wrongWord": "fryed", "answer": "fried"},
+                {"id": "F31", "sentence": "Did you bought a ticket?", "wrongWord": "bought", "answer": "buy"},
+                {"id": "F32", "sentence": "She have to wear glasses.", "wrongWord": "have", "answer": "has"},
+                {"id": "F33", "sentence": "Does he has to wash the plates?", "wrongWord": "has", "answer": "have"},
+                {"id": "F34", "sentence": "This game is most exciting than that one.", "wrongWord": "most", "answer": "more"},
+                {"id": "F35", "sentence": "It's one of the most beautiful place in town.", "wrongWord": "place", "answer": "places"},
+                {"id": "F36", "sentence": "This is than most interesting book in the library.", "wrongWord": "than", "answer": "the"}
+            ]
+        }
+    };
+
+    const pageCatalogs = { 'PU2:9:107': pu2Unit9Catalogs[107], 'PU2:9:109': pu2Unit9Catalogs[109], 'PU2:9:116': pu2Unit9Catalogs[116], 'PU2:9:119': pu2Unit9Catalogs[119], 'PU2:8:95': pu2Unit8Catalogs[95], 'PU2:8:96': pu2Unit8Catalogs[96], 'PU2:8:97': pu2Unit8Catalogs[97], 'PU2:8:98': pu2Unit8Catalogs[98], 'PU2:8:104': pu2Unit8Catalogs[104], 'PU2:7:83': pu2Unit7Catalogs[83], 'PU2:7:85': pu2Unit7Catalogs[85], 'PU2:7:87': pu2Unit7Catalogs[87], 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

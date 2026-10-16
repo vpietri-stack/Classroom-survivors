@@ -182,3 +182,5 @@ PU2 Unit 6 coverage checks 23 M/29 F and per-page totals, excluded M5/F5, exact 
 PU2 Unit 7 coverage checks 28 M/36 F and per-page totals, M1 exact edited wording/answers and two-letter prefixes, prefix validity, unique scoped identities, future-page exclusion and round variety. Chrome solves all 64 additions at 319px alongside previous boards.
 
 PU2 Unit 8 coverage checks 29 M/39 F and per-page totals, all edited sentences/answers/prefixes, excluded M30/F40, unique scoped identities, future-page exclusion and varied rounds. Chrome solves all 68 additions at 319px alongside previous boards.
+
+PU2 Unit 9 coverage checks 28 M/34 F, per-page totals, exact edited grammar targets/prefixes, seven-blank M14, single-sentence M13, revised feedback prompts, excluded F22/F23, unique identities, future-page exclusion and varied rounds. Chrome solves all 62 additions at 319px alongside earlier PU2/PU3 content.

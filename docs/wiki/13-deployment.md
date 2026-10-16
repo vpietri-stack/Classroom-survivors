@@ -220,6 +220,18 @@ Index preparation defaults to dry-run, backs up before an explicit apply, and
 never provisions database throughput. Keep the normal production approval and
 stamp discipline. A preview Pages push alone cannot validate the new API.
 
+### Wider speech collection release (2026-10-16)
+
+Release `2026-10-16c` integrates the bounded collector with current production
+curriculum. The teacher confirmed consent for all current users and authorized
+publication/activation. The several days of home collection already provide
+the initial pilot; validate the new safeguards without restarting it. Snapshot
+current student account IDs privately, publish with capture disabled, apply and
+verify only the audio index exclusion, then enable the exact approved list.
+Future accounts are not automatically consented. Keep the 30-recording cap,
+October 18 closing date, existing service tiers and throughput. Publish preview
+separately from its current history, preserving its isolated API/container.
+
 ## Update discipline
 
 ## PU3 Unit 9 page 109 release (13 October 2026)

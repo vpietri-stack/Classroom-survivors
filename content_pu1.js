@@ -1266,7 +1266,7 @@ TEACHING_CONTENT["PU1"] = {
                 'Yes, I do', "No, I don't", "I don't like",
                 'I want', 'you want', 'we want', 'they want', 'he wants', 'she wants',
                 "I don't want", "you don't want", "we don't want", "they don't want", "he doesn't want", "she doesn't want",
-                'can', "can't", 'there is', 'there are', 'his', 'her', 'their', 'my', 'your', 'please', 'thanks'
+                'can', "can't", 'there is', 'there are', "he - his", "she - her", "they - their", "I - my", "you - your", 'please', 'thanks'
             ],
             sentences: [
                 "Mum likes burgers.",
@@ -1376,8 +1376,8 @@ TEACHING_CONTENT["PU1"] = {
         },
         "84": {
             vocab: [
-                'riding', 'swimming', 'watching', 'cleaning', 'playing', 'painting', 'doing', 'eat eating', 'feet', 'Tom',
-                'what', 'doing', 'is', 'she', 'are', 'you', "I'm", "they're", "isn't", "not"
+                "ride - riding", "swim - swimming", "watch - watching", "clean - cleaning", "play - playing", "paint - painting", "do - doing", "eat - eating", 'feet', 'Tom',
+                'what',  'is', 'she', 'are', 'you', "I'm", "they're", "isn't", "not"
             ],
             sentences: [
                 "What are you doing?",
@@ -1400,18 +1400,18 @@ TEACHING_CONTENT["PU1"] = {
         },
         "92": {
             vocab: [
-                "play", "playing", "football", "basketball", "tennis", "hockey", "badminton", "baseball", "music",
+                "play", "play - playing", "football", "basketball", "tennis", "hockey", "badminton", "baseball", "music",
                 "tennis racket", "baseball bat", "hockey stick", "badminton racket",
                 "guitar", "piano",
-                "ride a bike", "riding a bike",
-                "swim", "swimming",
-                "watch TV", "watching TV",
-                "skateboard", "skateboarding",
-                "run", "running",
-                "jump", "jumping",
-                "eat", "eat eating",
-                "smile", "smiling",
-                "listen to music", "listening to music",
+                "ride a bike", "ride a bike - riding a bike",
+                "swim", "swim - swimming",
+                "watch TV", "watch TV - watching TV",
+                "skateboard", "skateboard - skateboarding",
+                "run", "run - running",
+                "jump", "jump - jumping",
+                "eat", "eat - eating",
+                "smile", "smile - smiling",
+                "listen to music", "listen to music - listening to music",
                 "he is", "he isn't", "she is", "she isn't", "it is", "it isn't",
                 "I am", "I'm", "I'm not",
                 "you are", "you aren't", "we are", "we aren't", "they are", "they aren't",
@@ -1629,7 +1629,7 @@ TEACHING_CONTENT["PU1"] = {
             ]
         },
         "110": {
-            vocab: ['shell', 'sea', 'beach', 'sand', 'boat', 'sun', 'camera', 'sunglasses', 'fish', 'take a photo', 'jellyfish', 'fishing'],
+            vocab: ['shell', 'sea', 'beach', 'sand', 'boat', 'sun', 'camera', 'sunglasses', 'fish', 'take a photo', 'jellyfish', "fish - fishing"],
             sentences: [
                 "At the beach, we can play on the sand.",
                 "At the beach, we can swim in the sea.",
@@ -1651,7 +1651,7 @@ TEACHING_CONTENT["PU1"] = {
             ]
         },
         "111": {
-            vocab: ['flying', 'kite', 'taking', 'photos', 'swimming', 'playing', 'sand', 'collecting', 'shells', 'like', 'enjoy', 'so', 'do', 'I', 'me', 'too'],
+            vocab: ["fly - flying", 'kite', "take - taking", 'photos', "swim - swimming", "play - playing", 'sand', "collect - collecting", 'shells', 'like', 'enjoy', 'so', 'do', 'I', "I - me", 'too'],
             sentences: [
                 "I like flying my kite.",
                 "I enjoy taking photos.",

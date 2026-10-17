@@ -300,7 +300,7 @@ TEACHING_CONTENT["PU2"] = {
         "7": {
             vocab: [
                 'countryside', 'field', 'forest', 'grass', 'ground', 'lake', 'leaf', 'leaves', 'mountain', 'river', 'rock', 'tractor',
-                'outside', 'beautiful', 'garden', 'pretty', 'problem', 'many', 'digging', 'fishing', 'barn', 'boat'
+                'outside', 'beautiful', 'garden', 'pretty', 'problem', 'many', "dig - digging", "fish - fishing", 'barn', 'boat'
             ],
             sentences: [
                 "Grandpa's farm is in the countryside.",
@@ -346,7 +346,7 @@ TEACHING_CONTENT["PU2"] = {
         "9": {
             vocab: [
                 'kittens', 'puppies', 'kitten', 'puppy',
-                'wash washing', 'play playing', 'look looking', 'eat eating', 'drink drinking', 'sleep sleeping', 'clean cleaning', 'take taking', 'walk walking', 'put on putting on', 'take off taking off', 'drive driving', 'read reading', 'do doing', 'talk talking', 'sing singing',
+                "wash - washing", "play - playing", "look - looking", "eat - eating", "drink - drinking", "sleep - sleeping", "clean - cleaning", "take - taking", "walk - walking", "put on - putting on", "take off - taking off", "drive - driving", "read - reading", "do - doing", "talk - talking", "sing - singing",
                 'face', 'legs', 'tail', 'ball', 'sock', 'ice cream', 'photo', 'shoes', 'sausages', 'hands', 'car', 'book', 'homework', 'boy', 'girl', 'man', 'woman', 'children',
                 'pretty', 'young', 'awake', 'happy', 'fat', 'short', 'red'
             ],
@@ -408,7 +408,7 @@ TEACHING_CONTENT["PU2"] = {
             vocab: [
                 'countryside', 'field', 'forest', 'grass', 'ground', 'lake', 'leaf', 'leaves', 'mountain', 'river', 'rock', 'tractor',
                 'wake up', 'get dressed', 'get up', 'have a shower', 'have breakfast', 'toothbrush', 'toothpaste', 'towel',
-                'going', 'getting', 'swimming', 'having', 'eating', 'kicking', 'playing', 'riding'
+                "go - going", "get - getting", "swim - swimming", "have - having", "eat - eating", "kick - kicking", "play - playing", "ride - riding"
             ],
             sentences: [
                 "What are you doing? I'm going to the forest.",
@@ -652,7 +652,7 @@ TEACHING_CONTENT["PU2"] = {
             vocab: [
                 'countryside', 'field', 'forest', 'grass', 'ground', 'lake', 'leaf', 'leaves', 'mountain', 'river', 'rock', 'tractor',
                 'wake up', 'get dressed', 'get up', 'have a shower', 'have breakfast', 'toothbrush', 'toothpaste', 'towel',
-                'going', 'getting', 'swimming', 'having', 'eating', 'kicking', 'playing', 'riding',
+                "go - going", "get - getting", "swim - swimming", "have - having", "eat - eating", "kick - kicking", "play - playing", "ride - riding",
                 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'weekend',
                 'do homework', 'go shopping', 'go skating', 'listen to music', 'read a comic', 'watch a film', 'write an email',
                 'always', 'often', 'sometimes', 'never',
@@ -769,7 +769,7 @@ TEACHING_CONTENT["PU2"] = {
         },
         "46": {
             vocab: [
-                'big', 'bigger', 'clean', 'cleaner', 'fat', 'fatter', 'funny', 'funnier', 'long', 'longer', 'nice', 'nicer', 'old', 'older', 'pretty', 'prettier', 'short', 'shorter', 'small', 'smaller', 'tall', 'taller', 'thin', 'thinner', 'young', 'younger', 'good', 'better', 'bad', 'worse'
+                'big', "big - bigger than", 'clean', "clean - cleaner than", 'fat', "fat - fatter than", 'funny', "funny - funnier than", 'long', "long - longer than", 'nice', "nice - nicer than", 'old', "old - older than", 'pretty', "pretty - prettier than", 'short', "short - shorter than", 'small', "small - smaller than", 'tall', "tall - taller than", 'thin', "thin - thinner than", 'young', "young - younger than", 'good', "good - better than", 'bad', "bad - worse than"
             ],
             sentences: [
                 "Jim and Jenny's uncle is shorter than their dad.",
@@ -814,8 +814,8 @@ TEACHING_CONTENT["PU2"] = {
             vocab: [
                 'aunt', 'uncle', 'cousin', 'daughter', 'son', 'granddaughter', 'grandson', 'grandparents', 'parents',
                 'balcony', 'basement', 'downstairs', 'upstairs', 'lift', 'roof', 'stairs', 'first floor', 'second floor', 'third floor', 'garage', 'garden',
-                'mine', 'yours', 'his', 'hers', 'ours', 'theirs', 'than',
-                'older', 'younger', 'bigger', 'smaller', 'taller', 'shorter', 'better', 'worse'
+                "I - my - mine", "you - your - yours", "he - his - his", "she - her - hers", "we - our - ours", "they - their - theirs", 'than',
+                "old - older than", "young - younger than", "big - bigger than", "small - smaller than", "tall - taller than", "short - shorter than", "good - better than", "bad - worse than"
             ],
             sentences: [
                 "My cousin is older than me.",
@@ -952,7 +952,7 @@ TEACHING_CONTENT["PU2"] = {
             vocab: [
                 'cloud', 'cloudy', 'rainbow', 'rain', 'rainy', 'snow', 'snowy', 'sun', 'sunny', 'wind', 'windy', 'fog', 'foggy', 'hot', 'cold',
                 'boots', 'coat', 'scarf', 'sweater', 'gloves', 'hat', 'raincoat', 'umbrella',
-                'was', 'were', "wasn't", "weren't", 'yesterday', 'last night', 'last week'
+                "am - was", "is - was", "are - were", "am not - wasn't", "isn't - wasn't", "aren't - weren't", 'yesterday', 'last night', 'last week'
             ],
             sentences: [
                 "It was sunny yesterday.",
@@ -986,15 +986,15 @@ TEACHING_CONTENT["PU2"] = {
             vocab: [
                 'aunt', 'uncle', 'cousin', 'daughter', 'son', 'granddaughter', 'grandson', 'grandparents', 'parents',
                 'balcony', 'basement', 'downstairs', 'upstairs', 'lift', 'roof', 'stairs', 'first floor', 'second floor', 'third floor', 'garage', 'garden',
-                'mine', 'yours', 'his', 'hers', 'ours', 'theirs', 'than',
-                'older', 'younger', 'bigger', 'smaller', 'taller', 'shorter', 'better', 'worse',
+                "I - my - mine", "you - your - yours", "he - his - his", "she - her - hers", "we - our - ours", "they - their - theirs", 'than',
+                "old - older than", "young - younger than", "big - bigger than", "small - smaller than", "tall - taller than", "short - shorter than", "good - better than", "bad - worse than",
                 'bat', 'bear', 'dolphin', 'kangaroo', 'lion', 'panda', 'parrot', 'penguin', 'rabbit', 'whale', 'shark',
                 'climb', 'fall', 'fly', 'hide', 'hop', 'jump', 'run', 'swim', 'walk',
                 'cage', 'above', 'below', 'near', 'opposite',
-                'the best', 'the worst', 'most', 'least', 'biggest', 'smallest', 'tallest', 'shortest', 'fastest', 'slowest',
+                "good - the best", "bad - the worst", 'most', 'least', "big - the biggest", "small - the smallest", "tall - the tallest", "short - the shortest", "fast - the fastest", "slow - the slowest",
                 'cloud', 'cloudy', 'rainbow', 'rain', 'rainy', 'snow', 'snowy', 'sun', 'sunny', 'wind', 'windy', 'fog', 'foggy', 'hot', 'cold',
                 'boots', 'coat', 'scarf', 'sweater', 'gloves', 'hat', 'raincoat', 'umbrella',
-                'was', 'were', "wasn't", "weren't", 'yesterday', 'last night', 'last week'
+                "am - was", "is - was", "are - were", "am not - wasn't", "isn't - wasn't", "aren't - weren't", 'yesterday', 'last night', 'last week'
             ],
             sentences: [
                 "My cousin is older than me.",
@@ -1064,7 +1064,7 @@ TEACHING_CONTENT["PU2"] = {
         },
         "85": {
             vocab: [
-                'bring brought', 'do did', 'drink drank', 'eat ate', 'get got', 'go went', 'have had', 'make made', 'put put', 'see saw',
+                "bring - brought", "do - did", "drink - drank", "eat - ate", "get - got", "go - went", "have - had", "make - made", "put - put", "see - saw",
                 'cake', 'juice', 'meatballs', 'orange', 'strawberries', 'water',
                 'breakfast', 'children', 'dinner', 'kitchen', 'last Saturday', 'lunch', 'parents', 'school', 'shop', 'shops', 'yesterday'
             ],
@@ -1101,9 +1101,9 @@ TEACHING_CONTENT["PU2"] = {
         "87": {
             vocab: [
                 'cheese', 'pasta', 'soup', 'sandwich', 'salad', 'vegetables', 'plate', 'bottle', 'glass', 'bowl', 'cup',
-                'boil boiled', 'cook cooked', 'cut', 'fry fried', 'carry carried', 'drop dropped', 'wash washed', 'cry cried',
-                'dance danced', 'help helped', 'like liked', 'look looked', 'play played', 'start started', 'stop stopped', 'smile smiled',
-                'go went', 'do did'
+                "boil - boiled", "cook - cooked", "cut - cut", "fry - fried", "carry - carried", "drop - dropped", "wash - washed", "cry - cried",
+                "dance - danced", "help - helped", "like - liked", "look - looked", "play - played", "start - started", "stop - stopped", "smile - smiled",
+                "go - went", "do - did"
             ],
             sentences: [
                 "I cooked lunch yesterday.",
@@ -1133,8 +1133,8 @@ TEACHING_CONTENT["PU2"] = {
         },
         "93": {
             vocab: [
-                'bring brought', 'do did', 'drink drank', 'eat ate', 'get got', 'go went', 'have had', 'make made', 'put put', 'see saw',
-                'boil boiled', 'carry carried', 'clap clapped', 'cook cooked', 'cry cried', 'cut cut', 'drop dropped', 'fry fried', 'help helped', 'invite invited', 'laugh laughed', 'like liked', 'smile smiled', 'start started', 'stop stopped', 'wash washed',
+                "bring - brought", "do - did", "drink - drank", "eat - ate", "get - got", "go - went", "have - had", "make - made", "put - put", "see - saw",
+                "boil - boiled", "carry - carried", "clap - clapped", "cook - cooked", "cry - cried", "cut - cut", "drop - dropped", "fry - fried", "help - helped", "invite - invited", "laugh - laughed", "like - liked", "smile - smiled", "start - started", "stop - stopped", "wash - washed",
                 'beans', 'bread', 'cake', 'carrots', 'cheese', 'fruit', 'meatballs', 'onions', 'orange', 'pasta', 'potatoes', 'salad', 'sandwich', 'soup', 'strawberries', 'vegetables',
                 'chocolate', 'juice', 'lemonade', 'milk', 'tea', 'water',
                 'bottle', 'bowl', 'cup', 'glass', 'plate',
@@ -1207,7 +1207,7 @@ TEACHING_CONTENT["PU2"] = {
         },
         "96": {
             vocab: [
-                'buy bought', 'bring brought', 'choose chose', 'drive drove', 'find found', 'give gave', 'hide hid', 'lose lost', 'ride rode', 'sit sat', 'sleep slept', 'stand stood', 'tell told', 'take took', 'wear wore'
+                "buy - bought", "bring - brought", "choose - chose", "drive - drove", "find - found", "give - gave", "hide - hid", "lose - lost", "ride - rode", "sit - sat", "sleep - slept", "stand - stood", "tell - told", "take - took", "wear - wore"
             ],
             sentences: [
                 "He bought it last year.",
@@ -1240,7 +1240,7 @@ TEACHING_CONTENT["PU2"] = {
         },
         "97": {
             vocab: [
-                'buy bought', 'choose chose', 'draw drew', 'drive drove', 'feed fed', 'find found', 'give gave', 'go went', 'hide hid', 'lose lost', 'sleep slept', 'take took', 'wear wore',
+                "buy - bought", "choose - chose", "draw - drew", "drive - drove", "feed - fed", "find - found", "give - gave", "go - went", "hide - hid", "lose - lost", "sleep - slept", "take - took", "wear - wore",
                 'photos', 'skates', 'sweater', 'picture', 'scarf', 'tickets', 'boots', 'chocolate',
                 'garden', 'bus', 'park', 'school', 'bookcase', 'funfair', 'ride',
                 'rabbit', 'fish'
@@ -1297,10 +1297,9 @@ TEACHING_CONTENT["PU2"] = {
             vocab: [
                 'bus station', 'café', 'cinema', 'hospital', 'library', 'market', 'shopping centre', 'sports centre', 'supermarket', 'swimming pool', 'zoo',
                 'car park', 'litter bin', 'pavement', 'square', 'traffic lights', 'ticket',
-                'buy bought', 'catch caught', 'come came', 'draw drew', 'drink drank', 'eat ate',
-                'find found', 'give gave', 'have had', 'lose lost', 'make made', 'see saw', 'take took', 'wear wore',
-                'have to', 'have had'
-            ],
+                "buy - bought", "catch - caught", "come - came", "draw - drew", "drink - drank", "eat - ate",
+                "find - found", "give - gave", "have - had", "lose - lost", "make - made", "see - saw", "take - took", "wear - wore",
+                'have to'],
             sentences: [
                 "I bought a ticket at the bus station.",
                 "She caught the bus.",
@@ -1423,15 +1422,15 @@ TEACHING_CONTENT["PU2"] = {
         "119": {
             vocab: [
                 'beans', 'cheese', 'chicken', 'eggs', 'flour', 'fruit', 'meat', 'pasta', 'peas', 'pepper', 'potatoes', 'rice', 'salt', 'soup', 'sugar', 'vegetables',
-                'boil', 'chop', 'cook', 'cut', 'fry', 'mix', 'wash', 'add',
+                'boil', 'chop', 'cook', "cut - cut", 'fry', 'mix', 'wash', 'add',
                 'bus station', 'café', 'cinema', 'hospital', 'library', 'market', 'shopping centre', 'sports centre', 'supermarket', 'swimming pool', 'zoo',
                 'car park', 'litter bin', 'pavement', 'square', 'traffic lights', 'ticket',
                 'afraid', 'angry', 'boring', 'busy', 'dangerous', 'difficult', 'easy', 'exciting', 'frightened', 'hungry', 'interesting',
                 'surprised', 'thirsty', 'tired', 'beautiful', 'famous',
-                'boil boiled', 'cook cooked', 'cut', 'fry fried', 'carry carried', 'drop dropped', 'wash washed', 'cry cried',
-                'dance danced', 'help helped', 'like liked', 'look looked', 'play played', 'start started', 'stop stopped', 'smile smiled',
-                'go went', 'do did', 'buy bought', 'catch caught', 'come came', 'draw drew', 'drink drank', 'eat ate',
-                'find found', 'give gave', 'have had', 'lose lost', 'make made', 'see saw', 'take took', 'wear wore',
+                "boil - boiled", "cook - cooked",  "fry - fried", "carry - carried", "drop - dropped", "wash - washed", "cry - cried",
+                "dance - danced", "help - helped", "like - liked", "look - looked", "play - played", "start - started", "stop - stopped", "smile - smiled",
+                "go - went", "do - did", "buy - bought", "catch - caught", "come - came", "draw - drew", "drink - drank", "eat - ate",
+                "find - found", "give - gave", "have - had", "lose - lost", "make - made", "see - saw", "take - took", "wear - wore",
                 'have to', 'more', 'most', 'one of the'
             ],
             sentences: [

@@ -36,6 +36,13 @@ Two extra aliases: `npm run test:td` = `test_td_gate.js && test_td_core.js`. The
 
 ## The stamp guard must stay first
 
+`test_vocab_normalization.js` also runs in `npm test`. It checks the canonical
+comparison/tense/pronoun labels across PU1–3 and Think0–1, role-sensitive
+exceptions, exact translations and continuity of existing image lookups. It
+also pins the original beginner labels in PU1 Units 0-3 while later units retain
+their normalized forms. It exercises every audited legacy SR alias, latest-record and same-session failure
+resolution, non-mutating reads, interval/lapse preservation and sparse deltas.
+
 `test_deploy_stamp_sync.js` asserts the three deploy stamps are byte-identical (`version.json` version == `frontend_auth.js` `APP_VERSION` == `index.html` `frontend_auth.js?v=`). It is intentionally the first command in the chain so drift fails the whole run. Never reorder, never bypass. (Why: red update banner for all users — see [Auth/Versioning](04-auth-versioning.md).)
 
 ## Harness styles (know which one you're extending)

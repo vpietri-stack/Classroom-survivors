@@ -24,7 +24,7 @@ TEACHING_CONTENT["Think0"] = {
                 'hello', 'hi', 'bye',
 
                 // Basic Structures
-                "it's", "what's", 'this', 'in', 'English', 'your', 'my', 'name',
+                "it's", "what's", 'this', 'in', 'English', "you - your", "I - my", 'name',
                 'open', 'close', 'listen', 'look', 'put', 'work', 'hand', 'up', 'partner',
                 'sorry', 'understand', 'mean',
 

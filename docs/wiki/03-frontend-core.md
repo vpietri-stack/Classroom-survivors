@@ -207,6 +207,44 @@ flowchart LR
 
 ## 5b. translations.js (structure only)
 
+### Vocabulary form convention (October 2026)
+
+PU1, PU2, PU3, Think0 and Think1 vocabulary entries use `base - comparative than`,
+`base - the superlative`, and `base - inflected verb` (including phrasal verbs).
+Standalone possessive adjectives become `I - my` etc.; possessive pronouns use
+triples such as `I - my - mine`; object pronouns use `I - me` etc. `his` follows
+the page's grammatical role. Comparative adverbs retain their own base, e.g.
+`well - better than`, distinct from `good - better than`.
+
+PU1 Units 0-3 are exempt: their original vocabulary labels (`my`, `your`,
+`got`) are retained. Shared canonical translations, images and SR aliases remain
+available for the normalized labels used in later units and other books.
+
+Standalone `was` expands to **both** `am - was` and `is - was`; `wasn't` expands
+to `am not - wasn't` and `isn't - wasn't`. Other labels are `are - were`,
+`aren't - weren't`, `can - could`, and `can't - couldn't`. Identical resulting
+labels are deduplicated on a page. Think2, full sentences, sentence pairs and
+non-spelling exercise prompts are unchanged. Nouns/adjectives that resemble
+verb forms remain intact (the picture noun `painting`, `morning`, `interesting`,
+directional `left`); unchanged-spelling past verbs are paired on their past-tense
+pages (`put - put`, `read - read`, `cut - cut`).
+
+`VOCAB_SR_LEGACY_KEYS` in `sr_engine.js` lists exact old labels for each renamed
+target. Selectors and vocabulary updates read the most recent old/canonical SR
+record, preserving cooldown and mastery. At the same session index, canonical
+records win so fresh answers cannot be shadowed by an old alias; ties between
+legacy labels favor failure. Lapses use the maximum, not the sum, and recovery
+retains the prior interval. Canonical results use the usual sparse SR delta. Old keys
+remain stored for rollback and unchanged Think2 content; no eager database or
+full-state migration is required. The generic `itemKey()` rules remain unchanged.
+
+New exact translation entries accompany new labels, and existing PNG artwork is
+copied to the canonical filename where available. Legacy translations and PNGs
+remain available to other content. Previously missing illustrations are not
+invented by this normalization step. `she - her` has the shared translation
+`她 - 她/她的` because the same label serves object and possessive-adjective roles.
+`test_vocab_normalization.js` checks these content and progress contracts.
+
 - 5318 lines, one `const LOCAL_TRANSLATIONS = { … }` object (~5,139 `"english": "中文"` entries,
   verified by grep count), organized only by comment banners (School Supplies, Animals, …,
   ending with full-sentence translations).
@@ -281,6 +319,22 @@ the 41 MB Whisper download (header comment asset_cache.js:1–29):
   unlock / visibilitychange / WeixinJSBridgeReady (iOS/WeChat suspend AudioContexts).
 
 ### gen_missing_audio.js (166 lines)
+
+Vocabulary audio coverage (2026-10-17, normalization worktree): 101 missing
+canonical MP3 filenames were added after spoken-content checks. 61 reuse existing
+recordings byte-for-byte; 40 were generated through Sound of Text, voice `en-GB`,
+including a clearer `build - built` replacement. Full hyphenated labels are
+submitted directly; hyphens are not spoken. The `read - read` recording is the
+exception: direct text produced /ri:d/ twice, so phonetic input `reed - red`
+supplies present /ri:d/ then past /red/ under the unchanged canonical filename.
+Original recordings are retained. Of 274 paired labels in PU1-3/Think0-1, 267 now
+have exact-filename local audio; the remaining seven loaded through Youdao in
+the coverage audit. Vocab audio paths are derived at runtime; no static manifest
+addition is needed. This does not change the TTS fallback order or deploy stamps.
+
+Release `2026-10-17a` ships the normalization, PU1 Units 0-3 exemption, 45 image
+aliases and these 101 audio assets. Public source/verification metadata and exact
+asset hashes are retained in [the audio manifest](../vocabulary-audio-2026-10-17.json).
 
 Offline coverage tool for the hand-recorded `audio_mp3/` corpus
 (`node gen_missing_audio.js content_pu1.js [--generate]`):

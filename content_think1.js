@@ -163,8 +163,8 @@ TEACHING_CONTENT["Think1"] = {
             vocab: [
                 'aunt', 'brother', 'cousin', 'dad', 'daughter', 'father', 'grandfather', 'granddad', 'grandmother', 'grandma', 'husband', 'mum', 'mother', 'nephew', 'niece', 'parent', 'sister', 'son', 'uncle', 'wife',
                 'angry', 'bored', 'excited', 'happy', 'nervous', 'relaxed', 'sad', 'scared', 'surprised', 'tired', 'upset', 'worried',
-                'mine', 'yours', 'his', 'hers', 'ours', 'theirs',
-                'was', 'were', "wasn't", "weren't"
+                "I - my - mine", "you - your - yours", "he - his - his", "she - her - hers", "we - our - ours", "they - their - theirs",
+                "am - was", "is - was", "are - were", "am not - wasn't", "isn't - wasn't", "aren't - weren't"
             ],
             sentences: [
                 "This is my book.",
@@ -207,9 +207,9 @@ TEACHING_CONTENT["Think1"] = {
                 'armchair', 'bath', 'bed', 'carpet', 'cooker', 'cupboard', 'curtain', 'desk', 'lamp', 'mirror', 'poster', 'shelf', 'shelves', 'sofa', 'table', 'wardrobe',
                 'look after', 'look at', 'look for', 'look into', 'look up',
                 'bored', 'boring', 'excited', 'exciting', 'interested', 'interesting', 'tired', 'tiring', 'amazed', 'amazing', 'relaxed', 'relaxing', 'annoyed', 'annoying',
-                'arrive arrived', 'ask asked', 'cook cooked', 'decide decided', 'hate hated', 'help helped', 'like liked', 'live lived', 'look looked',
-                'love loved', 'move moved', 'phone phoned', 'play played', 'start started', 'stay stayed', 'study studied', 'tidy tidied', 'visit visited',
-                'want wanted', 'watch watched', 'work worked',
+                "arrive - arrived", "ask - asked", "cook - cooked", "decide - decided", "hate - hated", "help - helped", "like - liked", "live - lived", "look - looked",
+                "love - loved", "move - moved", "phone - phoned", "play - played", "start - started", "stay - stayed", "study - studied", "tidy - tidied", "visit - visited",
+                "want - wanted", "watch - watched", "work - worked",
                 'very', 'really', 'quite'
             ],
             sentences: [
@@ -243,9 +243,9 @@ TEACHING_CONTENT["Think1"] = {
         "58": {
             vocab: [
                 'yesterday', 'last night', 'last week', 'last month', 'last year', 'ago',
-                'become became', 'buy bought', 'come came', 'do did', 'drink drank', 'eat ate', 'feel felt', 'find found', 'fly flew', 'get got', 'give gave',
-                'go went', 'have had', 'know knew', 'leave left', 'lose lost', 'make made', 'meet met', 'put', 'read', 'run ran', 'say said', 'see saw',
-                'send sent', 'sit sat', 'speak spoke', 'take took', 'tell told', 'think thought', 'win won', 'write wrote'
+                "become - became", "buy - bought", "come - came", "do - did", "drink - drank", "eat - ate", "feel - felt", "find - found", "fly - flew", "get - got", "give - gave",
+                "go - went", "have - had", "know - knew", "leave - left", "lose - lost", "make - made", "meet - met", "put - put", "read - read", "run - ran", "say - said", "see - saw",
+                "send - sent", "sit - sat", "speak - spoke", "take - took", "tell - told", "think - thought", "win - won", "write - wrote"
             ],
             sentences: [
                 "I went to the cinema yesterday.",
@@ -270,10 +270,10 @@ TEACHING_CONTENT["Think1"] = {
             vocab: [
                 'calm', 'cheerful', 'friendly', 'funny', 'helpful', 'intelligent', 'kind', 'nice', 'quiet',
                 'yesterday', 'last night', 'last week', 'last month', 'last year', 'ago',
-                'become became', 'buy bought', 'come came', 'do did', 'drink drank', 'eat ate', 'feel felt', 'find found', 'fly flew', 'get got', 'give gave',
-                'go went', 'have had', 'know knew', 'leave left', 'lose lost', 'make made', 'meet met', 'put', 'read', 'run ran', 'say said', 'see saw',
-                'send sent', 'sit sat', 'speak spoke', 'take took', 'tell told', 'think thought', 'win won', 'write wrote',
-                'mine', 'yours', 'hers'
+                "become - became", "buy - bought", "come - came", "do - did", "drink - drank", "eat - ate", "feel - felt", "find - found", "fly - flew", "get - got", "give - gave",
+                "go - went", "have - had", "know - knew", "leave - left", "lose - lost", "make - made", "meet - met", "put - put", "read - read", "run - ran", "say - said", "see - saw",
+                "send - sent", "sit - sat", "speak - spoke", "take - took", "tell - told", "think - thought", "win - won", "write - wrote",
+                "I - my - mine", "you - your - yours", "she - her - hers"
             ],
             sentences: [
                 "I went to the cinema yesterday.",

@@ -36,6 +36,16 @@ includes('PU1', '6', '81', ['I - my', 'he - his', 'she - her', 'they - their']);
 includes('PU2', '4', '54', ['I - my - mine', 'he - his - his', 'she - her - hers']);
 includes('PU2', '6', '78', ["am - was", "is - was", "are - were", "am not - wasn't", "isn't - wasn't", "aren't - weren't"]);
 includes('PU3', '1', '16', ['can - could', "can't - couldn't"]);
+// Early PU1 retains the original beginner-facing forms by teacher request.
+includes('PU1', '0', '5', ['your']);
+includes('PU1', '0', '8', ['my']);
+includes('PU1', '1', '16', ['my', 'your']);
+includes('PU1', '2', '23', ['got']);
+includes('PU1', '3', '35', ['my', 'your', 'got']);
+for (const e of entries.filter(e => e.book === 'PU1' && Number(e.unit) <= 3)) {
+    assert(!['I - my', 'you - your', 'get - got'].includes(e.word),
+        `Early PU1 must keep its original labels: ${JSON.stringify(e)}`);
+}
 // Identical-looking words with different meanings/roles are not global replacements.
 includes('PU1', '8', '99', ['painting']);
 includes('PU3', '8', '95', ['left']);
@@ -46,6 +56,7 @@ includes('Think1', '5', '55', ['interesting', 'tiring']);
 const legacyLabels = new Set(Object.values(aliases).flat());
 for (const e of entries) {
     const key = sandbox.itemKey(e.word);
+    if (e.book === 'PU1' && Number(e.unit) <= 3 && ['my', 'your', 'got'].includes(key)) continue;
     // Bare base verbs and the picture noun still intentionally exist elsewhere.
     if (['cut', 'put', 'read', 'painting'].includes(key)) continue;
     assert(!legacyLabels.has(key), `Unconverted vocabulary: ${JSON.stringify(e)}`);

@@ -1,5 +1,18 @@
 # Deployment & Release Discipline
 
+## Vocabulary normalization release (2026-10-17a)
+
+Publish to preview first and verify hosted stamps, vocabulary/SR/translation
+scripts, 45 image aliases and 101 verified audio assets before pushing production.
+Build each release on its remote's existing `main`; do not merge preview history
+into production or change the preview API/container or either site's feature gates.
+The release excludes Think2 and restores original vocabulary in PU1 Units 0-3.
+The version/auth/index stamps and changed book/SR/translation script cache busters
+advance together, including the teacher-dashboard references. Existing SR records
+remain readable through the legacy-key compatibility map; no database rewrite is
+performed. Production is complete only after both Pages and Azure workflows pass
+and served content/assets match the validated local release.
+
 > **Last verified:** 2026-09-04 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
 
 **Owner files:** `AGENTS.md`, `DEPLOY_VERSION_STAMP.md`, `.github/workflows/azure-static-web-apps-brave-bush-0438ab000.yml`, `package.json`, `test_deploy_stamp_sync.js`, `version.json`, `staticwebapp.config.json`

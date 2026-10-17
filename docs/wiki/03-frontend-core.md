@@ -216,6 +216,10 @@ triples such as `I - my - mine`; object pronouns use `I - me` etc. `his` follows
 the page's grammatical role. Comparative adverbs retain their own base, e.g.
 `well - better than`, distinct from `good - better than`.
 
+PU1 Units 0-3 are exempt: their original vocabulary labels (`my`, `your`,
+`got`) are retained. Shared canonical translations, images and SR aliases remain
+available for the normalized labels used in later units and other books.
+
 Standalone `was` expands to **both** `am - was` and `is - was`; `wasn't` expands
 to `am not - wasn't` and `isn't - wasn't`. Other labels are `are - were`,
 `aren't - weren't`, `can - could`, and `can't - couldn't`. Identical resulting
@@ -315,6 +319,22 @@ the 41 MB Whisper download (header comment asset_cache.js:1–29):
   unlock / visibilitychange / WeixinJSBridgeReady (iOS/WeChat suspend AudioContexts).
 
 ### gen_missing_audio.js (166 lines)
+
+Vocabulary audio coverage (2026-10-17, normalization worktree): 101 missing
+canonical MP3 filenames were added after spoken-content checks. 61 reuse existing
+recordings byte-for-byte; 40 were generated through Sound of Text, voice `en-GB`,
+including a clearer `build - built` replacement. Full hyphenated labels are
+submitted directly; hyphens are not spoken. The `read - read` recording is the
+exception: direct text produced /ri:d/ twice, so phonetic input `reed - red`
+supplies present /ri:d/ then past /red/ under the unchanged canonical filename.
+Original recordings are retained. Of 274 paired labels in PU1-3/Think0-1, 267 now
+have exact-filename local audio; the remaining seven loaded through Youdao in
+the coverage audit. Vocab audio paths are derived at runtime; no static manifest
+addition is needed. This does not change the TTS fallback order or deploy stamps.
+
+Release `2026-10-17a` ships the normalization, PU1 Units 0-3 exemption, 45 image
+aliases and these 101 audio assets. Public source/verification metadata and exact
+asset hashes are retained in [the audio manifest](../vocabulary-audio-2026-10-17.json).
 
 Offline coverage tool for the hand-recorded `audio_mp3/` corpus
 (`node gen_missing_audio.js content_pu1.js [--generate]`):

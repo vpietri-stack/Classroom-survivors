@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-16c",
-  "deployedAt": "2026-10-16",
-  "notes": "Production: bounded consented speech collection for existing student accounts; 30 recordings per child, coordinated uploads, October 18 closing date."
+  "version": "2026-10-17a",
+  "deployedAt": "2026-10-17",
+  "notes": "Approved paired-vocabulary normalization for PU1-3 and Think0-1, excluding PU1 Units 0-3; preserve existing SR progress; 45 image aliases and 101 verified audio assets."
 }

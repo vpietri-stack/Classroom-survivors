@@ -13,6 +13,7 @@ const target={id:'t',startTime:'2026-10-18T10:00:00.000Z',endTime:'2026-10-25T08
  const container={items:{query:spec=>({fetchAll:async()=>{
      const query=typeof spec==='string'?spec:spec.query;queries.push(query);
      assert(!query.includes('SELECT *'));assert(!query.includes('c.srState'));
+     if(!query.includes('JOIN e IN')) assert(query.includes('NOT IS_DEFINED(c.type)')); // Diagnostic and archive documents are not students.
      if(query.includes('JOIN e IN')) {
          const ids=spec.parameters.filter(p=>p.name.startsWith('@id')).map(p=>p.value);
          assert(ids.length<=20);

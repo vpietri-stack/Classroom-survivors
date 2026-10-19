@@ -1,10 +1,10 @@
 /* Temporary consented audio research. Server switch is OFF by default.
  * This queue is disposable and never touches the student-progress queue.
- * Closed at the end of 2026-10-18 China time, even on a stale client.
+ * Closed at the end of 2026-10-25 China time, even on a stale client.
  */
 (function (global) {
   'use strict';
-  const CAPTURE_ENDS_AT = Date.parse('2026-10-19T00:00:00+08:00');
+  const CAPTURE_ENDS_AT = Date.parse('2026-10-26T00:00:00+08:00');
   const MAX_SAMPLES_PER_STUDENT = 30;
   const MAX_WAV_BYTES = 300000;
   const MAX_PENDING = 2; // includes consent lookup, encoding and in-flight upload

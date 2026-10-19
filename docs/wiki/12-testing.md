@@ -207,3 +207,5 @@ PU2 Unit 9 coverage checks 28 M/34 F, per-page totals, exact edited grammar targ
 PU1 Units 0-1 coverage checks all 69 approved boards, per-page totals, prefix validity, unique SR identities, varied five-board rounds, future-page exclusion and the exact M12 blanks. The real-app Chrome integration solves each added board at 319px alongside all earlier PU2/PU3 boards.
 
 PU1 Unit 2 checks cover all 62 boards, exact per-page counts, complete unique IDs, mixed four-blank prefixes, senses grouping under page 26, contraction targets, scoped SR identities, future-page exclusion and varied rounds. All 62 additions are solved through the real app widget at 319px alongside earlier boards.
+
+PU1 Unit 3 checks cover all 64 boards, per-page placement, complete unique IDs, prefix validity, exact inline emotion symbols, alpaca facts, product/come-comes contrasts, scoped SR identities, future-page exclusion and varied rounds. All additions are solved through the real app widget at 319px alongside earlier boards.

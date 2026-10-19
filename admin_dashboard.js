@@ -529,7 +529,7 @@ async function submitAddStudent() {
             return; 
         }
         closeModal('addStudentModal');
-        loadAllStudents(); // Refresh
+        refreshDashboardData(); // New membership also updates future calendar rosters.
     } catch(e) {
         errEl.textContent = 'Network error'; errEl.classList.remove('hidden');
         if (addBtn) {

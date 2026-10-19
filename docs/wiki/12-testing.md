@@ -131,6 +131,8 @@ See [runbook](../speech-collection-rollout.md).
 
 ## Update discipline
 
+`test_dashboard_efficiency.js` (in `npm test`) covers compact projections, malformed legacy sessions, reduction of large exercise/SR payloads, 304 responses, changed/removed rows, unknown-revision fallback, secure-field isolation, per-student role boundaries, bounded archive batches, live/archive dedup and exact report counts. Calendar tests verify unchanged membership/horizon reads perform no generation writes and normal attendance saves do not rebuild calendars. Chrome uses the compact/delta protocol and covers conditional refreshes, lazy profile loading, no overview/archive downloads during report generation, fresh progress updates, retained filters, failure recovery and all existing report/attendance workflows.
+
 Any agent that adds/changes a test file, changes the `test` script chain, or changes a pinned contract must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
 
 ## Target report coverage

@@ -20,6 +20,7 @@
     }
     function addDays(value, days) { return new Date(new Date(value).getTime() + days * DAY).toISOString(); }
     function groupKey(teacher, classTime) { return JSON.stringify([teacher || '', classTime || '']); }
+    function targetCountKey(target) {return target.id || JSON.stringify([target.startTime,target.endTime,target.targetSessions,target.manualOffset || 0]);}
     // One account can attend several groups. The legacy fields remain its primary group.
     function memberships(student) {
         const groups = [{teacher: student.teacher || '', classTime: student.classTime || ''}, ...(student.classGroups || [])];
@@ -136,5 +137,5 @@
         const attended = records.filter(r => r.status === 'attended').length;
         return { attended, recorded: records.length, rate: records.length ? Math.round(attended / records.length * 100) : null, records };
     }
-    return { DAY, START_DATE, beijingDate, localInput, iso, addDays, groupKey, memberships, belongsTo, targetGroupKey, targetBelongsTo, parseClassTime, occurrences, shortLoss, countPractice, previousTarget, updateTargets, attendanceStats };
+    return { DAY, START_DATE, beijingDate, localInput, iso, addDays, groupKey, targetCountKey, memberships, belongsTo, targetGroupKey, targetBelongsTo, parseClassTime, occurrences, shortLoss, countPractice, previousTarget, updateTargets, attendanceStats };
 });

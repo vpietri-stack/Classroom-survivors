@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-19e",
+  "version": "2026-10-19f",
   "deployedAt": "2026-10-19",
-  "notes": "Preview: approved PU1 Unit 4 22 missing-word/32 find-fix boards with teacher edits; retain speech collection extension and safeguards from 2026-10-19d."
+  "notes": "Compact dashboard refreshes and deltas, bounded calendar reads, batched report and attendance counts; preserve preview curriculum and isolated data."
 }

@@ -247,6 +247,19 @@ separately from its current history, preserving its isolated API/container.
 
 ## Update discipline
 
+## Dashboard data efficiency (19 October 2026)
+
+Release `2026-10-19f` replaces full-roster downloads with compact snapshots and
+revision deltas, loads full profiles on demand, batches bounded practice reads,
+and updates attendance rows directly. Calendar generation metadata prevents
+repeated reconciliation on unchanged refreshes. Publish and verify preview
+Pages plus the existing draft PR #1 API first, preserving its isolated container
+and current preview-only curriculum. Production is released from its own main
+history with the same dashboard changes, without merging the preview PR history
+or closing that API environment. Synchronize the stamp trio and dashboard script
+cache busters. Validate the full root suite, private auth suite, isolated Cosmos
+attendance/archive/retry integration, and served API/UI before completion.
+
 ## PU3 Unit 9 page 109 release (13 October 2026)
 
 Stamp `2026-10-13i` publishes the teacher-approved before/when/after lesson to both production and preview Pages. The release updates all three version stamps, the `content_pu3.js` / `translations.js` cache busters, and the teacher dashboard's auth/content cache busters. The existing preview-path API routing and isolated preview container are preserved; no account or target data are migrated. The lesson is applied separately on each remote's current main history so production does not merge/close draft PR #1 (which hosts the preview API). Deployment is performed from feature worktrees so other sessions' uncommitted changes in the shared main checkout remain untouched.

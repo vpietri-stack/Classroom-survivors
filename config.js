@@ -70,12 +70,12 @@ const THREE_TD_ENABLED = (function () {
     return path.indexOf('/classroom-survivors-preview') === 0;
 })();
 
-// Mixed non-spelling exercises are released on live, preview and development.
+// Pilot the mixed round on preview/dev; production stays on the current flow
+// until a deliberate release enables this feature there.
 const NON_SPELLING_ENABLED = (function () {
     const host = window.location.hostname;
     const preview = /^\/Classroom-survivors-preview(?:\/|$)/i.test(window.location.pathname);
-    const production = /^\/Classroom-survivors(?:\/|$)/i.test(window.location.pathname);
     const local = window.location.protocol === 'file:' || host === 'localhost' || host === '127.0.0.1'
         || /^192\.168\./.test(host) || /^10\./.test(host) || /^172\.(1[6-9]|2\d|3[01])\./.test(host);
-    return (production || preview || local) && new URLSearchParams(window.location.search).get('nonspelling') !== '0';
+    return (preview || local) && new URLSearchParams(window.location.search).get('nonspelling') !== '0';
 })();

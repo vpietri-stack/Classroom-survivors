@@ -2,6 +2,7 @@ const { app } = require('@azure/functions');
 const { validateApiKey } = require('./shared/validateApiKey');
 const { getContainer } = require('./shared/db');
 const auth = require('./shared/auth');
+const {dashboardData} = require('./shared/dashboardData');
 
 app.http('getStudents', {
     methods: ['GET'],
@@ -46,6 +47,13 @@ app.http('getStudents', {
 async function getAllStudents(context, request, allowSecure) {
     try {
         const container = getContainer();
+        if (request.query.get('studentId')) {
+            const {resources} = await container.items.query({query:"SELECT * FROM c WHERE c.id = @id AND (c.role = 'student' OR NOT IS_DEFINED(c.role)) AND NOT IS_DEFINED(c.type)",parameters:[{name:'@id',value:request.query.get('studentId')}]}).fetchAll();
+            const secure = allowSecure && request.query.get('includeSecure') === 'true';
+            if (resources[0] && request.query.get('since') && request.query.get('since') === resources[0]._etag) return {status:304,headers:{'Cache-Control':'private, no-store'}};
+            return {status:200,headers:{'Cache-Control':'private, no-store'},jsonBody:resources.map(s => ({...auth.publicUser(s),detailRevision:s._etag,...(secure ? {password:s.password} : {})}))};
+        }
+        if (request.query.get('view') === 'dashboard') return await dashboardData(container, {secure:allowSecure && request.query.get('includeSecure') === 'true',since:request.query.get('since') || ''});
         // Exclude analytics-archive docs: they have no `role` (so the
         // NOT IS_DEFINED(c.role) clause would otherwise pull them in as
         // phantom students on the dashboard). Keep them out of the list;

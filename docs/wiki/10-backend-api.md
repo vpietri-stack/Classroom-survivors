@@ -126,6 +126,14 @@ See [rollout](../speech-collection-rollout.md) for deployment and pilot checks.
 
 ## Update discipline
 
+## Dashboard performance API (19 October 2026)
+
+Privileged `GET getStudents?view=dashboard&includeSecure=true&since=<revision>` returns `{revision,full,students,removed}`. Stable revisions return 304 without a response body; warm instances compare bounded per-student hash maps and cold instances return full compact snapshots. Credentials remain restricted to the existing trusted includeSecure contract. Students always receive only their own sanitized record, regardless of view/studentId parameters. `GET getStudents?studentId=...` loads one complete student record for privileged callers, with `detailRevision` for conditional reloads. The legacy array response remains available without view parameters.
+
+`classCalendar` GET accepts a `from`/`through` month range and `since` revision. It includes older scheduled classes whose completion has not been confirmed. Calendar generation persists roster-hash/horizon metadata, reconciles memberships only on change, and extends only the missing future interval. Attendance POST reads the affected group and one projected cohort, shares archive reads, locks a class once, and atomically patches each student's receipts/targets with ETag retries. Results include fresh target counts and the affected class so clients need no global reload. `attendanceComplete` is set only after all roster receipts are confirmed and is an optimization, never the idempotency source.
+
+Target report archives are read in bounded 20-student batches rather than one request per group member; merged ranges preserve dual-group practice counting. Live/archive projections include only counting/duration fields. The response adds privileged `progressUpdates` metadata for existing roster rows; report rows remain credential/account-ID free. Report generation remains fresh and independent of roster/calendar availability.
+
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
 
 ## Target report export

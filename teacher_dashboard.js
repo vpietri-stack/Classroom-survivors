@@ -11,6 +11,8 @@ let sortState = { column: 'name', direction: 'asc' };
 let exerciseSortState = { column: 'timestamp', direction: 'desc' };
 let isBM = false;            // Flag for Branch Manager role
 let dashboardRefreshPromise = null;
+let dashboardDataRevision = '';
+let studentDetailSequence = 0;
 
 // ----- INIT -----
 
@@ -63,17 +65,28 @@ async function loadAllStudents({ preserveDisplay = false, throwOnError = false }
     if (!preserveDisplay) tbody.innerHTML = `<tr><td colspan="6"><div class="loading-spinner"></div></td></tr>`;
 
     try {
-        const includeSecure = (isAdmin || isBM) ? '?includeSecure=true' : '';
-        const url = `${API_BASE}/getStudents${includeSecure}`;
+        const params = new URLSearchParams({view:'dashboard'});
+        if (isAdmin || isBM) params.set('includeSecure','true');
+        if (dashboardDataRevision) params.set('since',dashboardDataRevision);
+        const url = `${API_BASE}/getStudents?${params}`;
         const res = await apiFetch(url, {cache:'no-store'});
+        if (res.status === 304) {allStudents.forEach(s=>{s._summary=true;}); return true;}
         if (!res.ok) throw new Error('Failed to fetch students');
         const data = await res.json();
         // Filter out teachers and admins from list
-        allStudents = data.filter(s => s.role !== 'BM' && s.role !== 'admin');
+        if (Array.isArray(data)) {allStudents = data.filter(s => s.role !== 'BM' && s.role !== 'admin'); dashboardDataRevision = '';}
+        else {
+            // Summary hashes intentionally exclude exercise/SR history. Revalidate any
+            // previously opened profile even when only another student's row changed.
+            allStudents.forEach(s=>{s._summary=true;});
+            const next = new Map((data.full ? [] : allStudents).map(s => [s.id,s]));
+            for (const id of data.removed || []) next.delete(id);
+            for (const student of data.students) next.set(student.id,student);
+            allStudents = [...next.values()]; dashboardDataRevision = data.revision;
+        }
         populateTeacherFilter();
         populateClassTimeFilter();
         applyFilters();
-        if (typeof loadClassCalendar === 'function') await loadClassCalendar();
         return true;
     } catch (e) {
         if (throwOnError) throw e;
@@ -89,7 +102,10 @@ function refreshDashboardData() {
     button.disabled=true;button.textContent='Refreshing…';status.textContent='Loading fresh data…';
     dashboardRefreshPromise=(async()=>{
         try {
-            await loadAllStudents({preserveDisplay:true,throwOnError:true});
+            const results = await Promise.allSettled([loadAllStudents({preserveDisplay:true,throwOnError:true}),
+                typeof loadClassCalendar === 'function' ? loadClassCalendar() : Promise.resolve(true)]);
+            if (results[0].status === 'rejected') throw results[0].reason;
+            if (results[1].status === 'rejected' || results[1].value === false) throw new Error('Calendar could not refresh; the student list is up to date');
             status.textContent=`Updated ${new Date().toLocaleTimeString('en-GB',{timeZone:'Asia/Shanghai'})} (Beijing time)`;
             return true;
         } catch(err) {
@@ -239,11 +255,17 @@ function getAnalyticsInRange(student, dateFrom, dateTo) {
 }
 
 function countSessions(student, dateFrom, dateTo) {
+    if (student._summary && student.sessionDays) return student.sessionDays.filter(d=>(!dateFrom || d[0]>=dateFrom)&&(!dateTo || d[0]<=dateTo)).reduce((sum,d)=>sum+d[1],0);
     const analytics = getAnalyticsInRange(student, dateFrom, dateTo);
     return analytics.filter(e => e.type === 'session').length;
 }
 
 function avgStudyDuration(student, dateFrom, dateTo) {
+    if (student._summary && student.sessionDays) {
+        const days=student.sessionDays.filter(d=>(!dateFrom || d[0]>=dateFrom)&&(!dateTo || d[0]<=dateTo));
+        const count=days.reduce((sum,d)=>sum+d[2],0);
+        return count ? days.reduce((sum,d)=>sum+d[3],0)/count : 0;
+    }
     const analytics = getAnalyticsInRange(student, dateFrom, dateTo);
     const studySessions = analytics.filter(e => e.type === 'session' && e.sessionType === 'study');
     if (studySessions.length === 0) return 0;
@@ -378,13 +400,19 @@ function dashboardGroupsForView(student) {
 }
 
 function getStudentTargetInfo(student, key) {
-    if (!student.targets || student.targets.length === 0) return null;
     const now = new Date();
     if (!key) {
         const groups = dashboardGroupsForView(student);
         const group = groups[0];
         if (group) key = ClassCalendarCore.groupKey(group.teacher, group.classTime);
     }
+    const progress = (student._groupProgress || []).find(p => p.key === key);
+    if (progress) {
+        if (!progress.target) return null;
+        const t = progress.target, completed = progress.completed;
+        return {target:t,completed,status:now < new Date(t.startTime) ? 'upcoming' : now > new Date(t.endTime) ? completed >= t.targetSessions ? 'completed' : 'missed' : 'active'};
+    }
+    if (!student.targets || student.targets.length === 0) return null;
     const targets = student.targets.filter(t => !key || ClassCalendarCore.targetBelongsTo(student,t,key));
 
     // 1. Active target
@@ -392,7 +420,7 @@ function getStudentTargetInfo(student, key) {
         const start = new Date(t.startTime);
         const end = new Date(t.endTime);
         if (now >= start && now <= end) {
-            const completed = countTargetSessions(student, start, end) + (t.manualOffset || 0);
+            const completed = student.targetCounts?.[ClassCalendarCore.targetCountKey(t)] ?? (countTargetSessions(student, start, end) + (t.manualOffset || 0));
             return { target: t, completed, status: 'active' };
         }
     }
@@ -405,7 +433,7 @@ function getStudentTargetInfo(student, key) {
         const t = past[0];
         const start = new Date(t.startTime);
         const end = new Date(t.endTime);
-        const completed = countTargetSessions(student, start, end) + (t.manualOffset || 0);
+        const completed = student.targetCounts?.[ClassCalendarCore.targetCountKey(t)] ?? (countTargetSessions(student, start, end) + (t.manualOffset || 0));
         return { target: t, completed, status: completed >= t.targetSessions ? 'completed' : 'missed' };
     }
 
@@ -491,8 +519,26 @@ function renderStudentsTable(dateFrom, dateTo) {
 // ----- STUDENT DETAIL -----
 
 async function openStudentDetail(studentId) {
+    const sequence = ++studentDetailSequence;
     currentStudent = allStudents.find(s => s.id === studentId);
     if (!currentStudent) return;
+    if (currentStudent._summary) {
+        const row = document.getElementById('dashboardRefreshStatus');
+        row.textContent = 'Loading this student’s details…';
+        try {
+            const params = new URLSearchParams({studentId});
+            if (isAdmin || isBM) params.set('includeSecure','true');
+            if (currentStudent.detailRevision) params.set('since',currentStudent.detailRevision);
+            const res = await apiFetch(`${API_BASE}/getStudents?${params}`,{cache:'no-store'});
+            if (!res.ok && res.status !== 304) throw new Error('Could not load student details. Please retry.');
+            const data = res.status === 304 ? [currentStudent] : await res.json();
+            if (sequence !== studentDetailSequence) return;
+            if (!data[0]) throw new Error('Student no longer exists. Refresh the dashboard.');
+            if (res.status !== 304) {delete currentStudent._fullAnalytics; delete currentStudent._archivesLoaded;}
+            Object.assign(currentStudent,data[0]); delete currentStudent._summary; delete currentStudent._groupProgress; delete currentStudent.targetCounts; delete currentStudent.sessionDays;
+            row.textContent = '';
+        } catch(err) {if(sequence === studentDetailSequence) {row.textContent=err.message; currentStudent=null;}return;}
+    }
 
     document.getElementById('dashboardMain').classList.add('hidden');
     document.getElementById('studentDetailView').classList.remove('hidden');
@@ -520,6 +566,7 @@ async function openStudentDetail(studentId) {
 }
 
 function backToDashboard() {
+    studentDetailSequence++;
     document.getElementById('studentDetailView').classList.add('hidden');
     document.getElementById('dashboardMain').classList.remove('hidden');
     currentStudent = null;
@@ -546,20 +593,25 @@ function mergeAnalytics(live, archives) {
 // fetch fails (e.g. archive endpoint unreachable), we silently fall back to the
 // live data — never block the detail view on it.
 async function loadStudentArchives(studentId) {
+    const student = currentStudent;
+    if (!student || student.id !== studentId) return;
+    if (student._archivesLoaded) return;
     const badge = document.getElementById('detailArchiveBadge');
     const countEl = document.getElementById('detailArchiveCount');
     const liveEvents = (currentStudent && Array.isArray(currentStudent.analytics)) ? currentStudent.analytics : [];
-    currentStudent._fullAnalytics = liveEvents; // default: live only
+    student._fullAnalytics = liveEvents; // default: live only
     if (badge) badge.classList.add('hidden');
 
     try {
         const res = await apiFetch(`${API_BASE}/getStudentArchive?studentId=${encodeURIComponent(studentId)}`);
         if (!res.ok) return;
         const archives = await res.json();
-        if (!Array.isArray(archives) || archives.length === 0) return;
+        if (!Array.isArray(archives)) return;
+        student._archivesLoaded = true;
+        if (archives.length === 0 || currentStudent !== student) return;
 
         const merged = mergeAnalytics(liveEvents, archives);
-        currentStudent._fullAnalytics = merged;
+        student._fullAnalytics = merged;
 
         const totalArchived = merged.length - liveEvents.length;
         if (badge && countEl) {

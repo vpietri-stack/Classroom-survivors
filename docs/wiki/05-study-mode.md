@@ -285,10 +285,10 @@ Both are in the `npm test` chain — see [Testing](12-testing.md). Related live 
 
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
 
-## Mixed Round D
+## Mixed Round D on preview (2026-10-13)
 
-NON_SPELLING_ENABLED enables the released flow on production, preview and local/file development.
-The nonspelling=0 diagnostic override retains the legacy flow. A/B/C keep existing
+NON_SPELLING_ENABLED enables the new flow on preview and local/file development.
+The production URL retains the legacy flow until release. A/B/C keep existing
 recognition, word scramble and handwriting. Round D presents five boards chosen
 by NonSpellingContent.select: sentence scramble, sentence match, missing words
 and find/fix. At least three eligible types appear when available. Cooldown fills
@@ -351,9 +351,6 @@ PU3 Unit 9 pages 107/110/111 add 24 M/36 F boards (8/10, 8/12 and 8/14 respectiv
 
 Study startup fix (2026-10-14): AVAILABLE_CONTENT can list pages that have no TEACHING_CONTENT entry (currently PU1 Unit 2 pages 24/25). The mixed non-spelling pool now skips missing books/units/pages just as the legacy SR picker does. Original absolute page indexes remain intact, so proximity weighting, earlier-page review, cooldown and future-page exclusion retain their behavior. Missing current pages may still review earlier loaded material; a wholly unloaded book returns an empty pool. This guard applies to Study and game challenges.
 
-Production promotion 2026-10-15a enables the complete approved PU3 Units 1-9 catalog (432 additional M/F boards plus the original 14 page-109 boards) with the preview-tested prefix/contraction widget and 48 flashcards. The already-live production mixed-flow gate and existing SR identities are preserved. The page-availability correction from 2026-10-14m is included.
-
-
 PU2 Unit 1 adds 22 M/24 F boards across the existing pages 7 (5 M/5 F), 9 (6 M/7 F), 10 (7 M/8 F), and 16 (4 M/4 F). Countryside vocabulary, present continuous, daily routines and present simple/continuous contrasts use the approved restricted keyboards and initial hints. M13 includes the school-clothes wording; F3 uses rocks. The rejected planet boards M23/M24 and F25-F28 are excluded. Legacy vocabulary, scrambles, pairs and PU3 content are unchanged.
 
 PU2 Unit 2 adds 24 M/28 F boards on pages 19 (6 M/7 F), 21 (6 M/7 F), 22 (6 M/6 F), and 25 (6 M/8 F). M1/M3/M4 use the approved comes-before/after wording. M10/M11 prefill t/o and d/w; M19/M20 prefill m in must/must-not. The page 19 legacy matching pair now correctly states Tuesday comes after Monday. All other legacy content and earlier typed boards remain unchanged.
@@ -373,3 +370,11 @@ PU2 Unit 7 adds 28 M/36 F boards on existing pages 83 (6/8), 85 (10/12) and 87 (
 PU2 Unit 8 adds 29 M/39 F boards on existing pages 95 (4/6), 96 (7/10), 97 (5/6), 98 (6/8) and 104 (7/9). All twelve teacher notes are incorporated: map wording; lunch brought onto the train; lost/found and birthday/gave/hid pairs; sat/was/slept; pedestrian already written; station/park/ticket repairs; M30/F40 omitted. M8 uses grammatical subject wording She and Grandpa. Legacy arrays and earlier units remain unchanged.
 
 PU2 Unit 9 adds 28 M/34 F boards on pages 107 (6/8), 109 (8/10), 116 (8/8), 119 (6/8). All sixteen teacher notes are applied: angry dogs, extra grammar blanks, single-row M13, boring contrast, one-of-the-most chunks, revised F6-F8 and excluded F22/F23. Requested boards now have up to seven blanks with mixed locked prefixes. M8 retains film (correcting firm); M17 retains the necessary is after This. Legacy arrays and earlier units remain unchanged.
+
+PU1 Units 0-1 add 31 M/38 F boards using the existing page grouping: Unit 0 pages 5 (9/8), 7 (2/2), 8 (2/4); Unit 1 pages 9 (4/4), 10 (2/4), 11 (4/6), 12 (2/2), 13 (2/2), 16 (4/6). M12 on page 12 contains both explicit blanks. Initial hints are locked and excluded from target keyboards; colour/object symbols supply the approved visual context. Legacy arrays and all PU2/PU3 boards are preserved. Unit 2 is still review-only.
+
+PU1 Unit 2 adds the approved 26 M/36 F boards on existing pages 19 (4/4), 20 (2/4), 21 (4/4), 22 (6/8), 23 (4/6), and 26 (6/10). Family words, identity pronouns, body plurals and have/has-got forms retain approved wording and locked initials. The senses content from book pages 24-25 is grouped under page 26 review; unavailable pages are not reintroduced. Legacy arrays and earlier authored boards are preserved; Unit 3 is review-only.
+
+PU1 Unit 3 adds 28 M/36 F boards on existing pages 31 (4/4), 32 (2/2), 33 (4/6), 34 (4/4), 35 (4/6), 36 (3/4), 37 (3/4), and 43 (4/6). Farm animals, adjectives, articles, be/have-got agreement, contractions, animal products and the alpaca reading retain the approved wording and locked initials. F13/F14 include their inline emotion symbols. Existing vocabulary, scrambles, pairs and earlier authored boards are preserved. Unit 4 remains review-only.
+
+PU1 Unit 4 adds 22 M/32 F boards on pages 45 (5/6), 47 (7/10), 48 (4/6), and 54 (6/10). Food symbols, likes/dislikes, do/does, articles, polite requests and ingredient plurals retain the approved placement and first-letter hints. M16 uses I eat two sausages and eggs for breakfast with the initial s locked, removing misleading hot-dog symbols and making the plural target explicit. M21/M23 are omitted without renumbering the other IDs. F22 uses grapeballs -> meatballs. Legacy arrays and earlier boards are preserved; Unit 5 remains review-only.

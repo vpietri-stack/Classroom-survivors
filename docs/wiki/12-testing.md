@@ -131,6 +131,8 @@ See [runbook](../speech-collection-rollout.md).
 
 ## Update discipline
 
+`test_dashboard_efficiency.js` (in `npm test`) covers compact projections, malformed legacy sessions, reduction of large exercise/SR payloads, 304 responses, changed/removed rows, unknown-revision fallback, secure-field isolation, per-student role boundaries, bounded archive batches, live/archive dedup and exact report counts. Calendar tests verify unchanged membership/horizon reads perform no generation writes and normal attendance saves do not rebuild calendars. Chrome uses the compact/delta protocol and covers conditional refreshes, lazy profile loading, no overview/archive downloads during report generation, fresh progress updates, retained filters, failure recovery and all existing report/attendance workflows.
+
 Any agent that adds/changes a test file, changes the `test` script chain, or changes a pinned contract must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
 
 ## Target report coverage
@@ -189,9 +191,6 @@ test_non_spelling_startup.js reproduces the PU1 pages 24/25 crash, exercises sel
 
 The startup regression now asserts that every advertised real page has content, the exact corrected PU1/PU2 page lists, PU2 p47 selection and future-page exclusion at p46. Missing PU1 pages 24/25 are reintroduced only inside isolated test contexts to retain the crash regression. Real Study-button tests include PU2 p47 on desktop and 319px.
 
-Production promotion 2026-10-15a runs the complete preview-expanded suite against the production gate/config, including all 432 newly authored boards, original page-109 fixtures, immutable initials/contractions, 48 image assets and corrected PU1/PU2 availability. Production-enabled, unrelated-site exclusion and nonspelling=0 assertions are retained from the production test footer.
-
-
 PU2 Unit 1 coverage enforces the approved 22 M/24 F totals and per-page counts, excluded planet items, school-clothes/rocks edits, prefix validity, unique SR keys and future-page exclusion. Chrome solves each of the 46 boards through the real widget at 319px, alongside the existing PU3 coverage.
 
 PU2 Unit 2 tests cover the 24/28 totals, page placement, approved weekday wording/answers, locked initials, unique SR keys, future-page exclusion and the Tuesday/Monday matching correction. Chrome solves all 52 additional boards at 319px alongside PU2 Unit 1 and PU3.
@@ -209,3 +208,11 @@ PU2 Unit 7 coverage checks 28 M/36 F and per-page totals, M1 exact edited wordin
 PU2 Unit 8 coverage checks 29 M/39 F and per-page totals, all edited sentences/answers/prefixes, excluded M30/F40, unique scoped identities, future-page exclusion and varied rounds. Chrome solves all 68 additions at 319px alongside previous boards.
 
 PU2 Unit 9 coverage checks 28 M/34 F, per-page totals, exact edited grammar targets/prefixes, seven-blank M14, single-sentence M13, revised feedback prompts, excluded F22/F23, unique identities, future-page exclusion and varied rounds. Chrome solves all 62 additions at 319px alongside earlier PU2/PU3 content.
+
+PU1 Units 0-1 coverage checks all 69 approved boards, per-page totals, prefix validity, unique SR identities, varied five-board rounds, future-page exclusion and the exact M12 blanks. The real-app Chrome integration solves each added board at 319px alongside all earlier PU2/PU3 boards.
+
+PU1 Unit 2 checks cover all 62 boards, exact per-page counts, complete unique IDs, mixed four-blank prefixes, senses grouping under page 26, contraction targets, scoped SR identities, future-page exclusion and varied rounds. All 62 additions are solved through the real app widget at 319px alongside earlier boards.
+
+PU1 Unit 3 checks cover all 64 boards, per-page placement, complete unique IDs, prefix validity, exact inline emotion symbols, alpaca facts, product/come-comes contrasts, scoped SR identities, future-page exclusion and varied rounds. All additions are solved through the real app widget at 319px alongside earlier boards.
+
+PU1 Unit 4 checks enforce 54 boards and per-page totals, M21/M23 exclusions, complete retained IDs, exact M16 breakfast wording with no hot-dog symbols, exact F22 grapeballs repair, three-blank and mixed-prefix boards, unique SR keys, round variety and future-page exclusion. Chrome solves every addition through the real app widget at 319px alongside earlier content.

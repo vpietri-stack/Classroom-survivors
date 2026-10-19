@@ -139,6 +139,10 @@ bounded last-write statistics. Export/count code must exclude control records.
 
 ## Update discipline
 
+Calendar generation metadata is stored separately as `{id: 'class_calendar_state', studentId: 'class_calendar_state', role: 'classCalendarState', rosterHash, generatedThrough, groupKeys}`. It tracks generated weekly occurrences without storing a stale calendar snapshot. Membership signatures use sorted groups/student IDs, preventing ordering-only writes. Class documents may gain `attendanceComplete: true` after all roster receipts are confirmed; student attendance remains authoritative. Both document roles remain excluded from student queries.
+
+Dashboard summaries are transient read models, not student writes: `_summary`, `sessionDays` (`[UTC date, sessions, study sessions, study duration ms]` tuples), representative `targets` and `targetCounts`. Complete student records remain unchanged and available on demand. Client-only revision/progress caches are in memory; no new localStorage keys or retained copies of private history are introduced.
+
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
 
 ## Preview non-spelling exercise identities (2026-10-13)

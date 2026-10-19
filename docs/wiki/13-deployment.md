@@ -247,6 +247,19 @@ separately from its current history, preserving its isolated API/container.
 
 ## Update discipline
 
+## Dashboard data efficiency (19 October 2026)
+
+Release `2026-10-19g` replaces full-roster downloads with compact snapshots and
+revision deltas, loads full profiles on demand, batches bounded practice reads,
+and updates attendance rows directly. Calendar generation metadata prevents
+repeated reconciliation on unchanged refreshes. Publish and verify preview
+Pages plus the existing draft PR #1 API first, preserving its isolated container
+and current preview-only curriculum. Production is released from its own main
+history with the same dashboard changes, without merging the preview PR history
+or closing that API environment. Synchronize the stamp trio and dashboard script
+cache busters. Validate the full root suite, private auth suite, isolated Cosmos
+attendance/archive/retry integration, and served API/UI before completion.
+
 ## PU3 Unit 9 page 109 release (13 October 2026)
 
 Stamp `2026-10-13i` publishes the teacher-approved before/when/after lesson to both production and preview Pages. The release updates all three version stamps, the `content_pu3.js` / `translations.js` cache busters, and the teacher dashboard's auth/content cache busters. The existing preview-path API routing and isolated preview container are preserved; no account or target data are migrated. The lesson is applied separately on each remote's current main history so production does not merge/close draft PR #1 (which hosts the preview API). Deployment is performed from feature worktrees so other sessions' uncommitted changes in the shared main checkout remain untouched.
@@ -289,9 +302,6 @@ Preview release 2026-10-14l publishes the 48 approved PU3 flashcard PNGs and the
 
 Preview-only 2026-10-14m corrects PU1 U2 and PU2 U4 availability. Both changed book-pack cache busters advance in the student page and dashboard; the stamp trio and dashboard auth link remain synchronized. Existing 48 PU3 flashcards and the missing-page guard are retained. Production is not updated by this release.
 
-Production release 2026-10-15a promotes the validated preview b63a306 content and 48 flashcards, including the 2026-10-14m registry correction (PU1 Unit 2 removes pages 24/25; PU2 Unit 4 exposes page 47). It is built on origin/main without merging preview history or closing the isolated preview API PR. Production config/API routing, the already-enabled mixed exercise gate and dashboard cache busters are retained. New curriculum/widget/CSS/translation cache busters and all version stamps advance together. Existing students, SR keys, backend/data and page 109 content remain intact. Production Pages and Azure deployment plus served-file checks are required before completion.
-
-
 Preview release 2026-10-15a publishes only the approved PU2 Unit 1 22 M/24 F boards. The non-spelling curriculum cache buster advances with the synchronized stamp trio and dashboard auth link. Production and isolated preview API/data remain unchanged; PU2 Unit 2 is still a review-only proposal.
 
 Preview release 2026-10-15b publishes the approved PU2 Unit 2 typed boards and Tuesday/Monday pair correction. The book-pack and non-spelling curriculum cache busters advance with the synchronized stamp trio and dashboard auth link. Production and isolated preview API/data are unchanged; Unit 3 remains review-only.
@@ -310,7 +320,11 @@ Preview release 2026-10-16a publishes approved PU2 Unit 8 boards with the teache
 
 Preview release 2026-10-16b publishes approved PU2 Unit 9 with all teacher annotations, expanded grammar blanks and F22/F23 omitted. The curriculum cache buster and synchronized version/auth/index/dashboard stamps advance together. All nine PU2 units are prepared for the explicitly authorized production promotion using a separate production-based worktree.
 
-Production release 2026-10-16b promotes all approved PU2 Units 1-9: 236 missing-word boards and 291 find-fix exercises, the Tuesday/Monday pair fix and answer-length support for granddaughter. It is based on current origin/main in a separate production worktree, preserving production API/config and all prior PU3 content/images. Curriculum/widget and synchronized auth/version/index/dashboard stamps advance together. Preview is verified before pushing origin/main; production Pages and Azure workflows plus hosted-file checks are then verified independently.
+Preview release 2026-10-19a adds the approved PU1 Units 0-1 31 M/38 F boards. The non-spelling curriculum cache buster advances with the synchronized version/auth/index stamps and dashboard auth link. The release builds on current preview main, retaining its vocabulary and speech updates. Production and isolated preview data are unchanged; Unit 2 is a proposal.
+
+Preview release 2026-10-19b publishes the approved PU1 Unit 2 26 M/36 F boards. The curriculum cache buster advances with the synchronized version/auth/index stamps and dashboard auth link. Existing preview API/data and production are unchanged; Unit 3 remains a review draft.
+
+Preview release 2026-10-19c publishes approved PU1 Unit 3 28 M/36 F boards. The curriculum cache buster advances with the synchronized version/auth/index stamps and dashboard auth link. Production and the isolated preview API/data are unchanged; Unit 4 is a review proposal.
 
 
 ## Speech collection extension (19 October 2026)
@@ -324,3 +338,5 @@ quota records, upload bounds and throughput. Browser collection cache counter
 advances to 4. Production and preview are released from their own current
 histories, retaining their curriculum and API routing. Verify live reopening
 and the new cutoff without uploading synthetic audio to production.
+
+Preview release 2026-10-19e publishes approved PU1 Unit 4 22 M/32 F boards with all teacher annotations applied. The curriculum cache buster, version/auth/index stamps and dashboard auth link advance together. Production and isolated preview API/data are unchanged.

@@ -12,18 +12,30 @@ const practice = n => Array.from({length:n},(_,i) => ({eventId:'s'+i,type:'sessi
 
 // In-memory Cosmos contract: reads are snapshots; writes honor ETags and partition keys.
 class Store {
-    constructor(docs) { this.docs = new Map(docs.map(d => [d.id,{...copy(d),_etag:'1'}])); this.inject = null; this.keys = []; }
+    constructor(docs) { this.docs = new Map(docs.map(d => [d.id,{...copy(d),_etag:'1'}])); this.inject = null; this.keys = []; this.queries=[]; this.writes=0; }
     items = {
         query: spec => ({fetchAll:async () => {
             const q = typeof spec === 'string' ? spec : spec.query;
+            this.queries.push(q);
             let docs = [...this.docs.values()];
-            if (q.includes("c.role = 'classCalendar'")) docs = docs.filter(d => d.role === 'classCalendar');
-            else if (q.includes("c.type = 'student_analytics_archive'")) docs = docs.filter(d => d.type === 'student_analytics_archive' && d.studentId === spec.parameters[0].value);
+            if (q.includes("c.role = 'classCalendar'")) {
+                docs = docs.filter(d => d.role === 'classCalendar');
+                const params = new Map((spec.parameters || []).map(p=>[p.name,p.value]));
+                if (params.has('@group')) docs = docs.filter(d=>d.groupKey===params.get('@group'));
+                if (params.has('@future')) docs = docs.filter(d=>d.startTime>params.get('@future'));
+                if (params.has('@from')) docs = docs.filter(d=>(d.startTime>=params.get('@from') && d.startTime<=params.get('@to')) || (d.endTime<=params.get('@now') && d.status==='scheduled' && !d.attendanceComplete));
+            }
+            else if (q.includes("c.type = 'student_analytics_archive'")) {
+                const ids=spec.parameters.filter(p=>p.name.startsWith('@id')).map(p=>p.value);
+                docs = docs.filter(d => d.type === 'student_analytics_archive' && ids.includes(d.studentId));
+                if (q.includes('JOIN e IN')) docs=docs.flatMap(d=>d.events.filter(e=>e.type==='session').map(event=>({studentId:d.studentId,event})));
+            }
             else if (q.includes('c.id = @id')) docs = docs.filter(d => d.id === spec.parameters[0].value);
+            else if (q.includes('ARRAY_CONTAINS(@ids, c.id)')) docs=docs.filter(d=>spec.parameters[0].value.includes(d.id));
             else docs = docs.filter(d => (!d.role || d.role === 'student') && !d.type);
             return {resources:copy(docs)};
         }}),
-        create:async doc => { if (this.docs.has(doc.id)) throw {code:409}; const resource = {...copy(doc),_etag:'1'}; this.docs.set(doc.id,resource); return {resource:copy(resource)}; }
+        create:async doc => {this.writes++; if (this.docs.has(doc.id)) throw {code:409}; const resource = {...copy(doc),_etag:'1'}; this.docs.set(doc.id,resource); return {resource:copy(resource)}; }
     };
     item(id,pk) {
         const read = () => {
@@ -34,6 +46,7 @@ class Store {
             return doc;
         };
         return {read:async () => ({resource:copy(read())}),patch:async (ops,options) => {
+            this.writes++;
             const doc = read();
             if (this.inject) { const inject=this.inject; this.inject=null; inject(doc); doc._etag=String(+doc._etag+1); }
             if (options?.accessCondition && options.accessCondition.condition !== doc._etag) throw {code:412};
@@ -91,7 +104,8 @@ async function coreAndServiceTests() {
         const second = generated.find(e => e.startTime === at('25'));
         assert(first && second);
         const size=store.docs.size;
-        await service.ensureCalendar(store,'2026-10-31'); assert.equal(store.docs.size,size);
+        const writes=store.writes;
+        await service.ensureCalendar(store,'2026-10-31'); assert.equal(store.docs.size,size);assert.equal(store.writes,writes);
         // Foreign student and future attendance fail without locking a class.
         await assert.rejects(service.recordBatch(store,{action:'record',eventId:first.id,studentIds:['outsider'],status:'attended'},'admin'),/belonging/);
         assert(!store.docs.get(first.id).attendanceStarted);
@@ -104,7 +118,9 @@ async function coreAndServiceTests() {
         const duplicate = await service.recordOne(store,first,'a','missed',second,'admin');
         assert(duplicate.duplicate); assert.equal(store.docs.get('a').targets[0].targetSessions,20);
         assert.equal(store.docs.get('a').attendance.length,1);
+        const beforeBatch=store.queries.length;
         const partial = await service.recordBatch(store,{action:'record',eventId:first.id,studentIds:['a','b'],status:'attended'},'admin');
+        assert(!store.queries.slice(beforeBatch).some(q=>q.includes('SELECT c.id, c.teacher, c.classTime'))); // no calendar rebuild for an attendance save
         assert(partial.success); assert.equal(store.docs.get('b').targets[1].targetSessions,10);
         await assert.rejects(service.saveEvent(store,{eventId:first.id,startTime:at('20'),endTime:at('20','18:00')}),/cannot be edited/);
         const cancel1 = await service.recordBatch(store,{action:'cancel',eventId:second.id},'admin'); assert(cancel1.success);
@@ -233,6 +249,7 @@ function httpHandler(file,store,gate={token:{role:'admin',sub:'admin'}}) {
         if (id==='./shared/validateApiKey') return {validateApiKey:()=>true};
         if (id==='./shared/db') return {getContainer:()=>store};
         if (id==='./shared/auth') return {requireAuth:()=>gate,isPrivileged:token=>['admin','teacher','BM'].includes(token.role),forbidden:()=>({status:403}),publicUser:copy};
+        if (id==='crypto') return require('crypto');
         return require(require('path').resolve(require('path').dirname(filename),id));
     }};
     vm.runInNewContext(fs.readFileSync(filename,'utf8'),sandbox);

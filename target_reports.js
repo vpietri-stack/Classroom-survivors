@@ -40,13 +40,18 @@ async function generateTargetReports() {
     if (!teacher) return reportStatus('Select a teacher first.');
     clearTargetReports(); const run=targetReportState.run;
     targetReportState.busy=true;const button=reportElement('generateTargetReports');button.disabled=true;button.textContent='Generating…';
-    reportStatus('Refreshing dashboard data, targets and archived practice sessions…');
+    reportStatus('Loading fresh target reports…');
     try {
-        if (!await refreshDashboardData()) throw new Error('Could not refresh dashboard data. Please retry.');
-        if (run!==targetReportState.run) return;
         const res=await apiFetch(`${API_BASE}/getTargetReports?teacher=${encodeURIComponent(teacher)}`,{cache:'no-store'});
         const data=await res.json();if (!res.ok) throw new Error(data.error || 'Could not generate reports.');
         if (run!==targetReportState.run) return;
+        for (const update of data.progressUpdates || []) {
+            const student = allStudents.find(s => s.id === update.id);
+            if (!student) continue;
+            const progress = new Map((student._groupProgress || []).map(p=>[p.key,p]));
+            update.groupProgress.forEach(p=>progress.set(p.key,p)); student._groupProgress=[...progress.values()];
+        }
+        applyFilters();
         targetReportState.groups=data.groups.map(g=>({...g,generatedAt:data.generatedAt,closing:TargetReportsCore.pickClosing()}));targetReportState.generatedAt=data.generatedAt;targetReportState.index=0;
         if (!data.groups.length) return reportStatus('No student groups found for this teacher.');
         const select=reportElement('targetReportGroup');select.replaceChildren();

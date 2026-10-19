@@ -1343,7 +1343,136 @@
         }
     };
 
-    const pageCatalogs = { 'PU2:9:107': pu2Unit9Catalogs[107], 'PU2:9:109': pu2Unit9Catalogs[109], 'PU2:9:116': pu2Unit9Catalogs[116], 'PU2:9:119': pu2Unit9Catalogs[119], 'PU2:8:95': pu2Unit8Catalogs[95], 'PU2:8:96': pu2Unit8Catalogs[96], 'PU2:8:97': pu2Unit8Catalogs[97], 'PU2:8:98': pu2Unit8Catalogs[98], 'PU2:8:104': pu2Unit8Catalogs[104], 'PU2:7:83': pu2Unit7Catalogs[83], 'PU2:7:85': pu2Unit7Catalogs[85], 'PU2:7:87': pu2Unit7Catalogs[87], 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
+    // PU1 Units 0-1: teacher-approved Hello and school boards.
+    const pu1Unit0Catalogs = {
+        5: {
+            missing: [
+                {"id": "M1", "sentences": ["___ your name?", "___ old are you?"], "answers": ["what's", "how"]},
+                {"id": "M2", "sentences": ["What's ___ name?", "How old ___ you?"], "answers": ["your", "are"]},
+                {"id": "M3", "sentences": ["I'm 1. I'm ___.", "I'm 2. I'm ___."], "answers": ["one", "two"], "prefixes": ["o", "t"]},
+                {"id": "M4", "sentences": ["I'm 3. I'm ___.", "I'm 4. I'm ___."], "answers": ["three", "four"], "prefixes": ["t", "f"]},
+                {"id": "M5", "sentences": ["I'm 5. I'm ___.", "I'm 6. I'm ___."], "answers": ["five", "six"], "prefixes": ["f", "s"]},
+                {"id": "M6", "sentences": ["I'm 7. I'm ___.", "I'm 8. I'm ___."], "answers": ["seven", "eight"], "prefixes": ["s", "e"]},
+                {"id": "M7", "sentences": ["I'm 9. I'm ___.", "I'm 10. I'm ___."], "answers": ["nine", "ten"], "prefixes": ["n", "t"]},
+                {"id": "M8", "sentences": ["🟥 It's ___.", "🟦 It's ___."], "answers": ["red", "blue"], "prefixes": ["r", "b"]},
+                {"id": "M9", "sentences": ["🟨 It's ___.", "🟩 It's ___."], "answers": ["yellow", "green"], "prefixes": ["y", "g"]},
+            ],
+            fix: [
+                {"id": "F1", "sentence": "What your name?", "wrongWord": "what", "answer": "what's"},
+                {"id": "F2", "sentence": "How name are you?", "wrongWord": "name", "answer": "old"},
+                {"id": "F3", "sentence": "How old is you?", "wrongWord": "is", "answer": "are"},
+                {"id": "F4", "sentence": "What's you name?", "wrongWord": "you", "answer": "your"},
+                {"id": "F5", "sentence": "3 = four.", "wrongWord": "four", "answer": "three"},
+                {"id": "F6", "sentence": "8 = six.", "wrongWord": "six", "answer": "eight"},
+                {"id": "F7", "sentence": "🟥 This is blue.", "wrongWord": "blue", "answer": "red"},
+                {"id": "F8", "sentence": "🟦 This is green.", "wrongWord": "green", "answer": "blue"},
+            ],
+        },
+        7: {
+            missing: [
+                {"id": "M10", "sentences": ["___ bag is red.", "The pen ___ blue."], "answers": ["the", "is"]},
+                {"id": "M11", "sentences": ["📘 This is a ___.", "✏️ This is a ___."], "answers": ["book", "pencil"], "prefixes": ["b", "p"]},
+            ],
+            fix: [
+                {"id": "F9", "sentence": "The bag are red.", "wrongWord": "are", "answer": "is"},
+                {"id": "F10", "sentence": "✏️ This is a book.", "wrongWord": "book", "answer": "pencil"},
+            ],
+        },
+        8: {
+            missing: [
+                {"id": "M12", "sentences": ["___ my bag?", "___ in the box."], "answers": ["where's", "it's"]},
+                {"id": "M13", "sentences": ["The pen is next ___ the book.", "___ is my bag? It's under the desk."], "answers": ["to", "where"]},
+            ],
+            fix: [
+                {"id": "F11", "sentence": "Where the bag?", "wrongWord": "where", "answer": "where's"},
+                {"id": "F12", "sentence": "Where are my bag?", "wrongWord": "are", "answer": "is"},
+                {"id": "F13", "sentence": "The pen is next on the book.", "wrongWord": "on", "answer": "to"},
+                {"id": "F14", "sentence": "Where's my book? They're in the bag.", "wrongWord": "they're", "answer": "it's"},
+            ],
+        },
+    };
+    const pu1Unit1Catalogs = {
+        9: {
+            missing: [
+                {"id": "M1", "sentences": ["The book ___ on the desk.", "The books ___ on the desk."], "answers": ["is", "are"]},
+                {"id": "M2", "sentences": ["The pencil ___ in the bag.", "The pencils ___ in the bag."], "answers": ["is", "are"]},
+                {"id": "M3", "sentences": ["Where ___ the rubber?", "Where ___ the rubbers?"], "answers": ["is", "are"]},
+                {"id": "M4", "sentences": ["Where's the book? ___ on the desk.", "Where are the books? ___ in the bag."], "answers": ["it's", "they're"]},
+            ],
+            fix: [
+                {"id": "F1", "sentence": "The book are on the desk.", "wrongWord": "are", "answer": "is"},
+                {"id": "F2", "sentence": "The pencils is in the bag.", "wrongWord": "is", "answer": "are"},
+                {"id": "F3", "sentence": "Where is the rubbers?", "wrongWord": "is", "answer": "are"},
+                {"id": "F4", "sentence": "Where are the crayons? It's in the pencil case.", "wrongWord": "it's", "answer": "they're"},
+            ],
+        },
+        10: {
+            missing: [
+                {"id": "M5", "sentences": ["I draw a straight line with a ___.", "I write on ___."], "answers": ["ruler", "paper"], "prefixes": ["r", "p"]},
+                {"id": "M6", "sentences": ["Open the ___.", "Look out of the ___."], "answers": ["door", "window"], "prefixes": ["d", "w"]},
+            ],
+            fix: [
+                {"id": "F5", "sentence": "I use a rubber to draw straight lines.", "wrongWord": "rubber", "answer": "ruler"},
+                {"id": "F6", "sentence": "I use a ruler to rub out pencil marks.", "wrongWord": "ruler", "answer": "rubber"},
+                {"id": "F7", "sentence": "The books is in the bookcase.", "wrongWord": "is", "answer": "are"},
+                {"id": "F8", "sentence": "The ruler is next on the book.", "wrongWord": "on", "answer": "to"},
+            ],
+        },
+        11: {
+            missing: [
+                {"id": "M7", "sentences": ["What's ___? It's a window.", "What are ___? They're windows."], "answers": ["this", "these"]},
+                {"id": "M8", "sentences": ["What ___ this? It's a door.", "What ___ these? They're doors."], "answers": ["is", "are"]},
+                {"id": "M9", "sentences": ["What's this? ___ a cupboard.", "What are these? ___ cupboards."], "answers": ["it's", "they're"]},
+                {"id": "M10", "sentences": ["One ruler. Two ___.", "One bookcase. Three ___."], "answers": ["rulers", "bookcases"], "prefixes": ["r", "b"]},
+            ],
+            fix: [
+                {"id": "F9", "sentence": "What's these? It's a cupboard.", "wrongWord": "these", "answer": "this"},
+                {"id": "F10", "sentence": "What are this? They're windows.", "wrongWord": "this", "answer": "these"},
+                {"id": "F11", "sentence": "It's a rulers.", "wrongWord": "rulers", "answer": "ruler"},
+                {"id": "F12", "sentence": "They're three window.", "wrongWord": "window", "answer": "windows"},
+                {"id": "F13", "sentence": "These is my crayons.", "wrongWord": "is", "answer": "are"},
+                {"id": "F14", "sentence": "This are my ruler.", "wrongWord": "are", "answer": "is"},
+            ],
+        },
+        12: {
+            missing: [
+                {"id": "M11", "sentences": ["Are ___ OK?", "Yes, ___ you."], "answers": ["you", "thank"]},
+                {"id": "M12", "sentences": ["Here you ___!", "___ you very much."], "answers": ["are", "thank"]},
+            ],
+            fix: [
+                {"id": "F15", "sentence": "Are you OK? Yes, thanks you.", "wrongWord": "thanks", "answer": "thank"},
+                {"id": "F16", "sentence": "Here you is!", "wrongWord": "is", "answer": "are"},
+            ],
+        },
+        13: {
+            missing: [
+                {"id": "M13", "sentences": ["I ___ to the teacher.", "We work ___."], "answers": ["listen", "together"], "prefixes": ["l", "t"]},
+                {"id": "M14", "sentences": ["I ___ my book.", "I ___ my classmates."], "answers": ["share", "help"], "prefixes": ["s", "h"]},
+            ],
+            fix: [
+                {"id": "F17", "sentence": "I listen at the teacher.", "wrongWord": "at", "answer": "to"},
+                {"id": "F18", "sentence": "I share me book.", "wrongWord": "me", "answer": "my"},
+            ],
+        },
+        16: {
+            missing: [
+                {"id": "M15", "sentences": ["I am Jim. ___ Jim.", "You are Jenny. ___ Jenny."], "answers": ["i'm", "you're"]},
+                {"id": "M16", "sentences": ["He is Jim. ___ Jim.", "She is Jenny. ___ Jenny."], "answers": ["he's", "she's"]},
+                {"id": "M17", "sentences": ["We are friends. ___ friends.", "They are teachers. ___ teachers."], "answers": ["we're", "they're"]},
+                {"id": "M18", "sentences": ["It is a pen. ___ a pen.", "It is not a ruler. It ___ a ruler."], "answers": ["it's", "isn't"]},
+            ],
+            fix: [
+                {"id": "F19", "sentence": "I are Jim.", "wrongWord": "are", "answer": "am"},
+                {"id": "F20", "sentence": "You is my teacher.", "wrongWord": "is", "answer": "are"},
+                {"id": "F21", "sentence": "He are in the classroom.", "wrongWord": "are", "answer": "is"},
+                {"id": "F22", "sentence": "We is in the playground.", "wrongWord": "is", "answer": "are"},
+                {"id": "F23", "sentence": "They isn't my crayons.", "wrongWord": "isn't", "answer": "aren't"},
+                {"id": "F24", "sentence": "This aren't my bag.", "wrongWord": "aren't", "answer": "isn't"},
+            ],
+        },
+    };
+
+    const pageCatalogs = { 'PU1:0:5': pu1Unit0Catalogs[5], 'PU1:0:7': pu1Unit0Catalogs[7], 'PU1:0:8': pu1Unit0Catalogs[8], 'PU1:1:9': pu1Unit1Catalogs[9], 'PU1:1:10': pu1Unit1Catalogs[10], 'PU1:1:11': pu1Unit1Catalogs[11], 'PU1:1:12': pu1Unit1Catalogs[12], 'PU1:1:13': pu1Unit1Catalogs[13], 'PU1:1:16': pu1Unit1Catalogs[16], 'PU2:9:107': pu2Unit9Catalogs[107], 'PU2:9:109': pu2Unit9Catalogs[109], 'PU2:9:116': pu2Unit9Catalogs[116], 'PU2:9:119': pu2Unit9Catalogs[119], 'PU2:8:95': pu2Unit8Catalogs[95], 'PU2:8:96': pu2Unit8Catalogs[96], 'PU2:8:97': pu2Unit8Catalogs[97], 'PU2:8:98': pu2Unit8Catalogs[98], 'PU2:8:104': pu2Unit8Catalogs[104], 'PU2:7:83': pu2Unit7Catalogs[83], 'PU2:7:85': pu2Unit7Catalogs[85], 'PU2:7:87': pu2Unit7Catalogs[87], 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

@@ -306,3 +306,5 @@ Preview release 2026-10-15g publishes approved PU2 Unit 7 boards with the teache
 Preview release 2026-10-16a publishes approved PU2 Unit 8 boards with the teacher's twelve annotations applied. The curriculum cache buster and synchronized version/auth/index/dashboard stamps advance together. Production and preview API/data remain unchanged; Unit 9 is review-only.
 
 Preview release 2026-10-16b publishes approved PU2 Unit 9 with all teacher annotations, expanded grammar blanks and F22/F23 omitted. The curriculum cache buster and synchronized version/auth/index/dashboard stamps advance together. All nine PU2 units are prepared for the explicitly authorized production promotion using a separate production-based worktree.
+
+Preview release 2026-10-19a adds the approved PU1 Units 0-1 31 M/38 F boards. The non-spelling curriculum cache buster advances with the synchronized version/auth/index stamps and dashboard auth link. The release builds on current preview main, retaining its vocabulary and speech updates. Production and isolated preview data are unchanged; Unit 2 is a proposal.

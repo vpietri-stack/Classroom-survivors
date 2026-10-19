@@ -1472,7 +1472,109 @@
         },
     };
 
-    const pageCatalogs = { 'PU1:0:5': pu1Unit0Catalogs[5], 'PU1:0:7': pu1Unit0Catalogs[7], 'PU1:0:8': pu1Unit0Catalogs[8], 'PU1:1:9': pu1Unit1Catalogs[9], 'PU1:1:10': pu1Unit1Catalogs[10], 'PU1:1:11': pu1Unit1Catalogs[11], 'PU1:1:12': pu1Unit1Catalogs[12], 'PU1:1:13': pu1Unit1Catalogs[13], 'PU1:1:16': pu1Unit1Catalogs[16], 'PU2:9:107': pu2Unit9Catalogs[107], 'PU2:9:109': pu2Unit9Catalogs[109], 'PU2:9:116': pu2Unit9Catalogs[116], 'PU2:9:119': pu2Unit9Catalogs[119], 'PU2:8:95': pu2Unit8Catalogs[95], 'PU2:8:96': pu2Unit8Catalogs[96], 'PU2:8:97': pu2Unit8Catalogs[97], 'PU2:8:98': pu2Unit8Catalogs[98], 'PU2:8:104': pu2Unit8Catalogs[104], 'PU2:7:83': pu2Unit7Catalogs[83], 'PU2:7:85': pu2Unit7Catalogs[85], 'PU2:7:87': pu2Unit7Catalogs[87], 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
+    // PU1 Unit 2: approved family, body, have-got and senses boards.
+    const pu1Unit2Catalogs = {
+        19: {
+            missing: [
+                {"id": "M1", "sentences": ["Mr. Friendly is Jim's ___.", "Ms. Friendly is Jenny's ___."], "answers": ["father", "mother"], "prefixes": ["f", "m"]},
+                {"id": "M2", "sentences": ["Jim is Jenny's ___.", "Jenny is Jim's ___."], "answers": ["brother", "sister"], "prefixes": ["b", "s"]},
+                {"id": "M3", "sentences": ["Grandfather = ___.", "Grandmother = ___."], "answers": ["grandpa", "grandma"], "prefixes": ["g", "g"]},
+                {"id": "M4", "sentences": ["Dad = ___.", "Mum = ___."], "answers": ["father", "mother"], "prefixes": ["f", "m"]},
+            ],
+            fix: [
+                {"id": "F1", "sentence": "Mr. Friendly is Jim's mother.", "wrongWord": "mother", "answer": "father"},
+                {"id": "F2", "sentence": "Ms. Friendly is Jenny's father.", "wrongWord": "father", "answer": "mother"},
+                {"id": "F3", "sentence": "Jim is Jenny's sister.", "wrongWord": "sister", "answer": "brother"},
+                {"id": "F4", "sentence": "Jenny is Jim's brother.", "wrongWord": "brother", "answer": "sister"},
+            ],
+        },
+        20: {
+            missing: [
+                {"id": "M5", "sentences": ["This is Henrietta. She ___ Rocky's mother.", "Harry is Rocky's friend. He ___ Rocky's brother."], "answers": ["is", "isn't"]},
+                {"id": "M6", "sentences": ["These animals ___ Rocky's family.", "Shelly ___ his friend."], "answers": ["aren't", "is"]},
+            ],
+            fix: [
+                {"id": "F5", "sentence": "Henrietta is Rocky's father.", "wrongWord": "father", "answer": "mother"},
+                {"id": "F6", "sentence": "Shelly isn't Rocky's friend.", "wrongWord": "isn't", "answer": "is"},
+                {"id": "F7", "sentence": "Harry are Rocky's friend.", "wrongWord": "are", "answer": "is"},
+                {"id": "F8", "sentence": "These animals isn't Rocky's family.", "wrongWord": "isn't", "answer": "aren't"},
+            ],
+        },
+        21: {
+            missing: [
+                {"id": "M7", "sentences": ["Who ___ she? She's Jenny.", "___ he? He's Jim."], "answers": ["is", "who's"]},
+                {"id": "M8", "sentences": ["This is Jim. ___ a boy.", "This is Jenny. ___ a girl."], "answers": ["he's", "she's"]},
+                {"id": "M9", "sentences": ["___ is my brother, Jim.", "___ is my sister, Jenny."], "answers": ["he", "she"]},
+                {"id": "M10", "sentences": ["Jim is a ___.", "Jenny is a ___."], "answers": ["boy", "girl"], "prefixes": ["b", "g"]},
+            ],
+            fix: [
+                {"id": "F9", "sentence": "This is my mother. He's a woman.", "wrongWord": "he's", "answer": "she's"},
+                {"id": "F10", "sentence": "This is my father. She's a man.", "wrongWord": "she's", "answer": "he's"},
+                {"id": "F11", "sentence": "Who are she? She's Jenny.", "wrongWord": "are", "answer": "is"},
+                {"id": "F12", "sentence": "This is my brother. They're a boy.", "wrongWord": "they're", "answer": "he's"},
+            ],
+        },
+        22: {
+            missing: [
+                {"id": "M11", "sentences": ["I put a hat on my ___.", "I wear shoes on my ___."], "answers": ["head", "feet"], "prefixes": ["h", "f"]},
+                {"id": "M12", "sentences": ["I clap my ___.", "I close my ___."], "answers": ["hands", "eyes"], "prefixes": ["h", "e"]},
+                {"id": "M13", "sentences": ["I open my ___.", "I touch my ___."], "answers": ["mouth", "nose"], "prefixes": ["m", "n"]},
+                {"id": "M14", "sentences": ["One foot. Two ___.", "One hand. Two ___."], "answers": ["feet", "hands"], "prefixes": ["f", "h"]},
+                {"id": "M15", "sentences": ["One arm. Two ___.", "One leg. Two ___."], "answers": ["arms", "legs"], "prefixes": ["a", "l"]},
+                {"id": "M16", "sentences": ["Cameron is a cat. He's got a ___.", "I've got brown ___."], "answers": ["tail", "hair"], "prefixes": ["t", "h"]},
+            ],
+            fix: [
+                {"id": "F13", "sentence": "I wear shoes on my hands.", "wrongWord": "hands", "answer": "feet"},
+                {"id": "F14", "sentence": "I've got two foot.", "wrongWord": "foot", "answer": "feet"},
+                {"id": "F15", "sentence": "I've got one ears.", "wrongWord": "ears", "answer": "ear"},
+                {"id": "F16", "sentence": "I've got two hand.", "wrongWord": "hand", "answer": "hands"},
+                {"id": "F17", "sentence": "I've got two leg.", "wrongWord": "leg", "answer": "legs"},
+                {"id": "F18", "sentence": "I've got one noses.", "wrongWord": "noses", "answer": "nose"},
+                {"id": "F19", "sentence": "My eyes are on my feet.", "wrongWord": "feet", "answer": "face"},
+                {"id": "F20", "sentence": "Cameron is a cat. He's got a ruler.", "wrongWord": "ruler", "answer": "tail"},
+            ],
+        },
+        23: {
+            missing: [
+                {"id": "M17", "sentences": ["I've ___ brown hair.", "I ___ got a tail."], "answers": ["got", "haven't"]},
+                {"id": "M18", "sentences": ["I ___ got two eyes.", "I ___ got four eyes."], "answers": ["have", "haven't"]},
+                {"id": "M19", "sentences": ["___ you got a sister?", "___ he got a brother?"], "answers": ["have", "has"]},
+                {"id": "M20", "sentences": ["I have got blue eyes. ___ got blue eyes.", "They have got brown hair. ___ got brown hair."], "answers": ["i've", "they've"]},
+            ],
+            fix: [
+                {"id": "F21", "sentence": "I has got brown hair.", "wrongWord": "has", "answer": "have"},
+                {"id": "F22", "sentence": "They has got blue eyes.", "wrongWord": "has", "answer": "have"},
+                {"id": "F23", "sentence": "Have you get a brother?", "wrongWord": "get", "answer": "got"},
+                {"id": "F24", "sentence": "Has she got two eye?", "wrongWord": "eye", "answer": "eyes"},
+                {"id": "F25", "sentence": "I haven't get a tail.", "wrongWord": "get", "answer": "got"},
+                {"id": "F26", "sentence": "The children hasn't got green hair.", "wrongWord": "hasn't", "answer": "haven't"},
+            ],
+        },
+        26: {
+            missing: [
+                {"id": "M21", "sentences": ["I haven't got a tail. My sister ___ got a tail.", "I've got two hands. My brother ___ got two hands."], "answers": ["hasn't", "has"]},
+                {"id": "M22", "sentences": ["We ___ got two feet.", "A cat ___ got four feet."], "answers": ["have", "has"]},
+                {"id": "M23", "sentences": ["This is my brother. ___ a boy.", "These are my sisters. ___ girls."], "answers": ["he's", "they're"]},
+                {"id": "M24", "sentences": ["My sister ___ got brown hair and blue ___.", "My brothers ___ got black hair and brown ___."], "answers": ["has", "eyes", "have", "eyes"], "prefixes": ["", "e", "", "e"]},
+                {"id": "M25", "sentences": ["I ___ with my eyes.", "I ___ with my ears.", "I ___ things with my hands."], "answers": ["see", "hear", "touch"], "prefixes": ["s", "h", "t"]},
+                {"id": "M26", "sentences": ["I ___ with my nose.", "I ___ food with my mouth."], "answers": ["smell", "taste"], "prefixes": ["s", "t"]},
+            ],
+            fix: [
+                {"id": "F27", "sentence": "She have got long hair.", "wrongWord": "have", "answer": "has"},
+                {"id": "F28", "sentence": "He haven't got a tail.", "wrongWord": "haven't", "answer": "hasn't"},
+                {"id": "F29", "sentence": "We has got two feet.", "wrongWord": "has", "answer": "have"},
+                {"id": "F30", "sentence": "The robot have got a blue head.", "wrongWord": "have", "answer": "has"},
+                {"id": "F31", "sentence": "My brothers has got brown eyes.", "wrongWord": "has", "answer": "have"},
+                {"id": "F32", "sentence": "My eyes is blue.", "wrongWord": "is", "answer": "are"},
+                {"id": "F33", "sentence": "I see with my ears.", "wrongWord": "ears", "answer": "eyes"},
+                {"id": "F34", "sentence": "I hear with my eyes.", "wrongWord": "eyes", "answer": "ears"},
+                {"id": "F35", "sentence": "I smell with my feet.", "wrongWord": "feet", "answer": "nose"},
+                {"id": "F36", "sentence": "I taste food with my ears.", "wrongWord": "ears", "answer": "mouth"},
+            ],
+        },
+    };
+
+    const pageCatalogs = { 'PU1:2:19': pu1Unit2Catalogs[19], 'PU1:2:20': pu1Unit2Catalogs[20], 'PU1:2:21': pu1Unit2Catalogs[21], 'PU1:2:22': pu1Unit2Catalogs[22], 'PU1:2:23': pu1Unit2Catalogs[23], 'PU1:2:26': pu1Unit2Catalogs[26], 'PU1:0:5': pu1Unit0Catalogs[5], 'PU1:0:7': pu1Unit0Catalogs[7], 'PU1:0:8': pu1Unit0Catalogs[8], 'PU1:1:9': pu1Unit1Catalogs[9], 'PU1:1:10': pu1Unit1Catalogs[10], 'PU1:1:11': pu1Unit1Catalogs[11], 'PU1:1:12': pu1Unit1Catalogs[12], 'PU1:1:13': pu1Unit1Catalogs[13], 'PU1:1:16': pu1Unit1Catalogs[16], 'PU2:9:107': pu2Unit9Catalogs[107], 'PU2:9:109': pu2Unit9Catalogs[109], 'PU2:9:116': pu2Unit9Catalogs[116], 'PU2:9:119': pu2Unit9Catalogs[119], 'PU2:8:95': pu2Unit8Catalogs[95], 'PU2:8:96': pu2Unit8Catalogs[96], 'PU2:8:97': pu2Unit8Catalogs[97], 'PU2:8:98': pu2Unit8Catalogs[98], 'PU2:8:104': pu2Unit8Catalogs[104], 'PU2:7:83': pu2Unit7Catalogs[83], 'PU2:7:85': pu2Unit7Catalogs[85], 'PU2:7:87': pu2Unit7Catalogs[87], 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

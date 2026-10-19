@@ -456,7 +456,8 @@ assert.equal(new Set(pu2Unit9.filter(e => e.answer).map(e => e.sentence)).size, 
 const pu1Approved = [];
 for (const [unit, lastPage, missing, fixes, pages] of [
     [0, 8, 13, 14, [[5,9,8],[7,2,2],[8,2,4]]],
-    [1, 16, 18, 24, [[9,4,4],[10,2,4],[11,4,6],[12,2,2],[13,2,2],[16,4,6]]]
+    [1, 16, 18, 24, [[9,4,4],[10,2,4],[11,4,6],[12,2,2],[13,2,2],[16,4,6]]],
+    [2, 26, 26, 36, [[19,4,4],[20,2,4],[21,4,4],[22,6,8],[23,4,6],[26,6,10]]]
 ]) {
     const items = content.buildPool('PU1', unit, lastPage).entries.filter(e => e.item.id && e.item.unit === String(unit)).map(e => e.item);
     pu1Approved.push(...items);
@@ -474,9 +475,19 @@ for (const [unit, lastPage, missing, fixes, pages] of [
     }
     for (const item of items.filter(e => e.prefixes)) item.prefixes.forEach((prefix, i) => assert.ok(item.answers[i].startsWith(prefix)));
 }
-assert.equal(new Set(pu1Approved.map(e => e.key)).size, 69, 'PU1 units have distinct stable SR keys');
+assert.equal(new Set(pu1Approved.map(e => e.key)).size, 131, 'PU1 units have distinct stable SR keys');
 assert.deepEqual(Array.from(pu1Approved.find(e => e.unit === '1' && e.id === 'M12').sentences), ['Here you ___!', '___ you very much.'], 'M12 includes both approved blanks');
-assert.ok(!content.buildPool('PU1', 1, 16).entries.some(e => e.item.unit === '2'), 'Unit 2 remains review-only');
+assert.ok(!content.buildPool('PU1', 1, 16).entries.some(e => e.item.unit === '2'), 'Unit 2 stays out of Unit 1');
+const pu1Unit2 = pu1Approved.filter(e => e.unit === '2');
+assert.deepEqual(pu1Unit2.filter(e => e.answers).map(e => e.id).sort(), Array.from({length: 26}, (_, i) => 'M' + (i + 1)).sort());
+assert.deepEqual(pu1Unit2.filter(e => e.answer).map(e => e.id).sort(), Array.from({length: 36}, (_, i) => 'F' + (i + 1)).sort());
+assert.equal(new Set(pu1Unit2.filter(e => e.answer).map(e => e.sentence)).size, 36);
+const pu1Unit2M24 = pu1Unit2.find(e => e.id === 'M24');
+assert.deepEqual(Array.from(pu1Unit2M24.prefixes), ['', 'e', '', 'e']);
+assert.deepEqual(Array.from(pu1Unit2M24.answers), ['has', 'eyes', 'have', 'eyes']);
+for (const id of ['M25','M26','F33','F34','F35','F36']) assert.equal(pu1Unit2.find(e => e.id === id).page, '26', 'senses stay in approved review grouping');
+assert.deepEqual(Array.from(pu1Unit2.find(e => e.id === 'M20').answers), ["i've", "they've"]);
+assert.ok(!content.buildPool('PU1', 2, 26).entries.some(e => e.item.unit === '3'), 'Unit 3 remains review-only');
 for (const item of [...pu1Approved, ...unit1, ...unit2, ...unit3, ...unit4, ...unit5, ...unit6, ...unit7, ...unit8, ...unit9, ...pu2Unit1, ...pu2Unit2, ...pu2Unit3, ...pu2Unit4, ...pu2Unit5, ...pu2Unit6, ...pu2Unit7, ...pu2Unit8, ...pu2Unit9]) {
     if (item.answers) assert.equal(item.sentences.join(' ').split('___').length - 1, item.answers.length, item.id + ' has one target per blank');
     else if (Number.isInteger(item.wrongIndex)) assert.equal(item.sentence.split(' ')[item.wrongIndex].replace(/[.,!?]+$/, '').toLowerCase(), item.wrongWord, item.id + ' explicitly identifies its repeated wrong token');

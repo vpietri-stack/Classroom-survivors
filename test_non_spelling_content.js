@@ -458,7 +458,8 @@ for (const [unit, lastPage, missing, fixes, pages] of [
     [0, 8, 13, 14, [[5,9,8],[7,2,2],[8,2,4]]],
     [1, 16, 18, 24, [[9,4,4],[10,2,4],[11,4,6],[12,2,2],[13,2,2],[16,4,6]]],
     [2, 26, 26, 36, [[19,4,4],[20,2,4],[21,4,4],[22,6,8],[23,4,6],[26,6,10]]],
-    [3, 43, 28, 36, [[31,4,4],[32,2,2],[33,4,6],[34,4,4],[35,4,6],[36,3,4],[37,3,4],[43,4,6]]]
+    [3, 43, 28, 36, [[31,4,4],[32,2,2],[33,4,6],[34,4,4],[35,4,6],[36,3,4],[37,3,4],[43,4,6]]],
+    [4, 54, 22, 32, [[45,5,6],[47,7,10],[48,4,6],[54,6,10]]]
 ]) {
     const items = content.buildPool('PU1', unit, lastPage).entries.filter(e => e.item.id && e.item.unit === String(unit)).map(e => e.item);
     pu1Approved.push(...items);
@@ -476,7 +477,7 @@ for (const [unit, lastPage, missing, fixes, pages] of [
     }
     for (const item of items.filter(e => e.prefixes)) item.prefixes.forEach((prefix, i) => assert.ok(item.answers[i].startsWith(prefix)));
 }
-assert.equal(new Set(pu1Approved.map(e => e.key)).size, 195, 'PU1 units have distinct stable SR keys');
+assert.equal(new Set(pu1Approved.map(e => e.key)).size, 249, 'PU1 units have distinct stable SR keys');
 assert.deepEqual(Array.from(pu1Approved.find(e => e.unit === '1' && e.id === 'M12').sentences), ['Here you ___!', '___ you very much.'], 'M12 includes both approved blanks');
 assert.ok(!content.buildPool('PU1', 1, 16).entries.some(e => e.item.unit === '2'), 'Unit 2 stays out of Unit 1');
 const pu1Unit2 = pu1Approved.filter(e => e.unit === '2');
@@ -501,7 +502,23 @@ assert.deepEqual(Array.from(pu1Unit3.find(e => e.id === 'M26').answers), ["it's"
 for (const [id, wrong, answer] of [['F23','bees','cows'],['F24','cows','chickens'],['F25','sheep','bees'],['F26','chickens','sheep'],['F27','two','four'],['F28','short','long']]) {
     const item = pu1Unit3.find(e => e.id === id); assert.equal(item.wrongWord, wrong); assert.equal(item.answer, answer);
 }
-assert.ok(!content.buildPool('PU1', 3, 43).entries.some(e => e.item.unit === '4'), 'Unit 4 remains review-only');
+assert.ok(!content.buildPool('PU1', 3, 43).entries.some(e => e.item.unit === '4'), 'Unit 4 stays out of Unit 3');
+const pu1Unit4 = pu1Approved.filter(e => e.unit === '4');
+assert.deepEqual(pu1Unit4.filter(e => e.answers).map(e => e.id).sort(), Array.from({length: 24}, (_, i) => 'M' + (i + 1)).filter(id => !['M21','M23'].includes(id)).sort());
+assert.deepEqual(pu1Unit4.filter(e => e.answer).map(e => e.id).sort(), Array.from({length: 32}, (_, i) => 'F' + (i + 1)).sort());
+assert.equal(new Set(pu1Unit4.filter(e => e.answer).map(e => e.sentence)).size, 32);
+assert.ok(!pu1Unit4.some(e => ['M21','M23'].includes(e.id)), 'teacher-rejected pairs stay omitted');
+const pu1Unit4M16 = pu1Unit4.find(e => e.id === 'M16');
+assert.equal(pu1Unit4M16.sentences[1], 'I eat two ___ and eggs for breakfast.');
+assert.deepEqual(Array.from(pu1Unit4M16.answers), ['beans','sausages','meatballs']);
+assert.deepEqual(Array.from(pu1Unit4M16.prefixes), ['b','s','m']);
+assert.ok(!pu1Unit4.some(e => JSON.stringify(e).includes('🌭')), 'no misleading hot-dog emoji');
+const pu1Unit4F22 = pu1Unit4.find(e => e.id === 'F22');
+assert.equal(pu1Unit4F22.sentence, "These are balls of meat. They're grapeballs.");
+assert.equal(pu1Unit4F22.wrongWord, 'grapeballs');
+assert.equal(pu1Unit4F22.answer, 'meatballs');
+assert.deepEqual(Array.from(pu1Unit4.find(e => e.id === 'M18').prefixes), ['', 'p']);
+assert.ok(!content.buildPool('PU1', 4, 54).entries.some(e => e.item.unit === '5'), 'Unit 5 stays review-only');
 for (const item of [...pu1Approved, ...unit1, ...unit2, ...unit3, ...unit4, ...unit5, ...unit6, ...unit7, ...unit8, ...unit9, ...pu2Unit1, ...pu2Unit2, ...pu2Unit3, ...pu2Unit4, ...pu2Unit5, ...pu2Unit6, ...pu2Unit7, ...pu2Unit8, ...pu2Unit9]) {
     if (item.answers) assert.equal(item.sentences.join(' ').split('___').length - 1, item.answers.length, item.id + ' has one target per blank');
     else if (Number.isInteger(item.wrongIndex)) assert.equal(item.sentence.split(' ')[item.wrongIndex].replace(/[.,!?]+$/, '').toLowerCase(), item.wrongWord, item.id + ' explicitly identifies its repeated wrong token');

@@ -212,3 +212,5 @@ PU1 Units 0-1 coverage checks all 69 approved boards, per-page totals, prefix va
 PU1 Unit 2 checks cover all 62 boards, exact per-page counts, complete unique IDs, mixed four-blank prefixes, senses grouping under page 26, contraction targets, scoped SR identities, future-page exclusion and varied rounds. All 62 additions are solved through the real app widget at 319px alongside earlier boards.
 
 PU1 Unit 3 checks cover all 64 boards, per-page placement, complete unique IDs, prefix validity, exact inline emotion symbols, alpaca facts, product/come-comes contrasts, scoped SR identities, future-page exclusion and varied rounds. All additions are solved through the real app widget at 319px alongside earlier boards.
+
+PU1 Unit 4 checks enforce 54 boards and per-page totals, M21/M23 exclusions, complete retained IDs, exact M16 breakfast wording with no hot-dog symbols, exact F22 grapeballs repair, three-blank and mixed-prefix boards, unique SR keys, round variety and future-page exclusion. Chrome solves every addition through the real app widget at 319px alongside earlier content.

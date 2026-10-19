@@ -1690,7 +1690,89 @@
         },
     };
 
-    const pageCatalogs = { 'PU1:3:31': pu1Unit3Catalogs[31], 'PU1:3:32': pu1Unit3Catalogs[32], 'PU1:3:33': pu1Unit3Catalogs[33], 'PU1:3:34': pu1Unit3Catalogs[34], 'PU1:3:35': pu1Unit3Catalogs[35], 'PU1:3:36': pu1Unit3Catalogs[36], 'PU1:3:37': pu1Unit3Catalogs[37], 'PU1:3:43': pu1Unit3Catalogs[43], 'PU1:2:19': pu1Unit2Catalogs[19], 'PU1:2:20': pu1Unit2Catalogs[20], 'PU1:2:21': pu1Unit2Catalogs[21], 'PU1:2:22': pu1Unit2Catalogs[22], 'PU1:2:23': pu1Unit2Catalogs[23], 'PU1:2:26': pu1Unit2Catalogs[26], 'PU1:0:5': pu1Unit0Catalogs[5], 'PU1:0:7': pu1Unit0Catalogs[7], 'PU1:0:8': pu1Unit0Catalogs[8], 'PU1:1:9': pu1Unit1Catalogs[9], 'PU1:1:10': pu1Unit1Catalogs[10], 'PU1:1:11': pu1Unit1Catalogs[11], 'PU1:1:12': pu1Unit1Catalogs[12], 'PU1:1:13': pu1Unit1Catalogs[13], 'PU1:1:16': pu1Unit1Catalogs[16], 'PU2:9:107': pu2Unit9Catalogs[107], 'PU2:9:109': pu2Unit9Catalogs[109], 'PU2:9:116': pu2Unit9Catalogs[116], 'PU2:9:119': pu2Unit9Catalogs[119], 'PU2:8:95': pu2Unit8Catalogs[95], 'PU2:8:96': pu2Unit8Catalogs[96], 'PU2:8:97': pu2Unit8Catalogs[97], 'PU2:8:98': pu2Unit8Catalogs[98], 'PU2:8:104': pu2Unit8Catalogs[104], 'PU2:7:83': pu2Unit7Catalogs[83], 'PU2:7:85': pu2Unit7Catalogs[85], 'PU2:7:87': pu2Unit7Catalogs[87], 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
+    // PU1 Unit 4: approved food, likes/dislikes and polite request boards.
+    const pu1Unit4Catalogs = {
+        45: {
+            missing: [
+                {"id": "M1", "sentences": ["🍌 It's a ___.", "🍔 It's a ___."], "answers": ["banana", "burger"], "prefixes": ["b", "b"]},
+                {"id": "M2", "sentences": ["🍞 This is ___.", "🍫 This is ___."], "answers": ["bread", "chocolate"], "prefixes": ["b", "c"]},
+                {"id": "M3", "sentences": ["🎂 It's a ___.", "🥗 It's a ___."], "answers": ["cake", "salad"], "prefixes": ["c", "s"]},
+                {"id": "M4", "sentences": ["We make ___ with lemons and water.", "I drink ___."], "answers": ["lemonade", "water"], "prefixes": ["l", "w"]},
+                {"id": "M5", "sentences": ["🥭 It's a ___.", "🍗 This is ___."], "answers": ["mango", "chicken"], "prefixes": ["m", "c"]},
+            ],
+            fix: [
+                {"id": "F1", "sentence": "🍌 It's a burger.", "wrongWord": "burger", "answer": "banana"},
+                {"id": "F2", "sentence": "🍔 It's a banana.", "wrongWord": "banana", "answer": "burger"},
+                {"id": "F3", "sentence": "🍞 This is chocolate.", "wrongWord": "chocolate", "answer": "bread"},
+                {"id": "F4", "sentence": "🍫 This is bread.", "wrongWord": "bread", "answer": "chocolate"},
+                {"id": "F5", "sentence": "💧 This is lemonade.", "wrongWord": "lemonade", "answer": "water"},
+                {"id": "F6", "sentence": "🎂 It's a salad.", "wrongWord": "salad", "answer": "cake"},
+            ],
+        },
+        47: {
+            missing: [
+                {"id": "M6", "sentences": ["I ___ chocolate.", "She ___ chocolate."], "answers": ["like", "likes"]},
+                {"id": "M7", "sentences": ["We ___ bananas.", "He ___ bananas."], "answers": ["like", "likes"]},
+                {"id": "M8", "sentences": ["They ___ mangoes.", "My sister ___ mangoes."], "answers": ["like", "likes"]},
+                {"id": "M9", "sentences": ["___ you like bread?", "___ she like bread?"], "answers": ["do", "does"]},
+                {"id": "M10", "sentences": ["What ___ they like?", "What ___ Harry like?"], "answers": ["do", "does"]},
+                {"id": "M11", "sentences": ["👎 I ___ like chocolate.", "👎 He ___ like cake."], "answers": ["don't", "doesn't"]},
+                {"id": "M12", "sentences": ["👎 They ___ like chicken.", "👎 She ___ like burgers."], "answers": ["don't", "doesn't"]},
+            ],
+            fix: [
+                {"id": "F7", "sentence": "She like chocolate.", "wrongWord": "like", "answer": "likes"},
+                {"id": "F8", "sentence": "I likes bananas.", "wrongWord": "likes", "answer": "like"},
+                {"id": "F9", "sentence": "They likes bread.", "wrongWord": "likes", "answer": "like"},
+                {"id": "F10", "sentence": "My brother like mangoes.", "wrongWord": "like", "answer": "likes"},
+                {"id": "F11", "sentence": "Does you like chicken?", "wrongWord": "does", "answer": "do"},
+                {"id": "F12", "sentence": "Do she like cake?", "wrongWord": "do", "answer": "does"},
+                {"id": "F13", "sentence": "What do Harry like?", "wrongWord": "do", "answer": "does"},
+                {"id": "F14", "sentence": "He don't like chocolate.", "wrongWord": "don't", "answer": "doesn't"},
+                {"id": "F15", "sentence": "We doesn't like burgers.", "wrongWord": "doesn't", "answer": "don't"},
+                {"id": "F16", "sentence": "She doesn't likes salad.", "wrongWord": "likes", "answer": "like"},
+            ],
+        },
+        48: {
+            missing: [
+                {"id": "M13", "sentences": ["🍎 It's an ___.", "🍊 It's an ___."], "answers": ["apple", "orange"], "prefixes": ["a", "o"]},
+                {"id": "M14", "sentences": ["🍇 These are ___.", "Apples and bananas are ___."], "answers": ["grapes", "fruit"], "prefixes": ["g", "f"]},
+                {"id": "M15", "sentences": ["I drink orange ___.", "Chicken is ___."], "answers": ["juice", "meat"], "prefixes": ["j", "m"]},
+                {"id": "M16", "sentences": ["🫘 These are ___.", "I eat two ___ and eggs for breakfast.", "These balls of meat are ___."], "answers": ["beans", "sausages", "meatballs"], "prefixes": ["b", "s", "m"]},
+            ],
+            fix: [
+                {"id": "F17", "sentence": "🍎 It's an orange.", "wrongWord": "orange", "answer": "apple"},
+                {"id": "F18", "sentence": "🍊 It's an apple.", "wrongWord": "apple", "answer": "orange"},
+                {"id": "F19", "sentence": "🍇 These are beans.", "wrongWord": "beans", "answer": "grapes"},
+                {"id": "F20", "sentence": "Apples and bananas are meat.", "wrongWord": "meat", "answer": "fruit"},
+                {"id": "F21", "sentence": "I drink orange sausages.", "wrongWord": "sausages", "answer": "juice"},
+                {"id": "F22", "sentence": "These are balls of meat. They're grapeballs.", "wrongWord": "grapeballs", "answer": "meatballs"},
+            ],
+        },
+        54: {
+            missing: [
+                {"id": "M17", "sentences": ["Can I ___ some chocolate, please?", "Here you ___."], "answers": ["have", "are"]},
+                {"id": "M18", "sentences": ["___ you like some cake?", "Yes, ___."], "answers": ["would", "please"], "prefixes": ["", "p"]},
+                {"id": "M19", "sentences": ["No, ___ you.", "Can I have some water, ___?"], "answers": ["thank", "please"]},
+                {"id": "M20", "sentences": ["It's ___ apple.", "It's ___ banana."], "answers": ["an", "a"]},
+                {"id": "M22", "sentences": ["🧀 This is ___.", "🍅 It's a ___."], "answers": ["cheese", "tomato"], "prefixes": ["c", "t"]},
+                {"id": "M24", "sentences": ["One onion. Two ___.", "One potato. Two ___."], "answers": ["onions", "potatoes"], "prefixes": ["o", "p"]},
+            ],
+            fix: [
+                {"id": "F23", "sentence": "Can I has some chocolate, please?", "wrongWord": "has", "answer": "have"},
+                {"id": "F24", "sentence": "Would you likes some cake?", "wrongWord": "likes", "answer": "like"},
+                {"id": "F25", "sentence": "Here you is.", "wrongWord": "is", "answer": "are"},
+                {"id": "F26", "sentence": "No, thanks you.", "wrongWord": "thanks", "answer": "thank"},
+                {"id": "F27", "sentence": "It's a onion.", "wrongWord": "a", "answer": "an"},
+                {"id": "F28", "sentence": "It's an banana.", "wrongWord": "an", "answer": "a"},
+                {"id": "F29", "sentence": "🍟 We make these chips with chocolate.", "wrongWord": "chocolate", "answer": "potatoes"},
+                {"id": "F30", "sentence": "I like cheese, but my sister don't like it.", "wrongWord": "don't", "answer": "doesn't"},
+                {"id": "F31", "sentence": "My sisters likes pasta.", "wrongWord": "likes", "answer": "like"},
+                {"id": "F32", "sentence": "My dad doesn't eats rice.", "wrongWord": "eats", "answer": "eat"},
+            ],
+        },
+    };
+
+    const pageCatalogs = { 'PU1:4:45': pu1Unit4Catalogs[45], 'PU1:4:47': pu1Unit4Catalogs[47], 'PU1:4:48': pu1Unit4Catalogs[48], 'PU1:4:54': pu1Unit4Catalogs[54], 'PU1:3:31': pu1Unit3Catalogs[31], 'PU1:3:32': pu1Unit3Catalogs[32], 'PU1:3:33': pu1Unit3Catalogs[33], 'PU1:3:34': pu1Unit3Catalogs[34], 'PU1:3:35': pu1Unit3Catalogs[35], 'PU1:3:36': pu1Unit3Catalogs[36], 'PU1:3:37': pu1Unit3Catalogs[37], 'PU1:3:43': pu1Unit3Catalogs[43], 'PU1:2:19': pu1Unit2Catalogs[19], 'PU1:2:20': pu1Unit2Catalogs[20], 'PU1:2:21': pu1Unit2Catalogs[21], 'PU1:2:22': pu1Unit2Catalogs[22], 'PU1:2:23': pu1Unit2Catalogs[23], 'PU1:2:26': pu1Unit2Catalogs[26], 'PU1:0:5': pu1Unit0Catalogs[5], 'PU1:0:7': pu1Unit0Catalogs[7], 'PU1:0:8': pu1Unit0Catalogs[8], 'PU1:1:9': pu1Unit1Catalogs[9], 'PU1:1:10': pu1Unit1Catalogs[10], 'PU1:1:11': pu1Unit1Catalogs[11], 'PU1:1:12': pu1Unit1Catalogs[12], 'PU1:1:13': pu1Unit1Catalogs[13], 'PU1:1:16': pu1Unit1Catalogs[16], 'PU2:9:107': pu2Unit9Catalogs[107], 'PU2:9:109': pu2Unit9Catalogs[109], 'PU2:9:116': pu2Unit9Catalogs[116], 'PU2:9:119': pu2Unit9Catalogs[119], 'PU2:8:95': pu2Unit8Catalogs[95], 'PU2:8:96': pu2Unit8Catalogs[96], 'PU2:8:97': pu2Unit8Catalogs[97], 'PU2:8:98': pu2Unit8Catalogs[98], 'PU2:8:104': pu2Unit8Catalogs[104], 'PU2:7:83': pu2Unit7Catalogs[83], 'PU2:7:85': pu2Unit7Catalogs[85], 'PU2:7:87': pu2Unit7Catalogs[87], 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

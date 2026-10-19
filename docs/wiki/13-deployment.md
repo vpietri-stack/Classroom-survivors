@@ -325,3 +325,5 @@ quota records, upload bounds and throughput. Browser collection cache counter
 advances to 4. Production and preview are released from their own current
 histories, retaining their curriculum and API routing. Verify live reopening
 and the new cutoff without uploading synthetic audio to production.
+
+Preview release 2026-10-19e publishes approved PU1 Unit 4 22 M/32 F boards with all teacher annotations applied. The curriculum cache buster, version/auth/index stamps and dashboard auth link advance together. Production and isolated preview API/data are unchanged.

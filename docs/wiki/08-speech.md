@@ -16,7 +16,7 @@ The app does **fully in-browser speech recognition** (no server round-trip, no A
 | `speech_ui.js` (601 ln) | `window.SpeechUI` | Record button, sentence gates, junk-audio/hallucination gates, permission recovery, telemetry |
 | `speech_preload.js` (78 ln) | `window.SpeechStatus` | Eager model preload before login; state machine for UI |
 | `speech_debug.js` (153 ln) | `window.__speechLog` + debug panel | On-screen load diagnostics + rolling log + Retry |
-| `speech_sample_capture.js` | `window.SpeechSampleCapture` | ⏳ **Temporary** (2026-10-11 → 2026-10-19): stores the WAV for consented students so ASR changes can be measured. See §11.1 |
+| `speech_sample_capture.js` | `window.SpeechSampleCapture` | ⏳ **Temporary** (2026-10-11 → 2026-10-26): stores the WAV for consented students so ASR changes can be measured. See §11.1 |
 | `sr_engine.js` (329 ln) | pure functions | ⚠️ **Not speech** — "SR" = *Spaced Repetition*. Item selection + SR interval math (see §7) |
 | `test_sr_once_per_session.js` (172 ln) | test | SR once-per-session invariant tests (see §7) |
 
@@ -222,7 +222,7 @@ Despite sitting in the speech file cluster, `sr_engine.js` is the **Spaced Repet
 
 ## 11. Security & privacy considerations (from `SECURITY_AUDIT_HANDOFF.md` + code)
 
-- **Audio retention: none for the overwhelming majority of students** — recognition is fully local and audio blobs are discarded after transcription. ⚠️ **Temporary exception, 2026-10-11 → 2026-10-19:** a bounded research collection stores the WAV for **explicitly consented students only** (see §11.1). Outside that list, and outside that window, the "audio never leaves the device" guarantee holds exactly as before.
+- **Audio retention: none for the overwhelming majority of students** — recognition is fully local and audio blobs are discarded after transcription. ⚠️ **Temporary exception, 2026-10-11 → 2026-10-26:** a bounded research collection stores the WAV for **explicitly consented students only** (see §11.1). Outside that list, and outside that window, the "audio never leaves the device" guarantee holds exactly as before.
 - For everyone else the only artifacts leaving the device are *transcripts and metadata* in analytics events (target/transcript/accuracy/UA/durations).
 - **Mic permissions** are standard `getUserMedia` prompts handled client-side (§6); no permission state is stored server-side beyond error events.
 - Speech telemetry rides the same auth'd pipeline as all analytics: token in `X-Auth-Token`, events scoped to the token identity (`saveAnalytics`); dashboards can read them via `getStudents` under the privileged-role gate (`teacher/BM/admin`) — see [Auth & Versioning](04-auth-versioning.md) and [Backend API](10-backend-api.md).
@@ -236,7 +236,7 @@ are release-dependent; the expanded collector is OFF unless the API setting
 `SPEECH_SAMPLE_CAPTURE_ENABLED` is exactly `true`.
 
 - Exact server-side consent remains required. No child IDs are shipped in the
-  client or committed. The original cutoff remains 2026-10-19 00:00 China time;
+  client or committed. The approved cutoff is 2026-10-26 00:00 China time;
   invalid date settings close intake and cannot extend that window.
 - A small `reserveSpeechSample` POST obtains a global owner-bound lease before
   encoding/upload. One coordinator in the existing samples container works

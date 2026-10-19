@@ -312,3 +312,16 @@ Preview release 2026-10-19a adds the approved PU1 Units 0-1 31 M/38 F boards. Th
 Preview release 2026-10-19b publishes the approved PU1 Unit 2 26 M/36 F boards. The curriculum cache buster advances with the synchronized version/auth/index stamps and dashboard auth link. Existing preview API/data and production are unchanged; Unit 3 remains a review draft.
 
 Preview release 2026-10-19c publishes approved PU1 Unit 3 28 M/36 F boards. The curriculum cache buster advances with the synchronized version/auth/index stamps and dashboard auth link. Production and the isolated preview API/data are unchanged; Unit 4 is a review proposal.
+
+
+## Speech collection extension (19 October 2026)
+
+Release `2026-10-19d` extends both fixed collection deadlines to
+`2026-10-26T00:00:00+08:00`, end of Sunday October 25 China time, following the
+teacher's explicit approval after the Monday review. Publish frontend and API,
+then update only `SPEECH_SAMPLE_CAPTURE_ENDS` to that instant. Preserve the
+existing enable switch, exact consent list, 30-recording lifetime cap, existing
+quota records, upload bounds and throughput. Browser collection cache counter
+advances to 4. Production and preview are released from their own current
+histories, retaining their curriculum and API routing. Verify live reopening
+and the new cutoff without uploading synthetic audio to production.

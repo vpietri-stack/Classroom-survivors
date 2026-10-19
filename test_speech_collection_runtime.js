@@ -4,7 +4,7 @@ const vm = require('vm');
 const Module = require('module');
 const policy = require('./api/src/functions/shared/speechSamples');
 const store = require('./api/src/functions/shared/speechSampleStore');
-const NOW = Date.parse('2026-10-15T08:00:00+08:00');
+const NOW = Date.parse('2026-10-19T08:00:00+08:00');
 const originalNow = Date.now;
 Date.now = () => NOW;
 let checks = 0;
@@ -70,7 +70,7 @@ function browser(options = {}) {
       if (config.hang && url.endsWith(config.hang)) return new Promise(() => {});
       if (url.endsWith('/speechSampleConsent')) return { status: 200, json: async () => ({
         consented: config.enabled && req.headers['X-Auth-Token'] !== 'token-b', open: config.enabled,
-        endsAt: Date.parse('2026-10-19T00:00:00+08:00'), maxSamples: 30, maxWavBytes: 300000,
+        endsAt: Date.parse('2026-10-26T00:00:00+08:00'), maxSamples: 30, maxWavBytes: 300000,
       }) };
       if (url.endsWith('/reserveSpeechSample')) return { status: 200, json: async () => config.busy
         ? { skipped: 'busy', retryAfterMs: 15000 }

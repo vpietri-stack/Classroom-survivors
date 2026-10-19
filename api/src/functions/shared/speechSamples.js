@@ -15,10 +15,11 @@
 //      well as in the client, so a stale page or a hand-built request cannot
 //      keep uploading children's audio afterwards.
 
-// Collection window agreed with the teacher: went live 2026-10-11, extended the
-// same day to close at the start of 2026-10-19 China time. Override with
+// Collection went live 2026-10-11. On 2026-10-19, the teacher approved an
+// extension through October 25, closing at the start of October 26 China time.
+// Override with
 // SPEECH_SAMPLE_CAPTURE_ENDS (any Date.parse-able instant) to close early.
-const DEFAULT_CAPTURE_ENDS = '2026-10-19T00:00:00+08:00';
+const DEFAULT_CAPTURE_ENDS = '2026-10-26T00:00:00+08:00';
 const MAX_SAMPLES_PER_STUDENT = 30;
 const MAX_WAV_BYTES = 300_000;
 const MAX_WAV_BASE64_CHARS = 400_000;

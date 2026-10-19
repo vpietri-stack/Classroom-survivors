@@ -23,7 +23,7 @@ function compactStudent(student, now = Date.now()) {
 }
 
 async function dashboardData(container, {secure = false, since = ''} = {}) {
-    const {resources} = await container.items.query(`SELECT ${fields}${secure ? ', c.password' : ''}, ${liveSessions} FROM c WHERE (c.role = 'student' OR NOT IS_DEFINED(c.role)) AND (NOT IS_DEFINED(c.type) OR c.type <> 'student_analytics_archive')`).fetchAll();
+    const {resources} = await container.items.query(`SELECT ${fields}${secure ? ', c.password' : ''}, ${liveSessions} FROM c WHERE (c.role = 'student' OR NOT IS_DEFINED(c.role)) AND NOT IS_DEFINED(c.type)`).fetchAll();
     const students = resources.map(s => compactStudent(s)).sort((a,b) => a.id.localeCompare(b.id));
     const hashes = new Map(students.map(s => [s.id, digest(s)])), revision = digest([...hashes]);
     if (revision === since) return {status:304, headers:{'Cache-Control':'private, no-store'}};

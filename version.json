@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-19f",
+  "version": "2026-10-19g",
   "deployedAt": "2026-10-19",
   "notes": "Compact dashboard refreshes and deltas, on-demand student profiles, bounded calendar reads and batched target/attendance counts."
 }

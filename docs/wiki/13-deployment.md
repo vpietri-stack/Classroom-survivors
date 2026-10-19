@@ -249,7 +249,7 @@ separately from its current history, preserving its isolated API/container.
 
 ## Dashboard data efficiency (19 October 2026)
 
-Release `2026-10-19f` replaces full-roster downloads with compact snapshots and
+Release `2026-10-19g` replaces full-roster downloads with compact snapshots and
 revision deltas, loads full profiles on demand, batches bounded practice reads,
 and updates attendance rows directly. Calendar generation metadata prevents
 repeated reconciliation on unchanged refreshes. Publish and verify preview

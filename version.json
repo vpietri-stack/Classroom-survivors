@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-19d",
+  "version": "2026-10-19f",
   "deployedAt": "2026-10-19",
-  "notes": "Production: approved speech collection extension through October 25; retain consent snapshot, 30-recording lifetime cap and all upload safeguards."
+  "notes": "Compact dashboard refreshes and deltas, on-demand student profiles, bounded calendar reads and batched target/attendance counts."
 }

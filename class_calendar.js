@@ -5,6 +5,9 @@ let calendarLoadSeq = 0;
 let calendarEditingId = null;
 let attendanceUnchecked = new Set();
 let attendanceSaving = false;
+let attendanceReady = true;
+let calendarRevision = '';
+let calendarRevisionRange = '';
 
 function calendarFormat(value) {
     return new Date(value).toLocaleString('en-GB', {timeZone:'Asia/Shanghai',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
@@ -37,22 +40,29 @@ async function loadClassCalendar() {
     try {
         const [year,month] = monthInput.value.split('-').map(Number);
         const through = new Date(Date.UTC(year,month,0)).toISOString().slice(0,10);
-        const res = await apiFetch(`${API_BASE}/classCalendar?through=${through}`,{cache:'no-store'});
+        const range = `${year}-${String(month).padStart(2,'0')}-01`;
+        const params = new URLSearchParams({from:range,through});
+        if (calendarRevision && calendarRevisionRange === range) params.set('since',calendarRevision);
+        const res = await apiFetch(`${API_BASE}/classCalendar?${params}`,{cache:'no-store'});
+        if (seq !== calendarLoadSeq) return false;
+        if (res.status === 304) {message.textContent=''; renderClassCalendar(); return true;}
         if (!res.ok) throw new Error(await res.text());
         const data = await res.json();
         if (seq !== calendarLoadSeq) return;
         calendarEvents = data.events;
+        calendarRevision = data.revision || ''; calendarRevisionRange = range;
         calendarReady = true;
         const unparsed = [...new Set(allStudents.flatMap(s => ClassCalendarCore.memberships(s).map(g => g.classTime)).filter(t => t && !ClassCalendarCore.parseClassTime(t)))];
         message.textContent = unparsed.length ? `These class times need a weekday and time (for example Sun 16:30): ${unparsed.join(', ')}` : '';
         renderClassCalendar();
         applyFilters();
         if (currentStudent) renderStudentAttendance();
+        return true;
     } catch (err) {
         if (seq !== calendarLoadSeq) return;
-        calendarReady = false;
         message.textContent = `Unable to load calendar: ${err.message}`;
-        document.getElementById('classCalendarGrid').replaceChildren();
+        if (!calendarReady) document.getElementById('classCalendarGrid').replaceChildren();
+        return false;
     }
 }
 function toggleClassCalendar() {
@@ -97,19 +107,21 @@ function renderClassCalendar() {
 }
 async function openAttendanceChecklist() {
     attendanceUnchecked = new Set();
+    attendanceReady = false;
     document.getElementById('attendanceModal').classList.remove('hidden');
     document.getElementById('attendanceMessage').textContent = 'Refreshing attendance…';
     // Fresh roster prevents displaying receipts saved from another dashboard/device.
-    await loadAllStudents();
-    document.getElementById('attendanceMessage').textContent = calendarReady ? '' : 'Calendar unavailable. Close this window and retry.';
+    renderAttendanceChecklist();
+    attendanceReady = await refreshDashboardData();
+    document.getElementById('attendanceMessage').textContent = attendanceReady && calendarReady ? '' : 'Attendance could not refresh. Close this window and retry.';
     renderAttendanceChecklist();
 }
 function renderAttendanceChecklist() {
     const mount = document.getElementById('attendanceChecklist');
-    const rows = calendarReady ? pendingAttendance() : [];
+    const rows = calendarReady && attendanceReady ? pendingAttendance() : [];
     let groupId = null;
     mount.replaceChildren();
-    if (!rows.length) mount.textContent = calendarReady ? 'All completed classes have attendance recorded for these filters.' : 'Attendance could not be loaded.';
+    if (!rows.length) mount.textContent = !attendanceReady ? 'Waiting for fresh attendance data…' : calendarReady ? 'All completed classes have attendance recorded for these filters.' : 'Attendance could not be loaded.';
     for (const {event,student} of rows) {
         if (event.id !== groupId) {
             const title = document.createElement('h3');
@@ -140,13 +152,13 @@ function applyAttendanceResults(results) {
     for (const result of results || []) {
         if (!result.success) continue;
         const student = allStudents.find(s => s.id === result.studentId);
-        if (student) { student.attendance = result.attendance; student.targets = result.targets; }
+        if (student) { student.attendance = result.attendance; student.targets = result.targets; student.targetCounts={...student.targetCounts,...result.targetCounts}; delete student._groupProgress; }
     }
     applyFilters();
     if (currentStudent) renderStudentAttendance();
 }
 async function saveCheckedAttendance(status) {
-    if (attendanceSaving || !calendarReady) return;
+    if (attendanceSaving || !calendarReady || !attendanceReady) return;
     const rows = pendingAttendance().filter(({event,student}) => !attendanceUnchecked.has(attendanceKey(event.id,student.id)));
     const message = document.getElementById('attendanceMessage');
     if (!rows.length) { message.textContent = 'Select at least one student.'; return; }
@@ -159,6 +171,7 @@ async function saveCheckedAttendance(status) {
         for (const row of rows) { if (!groups.has(row.event.id)) groups.set(row.event.id,[]); groups.get(row.event.id).push(row.student.id); }
         for (const [eventId,studentIds] of groups) {
             const result = await calendarRequest({action:'record',eventId,studentIds,status});
+            applyCalendarEvent(result.event);
             const event = calendarEvents.find(e => e.id === eventId);
             if (event) event.attendanceStarted = true;
             applyAttendanceResults(result.results);
@@ -196,7 +209,7 @@ async function saveCalendarEdit(cancel) {
         const body = cancel ? {action:'cancel',eventId:event.id} : {action:'edit',eventId:event.id,etag:event.etag,startTime:ClassCalendarCore.iso(document.getElementById('calendarEditStart').value),endTime:ClassCalendarCore.iso(document.getElementById('calendarEditEnd').value)};
         const result = await calendarRequest(body);
         if (result.results) applyAttendanceResults(result.results);
-        await loadClassCalendar();
+        applyCalendarEvent(result.event);
         const failed = (result.results || []).filter(r => !r.success);
         if (failed.length) throw new Error(failed.map(r => r.error).join(' · '));
         closeModal('calendarEditModal');
@@ -206,6 +219,13 @@ async function saveCalendarEdit(cancel) {
         save.disabled = !!latest?.attendanceStarted || latest?.status === 'cancelled';
         cancelBtn.disabled = !!latest?.attendanceStarted && latest?.status !== 'cancelled';
     }
+}
+function applyCalendarEvent(event) {
+    if (!event) return;
+    const index = calendarEvents.findIndex(e=>e.id === event.id);
+    if (index < 0) calendarEvents.push(event); else calendarEvents[index] = event;
+    calendarRevision = '';
+    renderClassCalendar();
 }
 function attendanceRateCell(student,from,to) {
     const stats = ClassCalendarCore.attendanceStats(student,from,to);

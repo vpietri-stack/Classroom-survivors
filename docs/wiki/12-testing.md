@@ -119,7 +119,10 @@ Backend HTTP integration still requires the private `api/test_auth.js` helper an
 
 `test_speech_collection_runtime.js` covers 100 competing reservations, atomic
 quota races, duplicate requests, account switching, consent refresh, skipped
-acknowledgements and hung-network cleanup. `test_speech_capture_browser.js`
+acknowledgements and hung-network cleanup during the approved extension week.
+The speech policy/client boundary checks reopen after the original October 19
+cutoff, reject exactly at October 26 00:00 China time and still reject an
+app-setting override beyond that approved date. `test_speech_capture_browser.js`
 drives actual Record/Stop UI in Chrome using synthetic WAVs and checks rejected
 clips without changing grading rungs. Both run in root `npm test`. The optional
 real-Cosmos operator probe refuses production and cleans up only its own uniquely

@@ -9,11 +9,16 @@ Students use the app independently or with parents at home for review and
 practice. The pilot observes that normal home use; it is not a scheduled
 classroom activity or a request for families to practise simultaneously.
 
+On 2026-10-19 the teacher approved one more week after reviewing 432 recordings
+from 20 contributors. Reopen through October 25 with the same consent snapshot,
+30-recording lifetime cap and upload safeguards. Do not reset counts or enroll
+new accounts automatically.
+
 ## Fixed limits
 
 | Control | Limit |
 |---|---|
-| Capture closes | 2026-10-19 00:00 China time, end of Sunday October 18 |
+| Capture closes | 2026-10-26 00:00 China time, end of Sunday October 25 |
 | Per student | 30 recordings total, including existing clips |
 | Clip size | 300,000 raw WAV bytes / 400,000 base64 characters |
 | Client retention | Two pending clips including consent/encoding/in-flight work |

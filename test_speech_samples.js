@@ -1,5 +1,5 @@
 /* test_speech_samples.js — regression tests for the TEMPORARY speech-sample
- * research collection (consented students only, 2026-10-11 → 2026-10-19).
+ * research collection (consented students only, 2026-10-11 → 2026-10-26).
  *
  * These exist because the failure modes here are consent violations and
  * unbounded writes into the account that also holds student progress — both
@@ -71,6 +71,8 @@ setEnv('aaa', undefined);
 const defaultEnd = policy.captureEndsAt();
 eq(defaultEnd, Date.parse(policy.DEFAULT_CAPTURE_ENDS), 'default window end is the documented instant');
 eq(policy.withinCaptureWindow(defaultEnd - 1), true, 'open just before the deadline');
+eq(policy.withinCaptureWindow(Date.parse('2026-10-19T12:00:00+08:00')), true,
+    'approved extension reopens after the original deadline');
 eq(policy.withinCaptureWindow(defaultEnd), false, 'closed exactly AT the deadline');
 eq(policy.withinCaptureWindow(defaultEnd + 1), false, 'closed after the deadline');
 eq(policy.withinCaptureWindow(Date.parse('2020-01-01T00:00:00Z')), true, 'open well before the deadline');
@@ -141,11 +143,14 @@ check(typeof cap.maybeCapture === 'function', 'exposes maybeCapture()');
 check(typeof cap.ensureConsent === 'function', 'exposes ensureConsent()');
 check(typeof cap.decideCapture === 'function', 'exposes decideCapture() for unit tests');
 
-const ENDS = Date.parse('2026-10-19T00:00:00+08:00');
+const ENDS = Date.parse('2026-10-26T00:00:00+08:00');
 const BEFORE = ENDS - 60000;
 const good = { consented: true, endsAt: ENDS, nowMs: BEFORE, blobSize: 160000, sentCount: 0 };
 
 eq(cap.decideCapture(good).ok, true, 'captures when consented, in window, under cap');
+eq(cap.decideCapture(Object.assign({}, good, { nowMs: Date.parse('2026-10-19T12:00:00+08:00') })).ok, true,
+    'client accepts the approved extension week after the original cutoff');
+eq(ENDS, defaultEnd, 'client and server agree on the approved closing instant');
 eq(cap.decideCapture(Object.assign({}, good, { consented: false })).ok, false, 'refuses when not consented');
 eq(cap.decideCapture(Object.assign({}, good, { consented: false })).reason, 'not_consented', 'names the consent reason');
 eq(cap.decideCapture(Object.assign({}, good, { nowMs: ENDS })).ok, false, 'refuses exactly at the deadline');

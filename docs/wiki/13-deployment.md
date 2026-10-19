@@ -311,3 +311,16 @@ Preview release 2026-10-16a publishes approved PU2 Unit 8 boards with the teache
 Preview release 2026-10-16b publishes approved PU2 Unit 9 with all teacher annotations, expanded grammar blanks and F22/F23 omitted. The curriculum cache buster and synchronized version/auth/index/dashboard stamps advance together. All nine PU2 units are prepared for the explicitly authorized production promotion using a separate production-based worktree.
 
 Production release 2026-10-16b promotes all approved PU2 Units 1-9: 236 missing-word boards and 291 find-fix exercises, the Tuesday/Monday pair fix and answer-length support for granddaughter. It is based on current origin/main in a separate production worktree, preserving production API/config and all prior PU3 content/images. Curriculum/widget and synchronized auth/version/index/dashboard stamps advance together. Preview is verified before pushing origin/main; production Pages and Azure workflows plus hosted-file checks are then verified independently.
+
+
+## Speech collection extension (19 October 2026)
+
+Release `2026-10-19d` extends both fixed collection deadlines to
+`2026-10-26T00:00:00+08:00`, end of Sunday October 25 China time, following the
+teacher's explicit approval after the Monday review. Publish frontend and API,
+then update only `SPEECH_SAMPLE_CAPTURE_ENDS` to that instant. Preserve the
+existing enable switch, exact consent list, 30-recording lifetime cap, existing
+quota records, upload bounds and throughput. Browser collection cache counter
+advances to 4. Production and preview are released from their own current
+histories, retaining their curriculum and API routing. Verify live reopening
+and the new cutoff without uploading synthetic audio to production.

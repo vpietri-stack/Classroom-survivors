@@ -446,6 +446,24 @@ body {
     overflow: visible;
 }
 
+.non-spelling-detail {
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.item-detail-text.non-spelling-detail {
+    display: block;
+    max-width: 540px;
+    overflow: visible;
+}
+
+.exercise-location {
+    display: block;
+    margin-top: 6px;
+    color: var(--dash-text-dim);
+    font-size: 0.72rem;
+}
+
 .no-results {
     padding: 60px 20px;
     text-align: center;

@@ -36,6 +36,14 @@ Two extra aliases: `npm run test:td` = `test_td_gate.js && test_td_core.js`. The
 
 ## The stamp guard must stay first
 
+`test_dashboard_non_spelling.js` runs in the root suite and separately with
+`npm run test:dashboard-exercises`. It loads the real dashboard and content
+catalog in Chrome with mocked read-only API responses and blocked external
+traffic. It covers typed exercise labels/details, JSON and archived object
+payloads, SR filters/search/popups, catalog fallback for failed-only boards,
+unknown IDs, legacy rows and escaping. Screenshots use the OS temp folder
+`classroom-dashboard-non-spelling`.
+
 `test_vocab_normalization.js` also runs in `npm test`. It checks the canonical
 comparison/tense/pronoun labels across PU1–3 and Think0–1, role-sensitive
 exceptions, exact translations and continuity of existing image lookups. It

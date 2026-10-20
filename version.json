@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-19g",
-  "deployedAt": "2026-10-19",
-  "notes": "Compact dashboard refreshes and deltas, on-demand student profiles, bounded calendar reads and batched target/attendance counts."
+  "version": "2026-10-20a",
+  "deployedAt": "2026-10-20",
+  "notes": "Readable Missing Words and Find and Fix dashboard details, SR categories, search and popups; preserve production curriculum, feature gates and data."
 }

@@ -296,7 +296,9 @@ function exerciseTypeLabel(type) {
         'spelling': 'Spelling',
         'handwriting': 'Handwriting',
         'sentenceScramble': 'Sentence Scramble',
-        'sentenceMatch': 'Sentence Match'
+        'sentenceMatch': 'Sentence Match',
+        'missingWord': 'Missing Words',
+        'findAndFix': 'Find and Fix'
     };
     if (map[type]) return map[type];
     // Speech telemetry types: speech_attempt, speech_error, etc.
@@ -304,13 +306,82 @@ function exerciseTypeLabel(type) {
     return type || '—';
 }
 
-/** Safely convert itemDetails (string or object) to a display string. */
+/** Accept both original object payloads and JSON-encoded archive payloads. */
+function parseExerciseDetails(details) {
+    if (details && typeof details === 'object') return details;
+    if (typeof details === 'string' && details.trim().startsWith('{')) {
+        try { return JSON.parse(details); } catch (_) { /* Legacy plain text. */ }
+    }
+    return null;
+}
+
+function nonSpellingCategory(key) {
+    if (/^non-spelling:missing-word:/i.test(key)) return 'missingWord';
+    if (/^non-spelling:find-fix:/i.test(key)) return 'findAndFix';
+    return null;
+}
+
 function formatItemDetails(details) {
     if (!details) return '—';
+    const parsed = parseExerciseDetails(details);
+    if (parsed) {
+        const sentences = parsed.sentences || (parsed.sentence ? [parsed.sentence] : []);
+        const answers = parsed.answers || (parsed.answer ? [parsed.answer] : []);
+        if (Array.isArray(sentences) && sentences.length && Array.isArray(answers) && answers.length) {
+            return sentences.join('\n') + '\nAnswers: ' + answers.join(', ');
+        }
+        if (parsed.target) return String(parsed.target);
+    }
     if (typeof details === 'string') return details;
     // Object (e.g. speech telemetry payload)
     if (details.target) return details.target;
     try { return JSON.stringify(details); } catch (_) { return '—'; }
+}
+
+function nonSpellingLocation(details) {
+    return [details.book, details.unit != null ? 'U' + details.unit : '', details.page != null ? 'P' + details.page : '', details.id].filter(Boolean).join(' · ');
+}
+
+function renderExerciseDetails(details, typed = false) {
+    const text = formatItemDetails(details);
+    const parsed = typed && parseExerciseDetails(details);
+    return `<span class="item-detail-text${typed ? ' non-spelling-detail' : ''}" title="${_esc(text)}">${_esc(text)}</span>`
+        + (parsed ? `<small class="exercise-location">${_esc(nonSpellingLocation(parsed))}</small>` : '');
+}
+
+// SR stores IDs only. Authored content covers failed-only boards; the latest
+// event snapshot (including archives) takes precedence when one exists.
+function nonSpellingDetailsIndex(student) {
+    const index = new Map();
+    if (typeof NonSpellingContent !== 'undefined') {
+        for (const [book, units] of Object.entries(TEACHING_CONTENT)) {
+            for (const [unit, pages] of Object.entries(units)) {
+                for (const [page, content] of Object.entries(pages)) {
+                    for (const item of content.nonSpellingExercises || []) {
+                        if (item.type !== 'missing-word' && item.type !== 'find-fix') continue;
+                        const location = { book, unit, page };
+                        index.set(NonSpellingContent.typedKey(item, location), { ...item, ...location });
+                    }
+                }
+            }
+        }
+    }
+    const events = (student._fullAnalytics || student.analytics || []).filter(ex => ex.exerciseType === 'missingWord' || ex.exerciseType === 'findAndFix')
+        .slice().sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''));
+    for (const ex of events) {
+        const details = parseExerciseDetails(ex.itemDetails);
+        if (details && nonSpellingCategory(details.key)) index.set(details.key, details);
+    }
+    return index;
+}
+
+function describeSRItem(cat, key, index) {
+    const typed = cat === 'sentences' && nonSpellingCategory(key);
+    if (!typed) return { category: cat, label: { vocab: 'Vocabulary', sentences: 'Sentences', sentencePairs: 'Sentence Pairs' }[cat], text: key, html: _esc(key) };
+    const parts = key.split(':');
+    const details = index.get(key) || { book: parts[2].toUpperCase(), unit: parts[3], page: parts[4], id: parts.slice(5).join(':').toUpperCase() };
+    const content = details.sentences || details.sentence ? details : nonSpellingLocation(details);
+    return { category: typed, label: exerciseTypeLabel(typed), text: formatItemDetails(content), location: nonSpellingLocation(details), html: renderExerciseDetails(content, true) };
 }
 
 function sessionTypeLabel(sessionType) {
@@ -773,11 +844,9 @@ function openSessionDetail(sessionIdx) {
             ? `<span class="badge badge-attempts-high">${ex.attempts}</span>`
             : `<span class="badge badge-attempts-1">${ex.attempts}</span>`;
 
-        const detailStr = formatItemDetails(ex.itemDetails);
-
         return `<tr>
             <td><span class="badge badge-type">${exerciseTypeLabel(ex.exerciseType)}</span></td>
-            <td><span class="item-detail-text" title="${detailStr.replace(/"/g, '&quot;')}">${detailStr}</span></td>
+            <td>${renderExerciseDetails(ex.itemDetails, ex.exerciseType === 'missingWord' || ex.exerciseType === 'findAndFix')}</td>
             <td>${attBadge}</td>
         </tr>`;
     }).join('');
@@ -842,7 +911,11 @@ function applyExerciseFilters() {
 
     exercises = exercises.filter(ex => {
         if (typeFilter && ex.exerciseType !== typeFilter) return false;
-        if (itemFilter && !(ex.itemDetails || '').toLowerCase().includes(itemFilter)) return false;
+        if (itemFilter) {
+            const details = parseExerciseDetails(ex.itemDetails);
+            const searchable = [formatItemDetails(ex.itemDetails), details ? nonSpellingLocation(details) : '', details?.key || ''].join(' ');
+            if (!searchable.toLowerCase().includes(itemFilter)) return false;
+        }
         if (minAttempts > 0 && (ex.attempts || 0) < minAttempts) return false;
         return true;
     });
@@ -869,14 +942,12 @@ function applyExerciseFilters() {
         // SR lookup: determine SR key and category from this exercise
         const srKey = getSRKeyForExercise(ex);
         const srClickAttr = srKey
-            ? `style="cursor:pointer" onclick="showSRPopup(${JSON.stringify(JSON.stringify(srKey))})" title="Click to view SR state"`
+            ? `style="cursor:pointer" onclick="${_esc('showSRPopup(' + JSON.stringify(JSON.stringify(srKey)) + ')')}" title="Click to view SR state"`
             : '';
-
-        const detailStr = formatItemDetails(ex.itemDetails);
 
         return `<tr ${srClickAttr}>
             <td><span class="badge badge-type">${exerciseTypeLabel(ex.exerciseType)}</span></td>
-            <td><span class="item-detail-text" title="${detailStr.replace(/"/g, '&quot;')}">${detailStr}</span>${srKey ? ' <i class="fas fa-brain" style="color:var(--dash-primary);font-size:0.7rem;opacity:0.7"></i>' : ''}</td>
+            <td>${renderExerciseDetails(ex.itemDetails, ex.exerciseType === 'missingWord' || ex.exerciseType === 'findAndFix')}${srKey ? ' <i class="fas fa-brain" style="color:var(--dash-primary);font-size:0.7rem;opacity:0.7"></i>' : ''}</td>
             <td>${attBadge}</td>
             <td>${modeBadge}</td>
             <td style="color: var(--dash-text-dim); font-size: 0.78rem;">${formatTimestamp(ex.timestamp)}</td>

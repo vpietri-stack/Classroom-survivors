@@ -142,7 +142,7 @@ async function waitBoard(page, index) { await page.waitForFunction(i => STUDY_ST
             for (const [unit, pages] of [['1', ['7', '9', '10', '16']], ['2', ['19', '21', '22', '25']], ['3', ['31', '33', '40']], ['4', ['45', '46', '47', '54']], ['5', ['57', '60', '62']], ['6', ['78', '81']], ['7', ['83', '85', '87']], ['8', ['95', '96', '97', '98', '104']], ['9', ['107', '109', '116', '119']]]) {
                 for (const page of pages) items.push(...TEACHING_CONTENT.PU2[unit][page].nonSpellingExercises.filter(e => e.id).map(e => ({ ...e, book: 'PU2', unit, page })));
             }
-            for (const [unit, pages] of [['0', ['5', '7', '8']], ['1', ['9', '10', '11', '12', '13', '16']], ['2', ['19', '20', '21', '22', '23', '26']], ['3', ['31', '32', '33', '34', '35', '36', '37', '43']], ['4', ['45', '47', '48', '54']]]) {
+            for (const [unit, pages] of [['0', ['5', '7', '8']], ['1', ['9', '10', '11', '12', '13', '16']], ['2', ['19', '20', '21', '22', '23', '26']], ['3', ['31', '32', '33', '34', '35', '36', '37', '43']], ['4', ['45', '47', '48', '54']], ['5', ['57', '59', '60', '61', '63']]]) {
                 for (const page of pages) items.push(...TEACHING_CONTENT.PU1[unit][page].nonSpellingExercises.filter(e => e.id).map(e => ({ ...e, book: 'PU1', unit, page })));
             }
             const host = document.querySelector('#grammarGame .minigame-container');
@@ -200,6 +200,25 @@ async function waitBoard(page, index) { await page.waitForFunction(i => STUDY_ST
                 ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), presentation + ' contraction board fits 319px');
                 await page.screenshot({ path: path.join(screenshots, 'phone-' + presentation + '-contraction-' + id + '.png'), fullPage: true });
             }
+        }
+        const toyStarts = approved.find(e => e.book === 'PU1' && e.unit === '5' && e.id === 'M14');
+        for (const presentation of ['study', 'game']) {
+            await page.evaluate(({ item, presentation }) => {
+                document.getElementById('studyModeOverlay').classList.toggle('hidden', presentation !== 'study');
+                document.getElementById('grammarGame').classList.toggle('hidden', presentation === 'study');
+                const host = presentation === 'study' ? document.getElementById('study-game-area') : document.querySelector('#grammarGame .minigame-container');
+                NonSpellingWidget.mount(host, item, { presentation, onCheck() {}, onNext() {} });
+            }, { item: toyStarts, presentation });
+            ok(await page.evaluate(() => NonSpellingWidget.getState().input.join(',') === 'ballo,heli'), presentation + ' preserves both longer toy word starts');
+            const toyKeys = await page.locator('[data-letter]').evaluateAll(keys => keys.map(key => key.dataset.letter).sort().join(''));
+            ok(toyKeys === [...new Set('onscopter')].sort().join(''), presentation + ' toy keyboard contains only the missing suffix letters');
+            await page.keyboard.press('Backspace'); await click(page, '#clear');
+            ok(await page.evaluate(() => NonSpellingWidget.getState().input.join(',') === 'ballo,heli'), presentation + ' backspace and CLEAR retain full toy prefixes');
+            await click(page, '[data-box="0"]'); await type(page, 'ons');
+            await click(page, '[data-box="1"]'); await type(page, 'copter');
+            await click(page, '#check');
+            ok(await page.evaluate(() => NonSpellingWidget.getState().solved), presentation + ' toy suffixes solve using only on-screen keys');
+            ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), presentation + ' longer toy prefixes fit a 319px phone');
         }
         const hinted = approved.find(e => e.unit === '4' && e.id === 'M1');
         for (const presentation of ['study', 'game']) {

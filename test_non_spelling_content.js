@@ -459,7 +459,8 @@ for (const [unit, lastPage, missing, fixes, pages] of [
     [1, 16, 18, 24, [[9,4,4],[10,2,4],[11,4,6],[12,2,2],[13,2,2],[16,4,6]]],
     [2, 26, 26, 36, [[19,4,4],[20,2,4],[21,4,4],[22,6,8],[23,4,6],[26,6,10]]],
     [3, 43, 28, 36, [[31,4,4],[32,2,2],[33,4,6],[34,4,4],[35,4,6],[36,3,4],[37,3,4],[43,4,6]]],
-    [4, 54, 22, 32, [[45,5,6],[47,7,10],[48,4,6],[54,6,10]]]
+    [4, 54, 22, 32, [[45,5,6],[47,7,10],[48,4,6],[54,6,10]]],
+    [5, 63, 28, 36, [[57,5,6],[59,8,10],[60,5,6],[61,6,8],[63,4,6]]]
 ]) {
     const items = content.buildPool('PU1', unit, lastPage).entries.filter(e => e.item.id && e.item.unit === String(unit)).map(e => e.item);
     pu1Approved.push(...items);
@@ -477,7 +478,7 @@ for (const [unit, lastPage, missing, fixes, pages] of [
     }
     for (const item of items.filter(e => e.prefixes)) item.prefixes.forEach((prefix, i) => assert.ok(item.answers[i].startsWith(prefix)));
 }
-assert.equal(new Set(pu1Approved.map(e => e.key)).size, 249, 'PU1 units have distinct stable SR keys');
+assert.equal(new Set(pu1Approved.map(e => e.key)).size, 313, 'PU1 units have distinct stable SR keys');
 assert.deepEqual(Array.from(pu1Approved.find(e => e.unit === '1' && e.id === 'M12').sentences), ['Here you ___!', '___ you very much.'], 'M12 includes both approved blanks');
 assert.ok(!content.buildPool('PU1', 1, 16).entries.some(e => e.item.unit === '2'), 'Unit 2 stays out of Unit 1');
 const pu1Unit2 = pu1Approved.filter(e => e.unit === '2');
@@ -518,7 +519,24 @@ assert.equal(pu1Unit4F22.sentence, "These are balls of meat. They're grapeballs.
 assert.equal(pu1Unit4F22.wrongWord, 'grapeballs');
 assert.equal(pu1Unit4F22.answer, 'meatballs');
 assert.deepEqual(Array.from(pu1Unit4.find(e => e.id === 'M18').prefixes), ['', 'p']);
-assert.ok(!content.buildPool('PU1', 4, 54).entries.some(e => e.item.unit === '5'), 'Unit 5 stays review-only');
+assert.ok(!content.buildPool('PU1', 4, 54).entries.some(e => e.item.unit === '5'), 'Unit 5 stays out of Unit 4');
+const pu1Unit5 = pu1Approved.filter(e => e.unit === '5');
+assert.deepEqual(pu1Unit5.filter(e => e.answers).map(e => e.id).sort(), Array.from({length: 28}, (_, i) => 'M' + (i + 1)).sort());
+assert.deepEqual(pu1Unit5.filter(e => e.answer).map(e => e.id).sort(), Array.from({length: 36}, (_, i) => 'F' + (i + 1)).sort());
+assert.equal(new Set(pu1Unit5.filter(e => e.answer).map(e => e.sentence)).size, 36);
+assert.equal(pu1Unit5.find(e => e.id === 'M2').sentences[0], 'We fly to Beijing in a ___.');
+const pu1Unit5M14 = pu1Unit5.find(e => e.id === 'M14');
+assert.deepEqual(Array.from(pu1Unit5M14.answers), ['balloons','helicopter']);
+assert.deepEqual(Array.from(pu1Unit5M14.prefixes), ['ballo','heli']);
+assert.deepEqual(Array.from(pu1Unit5M14.sentences), ["I've got six ___ for my birthday party.", 'My toy ___ can fly.']);
+assert.deepEqual(Array.from(pu1Unit5.find(e => e.id === 'M4').answers), ['doll','doll','house']);
+assert.equal(pu1Unit5.find(e => e.id === 'M15').sentences.length, 1, 'computer and mouse share the approved sentence');
+for (const id of ['M19','M20','M21']) assert.equal(pu1Unit5.find(e => e.id === id).answers.length, 4, 'birthday boards practise want/wants and possession together');
+for (const [id, wrong, answer] of [['F17','balloon','balloons'],['F18','helicopter','helicopters'],['F31','squares','circles'],['F34','circle','rectangle']]) {
+    const item = pu1Unit5.find(e => e.id === id); assert.equal(item.wrongWord, wrong); assert.equal(item.answer, answer);
+}
+assert.ok(!pu1Unit5.some(e => /wings|blades|put air in|🪁|🚲|✈️|🚗|⚽|🤖|🎈|🚁|🖥️|⌨️|📻|🧸|🔴|🟦|🔺|▭/u.test(JSON.stringify(e))), 'approved simple contexts replace difficult clues and toy/shape emojis');
+assert.ok(!content.buildPool('PU1', 5, 63).entries.some(e => e.item.unit === '6'), 'Unit 6 stays out of Unit 5');
 for (const item of [...pu1Approved, ...unit1, ...unit2, ...unit3, ...unit4, ...unit5, ...unit6, ...unit7, ...unit8, ...unit9, ...pu2Unit1, ...pu2Unit2, ...pu2Unit3, ...pu2Unit4, ...pu2Unit5, ...pu2Unit6, ...pu2Unit7, ...pu2Unit8, ...pu2Unit9]) {
     if (item.answers) assert.equal(item.sentences.join(' ').split('___').length - 1, item.answers.length, item.id + ' has one target per blank');
     else if (Number.isInteger(item.wrongIndex)) assert.equal(item.sentence.split(' ')[item.wrongIndex].replace(/[.,!?]+$/, '').toLowerCase(), item.wrongWord, item.id + ' explicitly identifies its repeated wrong token');

@@ -352,3 +352,5 @@ histories, retaining their curriculum and API routing. Verify live reopening
 and the new cutoff without uploading synthetic audio to production.
 
 Preview release 2026-10-19e publishes approved PU1 Unit 4 22 M/32 F boards with all teacher annotations applied. The curriculum cache buster, version/auth/index stamps and dashboard auth link advance together. Production and isolated preview API/data are unchanged.
+
+Preview release 2026-10-20b publishes the approved PU1 Unit 5 28 M/36 F boards with contextual toy/shape clues, longer locked prefixes and plural repairs. Build on current preview main to retain the dashboard updates. Refresh the curriculum cache buster in both the app and dashboard, synchronize version/auth/index stamps and the dashboard auth link, and verify hosted files after Pages succeeds. Production and isolated preview API/data are unchanged.

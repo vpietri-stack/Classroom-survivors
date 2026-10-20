@@ -1772,7 +1772,105 @@
         },
     };
 
-    const pageCatalogs = { 'PU1:4:45': pu1Unit4Catalogs[45], 'PU1:4:47': pu1Unit4Catalogs[47], 'PU1:4:48': pu1Unit4Catalogs[48], 'PU1:4:54': pu1Unit4Catalogs[54], 'PU1:3:31': pu1Unit3Catalogs[31], 'PU1:3:32': pu1Unit3Catalogs[32], 'PU1:3:33': pu1Unit3Catalogs[33], 'PU1:3:34': pu1Unit3Catalogs[34], 'PU1:3:35': pu1Unit3Catalogs[35], 'PU1:3:36': pu1Unit3Catalogs[36], 'PU1:3:37': pu1Unit3Catalogs[37], 'PU1:3:43': pu1Unit3Catalogs[43], 'PU1:2:19': pu1Unit2Catalogs[19], 'PU1:2:20': pu1Unit2Catalogs[20], 'PU1:2:21': pu1Unit2Catalogs[21], 'PU1:2:22': pu1Unit2Catalogs[22], 'PU1:2:23': pu1Unit2Catalogs[23], 'PU1:2:26': pu1Unit2Catalogs[26], 'PU1:0:5': pu1Unit0Catalogs[5], 'PU1:0:7': pu1Unit0Catalogs[7], 'PU1:0:8': pu1Unit0Catalogs[8], 'PU1:1:9': pu1Unit1Catalogs[9], 'PU1:1:10': pu1Unit1Catalogs[10], 'PU1:1:11': pu1Unit1Catalogs[11], 'PU1:1:12': pu1Unit1Catalogs[12], 'PU1:1:13': pu1Unit1Catalogs[13], 'PU1:1:16': pu1Unit1Catalogs[16], 'PU2:9:107': pu2Unit9Catalogs[107], 'PU2:9:109': pu2Unit9Catalogs[109], 'PU2:9:116': pu2Unit9Catalogs[116], 'PU2:9:119': pu2Unit9Catalogs[119], 'PU2:8:95': pu2Unit8Catalogs[95], 'PU2:8:96': pu2Unit8Catalogs[96], 'PU2:8:97': pu2Unit8Catalogs[97], 'PU2:8:98': pu2Unit8Catalogs[98], 'PU2:8:104': pu2Unit8Catalogs[104], 'PU2:7:83': pu2Unit7Catalogs[83], 'PU2:7:85': pu2Unit7Catalogs[85], 'PU2:7:87': pu2Unit7Catalogs[87], 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
+    // PU1 Unit 5: approved toys, possession, birthday wishes and shapes.
+    const pu1Unit5Catalogs = {
+        57: {
+            missing: [
+                {"id": "M1", "sentences": ["I fly my ___ on a string in the wind.", "I ride my ___ to school."], "answers": ["kite", "bike"], "prefixes": ["k", "b"]},
+                {"id": "M2", "sentences": ["We fly to Beijing in a ___.", "Dad drives his ___ to work."], "answers": ["plane", "car"], "prefixes": ["p", "c"]},
+                {"id": "M3", "sentences": ["I kick my ___ to play football.", "My toy ___ has got a head, two arms and two legs."], "answers": ["ball", "robot"], "prefixes": ["b", "r"]},
+                {"id": "M4", "sentences": ["Eva likes her pretty ___.", "The ___ ___ has got two windows."], "answers": ["doll", "doll", "house"], "prefixes": ["d", "d", "h"]},
+                {"id": "M5", "sentences": ["It's my ___ today.", "This toy is my ___."], "answers": ["birthday", "present"], "prefixes": ["b", "p"]},
+            ],
+            fix: [
+                {"id": "F1", "sentence": "I fly my plane on a string in the wind.", "wrongWord": "plane", "answer": "kite"},
+                {"id": "F2", "sentence": "My car has got two wheels. I ride it to school.", "wrongWord": "car", "answer": "bike"},
+                {"id": "F3", "sentence": "We fly to Beijing in a kite.", "wrongWord": "kite", "answer": "plane"},
+                {"id": "F4", "sentence": "My toy ball has got a head, two arms and two legs.", "wrongWord": "ball", "answer": "robot"},
+                {"id": "F5", "sentence": "I kick the robot to play football.", "wrongWord": "robot", "answer": "ball"},
+                {"id": "F6", "sentence": "My bike has got four wheels and four doors.", "wrongWord": "bike", "answer": "car"},
+            ],
+        },
+        59: {
+            missing: [
+                {"id": "M6", "sentences": ["I've got a kite. It's ___ kite.", "You've got a car. It's ___ car."], "answers": ["my", "your"]},
+                {"id": "M7", "sentences": ["Jim has got a robot. ___ robot is grey.", "Jenny has got a doll. ___ doll is new."], "answers": ["his", "her"]},
+                {"id": "M8", "sentences": ["We've got balls. They're ___ balls.", "They've got a bike. It's ___ bike."], "answers": ["our", "their"]},
+                {"id": "M9", "sentences": ["Grandma and Grandpa have got a house. ___ house is yellow.", "Jim and I have got a ball. ___ ball is blue."], "answers": ["their", "our"]},
+                {"id": "M10", "sentences": ["This is Jenny's car. It's ___ car.", "These are Jim's toys. They're ___ toys."], "answers": ["her", "his"]},
+                {"id": "M11", "sentences": ["___ kite is this? It's Jim's.", "___ he? He's Jim."], "answers": ["whose", "who's"]},
+                {"id": "M12", "sentences": ["This kite is for Jim. It's ___ kite.", "This doll is for Jenny. It's ___ doll."], "answers": ["jim's", "jenny's"]},
+                {"id": "M13", "sentences": ["The cat has got a tail. ___ tail is long.", "___ a toy cat."], "answers": ["its", "it's"]},
+            ],
+            fix: [
+                {"id": "F7", "sentence": "I've got a kite. It's me kite.", "wrongWord": "me", "answer": "my"},
+                {"id": "F8", "sentence": "You've got a car. It's you car.", "wrongWord": "you", "answer": "your"},
+                {"id": "F9", "sentence": "Jim has got a robot. Her robot is grey.", "wrongWord": "her", "answer": "his"},
+                {"id": "F10", "sentence": "Jenny has got a doll. His doll is new.", "wrongWord": "his", "answer": "her"},
+                {"id": "F11", "sentence": "We've got a ball. It's we ball.", "wrongWord": "we", "answer": "our"},
+                {"id": "F12", "sentence": "They've got a bike. It's they bike.", "wrongWord": "they", "answer": "their"},
+                {"id": "F13", "sentence": "This is Jenny's car. It's she car.", "wrongWord": "she", "answer": "her"},
+                {"id": "F14", "sentence": "These are Jim's toys. They're he toys.", "wrongWord": "he", "answer": "his"},
+                {"id": "F15", "sentence": "Who's kite is this? It's Jim's.", "wrongWord": "who's", "answer": "whose"},
+                {"id": "F16", "sentence": "The cat has got a tail. It's tail is long.", "wrongWord": "it's", "answer": "its"},
+            ],
+        },
+        60: {
+            missing: [
+                {"id": "M14", "sentences": ["I've got six ___ for my birthday party.", "My toy ___ can fly."], "answers": ["balloons", "helicopter"], "prefixes": ["ballo", "heli"]},
+                {"id": "M15", "sentences": ["My ___ has got a keyboard and a ___."], "answers": ["computer", "mouse"], "prefixes": ["c", "m"]},
+                {"id": "M16", "sentences": ["My computer has got a ___ with lots of letters.", "I listen to music on my ___."], "answers": ["keyboard", "radio"], "prefixes": ["k", "r"]},
+                {"id": "M17", "sentences": ["I take my soft ___ ___ to bed.", "I put my toys in a toy ___."], "answers": ["teddy", "bear", "box"], "prefixes": ["t", "b", "b"]},
+                {"id": "M18", "sentences": ["We play a board ___.", "The toy ___ is on the water."], "answers": ["game", "ship"], "prefixes": ["g", "s"]},
+            ],
+            fix: [
+                {"id": "F17", "sentence": "I've got six balloon for my birthday party.", "wrongWord": "balloon", "answer": "balloons"},
+                {"id": "F18", "sentence": "I've got two helicopter.", "wrongWord": "helicopter", "answer": "helicopters"},
+                {"id": "F19", "sentence": "My teddy cat is a soft toy with small round ears.", "wrongWord": "cat", "answer": "bear"},
+                {"id": "F20", "sentence": "I put my toys in my toy bread.", "wrongWord": "bread", "answer": "box"},
+                {"id": "F21", "sentence": "My computer has got a cheese and a mouse.", "wrongWord": "cheese", "answer": "keyboard"},
+                {"id": "F22", "sentence": "We play a board cake.", "wrongWord": "cake", "answer": "game"},
+            ],
+        },
+        61: {
+            missing: [
+                {"id": "M19", "sentences": ["I ___ a robot for ___ birthday.", "He ___ a robot for ___ birthday."], "answers": ["want", "my", "wants", "his"], "prefixes": ["w", "m", "w", "h"]},
+                {"id": "M20", "sentences": ["We ___ kites for ___ birthdays.", "She ___ a kite for ___ birthday."], "answers": ["want", "our", "wants", "her"], "prefixes": ["w", "o", "w", "h"]},
+                {"id": "M21", "sentences": ["They ___ some balloons for ___ birthdays.", "My brother ___ a plane for ___ birthday."], "answers": ["want", "their", "wants", "his"], "prefixes": ["w", "t", "w", "h"]},
+                {"id": "M22", "sentences": ["___ you want a teddy?", "___ she want a robot?"], "answers": ["do", "does"]},
+                {"id": "M23", "sentences": ["What ___ they want?", "What ___ he want?"], "answers": ["do", "does"]},
+                {"id": "M24", "sentences": ["👎 I ___ want a car.", "👎 He ___ want a doll."], "answers": ["don't", "doesn't"]},
+            ],
+            fix: [
+                {"id": "F23", "sentence": "He want a helicopter.", "wrongWord": "want", "answer": "wants"},
+                {"id": "F24", "sentence": "I wants a robot.", "wrongWord": "wants", "answer": "want"},
+                {"id": "F25", "sentence": "My sister want a doll.", "wrongWord": "want", "answer": "wants"},
+                {"id": "F26", "sentence": "They wants some balloons.", "wrongWord": "wants", "answer": "want"},
+                {"id": "F27", "sentence": "Do he want a teddy?", "wrongWord": "do", "answer": "does"},
+                {"id": "F28", "sentence": "Does you want a plane?", "wrongWord": "does", "answer": "do"},
+                {"id": "F29", "sentence": "He don't want a car.", "wrongWord": "don't", "answer": "doesn't"},
+                {"id": "F30", "sentence": "She doesn't wants a kite.", "wrongWord": "wants", "answer": "want"},
+            ],
+        },
+        63: {
+            missing: [
+                {"id": "M25", "sentences": ["The wheels on my bike are two ___.", "A ___ has got four sides."], "answers": ["circles", "square"], "prefixes": ["c", "s"]},
+                {"id": "M26", "sentences": ["A ___ has got three sides.", "A ___ has got two long sides and two short sides."], "answers": ["triangle", "rectangle"], "prefixes": ["t", "r"]},
+                {"id": "M27", "sentences": ["A triangle has got ___ sides.", "A square has got ___ sides."], "answers": ["three", "four"], "prefixes": ["t", "f"]},
+                {"id": "M28", "sentences": ["One circle. Two ___.", "One rectangle. Two ___."], "answers": ["circles", "rectangles"], "prefixes": ["c", "r"]},
+            ],
+            fix: [
+                {"id": "F31", "sentence": "The wheels on my bike are squares.", "wrongWord": "squares", "answer": "circles"},
+                {"id": "F32", "sentence": "A triangle has got four equal sides.", "wrongWord": "triangle", "answer": "square"},
+                {"id": "F33", "sentence": "A rectangle has got three sides.", "wrongWord": "rectangle", "answer": "triangle"},
+                {"id": "F34", "sentence": "A circle has got two long sides and two short sides.", "wrongWord": "circle", "answer": "rectangle"},
+                {"id": "F35", "sentence": "A triangle has got four sides.", "wrongWord": "four", "answer": "three"},
+                {"id": "F36", "sentence": "I've got two rectangle.", "wrongWord": "rectangle", "answer": "rectangles"},
+            ],
+        },
+    };
+
+    const pageCatalogs = { 'PU1:5:57': pu1Unit5Catalogs[57], 'PU1:5:59': pu1Unit5Catalogs[59], 'PU1:5:60': pu1Unit5Catalogs[60], 'PU1:5:61': pu1Unit5Catalogs[61], 'PU1:5:63': pu1Unit5Catalogs[63], 'PU1:4:45': pu1Unit4Catalogs[45], 'PU1:4:47': pu1Unit4Catalogs[47], 'PU1:4:48': pu1Unit4Catalogs[48], 'PU1:4:54': pu1Unit4Catalogs[54], 'PU1:3:31': pu1Unit3Catalogs[31], 'PU1:3:32': pu1Unit3Catalogs[32], 'PU1:3:33': pu1Unit3Catalogs[33], 'PU1:3:34': pu1Unit3Catalogs[34], 'PU1:3:35': pu1Unit3Catalogs[35], 'PU1:3:36': pu1Unit3Catalogs[36], 'PU1:3:37': pu1Unit3Catalogs[37], 'PU1:3:43': pu1Unit3Catalogs[43], 'PU1:2:19': pu1Unit2Catalogs[19], 'PU1:2:20': pu1Unit2Catalogs[20], 'PU1:2:21': pu1Unit2Catalogs[21], 'PU1:2:22': pu1Unit2Catalogs[22], 'PU1:2:23': pu1Unit2Catalogs[23], 'PU1:2:26': pu1Unit2Catalogs[26], 'PU1:0:5': pu1Unit0Catalogs[5], 'PU1:0:7': pu1Unit0Catalogs[7], 'PU1:0:8': pu1Unit0Catalogs[8], 'PU1:1:9': pu1Unit1Catalogs[9], 'PU1:1:10': pu1Unit1Catalogs[10], 'PU1:1:11': pu1Unit1Catalogs[11], 'PU1:1:12': pu1Unit1Catalogs[12], 'PU1:1:13': pu1Unit1Catalogs[13], 'PU1:1:16': pu1Unit1Catalogs[16], 'PU2:9:107': pu2Unit9Catalogs[107], 'PU2:9:109': pu2Unit9Catalogs[109], 'PU2:9:116': pu2Unit9Catalogs[116], 'PU2:9:119': pu2Unit9Catalogs[119], 'PU2:8:95': pu2Unit8Catalogs[95], 'PU2:8:96': pu2Unit8Catalogs[96], 'PU2:8:97': pu2Unit8Catalogs[97], 'PU2:8:98': pu2Unit8Catalogs[98], 'PU2:8:104': pu2Unit8Catalogs[104], 'PU2:7:83': pu2Unit7Catalogs[83], 'PU2:7:85': pu2Unit7Catalogs[85], 'PU2:7:87': pu2Unit7Catalogs[87], 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

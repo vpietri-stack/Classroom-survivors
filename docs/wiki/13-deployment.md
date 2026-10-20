@@ -1,5 +1,17 @@
 # Deployment & Release Discipline
 
+## Typed exercise dashboard release (2026-10-20a)
+
+Release the Missing Words/Find and Fix dashboard presentation and SR lookup fix
+to preview first, verify hosted details/filters/popups, then promote the same
+dashboard change on the production remote's existing main. Preserve each site's
+curriculum, feature gates, API routing and isolated data. The dashboard loads its
+own site's existing `non_spelling_content.js` for failed-only SR descriptions;
+this release does not publish preview curriculum to production or rewrite SR
+records. Refresh dashboard JS/CSS cache busters and synchronize version/auth/index
+stamps plus the dashboard auth script reference. Production requires successful
+Pages and Azure workflows and verification of the served dashboard assets.
+
 ## Vocabulary normalization release (2026-10-17a)
 
 Publish to preview first and verify hosted stamps, vocabulary/SR/translation

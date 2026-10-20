@@ -12,7 +12,7 @@ One HTML app shell (`teacher_dashboard.html`), two role views. `teacher_dashboar
 
 1. `config.js`, `frontend_auth.js` (API base, `apiFetch`, app key)
 2. **Inline stub:** `<script>var TEACHING_CONTENT = {}; var AVAILABLE_CONTENT = {};</script>` — the content packs are loaded to serve the **test iframe** (`#testIframe` loads `index.html?testMode=true&…`); the stub exists so pack files parse, and `sr_engine.js`/`teaching_content.js` are deliberately NOT loaded (the dashboard never does SR math itself; it renders `srState` read-only)
-3. All 7 content packs (`content_pu1/2/3.js`, `content_think0/1/2.js`, `content_test.js`)
+3. All 7 content packs (`content_pu1/2/3.js`, `content_think0/1/2.js`, `content_test.js`), then `non_spelling_content.js` to resolve typed exercise SR IDs to authored prompts without running SR selection or changing stored progress.
 4. `teacher_dashboard.js` (declares `let isBM = false` at top level, ~12) then `geo_export.js` (Student Locations panel + location exports; needs `allStudents` from the base script) then `admin_dashboard.js` (declares `let isAdmin = false`, ~6) — **do not redeclare either**; both are top-level `let` shared across the two files
 
 `apiFetch` (defined in `frontend_auth.js`) attaches `X-App-Key` + `X-Auth-Token` automatically — dashboards never hand-roll auth headers.
@@ -47,6 +47,27 @@ flowchart TD
 | **Settings** | `populateSettingsTab()` + `saveStudentSettings()` (admin_dashboard.js ~150/~175); the Student Locations panel sits at the bottom (see below) |
 | **Targets** | `renderTargetsTab()` + `adjustTargetOffset` (admin_dashboard.js ~222/~344) |
 | **SR** | `renderSRTab()` — read-only SR state explorer; per-item popup shows interval/due/last result (admin_dashboard.js ~700-724) |
+
+## Missing Words and Find and Fix (20 October 2026)
+
+Exercises and session details decode both object and JSON-string `itemDetails` for
+`missingWord`/`findAndFix`, showing prompts, answers and book/unit/page/item ID.
+The two types have their own Exercise and SR filters. Searches include readable
+prompts/answers and curriculum IDs. Details wrap and are HTML-escaped; SR links
+encode their JavaScript argument before escaping the HTML attribute.
+
+SR records remain in `srState.sentences`, with their original
+`non-spelling:<type>:<book>:<unit>:<page>:<id>` keys. The display separates them
+from legacy sentences and resolves wording from the latest live/archive event,
+falling back to the shared authored catalog for failures without a completion
+event. Unknown IDs still show type/location/ID. The tab and exercise popup read
+the saved intervals/results directly; they never infer SR records from exercise
+completion events. Both `failure` and legacy `fail` receive failure styling.
+
+`test_dashboard_non_spelling.js` drives the real dashboard with isolated API
+fixtures, covering the reported raw JSON issue, archived object payloads, type
+filters, readable search, SR popup clicks, failed-only catalog resolution,
+unknown IDs, legacy rows and HTML escaping. No student writes are allowed.
 
 ## Archive merge (the reason `getStudentArchive` exists)
 

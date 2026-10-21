@@ -68,6 +68,8 @@ jsdom harness details that bite: the script order list inside each test **must m
 
 ## Contract tests that pin cross-layer promises
 
+`test_handwriting_browser.js` also checks per-word skipping through the real button: untouched and partially written words, a fresh skip on the next word, double-tap protection, final-word continuation, cancellation of pen-lift/accepted-letter/reveal timers, exit during the skip delay, and no completed-handwriting event or SR result for skipped words.
+
 These exist because their contracts were broken in production; treat failures as regressions, not flakiness:
 
 - `test_session_flush_deadline.js` — the completion-time flush (`flushAnalyticsWithDeadline`) must resolve true when drained and **never hang past the deadline**; cached-profile writer must survive quota errors. Also pins the 2026-09-03a **ack discipline**: full-ack drains the queue / silent-200 keeps the queue / partial-ack keeps the queue.

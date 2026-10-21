@@ -349,3 +349,7 @@ quota records, upload bounds and throughput. Browser collection cache counter
 advances to 4. Production and preview are released from their own current
 histories, retaining their curriculum and API routing. Verify live reopening
 and the new cutoff without uploading synthetic audio to production.
+
+## Handwriting skip production release (21 October 2026)
+
+Release `2026-10-21a` promotes the preview-tested Round C per-word handwriting skip button, labelled `跳过这个词的书写` (skip writing this word). Apply only the feature patch on current production main, preserving production curriculum, API routing and data. Synchronize the version/auth/index stamps and dashboard auth link, refresh the Study Mode cache buster, run the full root test suite, then push explicitly to `origin/main`. Verify both Pages and Azure workflows succeed, compare hosted files against committed bytes, and exercise the skip flow on the live site with API calls intercepted.

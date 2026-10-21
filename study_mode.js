@@ -475,6 +475,7 @@ function finishRoundC() {
 // Internal round 'D' renders as "Round C" — the same offset convention the rest
 // of this file uses (internal 'C' renders as "Round B").
 function startRoundD() {
+    clearTimeout(roundDTimer);
     STUDY_STATE.round = 'D';
     STUDY_STATE.currentWordIndex = 0;
     updateStudyUI("Round C: Handwriting", "Write the missing letters.");
@@ -485,6 +486,7 @@ function startRoundD() {
 }
 
 function nextRoundDWord() {
+    clearTimeout(roundDTimer);
     if (STUDY_STATE.currentWordIndex >= STUDY_STATE.words.length) {
         finishRoundD();
         return;
@@ -504,9 +506,14 @@ function nextRoundDWord() {
 
             <div id="handwriting-trace" class="flex flex-col items-center"></div>
 
-            <button onclick="clearRoundD()" aria-label="Erase what you wrote" class="game-btn bg-gray-500 py-2 px-6">
-                <i class="fas fa-eraser"></i> ERASE
-            </button>
+            <div class="flex flex-wrap justify-center gap-3">
+                <button onclick="clearRoundD()" aria-label="Erase what you wrote" class="game-btn bg-gray-500 py-2 px-6">
+                    <i class="fas fa-eraser"></i> ERASE
+                </button>
+                <button id="handwriting-skip" onclick="skipRoundDWord()" aria-label="跳过这个词的书写" class="game-btn bg-gray-500 py-2 px-6">
+                    跳过这个词的书写
+                </button>
+            </div>
         </div>
     `;
     showTranslation('roundD-translation', word);
@@ -545,6 +552,7 @@ let roundDCursor = 0;      // index into roundDGapOrder: the gap being written
 let roundDAttempts = 0;    // rejected traces on the CURRENT gap
 let roundDGuided = false;  // has the outline faded in yet?
 let roundDTrace = null;    // the hwCreateTraceBox widget
+let roundDTimer = null;    // pending next-letter or next-word advance
 let roundDTargetShownAt = 0;  // when the current gap was offered, for trace timing
 
 const ROUND_D_MAX_GAPS = 6;      // cap per word, so a 29-letter item stays quick
@@ -585,6 +593,7 @@ function renderRoundDSlots() {
 
 // Point the trace box at the next gap, or finish the word when none are left.
 function roundDShowTarget() {
+    if (STUDY_STATE.round !== 'D' || STUDY_STATE.isTransitioning) return;
     if (roundDCursor >= roundDGapOrder.length) { roundDWordComplete(); return; }
     roundDAttempts = 0;
     roundDGuided = false;
@@ -603,7 +612,7 @@ function roundDAcceptLetter(letter, scores) {
     roundDCursor++;
     synthGem();
     renderRoundDSlots();
-    setTimeout(() => {
+    roundDTimer = setTimeout(() => {
         if (STUDY_STATE.round === 'D') roundDShowTarget();
     }, 420);
 }
@@ -629,7 +638,7 @@ function roundDRejectLetter(letter, scores) {
         slot.given = true;
         roundDCursor++;
         renderRoundDSlots();
-        setTimeout(() => {
+        roundDTimer = setTimeout(() => {
             if (STUDY_STATE.round === 'D') roundDShowTarget();
         }, 900);
         return;
@@ -642,18 +651,40 @@ function roundDRejectLetter(letter, scores) {
 }
 
 function roundDWordComplete() {
+    if (STUDY_STATE.isTransitioning) return;
     STUDY_STATE.isTransitioning = true;
     roundDTrace.freeze();
     renderRoundDSlots();
     playHappySound();
     queueExerciseEvent('handwriting', 'study', roundDWord);
     hwCaptureEndWord();
-    setTimeout(() => {
+    advanceRoundDWord(1000);
+}
+
+function skipRoundDWord() {
+    if (STUDY_STATE.round !== 'D' || STUDY_STATE.isTransitioning || !roundDTrace) return;
+    // Keep already judged traces, but a skipped word earns no completion event
+    // or success sound. Destroy cancels any pending pen-lift judgement.
+    STUDY_STATE.isTransitioning = true;
+    clearTimeout(roundDTimer);
+    roundDTrace.destroy();
+    roundDTrace = null;
+    hwCaptureEndWord();
+    // Briefly lock the button so a double tap cannot skip the next word too.
+    advanceRoundDWord(300);
+}
+
+function advanceRoundDWord(delayMs) {
+    clearTimeout(roundDTimer);
+    const skip = document.getElementById('handwriting-skip');
+    if (skip) skip.disabled = true;
+    roundDTimer = setTimeout(() => {
+        if (!STUDY_STATE.active || STUDY_STATE.round !== 'D') return;
         STUDY_STATE.currentWordIndex++;
         startExerciseTracking();
         STUDY_STATE.isTransitioning = false;
         nextRoundDWord();
-    }, 1000);
+    }, delayMs);
 }
 
 function clearRoundD() {
@@ -663,6 +694,7 @@ function clearRoundD() {
 }
 
 function finishRoundD() {
+    if (roundDTrace) { roundDTrace.destroy(); roundDTrace = null; }
     startRoundE();
 }
 
@@ -1262,6 +1294,7 @@ function exitStudyMode() {
         srStudyResults = [];
     }
     STUDY_STATE.active = false; // so the game-mode keydown listener resumes
+    clearTimeout(roundDTimer);
     // A word abandoned halfway is still worth keeping: the letters a child gave
     // up on are the ones the recognition needs to learn from.
     hwCaptureEndWord();

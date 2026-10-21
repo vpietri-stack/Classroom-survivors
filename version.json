@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-20a",
-  "deployedAt": "2026-10-20",
-  "notes": "Readable Missing Words and Find and Fix dashboard details, SR categories, search and popups; preserve production curriculum, feature gates and data."
+  "version": "2026-10-21a",
+  "deployedAt": "2026-10-21",
+  "notes": "Round C offers a per-word handwriting skip button labelled 跳过这个词的书写; preserve production curriculum, dashboard, API routing and data."
 }

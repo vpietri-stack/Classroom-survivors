@@ -11,7 +11,8 @@ async function draw(page,strokes){await page.evaluate(strokes=>{const cv=documen
  const browser=await chromium.launch({executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe',headless:true});let checks=0;const errors=[],external=[];
  function check(condition,message){assert.ok(condition,message);checks++;console.log('PASS: '+message);}
  try{
-  const context=await browser.newContext({viewport:{width:390,height:844}});context.on('request',r=>{if(/^https?:/.test(r.url())&&!r.url().startsWith('http://127.0.0.1:'))external.push(r.url());});
+  let modelDownloads=0;
+  const context=await browser.newContext({viewport:{width:390,height:844}});context.on('request',r=>{if(/^https?:/.test(r.url())&&!r.url().startsWith('http://127.0.0.1:'))external.push(r.url());if(r.url().includes('/letters-v2.bin?'))modelDownloads++;});
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(url);await page.waitForFunction(()=>HWRecognition.isReady());
   check(await page.evaluate(()=>HWRecognition.isReady()),'Neural worker and checked model initialize under a repository subpath');
   check(await page.evaluate(()=>HWDecision.decide(Array(26).fill(1/26),'7',{minimal:false,rawInkCount:500,baselineAccepted:true},{}).accepted),'Unsupported characters retain their font-checker fallback');
@@ -42,7 +43,7 @@ async function draw(page,strokes){await page.evaluate(strokes=>{const cv=documen
   check(await page.evaluate(()=>roundDCursor===0&&previewEvents.length===0),'Destroyed canvas ignores a late inference result');
   await page.evaluate(()=>HWRecognition.verify=window.__oldVerify);
   await page.setViewportSize({width:320,height:760});check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Phone layout fits 320 pixels');
-  await page.waitForFunction(()=>navigator.serviceWorker.controller!==null);await context.setOffline(true);await page.reload();await page.waitForFunction(()=>HWRecognition.isReady());
+  await page.waitForFunction(()=>navigator.serviceWorker.controller!==null);check(modelDownloads===1,'First visit downloads the model once; offline setup reuses the checked cache');await context.setOffline(true);await page.reload();await page.waitForFunction(()=>HWRecognition.isReady());
   check(await page.evaluate(()=>HWRecognition.isReady()),'Preview reloads and recognizes with the network offline');await context.setOffline(false);
   check(external.length===0,'No external scripts, fonts or recognition requests');check(errors.length===0,'No browser runtime errors');
   await context.close();

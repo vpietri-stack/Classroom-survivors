@@ -20,7 +20,7 @@
     loading=(async()=>{
       phase='manifest';lastFailure=null;
       let cache=null;try{cache=await caches.open(CACHE);}catch(e){}
-      const manifestURL=new URL('model.json?v=2026-10-22b',base).href;
+      const manifestURL=new URL('model.json?v=2026-10-22c',base).href;
       let raw;
       try{raw=await fetchBounded(manifestURL);}catch(e){const cached=cache&&await cache.match(manifestURL);if(!cached)throw e;raw=await cached.arrayBuffer();}
       manifest=JSON.parse(new TextDecoder().decode(raw));
@@ -31,7 +31,7 @@
       if(cached){const bytes=await cached.arrayBuffer();if(bytes.byteLength===manifest.weightBytes&&await checked(bytes,manifest.sha256))weights=bytes;else if(cache)await cache.delete(weightsURL);}
       if(!weights){
         for(let attempt=0;attempt<2&&!weights;attempt++){
-          try{weights=await fetchBounded(weightsURL,30000);}catch(e){if(attempt===1)throw e;}
+          try{weights=await fetchBounded(weightsURL,60000);}catch(e){if(attempt===1)throw e;}
         }
         if(weights.byteLength!==manifest.weightBytes||!await checked(weights,manifest.sha256))throw Error('Invalid weights');
       }
@@ -45,7 +45,7 @@
         return new TextDecoder().decode(bytes);
       }
       phase='runtime';
-      const kernel=await source('cnn.js'),handler=await source('worker.js?v=2026-10-22b');
+      const kernel=await source('cnn.js'),handler=await source('worker.js?v=2026-10-22c');
       workerURL=URL.createObjectURL(new Blob([kernel,'\n',handler.replace(/^importScripts\([^\n]+\);\s*/, '')],{type:'text/javascript'}));
       await new Promise((resolve,reject)=>{
         phase='worker';

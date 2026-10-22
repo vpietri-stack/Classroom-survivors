@@ -33,6 +33,10 @@ are bundled locally for offline worker startup. Downloads/inference have bounded
 timeouts. Failure falls back to the existing checker; hint, undo and skip remain
 usable. No external model hub, recognition endpoint or CDN is used. Cache eviction
 and actual device/China-network first download still need validation.
+The larger weights allow 30 seconds per background attempt with one retry;
+manifest/runtime requests remain bounded at eight seconds. A failed warm-up can
+be retried at the next round entry. `HWRecognition.status()` reports the loading
+phase/failure for diagnosis without exposing tensors or student information.
 
 Engine version 2 identifies this checkpoint/policy. Capture retains its existing
 consent/window/cap gates; traces stay out of analytics. Stored precision/recall

@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-22a",
+  "version": "2026-10-22b",
   "deployedAt": "2026-10-22",
-  "notes": "Preview: local neural handwriting, retained ink, immediate hints, undo, faster progression, assisted completion distinction; production unchanged."
+  "notes": "Preview: local neural handwriting, retained ink, immediate hints, undo, faster progression, assisted completion distinction; production unchanged. Slow first-download handling keeps recognition warm-up asynchronous and retries once."
 }

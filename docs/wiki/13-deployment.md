@@ -1,6 +1,6 @@
 # Deployment & Release Discipline
 
-## Handwriting preview (2026-10-22a)
+## Handwriting preview (2026-10-22b)
 
 Publish this handwriting integration to `preview` remote `main` only; production
 requires a later explicit release request. Preserve preview's curriculum/API/data.
@@ -12,6 +12,10 @@ Its offline SW is scoped to the `handwriting_preview` URL prefix, with no change
 to the main app's update worker. On a later preview-shell/runtime change, bump
 the narrow SW cache name and runtime query versions together to avoid stale
 cache-first assets. Model weights are separately keyed by SHA-256.
+The first hosted check exposed a slow cold weight fetch. Release b allows
+30 seconds per background weight attempt plus one retry, while input/hint/skip
+remain usable. A failed warm-up can retry at the next round entry; internal
+`HWRecognition.status()` identifies the failing phase.
 
 ## Typed exercise dashboard release (2026-10-20a)
 

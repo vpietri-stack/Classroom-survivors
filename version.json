@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-21a",
-  "deployedAt": "2026-10-21",
-  "notes": "Preview: Round C offers a per-word handwriting skip button in simplified Chinese; retain current curriculum, dashboard and isolated preview data."
+  "version": "2026-10-22a",
+  "deployedAt": "2026-10-22",
+  "notes": "Preview: local neural handwriting, retained ink, immediate hints, undo, faster progression, assisted completion distinction; production unchanged."
 }

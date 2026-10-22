@@ -1,5 +1,13 @@
 # Testing
 
+`test_handwriting_neural_browser.js` serves the actual preview under a repository
+subpath and checks worker loading, immediate assisted hint, retained ink, undo,
+unfinished dotted letters, pointerup endpoint capture, async skip/destroy races,
+320px layout, offline reload, no external requests and first-download failure
+with usable hint/skip. It is part of `npm test`. Existing handwriting/capture
+browser tests cover engine 2 and assisted completion. The dotted-i fixture now
+draws the actual upper dot; its former y-cut accidentally drew another stem.
+
 > **Last verified:** 2026-10-11 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
 
 **Owner files:** `package.json` (`test` script), `test_*.js` (root), `api/test_auth.js`, plus the out-of-chain `vs_*` test family.

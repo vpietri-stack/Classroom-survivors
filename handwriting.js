@@ -79,7 +79,7 @@ var HW_STROKE_GAP_MS = 1500;
 
 // Bump whenever the geometry above changes, so a stored trace can still be
 // matched to the bars that judged it (see handwriting_sample_capture.js).
-var HW_ENGINE_VERSION = 1;
+var HW_ENGINE_VERSION = 2;
 
 // A slow finger can leave thousands of points on one stroke, and every stored
 // trace has to share a request-unit pool with student progress. Stride-sampling
@@ -605,6 +605,9 @@ function hwCreateTraceBox(opts) {
     var target = null, guided = false, frozen = false;
     var strokes = [], drawing = null;
     var pendingReject = null;   // timer judging a lifted-pen trace as finished
+    var revision = 0, destroyed = false;
+    var fallbackPass = false;
+    var gentle = !!opts.keepInkOnReject;
 
     function cancelPending() {
         if (pendingReject) { clearTimeout(pendingReject); pendingReject = null; }
@@ -693,6 +696,8 @@ function hwCreateTraceBox(opts) {
         if (frozen || !target) return;
         e.preventDefault();
         cancelPending();   // a new stroke means the previous lift was mid-letter
+        revision++;
+        if (opts.onWriting) opts.onWriting();
         if (cv.setPointerCapture) { try { cv.setPointerCapture(e.pointerId); } catch (err) { } }
         drawing = [toMask(e)];
         strokes.push(drawing);
@@ -702,16 +707,36 @@ function hwCreateTraceBox(opts) {
     function onMove(e) {
         if (!drawing) return;
         e.preventDefault();
-        var p = toMask(e);
-        var last = drawing[drawing.length - 1];
-        if (Math.abs(p.x - last.x) + Math.abs(p.y - last.y) < 0.8) return;
-        drawing.push(p);
+        var samples = e.getCoalescedEvents ? e.getCoalescedEvents() : [];
+        if (!samples.length) samples = [e];
+        for (var n = 0; n < samples.length; n++) {
+            var p = toMask(samples[n]);
+            var last = drawing[drawing.length - 1];
+            if (Math.abs(p.x - last.x) + Math.abs(p.y - last.y) >= 0.8) drawing.push(p);
+        }
         redraw();
     }
 
-    function onUp() {
+    function onUp(e) {
         if (!drawing) return;
+        // A quick movement can finish without an intervening pointermove.
+        if (e && Number.isFinite(e.clientX) && Number.isFinite(e.clientY)) {
+            var end=toMask(e),last=drawing[drawing.length-1];
+            if (Math.abs(end.x-last.x)+Math.abs(end.y-last.y)>=0.8) drawing.push(end);
+        }
         drawing = null;
+        if (gentle) {
+            if (typeof HWRecognition === 'undefined' || !HWRecognition.isReady()) {
+                // Preserve the old checker's successful pen-lift decision if
+                // its font-only fallback is in use, while allowing more ink
+                // during the short pause before actually advancing.
+                fallbackPass = fallbackPass || hwAccept(hwVerify(strokes,target,HW_PEN,HW_TOL).scores,guided ? HW_PROFILE.guided : HW_PROFILE.free);
+            }
+            cancelPending();
+            var token = revision;
+            pendingReject = setTimeout(function () { pendingReject = null; evaluateGentle(token); }, 160);
+            return;
+        }
         if (evaluate(false)) return;
         // Not a letter yet. The pen may simply be between strokes (t, i, f, x),
         // so wait for the next one before this counts as a failed attempt.
@@ -721,6 +746,38 @@ function hwCreateTraceBox(opts) {
             evaluate(true);
         }, HW_STROKE_GAP_MS);
     }
+
+    async function evaluateGentle(token, silent) {
+        if (destroyed || frozen || drawing || token !== revision || !target) return;
+        var profile = guided ? HW_PROFILE.guided : HW_PROFILE.free;
+        var scores = hwVerify(strokes, target, HW_PEN, HW_TOL).scores;
+        var accepted = hwAccept(scores, profile) || fallbackPass;
+        if ((target === 'i' || target === 'j') && typeof HWNN !== 'undefined') {
+            var dotCard={strokes:strokes.map(function (stroke) { return stroke.flatMap(function (p) { return [p.x,p.y]; }); })};
+            if (!HWNN.hasDot(dotCard)) accepted = false;
+        }
+        var verdict = null;
+        if (typeof HWRecognition !== 'undefined' && HWRecognition.isReady()) {
+            var card = {strokes:strokes.map(function (stroke) { return stroke.flatMap(function (p) { return [p.x,p.y]; }); }),pen:HW_PEN};
+            verdict = await HWRecognition.verify(card,target,accepted);
+        }
+        if (destroyed || frozen || drawing || token !== revision) return;
+        if (verdict) { accepted = verdict.accepted; scores.recognition = verdict; }
+        if (typeof window !== 'undefined') window.__hwLast = {target:target,guided:guided,accepted:accepted,judged:true,precision:+scores.precision.toFixed(2),recall:+scores.recall.toFixed(2),missing:+scores.missingPart.toFixed(2),overfilled:!!scores.overfilled,width:scores.widthRatio===undefined?null:+scores.widthRatio.toFixed(2),height:scores.heightRatio===undefined?null:+scores.heightRatio.toFixed(2),strokes:scores.strokeCount,minStrokes:scores.minStrokes,recognition:verdict};
+        if (accepted) {
+            frozen = true;
+            if (opts.onAccept) opts.onAccept(target,scores);
+        } else if (!silent) {
+            // A pause can be between strokes. Keep every stroke and let the
+            // child finish, undo, or request a hint; never erase on uncertainty.
+            pendingReject = setTimeout(function () {
+                pendingReject = null;
+                if (!destroyed && !frozen && !drawing && token === revision && opts.onReject) opts.onReject(target,scores);
+            }, 540);
+        }
+    }
+
+    function onCancel() { revision++; drawing = null; cancelPending(); }
 
     // final=false only ever accepts; final=true judges the attempt (accept or
     // reject). Returns true when the letter was accepted.
@@ -755,7 +812,7 @@ function hwCreateTraceBox(opts) {
     cv.addEventListener('pointerdown', onDown);
     cv.addEventListener('pointermove', onMove);
     cv.addEventListener('pointerup', onUp);
-    cv.addEventListener('pointercancel', onUp);
+    cv.addEventListener('pointercancel', onCancel);
     window.addEventListener('resize', measure);
     window.addEventListener('orientationchange', measure);
 
@@ -763,6 +820,8 @@ function hwCreateTraceBox(opts) {
         el: wrap,
         measure: measure,
         setTarget: function (ch) {
+            revision++;
+            fallbackPass = false;
             target = ch;
             strokes = [];
             drawing = null;
@@ -770,7 +829,7 @@ function hwCreateTraceBox(opts) {
             cancelPending();
             redraw();
         },
-        setGuided: function (on) { guided = !!on; redraw(); },
+        setGuided: function (on) { revision++; cancelPending(); guided = !!on; redraw(); },
         // Snapshot of what is on the paper right now, in the engine's own grid,
         // for the research collection. A copy, not a reference: the round wipes
         // the ink immediately after a rejection.
@@ -786,15 +845,17 @@ function hwCreateTraceBox(opts) {
                 size: HW_SIZE, pen: HW_PEN, tol: HW_TOL, engine: HW_ENGINE_VERSION
             };
         },
-        clearInk: function () { strokes = []; drawing = null; cancelPending(); redraw(); },
-        freeze: function () { frozen = true; cancelPending(); },
+        clearInk: function () { revision++; fallbackPass = false; strokes = []; drawing = null; cancelPending(); redraw(); },
+        undo: function () { if (frozen) return; revision++; fallbackPass = false; drawing = null; strokes.pop(); cancelPending(); redraw(); if (opts.onWriting) opts.onWriting(); if (gentle && strokes.length) { var token=revision; pendingReject=setTimeout(function(){pendingReject=null;evaluateGentle(token,true);},160); } },
+        freeze: function () { revision++; frozen = true; cancelPending(); },
         unfreeze: function () { frozen = false; },
         destroy: function () {
+            revision++; destroyed = true; frozen = true;
             cancelPending();
             cv.removeEventListener('pointerdown', onDown);
             cv.removeEventListener('pointermove', onMove);
             cv.removeEventListener('pointerup', onUp);
-            cv.removeEventListener('pointercancel', onUp);
+            cv.removeEventListener('pointercancel', onCancel);
             window.removeEventListener('resize', measure);
             window.removeEventListener('orientationchange', measure);
             if (wrap.parentElement) wrap.parentElement.removeChild(wrap);

@@ -417,14 +417,25 @@ body {
 }
 
 .hw-trace-canvas {
-    width: min(52vw, 180px);
-    height: min(52vw, 180px);
+    width: min(66vw, 230px);
+    height: min(66vw, 230px);
     background: #fffdf7;
     border: 3px solid rgba(148, 163, 184, 0.55);
     border-radius: 14px;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.22);
     touch-action: none;
     cursor: crosshair;
+}
+
+.hw-status {
+    min-height: 2.8em;
+    max-width: 480px;
+    margin: 4px 0;
+    padding: 0 12px;
+    text-align: center;
+    line-height: 1.4;
+    font-family: system-ui, 'Microsoft YaHei', sans-serif;
+    font-size: 14px;
 }
 
 /* Separators (space / - / . / ? / !) are not slots at all: no box, no shadow.

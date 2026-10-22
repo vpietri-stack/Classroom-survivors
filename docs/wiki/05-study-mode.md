@@ -1,5 +1,37 @@
 # Study Mode (UI Rounds A–D + Match; internal functions A/C/D/E/F)
 
+## Handwriting neural/interaction preview (2026-10-22)
+
+Round C/internal D uses a self-hosted worker recognizer warmed during the
+preceding scramble round. Its 325KB checked/cached weights and runtime live in
+`handwriting_model/`; its README explains development-only results and limits.
+Retraining was evaluated, but the earlier checkpoint with revised calibration
+performed better. The reserved benchmark remains unscored.
+
+The widget checks after a 160ms pen-lift pause; uncertainty appears after another
+540ms while retaining ink. A child can add strokes, use free `撤销上一笔`,
+`重新写`, immediate `显示提示`, or the exact per-word `跳过这个词的书写`.
+Success advances after 140ms and word completion after 450ms. Canvas cap: 230px.
+Pointerdown/clear/undo/guide/target/destroy invalidate asynchronous results.
+Pointercancel retains ink without grading; pointerup records its final endpoint
+even without a move event. Supported coalesced movement samples are retained.
+Lowercase i/j require a real upper dot; repeated stems do not count. A plain
+capital I is acceptable. é uses a readable e body with optional detached accent
+per the reviewed policy; spelling/display keep the accent.
+
+The two-failure guide/five-failure reveal safety net remains, but an unchanged
+drawing is not repeatedly judged by timers. Undo silently checks remaining ink
+for acceptance without adding failure. Any hint/reveal marks the word assisted
+and queues `handwritingAssisted` instead of independent `handwriting`. Skips still
+record neither completion nor SR; no handwriting SR success is introduced.
+Collection remains separately gated and stamped engine 2; geometry alone cannot
+replay neural outcomes or an earlier intermediate fallback pass.
+
+`handwriting_preview.html` exercises the real widget/round with four example
+words, in-memory counts, no account/collector/analytics/API scripts, and an offline
+worker scoped only to the `handwriting_preview` URL prefix. The main update
+worker is unchanged. Physical-device and mainland first-download checks remain.
+
 > **Last verified:** 2026-09-04 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
 
 **Owner files:** `study_mode.js` (1360 lines — the whole subsystem), `index.html` (`#studyModeOverlay`, `#study-game-area`, exit X ~line 327), `style.css` (`.study-*` classes), `sr_engine.js` (content/pair selection helpers called from here), `game.js` (`playTTS`, `goBackFromGameSelection`, the global keydown guard).

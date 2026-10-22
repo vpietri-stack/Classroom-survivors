@@ -295,6 +295,7 @@ function exerciseTypeLabel(type) {
         'wordScramble': 'Word Scramble',
         'spelling': 'Spelling',
         'handwriting': 'Handwriting',
+        'handwritingAssisted': 'Handwriting (with help)',
         'sentenceScramble': 'Sentence Scramble',
         'sentenceMatch': 'Sentence Match',
         'missingWord': 'Missing Words',

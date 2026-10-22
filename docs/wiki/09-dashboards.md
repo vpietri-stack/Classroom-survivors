@@ -1,5 +1,9 @@
 # Teacher & Admin Dashboards
 
+The handwriting preview adds `handwritingAssisted`, displayed/filterable as
+**Handwriting (with help)** for words completed using a guide/reveal. Independent
+completion remains `handwriting`; skipped words are not completions.
+
 > **Last verified:** 2026-09-27 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
 
 **Owner files:** `teacher_dashboard.html` (488 ln), `teacher_dashboard.js` (818 ln), `teacher_dashboard.css` (1151 ln), `admin_dashboard.js` (958 ln), `geo_export.js` (368 ln), `test_archive_merge_dashboard.js`

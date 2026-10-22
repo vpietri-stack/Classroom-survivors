@@ -1,5 +1,18 @@
 # Deployment & Release Discipline
 
+## Handwriting preview (2026-10-22a)
+
+Publish this handwriting integration to `preview` remote `main` only; production
+requires a later explicit release request. Preserve preview's curriculum/API/data.
+Synchronize the three version/auth/index stamps and dashboard auth reference;
+refresh changed study/handwriting/style/dashboard script cache-busters. Include
+all `handwriting_model/` runtime/manifest/weight files. The account-free
+`handwriting_preview.html` offers a direct test without account data or capture.
+Its offline SW is scoped to the `handwriting_preview` URL prefix, with no change
+to the main app's update worker. On a later preview-shell/runtime change, bump
+the narrow SW cache name and runtime query versions together to avoid stale
+cache-first assets. Model weights are separately keyed by SHA-256.
+
 ## Typed exercise dashboard release (2026-10-20a)
 
 Release the Missing Words/Find and Fix dashboard presentation and SR lookup fix

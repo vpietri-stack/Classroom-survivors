@@ -196,6 +196,8 @@ function finishRoundA() {
 
 // --- ROUND B: Word Scramble ---
 function startRoundC() {
+    // Warm/download during the preceding scramble round without delaying it.
+    if (typeof HWRecognition !== 'undefined') HWRecognition.load();
     STUDY_STATE.round = 'C';
     STUDY_STATE.currentWordIndex = 0;
     updateStudyUI("Round B: Word Scramble", "Unscramble the letters.");
@@ -475,6 +477,7 @@ function finishRoundC() {
 // Internal round 'D' renders as "Round C" — the same offset convention the rest
 // of this file uses (internal 'C' renders as "Round B").
 function startRoundD() {
+    if (typeof HWRecognition !== 'undefined') HWRecognition.load();
     clearTimeout(roundDTimer);
     STUDY_STATE.round = 'D';
     STUDY_STATE.currentWordIndex = 0;
@@ -505,11 +508,14 @@ function nextRoundDWord() {
             <div id="handwriting-slots" class="flex flex-wrap justify-center gap-[var(--gap-xs)] min-h-[60px] w-full px-4 text-white"></div>
 
             <div id="handwriting-trace" class="flex flex-col items-center"></div>
+            <p id="handwriting-status" class="hw-status" role="status" aria-live="polite">写出空格中的字母；不会写可以点“显示提示”</p>
 
             <div class="flex flex-wrap justify-center gap-3">
-                <button onclick="clearRoundD()" aria-label="Erase what you wrote" class="game-btn bg-gray-500 py-2 px-6">
-                    <i class="fas fa-eraser"></i> ERASE
+                <button onclick="undoRoundD()" aria-label="撤销上一笔" class="game-btn bg-gray-500 py-2 px-6">撤销上一笔</button>
+                <button onclick="clearRoundD()" aria-label="重新写" class="game-btn bg-gray-500 py-2 px-6">
+                    <i class="fas fa-eraser"></i> 重新写
                 </button>
+                <button id="handwriting-hint" onclick="showRoundDHint()" class="game-btn bg-gray-500 py-2 px-6">显示提示</button>
                 <button id="handwriting-skip" onclick="skipRoundDWord()" aria-label="跳过这个词的书写" class="game-btn bg-gray-500 py-2 px-6">
                     跳过这个词的书写
                 </button>
@@ -537,7 +543,8 @@ function nextRoundDWord() {
 
     const mount = document.getElementById('handwriting-trace');
     if (roundDTrace) roundDTrace.destroy();
-    roundDTrace = hwCreateTraceBox({ onAccept: roundDAcceptLetter, onReject: roundDRejectLetter });
+    roundDHadHelp = false;
+    roundDTrace = hwCreateTraceBox({ keepInkOnReject:true, onAccept:roundDAcceptLetter, onReject:roundDRejectLetter, onWriting:function () { roundDStatus('继续写；写好后抬手即可'); } });
     mount.appendChild(roundDTrace.el);
     roundDTrace.measure();
 
@@ -552,6 +559,7 @@ let roundDCursor = 0;      // index into roundDGapOrder: the gap being written
 let roundDAttempts = 0;    // rejected traces on the CURRENT gap
 let roundDGuided = false;  // has the outline faded in yet?
 let roundDTrace = null;    // the hwCreateTraceBox widget
+let roundDHadHelp = false; // explicit hint or automatic guide/reveal in this word
 let roundDTimer = null;    // pending next-letter or next-word advance
 let roundDTargetShownAt = 0;  // when the current gap was offered, for trace timing
 
@@ -600,7 +608,30 @@ function roundDShowTarget() {
     roundDTargetShownAt = Date.now();
     roundDTrace.setGuided(false);
     roundDTrace.setTarget(roundDSlots[roundDGapOrder[roundDCursor]].char);
+    roundDStatus('写出空格中的字母；不会写可以点“显示提示”');
+    const hint = document.getElementById('handwriting-hint');
+    if (hint) hint.disabled = false;
     renderRoundDSlots();
+}
+
+function roundDStatus(text) {
+    const el = document.getElementById('handwriting-status');
+    if (el) el.textContent = text;
+}
+
+function showRoundDHint() {
+    if (STUDY_STATE.isTransitioning || !roundDTrace || roundDGuided) return;
+    roundDGuided = true;
+    roundDHadHelp = true;
+    roundDTrace.setGuided(true);
+    const hint = document.getElementById('handwriting-hint');
+    if (hint) hint.disabled = true;
+    roundDStatus('沿着提示写一写');
+}
+
+function undoRoundD() {
+    if (STUDY_STATE.isTransitioning || !roundDTrace) return;
+    roundDTrace.undo();
 }
 
 function roundDAcceptLetter(letter, scores) {
@@ -614,7 +645,7 @@ function roundDAcceptLetter(letter, scores) {
     renderRoundDSlots();
     roundDTimer = setTimeout(() => {
         if (STUDY_STATE.round === 'D') roundDShowTarget();
-    }, 420);
+    }, 140);
 }
 
 function roundDRejectLetter(letter, scores) {
@@ -623,14 +654,10 @@ function roundDRejectLetter(letter, scores) {
     // Recorded before clearInk(), which wipes the strokes this trace refers to.
     hwCaptureLetter(false, scores, roundDAttempts, roundDAttempts >= ROUND_D_GIVE_UP_AFTER);
     incrementExerciseAttempts();
-    roundDTrace.clearInk();
-    const wrap = roundDTrace.el;
-    wrap.classList.remove('hw-shake');
-    void wrap.offsetWidth;                 // reflow so the animation restarts
-    wrap.classList.add('hw-shake');
-    synthError();
+    roundDStatus('还没认出来，可以补一笔、重新写，或显示提示');
 
     if (roundDAttempts >= ROUND_D_GIVE_UP_AFTER) {
+        roundDHadHelp = true;
         // Dead end: reveal the letter so a child can never get stuck. It is
         // marked as given, so it reads differently from one they wrote.
         const slot = roundDSlots[roundDGapOrder[roundDCursor]];
@@ -640,13 +667,12 @@ function roundDRejectLetter(letter, scores) {
         renderRoundDSlots();
         roundDTimer = setTimeout(() => {
             if (STUDY_STATE.round === 'D') roundDShowTarget();
-        }, 900);
+        }, 400);
         return;
     }
     // Second failure on this letter: fade the outline in and loosen the bar.
     if (!roundDGuided && roundDAttempts >= ROUND_D_GUIDE_AFTER) {
-        roundDGuided = true;
-        roundDTrace.setGuided(true);
+        showRoundDHint();
     }
 }
 
@@ -656,9 +682,10 @@ function roundDWordComplete() {
     roundDTrace.freeze();
     renderRoundDSlots();
     playHappySound();
-    queueExerciseEvent('handwriting', 'study', roundDWord);
+    // Hints/reveals are assisted practice, not an independent answer.
+    queueExerciseEvent(roundDHadHelp ? 'handwritingAssisted' : 'handwriting', 'study', roundDWord);
     hwCaptureEndWord();
-    advanceRoundDWord(1000);
+    advanceRoundDWord(450);
 }
 
 function skipRoundDWord() {
@@ -691,6 +718,7 @@ function clearRoundD() {
     // Erasing a slip is free — it must not count as a failed attempt.
     if (STUDY_STATE.isTransitioning || !roundDTrace) return;
     roundDTrace.clearInk();
+    roundDStatus(roundDGuided ? '沿着提示写一写' : '写出空格中的字母');
 }
 
 function finishRoundD() {

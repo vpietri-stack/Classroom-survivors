@@ -114,6 +114,7 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
         if (skip.xGt !== undefined) return p.x > skip.xGt;
         if (skip.xLt !== undefined) return p.x < skip.xLt;
         if (skip.yLt !== undefined) return p.y < skip.yLt;
+        if (skip.yGt !== undefined) return p.y > skip.yGt;
         return false;
       };
       const mask = hwGlyphMask(letter);
@@ -394,7 +395,7 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
   s = await state();
   ok(s.attempts === 0 && s.cursor === 0,
     'strokes: lifting the pen after the stem is NOT judged as a failed attempt');
-  await page.evaluate((d) => window.__hwDraw(window.__hwPath('i', { yLt: d.cut })), { cut: iDotCut });  // the dot, after a real pause
+  await page.evaluate((d) => window.__hwDraw(window.__hwPath('i', { yGt: d.cut })), { cut: iDotCut });  // the actual dot, after a real pause
   await page.waitForTimeout(SETTLE);
   s = await state();
   ok(s.cursor === 1,
@@ -454,8 +455,8 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
     }), 1400));
   });
   ok(giveUp.given && giveUp.slots === 'I?', 'dead end: the last letter is revealed rather than blocking the child');
-  ok(giveUp.events.length >= 1 && giveUp.events[giveUp.events.length - 1][0] === 'handwriting',
-    'telemetry: a "handwriting" exercise event is queued when the word completes (' +
+  ok(giveUp.events.length >= 1 && giveUp.events[giveUp.events.length - 1][0] === 'handwritingAssisted',
+    'telemetry: a reveal is counted as assisted handwriting instead of independent completion (' +
     JSON.stringify(giveUp.events.map(e => e[2])) + ')');
 
   // --- a long word is capped, and ERASE is free ------------------------------

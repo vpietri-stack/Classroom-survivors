@@ -2,6 +2,10 @@
 
 ## Handwriting production promotion (2026-10-23f)
 
+The final 2026-10-23g reporting follow-up includes the assisted-handwriting
+dashboard label/filter and its script cache buster; auth/index/dashboard stamps
+advance together. It changes no collection eligibility, payload or API setting.
+
 Promote the reviewed handwriting runtime, checked model, automatic two-failure
 guides, retained ink, eraser controls and session skip onto origin/main's own
 history. Preserve production curriculum, feature gates, API routes and data;

@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-23f",
+  "version": "2026-10-23g",
   "deployedAt": "2026-10-23",
-  "notes": "Production: local handwriting recognition, retained ink, faster writing, automatic guides after two failed attempts, eraser icons and guided-failure session skip. Continue existing gated trace collection; preserve production curriculum/API/data."
+  "notes": "Production: reviewed local handwriting flow and assisted-handwriting dashboard label/filter; preserve production curriculum/API/data and existing trace collection."
 }

@@ -114,6 +114,7 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
         if (skip.xGt !== undefined) return p.x > skip.xGt;
         if (skip.xLt !== undefined) return p.x < skip.xLt;
         if (skip.yLt !== undefined) return p.y < skip.yLt;
+        if (skip.yGt !== undefined) return p.y > skip.yGt;
         return false;
       };
       const mask = hwGlyphMask(letter);
@@ -229,6 +230,7 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
   ok(entry.backingStore >= entry.boxPx, 'entry: the canvas backing store is scaled for the device');
   ok(entry.gaps >= 1 && typeof entry.target === 'string',
     'entry: a gap is offered straight away (target "' + entry.target + '")');
+  ok(await page.locator('#handwriting-skip').isHidden(), 'entry: skip is hidden before any guided failure');
 
   // --- skip applies to this word only, including while a letter is pending ---
   await page.evaluate(() => {
@@ -238,6 +240,9 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
     window.__skipSRBefore = JSON.stringify(srStudyResults);
     window.__roundEStarts = 0;
     window.startRoundE = function () { window.__roundEStarts++; STUDY_STATE.round = 'E'; };
+    // The neural browser suite drives real pen events to unlock this flag.
+    // These fixtures cover the subsequent skip lifecycle and timer races.
+    roundDSkipUnlocked = true;
     nextRoundDWord();
   });
   const skipButton = page.locator('#handwriting-skip');
@@ -291,6 +296,7 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
   await loadWord('cat', [0, 1, 2]);
   await page.evaluate(() => {
     roundDAttempts = ROUND_D_GIVE_UP_AFTER - 1;
+    roundDEffortAttempts = ROUND_D_GIVE_UP_AFTER;
     roundDRejectLetter();
     document.getElementById('handwriting-skip').click();
   });
@@ -394,7 +400,7 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
   s = await state();
   ok(s.attempts === 0 && s.cursor === 0,
     'strokes: lifting the pen after the stem is NOT judged as a failed attempt');
-  await page.evaluate((d) => window.__hwDraw(window.__hwPath('i', { yLt: d.cut })), { cut: iDotCut });  // the dot, after a real pause
+  await page.evaluate((d) => window.__hwDraw(window.__hwPath('i', { yGt: d.cut })), { cut: iDotCut });  // the actual dot, after a real pause
   await page.waitForTimeout(SETTLE);
   s = await state();
   ok(s.cursor === 1,
@@ -413,7 +419,7 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
   await page.evaluate((d) => window.__hwDraw(window.__hwLine(64, d.from, d.to)), { from: iDotCut + 4, to: 102 });
   await page.waitForTimeout(SETTLE);
   s = await state();
-  ok(s.guided === true && s.attempts === 2, 'scaffold: the outline fades in after 2 refusals');
+  ok(s.guided === true && s.attempts === 2 && await page.locator('#handwriting-hint').count() === 0, 'scaffold: guides appear automatically after two writing failures with no guide button');
 
   const painted = await page.evaluate(() => {
     const cv = document.querySelector('.hw-trace-canvas');
@@ -446,6 +452,7 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
 
   const giveUp = await page.evaluate(async () => {
     roundDAttempts = ROUND_D_GIVE_UP_AFTER - 1;   // one more refusal triggers the reveal
+    roundDEffortAttempts = ROUND_D_GIVE_UP_AFTER;
     roundDRejectLetter();
     return new Promise(res => setTimeout(() => res({
       slots: roundDSlots.map(x => x.type === 'fixed' ? '#' : (x.filled ? (x.given ? '?' : x.char.toUpperCase()) : '_')).join(''),
@@ -454,8 +461,8 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
     }), 1400));
   });
   ok(giveUp.given && giveUp.slots === 'I?', 'dead end: the last letter is revealed rather than blocking the child');
-  ok(giveUp.events.length >= 1 && giveUp.events[giveUp.events.length - 1][0] === 'handwriting',
-    'telemetry: a "handwriting" exercise event is queued when the word completes (' +
+  ok(giveUp.events.length >= 1 && giveUp.events[giveUp.events.length - 1][0] === 'handwritingAssisted',
+    'telemetry: a reveal is counted as assisted handwriting instead of independent completion (' +
     JSON.stringify(giveUp.events.map(e => e[2])) + ')');
 
   // --- a long word is capped, and ERASE is free ------------------------------

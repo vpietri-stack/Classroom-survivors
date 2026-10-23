@@ -1,5 +1,21 @@
 # Testing
 
+23 October handwriting checks pin initial/direct-call guide gating, exclusion
+of taps, automatic guides after two meaningful failures with no guide button,
+per-letter reset, retained ink and the existing reveal/skip paths. The failure
+that first displays guides must not unlock skip; a later guided failure does.
+Session skip coverage includes initial visibility/handler locks, unguided and
+tap exclusions, a real guided failure, persistence onto later words, and a new
+session reset. The two eraser buttons are exercised through their rendered UI.
+
+`test_handwriting_neural_browser.js` serves the actual preview under a repository
+subpath and checks worker loading, automatic assisted guides, retained ink, undo,
+unfinished dotted letters, pointerup endpoint capture, async skip/destroy races,
+320px layout, offline reload, no external requests and first-download failure
+with the same guide/skip locks. It is part of `npm test`. Existing handwriting/capture
+browser tests cover engine 2 and assisted completion. The dotted-i fixture now
+draws the actual upper dot; its former y-cut accidentally drew another stem.
+
 > **Last verified:** 2026-10-11 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
 
 **Owner files:** `package.json` (`test` script), `test_*.js` (root), `api/test_auth.js`, plus the out-of-chain `vs_*` test family.

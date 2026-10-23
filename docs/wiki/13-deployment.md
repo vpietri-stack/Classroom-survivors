@@ -1,5 +1,16 @@
 # Deployment & Release Discipline
 
+## Handwriting production promotion (2026-10-23f)
+
+Promote the reviewed handwriting runtime, checked model, automatic two-failure
+guides, retained ink, eraser controls and session skip onto origin/main's own
+history. Preserve production curriculum, feature gates, API routes and data;
+never merge the preview curriculum history. Synchronize version/auth/index and
+dashboard stamps and refresh shared handwriting/style queries. Model source
+queries remain the reviewed versions. The existing capture client/API stays
+unchanged, gated by the live enable list, collection end and per-day quota.
+Verify both Pages and Azure workflows and served assets after the production push.
+
 ## Typed exercise dashboard release (2026-10-20a)
 
 Release the Missing Words/Find and Fix dashboard presentation and SR lookup fix

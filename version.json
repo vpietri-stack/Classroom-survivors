@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-21a",
-  "deployedAt": "2026-10-21",
-  "notes": "Round C offers a per-word handwriting skip button labelled 跳过这个词的书写; preserve production curriculum, dashboard, API routing and data."
+  "version": "2026-10-23f",
+  "deployedAt": "2026-10-23",
+  "notes": "Production: local handwriting recognition, retained ink, faster writing, automatic guides after two failed attempts, eraser icons and guided-failure session skip. Continue existing gated trace collection; preserve production curriculum/API/data."
 }

@@ -9,6 +9,7 @@
     var timer = null, uploadTimer = null, saveTimer = null, refreshTimer = null, delay = 30000;
     var lastTick = Date.now(), lastLongTask = 0, observer = null, consoleOriginals = {}, lastConsole = {};
     var loadAt = performance.now(), configGeneration = 0;
+    var burstStart = Date.now(), ordinaryCount = 0, errorCount = 0, suppressed = 0;
     var encoder = typeof TextEncoder !== 'undefined' ? new TextEncoder() : null;
     function jsonBytes(value) { var json = JSON.stringify(value); return encoder ? encoder.encode(json).length : new Blob([json]).size; }
     function uid() { return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 11); }
@@ -38,6 +39,9 @@
     function record(type, detail, urgent) {
         try {
             if (!live()) return;
+            var now = Date.now(), critical = ['error', 'promise_error', 'console_error', 'resource_error', 'context_lost'].indexOf(type) >= 0;
+            if (now - burstStart >= 10000) { burstStart = now; ordinaryCount = 0; errorCount = 0; }
+            if (critical ? errorCount++ >= 8 : ordinaryCount++ >= 80) { suppressed++; return; }
             queue.push({ boot: boot, seq: ++seq, ts: new Date().toISOString(), elapsedMs: Math.round(performance.now() - loadAt),
                 type: type, context: Object.assign({}, context), detail: redact(typeof detail === 'string' ? detail : JSON.stringify(detail || {})) });
             if (queue.length > 200) queue.shift();
@@ -68,7 +72,7 @@
     }
     function snapshot() {
         var out = { visible: document.visibilityState, online: navigator.onLine, lagMs: Math.max(0, Date.now() - lastTick - 15000),
-            canvases: 0, canvasPixels: 0, images: document.images.length, viewport: innerWidth + 'x' + innerHeight };
+            canvases: 0, canvasPixels: 0, images: document.images.length, viewport: innerWidth + 'x' + innerHeight, suppressed: suppressed };
         try {
             document.querySelectorAll('canvas').forEach(function (c) { out.canvases++; out.canvasPixels += c.width * c.height; });
             if (w.SpeechStatus) out.speech = w.SpeechStatus.state;
@@ -127,10 +131,12 @@
             console[level] = function () {
                 try {
                     if (live()) {
-                        var message = Array.prototype.slice.call(arguments, 0, 4).map(simple).join(' ');
                         var now = Date.now(), rate = lastConsole[level] || { start: now, count: 0 };
                         if (now - rate.start >= 10000) rate = { start: now, count: 0 };
-                        if (rate.count++ < 8) record(level === 'error' ? 'console_error' : level === 'warn' ? 'console_warn' : 'console_log', message, level === 'error');
+                        if (rate.count++ < 8) {
+                            var message = Array.prototype.slice.call(arguments, 0, 4).map(simple).join(' ');
+                            record(level === 'error' ? 'console_error' : level === 'warn' ? 'console_warn' : 'console_log', message, level === 'error');
+                        }
                         lastConsole[level] = rate;
                     }
                 } catch (_) {}

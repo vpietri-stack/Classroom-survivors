@@ -461,7 +461,8 @@ for (const [unit, lastPage, missing, fixes, pages] of [
     [3, 43, 28, 36, [[31,4,4],[32,2,2],[33,4,6],[34,4,4],[35,4,6],[36,3,4],[37,3,4],[43,4,6]]],
     [4, 54, 22, 32, [[45,5,6],[47,7,10],[48,4,6],[54,6,10]]],
     [5, 63, 28, 36, [[57,5,6],[59,8,10],[60,5,6],[61,6,8],[63,4,6]]],
-    [6, 81, 32, 46, [[78,28,40],[81,4,6]]]
+    [6, 81, 32, 46, [[78,28,40],[81,4,6]]],
+    [7, 92, 28, 36, [[83,8,8],[84,8,12],[92,12,16]]]
 ]) {
     const items = content.buildPool('PU1', unit, lastPage).entries.filter(e => e.item.id && e.item.unit === String(unit)).map(e => e.item);
     pu1Approved.push(...items);
@@ -479,7 +480,7 @@ for (const [unit, lastPage, missing, fixes, pages] of [
     }
     for (const item of items.filter(e => e.prefixes)) item.prefixes.forEach((prefix, i) => assert.ok(item.answers[i].startsWith(prefix)));
 }
-assert.equal(new Set(pu1Approved.map(e => e.key)).size, 391, 'PU1 units have distinct stable SR keys');
+assert.equal(new Set(pu1Approved.map(e => e.key)).size, 455, 'PU1 units have distinct stable SR keys');
 assert.deepEqual(Array.from(pu1Approved.find(e => e.unit === '1' && e.id === 'M12').sentences), ['Here you ___!', '___ you very much.'], 'M12 includes both approved blanks');
 assert.ok(!content.buildPool('PU1', 1, 16).entries.some(e => e.item.unit === '2'), 'Unit 2 stays out of Unit 1');
 const pu1Unit2 = pu1Approved.filter(e => e.unit === '2');
@@ -567,6 +568,27 @@ for (const [id, wrong, answer] of [
     assert.equal(item.wrongWord, wrong); assert.equal(item.answer, answer); assert.equal(item.page, '78');
 }
 assert.ok(!content.buildPool('PU1', 6, 81).entries.some(e => e.item.unit === '7'), 'Unit 7 stays out of Unit 6');
+const pu1Unit7 = pu1Approved.filter(e => e.unit === '7');
+assert.deepEqual(pu1Unit7.filter(e => e.answers).map(e => e.id).sort(), Array.from({length: 28}, (_, i) => 'M' + (i + 1)).sort());
+assert.deepEqual(pu1Unit7.filter(e => e.answer).map(e => e.id).sort(), Array.from({length: 36}, (_, i) => 'F' + (i + 1)).sort());
+assert.equal(new Set(pu1Unit7.filter(e => e.answer).map(e => e.sentence)).size, 36);
+assert.deepEqual(Array.from(pu1Unit7.find(e => e.id === 'M1').prefixes), ['f','b']);
+assert.deepEqual(Array.from(pu1Unit7.find(e => e.id === 'M3').sentences), ['I can play ___ on the ___ or on a ___.']);
+assert.deepEqual(Array.from(pu1Unit7.find(e => e.id === 'M3').answers), ['music','piano','guitar']);
+assert.deepEqual(Array.from(pu1Unit7.find(e => e.id === 'M3').prefixes), ['m','p','g']);
+const pu1Unit7M4 = pu1Unit7.find(e => e.id === 'M4');
+assert.deepEqual(Array.from(pu1Unit7M4.sentences), ['After school, I like watching ___ or going for a ___ in the ___ pool.']);
+assert.deepEqual(Array.from(pu1Unit7M4.answers), ['tv','swim','swimming']);
+assert.deepEqual(Array.from(pu1Unit7M4.suffixes), ['','','ming']);
+assert.deepEqual(Array.from(pu1Unit7.find(e => e.id === 'M17').prefixes), ['b','h']);
+for (const item of pu1Unit7.filter(e => e.suffixes)) {
+    assert.equal(item.suffixes.length, item.answers.length);
+    item.suffixes.forEach((suffix, index) => {
+        assert.ok(item.answers[index].endsWith(suffix));
+        assert.ok(item.answers[index].length > suffix.length + ((item.prefixes || [])[index] || '').length);
+    });
+}
+assert.ok(!content.buildPool('PU1', 7, 92).entries.some(e => e.item.unit === '8'), 'Unit 8 stays out of Unit 7');
 for (const item of [...pu1Approved, ...unit1, ...unit2, ...unit3, ...unit4, ...unit5, ...unit6, ...unit7, ...unit8, ...unit9, ...pu2Unit1, ...pu2Unit2, ...pu2Unit3, ...pu2Unit4, ...pu2Unit5, ...pu2Unit6, ...pu2Unit7, ...pu2Unit8, ...pu2Unit9]) {
     if (item.answers) assert.equal(item.sentences.join(' ').split('___').length - 1, item.answers.length, item.id + ' has one target per blank');
     else if (Number.isInteger(item.wrongIndex)) assert.equal(item.sentence.split(' ')[item.wrongIndex].replace(/[.,!?]+$/, '').toLowerCase(), item.wrongWord, item.id + ' explicitly identifies its repeated wrong token');

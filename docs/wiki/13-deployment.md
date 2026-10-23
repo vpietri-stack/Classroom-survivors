@@ -395,3 +395,5 @@ The narrow preview offline worker reuses the checked model cache instead of
 downloading the model a second time during installation.
 
 Preview release 2026-10-23a adds the approved PU1 Unit 6 32 M/46 F boards with all teacher edits and there/their/they're practice. Retain current preview handwriting updates, feature gates and isolated API/data. Synchronize version/auth/index stamps and the dashboard auth link, refresh both app/dashboard curriculum cache busters, and verify hosted files after Pages succeeds. Production is unchanged.
+
+Preview release 2026-10-23d adds approved PU1 Unit 7 28 M/36 F boards and locked-ending support for the teacher's swimming-pool blank. Retain current preview handwriting updates and isolated API/data. Synchronize version/auth/index/dashboard stamps, refresh curriculum cache busters in both entry pages and the shared widget cache buster in index, then verify hosted files after Pages succeeds. Production and Unit 8 content are unchanged.

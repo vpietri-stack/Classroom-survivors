@@ -78,6 +78,8 @@ const server = http.createServer((req, res) => {
         check(cost < 200, '1000 lightweight checkpoints take under 200ms on the test browser (' + Math.round(cost) + 'ms)');
         check(uploads.every(p => Buffer.byteLength(JSON.stringify(p), 'utf8') <= 16000), 'Chinese text batches obey the UTF-8 byte budget');
         check(await page.evaluate(() => Object.keys(localStorage).filter(k => k.includes('queue_')).every(k => JSON.parse(localStorage.getItem(k)).events.length <= 200)), 'client queues remain bounded during event bursts');
+        await page.evaluate(() => { for (let i = 0; i < 1000; i++) ClientDiagnostics.record('error', 'error-flood-probe', true); });
+        check(await page.evaluate(() => Object.keys(localStorage).filter(k => k.includes('queue_')).every(k => JSON.parse(localStorage.getItem(k)).events.filter(e => e.detail === 'error-flood-probe').length <= 8)), 'an error flood cannot force unlimited synchronous log writes');
         console.log('Remote diagnostics browser: ' + checks + ' checks passed.');
     } finally { await browser.close(); await new Promise(r => server.close(r)); }
 })().catch(e => { console.error(e); server.close(); process.exitCode = 1; });

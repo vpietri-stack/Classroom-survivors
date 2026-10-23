@@ -144,7 +144,10 @@ Local keys start `csDiag_<deployment path>_<student id>_`: config, browser profi
 id, per-tab queue and heartbeat, and sessionStorage tab id. Deployment paths and
 account ownership isolate preview/production and different students. At most 200
 queued events / roughly 60K characters survive locally; saves debounce 750ms,
-errors persist immediately. Uploads start after 2s, then normally every 30s (or
+errors persist immediately. Each ten-second window admits at most 80 ordinary
+events and eight error/resource events, preventing an error storm from causing
+unbounded synchronous storage writes. Console formatting is also rate limited.
+Uploads start after 2s, then normally every 30s (or
 3s while draining); max 32 events / 16KB UTF-8, four-second deadline,
 backoff to five minutes. Only explicit per-event acknowledgements drain queues.
 Returning later replays surviving queues and previous-page breadcrumbs without

@@ -2,9 +2,9 @@
 
 ## Handwriting neural/interaction preview (2026-10-22)
 
-23 October adjustment: guides start locked for every letter. Two nontrivial
-unsuccessful writing attempts unlock the optional hint button; they no longer
-show the outline automatically. A direct handler call also respects the lock.
+23 October final adjustment (2026-10-23e): guides start hidden for every letter.
+Two nontrivial unsuccessful writing attempts automatically show the outline.
+There is no guide button. The internal guide helper respects the effort gate.
 An attempt must have at least HW_MIN_INK raw pixels and a stroke extending more
 than six normalized units, so taps/dots do not unlock help. This is a simple
 input-effort threshold, not an inference of intent or handwriting quality.
@@ -29,7 +29,7 @@ performed better. The reserved benchmark remains unscored.
 
 The widget checks after a 160ms pen-lift pause; uncertainty appears after another
 540ms while retaining ink. A child can add strokes, freely erase one stroke or
-the whole letter, unlock `显示提示` after two meaningful failures, and use the
+the whole letter, receive guides after two meaningful failures, and use the
 exact per-word `跳过这个词的书写` after the session's first guided failure.
 Success advances after 140ms and word completion after 450ms. Canvas cap: 230px.
 Pointerdown/clear/undo/guide/target/destroy invalidate asynchronous results.
@@ -39,7 +39,7 @@ Lowercase i/j require a real upper dot; repeated stems do not count. A plain
 capital I is acceptable. é uses a readable e body with optional detached accent
 per the reviewed policy; spelling/display keep the accent.
 
-The two-failure hint unlock/five-failure reveal safety net remains, but an unchanged
+The two-failure automatic guide/five-failure reveal safety net remains, but an unchanged
 drawing is not repeatedly judged by timers. Undo silently checks remaining ink
 for acceptance without adding failure. Any hint/reveal marks the word assisted
 and queues `handwritingAssisted` instead of independent `handwriting`. Skips still

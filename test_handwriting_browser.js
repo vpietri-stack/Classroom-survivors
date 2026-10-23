@@ -419,8 +419,7 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
   await page.evaluate((d) => window.__hwDraw(window.__hwLine(64, d.from, d.to)), { from: iDotCut + 4, to: 102 });
   await page.waitForTimeout(SETTLE);
   s = await state();
-  ok(s.guided === false && s.attempts === 2 && await page.locator('#handwriting-hint').isEnabled(), 'scaffold: two writing attempts unlock optional help without showing it');
-  await page.locator('#handwriting-hint').click();
+  ok(s.guided === true && s.attempts === 2 && await page.locator('#handwriting-hint').count() === 0, 'scaffold: guides appear automatically after two writing failures with no guide button');
 
   const painted = await page.evaluate(() => {
     const cv = document.querySelector('.hw-trace-canvas');

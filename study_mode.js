@@ -510,12 +510,11 @@ function nextRoundDWord() {
             <div id="handwriting-slots" class="flex flex-wrap justify-center gap-[var(--gap-xs)] min-h-[60px] w-full px-4 text-white"></div>
 
             <div id="handwriting-trace" class="flex flex-col items-center"></div>
-            <p id="handwriting-status" class="hw-status" role="status" aria-live="polite">先自己写一写；试写两次后可查看提示</p>
+            <p id="handwriting-status" class="hw-status" role="status" aria-live="polite">先自己写一写；试写两次后会出现提示</p>
 
             <div class="flex flex-wrap justify-center gap-3">
                 <button id="handwriting-undo" onclick="undoRoundD()" aria-label="擦掉上一笔" title="擦掉上一笔" class="game-btn bg-gray-500 hw-eraser">${roundDEraserIcon(false)}<span>一笔</span></button>
                 <button id="handwriting-clear" onclick="clearRoundD()" aria-label="擦掉整个字母" title="擦掉整个字母" class="game-btn bg-gray-500 hw-eraser">${roundDEraserIcon(true)}<span>全部</span></button>
-                <button id="handwriting-hint" onclick="showRoundDHint()" disabled class="game-btn bg-gray-500 py-2 px-6">显示提示</button>
                 <button id="handwriting-skip" onclick="skipRoundDWord()" ${roundDSkipUnlocked ? '' : 'hidden disabled'} aria-label="跳过这个词的书写" class="game-btn bg-gray-500 py-2 px-6 hw-skip">
                     跳过这个词的书写
                 </button>
@@ -566,7 +565,7 @@ let roundDTimer = null;    // pending next-letter or next-word advance
 let roundDTargetShownAt = 0;  // when the current gap was offered, for trace timing
 
 const ROUND_D_MAX_GAPS = 6;      // cap per word, so a 29-letter item stays quick
-const ROUND_D_GUIDE_AFTER = 2;   // meaningful attempts before the optional hint unlocks
+const ROUND_D_GUIDE_AFTER = 2;   // meaningful failed attempts before guides appear
 const ROUND_D_GIVE_UP_AFTER = 5; // meaningful failed attempts before reveal and advance
 
 function roundDEraserIcon(all) {
@@ -619,9 +618,7 @@ function roundDShowTarget() {
     roundDTargetShownAt = Date.now();
     roundDTrace.setGuided(false);
     roundDTrace.setTarget(roundDSlots[roundDGapOrder[roundDCursor]].char);
-    roundDStatus('先自己写一写；试写两次后可查看提示');
-    const hint = document.getElementById('handwriting-hint');
-    if (hint) hint.disabled = true;
+    roundDStatus('先自己写一写；试写两次后会出现提示');
     renderRoundDSlots();
 }
 
@@ -635,8 +632,6 @@ function showRoundDHint() {
     roundDGuided = true;
     roundDHadHelp = true;
     roundDTrace.setGuided(true);
-    const hint = document.getElementById('handwriting-hint');
-    if (hint) hint.disabled = true;
     roundDStatus('沿着提示写一写');
 }
 
@@ -688,12 +683,10 @@ function roundDRejectLetter(letter, scores) {
         }, 400);
         return;
     }
-    // Offer help after genuine writing effort; never show the outline just
-    // because two taps or an untouched hint button were submitted.
+    // Show help automatically after writing effort. The failure that first
+    // shows a guide was unguided, so only a later rejection can unlock skip.
     if (!roundDGuided && roundDEffortAttempts >= ROUND_D_GUIDE_AFTER) {
-        const hint = document.getElementById('handwriting-hint');
-        if (hint) hint.disabled = false;
-        roundDStatus('可以继续补写，也可以点“显示提示”');
+        showRoundDHint();
     }
 }
 

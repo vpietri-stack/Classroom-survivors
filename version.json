@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-23d",
+  "version": "2026-10-23e",
   "deployedAt": "2026-10-23",
-  "notes": "Preview: approved PU1 Unit 7 28 missing-word/36 find-fix boards with all teacher edits and a locked ming ending; retain preview handwriting updates and isolated data."
+  "notes": "Preview: guides appear automatically after two meaningful writing failures; remove guide button; preserve session skip, erasers, approved PU1 Unit 7 and isolated preview data."
 }

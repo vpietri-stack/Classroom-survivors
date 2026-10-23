@@ -1,14 +1,15 @@
 # Testing
 
-23 October handwriting checks pin the initial/direct-call guide lock, exclusion
-of taps, unlock after two meaningful failed attempts, optional rather than
-automatic guide display, per-letter reset, and the existing reveal/skip paths.
+23 October handwriting checks pin initial/direct-call guide gating, exclusion
+of taps, automatic guides after two meaningful failures with no guide button,
+per-letter reset, retained ink and the existing reveal/skip paths. The failure
+that first displays guides must not unlock skip; a later guided failure does.
 Session skip coverage includes initial visibility/handler locks, unguided and
 tap exclusions, a real guided failure, persistence onto later words, and a new
 session reset. The two eraser buttons are exercised through their rendered UI.
 
 `test_handwriting_neural_browser.js` serves the actual preview under a repository
-subpath and checks worker loading, effort-gated assisted hint, retained ink, undo,
+subpath and checks worker loading, automatic assisted guides, retained ink, undo,
 unfinished dotted letters, pointerup endpoint capture, async skip/destroy races,
 320px layout, offline reload, no external requests and first-download failure
 with the same guide/skip locks. It is part of `npm test`. Existing handwriting/capture

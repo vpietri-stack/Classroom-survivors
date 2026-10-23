@@ -41,9 +41,9 @@ phase/failure for diagnosis without exposing tensors or student information.
 The preview offline worker reuses this checked cache, avoiding a second parallel
 model download. It only prefetches the page/runtime/fonts itself.
 
-23 October: hint access is gated by two meaningful failed writing attempts per
-letter; single taps do not unlock it and outlines are no longer shown
-automatically after the second failure. The recognizer weights are unchanged.
+23 October final guide policy: outlines appear automatically after two meaningful
+failed writing attempts per letter. There is no guide button; single taps do not
+show guides. The recognizer weights are unchanged.
 Skip is hidden until a meaningful failure with a guide displayed, then remains
 available for subsequent words in that Study session. A new session resets it.
 

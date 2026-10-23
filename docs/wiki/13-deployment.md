@@ -1,5 +1,13 @@
 # Deployment & Release Discipline
 
+## Automatic guides preview (2026-10-23e)
+
+Build on current preview/main including PU1 Unit 7 (2026-10-23d). Remove the guide
+button and automatically display guides after two meaningful failed attempts.
+Only a subsequent guided failure unlocks session skip. Publish to preview/main
+only. Refresh the changed study query and narrow preview SW cache; keep unchanged
+recognizer/model source queries so existing checked model caches remain reusable.
+
 ## Session skip and erasers preview (2026-10-23c)
 
 Publish to preview/main only, including the normal index.html Study flow and the

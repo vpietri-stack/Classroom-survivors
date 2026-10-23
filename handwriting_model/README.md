@@ -40,6 +40,10 @@ phase/failure for diagnosis without exposing tensors or student information.
 The preview offline worker reuses this checked cache, avoiding a second parallel
 model download. It only prefetches the page/runtime/fonts itself.
 
+23 October: hint access is gated by two meaningful failed writing attempts per
+letter; single taps do not unlock it and outlines are no longer shown
+automatically after the second failure. The recognizer weights are unchanged.
+
 Engine version 2 identifies this checkpoint/policy. Capture retains its existing
 consent/window/cap gates; traces stay out of analytics. Stored precision/recall
 describe geometry, not CNN confidence; font-only replay cannot reproduce every

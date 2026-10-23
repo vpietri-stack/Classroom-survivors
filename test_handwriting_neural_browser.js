@@ -17,8 +17,19 @@ async function draw(page,strokes){await page.evaluate(strokes=>{const cv=documen
   check(await page.evaluate(()=>HWRecognition.isReady()),'Neural worker and checked model initialize under a repository subpath');
   check(await page.evaluate(()=>HWDecision.decide(Array(26).fill(1/26),'7',{minimal:false,rawInkCount:500,baselineAccepted:true},{}).accepted),'Unsupported characters retain their font-checker fallback');
   await page.locator('#preview-start').click();await page.waitForSelector('.hw-trace-canvas');
-  check(await page.locator('#handwriting-hint').isEnabled(),'Hint is available before any failure');
-  await page.locator('#handwriting-hint').click();check(await page.evaluate(()=>roundDGuided&&roundDHadHelp),'Hint immediately marks this word assisted');
+  check(await page.locator('#handwriting-hint').isDisabled(),'Hint starts locked before writing effort');
+  await page.evaluate(()=>showRoundDHint());check(await page.evaluate(()=>!roundDGuided&&!roundDHadHelp),'Direct hint handler cannot bypass the initial lock');
+  await loadWord(page,'i');
+  await draw(page,[[[40,70]]]);await page.waitForTimeout(900);
+  await draw(page,[[[70,70]]]);await page.waitForTimeout(900);
+  check(await page.evaluate(()=>roundDEffortAttempts===0&&!roundDGuided)&&await page.locator('#handwriting-hint').isDisabled(),'Two taps do not unlock or show guides');
+  await page.evaluate(()=>clearRoundD());
+  await draw(page,[[[64,55],[64,65],[64,75],[64,90],[64,102]]]);await page.waitForTimeout(900);
+  check(await page.locator('#handwriting-hint').isDisabled(),'One genuine failed attempt keeps hints locked');
+  await page.evaluate(()=>clearRoundD());
+  await draw(page,[[[64,55],[64,65],[64,75],[64,90],[64,102]]]);await page.waitForTimeout(900);
+  check(await page.locator('#handwriting-hint').isEnabled()&&await page.evaluate(()=>!roundDGuided),'Two genuine attempts unlock optional help without showing it automatically');
+  await page.locator('#handwriting-hint').click();check(await page.evaluate(()=>roundDGuided&&roundDHadHelp),'Unlocked hint marks the word assisted');
   await loadWord(page,'i');
   await draw(page,[[[64,55],[64,65],[64,75],[64,90],[64,102]]]);await page.waitForTimeout(900);
   check(await page.evaluate(()=>roundDCursor===0&&roundDTrace.takeTrace().s.length===1),'Uncertain stem stays visible and cannot pass as a dotted i');
@@ -47,7 +58,7 @@ async function draw(page,strokes){await page.evaluate(strokes=>{const cv=documen
   check(await page.evaluate(()=>HWRecognition.isReady()),'Preview reloads and recognizes with the network offline');await context.setOffline(false);
   check(external.length===0,'No external scripts, fonts or recognition requests');check(errors.length===0,'No browser runtime errors');
   await context.close();
-  const unavailable=await browser.newContext();await unavailable.route('**/handwriting_model/letters-v2.bin*',r=>r.abort());const fallback=await unavailable.newPage();await fallback.goto(url);await fallback.waitForFunction(()=>document.getElementById('model-status').textContent.includes('暂未加载'),{timeout:15000});await fallback.locator('#preview-start').click();await fallback.waitForSelector('#handwriting-skip');check(await fallback.locator('#handwriting-skip').isEnabled()&&await fallback.locator('#handwriting-hint').isEnabled(),'Failed first model download leaves hint and skip usable');await unavailable.close();
+  const unavailable=await browser.newContext();await unavailable.route('**/handwriting_model/letters-v2.bin*',r=>r.abort());const fallback=await unavailable.newPage();await fallback.goto(url);await fallback.waitForFunction(()=>document.getElementById('model-status').textContent.includes('暂未加载'),{timeout:15000});await fallback.locator('#preview-start').click();await fallback.waitForSelector('#handwriting-skip');check(await fallback.locator('#handwriting-skip').isEnabled()&&await fallback.locator('#handwriting-hint').isDisabled(),'Failed first download keeps skip usable and preserves the guide lock');await unavailable.close();
   console.log(checks+' neural/browser checks passed');
  }finally{await browser.close();await new Promise(r=>app.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;});

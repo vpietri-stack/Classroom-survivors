@@ -1,7 +1,11 @@
 # Testing
 
+23 October handwriting checks pin the initial/direct-call guide lock, exclusion
+of taps, unlock after two meaningful failed attempts, optional rather than
+automatic guide display, per-letter reset, and the existing reveal/skip paths.
+
 `test_handwriting_neural_browser.js` serves the actual preview under a repository
-subpath and checks worker loading, immediate assisted hint, retained ink, undo,
+subpath and checks worker loading, effort-gated assisted hint, retained ink, undo,
 unfinished dotted letters, pointerup endpoint capture, async skip/destroy races,
 320px layout, offline reload, no external requests and first-download failure
 with usable hint/skip. It is part of `npm test`. Existing handwriting/capture

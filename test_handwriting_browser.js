@@ -292,6 +292,7 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
   await loadWord('cat', [0, 1, 2]);
   await page.evaluate(() => {
     roundDAttempts = ROUND_D_GIVE_UP_AFTER - 1;
+    roundDEffortAttempts = ROUND_D_GIVE_UP_AFTER;
     roundDRejectLetter();
     document.getElementById('handwriting-skip').click();
   });
@@ -414,7 +415,8 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
   await page.evaluate((d) => window.__hwDraw(window.__hwLine(64, d.from, d.to)), { from: iDotCut + 4, to: 102 });
   await page.waitForTimeout(SETTLE);
   s = await state();
-  ok(s.guided === true && s.attempts === 2, 'scaffold: the outline fades in after 2 refusals');
+  ok(s.guided === false && s.attempts === 2 && await page.locator('#handwriting-hint').isEnabled(), 'scaffold: two writing attempts unlock optional help without showing it');
+  await page.locator('#handwriting-hint').click();
 
   const painted = await page.evaluate(() => {
     const cv = document.querySelector('.hw-trace-canvas');
@@ -447,6 +449,7 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
 
   const giveUp = await page.evaluate(async () => {
     roundDAttempts = ROUND_D_GIVE_UP_AFTER - 1;   // one more refusal triggers the reveal
+    roundDEffortAttempts = ROUND_D_GIVE_UP_AFTER;
     roundDRejectLetter();
     return new Promise(res => setTimeout(() => res({
       slots: roundDSlots.map(x => x.type === 'fixed' ? '#' : (x.filled ? (x.given ? '?' : x.char.toUpperCase()) : '_')).join(''),

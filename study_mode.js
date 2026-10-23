@@ -508,14 +508,14 @@ function nextRoundDWord() {
             <div id="handwriting-slots" class="flex flex-wrap justify-center gap-[var(--gap-xs)] min-h-[60px] w-full px-4 text-white"></div>
 
             <div id="handwriting-trace" class="flex flex-col items-center"></div>
-            <p id="handwriting-status" class="hw-status" role="status" aria-live="polite">写出空格中的字母；不会写可以点“显示提示”</p>
+            <p id="handwriting-status" class="hw-status" role="status" aria-live="polite">先自己写一写；试写两次后可查看提示</p>
 
             <div class="flex flex-wrap justify-center gap-3">
                 <button onclick="undoRoundD()" aria-label="撤销上一笔" class="game-btn bg-gray-500 py-2 px-6">撤销上一笔</button>
                 <button onclick="clearRoundD()" aria-label="重新写" class="game-btn bg-gray-500 py-2 px-6">
                     <i class="fas fa-eraser"></i> 重新写
                 </button>
-                <button id="handwriting-hint" onclick="showRoundDHint()" class="game-btn bg-gray-500 py-2 px-6">显示提示</button>
+                <button id="handwriting-hint" onclick="showRoundDHint()" disabled class="game-btn bg-gray-500 py-2 px-6">显示提示</button>
                 <button id="handwriting-skip" onclick="skipRoundDWord()" aria-label="跳过这个词的书写" class="game-btn bg-gray-500 py-2 px-6">
                     跳过这个词的书写
                 </button>
@@ -557,6 +557,7 @@ let roundDSlots = [];      // 1:1 with the word's characters
 let roundDGapOrder = [];   // gap slot indices, left-to-right
 let roundDCursor = 0;      // index into roundDGapOrder: the gap being written
 let roundDAttempts = 0;    // rejected traces on the CURRENT gap
+let roundDEffortAttempts = 0; // nontrivial failed writing attempts on this gap
 let roundDGuided = false;  // has the outline faded in yet?
 let roundDTrace = null;    // the hwCreateTraceBox widget
 let roundDHadHelp = false; // explicit hint or automatic guide/reveal in this word
@@ -564,8 +565,8 @@ let roundDTimer = null;    // pending next-letter or next-word advance
 let roundDTargetShownAt = 0;  // when the current gap was offered, for trace timing
 
 const ROUND_D_MAX_GAPS = 6;      // cap per word, so a 29-letter item stays quick
-const ROUND_D_GUIDE_AFTER = 2;   // rejected traces before the outline fades in
-const ROUND_D_GIVE_UP_AFTER = 5; // rejected traces before we reveal and move on
+const ROUND_D_GUIDE_AFTER = 2;   // meaningful attempts before the optional hint unlocks
+const ROUND_D_GIVE_UP_AFTER = 5; // meaningful failed attempts before reveal and advance
 
 // Re-render the answer row: given letters, gaps already written, and the one
 // active gap. Consecutive letters are wrapped in .word-group so a word never
@@ -604,13 +605,14 @@ function roundDShowTarget() {
     if (STUDY_STATE.round !== 'D' || STUDY_STATE.isTransitioning) return;
     if (roundDCursor >= roundDGapOrder.length) { roundDWordComplete(); return; }
     roundDAttempts = 0;
+    roundDEffortAttempts = 0;
     roundDGuided = false;
     roundDTargetShownAt = Date.now();
     roundDTrace.setGuided(false);
     roundDTrace.setTarget(roundDSlots[roundDGapOrder[roundDCursor]].char);
-    roundDStatus('写出空格中的字母；不会写可以点“显示提示”');
+    roundDStatus('先自己写一写；试写两次后可查看提示');
     const hint = document.getElementById('handwriting-hint');
-    if (hint) hint.disabled = false;
+    if (hint) hint.disabled = true;
     renderRoundDSlots();
 }
 
@@ -620,7 +622,7 @@ function roundDStatus(text) {
 }
 
 function showRoundDHint() {
-    if (STUDY_STATE.isTransitioning || !roundDTrace || roundDGuided) return;
+    if (STUDY_STATE.isTransitioning || !roundDTrace || roundDGuided || roundDEffortAttempts < ROUND_D_GUIDE_AFTER) return;
     roundDGuided = true;
     roundDHadHelp = true;
     roundDTrace.setGuided(true);
@@ -651,12 +653,13 @@ function roundDAcceptLetter(letter, scores) {
 function roundDRejectLetter(letter, scores) {
     if (STUDY_STATE.isTransitioning) return;
     roundDAttempts++;
-    // Recorded before clearInk(), which wipes the strokes this trace refers to.
-    hwCaptureLetter(false, scores, roundDAttempts, roundDAttempts >= ROUND_D_GIVE_UP_AFTER);
+    const meaningful = roundDMeaningfulAttempt(scores);
+    if (meaningful) roundDEffortAttempts++;
+    hwCaptureLetter(false, scores, roundDAttempts, roundDEffortAttempts >= ROUND_D_GIVE_UP_AFTER);
     incrementExerciseAttempts();
-    roundDStatus('还没认出来，可以补一笔、重新写，或显示提示');
+    roundDStatus(meaningful ? '还没认出来，可以补一笔或重新写' : '试着把字母写出来；点一下不会解锁提示');
 
-    if (roundDAttempts >= ROUND_D_GIVE_UP_AFTER) {
+    if (roundDEffortAttempts >= ROUND_D_GIVE_UP_AFTER) {
         roundDHadHelp = true;
         // Dead end: reveal the letter so a child can never get stuck. It is
         // marked as given, so it reads differently from one they wrote.
@@ -670,10 +673,22 @@ function roundDRejectLetter(letter, scores) {
         }, 400);
         return;
     }
-    // Second failure on this letter: fade the outline in and loosen the bar.
-    if (!roundDGuided && roundDAttempts >= ROUND_D_GUIDE_AFTER) {
-        showRoundDHint();
+    // Offer help after genuine writing effort; never show the outline just
+    // because two taps or an untouched hint button were submitted.
+    if (!roundDGuided && roundDEffortAttempts >= ROUND_D_GUIDE_AFTER) {
+        const hint = document.getElementById('handwriting-hint');
+        if (hint) hint.disabled = false;
+        roundDStatus('可以继续补写，也可以点“显示提示”');
     }
+}
+
+function roundDMeaningfulAttempt(scores) {
+    if (!scores || !Number.isFinite(scores.rawInkCount) || scores.rawInkCount < HW_MIN_INK || !roundDTrace) return false;
+    return roundDTrace.takeTrace().s.some(stroke => {
+        const xs = stroke.filter((_, i) => i % 2 === 0);
+        const ys = stroke.filter((_, i) => i % 2 === 1);
+        return xs.length > 1 && Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...ys)-Math.min(...ys)) > 6;
+    });
 }
 
 function roundDWordComplete() {

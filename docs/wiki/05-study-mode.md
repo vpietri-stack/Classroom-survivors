@@ -2,6 +2,16 @@
 
 ## Handwriting neural/interaction preview (2026-10-22)
 
+23 October adjustment: guides start locked for every letter. Two nontrivial
+unsuccessful writing attempts unlock the optional hint button; they no longer
+show the outline automatically. A direct handler call also respects the lock.
+An attempt must have at least HW_MIN_INK raw pixels and a stroke extending more
+than six normalized units, so taps/dots do not unlock help. This is a simple
+input-effort threshold, not an inference of intent or handwriting quality.
+All judged attempts remain captured, while the five-attempt reveal safety net
+also uses this separate meaningful-attempt counter. Any guide/reveal still marks
+the word assisted. Per-word skip remains available immediately.
+
 Round C/internal D uses a self-hosted worker recognizer warmed during the
 preceding scramble round. Its 325KB checked/cached weights and runtime live in
 `handwriting_model/`; its README explains development-only results and limits.

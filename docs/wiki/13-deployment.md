@@ -1,5 +1,13 @@
 # Deployment & Release Discipline
 
+## Guide access preview (2026-10-23b)
+
+Build on current preview/main, including the approved PU1 Unit 6 release. Publish
+only to the preview remote. Gate manual hints after two meaningful failed writing
+attempts, exclude taps and remove automatic guide display at the second failure.
+Weights and recognition decisions are unchanged. Refresh the narrow preview SW
+cache/runtime queries and synchronize all version/auth/index/dashboard stamps.
+
 ## Handwriting preview (2026-10-22c)
 
 Publish this handwriting integration to `preview` remote `main` only; production

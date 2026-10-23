@@ -33,6 +33,7 @@
   // The missing diagnostic hook. Engine + preload call this; we keep a rolling
   // buffer and push it into the panel.
   global.__speechLog = function (msg) {
+    if (global.ClientDiagnostics) global.ClientDiagnostics.record('speech', String(msg));
     buffer.push('[' + ts() + '] ' + msg);
     if (buffer.length > MAX_LINES) buffer.shift();
     renderLog();

@@ -2,6 +2,15 @@
 <html lang="en">
 
 <head>
+    <!-- Nonblocking recorder; early startup errors wait in a tiny memory buffer. -->
+    <script>
+        window.__csDiagEarly = [];
+        window.addEventListener('error', function (e) {
+            if (!window.ClientDiagnostics && window.__csDiagEarly.length < 8 && e.message)
+                window.__csDiagEarly.push(String(e.message).slice(0, 300) + ' ' + String(e.filename || '').split('?')[0] + ':' + e.lineno);
+        });
+    </script>
+    <script async src="client_diagnostics.js?v=2026-10-23h"></script>
     <!--
       Anti-cache hints. WeChat's iOS in-app WebView (WKWebView) aggressively
       caches index.html/JS and ignores the server's Cache-Control, which can
@@ -729,7 +738,7 @@
     <script src="translations.js?v=2026-10-17a"></script>
     <script src="config.js?v=2026-10-14a"></script>
     <script src="sr_engine.js?v=2026-10-17a"></script>
-    <script src="frontend_auth.js?v=2026-10-23g"></script>
+    <script src="frontend_auth.js?v=2026-10-23h"></script>
     <script src="teaching_content.js?v=2026-09-16a"></script>
     <script src="content_pu1.js?v=2026-10-17a"></script>
     <script src="content_pu2.js?v=2026-10-17a"></script>
@@ -761,7 +770,7 @@
     <!-- TEMPORARY (debugging phase): on-screen speech-load diagnostics + defines
          window.__speechLog. Must load BEFORE speech_preload.js so the log hook
          exists when the model load starts. Remove once loading is reliable. -->
-    <script src="speech_debug.js?v=3"></script>
+    <script src="speech_debug.js?v=2026-10-23h"></script>
     <!-- Invisible preload: start fetching + compiling the Whisper model on first page load,
          BEFORE login, so it's ready by the time the student reaches a speech round. -->
     <script src="speech_preload.js?v=2"></script>
@@ -897,13 +906,13 @@
          before study_mode.js, which calls hwEnsureFont()/hwCreateTraceBox(). -->
     <script src="handwriting_model/preprocess.js?v=2026-10-23c"></script>
     <script src="handwriting_model/decision.js?v=2026-10-23c"></script>
-    <script src="handwriting_recognition.js?v=2026-10-23c"></script>
-    <script src="handwriting.js?v=2026-10-23f"></script>
+    <script src="handwriting_recognition.js?v=2026-10-23h"></script>
+    <script src="handwriting.js?v=2026-10-23h"></script>
     <!-- Trace collection for the handwriting round (research; temporary — see the
          removal checklist in docs/wiki/05-study-mode.md). Inert unless the server
          enables it for this student. -->
     <script src="handwriting_sample_capture.js?v=2026-10-12a"></script>
-    <script src="study_mode.js?v=2026-10-23f"></script>
+    <script src="study_mode.js?v=2026-10-23h"></script>
     <script>
         // School Defense 3D (three.js POC) menu entry: revealed ONLY where
         // THREE_TD_ENABLED (config.js) is true — preview deploy, localhost,

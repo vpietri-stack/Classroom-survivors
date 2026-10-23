@@ -237,3 +237,8 @@ PU2 Unit 7 coverage checks 28 M/36 F and per-page totals, M1 exact edited wordin
 PU2 Unit 8 coverage checks 29 M/39 F and per-page totals, all edited sentences/answers/prefixes, excluded M30/F40, unique scoped identities, future-page exclusion and varied rounds. Chrome solves all 68 additions at 319px alongside previous boards.
 
 PU2 Unit 9 coverage checks 28 M/34 F, per-page totals, exact edited grammar targets/prefixes, seven-blank M14, single-sentence M13, revised feedback prompts, excluded F22/F23, unique identities, future-page exclusion and varied rounds. Chrome solves all 62 additions at 319px alongside earlier PU2/PU3 content.
+
+
+## Remote incident diagnostics (2026-10-23)
+
+Remote diagnostics: test_client_diagnostics.js verifies strict token scoping, opt-in/expiry, sanitizing, ack/dedup, concurrency and storage bounds. test_client_diagnostics_browser.js verifies console capture, recovery after reload/delayed return, network failures, account switching, disabled behaviour and the UTF-8 payload budget. Both run in npm test.

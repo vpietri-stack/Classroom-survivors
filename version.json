@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-23g",
+  "version": "2026-10-23h",
   "deployedAt": "2026-10-23",
-  "notes": "Production: reviewed local handwriting flow and assisted-handwriting dashboard label/filter; preserve production curriculum/API/data and existing trace collection."
+  "notes": "Temporary account-enabled remote incident diagnostics with bounded persistent logs and teacher timeline; preserve current production learning flow and progress."
 }

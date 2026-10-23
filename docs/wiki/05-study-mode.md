@@ -1,5 +1,11 @@
 # Study Mode (UI Rounds A–D + Match; internal functions A/C/D/E/F)
 
+Temporary remote diagnostics (2026-10-23): optional `ClientDiagnostics` hooks
+record word/letter/target/validation/accept/reject/skip transitions, including
+neural-worker load failures and prediction timeouts. Hooks are inert for accounts
+without a server-enabled trial; no ink or learner interaction is added. See
+[Telemetry](14-telemetry.md) for isolation, retention, upload budgets and removal.
+
 ## Handwriting local recognition (production 2026-10-23f)
 
 Production promotes the reviewed handwriting flow from preview without changing

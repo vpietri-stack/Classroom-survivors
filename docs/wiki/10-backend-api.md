@@ -77,6 +77,19 @@ Read-modify-write of the whole student doc; carries the hardest-won concurrency 
 
 ## Environment variables (names only)
 
+### `clientDiagnostics` (temporary, 2026-10-23)
+
+GET/POST and CORS preflight. Always requires a verified session token, including
+when legacy auth enforcement is disabled. GET returns only the actor's enabled
+configuration; privileged `?studentId=<id>&view=events` returns a bounded incident
+history from the student's partition. POST `{action:'configure',enabled,days}`
+is privileged only, capped at 14 days. Student POST batches are scoped to token
+identity, require an active server trial and validated event types/ids/times,
+and return explicit event acknowledgements. Bodies over 24KB / batches over 40
+events are rejected. No writes touch Students; details and device metadata are
+sanitized again server-side. See [Telemetry](14-telemetry.md) for retention,
+queue limits, container setup and environment overrides.
+
 | Var | Set where | Purpose |
 |---|---|---|
 | `COSMOS_ENDPOINT`, `COSMOS_KEY` | Function App settings | Cosmos credentials (values withheld) |

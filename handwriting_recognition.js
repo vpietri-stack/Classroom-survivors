@@ -51,7 +51,7 @@
         phase='worker';
         const timer=setTimeout(()=>reject(Error('Worker timeout')),4000);
         worker=new Worker(workerURL);
-        worker.onerror=event=>{event.preventDefault();clearTimeout(timer);stop();reject(Error('Worker failed'));};
+        worker.onerror=event=>{if(root.ClientDiagnostics)root.ClientDiagnostics.record('error','handwriting worker failed',true);event.preventDefault();clearTimeout(timer);stop();reject(Error('Worker failed'));};
         worker.onmessage=event=>{
           const message=event.data;
           if(message.type==='ready'){clearTimeout(timer);URL.revokeObjectURL(workerURL);workerURL=null;ready=true;phase='ready';resolve();return;}
@@ -61,7 +61,7 @@
         worker.postMessage({type:'load',manifest,weights},[weights]);
       });
       return true;
-    })().catch(error=>{lastFailure={phase,message:error.message};stop();phase='failed';loading=null;return false;});
+    })().catch(error=>{if(root.ClientDiagnostics)root.ClientDiagnostics.record('error','handwriting load '+phase+': '+error.message,true);lastFailure={phase,message:error.message};stop();phase='failed';loading=null;return false;});
     return loading;
   }
   async function verify(card,target,baselineAccepted){
@@ -70,7 +70,7 @@
     if(info.minimal||info.rawInkCount<200)return {accepted:false,reason:'insufficient-ink',model:manifest.id};
     const input=info.input,id=++serial;
     const probabilities=await new Promise(resolve=>{
-      const timer=setTimeout(()=>{pending.delete(id);resolve(null);},1200);
+      const timer=setTimeout(()=>{if(root.ClientDiagnostics)root.ClientDiagnostics.record('error','handwriting prediction timeout',true);pending.delete(id);resolve(null);},1200);
       pending.set(id,{resolve,timer});worker.postMessage({type:'predict',id,input:input.buffer},[input.buffer]);
     });
     return probabilities?Object.assign(HWDecision.decide(probabilities,target,info,manifest.calibration),{model:manifest.id}):null;

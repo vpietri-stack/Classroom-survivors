@@ -276,3 +276,8 @@ and local recordings after the agreed calibration/retention work.
 ## Update discipline
 
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
+
+
+## Remote incident diagnostics (2026-10-23)
+
+When a remote incident trial is enabled for the active student, the existing __speechLog hook also feeds the bounded diagnostic recorder. No extra speech inference or audio capture is introduced. See [Telemetry](14-telemetry.md).

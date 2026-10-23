@@ -12,6 +12,13 @@ One HTML app shell (`teacher_dashboard.html`), two role views. `teacher_dashboar
 
 ## Files & load order
 
+The BM/admin-only student `Diagnostics` tab loads `diagnostics_dashboard.js`.
+It reads the separate authenticated `clientDiagnostics` endpoint, shows last
+upload and device/profile activity, and can enable a seven-day trial or stop
+recording remotely. All incoming text uses textContent (including error stacks).
+It does not query, merge, or increment learning/session analytics. See
+[Telemetry](14-telemetry.md) for limits and the interpretation of restart clues.
+
 `teacher_dashboard.html:474-486` loads, in order:
 
 1. `config.js`, `frontend_auth.js` (API base, `apiFetch`, app key)

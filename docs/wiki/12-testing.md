@@ -248,3 +248,8 @@ PU1 Unit 5 checks enforce 28 M/36 F and per-page counts, complete IDs, prefix va
 PU1 Unit 6 checks enforce 32 M/46 F and per-page counts, exact revised M4/M6/M11/M12 wording, excluded habitat IDs, complete retained IDs, valid locked prefixes, distinct SR keys, future-page exclusion and round variety. All 78 additions solve through the real widget at 319px. Dedicated Study/game checks reject there/their/they're in the wrong grammatical roles, retain unhinted boxes and the apostrophe key, then accept the intended answers from on-screen input.
 
 PU1 Unit 7 checks enforce 28 M/36 F and per-page counts, complete IDs, exact teacher-edited M1/M3/M4/M17 answers and hints, valid suffixes, scoped SR identities and future-page exclusion. Chrome solves all additions at 319px. Study/game suffix checks cover visible locked ming, editable-only keyboard letters, empty-check nudges, per-letter failure feedback, timed retry, backspace/CLEAR and successful full-word grading from on-screen input.
+
+
+## Remote incident diagnostics (2026-10-23)
+
+Remote diagnostics: test_client_diagnostics.js verifies strict token scoping, opt-in/expiry, sanitizing, ack/dedup, concurrency and storage bounds. test_client_diagnostics_browser.js verifies console capture, recovery after reload/delayed return, network failures, account switching, disabled behaviour and the UTF-8 payload budget. Both run in npm test.

@@ -1,5 +1,7 @@
 # Study Mode (UI Rounds A–D + Match; internal functions A/C/D/E/F)
 
+Temporary remote diagnostics: optional handwriting checkpoints and neural worker errors feed the account-enabled recorder. No ink or learner interactions are added. See [Telemetry](14-telemetry.md).
+
 ## Handwriting neural/interaction preview (2026-10-22)
 
 23 October final adjustment (2026-10-23e): guides start hidden for every letter.

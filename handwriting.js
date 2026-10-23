@@ -749,6 +749,7 @@ function hwCreateTraceBox(opts) {
 
     async function evaluateGentle(token, silent) {
         if (destroyed || frozen || drawing || token !== revision || !target) return;
+        if (window.ClientDiagnostics) ClientDiagnostics.checkpoint('handwriting-validation-start', { letter: target });
         var profile = guided ? HW_PROFILE.guided : HW_PROFILE.free;
         var scores = hwVerify(strokes, target, HW_PEN, HW_TOL).scores;
         var accepted = hwAccept(scores, profile) || fallbackPass;
@@ -760,9 +761,11 @@ function hwCreateTraceBox(opts) {
         if (typeof HWRecognition !== 'undefined' && HWRecognition.isReady()) {
             var card = {strokes:strokes.map(function (stroke) { return stroke.flatMap(function (p) { return [p.x,p.y]; }); }),pen:HW_PEN};
             verdict = await HWRecognition.verify(card,target,accepted);
+            if (window.ClientDiagnostics) ClientDiagnostics.record('activity', 'handwriting-model-result: ' + (verdict ? verdict.reason : 'no-result'));
         }
         if (destroyed || frozen || drawing || token !== revision) return;
         if (verdict) { accepted = verdict.accepted; scores.recognition = verdict; }
+        if (window.ClientDiagnostics) ClientDiagnostics.checkpoint('handwriting-validation-result', { letter: target });
         if (typeof window !== 'undefined') window.__hwLast = {target:target,guided:guided,accepted:accepted,judged:true,precision:+scores.precision.toFixed(2),recall:+scores.recall.toFixed(2),missing:+scores.missingPart.toFixed(2),overfilled:!!scores.overfilled,width:scores.widthRatio===undefined?null:+scores.widthRatio.toFixed(2),height:scores.heightRatio===undefined?null:+scores.heightRatio.toFixed(2),strokes:scores.strokeCount,minStrokes:scores.minStrokes,recognition:verdict};
         if (accepted) {
             frozen = true;
@@ -783,9 +786,11 @@ function hwCreateTraceBox(opts) {
     // reject). Returns true when the letter was accepted.
     function evaluate(final) {
         if (!target || frozen) return false;
+        if (window.ClientDiagnostics) ClientDiagnostics.checkpoint('handwriting-validation-start', { letter: target });
         var profile = guided ? HW_PROFILE.guided : HW_PROFILE.free;
         var scores = hwVerify(strokes, target, HW_PEN, HW_TOL).scores;
         var accepted = hwAccept(scores, profile);
+        if (window.ClientDiagnostics) ClientDiagnostics.checkpoint('handwriting-validation-result', { letter: target });
         // Readout for tuning against real handwriting (the dev harness shows it;
         // production ignores it).
         if (typeof window !== 'undefined') {

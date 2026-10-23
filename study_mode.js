@@ -27,6 +27,7 @@ function showStudyNotice(msg) {
 
 // Entry point
 function initStudyMode() {
+    if (window.ClientDiagnostics) ClientDiagnostics.checkpoint('study-start', { mode: 'study', active: true, word: '', letter: '' });
     if (window.NonSpellingFlow) NonSpellingFlow.cleanupStudy();
     // Determine book/unit/page from current selection
     let book = "PU1", unit = "0", page = "5";
@@ -475,6 +476,12 @@ function finishRoundC() {
 
 
 // --- ROUND C: Handwriting (write the missing letters) ---
+function diagHandwriting(checkpoint, letter) {
+    if (window.ClientDiagnostics) ClientDiagnostics.checkpoint(checkpoint, {
+        mode: 'study', round: 'D', word: roundDWord,
+        letter: letter || (roundDSlots[roundDGapOrder[roundDCursor]] || {}).char || '', active: STUDY_STATE.active
+    });
+}
 // Internal round 'D' renders as "Round C" — the same offset convention the rest
 // of this file uses (internal 'C' renders as "Round B").
 function startRoundD() {
@@ -530,6 +537,7 @@ function nextRoundDWord() {
     // so a 29-letter item costs the same as a 6-letter one.
     const punct = [' ', "'", "-", ".", "?", "!", ","];
     roundDWord = word;
+    diagHandwriting('handwriting-word-start', '');
     roundDSlots = word.split('').map(ch => punct.includes(ch)
         ? { type: 'fixed', char: ch }
         : { type: 'letter', char: ch, gap: false, filled: false, given: false });
@@ -617,8 +625,10 @@ function roundDShowTarget() {
     roundDGuided = false;
     roundDTargetShownAt = Date.now();
     roundDTrace.setGuided(false);
+    diagHandwriting('handwriting-target-start');
     roundDTrace.setTarget(roundDSlots[roundDGapOrder[roundDCursor]].char);
     roundDStatus('先自己写一写；试写两次后会出现提示');
+    diagHandwriting('handwriting-target-ready');
     renderRoundDSlots();
 }
 
@@ -641,6 +651,7 @@ function undoRoundD() {
 }
 
 function roundDAcceptLetter(letter, scores) {
+    diagHandwriting('handwriting-accepted', letter);
     if (STUDY_STATE.isTransitioning) return;
     hwCaptureLetter(true, scores, roundDAttempts + 1, false);
     const slot = roundDSlots[roundDGapOrder[roundDCursor]];
@@ -655,6 +666,7 @@ function roundDAcceptLetter(letter, scores) {
 }
 
 function roundDRejectLetter(letter, scores) {
+    diagHandwriting('handwriting-rejected', letter);
     if (STUDY_STATE.isTransitioning) return;
     roundDAttempts++;
     const meaningful = roundDMeaningfulAttempt(scores);
@@ -700,6 +712,7 @@ function roundDMeaningfulAttempt(scores) {
 }
 
 function roundDWordComplete() {
+    diagHandwriting('handwriting-word-complete');
     if (STUDY_STATE.isTransitioning) return;
     STUDY_STATE.isTransitioning = true;
     roundDTrace.freeze();
@@ -713,6 +726,7 @@ function roundDWordComplete() {
 
 function skipRoundDWord() {
     if (!roundDSkipUnlocked || STUDY_STATE.round !== 'D' || STUDY_STATE.isTransitioning || !roundDTrace) return;
+    diagHandwriting('handwriting-word-skip');
     // Keep already judged traces, but a skipped word earns no completion event
     // or success sound. Destroy cancels any pending pen-lift judgement.
     STUDY_STATE.isTransitioning = true;

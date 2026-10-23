@@ -699,7 +699,7 @@ function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
 
-    ['tabSessions','tabExercises','tabTest','tabSettings','tabTargets','tabSR','tabMap','tabAttendance'].forEach(id => {
+    ['tabSessions','tabExercises','tabTest','tabSettings','tabTargets','tabSR','tabMap','tabAttendance','tabDiagnostics'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
     });
@@ -708,7 +708,11 @@ function switchTab(tab) {
     const sessionDetail = document.getElementById('sessionDetailPanel');
     sessionDetail.classList.add('hidden');
 
-    if (tab === 'attendance') {
+    if (tab === 'diagnostics') {
+        document.getElementById('tabDiagnostics').classList.remove('hidden');
+        dateFilter.classList.add('hidden');
+        if (typeof renderDiagnosticsTab === 'function') renderDiagnosticsTab();
+    } else if (tab === 'attendance') {
         document.getElementById('tabAttendance').classList.remove('hidden');
         dateFilter.classList.remove('hidden');
         renderStudentAttendance();

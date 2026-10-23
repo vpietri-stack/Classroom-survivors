@@ -460,7 +460,8 @@ for (const [unit, lastPage, missing, fixes, pages] of [
     [2, 26, 26, 36, [[19,4,4],[20,2,4],[21,4,4],[22,6,8],[23,4,6],[26,6,10]]],
     [3, 43, 28, 36, [[31,4,4],[32,2,2],[33,4,6],[34,4,4],[35,4,6],[36,3,4],[37,3,4],[43,4,6]]],
     [4, 54, 22, 32, [[45,5,6],[47,7,10],[48,4,6],[54,6,10]]],
-    [5, 63, 28, 36, [[57,5,6],[59,8,10],[60,5,6],[61,6,8],[63,4,6]]]
+    [5, 63, 28, 36, [[57,5,6],[59,8,10],[60,5,6],[61,6,8],[63,4,6]]],
+    [6, 81, 32, 46, [[78,28,40],[81,4,6]]]
 ]) {
     const items = content.buildPool('PU1', unit, lastPage).entries.filter(e => e.item.id && e.item.unit === String(unit)).map(e => e.item);
     pu1Approved.push(...items);
@@ -478,7 +479,7 @@ for (const [unit, lastPage, missing, fixes, pages] of [
     }
     for (const item of items.filter(e => e.prefixes)) item.prefixes.forEach((prefix, i) => assert.ok(item.answers[i].startsWith(prefix)));
 }
-assert.equal(new Set(pu1Approved.map(e => e.key)).size, 313, 'PU1 units have distinct stable SR keys');
+assert.equal(new Set(pu1Approved.map(e => e.key)).size, 391, 'PU1 units have distinct stable SR keys');
 assert.deepEqual(Array.from(pu1Approved.find(e => e.unit === '1' && e.id === 'M12').sentences), ['Here you ___!', '___ you very much.'], 'M12 includes both approved blanks');
 assert.ok(!content.buildPool('PU1', 1, 16).entries.some(e => e.item.unit === '2'), 'Unit 2 stays out of Unit 1');
 const pu1Unit2 = pu1Approved.filter(e => e.unit === '2');
@@ -537,6 +538,35 @@ for (const [id, wrong, answer] of [['F17','balloon','balloons'],['F18','helicopt
 }
 assert.ok(!pu1Unit5.some(e => /wings|blades|put air in|🪁|🚲|✈️|🚗|⚽|🤖|🎈|🚁|🖥️|⌨️|📻|🧸|🔴|🟦|🔺|▭/u.test(JSON.stringify(e))), 'approved simple contexts replace difficult clues and toy/shape emojis');
 assert.ok(!content.buildPool('PU1', 5, 63).entries.some(e => e.item.unit === '6'), 'Unit 6 stays out of Unit 5');
+const pu1Unit6 = pu1Approved.filter(e => e.unit === '6');
+assert.deepEqual(pu1Unit6.filter(e => e.answers).map(e => e.id).sort(), Array.from({length: 34}, (_, i) => 'M' + (i + 1)).filter(id => !['M25','M26'].includes(id)).sort());
+assert.deepEqual(pu1Unit6.filter(e => e.answer).map(e => e.id).sort(), Array.from({length: 48}, (_, i) => 'F' + (i + 1)).filter(id => !['F25','F26'].includes(id)).sort());
+assert.equal(new Set(pu1Unit6.filter(e => e.answer).map(e => e.sentence)).size, 46);
+assert.deepEqual(Array.from(pu1Unit6.find(e => e.id === 'M4').sentences), ['We can go to Beijing by plane or by ___.', "I go to school in my mum's ___."]);
+assert.equal(pu1Unit6.find(e => e.id === 'M6').sentences[0], 'This brown ___ is very tall.');
+for (const [id, sentences, answers] of [
+    ['M11',['There ___ any cars in the garden.','There ___ a bus in the classroom.'],["aren't","isn't"]],
+    ['M12',['There ___ any buses in the classroom.','There ___ two lorries in the street.'],["aren't",'are']]
+]) {
+    const item = pu1Unit6.find(e => e.id === id);
+    assert.deepEqual(Array.from(item.sentences), sentences);
+    assert.deepEqual(Array.from(item.answers), answers);
+    assert.ok(!item.prefixes, 'revised agreement boards have no locked hints');
+}
+for (const id of ['M31','M32','M33','M34']) {
+    const item = pu1Unit6.find(e => e.id === id);
+    assert.deepEqual(Array.from(item.answers).sort(), ['their',"they're",'there'].sort(), id + ' practises all three homophones');
+    assert.equal(item.page, '78');
+    assert.ok(!item.prefixes, 'homophones are selected from context without initial hints');
+}
+for (const [id, wrong, answer] of [
+    ['F41','their','there'],['F42',"they're",'there'],['F43','there',"they're"],['F44','their',"they're"],
+    ['F45',"they're",'their'],['F46','there','their'],['F47','their',"they're"],['F48',"they're",'there']
+]) {
+    const item = pu1Unit6.find(e => e.id === id);
+    assert.equal(item.wrongWord, wrong); assert.equal(item.answer, answer); assert.equal(item.page, '78');
+}
+assert.ok(!content.buildPool('PU1', 6, 81).entries.some(e => e.item.unit === '7'), 'Unit 7 stays out of Unit 6');
 for (const item of [...pu1Approved, ...unit1, ...unit2, ...unit3, ...unit4, ...unit5, ...unit6, ...unit7, ...unit8, ...unit9, ...pu2Unit1, ...pu2Unit2, ...pu2Unit3, ...pu2Unit4, ...pu2Unit5, ...pu2Unit6, ...pu2Unit7, ...pu2Unit8, ...pu2Unit9]) {
     if (item.answers) assert.equal(item.sentences.join(' ').split('___').length - 1, item.answers.length, item.id + ' has one target per blank');
     else if (Number.isInteger(item.wrongIndex)) assert.equal(item.sentence.split(' ')[item.wrongIndex].replace(/[.,!?]+$/, '').toLowerCase(), item.wrongWord, item.id + ' explicitly identifies its repeated wrong token');

@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-22c",
-  "deployedAt": "2026-10-22",
-  "notes": "Preview: local neural handwriting, retained ink, immediate hints, undo, faster progression, assisted completion distinction; production unchanged. Slow first-download handling keeps recognition warm-up asynchronous and retries once."
+  "version": "2026-10-23a",
+  "deployedAt": "2026-10-23",
+  "notes": "Preview: approved PU1 Unit 6 32 missing-word/46 find-fix boards, revised clues and agreement, there/their/they're practice; retain preview handwriting updates and isolated data."
 }

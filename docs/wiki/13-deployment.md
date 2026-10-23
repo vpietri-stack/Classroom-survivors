@@ -376,3 +376,5 @@ Preview release 2026-10-21a adds the Round C per-word handwriting skip button, l
 
 The narrow preview offline worker reuses the checked model cache instead of
 downloading the model a second time during installation.
+
+Preview release 2026-10-23a adds the approved PU1 Unit 6 32 M/46 F boards with all teacher edits and there/their/they're practice. Retain current preview handwriting updates, feature gates and isolated API/data. Synchronize version/auth/index stamps and the dashboard auth link, refresh both app/dashboard curriculum cache busters, and verify hosted files after Pages succeeds. Production is unchanged.

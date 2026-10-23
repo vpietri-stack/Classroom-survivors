@@ -30,8 +30,9 @@ Other unsupported characters retain the existing font-checker verdict.
 `handwriting_recognition.js` downloads and SHA-256 checks weights, caches them
 using `cs-handwriting-model-v2`, and runs inference in a worker. Runtime sources
 are bundled locally for offline worker startup. Downloads/inference have bounded
-timeouts. Failure falls back to the existing checker; hint, undo and skip remain
-usable. No external model hub, recognition endpoint or CDN is used. Cache eviction
+timeouts. Failure falls back to the existing checker; erasers remain available
+and hint/skip keep their normal effort gates. No external model hub, recognition
+endpoint or CDN is used. Cache eviction
 and actual device/China-network first download still need validation.
 The larger weights allow 60 seconds per background attempt with one retry;
 manifest/runtime requests remain bounded at eight seconds. A failed warm-up can
@@ -43,6 +44,8 @@ model download. It only prefetches the page/runtime/fonts itself.
 23 October: hint access is gated by two meaningful failed writing attempts per
 letter; single taps do not unlock it and outlines are no longer shown
 automatically after the second failure. The recognizer weights are unchanged.
+Skip is hidden until a meaningful failure with a guide displayed, then remains
+available for subsequent words in that Study session. A new session resets it.
 
 Engine version 2 identifies this checkpoint/policy. Capture retains its existing
 consent/window/cap gates; traces stay out of analytics. Stored precision/recall

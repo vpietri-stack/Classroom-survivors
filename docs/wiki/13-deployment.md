@@ -1,5 +1,14 @@
 # Deployment & Release Discipline
 
+## Session skip and erasers preview (2026-10-23c)
+
+Publish to preview/main only, including the normal index.html Study flow and the
+shared account-free handwriting page. Skip is hidden until a meaningful guided
+failure, then remains available for the rest of the Study session. Use distinct
+single-stroke/whole-letter SVG erasers. Recognition weights are unchanged.
+Refresh shared style/study queries, synchronized auth stamps and the narrow
+preview SW. Verify the hosted main entry as well as the account-free test page.
+
 ## Guide access preview (2026-10-23b)
 
 Build on current preview/main, including the approved PU1 Unit 6 release. Publish

@@ -55,6 +55,7 @@ function initStudyMode() {
     STUDY_STATE.round = 'A';
     STUDY_STATE.isTransitioning = false;
     STUDY_STATE.srFinalized = false;
+    roundDSkipUnlocked = false;
 
     // Reset SR tracking for this session
     srStudyResults = [];
@@ -481,6 +482,7 @@ function startRoundD() {
     clearTimeout(roundDTimer);
     STUDY_STATE.round = 'D';
     STUDY_STATE.currentWordIndex = 0;
+    roundDSkipUnlocked = false;
     updateStudyUI("Round C: Handwriting", "Write the missing letters.");
     startExerciseTracking();
     // Fredoka must be loaded before the first glyph mask is built, otherwise the
@@ -511,12 +513,10 @@ function nextRoundDWord() {
             <p id="handwriting-status" class="hw-status" role="status" aria-live="polite">先自己写一写；试写两次后可查看提示</p>
 
             <div class="flex flex-wrap justify-center gap-3">
-                <button onclick="undoRoundD()" aria-label="撤销上一笔" class="game-btn bg-gray-500 py-2 px-6">撤销上一笔</button>
-                <button onclick="clearRoundD()" aria-label="重新写" class="game-btn bg-gray-500 py-2 px-6">
-                    <i class="fas fa-eraser"></i> 重新写
-                </button>
+                <button id="handwriting-undo" onclick="undoRoundD()" aria-label="擦掉上一笔" title="擦掉上一笔" class="game-btn bg-gray-500 hw-eraser">${roundDEraserIcon(false)}<span>一笔</span></button>
+                <button id="handwriting-clear" onclick="clearRoundD()" aria-label="擦掉整个字母" title="擦掉整个字母" class="game-btn bg-gray-500 hw-eraser">${roundDEraserIcon(true)}<span>全部</span></button>
                 <button id="handwriting-hint" onclick="showRoundDHint()" disabled class="game-btn bg-gray-500 py-2 px-6">显示提示</button>
-                <button id="handwriting-skip" onclick="skipRoundDWord()" aria-label="跳过这个词的书写" class="game-btn bg-gray-500 py-2 px-6">
+                <button id="handwriting-skip" onclick="skipRoundDWord()" ${roundDSkipUnlocked ? '' : 'hidden disabled'} aria-label="跳过这个词的书写" class="game-btn bg-gray-500 py-2 px-6 hw-skip">
                     跳过这个词的书写
                 </button>
             </div>
@@ -561,12 +561,21 @@ let roundDEffortAttempts = 0; // nontrivial failed writing attempts on this gap
 let roundDGuided = false;  // has the outline faded in yet?
 let roundDTrace = null;    // the hwCreateTraceBox widget
 let roundDHadHelp = false; // explicit hint or automatic guide/reveal in this word
+let roundDSkipUnlocked = false; // guided failure unlocks skipping for this session
 let roundDTimer = null;    // pending next-letter or next-word advance
 let roundDTargetShownAt = 0;  // when the current gap was offered, for trace timing
 
 const ROUND_D_MAX_GAPS = 6;      // cap per word, so a 29-letter item stays quick
 const ROUND_D_GUIDE_AFTER = 2;   // meaningful attempts before the optional hint unlocks
 const ROUND_D_GIVE_UP_AFTER = 5; // meaningful failed attempts before reveal and advance
+
+function roundDEraserIcon(all) {
+    // Shared eraser; the paper shows either one removable stroke or a whole letter.
+    const paper = all
+        ? '<rect x="5" y="3" width="35" height="35" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M25 14c-12-7-19 16-8 15 7-1 10-15 9-16l-1 17" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="3 4"/>'
+        : '<path d="M6 29c1-16 10-18 15-12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M21 17c5 6 10 9 17 0" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="3 4"/>';
+    return `<svg viewBox="0 0 64 44" aria-hidden="true" focusable="false">${paper}<path d="m34 25 12-13a4 4 0 0 1 6 0l8 8a4 4 0 0 1 0 6L47 39H37l-5-5a6 6 0 0 1 2-9Z" fill="#f9a8d4" stroke="#334155" stroke-width="2"/><path d="m34 25 13 14H37l-5-5a6 6 0 0 1 2-9Z" fill="#f8fafc" stroke="#334155" stroke-width="2"/><path d="M47 40h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+}
 
 // Re-render the answer row: given letters, gaps already written, and the one
 // active gap. Consecutive letters are wrapped in .word-group so a word never
@@ -658,6 +667,12 @@ function roundDRejectLetter(letter, scores) {
     hwCaptureLetter(false, scores, roundDAttempts, roundDEffortAttempts >= ROUND_D_GIVE_UP_AFTER);
     incrementExerciseAttempts();
     roundDStatus(meaningful ? '还没认出来，可以补一笔或重新写' : '试着把字母写出来；点一下不会解锁提示');
+    if (meaningful && roundDGuided && !roundDSkipUnlocked) {
+        roundDSkipUnlocked = true;
+        const skip = document.getElementById('handwriting-skip');
+        if (skip) { skip.hidden = false; skip.disabled = false; }
+        roundDStatus('还没认出来，可以继续写，也可以跳过这个词');
+    }
 
     if (roundDEffortAttempts >= ROUND_D_GIVE_UP_AFTER) {
         roundDHadHelp = true;
@@ -704,7 +719,7 @@ function roundDWordComplete() {
 }
 
 function skipRoundDWord() {
-    if (STUDY_STATE.round !== 'D' || STUDY_STATE.isTransitioning || !roundDTrace) return;
+    if (!roundDSkipUnlocked || STUDY_STATE.round !== 'D' || STUDY_STATE.isTransitioning || !roundDTrace) return;
     // Keep already judged traces, but a skipped word earns no completion event
     // or success sound. Destroy cancels any pending pen-lift judgement.
     STUDY_STATE.isTransitioning = true;

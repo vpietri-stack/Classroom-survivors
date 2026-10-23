@@ -20,7 +20,7 @@
     loading=(async()=>{
       phase='manifest';lastFailure=null;
       let cache=null;try{cache=await caches.open(CACHE);}catch(e){}
-      const manifestURL=new URL('model.json?v=2026-10-23b',base).href;
+      const manifestURL=new URL('model.json?v=2026-10-23c',base).href;
       let raw;
       try{raw=await fetchBounded(manifestURL);}catch(e){const cached=cache&&await cache.match(manifestURL);if(!cached)throw e;raw=await cached.arrayBuffer();}
       manifest=JSON.parse(new TextDecoder().decode(raw));
@@ -45,7 +45,7 @@
         return new TextDecoder().decode(bytes);
       }
       phase='runtime';
-      const kernel=await source('cnn.js'),handler=await source('worker.js?v=2026-10-23b');
+      const kernel=await source('cnn.js'),handler=await source('worker.js?v=2026-10-23c');
       workerURL=URL.createObjectURL(new Blob([kernel,'\n',handler.replace(/^importScripts\([^\n]+\);\s*/, '')],{type:'text/javascript'}));
       await new Promise((resolve,reject)=>{
         phase='worker';

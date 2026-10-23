@@ -1,6 +1,6 @@
 // Scope is the handwriting_preview URL prefix only, never the main app.
-const CACHE='cs-hw-preview-2026-10-23b';
-const FILES=['handwriting_preview.html','handwriting_preview.css?v=2026-10-23b','handwriting_preview.js?v=2026-10-23b','style.css?v=2026-10-23b','handwriting.js?v=2026-10-23b','study_mode.js?v=2026-10-23b','handwriting_recognition.js?v=2026-10-23b','handwriting_model/preprocess.js?v=2026-10-23b','handwriting_model/decision.js?v=2026-10-23b','handwriting_model/worker.js?v=2026-10-23b','handwriting_model/cnn.js','fonts/fonts.css',...['Fredoka-400-latin','Fredoka-400-latin-ext','Nunito-400-latin','Nunito-400-latin-ext','Nunito-700-latin','Nunito-700-latin-ext','Nunito-800-latin','Nunito-800-latin-ext'].map(name=>'fonts/'+name+'.woff2')];
+const CACHE='cs-hw-preview-2026-10-23c';
+const FILES=['handwriting_preview.html','handwriting_preview.css?v=2026-10-23c','handwriting_preview.js?v=2026-10-23c','style.css?v=2026-10-23c','handwriting.js?v=2026-10-23c','study_mode.js?v=2026-10-23c','handwriting_recognition.js?v=2026-10-23c','handwriting_model/preprocess.js?v=2026-10-23c','handwriting_model/decision.js?v=2026-10-23c','handwriting_model/worker.js?v=2026-10-23c','handwriting_model/cnn.js','fonts/fonts.css',...['Fredoka-400-latin','Fredoka-400-latin-ext','Nunito-400-latin','Nunito-400-latin-ext','Nunito-700-latin','Nunito-700-latin-ext','Nunito-800-latin','Nunito-800-latin-ext'].map(name=>'fonts/'+name+'.woff2')];
 const base=new URL('./',self.location.href);
 self.addEventListener('install',event=>event.waitUntil((async()=>{
   const cache=await caches.open(CACHE);await cache.addAll(FILES.map(file=>new URL(file,base).href));

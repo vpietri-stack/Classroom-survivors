@@ -230,6 +230,7 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
   ok(entry.backingStore >= entry.boxPx, 'entry: the canvas backing store is scaled for the device');
   ok(entry.gaps >= 1 && typeof entry.target === 'string',
     'entry: a gap is offered straight away (target "' + entry.target + '")');
+  ok(await page.locator('#handwriting-skip').isHidden(), 'entry: skip is hidden before any guided failure');
 
   // --- skip applies to this word only, including while a letter is pending ---
   await page.evaluate(() => {
@@ -239,6 +240,9 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
     window.__skipSRBefore = JSON.stringify(srStudyResults);
     window.__roundEStarts = 0;
     window.startRoundE = function () { window.__roundEStarts++; STUDY_STATE.round = 'E'; };
+    // The neural browser suite drives real pen events to unlock this flag.
+    // These fixtures cover the subsequent skip lifecycle and timer races.
+    roundDSkipUnlocked = true;
     nextRoundDWord();
   });
   const skipButton = page.locator('#handwriting-skip');

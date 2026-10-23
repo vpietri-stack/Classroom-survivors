@@ -18,6 +18,9 @@ async function draw(page,strokes){await page.evaluate(strokes=>{const cv=documen
   check(await page.evaluate(()=>HWDecision.decide(Array(26).fill(1/26),'7',{minimal:false,rawInkCount:500,baselineAccepted:true},{}).accepted),'Unsupported characters retain their font-checker fallback');
   await page.locator('#preview-start').click();await page.waitForSelector('.hw-trace-canvas');
   check(await page.locator('#handwriting-hint').isDisabled(),'Hint starts locked before writing effort');
+  check(await page.locator('#handwriting-skip').isHidden(),'Skip starts hidden for a new session');
+  await page.evaluate(()=>skipRoundDWord());await page.waitForTimeout(350);
+  check(await page.evaluate(()=>STUDY_STATE.currentWordIndex===0&&!STUDY_STATE.isTransitioning),'Direct skip handler cannot bypass the session lock');
   await page.evaluate(()=>showRoundDHint());check(await page.evaluate(()=>!roundDGuided&&!roundDHadHelp),'Direct hint handler cannot bypass the initial lock');
   await loadWord(page,'i');
   await draw(page,[[[40,70]]]);await page.waitForTimeout(900);
@@ -29,11 +32,18 @@ async function draw(page,strokes){await page.evaluate(strokes=>{const cv=documen
   await page.evaluate(()=>clearRoundD());
   await draw(page,[[[64,55],[64,65],[64,75],[64,90],[64,102]]]);await page.waitForTimeout(900);
   check(await page.locator('#handwriting-hint').isEnabled()&&await page.evaluate(()=>!roundDGuided),'Two genuine attempts unlock optional help without showing it automatically');
+  check(await page.locator('#handwriting-skip').isHidden(),'Unguided failures do not unlock skip');
   await page.locator('#handwriting-hint').click();check(await page.evaluate(()=>roundDGuided&&roundDHadHelp),'Unlocked hint marks the word assisted');
+  check(await page.locator('#handwriting-skip').isHidden(),'Showing a guide alone does not unlock skip');
+  await page.locator('#handwriting-clear').click();await draw(page,[[[64,70]]]);await page.waitForTimeout(900);
+  check(await page.locator('#handwriting-skip').isHidden(),'A guided tap is insufficient to unlock skip');
+  await page.locator('#handwriting-clear').click();await draw(page,[[[64,55],[64,65],[64,75],[64,90],[64,102]]]);await page.waitForTimeout(900);
+  check(await page.locator('#handwriting-skip').isVisible()&&await page.locator('#handwriting-skip').isEnabled(),'A meaningful failure after guides unlocks skip');
   await loadWord(page,'i');
+  check(await page.locator('#handwriting-skip').isVisible()&&await page.locator('#handwriting-hint').isDisabled(),'Skip remains unlocked on later targets while guides reset');
   await draw(page,[[[64,55],[64,65],[64,75],[64,90],[64,102]]]);await page.waitForTimeout(900);
   check(await page.evaluate(()=>roundDCursor===0&&roundDTrace.takeTrace().s.length===1),'Uncertain stem stays visible and cannot pass as a dotted i');
-  const before=await page.evaluate(()=>roundDAttempts);await page.evaluate(()=>undoRoundD());check(await page.evaluate(()=>roundDTrace.takeTrace().s.length===0&&roundDAttempts===1),'Undo removes a stroke without another attempt');
+  const before=await page.evaluate(()=>roundDAttempts);await page.locator('#handwriting-undo').click();check(await page.evaluate(()=>roundDTrace.takeTrace().s.length===0&&roundDAttempts===1),'Eraser for one stroke removes it without another attempt');
   await draw(page,[[[64,55],[64,65],[64,75],[64,90],[64,102]]]);await page.waitForTimeout(400);
   check(await page.evaluate(()=>roundDCursor===0),'A normal inter-stroke pause does not advance an unfinished i');
   await draw(page,[[[64,33]]]);await page.waitForTimeout(400);
@@ -47,8 +57,11 @@ async function draw(page,strokes){await page.evaluate(strokes=>{const cv=documen
   await page.evaluate(()=>{window.__oldVerify=HWRecognition.verify;HWRecognition.verify=()=>new Promise(resolve=>window.__lateRecognition=resolve);});
   await draw(page,[[[40,60],[50,65],[60,70],[70,80]]]);await page.waitForTimeout(220);await page.locator('#handwriting-skip').click();
   await page.evaluate(()=>window.__lateRecognition({accepted:true,model:'delayed-test'}));await page.waitForTimeout(400);
-  check(await page.evaluate(()=>STUDY_STATE.currentWordIndex===1&&roundDCursor===0&&previewEvents.length===0),'A late neural result after skip cannot fill the next word or award completion');
+  check(await page.evaluate(()=>STUDY_STATE.currentWordIndex===1&&roundDCursor===0&&previewEvents.length===0)&&await page.locator('#handwriting-skip').isVisible(),'Skip stays available on the next word; late results cannot fill it or award completion');
   await page.evaluate(()=>HWRecognition.verify=window.__oldVerify);
+  await page.evaluate(()=>previewBegin());await page.waitForSelector('.hw-trace-canvas');
+  check(await page.locator('#handwriting-skip').isHidden()&&await page.evaluate(()=>!roundDSkipUnlocked),'A new session locks skip again');
+  check(await page.locator('#handwriting-undo svg').count()===1&&await page.locator('#handwriting-clear svg').count()===1&&await page.locator('#handwriting-undo').getAttribute('aria-label')==='擦掉上一笔'&&await page.locator('#handwriting-clear').getAttribute('aria-label')==='擦掉整个字母','Distinct eraser icons have explicit accessible Chinese labels');
   await loadWord(page,'o');await page.evaluate(()=>{HWRecognition.verify=()=>new Promise(resolve=>window.__lateRecognition=resolve);});await draw(page,[[[40,60],[50,65],[60,70],[70,80]]]);await page.waitForTimeout(220);
   await page.evaluate(()=>{roundDTrace.destroy();roundDTrace=null;STUDY_STATE.active=false;window.__lateRecognition({accepted:true});});await page.waitForTimeout(200);
   check(await page.evaluate(()=>roundDCursor===0&&previewEvents.length===0),'Destroyed canvas ignores a late inference result');
@@ -58,7 +71,7 @@ async function draw(page,strokes){await page.evaluate(strokes=>{const cv=documen
   check(await page.evaluate(()=>HWRecognition.isReady()),'Preview reloads and recognizes with the network offline');await context.setOffline(false);
   check(external.length===0,'No external scripts, fonts or recognition requests');check(errors.length===0,'No browser runtime errors');
   await context.close();
-  const unavailable=await browser.newContext();await unavailable.route('**/handwriting_model/letters-v2.bin*',r=>r.abort());const fallback=await unavailable.newPage();await fallback.goto(url);await fallback.waitForFunction(()=>document.getElementById('model-status').textContent.includes('暂未加载'),{timeout:15000});await fallback.locator('#preview-start').click();await fallback.waitForSelector('#handwriting-skip');check(await fallback.locator('#handwriting-skip').isEnabled()&&await fallback.locator('#handwriting-hint').isDisabled(),'Failed first download keeps skip usable and preserves the guide lock');await unavailable.close();
+  const unavailable=await browser.newContext();await unavailable.route('**/handwriting_model/letters-v2.bin*',r=>r.abort());const fallback=await unavailable.newPage();await fallback.goto(url);await fallback.waitForFunction(()=>document.getElementById('model-status').textContent.includes('暂未加载'),null,{timeout:15000});await fallback.locator('#preview-start').click();await fallback.waitForSelector('#handwriting-skip',{state:'attached'});check(await fallback.locator('#handwriting-skip').isHidden()&&await fallback.locator('#handwriting-hint').isDisabled(),'Failed first download preserves skip and guide locks while the fallback checker remains usable');await unavailable.close();
   console.log(checks+' neural/browser checks passed');
  }finally{await browser.close();await new Promise(r=>app.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;});

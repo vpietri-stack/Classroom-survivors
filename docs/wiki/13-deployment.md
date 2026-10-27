@@ -1,5 +1,9 @@
 # Deployment & Release Discipline
 
+## Cancellation target correction (2026-10-27a)
+
+New class cancellations add 10 sessions as well as seven days to the existing group target. Existing cancellation receipts remain unchanged. Publish independently on current preview/production histories, retaining their curriculum, routes and data; deploy the existing PR #1 API before promoting production. Synchronize the stamp trio and dashboard auth/calendar/core cache busters. Verify the served rule and cancellation retry behaviour without altering real student attendance.
+
 ## Handwriting production promotion (2026-10-23f)
 
 The final 2026-10-23g reporting follow-up includes the assisted-handwriting

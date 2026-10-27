@@ -36,6 +36,18 @@ One Cosmos DB (`Val-EslApp`), one main container (`Students`) holding **everythi
 
 ## Student document shape
 
+### Preview-note completion (2026-10-27, preview API)
+
+`previewNotes` is a small catalog-bounded map, currently
+`{"pu3-u9-p111":{"version":1,"completedAt":"ISO"}}`. The normal `saveAnalytics`
+IfMatch retry loop derives it from valid completed Study events with
+`data.previewNote:{id,version,book,unit,page,wordCount:5,exerciseCount:5}`.
+`shared/previewNotesCore.js` accepts only registered lesson IDs and matching
+location/version/counts; duplicate delivery is idempotent. It writes alongside
+ordinary session/SR changes in the same student-document replace and survives
+analytics archival. Existing `publicUser` returns it on login. No new endpoint,
+container, throughput, recording collection or target-counting rule is added.
+
 Fields written by the API (addStudent.js ~40-57 + later mutations). Client-visible fields only — `password` handling noted separately.
 
 ```jsonc

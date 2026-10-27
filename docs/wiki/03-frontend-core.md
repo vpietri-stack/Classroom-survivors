@@ -392,4 +392,4 @@ PU3 Unit 9 additions (preview 2026-10-14j) keep page 107 legacy content and page
 
 Preview registry correction (2026-10-14m): PU1 Unit 2 availability is [19,20,21,22,23,26], removing nonexistent pages 24/25. PU2 Unit 4 is [45,46,47,54], exposing the already-authored page 47. Corresponding class_config.js documentation and pack cache busters are updated; teaching arrays, translations and student assignments are unchanged.
 
-Production promotion 2026-10-15a publishes both flashcard batches (48 PNGs, each below 100,000 bytes), all approved PU3 curriculum/translations and the PU1/PU2 availability corrections. Runtime content and image bytes match validated preview b63a306; production keeps its enabled mixed-flow gate and API routing.
+PU2 Unit 2 preview 2026-10-15b corrects the page 19 matching pair to Tuesday comes after / Monday. This changes only that legacy pair; vocabulary, scrambles and their translations remain unchanged. New typed boards live in the shared non-spelling catalog.

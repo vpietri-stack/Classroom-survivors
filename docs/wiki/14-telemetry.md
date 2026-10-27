@@ -1,5 +1,13 @@
 # Telemetry & Data Delivery
 
+Handwriting preview (2026-10-22): `handwritingAssisted` identifies a word completed
+after a hint, outline or reveal; `handwriting` remains independent completion.
+Skips produce neither. Both use the existing queue and string word itemDetails;
+no trace, CNN tensor or confidence vector enters analytics. Dashboard label/filter
+distinguish assistance. The separately gated collector uses engine version 2 to
+identify new recognition rules. The account-free preview loads no collector or
+analytics sender and saves no student progress.
+
 > **Last verified:** 2026-09-25 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
 
 **Owner files:** `frontend_auth.js` (queue/flush/beacon), `teaching_content.js` (persisted queue, scoped keys), `sr_engine.js` (`extractSRDelta`/`mergeSRDelta`), `api/src/functions/saveAnalytics.js` (acks/archive/diagnostics/delta-merge), `test_session_flush_deadline.js`, `test_auto_archive_analytics.js`

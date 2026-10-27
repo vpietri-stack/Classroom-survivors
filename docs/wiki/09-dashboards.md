@@ -1,8 +1,8 @@
 # Teacher & Admin Dashboards
 
-Handwriting release 2026-10-23g: `handwritingAssisted` is displayed and filterable
-as "Handwriting (with help)". Automatic guides/reveals use this event instead of
-independent handwriting completion. Existing records are not rewritten.
+The handwriting preview adds `handwritingAssisted`, displayed/filterable as
+**Handwriting (with help)** for words completed using a guide/reveal. Independent
+completion remains `handwriting`; skipped words are not completions.
 
 > **Last verified:** 2026-09-27 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
 

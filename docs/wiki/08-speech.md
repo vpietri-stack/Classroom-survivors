@@ -267,6 +267,16 @@ and local recordings after the agreed calibration/retention work.
 
 ## 12. Related pages
 
+### Interactive illustrated notes POC (2026-10-27)
+
+`interactive_notes_poc.html` was revised to listening-only at the user's request.
+It displays all four original PU3 U9 p111 infographic pages, including the intro,
+and plays standalone-word or example-sentence audio on tap. It no longer loads
+Recorder, LocalEngine, Scorer, microphone or speech collection code. The earlier
+speech experiment is preserved at commit `cfe4fa6`; no recognition-accuracy claim
+applies to the current listening page. See [Interactive notes POC](../interactive-notes-poc.md)
+for audio preparation, hotspot alignment and verification.
+
 - [Study Mode](05-study-mode.md) — Round E scramble where the sentence gate lives.
 - [Game Modes](06-game-modes.md) / [Vampire Survivors](07-vampire-survivors.md) — game-side gate + SR recording order.
 - [Backend API](10-backend-api.md) — `saveAnalytics` acks/delivery diagnostics; [Data Model](11-data-model.md) — event shapes.

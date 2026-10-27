@@ -1,23 +1,46 @@
 # Deployment & Release Discipline
 
-## Cancellation target correction (2026-10-27a)
+## Automatic guides preview (2026-10-23e)
 
-New class cancellations add 10 sessions as well as seven days to the existing group target. Existing cancellation receipts remain unchanged. Publish independently on current preview/production histories, retaining their curriculum, routes and data; deploy the existing PR #1 API before promoting production. Synchronize the stamp trio and dashboard auth/calendar/core cache busters. Verify the served rule and cancellation retry behaviour without altering real student attendance.
+Build on current preview/main including PU1 Unit 7 (2026-10-23d). Remove the guide
+button and automatically display guides after two meaningful failed attempts.
+Only a subsequent guided failure unlocks session skip. Publish to preview/main
+only. Refresh the changed study query and narrow preview SW cache; keep unchanged
+recognizer/model source queries so existing checked model caches remain reusable.
 
-## Handwriting production promotion (2026-10-23f)
+## Session skip and erasers preview (2026-10-23c)
 
-The final 2026-10-23g reporting follow-up includes the assisted-handwriting
-dashboard label/filter and its script cache buster; auth/index/dashboard stamps
-advance together. It changes no collection eligibility, payload or API setting.
+Publish to preview/main only, including the normal index.html Study flow and the
+shared account-free handwriting page. Skip is hidden until a meaningful guided
+failure, then remains available for the rest of the Study session. Use distinct
+single-stroke/whole-letter SVG erasers. Recognition weights are unchanged.
+Refresh shared style/study queries, synchronized auth stamps and the narrow
+preview SW. Verify the hosted main entry as well as the account-free test page.
 
-Promote the reviewed handwriting runtime, checked model, automatic two-failure
-guides, retained ink, eraser controls and session skip onto origin/main's own
-history. Preserve production curriculum, feature gates, API routes and data;
-never merge the preview curriculum history. Synchronize version/auth/index and
-dashboard stamps and refresh shared handwriting/style queries. Model source
-queries remain the reviewed versions. The existing capture client/API stays
-unchanged, gated by the live enable list, collection end and per-day quota.
-Verify both Pages and Azure workflows and served assets after the production push.
+## Guide access preview (2026-10-23b)
+
+Build on current preview/main, including the approved PU1 Unit 6 release. Publish
+only to the preview remote. Gate manual hints after two meaningful failed writing
+attempts, exclude taps and remove automatic guide display at the second failure.
+Weights and recognition decisions are unchanged. Refresh the narrow preview SW
+cache/runtime queries and synchronize all version/auth/index/dashboard stamps.
+
+## Handwriting preview (2026-10-22c)
+
+Publish this handwriting integration to `preview` remote `main` only; production
+requires a later explicit release request. Preserve preview's curriculum/API/data.
+Synchronize the three version/auth/index stamps and dashboard auth reference;
+refresh changed study/handwriting/style/dashboard script cache-busters. Include
+all `handwriting_model/` runtime/manifest/weight files. The account-free
+`handwriting_preview.html` offers a direct test without account data or capture.
+Its offline SW is scoped to the `handwriting_preview` URL prefix, with no change
+to the main app's update worker. On a later preview-shell/runtime change, bump
+the narrow SW cache name and runtime query versions together to avoid stale
+cache-first assets. Model weights are separately keyed by SHA-256.
+The first hosted check exposed a slow cold weight fetch. Release b allows
+30 seconds per background weight attempt plus one retry, while input/hint/skip
+remain usable. A failed warm-up can retry at the next round entry; internal
+`HWRecognition.status()` identifies the failing phase.
 
 ## Typed exercise dashboard release (2026-10-20a)
 
@@ -333,9 +356,6 @@ Preview release 2026-10-14l publishes the 48 approved PU3 flashcard PNGs and the
 
 Preview-only 2026-10-14m corrects PU1 U2 and PU2 U4 availability. Both changed book-pack cache busters advance in the student page and dashboard; the stamp trio and dashboard auth link remain synchronized. Existing 48 PU3 flashcards and the missing-page guard are retained. Production is not updated by this release.
 
-Production release 2026-10-15a promotes the validated preview b63a306 content and 48 flashcards, including the 2026-10-14m registry correction (PU1 Unit 2 removes pages 24/25; PU2 Unit 4 exposes page 47). It is built on origin/main without merging preview history or closing the isolated preview API PR. Production config/API routing, the already-enabled mixed exercise gate and dashboard cache busters are retained. New curriculum/widget/CSS/translation cache busters and all version stamps advance together. Existing students, SR keys, backend/data and page 109 content remain intact. Production Pages and Azure deployment plus served-file checks are required before completion.
-
-
 Preview release 2026-10-15a publishes only the approved PU2 Unit 1 22 M/24 F boards. The non-spelling curriculum cache buster advances with the synchronized stamp trio and dashboard auth link. Production and isolated preview API/data remain unchanged; PU2 Unit 2 is still a review-only proposal.
 
 Preview release 2026-10-15b publishes the approved PU2 Unit 2 typed boards and Tuesday/Monday pair correction. The book-pack and non-spelling curriculum cache busters advance with the synchronized stamp trio and dashboard auth link. Production and isolated preview API/data are unchanged; Unit 3 remains review-only.
@@ -354,7 +374,11 @@ Preview release 2026-10-16a publishes approved PU2 Unit 8 boards with the teache
 
 Preview release 2026-10-16b publishes approved PU2 Unit 9 with all teacher annotations, expanded grammar blanks and F22/F23 omitted. The curriculum cache buster and synchronized version/auth/index/dashboard stamps advance together. All nine PU2 units are prepared for the explicitly authorized production promotion using a separate production-based worktree.
 
-Production release 2026-10-16b promotes all approved PU2 Units 1-9: 236 missing-word boards and 291 find-fix exercises, the Tuesday/Monday pair fix and answer-length support for granddaughter. It is based on current origin/main in a separate production worktree, preserving production API/config and all prior PU3 content/images. Curriculum/widget and synchronized auth/version/index/dashboard stamps advance together. Preview is verified before pushing origin/main; production Pages and Azure workflows plus hosted-file checks are then verified independently.
+Preview release 2026-10-19a adds the approved PU1 Units 0-1 31 M/38 F boards. The non-spelling curriculum cache buster advances with the synchronized version/auth/index stamps and dashboard auth link. The release builds on current preview main, retaining its vocabulary and speech updates. Production and isolated preview data are unchanged; Unit 2 is a proposal.
+
+Preview release 2026-10-19b publishes the approved PU1 Unit 2 26 M/36 F boards. The curriculum cache buster advances with the synchronized version/auth/index stamps and dashboard auth link. Existing preview API/data and production are unchanged; Unit 3 remains a review draft.
+
+Preview release 2026-10-19c publishes approved PU1 Unit 3 28 M/36 F boards. The curriculum cache buster advances with the synchronized version/auth/index stamps and dashboard auth link. Production and the isolated preview API/data are unchanged; Unit 4 is a review proposal.
 
 
 ## Speech collection extension (19 October 2026)
@@ -369,6 +393,20 @@ advances to 4. Production and preview are released from their own current
 histories, retaining their curriculum and API routing. Verify live reopening
 and the new cutoff without uploading synthetic audio to production.
 
-## Handwriting skip production release (21 October 2026)
+Preview release 2026-10-19e publishes approved PU1 Unit 4 22 M/32 F boards with all teacher annotations applied. The curriculum cache buster, version/auth/index stamps and dashboard auth link advance together. Production and isolated preview API/data are unchanged.
 
-Release `2026-10-21a` promotes the preview-tested Round C per-word handwriting skip button, labelled `跳过这个词的书写` (skip writing this word). Apply only the feature patch on current production main, preserving production curriculum, API routing and data. Synchronize the version/auth/index stamps and dashboard auth link, refresh the Study Mode cache buster, run the full root test suite, then push explicitly to `origin/main`. Verify both Pages and Azure workflows succeed, compare hosted files against committed bytes, and exercise the skip flow on the live site with API calls intercepted.
+Preview release 2026-10-20b publishes the approved PU1 Unit 5 28 M/36 F boards with contextual toy/shape clues, longer locked prefixes and plural repairs. Build on current preview main to retain the dashboard updates. Refresh the curriculum cache buster in both the app and dashboard, synchronize version/auth/index stamps and the dashboard auth link, and verify hosted files after Pages succeeds. Production and isolated preview API/data are unchanged.
+
+Preview release 2026-10-21a adds the Round C per-word handwriting skip button, labelled `跳过这个词的书写` (skip writing this word). It retains the current preview curriculum and API configuration. Refresh the Study Mode cache buster, synchronize version/auth/index stamps, and verify the hosted files and skip flow after Pages succeeds.
+
+The narrow preview offline worker reuses the checked model cache instead of
+downloading the model a second time during installation.
+
+Preview release 2026-10-23a adds the approved PU1 Unit 6 32 M/46 F boards with all teacher edits and there/their/they're practice. Retain current preview handwriting updates, feature gates and isolated API/data. Synchronize version/auth/index stamps and the dashboard auth link, refresh both app/dashboard curriculum cache busters, and verify hosted files after Pages succeeds. Production is unchanged.
+
+Preview release 2026-10-23d adds approved PU1 Unit 7 28 M/36 F boards and locked-ending support for the teacher's swimming-pool blank. Retain current preview handwriting updates and isolated API/data. Synchronize version/auth/index/dashboard stamps, refresh curriculum cache busters in both entry pages and the shared widget cache buster in index, then verify hosted files after Pages succeeds. Production and Unit 8 content are unchanged.
+
+
+## Cancellation target correction (2026-10-27a)
+
+New class cancellations add 10 sessions as well as seven days to the existing group target. Existing cancellation receipts remain unchanged. Publish independently on current preview/production histories, retaining their curriculum, routes and data; deploy the existing PR #1 API before promoting production. Synchronize the stamp trio and dashboard auth/calendar/core cache busters. Verify the served rule and cancellation retry behaviour without altering real student attendance.

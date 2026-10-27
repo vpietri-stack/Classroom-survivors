@@ -105,6 +105,21 @@ These exist because their contracts were broken in production; treat failures as
 
 ## Out-of-chain test families (not in `npm test`)
 
+- `node test_preview_notes_api.js` drives the real `saveAnalytics` handler with
+  a bounded fake database/auth transport. It covers a completed normal Study
+  event and SR delta, durable preview-note completion in the same etag write,
+  a competing-writer retry, duplicate acknowledgement and one session credit,
+  plus retention after analytics archival. No live/preview API or child data is
+  used by this focused test.
+- `test_interactive_notes_poc.js` and `test_interactive_notes_poc_browser.js`
+  cover the listening-only PU3 U9 p111 original four-page note. They verify every
+  hotspot and its word/sentence audio, all 31 MP3 decodes, natural audio playback,
+  stop/replay/speed/error handling, page zoom and 320px layout, and no model,
+  microphone, progress writes or API/external calls. Browser tests expect a root
+  static server at `127.0.0.1:8093`; an explicit page URL can be passed. See
+  [test boundaries](../interactive-notes-poc.md). The earlier speech-specific POC
+  tests were removed with that superseded interface.
+
 - `test_new_exercises_poc_browser.js` — standalone POC browser checks. Run
   `node test_new_exercises_poc_browser.js` to use the local HTML file, or pass a
   served URL as its first argument. Uses installed Chrome and Playwright. Covers
@@ -219,9 +234,6 @@ test_non_spelling_startup.js reproduces the PU1 pages 24/25 crash, exercises sel
 
 The startup regression now asserts that every advertised real page has content, the exact corrected PU1/PU2 page lists, PU2 p47 selection and future-page exclusion at p46. Missing PU1 pages 24/25 are reintroduced only inside isolated test contexts to retain the crash regression. Real Study-button tests include PU2 p47 on desktop and 319px.
 
-Production promotion 2026-10-15a runs the complete preview-expanded suite against the production gate/config, including all 432 newly authored boards, original page-109 fixtures, immutable initials/contractions, 48 image assets and corrected PU1/PU2 availability. Production-enabled, unrelated-site exclusion and nonspelling=0 assertions are retained from the production test footer.
-
-
 PU2 Unit 1 coverage enforces the approved 22 M/24 F totals and per-page counts, excluded planet items, school-clothes/rocks edits, prefix validity, unique SR keys and future-page exclusion. Chrome solves each of the 46 boards through the real widget at 319px, alongside the existing PU3 coverage.
 
 PU2 Unit 2 tests cover the 24/28 totals, page placement, approved weekday wording/answers, locked initials, unique SR keys, future-page exclusion and the Tuesday/Monday matching correction. Chrome solves all 52 additional boards at 319px alongside PU2 Unit 1 and PU3.
@@ -239,6 +251,20 @@ PU2 Unit 7 coverage checks 28 M/36 F and per-page totals, M1 exact edited wordin
 PU2 Unit 8 coverage checks 29 M/39 F and per-page totals, all edited sentences/answers/prefixes, excluded M30/F40, unique scoped identities, future-page exclusion and varied rounds. Chrome solves all 68 additions at 319px alongside previous boards.
 
 PU2 Unit 9 coverage checks 28 M/34 F, per-page totals, exact edited grammar targets/prefixes, seven-blank M14, single-sentence M13, revised feedback prompts, excluded F22/F23, unique identities, future-page exclusion and varied rounds. Chrome solves all 62 additions at 319px alongside earlier PU2/PU3 content.
+
+PU1 Units 0-1 coverage checks all 69 approved boards, per-page totals, prefix validity, unique SR identities, varied five-board rounds, future-page exclusion and the exact M12 blanks. The real-app Chrome integration solves each added board at 319px alongside all earlier PU2/PU3 boards.
+
+PU1 Unit 2 checks cover all 62 boards, exact per-page counts, complete unique IDs, mixed four-blank prefixes, senses grouping under page 26, contraction targets, scoped SR identities, future-page exclusion and varied rounds. All 62 additions are solved through the real app widget at 319px alongside earlier boards.
+
+PU1 Unit 3 checks cover all 64 boards, per-page placement, complete unique IDs, prefix validity, exact inline emotion symbols, alpaca facts, product/come-comes contrasts, scoped SR identities, future-page exclusion and varied rounds. All additions are solved through the real app widget at 319px alongside earlier boards.
+
+PU1 Unit 4 checks enforce 54 boards and per-page totals, M21/M23 exclusions, complete retained IDs, exact M16 breakfast wording with no hot-dog symbols, exact F22 grapeballs repair, three-blank and mixed-prefix boards, unique SR keys, round variety and future-page exclusion. Chrome solves every addition through the real app widget at 319px alongside earlier content.
+
+PU1 Unit 5 checks enforce 28 M/36 F and per-page counts, complete IDs, prefix validity, simple contextual clues, the revised plurals, unique scoped SR keys, round variety and future-page exclusion. Chrome solves every addition at 319px. Dedicated Study/game checks exercise M14's longer ballo/heli prefixes, the exact suffix-only keyboard, prefix retention through backspace/CLEAR and on-screen completion.
+
+PU1 Unit 6 checks enforce 32 M/46 F and per-page counts, exact revised M4/M6/M11/M12 wording, excluded habitat IDs, complete retained IDs, valid locked prefixes, distinct SR keys, future-page exclusion and round variety. All 78 additions solve through the real widget at 319px. Dedicated Study/game checks reject there/their/they're in the wrong grammatical roles, retain unhinted boxes and the apostrophe key, then accept the intended answers from on-screen input.
+
+PU1 Unit 7 checks enforce 28 M/36 F and per-page counts, complete IDs, exact teacher-edited M1/M3/M4/M17 answers and hints, valid suffixes, scoped SR identities and future-page exclusion. Chrome solves all additions at 319px. Study/game suffix checks cover visible locked ming, editable-only keyboard letters, empty-check nudges, per-letter failure feedback, timed retry, backspace/CLEAR and successful full-word grading from on-screen input.
 
 
 ## Remote incident diagnostics (2026-10-23)

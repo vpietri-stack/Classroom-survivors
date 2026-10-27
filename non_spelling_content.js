@@ -1343,7 +1343,714 @@
         }
     };
 
-    const pageCatalogs = { 'PU2:9:107': pu2Unit9Catalogs[107], 'PU2:9:109': pu2Unit9Catalogs[109], 'PU2:9:116': pu2Unit9Catalogs[116], 'PU2:9:119': pu2Unit9Catalogs[119], 'PU2:8:95': pu2Unit8Catalogs[95], 'PU2:8:96': pu2Unit8Catalogs[96], 'PU2:8:97': pu2Unit8Catalogs[97], 'PU2:8:98': pu2Unit8Catalogs[98], 'PU2:8:104': pu2Unit8Catalogs[104], 'PU2:7:83': pu2Unit7Catalogs[83], 'PU2:7:85': pu2Unit7Catalogs[85], 'PU2:7:87': pu2Unit7Catalogs[87], 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
+    // PU1 Units 0-1: teacher-approved Hello and school boards.
+    const pu1Unit0Catalogs = {
+        5: {
+            missing: [
+                {"id": "M1", "sentences": ["___ your name?", "___ old are you?"], "answers": ["what's", "how"]},
+                {"id": "M2", "sentences": ["What's ___ name?", "How old ___ you?"], "answers": ["your", "are"]},
+                {"id": "M3", "sentences": ["I'm 1. I'm ___.", "I'm 2. I'm ___."], "answers": ["one", "two"], "prefixes": ["o", "t"]},
+                {"id": "M4", "sentences": ["I'm 3. I'm ___.", "I'm 4. I'm ___."], "answers": ["three", "four"], "prefixes": ["t", "f"]},
+                {"id": "M5", "sentences": ["I'm 5. I'm ___.", "I'm 6. I'm ___."], "answers": ["five", "six"], "prefixes": ["f", "s"]},
+                {"id": "M6", "sentences": ["I'm 7. I'm ___.", "I'm 8. I'm ___."], "answers": ["seven", "eight"], "prefixes": ["s", "e"]},
+                {"id": "M7", "sentences": ["I'm 9. I'm ___.", "I'm 10. I'm ___."], "answers": ["nine", "ten"], "prefixes": ["n", "t"]},
+                {"id": "M8", "sentences": ["🟥 It's ___.", "🟦 It's ___."], "answers": ["red", "blue"], "prefixes": ["r", "b"]},
+                {"id": "M9", "sentences": ["🟨 It's ___.", "🟩 It's ___."], "answers": ["yellow", "green"], "prefixes": ["y", "g"]},
+            ],
+            fix: [
+                {"id": "F1", "sentence": "What your name?", "wrongWord": "what", "answer": "what's"},
+                {"id": "F2", "sentence": "How name are you?", "wrongWord": "name", "answer": "old"},
+                {"id": "F3", "sentence": "How old is you?", "wrongWord": "is", "answer": "are"},
+                {"id": "F4", "sentence": "What's you name?", "wrongWord": "you", "answer": "your"},
+                {"id": "F5", "sentence": "3 = four.", "wrongWord": "four", "answer": "three"},
+                {"id": "F6", "sentence": "8 = six.", "wrongWord": "six", "answer": "eight"},
+                {"id": "F7", "sentence": "🟥 This is blue.", "wrongWord": "blue", "answer": "red"},
+                {"id": "F8", "sentence": "🟦 This is green.", "wrongWord": "green", "answer": "blue"},
+            ],
+        },
+        7: {
+            missing: [
+                {"id": "M10", "sentences": ["___ bag is red.", "The pen ___ blue."], "answers": ["the", "is"]},
+                {"id": "M11", "sentences": ["📘 This is a ___.", "✏️ This is a ___."], "answers": ["book", "pencil"], "prefixes": ["b", "p"]},
+            ],
+            fix: [
+                {"id": "F9", "sentence": "The bag are red.", "wrongWord": "are", "answer": "is"},
+                {"id": "F10", "sentence": "✏️ This is a book.", "wrongWord": "book", "answer": "pencil"},
+            ],
+        },
+        8: {
+            missing: [
+                {"id": "M12", "sentences": ["___ my bag?", "___ in the box."], "answers": ["where's", "it's"]},
+                {"id": "M13", "sentences": ["The pen is next ___ the book.", "___ is my bag? It's under the desk."], "answers": ["to", "where"]},
+            ],
+            fix: [
+                {"id": "F11", "sentence": "Where the bag?", "wrongWord": "where", "answer": "where's"},
+                {"id": "F12", "sentence": "Where are my bag?", "wrongWord": "are", "answer": "is"},
+                {"id": "F13", "sentence": "The pen is next on the book.", "wrongWord": "on", "answer": "to"},
+                {"id": "F14", "sentence": "Where's my book? They're in the bag.", "wrongWord": "they're", "answer": "it's"},
+            ],
+        },
+    };
+    const pu1Unit1Catalogs = {
+        9: {
+            missing: [
+                {"id": "M1", "sentences": ["The book ___ on the desk.", "The books ___ on the desk."], "answers": ["is", "are"]},
+                {"id": "M2", "sentences": ["The pencil ___ in the bag.", "The pencils ___ in the bag."], "answers": ["is", "are"]},
+                {"id": "M3", "sentences": ["Where ___ the rubber?", "Where ___ the rubbers?"], "answers": ["is", "are"]},
+                {"id": "M4", "sentences": ["Where's the book? ___ on the desk.", "Where are the books? ___ in the bag."], "answers": ["it's", "they're"]},
+            ],
+            fix: [
+                {"id": "F1", "sentence": "The book are on the desk.", "wrongWord": "are", "answer": "is"},
+                {"id": "F2", "sentence": "The pencils is in the bag.", "wrongWord": "is", "answer": "are"},
+                {"id": "F3", "sentence": "Where is the rubbers?", "wrongWord": "is", "answer": "are"},
+                {"id": "F4", "sentence": "Where are the crayons? It's in the pencil case.", "wrongWord": "it's", "answer": "they're"},
+            ],
+        },
+        10: {
+            missing: [
+                {"id": "M5", "sentences": ["I draw a straight line with a ___.", "I write on ___."], "answers": ["ruler", "paper"], "prefixes": ["r", "p"]},
+                {"id": "M6", "sentences": ["Open the ___.", "Look out of the ___."], "answers": ["door", "window"], "prefixes": ["d", "w"]},
+            ],
+            fix: [
+                {"id": "F5", "sentence": "I use a rubber to draw straight lines.", "wrongWord": "rubber", "answer": "ruler"},
+                {"id": "F6", "sentence": "I use a ruler to rub out pencil marks.", "wrongWord": "ruler", "answer": "rubber"},
+                {"id": "F7", "sentence": "The books is in the bookcase.", "wrongWord": "is", "answer": "are"},
+                {"id": "F8", "sentence": "The ruler is next on the book.", "wrongWord": "on", "answer": "to"},
+            ],
+        },
+        11: {
+            missing: [
+                {"id": "M7", "sentences": ["What's ___? It's a window.", "What are ___? They're windows."], "answers": ["this", "these"]},
+                {"id": "M8", "sentences": ["What ___ this? It's a door.", "What ___ these? They're doors."], "answers": ["is", "are"]},
+                {"id": "M9", "sentences": ["What's this? ___ a cupboard.", "What are these? ___ cupboards."], "answers": ["it's", "they're"]},
+                {"id": "M10", "sentences": ["One ruler. Two ___.", "One bookcase. Three ___."], "answers": ["rulers", "bookcases"], "prefixes": ["r", "b"]},
+            ],
+            fix: [
+                {"id": "F9", "sentence": "What's these? It's a cupboard.", "wrongWord": "these", "answer": "this"},
+                {"id": "F10", "sentence": "What are this? They're windows.", "wrongWord": "this", "answer": "these"},
+                {"id": "F11", "sentence": "It's a rulers.", "wrongWord": "rulers", "answer": "ruler"},
+                {"id": "F12", "sentence": "They're three window.", "wrongWord": "window", "answer": "windows"},
+                {"id": "F13", "sentence": "These is my crayons.", "wrongWord": "is", "answer": "are"},
+                {"id": "F14", "sentence": "This are my ruler.", "wrongWord": "are", "answer": "is"},
+            ],
+        },
+        12: {
+            missing: [
+                {"id": "M11", "sentences": ["Are ___ OK?", "Yes, ___ you."], "answers": ["you", "thank"]},
+                {"id": "M12", "sentences": ["Here you ___!", "___ you very much."], "answers": ["are", "thank"]},
+            ],
+            fix: [
+                {"id": "F15", "sentence": "Are you OK? Yes, thanks you.", "wrongWord": "thanks", "answer": "thank"},
+                {"id": "F16", "sentence": "Here you is!", "wrongWord": "is", "answer": "are"},
+            ],
+        },
+        13: {
+            missing: [
+                {"id": "M13", "sentences": ["I ___ to the teacher.", "We work ___."], "answers": ["listen", "together"], "prefixes": ["l", "t"]},
+                {"id": "M14", "sentences": ["I ___ my book.", "I ___ my classmates."], "answers": ["share", "help"], "prefixes": ["s", "h"]},
+            ],
+            fix: [
+                {"id": "F17", "sentence": "I listen at the teacher.", "wrongWord": "at", "answer": "to"},
+                {"id": "F18", "sentence": "I share me book.", "wrongWord": "me", "answer": "my"},
+            ],
+        },
+        16: {
+            missing: [
+                {"id": "M15", "sentences": ["I am Jim. ___ Jim.", "You are Jenny. ___ Jenny."], "answers": ["i'm", "you're"]},
+                {"id": "M16", "sentences": ["He is Jim. ___ Jim.", "She is Jenny. ___ Jenny."], "answers": ["he's", "she's"]},
+                {"id": "M17", "sentences": ["We are friends. ___ friends.", "They are teachers. ___ teachers."], "answers": ["we're", "they're"]},
+                {"id": "M18", "sentences": ["It is a pen. ___ a pen.", "It is not a ruler. It ___ a ruler."], "answers": ["it's", "isn't"]},
+            ],
+            fix: [
+                {"id": "F19", "sentence": "I are Jim.", "wrongWord": "are", "answer": "am"},
+                {"id": "F20", "sentence": "You is my teacher.", "wrongWord": "is", "answer": "are"},
+                {"id": "F21", "sentence": "He are in the classroom.", "wrongWord": "are", "answer": "is"},
+                {"id": "F22", "sentence": "We is in the playground.", "wrongWord": "is", "answer": "are"},
+                {"id": "F23", "sentence": "They isn't my crayons.", "wrongWord": "isn't", "answer": "aren't"},
+                {"id": "F24", "sentence": "This aren't my bag.", "wrongWord": "aren't", "answer": "isn't"},
+            ],
+        },
+    };
+
+    // PU1 Unit 2: approved family, body, have-got and senses boards.
+    const pu1Unit2Catalogs = {
+        19: {
+            missing: [
+                {"id": "M1", "sentences": ["Mr. Friendly is Jim's ___.", "Ms. Friendly is Jenny's ___."], "answers": ["father", "mother"], "prefixes": ["f", "m"]},
+                {"id": "M2", "sentences": ["Jim is Jenny's ___.", "Jenny is Jim's ___."], "answers": ["brother", "sister"], "prefixes": ["b", "s"]},
+                {"id": "M3", "sentences": ["Grandfather = ___.", "Grandmother = ___."], "answers": ["grandpa", "grandma"], "prefixes": ["g", "g"]},
+                {"id": "M4", "sentences": ["Dad = ___.", "Mum = ___."], "answers": ["father", "mother"], "prefixes": ["f", "m"]},
+            ],
+            fix: [
+                {"id": "F1", "sentence": "Mr. Friendly is Jim's mother.", "wrongWord": "mother", "answer": "father"},
+                {"id": "F2", "sentence": "Ms. Friendly is Jenny's father.", "wrongWord": "father", "answer": "mother"},
+                {"id": "F3", "sentence": "Jim is Jenny's sister.", "wrongWord": "sister", "answer": "brother"},
+                {"id": "F4", "sentence": "Jenny is Jim's brother.", "wrongWord": "brother", "answer": "sister"},
+            ],
+        },
+        20: {
+            missing: [
+                {"id": "M5", "sentences": ["This is Henrietta. She ___ Rocky's mother.", "Harry is Rocky's friend. He ___ Rocky's brother."], "answers": ["is", "isn't"]},
+                {"id": "M6", "sentences": ["These animals ___ Rocky's family.", "Shelly ___ his friend."], "answers": ["aren't", "is"]},
+            ],
+            fix: [
+                {"id": "F5", "sentence": "Henrietta is Rocky's father.", "wrongWord": "father", "answer": "mother"},
+                {"id": "F6", "sentence": "Shelly isn't Rocky's friend.", "wrongWord": "isn't", "answer": "is"},
+                {"id": "F7", "sentence": "Harry are Rocky's friend.", "wrongWord": "are", "answer": "is"},
+                {"id": "F8", "sentence": "These animals isn't Rocky's family.", "wrongWord": "isn't", "answer": "aren't"},
+            ],
+        },
+        21: {
+            missing: [
+                {"id": "M7", "sentences": ["Who ___ she? She's Jenny.", "___ he? He's Jim."], "answers": ["is", "who's"]},
+                {"id": "M8", "sentences": ["This is Jim. ___ a boy.", "This is Jenny. ___ a girl."], "answers": ["he's", "she's"]},
+                {"id": "M9", "sentences": ["___ is my brother, Jim.", "___ is my sister, Jenny."], "answers": ["he", "she"]},
+                {"id": "M10", "sentences": ["Jim is a ___.", "Jenny is a ___."], "answers": ["boy", "girl"], "prefixes": ["b", "g"]},
+            ],
+            fix: [
+                {"id": "F9", "sentence": "This is my mother. He's a woman.", "wrongWord": "he's", "answer": "she's"},
+                {"id": "F10", "sentence": "This is my father. She's a man.", "wrongWord": "she's", "answer": "he's"},
+                {"id": "F11", "sentence": "Who are she? She's Jenny.", "wrongWord": "are", "answer": "is"},
+                {"id": "F12", "sentence": "This is my brother. They're a boy.", "wrongWord": "they're", "answer": "he's"},
+            ],
+        },
+        22: {
+            missing: [
+                {"id": "M11", "sentences": ["I put a hat on my ___.", "I wear shoes on my ___."], "answers": ["head", "feet"], "prefixes": ["h", "f"]},
+                {"id": "M12", "sentences": ["I clap my ___.", "I close my ___."], "answers": ["hands", "eyes"], "prefixes": ["h", "e"]},
+                {"id": "M13", "sentences": ["I open my ___.", "I touch my ___."], "answers": ["mouth", "nose"], "prefixes": ["m", "n"]},
+                {"id": "M14", "sentences": ["One foot. Two ___.", "One hand. Two ___."], "answers": ["feet", "hands"], "prefixes": ["f", "h"]},
+                {"id": "M15", "sentences": ["One arm. Two ___.", "One leg. Two ___."], "answers": ["arms", "legs"], "prefixes": ["a", "l"]},
+                {"id": "M16", "sentences": ["Cameron is a cat. He's got a ___.", "I've got brown ___."], "answers": ["tail", "hair"], "prefixes": ["t", "h"]},
+            ],
+            fix: [
+                {"id": "F13", "sentence": "I wear shoes on my hands.", "wrongWord": "hands", "answer": "feet"},
+                {"id": "F14", "sentence": "I've got two foot.", "wrongWord": "foot", "answer": "feet"},
+                {"id": "F15", "sentence": "I've got one ears.", "wrongWord": "ears", "answer": "ear"},
+                {"id": "F16", "sentence": "I've got two hand.", "wrongWord": "hand", "answer": "hands"},
+                {"id": "F17", "sentence": "I've got two leg.", "wrongWord": "leg", "answer": "legs"},
+                {"id": "F18", "sentence": "I've got one noses.", "wrongWord": "noses", "answer": "nose"},
+                {"id": "F19", "sentence": "My eyes are on my feet.", "wrongWord": "feet", "answer": "face"},
+                {"id": "F20", "sentence": "Cameron is a cat. He's got a ruler.", "wrongWord": "ruler", "answer": "tail"},
+            ],
+        },
+        23: {
+            missing: [
+                {"id": "M17", "sentences": ["I've ___ brown hair.", "I ___ got a tail."], "answers": ["got", "haven't"]},
+                {"id": "M18", "sentences": ["I ___ got two eyes.", "I ___ got four eyes."], "answers": ["have", "haven't"]},
+                {"id": "M19", "sentences": ["___ you got a sister?", "___ he got a brother?"], "answers": ["have", "has"]},
+                {"id": "M20", "sentences": ["I have got blue eyes. ___ got blue eyes.", "They have got brown hair. ___ got brown hair."], "answers": ["i've", "they've"]},
+            ],
+            fix: [
+                {"id": "F21", "sentence": "I has got brown hair.", "wrongWord": "has", "answer": "have"},
+                {"id": "F22", "sentence": "They has got blue eyes.", "wrongWord": "has", "answer": "have"},
+                {"id": "F23", "sentence": "Have you get a brother?", "wrongWord": "get", "answer": "got"},
+                {"id": "F24", "sentence": "Has she got two eye?", "wrongWord": "eye", "answer": "eyes"},
+                {"id": "F25", "sentence": "I haven't get a tail.", "wrongWord": "get", "answer": "got"},
+                {"id": "F26", "sentence": "The children hasn't got green hair.", "wrongWord": "hasn't", "answer": "haven't"},
+            ],
+        },
+        26: {
+            missing: [
+                {"id": "M21", "sentences": ["I haven't got a tail. My sister ___ got a tail.", "I've got two hands. My brother ___ got two hands."], "answers": ["hasn't", "has"]},
+                {"id": "M22", "sentences": ["We ___ got two feet.", "A cat ___ got four feet."], "answers": ["have", "has"]},
+                {"id": "M23", "sentences": ["This is my brother. ___ a boy.", "These are my sisters. ___ girls."], "answers": ["he's", "they're"]},
+                {"id": "M24", "sentences": ["My sister ___ got brown hair and blue ___.", "My brothers ___ got black hair and brown ___."], "answers": ["has", "eyes", "have", "eyes"], "prefixes": ["", "e", "", "e"]},
+                {"id": "M25", "sentences": ["I ___ with my eyes.", "I ___ with my ears.", "I ___ things with my hands."], "answers": ["see", "hear", "touch"], "prefixes": ["s", "h", "t"]},
+                {"id": "M26", "sentences": ["I ___ with my nose.", "I ___ food with my mouth."], "answers": ["smell", "taste"], "prefixes": ["s", "t"]},
+            ],
+            fix: [
+                {"id": "F27", "sentence": "She have got long hair.", "wrongWord": "have", "answer": "has"},
+                {"id": "F28", "sentence": "He haven't got a tail.", "wrongWord": "haven't", "answer": "hasn't"},
+                {"id": "F29", "sentence": "We has got two feet.", "wrongWord": "has", "answer": "have"},
+                {"id": "F30", "sentence": "The robot have got a blue head.", "wrongWord": "have", "answer": "has"},
+                {"id": "F31", "sentence": "My brothers has got brown eyes.", "wrongWord": "has", "answer": "have"},
+                {"id": "F32", "sentence": "My eyes is blue.", "wrongWord": "is", "answer": "are"},
+                {"id": "F33", "sentence": "I see with my ears.", "wrongWord": "ears", "answer": "eyes"},
+                {"id": "F34", "sentence": "I hear with my eyes.", "wrongWord": "eyes", "answer": "ears"},
+                {"id": "F35", "sentence": "I smell with my feet.", "wrongWord": "feet", "answer": "nose"},
+                {"id": "F36", "sentence": "I taste food with my ears.", "wrongWord": "ears", "answer": "mouth"},
+            ],
+        },
+    };
+
+    // PU1 Unit 3: approved farm animals, descriptions and animal products.
+    const pu1Unit3Catalogs = {
+        31: {
+            missing: [
+                {"id": "M1", "sentences": ["Harry is a ___.", "Cameron is a ___."], "answers": ["horse", "cat"], "prefixes": ["h", "c"]},
+                {"id": "M2", "sentences": ["Gracie is a ___.", "Shelly is a ___."], "answers": ["goat", "sheep"], "prefixes": ["g", "s"]},
+                {"id": "M3", "sentences": ["A ___ has got eight legs.", "A ___ says \"quack\"."], "answers": ["spider", "duck"], "prefixes": ["s", "d"]},
+                {"id": "M4", "sentences": ["Henrietta is a ___.", "Rocky is a ___."], "answers": ["hen", "rooster"], "prefixes": ["h", "r"]},
+            ],
+            fix: [
+                {"id": "F1", "sentence": "Harry is a cow.", "wrongWord": "cow", "answer": "horse"},
+                {"id": "F2", "sentence": "Cameron is a dog.", "wrongWord": "dog", "answer": "cat"},
+                {"id": "F3", "sentence": "Gracie is a sheep.", "wrongWord": "sheep", "answer": "goat"},
+                {"id": "F4", "sentence": "Shelly is a goat.", "wrongWord": "goat", "answer": "sheep"},
+            ],
+        },
+        32: {
+            missing: [
+                {"id": "M5", "sentences": ["Harry is ___.", "Rocky's spider is ___."], "answers": ["big", "small"], "prefixes": ["b", "s"]},
+                {"id": "M6", "sentences": ["Gracie isn't young. She's ___.", "Rocky's brother and sister aren't old. They're ___."], "answers": ["old", "young"], "prefixes": ["o", "y"]},
+            ],
+            fix: [
+                {"id": "F5", "sentence": "Harry is a small horse.", "wrongWord": "small", "answer": "big"},
+                {"id": "F6", "sentence": "Gracie is young. She's an old goat.", "wrongWord": "young", "answer": "old"},
+            ],
+        },
+        33: {
+            missing: [
+                {"id": "M7", "sentences": ["A horse ___ big.", "The horses ___ big."], "answers": ["is", "are"]},
+                {"id": "M8", "sentences": ["This book isn't old. It's ___.", "This cat isn't old. It's ___."], "answers": ["new", "young"], "prefixes": ["n", "y"]},
+                {"id": "M9", "sentences": ["The donkey has got ___ ears.", "The sheep has got a ___ tail."], "answers": ["long", "short"], "prefixes": ["l", "s"]},
+                {"id": "M10", "sentences": ["It's ___ old cat.", "It's ___ young cat."], "answers": ["an", "a"]},
+            ],
+            fix: [
+                {"id": "F7", "sentence": "It's an small spider.", "wrongWord": "an", "answer": "a"},
+                {"id": "F8", "sentence": "It's a old cat.", "wrongWord": "a", "answer": "an"},
+                {"id": "F9", "sentence": "The horses is big.", "wrongWord": "is", "answer": "are"},
+                {"id": "F10", "sentence": "The donkey have got long ears.", "wrongWord": "have", "answer": "has"},
+                {"id": "F11", "sentence": "It's a young cats.", "wrongWord": "cats", "answer": "cat"},
+                {"id": "F12", "sentence": "They're small horse.", "wrongWord": "horse", "answer": "horses"},
+            ],
+        },
+        34: {
+            missing: [
+                {"id": "M11", "sentences": ["The dog isn't sad. It's ___.", "The cat isn't happy. It's ___."], "answers": ["happy", "sad"], "prefixes": ["h", "s"]},
+                {"id": "M12", "sentences": ["He's a ___ dog. He makes me laugh.", "It's an ___ cat. Don't touch it!"], "answers": ["funny", "angry"], "prefixes": ["f", "a"]},
+                {"id": "M13", "sentences": ["The dog isn't ugly. It's ___.", "This spider isn't beautiful. It's ___."], "answers": ["beautiful", "ugly"], "prefixes": ["b", "u"]},
+                {"id": "M14", "sentences": ["It's ___ angry cat.", "It's ___ happy dog."], "answers": ["an", "a"]},
+            ],
+            fix: [
+                {"id": "F13", "sentence": "😊 It's a sad dog.", "wrongWord": "sad", "answer": "happy"},
+                {"id": "F14", "sentence": "😠 It's a happy cat.", "wrongWord": "happy", "answer": "angry"},
+                {"id": "F15", "sentence": "She's a angry cat.", "wrongWord": "a", "answer": "an"},
+                {"id": "F16", "sentence": "He's an happy dog.", "wrongWord": "an", "answer": "a"},
+            ],
+        },
+        35: {
+            missing: [
+                {"id": "M15", "sentences": ["My dog ___ got a long tail.", "My dogs ___ got long tails."], "answers": ["has", "have"]},
+                {"id": "M16", "sentences": ["A donkey ___ got long ears.", "A donkey ___ got short ears."], "answers": ["has", "hasn't"]},
+                {"id": "M17", "sentences": ["___ it got a long face?", "___ they got long ears?"], "answers": ["has", "have"]},
+                {"id": "M18", "sentences": ["It has got a big body. ___ got a big body.", "It has not got small feet. It ___ got small feet."], "answers": ["it's", "hasn't"]},
+            ],
+            fix: [
+                {"id": "F17", "sentence": "My dog have got a long tail.", "wrongWord": "have", "answer": "has"},
+                {"id": "F18", "sentence": "My dogs has got long tails.", "wrongWord": "has", "answer": "have"},
+                {"id": "F19", "sentence": "Has it get a long face?", "wrongWord": "get", "answer": "got"},
+                {"id": "F20", "sentence": "Have it got long ears?", "wrongWord": "have", "answer": "has"},
+                {"id": "F21", "sentence": "It haven't got small feet.", "wrongWord": "haven't", "answer": "hasn't"},
+                {"id": "F22", "sentence": "My donkey has got two long ear.", "wrongWord": "ear", "answer": "ears"},
+            ],
+        },
+        36: {
+            missing: [
+                {"id": "M19", "sentences": ["The ___ comes from cows.", "These ___ come from chickens."], "answers": ["milk", "eggs"], "prefixes": ["m", "e"]},
+                {"id": "M20", "sentences": ["The ___ comes from bees.", "This ___ comes from sheep."], "answers": ["honey", "wool"], "prefixes": ["h", "w"]},
+                {"id": "M21", "sentences": ["Milk ___ from cows.", "Eggs ___ from chickens."], "answers": ["comes", "come"]},
+            ],
+            fix: [
+                {"id": "F23", "sentence": "Milk comes from bees.", "wrongWord": "bees", "answer": "cows"},
+                {"id": "F24", "sentence": "Eggs come from cows.", "wrongWord": "cows", "answer": "chickens"},
+                {"id": "F25", "sentence": "Honey comes from sheep.", "wrongWord": "sheep", "answer": "bees"},
+                {"id": "F26", "sentence": "Wool comes from chickens.", "wrongWord": "chickens", "answer": "sheep"},
+            ],
+        },
+        37: {
+            missing: [
+                {"id": "M22", "sentences": ["People use ___ to make clothes.", "We get wool from ___."], "answers": ["wool", "sheep"], "prefixes": ["w", "s"]},
+                {"id": "M23", "sentences": ["An alpaca has got four ___.", "It's got ___ hair."], "answers": ["legs", "long"], "prefixes": ["l", "l"]},
+                {"id": "M24", "sentences": ["Wool comes ___ sheep.", "Honey ___ from bees."], "answers": ["from", "comes"]},
+            ],
+            fix: [
+                {"id": "F27", "sentence": "An alpaca has got two legs.", "wrongWord": "two", "answer": "four"},
+                {"id": "F28", "sentence": "An alpaca has got short hair.", "wrongWord": "short", "answer": "long"},
+                {"id": "F29", "sentence": "Honey comes in bees.", "wrongWord": "in", "answer": "from"},
+                {"id": "F30", "sentence": "Eggs comes from chickens.", "wrongWord": "comes", "answer": "come"},
+            ],
+        },
+        43: {
+            missing: [
+                {"id": "M25", "sentences": ["One sheep. Two ___.", "One cow. Two ___."], "answers": ["sheep", "cows"], "prefixes": ["s", "c"]},
+                {"id": "M26", "sentences": ["It's a horse. ___ got a long tail.", "They're donkeys. ___ got long ears."], "answers": ["it's", "they've"]},
+                {"id": "M27", "sentences": ["My dog is happy. It ___ sad.", "My dogs are young. They ___ old."], "answers": ["isn't", "aren't"]},
+                {"id": "M28", "sentences": ["This is ___ old book.", "These ___ new books."], "answers": ["an", "are"]},
+            ],
+            fix: [
+                {"id": "F31", "sentence": "One sheep. Two sheeps.", "wrongWord": "sheeps", "answer": "sheep"},
+                {"id": "F32", "sentence": "The donkey has got four leg.", "wrongWord": "leg", "answer": "legs"},
+                {"id": "F33", "sentence": "These is my cows.", "wrongWord": "is", "answer": "are"},
+                {"id": "F34", "sentence": "This are my sheep.", "wrongWord": "are", "answer": "is"},
+                {"id": "F35", "sentence": "My cats isn't old.", "wrongWord": "isn't", "answer": "aren't"},
+                {"id": "F36", "sentence": "Milk come from cows.", "wrongWord": "come", "answer": "comes"},
+            ],
+        },
+    };
+
+    // PU1 Unit 4: approved food, likes/dislikes and polite request boards.
+    const pu1Unit4Catalogs = {
+        45: {
+            missing: [
+                {"id": "M1", "sentences": ["🍌 It's a ___.", "🍔 It's a ___."], "answers": ["banana", "burger"], "prefixes": ["b", "b"]},
+                {"id": "M2", "sentences": ["🍞 This is ___.", "🍫 This is ___."], "answers": ["bread", "chocolate"], "prefixes": ["b", "c"]},
+                {"id": "M3", "sentences": ["🎂 It's a ___.", "🥗 It's a ___."], "answers": ["cake", "salad"], "prefixes": ["c", "s"]},
+                {"id": "M4", "sentences": ["We make ___ with lemons and water.", "I drink ___."], "answers": ["lemonade", "water"], "prefixes": ["l", "w"]},
+                {"id": "M5", "sentences": ["🥭 It's a ___.", "🍗 This is ___."], "answers": ["mango", "chicken"], "prefixes": ["m", "c"]},
+            ],
+            fix: [
+                {"id": "F1", "sentence": "🍌 It's a burger.", "wrongWord": "burger", "answer": "banana"},
+                {"id": "F2", "sentence": "🍔 It's a banana.", "wrongWord": "banana", "answer": "burger"},
+                {"id": "F3", "sentence": "🍞 This is chocolate.", "wrongWord": "chocolate", "answer": "bread"},
+                {"id": "F4", "sentence": "🍫 This is bread.", "wrongWord": "bread", "answer": "chocolate"},
+                {"id": "F5", "sentence": "💧 This is lemonade.", "wrongWord": "lemonade", "answer": "water"},
+                {"id": "F6", "sentence": "🎂 It's a salad.", "wrongWord": "salad", "answer": "cake"},
+            ],
+        },
+        47: {
+            missing: [
+                {"id": "M6", "sentences": ["I ___ chocolate.", "She ___ chocolate."], "answers": ["like", "likes"]},
+                {"id": "M7", "sentences": ["We ___ bananas.", "He ___ bananas."], "answers": ["like", "likes"]},
+                {"id": "M8", "sentences": ["They ___ mangoes.", "My sister ___ mangoes."], "answers": ["like", "likes"]},
+                {"id": "M9", "sentences": ["___ you like bread?", "___ she like bread?"], "answers": ["do", "does"]},
+                {"id": "M10", "sentences": ["What ___ they like?", "What ___ Harry like?"], "answers": ["do", "does"]},
+                {"id": "M11", "sentences": ["👎 I ___ like chocolate.", "👎 He ___ like cake."], "answers": ["don't", "doesn't"]},
+                {"id": "M12", "sentences": ["👎 They ___ like chicken.", "👎 She ___ like burgers."], "answers": ["don't", "doesn't"]},
+            ],
+            fix: [
+                {"id": "F7", "sentence": "She like chocolate.", "wrongWord": "like", "answer": "likes"},
+                {"id": "F8", "sentence": "I likes bananas.", "wrongWord": "likes", "answer": "like"},
+                {"id": "F9", "sentence": "They likes bread.", "wrongWord": "likes", "answer": "like"},
+                {"id": "F10", "sentence": "My brother like mangoes.", "wrongWord": "like", "answer": "likes"},
+                {"id": "F11", "sentence": "Does you like chicken?", "wrongWord": "does", "answer": "do"},
+                {"id": "F12", "sentence": "Do she like cake?", "wrongWord": "do", "answer": "does"},
+                {"id": "F13", "sentence": "What do Harry like?", "wrongWord": "do", "answer": "does"},
+                {"id": "F14", "sentence": "He don't like chocolate.", "wrongWord": "don't", "answer": "doesn't"},
+                {"id": "F15", "sentence": "We doesn't like burgers.", "wrongWord": "doesn't", "answer": "don't"},
+                {"id": "F16", "sentence": "She doesn't likes salad.", "wrongWord": "likes", "answer": "like"},
+            ],
+        },
+        48: {
+            missing: [
+                {"id": "M13", "sentences": ["🍎 It's an ___.", "🍊 It's an ___."], "answers": ["apple", "orange"], "prefixes": ["a", "o"]},
+                {"id": "M14", "sentences": ["🍇 These are ___.", "Apples and bananas are ___."], "answers": ["grapes", "fruit"], "prefixes": ["g", "f"]},
+                {"id": "M15", "sentences": ["I drink orange ___.", "Chicken is ___."], "answers": ["juice", "meat"], "prefixes": ["j", "m"]},
+                {"id": "M16", "sentences": ["🫘 These are ___.", "I eat two ___ and eggs for breakfast.", "These balls of meat are ___."], "answers": ["beans", "sausages", "meatballs"], "prefixes": ["b", "s", "m"]},
+            ],
+            fix: [
+                {"id": "F17", "sentence": "🍎 It's an orange.", "wrongWord": "orange", "answer": "apple"},
+                {"id": "F18", "sentence": "🍊 It's an apple.", "wrongWord": "apple", "answer": "orange"},
+                {"id": "F19", "sentence": "🍇 These are beans.", "wrongWord": "beans", "answer": "grapes"},
+                {"id": "F20", "sentence": "Apples and bananas are meat.", "wrongWord": "meat", "answer": "fruit"},
+                {"id": "F21", "sentence": "I drink orange sausages.", "wrongWord": "sausages", "answer": "juice"},
+                {"id": "F22", "sentence": "These are balls of meat. They're grapeballs.", "wrongWord": "grapeballs", "answer": "meatballs"},
+            ],
+        },
+        54: {
+            missing: [
+                {"id": "M17", "sentences": ["Can I ___ some chocolate, please?", "Here you ___."], "answers": ["have", "are"]},
+                {"id": "M18", "sentences": ["___ you like some cake?", "Yes, ___."], "answers": ["would", "please"], "prefixes": ["", "p"]},
+                {"id": "M19", "sentences": ["No, ___ you.", "Can I have some water, ___?"], "answers": ["thank", "please"]},
+                {"id": "M20", "sentences": ["It's ___ apple.", "It's ___ banana."], "answers": ["an", "a"]},
+                {"id": "M22", "sentences": ["🧀 This is ___.", "🍅 It's a ___."], "answers": ["cheese", "tomato"], "prefixes": ["c", "t"]},
+                {"id": "M24", "sentences": ["One onion. Two ___.", "One potato. Two ___."], "answers": ["onions", "potatoes"], "prefixes": ["o", "p"]},
+            ],
+            fix: [
+                {"id": "F23", "sentence": "Can I has some chocolate, please?", "wrongWord": "has", "answer": "have"},
+                {"id": "F24", "sentence": "Would you likes some cake?", "wrongWord": "likes", "answer": "like"},
+                {"id": "F25", "sentence": "Here you is.", "wrongWord": "is", "answer": "are"},
+                {"id": "F26", "sentence": "No, thanks you.", "wrongWord": "thanks", "answer": "thank"},
+                {"id": "F27", "sentence": "It's a onion.", "wrongWord": "a", "answer": "an"},
+                {"id": "F28", "sentence": "It's an banana.", "wrongWord": "an", "answer": "a"},
+                {"id": "F29", "sentence": "🍟 We make these chips with chocolate.", "wrongWord": "chocolate", "answer": "potatoes"},
+                {"id": "F30", "sentence": "I like cheese, but my sister don't like it.", "wrongWord": "don't", "answer": "doesn't"},
+                {"id": "F31", "sentence": "My sisters likes pasta.", "wrongWord": "likes", "answer": "like"},
+                {"id": "F32", "sentence": "My dad doesn't eats rice.", "wrongWord": "eats", "answer": "eat"},
+            ],
+        },
+    };
+
+    // PU1 Unit 5: approved toys, possession, birthday wishes and shapes.
+    const pu1Unit5Catalogs = {
+        57: {
+            missing: [
+                {"id": "M1", "sentences": ["I fly my ___ on a string in the wind.", "I ride my ___ to school."], "answers": ["kite", "bike"], "prefixes": ["k", "b"]},
+                {"id": "M2", "sentences": ["We fly to Beijing in a ___.", "Dad drives his ___ to work."], "answers": ["plane", "car"], "prefixes": ["p", "c"]},
+                {"id": "M3", "sentences": ["I kick my ___ to play football.", "My toy ___ has got a head, two arms and two legs."], "answers": ["ball", "robot"], "prefixes": ["b", "r"]},
+                {"id": "M4", "sentences": ["Eva likes her pretty ___.", "The ___ ___ has got two windows."], "answers": ["doll", "doll", "house"], "prefixes": ["d", "d", "h"]},
+                {"id": "M5", "sentences": ["It's my ___ today.", "This toy is my ___."], "answers": ["birthday", "present"], "prefixes": ["b", "p"]},
+            ],
+            fix: [
+                {"id": "F1", "sentence": "I fly my plane on a string in the wind.", "wrongWord": "plane", "answer": "kite"},
+                {"id": "F2", "sentence": "My car has got two wheels. I ride it to school.", "wrongWord": "car", "answer": "bike"},
+                {"id": "F3", "sentence": "We fly to Beijing in a kite.", "wrongWord": "kite", "answer": "plane"},
+                {"id": "F4", "sentence": "My toy ball has got a head, two arms and two legs.", "wrongWord": "ball", "answer": "robot"},
+                {"id": "F5", "sentence": "I kick the robot to play football.", "wrongWord": "robot", "answer": "ball"},
+                {"id": "F6", "sentence": "My bike has got four wheels and four doors.", "wrongWord": "bike", "answer": "car"},
+            ],
+        },
+        59: {
+            missing: [
+                {"id": "M6", "sentences": ["I've got a kite. It's ___ kite.", "You've got a car. It's ___ car."], "answers": ["my", "your"]},
+                {"id": "M7", "sentences": ["Jim has got a robot. ___ robot is grey.", "Jenny has got a doll. ___ doll is new."], "answers": ["his", "her"]},
+                {"id": "M8", "sentences": ["We've got balls. They're ___ balls.", "They've got a bike. It's ___ bike."], "answers": ["our", "their"]},
+                {"id": "M9", "sentences": ["Grandma and Grandpa have got a house. ___ house is yellow.", "Jim and I have got a ball. ___ ball is blue."], "answers": ["their", "our"]},
+                {"id": "M10", "sentences": ["This is Jenny's car. It's ___ car.", "These are Jim's toys. They're ___ toys."], "answers": ["her", "his"]},
+                {"id": "M11", "sentences": ["___ kite is this? It's Jim's.", "___ he? He's Jim."], "answers": ["whose", "who's"]},
+                {"id": "M12", "sentences": ["This kite is for Jim. It's ___ kite.", "This doll is for Jenny. It's ___ doll."], "answers": ["jim's", "jenny's"]},
+                {"id": "M13", "sentences": ["The cat has got a tail. ___ tail is long.", "___ a toy cat."], "answers": ["its", "it's"]},
+            ],
+            fix: [
+                {"id": "F7", "sentence": "I've got a kite. It's me kite.", "wrongWord": "me", "answer": "my"},
+                {"id": "F8", "sentence": "You've got a car. It's you car.", "wrongWord": "you", "answer": "your"},
+                {"id": "F9", "sentence": "Jim has got a robot. Her robot is grey.", "wrongWord": "her", "answer": "his"},
+                {"id": "F10", "sentence": "Jenny has got a doll. His doll is new.", "wrongWord": "his", "answer": "her"},
+                {"id": "F11", "sentence": "We've got a ball. It's we ball.", "wrongWord": "we", "answer": "our"},
+                {"id": "F12", "sentence": "They've got a bike. It's they bike.", "wrongWord": "they", "answer": "their"},
+                {"id": "F13", "sentence": "This is Jenny's car. It's she car.", "wrongWord": "she", "answer": "her"},
+                {"id": "F14", "sentence": "These are Jim's toys. They're he toys.", "wrongWord": "he", "answer": "his"},
+                {"id": "F15", "sentence": "Who's kite is this? It's Jim's.", "wrongWord": "who's", "answer": "whose"},
+                {"id": "F16", "sentence": "The cat has got a tail. It's tail is long.", "wrongWord": "it's", "answer": "its"},
+            ],
+        },
+        60: {
+            missing: [
+                {"id": "M14", "sentences": ["I've got six ___ for my birthday party.", "My toy ___ can fly."], "answers": ["balloons", "helicopter"], "prefixes": ["ballo", "heli"]},
+                {"id": "M15", "sentences": ["My ___ has got a keyboard and a ___."], "answers": ["computer", "mouse"], "prefixes": ["c", "m"]},
+                {"id": "M16", "sentences": ["My computer has got a ___ with lots of letters.", "I listen to music on my ___."], "answers": ["keyboard", "radio"], "prefixes": ["k", "r"]},
+                {"id": "M17", "sentences": ["I take my soft ___ ___ to bed.", "I put my toys in a toy ___."], "answers": ["teddy", "bear", "box"], "prefixes": ["t", "b", "b"]},
+                {"id": "M18", "sentences": ["We play a board ___.", "The toy ___ is on the water."], "answers": ["game", "ship"], "prefixes": ["g", "s"]},
+            ],
+            fix: [
+                {"id": "F17", "sentence": "I've got six balloon for my birthday party.", "wrongWord": "balloon", "answer": "balloons"},
+                {"id": "F18", "sentence": "I've got two helicopter.", "wrongWord": "helicopter", "answer": "helicopters"},
+                {"id": "F19", "sentence": "My teddy cat is a soft toy with small round ears.", "wrongWord": "cat", "answer": "bear"},
+                {"id": "F20", "sentence": "I put my toys in my toy bread.", "wrongWord": "bread", "answer": "box"},
+                {"id": "F21", "sentence": "My computer has got a cheese and a mouse.", "wrongWord": "cheese", "answer": "keyboard"},
+                {"id": "F22", "sentence": "We play a board cake.", "wrongWord": "cake", "answer": "game"},
+            ],
+        },
+        61: {
+            missing: [
+                {"id": "M19", "sentences": ["I ___ a robot for ___ birthday.", "He ___ a robot for ___ birthday."], "answers": ["want", "my", "wants", "his"], "prefixes": ["w", "m", "w", "h"]},
+                {"id": "M20", "sentences": ["We ___ kites for ___ birthdays.", "She ___ a kite for ___ birthday."], "answers": ["want", "our", "wants", "her"], "prefixes": ["w", "o", "w", "h"]},
+                {"id": "M21", "sentences": ["They ___ some balloons for ___ birthdays.", "My brother ___ a plane for ___ birthday."], "answers": ["want", "their", "wants", "his"], "prefixes": ["w", "t", "w", "h"]},
+                {"id": "M22", "sentences": ["___ you want a teddy?", "___ she want a robot?"], "answers": ["do", "does"]},
+                {"id": "M23", "sentences": ["What ___ they want?", "What ___ he want?"], "answers": ["do", "does"]},
+                {"id": "M24", "sentences": ["👎 I ___ want a car.", "👎 He ___ want a doll."], "answers": ["don't", "doesn't"]},
+            ],
+            fix: [
+                {"id": "F23", "sentence": "He want a helicopter.", "wrongWord": "want", "answer": "wants"},
+                {"id": "F24", "sentence": "I wants a robot.", "wrongWord": "wants", "answer": "want"},
+                {"id": "F25", "sentence": "My sister want a doll.", "wrongWord": "want", "answer": "wants"},
+                {"id": "F26", "sentence": "They wants some balloons.", "wrongWord": "wants", "answer": "want"},
+                {"id": "F27", "sentence": "Do he want a teddy?", "wrongWord": "do", "answer": "does"},
+                {"id": "F28", "sentence": "Does you want a plane?", "wrongWord": "does", "answer": "do"},
+                {"id": "F29", "sentence": "He don't want a car.", "wrongWord": "don't", "answer": "doesn't"},
+                {"id": "F30", "sentence": "She doesn't wants a kite.", "wrongWord": "wants", "answer": "want"},
+            ],
+        },
+        63: {
+            missing: [
+                {"id": "M25", "sentences": ["The wheels on my bike are two ___.", "A ___ has got four sides."], "answers": ["circles", "square"], "prefixes": ["c", "s"]},
+                {"id": "M26", "sentences": ["A ___ has got three sides.", "A ___ has got two long sides and two short sides."], "answers": ["triangle", "rectangle"], "prefixes": ["t", "r"]},
+                {"id": "M27", "sentences": ["A triangle has got ___ sides.", "A square has got ___ sides."], "answers": ["three", "four"], "prefixes": ["t", "f"]},
+                {"id": "M28", "sentences": ["One circle. Two ___.", "One rectangle. Two ___."], "answers": ["circles", "rectangles"], "prefixes": ["c", "r"]},
+            ],
+            fix: [
+                {"id": "F31", "sentence": "The wheels on my bike are squares.", "wrongWord": "squares", "answer": "circles"},
+                {"id": "F32", "sentence": "A triangle has got four equal sides.", "wrongWord": "triangle", "answer": "square"},
+                {"id": "F33", "sentence": "A rectangle has got three sides.", "wrongWord": "rectangle", "answer": "triangle"},
+                {"id": "F34", "sentence": "A circle has got two long sides and two short sides.", "wrongWord": "circle", "answer": "rectangle"},
+                {"id": "F35", "sentence": "A triangle has got four sides.", "wrongWord": "four", "answer": "three"},
+                {"id": "F36", "sentence": "I've got two rectangle.", "wrongWord": "rectangle", "answer": "rectangles"},
+            ],
+        },
+    };
+
+    // PU1 Unit 6: approved transport, animals, there-forms and mixed review.
+    const pu1Unit6Catalogs = {
+        78: {
+            missing: [
+                {"id": "M1", "sentences": ["We wait at the ___ ___.", "Then we get on the ___."], "answers": ["bus", "stop", "bus"], "prefixes": ["b", "s", "b"]},
+                {"id": "M2", "sentences": ["We buy books at the ___.", "We buy toys at the toy ___."], "answers": ["bookshop", "shop"], "prefixes": ["b", "s"]},
+                {"id": "M3", "sentences": ["There are flowers in our ___.", "We play in the ___ after school."], "answers": ["garden", "park"], "prefixes": ["g", "p"]},
+                {"id": "M4", "sentences": ["We can go to Beijing by plane or by ___.", "I go to school in my mum's ___."], "answers": ["train", "car"], "prefixes": ["tr", "c"]},
+                {"id": "M5", "sentences": ["A ___ has got two wheels.", "This big ___ has got six wheels."], "answers": ["motorbike", "lorry"], "prefixes": ["motor", "lor"]},
+                {"id": "M6", "sentences": ["This brown ___ is very tall.", "There are red and yellow ___ in the garden."], "answers": ["tree", "flowers"], "prefixes": ["tr", "fl"]},
+                {"id": "M7", "sentences": ["There ___ a bus in the street.", "There ___ two cars in the street."], "answers": ["is", "are"]},
+                {"id": "M8", "sentences": ["There ___ three monkeys in the tree.", "There ___ a tiger at the zoo."], "answers": ["are", "is"]},
+                {"id": "M9", "sentences": ["___ there a bookshop in your town?", "___ there any shops in your town?"], "answers": ["is", "are"]},
+                {"id": "M10", "sentences": ["There aren't ___ trains.", "Are there ___ motorbikes?"], "answers": ["any", "any"]},
+                {"id": "M11", "sentences": ["There ___ any cars in the garden.", "There ___ a bus in the classroom."], "answers": ["aren't", "isn't"]},
+                {"id": "M12", "sentences": ["There ___ any buses in the classroom.", "There ___ two lorries in the street."], "answers": ["aren't", "are"]},
+                {"id": "M13", "sentences": ["Is there a train? No, there ___.", "Are there any buses? No, there ___."], "answers": ["isn't", "aren't"]},
+                {"id": "M14", "sentences": ["Is there a garden? Yes, there ___.", "Are there any flowers? Yes, there ___."], "answers": ["is", "are"]},
+                {"id": "M15", "sentences": ["A ___ has got a very long neck.", "A ___ hasn't got any legs."], "answers": ["giraffe", "snake"], "prefixes": ["g", "s"]},
+                {"id": "M16", "sentences": ["An ___ is big and grey.", "A ___ is black and white."], "answers": ["elephant", "zebra"], "prefixes": ["e", "z"]},
+                {"id": "M17", "sentences": ["A ___ ___ is a big white animal.", "A ___ is a big orange and black cat."], "answers": ["polar", "bear", "tiger"], "prefixes": ["p", "b", "t"]},
+                {"id": "M18", "sentences": ["A ___ can climb trees.", "A ___ has got a long tail and a big mouth."], "answers": ["monkey", "crocodile"], "prefixes": ["mon", "croc"]},
+                {"id": "M19", "sentences": ["A ___ is a black and white bird.", "A ___ is a pink bird with long legs."], "answers": ["penguin", "flamingo"], "prefixes": ["pen", "fla"]},
+                {"id": "M20", "sentences": ["A ___ is a big animal. It likes water.", "A ___ is a big cat with long hair."], "answers": ["hippo", "lion"], "prefixes": ["hi", "li"]},
+                {"id": "M21", "sentences": ["A ___ is a black and white bear.", "My pet ___ has got four short legs and a long tail."], "answers": ["panda", "lizard"], "prefixes": ["pa", "liz"]},
+                {"id": "M22", "sentences": ["A ___ is a big grey animal.", "A ___ can jump and swim."], "answers": ["rhino", "frog"], "prefixes": ["rhi", "fr"]},
+                {"id": "M23", "sentences": ["Let's ___ a game.", "Let's ___ a picture."], "answers": ["play", "draw"], "prefixes": ["p", "d"]},
+                {"id": "M24", "sentences": ["___ look at the zebras.", "That's a good ___."], "answers": ["let's", "idea"], "prefixes": ["l", "i"]},
+                {"id": "M31", "sentences": ["___ are two zebras at the zoo.", "___ black and white.", "___ legs are long."], "answers": ["there", "they're", "their"]},
+                {"id": "M32", "sentences": ["The children have got a ball. It's ___ ball.", "___ in the park.", "___ is a tree in the park."], "answers": ["their", "they're", "there"]},
+                {"id": "M33", "sentences": ["___ are three cars in the street.", "___ red.", "___ doors are black."], "answers": ["there", "they're", "their"]},
+                {"id": "M34", "sentences": ["Jim and Jenny have got a garden.", "___ garden has got lots of flowers.", "___ are two trees in it.", "___ very tall."], "answers": ["their", "there", "they're"]},
+            ],
+            fix: [
+                {"id": "F1", "sentence": "We wait for the bus at the bus shop.", "wrongWord": "shop", "answer": "stop"},
+                {"id": "F2", "sentence": "We buy books at the bookstop.", "wrongWord": "bookstop", "answer": "bookshop"},
+                {"id": "F3", "sentence": "There are lots of flowers in our keyboard.", "wrongWord": "keyboard", "answer": "garden"},
+                {"id": "F4", "sentence": "We play football in the train.", "wrongWord": "train", "answer": "park"},
+                {"id": "F5", "sentence": "There are two lorry in the street.", "wrongWord": "lorry", "answer": "lorries"},
+                {"id": "F6", "sentence": "There are three bus in the street.", "wrongWord": "bus", "answer": "buses"},
+                {"id": "F7", "sentence": "There are a car in the street.", "wrongWord": "are", "answer": "is"},
+                {"id": "F8", "sentence": "There is two lorries in the park.", "wrongWord": "is", "answer": "are"},
+                {"id": "F9", "sentence": "There aren't a train in the park.", "wrongWord": "aren't", "answer": "isn't"},
+                {"id": "F10", "sentence": "There isn't any shops in my town.", "wrongWord": "isn't", "answer": "aren't"},
+                {"id": "F11", "sentence": "Is there any trees in the garden?", "wrongWord": "is", "answer": "are"},
+                {"id": "F12", "sentence": "Are there a zoo in your town?", "wrongWord": "are", "answer": "is"},
+                {"id": "F13", "sentence": "There are any flowers in the garden.", "wrongWord": "any", "answer": "some"},
+                {"id": "F14", "sentence": "There aren't a monkeys in the tree.", "wrongWord": "a", "answer": "any"},
+                {"id": "F15", "sentence": "There is a elephant at the zoo.", "wrongWord": "a", "answer": "an"},
+                {"id": "F16", "sentence": "There are two crocodile in the water.", "wrongWord": "crocodile", "answer": "crocodiles"},
+                {"id": "F17", "sentence": "A zebra has got a very long neck.", "wrongWord": "zebra", "answer": "giraffe"},
+                {"id": "F18", "sentence": "A giraffe is a long animal with no legs.", "wrongWord": "giraffe", "answer": "snake"},
+                {"id": "F19", "sentence": "The elephant is a big green animal.", "wrongWord": "green", "answer": "grey"},
+                {"id": "F20", "sentence": "A zebra is black and pink.", "wrongWord": "pink", "answer": "white"},
+                {"id": "F21", "sentence": "A polar bear is a big black animal. It lives on the ice.", "wrongWord": "black", "answer": "white"},
+                {"id": "F22", "sentence": "Tigers eat bread. They're big cats.", "wrongWord": "bread", "answer": "meat"},
+                {"id": "F23", "sentence": "A flamingo is a blue bird with long legs.", "wrongWord": "blue", "answer": "pink"},
+                {"id": "F24", "sentence": "A snake has got four legs.", "wrongWord": "four", "answer": "no"},
+                {"id": "F27", "sentence": "A panda is black and green.", "wrongWord": "green", "answer": "white"},
+                {"id": "F28", "sentence": "A frog has got eight legs.", "wrongWord": "eight", "answer": "four"},
+                {"id": "F29", "sentence": "A lizard has got six legs.", "wrongWord": "six", "answer": "four"},
+                {"id": "F30", "sentence": "A penguin can fly.", "wrongWord": "can", "answer": "can't"},
+                {"id": "F31", "sentence": "Let's playing a game.", "wrongWord": "playing", "answer": "play"},
+                {"id": "F32", "sentence": "Let's looking at the zebras.", "wrongWord": "looking", "answer": "look"},
+                {"id": "F33", "sentence": "Let's colour the elephants grey. That's a good egg.", "wrongWord": "egg", "answer": "idea"},
+                {"id": "F34", "sentence": "Let's draws a picture.", "wrongWord": "draws", "answer": "draw"},
+                {"id": "F41", "sentence": "Their are two elephants at the zoo.", "wrongWord": "their", "answer": "there"},
+                {"id": "F42", "sentence": "They're is a bus in the street.", "wrongWord": "they're", "answer": "there"},
+                {"id": "F43", "sentence": "The zebras are black and white. There very big.", "wrongWord": "there", "answer": "they're"},
+                {"id": "F44", "sentence": "The children are in the park. Their happy.", "wrongWord": "their", "answer": "they're"},
+                {"id": "F45", "sentence": "Jim and Jenny have got a bike. It's they're bike.", "wrongWord": "they're", "answer": "their"},
+                {"id": "F46", "sentence": "The giraffes are tall. There necks are long.", "wrongWord": "there", "answer": "their"},
+                {"id": "F47", "sentence": "Look at the monkeys. Their in the tree.", "wrongWord": "their", "answer": "they're"},
+                {"id": "F48", "sentence": "They're are three flowers in the garden.", "wrongWord": "they're", "answer": "there"},
+            ],
+        },
+        81: {
+            missing: [
+                {"id": "M27", "sentences": ["I've got a robot. It's ___ robot.", "She's got a doll. It's ___ doll."], "answers": ["my", "her"]},
+                {"id": "M28", "sentences": ["My brother ___ bananas.", "My sisters ___ mangoes."], "answers": ["likes", "like"], "prefixes": ["l", "l"]},
+                {"id": "M29", "sentences": ["He ___ a robot for his birthday.", "They ___ a board game for their birthday."], "answers": ["wants", "want"], "prefixes": ["w", "w"]},
+                {"id": "M30", "sentences": ["___ I have some water, please?", "Here you ___."], "answers": ["can", "are"]},
+            ],
+            fix: [
+                {"id": "F35", "sentence": "My sister like bananas.", "wrongWord": "like", "answer": "likes"},
+                {"id": "F36", "sentence": "They likes chocolate.", "wrongWord": "likes", "answer": "like"},
+                {"id": "F37", "sentence": "He want a robot for his birthday.", "wrongWord": "want", "answer": "wants"},
+                {"id": "F38", "sentence": "Do she want a teddy?", "wrongWord": "do", "answer": "does"},
+                {"id": "F39", "sentence": "This is Jenny's bike. It's his bike.", "wrongWord": "his", "answer": "her"},
+                {"id": "F40", "sentence": "Can I has some water, please?", "wrongWord": "has", "answer": "have"},
+            ],
+        },
+    };
+
+    // PU1 Unit 7: approved sports, present continuous and permission boards.
+    const pu1Unit7Catalogs = {
+        83: {
+            missing: [
+                {"id": "M1", "sentences": ["We play ___ with a big ball and our feet.", "We play ___ with a big orange ball."], "answers": ["football", "basketball"], "prefixes": ["f", "b"]},
+                {"id": "M2", "sentences": ["I play ___ with a small yellow ball.", "I ride my ___ to school."], "answers": ["tennis", "bike"], "prefixes": ["t", "b"]},
+                {"id": "M3", "sentences": ["I can play ___ on the ___ or on a ___."], "answers": ["music", "piano", "guitar"], "prefixes": ["m", "p", "g"]},
+                {"id": "M4", "sentences": ["After school, I like watching ___ or going for a ___ in the ___ pool."], "answers": ["tv", "swim", "swimming"], "prefixes": ["", "s", ""], "suffixes": ["", "", "ming"]},
+                {"id": "M5", "sentences": ["I ___ ___ play tennis.", "He ___ ___ ride a bike."], "answers": ["want", "to", "wants", "to"], "prefixes": ["w", "", "w", ""]},
+                {"id": "M6", "sentences": ["We want to ___ football.", "I want to ___ a bike."], "answers": ["play", "ride"], "prefixes": ["p", "r"]},
+                {"id": "M7", "sentences": ["Let's ___ the guitar.", "Let's ___ television."], "answers": ["play", "watch"], "prefixes": ["p", "w"]},
+                {"id": "M8", "sentences": ["I play ___ piano.", "Football ___ my favourite sport."], "answers": ["the", "is"]},
+            ],
+            fix: [
+                {"id": "F1", "sentence": "I ride football with my friends.", "wrongWord": "ride", "answer": "play"},
+                {"id": "F2", "sentence": "I play my bike to school.", "wrongWord": "play", "answer": "ride"},
+                {"id": "F3", "sentence": "Let's listen television.", "wrongWord": "listen", "answer": "watch"},
+                {"id": "F4", "sentence": "I want for play tennis.", "wrongWord": "for", "answer": "to"},
+                {"id": "F5", "sentence": "She want to play the piano.", "wrongWord": "want", "answer": "wants"},
+                {"id": "F6", "sentence": "Let's plays basketball.", "wrongWord": "plays", "answer": "play"},
+                {"id": "F7", "sentence": "I play at guitar.", "wrongWord": "at", "answer": "the"},
+                {"id": "F8", "sentence": "I wants to swim.", "wrongWord": "wants", "answer": "want"},
+            ],
+        },
+        84: {
+            missing: [
+                {"id": "M9", "sentences": ["I ___ watching television.", "She ___ playing tennis."], "answers": ["am", "is"]},
+                {"id": "M10", "sentences": ["You ___ riding a bike.", "My brother ___ swimming."], "answers": ["are", "is"]},
+                {"id": "M11", "sentences": ["We ___ playing football.", "I ___ eating an apple."], "answers": ["are", "am"]},
+                {"id": "M12", "sentences": ["What ___ she doing?", "What ___ they doing?"], "answers": ["is", "are"]},
+                {"id": "M13", "sentences": ["___ he playing tennis?", "___ you watching television?"], "answers": ["is", "are"]},
+                {"id": "M14", "sentences": ["I'm ___ a picture.", "She's ___ her feet."], "answers": ["painting", "cleaning"], "prefixes": ["p", "c"]},
+                {"id": "M15", "sentences": ["I'm ___ a bike.", "They're ___ in the water."], "answers": ["riding", "swimming"], "prefixes": ["r", "sw"]},
+                {"id": "M16", "sentences": ["Are you swimming? No, I'm ___.", "Is she playing tennis? No, she ___."], "answers": ["not", "isn't"]},
+            ],
+            fix: [
+                {"id": "F9", "sentence": "I is watching television.", "wrongWord": "is", "answer": "am"},
+                {"id": "F10", "sentence": "She are playing tennis.", "wrongWord": "are", "answer": "is"},
+                {"id": "F11", "sentence": "They is riding their bikes.", "wrongWord": "is", "answer": "are"},
+                {"id": "F12", "sentence": "We am watching television.", "wrongWord": "am", "answer": "are"},
+                {"id": "F13", "sentence": "What is she do?", "wrongWord": "do", "answer": "doing"},
+                {"id": "F14", "sentence": "What are he doing?", "wrongWord": "are", "answer": "is"},
+                {"id": "F15", "sentence": "Is you playing football?", "wrongWord": "is", "answer": "are"},
+                {"id": "F16", "sentence": "I'm play tennis.", "wrongWord": "play", "answer": "playing"},
+                {"id": "F17", "sentence": "She's ride a bike.", "wrongWord": "ride", "answer": "riding"},
+                {"id": "F18", "sentence": "They're swiming.", "wrongWord": "swiming", "answer": "swimming"},
+                {"id": "F19", "sentence": "I'm not eat an apple.", "wrongWord": "eat", "answer": "eating"},
+                {"id": "F20", "sentence": "They isn't watching television.", "wrongWord": "isn't", "answer": "aren't"},
+            ],
+        },
+        92: {
+            missing: [
+                {"id": "M17", "sentences": ["We use a bat and a small ball to play ___.", "We use a stick and a ball to play ___."], "answers": ["baseball", "hockey"], "prefixes": ["b", "h"]},
+                {"id": "M18", "sentences": ["I play ___ with my sister.", "We use a ___ to hit the ball in tennis."], "answers": ["badminton", "racket"], "prefixes": ["bad", "r"]},
+                {"id": "M19", "sentences": ["He's ___ the football with his foot.", "She's ___ the tennis ball with her racket."], "answers": ["kicking", "hitting"], "prefixes": ["k", "h"]},
+                {"id": "M20", "sentences": ["He's ___ the ball to me.", "I'm ___ it with my hands."], "answers": ["throwing", "catching"], "prefixes": ["th", "cat"]},
+                {"id": "M21", "sentences": ["She's ___ in the park.", "He's ___ in the park."], "answers": ["running", "skateboarding"], "prefixes": ["run", "skate"]},
+                {"id": "M22", "sentences": ["I can ___ a bike.", "I'm ___ a bike now."], "answers": ["ride", "riding"], "prefixes": ["r", "r"]},
+                {"id": "M23", "sentences": ["We want to ___ in the water.", "We're ___ now."], "answers": ["swim", "swimming"], "prefixes": ["s", "sw"]},
+                {"id": "M24", "sentences": ["Let's ___ football.", "They're ___ football now."], "answers": ["play", "playing"], "prefixes": ["p", "p"]},
+                {"id": "M25", "sentences": ["Can I ___ television, please?", "Dad is ___ television."], "answers": ["watch", "watching"], "prefixes": ["w", "w"]},
+                {"id": "M26", "sentences": ["___ we play in the park, Mum?", "Yes, you ___, but you ___ play in the road."], "answers": ["can", "can", "can't"]},
+                {"id": "M27", "sentences": ["She's playing ___ guitar.", "We're listening ___ music."], "answers": ["the", "to"]},
+                {"id": "M28", "sentences": ["___ are two boys in the park.", "___ playing football.", "___ ball is red."], "answers": ["there", "they're", "their"]},
+            ],
+            fix: [
+                {"id": "F21", "sentence": "We play baseball with a banana.", "wrongWord": "banana", "answer": "bat"},
+                {"id": "F22", "sentence": "We play hockey with a guitar.", "wrongWord": "guitar", "answer": "stick"},
+                {"id": "F23", "sentence": "We use a tennis rabbit to play tennis.", "wrongWord": "rabbit", "answer": "racket"},
+                {"id": "F24", "sentence": "He's kicking the tennis ball with his racket.", "wrongWord": "kicking", "answer": "hitting"},
+                {"id": "F25", "sentence": "She's hiting the ball.", "wrongWord": "hiting", "answer": "hitting"},
+                {"id": "F26", "sentence": "They're runing in the park.", "wrongWord": "runing", "answer": "running"},
+                {"id": "F27", "sentence": "I can riding a bike.", "wrongWord": "riding", "answer": "ride"},
+                {"id": "F28", "sentence": "I want to swimming.", "wrongWord": "swimming", "answer": "swim"},
+                {"id": "F29", "sentence": "Let's playing hockey.", "wrongWord": "playing", "answer": "play"},
+                {"id": "F30", "sentence": "Can we watching television, please?", "wrongWord": "watching", "answer": "watch"},
+                {"id": "F31", "sentence": "She's smileing.", "wrongWord": "smileing", "answer": "smiling"},
+                {"id": "F32", "sentence": "We are listen to music.", "wrongWord": "listen", "answer": "listening"},
+                {"id": "F33", "sentence": "She's playing to guitar.", "wrongWord": "to", "answer": "the"},
+                {"id": "F34", "sentence": "Dad is listening the music.", "wrongWord": "the", "answer": "to"},
+                {"id": "F35", "sentence": "Their playing basketball in the park.", "wrongWord": "their", "answer": "they're"},
+                {"id": "F36", "sentence": "The children are playing tennis. They're rackets are new.", "wrongWord": "they're", "answer": "their"},
+            ],
+        },
+    };
+
+    const pageCatalogs = { 'PU1:7:83': pu1Unit7Catalogs[83], 'PU1:7:84': pu1Unit7Catalogs[84], 'PU1:7:92': pu1Unit7Catalogs[92], 'PU1:6:78': pu1Unit6Catalogs[78], 'PU1:6:81': pu1Unit6Catalogs[81], 'PU1:5:57': pu1Unit5Catalogs[57], 'PU1:5:59': pu1Unit5Catalogs[59], 'PU1:5:60': pu1Unit5Catalogs[60], 'PU1:5:61': pu1Unit5Catalogs[61], 'PU1:5:63': pu1Unit5Catalogs[63], 'PU1:4:45': pu1Unit4Catalogs[45], 'PU1:4:47': pu1Unit4Catalogs[47], 'PU1:4:48': pu1Unit4Catalogs[48], 'PU1:4:54': pu1Unit4Catalogs[54], 'PU1:3:31': pu1Unit3Catalogs[31], 'PU1:3:32': pu1Unit3Catalogs[32], 'PU1:3:33': pu1Unit3Catalogs[33], 'PU1:3:34': pu1Unit3Catalogs[34], 'PU1:3:35': pu1Unit3Catalogs[35], 'PU1:3:36': pu1Unit3Catalogs[36], 'PU1:3:37': pu1Unit3Catalogs[37], 'PU1:3:43': pu1Unit3Catalogs[43], 'PU1:2:19': pu1Unit2Catalogs[19], 'PU1:2:20': pu1Unit2Catalogs[20], 'PU1:2:21': pu1Unit2Catalogs[21], 'PU1:2:22': pu1Unit2Catalogs[22], 'PU1:2:23': pu1Unit2Catalogs[23], 'PU1:2:26': pu1Unit2Catalogs[26], 'PU1:0:5': pu1Unit0Catalogs[5], 'PU1:0:7': pu1Unit0Catalogs[7], 'PU1:0:8': pu1Unit0Catalogs[8], 'PU1:1:9': pu1Unit1Catalogs[9], 'PU1:1:10': pu1Unit1Catalogs[10], 'PU1:1:11': pu1Unit1Catalogs[11], 'PU1:1:12': pu1Unit1Catalogs[12], 'PU1:1:13': pu1Unit1Catalogs[13], 'PU1:1:16': pu1Unit1Catalogs[16], 'PU2:9:107': pu2Unit9Catalogs[107], 'PU2:9:109': pu2Unit9Catalogs[109], 'PU2:9:116': pu2Unit9Catalogs[116], 'PU2:9:119': pu2Unit9Catalogs[119], 'PU2:8:95': pu2Unit8Catalogs[95], 'PU2:8:96': pu2Unit8Catalogs[96], 'PU2:8:97': pu2Unit8Catalogs[97], 'PU2:8:98': pu2Unit8Catalogs[98], 'PU2:8:104': pu2Unit8Catalogs[104], 'PU2:7:83': pu2Unit7Catalogs[83], 'PU2:7:85': pu2Unit7Catalogs[85], 'PU2:7:87': pu2Unit7Catalogs[87], 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

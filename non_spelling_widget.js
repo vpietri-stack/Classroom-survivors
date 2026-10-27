@@ -21,6 +21,8 @@
   }
   function current() { return session[cursor]; }
   function prefix(index) { return current().type === 'missing' ? (current().prefixes || [])[index] || '' : ''; }
+  function suffix(index) { return current().type === 'missing' ? (current().suffixes || [])[index] || '' : ''; }
+  function fullAnswer(index) { return input[index] + suffix(index); }
   function makeButton(className, label, handler) {
     const button = document.createElement('button');
     button.type = 'button';
@@ -64,7 +66,7 @@
   function startExercise() {
     const exercise = current();
     const targets = exercise.type === 'missing' ? exercise.answers : [exercise.answer];
-    letters = shuffle([...new Set(targets.map((target, index) => target.slice(prefix(index).length)).join('').toLowerCase())]);
+    letters = shuffle([...new Set(targets.map((target, index) => target.slice(prefix(index).length, target.length - suffix(index).length)).join('').toLowerCase())]);
     $('summary').hidden = true;
     $('sentences').hidden = false;
     $('actions').hidden = false;
@@ -100,7 +102,7 @@
   function answerBox(index, target) {
     const button = makeButton('nse-answer', '', () => chooseBox(index));
     button.dataset.box = index;
-    button.setAttribute('aria-label', '第' + (index + 1) + '个空格：' + (input[index] || '未填写'));
+    button.setAttribute('aria-label', '第' + (index + 1) + '个空格：' + (fullAnswer(index) || '未填写'));
     button.setAttribute('aria-pressed', String(index === activeBox));
     if (index === activeBox && !locked) button.classList.add('active');
     if (verdict && current().type === 'fix') button.classList.add(verdict.word ? 'word-correct' : 'word-wrong');
@@ -110,7 +112,7 @@
       placeholder.setAttribute('aria-hidden', 'true');
       button.appendChild(placeholder);
     } else {
-      const count = verdict ? Math.max(input[index].length, target.length) : input[index].length;
+      const count = verdict ? Math.max(input[index].length, target.length - suffix(index).length) : input[index].length;
       for (let i = 0; i < count; i++) {
         const span = document.createElement('span');
         span.className = 'letter';
@@ -126,9 +128,15 @@
         button.appendChild(placeholder);
       }
     }
+    for (const letter of suffix(index)) {
+      const span = document.createElement('span');
+      span.className = 'letter nse-prefilled nse-suffix';
+      span.textContent = letter;
+      button.appendChild(span);
+    }
     if (verdict) {
-      button.classList.add(input[index] === target ? 'spelling-correct' : 'spelling-wrong');
-      if (input[index] === target && (current().type === 'missing' || verdict.word)) button.classList.add('all-correct');
+      button.classList.add(fullAnswer(index) === target ? 'spelling-correct' : 'spelling-wrong');
+      if (fullAnswer(index) === target && (current().type === 'missing' || verdict.word)) button.classList.add('all-correct');
     }
     return button;
   }
@@ -328,7 +336,7 @@
     if (input.some((value, index) => value.length <= prefix(index).length)) return message('请先填好所有空格。');
     exercise.attempts++;
     if (exercise.type === 'missing') {
-      verdict = { spelling: input.every((value, index) => value === exercise.answers[index]) };
+      verdict = { spelling: input.every((value, index) => fullAnswer(index) === exercise.answers[index]) };
     } else {
       const correctPosition = !Number.isInteger(exercise.wrongIndex) || binnedWord === exercise.wrongIndex;
       verdict = { word: correctPosition && plainWord(exercise.sentence.split(' ')[binnedWord]) === exercise.wrongWord, spelling: input[0] === exercise.answer };

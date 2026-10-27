@@ -77,6 +77,13 @@ These exist because their contracts were broken in production; treat failures as
 
 ## Out-of-chain test families (not in `npm test`)
 
+- `node test_preview_notes_api.js` drives the real `saveAnalytics` handler with
+  a bounded fake database/auth transport. It covers a completed normal Study
+  event and SR delta, durable preview-note completion in the same etag write,
+  a competing-writer retry, duplicate acknowledgement and one session credit,
+  plus retention after analytics archival. No live/preview API or child data is
+  used by this focused test.
+
 - `test_new_exercises_poc_browser.js` — standalone POC browser checks. Run
   `node test_new_exercises_poc_browser.js` to use the local HTML file, or pass a
   served URL as its first argument. Uses installed Chrome and Playwright. Covers

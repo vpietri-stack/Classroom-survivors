@@ -267,6 +267,19 @@ and local recordings after the agreed calibration/retention work.
 
 ## 12. Related pages
 
+### Interactive illustrated notes POC (2026-10-27)
+
+`interactive_notes_poc.html` reuses the real Recorder, LocalEngine and Scorer
+on a separate PU3 U9 p111 page. It has twelve reference MP3s, optional local
+teacher demos, on-demand model load, listen-before-repeat gating, cancellable
+recording and stale-result protection, plus target-adjective transcript evidence
+to distinguish -ing from -ed even under the normal PU3 retry ladder. It adds no
+student-audio upload, auth/API calls, SR credit or production entry-point change.
+All twelve synthetic reference readings passed the real-model smoke test on the
+development PC; physical child-device recognition remains to be tested. See
+[Interactive notes POC](../interactive-notes-poc.md) for storage keys, lifecycle,
+test boundaries and proposed integration.
+
 - [Study Mode](05-study-mode.md) — Round E scramble where the sentence gate lives.
 - [Game Modes](06-game-modes.md) / [Vampire Survivors](07-vampire-survivors.md) — game-side gate + SR recording order.
 - [Backend API](10-backend-api.md) — `saveAnalytics` acks/delivery diagnostics; [Data Model](11-data-model.md) — event shapes.

@@ -20,6 +20,7 @@ directly with a `?v=` cache-buster; files share state through the global JS name
 | Teaching content | `teaching_content.js`, `content_pu1/2/3.js`, `content_think0/1/2.js`, `content_test.js` |
 | Game modes | `vampire_survivors.js`, `gomoku.js`, `uno.js`, `tower_defense.js`, `game.js`, `study_mode.js`, `handwriting.js` |
 | Exercise POC | `new_exercises_poc.html/.css/.js` (standalone PU3 U9 p109 missing-word/find-fix trial), `serve_new_exercises_poc.js` (allowlisted local/LAN server) |
+| Interactive note POC | `interactive_notes_poc.html/.css/.js`, `interactive_notes_data.js`, `interactive_notes_core.js`, `interactive_notes_assets/` (PU3 U9 p111 tap/listen/repeat prototype; [design and state](../interactive-notes-poc.md)) |
 | Speech stack | `sr_engine.js`, `speech_preload.js`, `speech_recorder.js`, `speech_engine.js`, `speech_scorer.js`, `speech_ui.js`, `speech_debug.js` |
 | ⏳ Research collections (temporary) | `speech_sample_capture.js` (audio, until 2026-10-19), `handwriting_sample_capture.js` (pen traces, until 2027-01-31) |
 | Dashboards | `teacher_dashboard.html/.js/.css`, `admin_dashboard.js`, `class_calendar.js/.css`; shared calendar rules in `api/src/functions/shared/classCalendarCore.js`, compact roster/revisions in `shared/dashboardData.js`, bounded session reads in `shared/practiceReads.js` |

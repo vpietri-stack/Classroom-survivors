@@ -27,11 +27,15 @@ const ok = (value, label) => { assert.ok(value, label); checks++; console.log('P
       HTMLMediaElement.prototype.pause = function () { audioTest.paused++; return pause.call(this); };
       HTMLMediaElement.prototype.play = function () {
         audioTest.played.push(this.src); audioTest.audio.push(this);
+        if (audioTest.directFails) {
+          if (!this.src.startsWith('blob:')) { setTimeout(() => this.dispatchEvent(new Event('error')), 0); return Promise.reject(new Error('media request failed')); }
+          setTimeout(() => this.dispatchEvent(new Event('ended')), 40);
+        }
         return audioTest.fail ? Promise.reject(new Error('unavailable')) : Promise.resolve();
       };
       if (navigator.mediaDevices) navigator.mediaDevices.getUserMedia = () => { audioTest.micRequests++; throw new Error('microphone forbidden'); };
     });
-    await page.goto(url); await page.waitForFunction(() => window.InteractiveNotesPOC);
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 90000 }); await page.waitForFunction(() => window.InteractiveNotesPOC);
     ok(await page.locator('.note-page').count() === 4, 'all four original infographic pages displayed');
     ok((await page.locator('.page-image').first().getAttribute('src')).endsWith('01-grammar-guide.png'), 'intro page is the first full page');
     ok(await page.locator('.hotspot.word').count() === 12, 'twelve separately clickable vocabulary headings');
@@ -60,7 +64,14 @@ const ok = (value, label) => { assert.ok(value, label); checks++; console.log('P
     await page.evaluate(() => { audioTest.fail = true; }); await page.locator('#replay').click();
     await page.waitForFunction(() => document.getElementById('playerStatus').textContent.includes('重试'));
     ok(await page.evaluate(() => !InteractiveNotesPOC.snapshot().playing), 'failed audio resets for retry');
-    await page.evaluate(() => { audioTest.fail = false; });
+    await page.evaluate(() => { audioTest.fail = false; audioTest.directFails = true; });
+    await page.locator('[data-clip="word-bored"]').evaluate(el => el.scrollIntoView({ block: 'center' })); await page.locator('[data-clip="word-bored"]').click();
+    await page.waitForFunction(() => !InteractiveNotesPOC.snapshot().playing);
+    ok((await page.locator('#playerStatus').textContent()).includes('还想听') && await page.evaluate(() => audioTest.played.at(-1).startsWith('blob:')), 'media-request failure retries a full same-origin MP3 through a Blob URL');
+    const cachedAudio = await page.evaluate(() => audioTest.played.at(-1));
+    await page.locator('#replay').click(); await page.waitForFunction(() => !InteractiveNotesPOC.snapshot().playing);
+    ok(await page.evaluate(url => audioTest.played.at(-1) === url, cachedAudio), 'subsequent playback reuses the in-memory audio');
+    await page.evaluate(() => { audioTest.directFails = false; });
     await page.locator('#showAreas').check();
     ok(await page.locator('body').evaluate(el => el.classList.contains('show-areas')), 'optional hotspot guide works');
     const missing = await page.evaluate(async () => {
@@ -95,7 +106,7 @@ const ok = (value, label) => { assert.ok(value, label); checks++; console.log('P
     const realContext = await browser.newContext({ viewport: { width: 1280, height: 1800 } });
     const real = await realContext.newPage();
     await real.route('**/*', route => route.request().url().startsWith(new URL(url).origin) ? route.continue() : route.abort());
-    await real.goto(url); await real.waitForFunction(() => window.InteractiveNotesPOC);
+    await real.goto(url, { waitUntil: 'domcontentloaded', timeout: 90000 }); await real.waitForFunction(() => window.InteractiveNotesPOC);
     await real.locator('[data-clip="intro-puppy"]').first().click();
     await real.waitForFunction(() => !InteractiveNotesPOC.snapshot().playing);
     ok((await real.locator('#playerStatus').textContent()).includes('还想听'), 'real intro sentence audio plays to completion');

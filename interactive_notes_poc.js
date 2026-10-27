@@ -2,7 +2,8 @@
   'use strict';
   const lesson = window.InteractiveNotesData;
   const $ = id => document.getElementById(id);
-  let current = null, audio = null, generation = 0, playing = false, timer = null;
+  let current = null, audio = null, generation = 0, playing = false, timer = null, fetchController = null;
+  const audioCache = new Map();
   function updateActive(id) {
     document.querySelectorAll('.hotspot').forEach(button => {
       button.classList.toggle('active', !!id && button.dataset.clip === id);
@@ -11,6 +12,8 @@
   }
   function stop() {
     generation++; clearTimeout(timer); timer = null;
+    if (fetchController) fetchController.abort();
+    fetchController = null;
     if (audio) { audio.onended = null; audio.onerror = null; audio.pause(); audio.removeAttribute('src'); audio.load(); audio = null; }
     playing = false; $('stop').disabled = true; updateActive(null);
   }
@@ -20,20 +23,58 @@
     stop(); current = id; const token = generation;
     $('nowPlaying').textContent = clip.text;
     $('playerStatus').textContent = '正在播放 · ' + clip.translation;
+    delete $('playerStatus').dataset.audioError;
     $('replay').disabled = false; $('stop').disabled = false;
     playing = true; updateActive(id);
-    audio = new Audio(clip.audio); audio.playbackRate = Number($('speed').value);
-    function failed() {
+    let usedBlob = audioCache.has(clip.audio);
+    function failed(error) {
       if (token !== generation) return;
+      $('playerStatus').dataset.audioError = (error && error.name) || (audio && audio.error ? 'media-' + audio.error.code : 'playback-timeout');
       stop(); $('playerStatus').textContent = '这段音频暂时没能播放，请点“再听一次”重试。';
     }
-    audio.onended = () => {
+    async function retryFullFile(error) {
       if (token !== generation) return;
-      stop(); $('playerStatus').textContent = clip.translation + ' · 还想听就再点一次。';
-    };
-    audio.onerror = failed;
-    timer = setTimeout(failed, 45000);
-    audio.play().catch(failed);
+      if (usedBlob || (error && error.name === 'NotAllowedError')) { failed(error); return; }
+      usedBlob = true; clearTimeout(timer);
+      if (audio) { audio.onended = null; audio.onerror = null; audio.onplaying = null; audio.pause(); audio.removeAttribute('src'); audio.load(); }
+      $('playerStatus').textContent = '正在加载这段音频，请稍等…';
+      const controller = new AbortController(); fetchController = controller;
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      try {
+        // A static-host range/media request can stall while a regular full GET
+        // succeeds. Reuse the same saved MP3 through a local Blob URL instead.
+        const response = await fetch(clip.audio, { signal: controller.signal });
+        if (!response.ok) throw new Error('audio unavailable');
+        const bytes = await response.arrayBuffer();
+        if (bytes.byteLength < 1000) throw new Error('empty audio');
+        if (token !== generation) return;
+        const url = URL.createObjectURL(new Blob([bytes], { type: 'audio/mpeg' }));
+        audioCache.set(clip.audio, url); startAudio(url);
+      } catch (failure) { if (token === generation) failed(failure); }
+      finally { clearTimeout(timeout); if (fetchController === controller) fetchController = null; }
+    }
+    function startAudio(source) {
+      if (token !== generation) return;
+      let failureHandled = false;
+      const onFailure = error => {
+        if (failureHandled) return;
+        failureHandled = true; retryFullFile(error);
+      };
+      audio = new Audio(source); audio.playbackRate = Number($('speed').value);
+      audio.onended = () => {
+        if (token !== generation) return;
+        stop(); $('playerStatus').textContent = clip.translation + ' · 还想听就再点一次。';
+      };
+      audio.onplaying = () => {
+        if (token !== generation) return;
+        clearTimeout(timer); timer = setTimeout(failed, 45000);
+        $('playerStatus').textContent = '正在播放 · ' + clip.translation;
+      };
+      audio.onerror = onFailure;
+      timer = setTimeout(onFailure, 4000);
+      audio.play().catch(onFailure);
+    }
+    startAudio(audioCache.get(clip.audio) || clip.audio);
   }
   lesson.pages.forEach((page, index) => {
     const article = document.createElement('article'); article.className = 'note-page'; article.id = 'page-' + (index + 1);
@@ -64,6 +105,6 @@
   $('stop').addEventListener('click', () => { stop(); $('playerStatus').textContent = '已停止。点单词、图片或句子继续听。'; });
   $('replay').addEventListener('click', () => { if (current) play(current); });
   document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); });
-  window.addEventListener('pagehide', stop);
+  window.addEventListener('pagehide', () => { stop(); audioCache.forEach(url => URL.revokeObjectURL(url)); audioCache.clear(); });
   window.InteractiveNotesPOC = { snapshot: () => ({ pageCount: lesson.pages.length, currentClip: current, playing, mode: 'listening-only' }) };
 })();

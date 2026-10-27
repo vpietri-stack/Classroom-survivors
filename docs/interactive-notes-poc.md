@@ -69,7 +69,11 @@ Hotspot coordinates scale with the image, not the browser viewport, so tap
 targets stay aligned at different sizes and zoom. There is no OCR dependency
 or raster editing. Stale ended/error callbacks cannot interrupt a newer clip;
 hiding/leaving the page stops audio. A 45-second safety timeout allows retry
-if playback fails to finish.
+if playback fails to finish. If a static-host media/range request fails or does
+not start within four seconds, the player retries a full same-origin GET with
+a 15-second fetch timeout, then plays an audio/mpeg Blob URL. Successful Blob
+URLs are reused in memory (at most the 31 clips) and revoked on page exit.
+This adds no external TTS, microphone access or persistent practice state.
 
 No app entry, existing Study round, curriculum availability, student record,
 SR, reward, dashboard or deploy-version stamp is changed. The POC is available

@@ -287,3 +287,7 @@ impossible on `sendBeacon`, and SWA drops POST query params).
 ## Update discipline
 
 Any agent that changes code covered by this page must update this page in the same commit. The wiki is the single source of truth; skills/memory hold only behavior rules and point here.
+
+## Remote incident diagnostics (2026-10-23)
+
+The optional account-enabled remote recorder attaches after student login, stops on profile change, and observes API result timings plus progress acknowledgements. It does not change auth or progress queue semantics. See [Telemetry](14-telemetry.md).

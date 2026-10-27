@@ -1,5 +1,13 @@
 # Telemetry & Data Delivery
 
+Handwriting preview (2026-10-22): `handwritingAssisted` identifies a word completed
+after a hint, outline or reveal; `handwriting` remains independent completion.
+Skips produce neither. Both use the existing queue and string word itemDetails;
+no trace, CNN tensor or confidence vector enters analytics. Dashboard label/filter
+distinguish assistance. The separately gated collector uses engine version 2 to
+identify new recognition rules. The account-free preview loads no collector or
+analytics sender and saves no student progress.
+
 > **Last verified:** 2026-09-25 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
 
 **Owner files:** `frontend_auth.js` (queue/flush/beacon), `teaching_content.js` (persisted queue, scoped keys), `sr_engine.js` (`extractSRDelta`/`mergeSRDelta`), `api/src/functions/saveAnalytics.js` (acks/archive/diagnostics/delta-merge), `test_session_flush_deadline.js`, `test_auto_archive_analytics.js`
@@ -113,6 +121,58 @@ counts/bytes. Read-only `api/speech_collection_ops.js status` reports these
 without downloading audio or printing student identity. Last values are not
 historical latency percentiles; retain private before/during/after snapshots
 for the staged pilot. See [runbook](../speech-collection-rollout.md).
+
+## Temporary remote incident recorder (2026-10-23)
+
+`client_diagnostics.js` is nonblocking and inert until the signed-in student's
+`clientDiagnostics` configuration enables it. The parent uses the usual game URL
+and only reports the approximate incident time/device. No developer tools or
+screen recording are needed. `Diagnostics` in the BM/admin student detail view
+shows last upload, browser profiles, page starts, exercise checkpoints, errors,
+and console messages; Enable for 7 days / Stop recording are authenticated controls.
+
+The recorder captures bounded sanitized primitive console log/info/warn/error
+messages (objects are omitted; Error messages/stacks retained), runtime/promise
+and resource errors, app API timings, lifecycle/BFCache events, sparse long tasks,
+15-second visible-page heartbeats, canvas sizes/counts, optional heap readings,
+handwriting validation/target/accept/reject/skip checkpoints and speech-engine
+messages. It does not record ink, audio, screenshots, form values, request bodies,
+headers, or console object dumps. Browser heap readings are optional, not total
+device memory. A missing exit callback is a clue, never proof of an OS memory kill.
+
+Local keys start `csDiag_<deployment path>_<student id>_`: config, browser profile
+id, per-tab queue and heartbeat, and sessionStorage tab id. Deployment paths and
+account ownership isolate preview/production and different students. At most 200
+queued events / roughly 60K characters survive locally; saves debounce 750ms,
+errors persist immediately. Each ten-second window admits at most 80 ordinary
+events and eight error/resource events, preventing an error storm from causing
+unbounded synchronous storage writes. Console formatting is also rate limited.
+Uploads start after 2s, then normally every 30s (or
+3s while draining); max 32 events / 16KB UTF-8, four-second deadline,
+backoff to five minutes. Only explicit per-event acknowledgements drain queues.
+Returning later replays surviving queues and previous-page breadcrumbs without
+the legacy one-hour restart cutoff. Storage/transport can still be unavailable.
+No dialogs or extra learner controls are introduced.
+
+The dedicated `client_diagnostics` Cosmos container (`/studentId`, shared DB
+throughput, 14-day TTL) never reads/writes Students or progress analytics.
+Configuration documents have `id:'config'`, type `client_diagnostics_config`,
+`enabled`, `endsAt` (hard client/server expiry), and `ttl:-1`. Bounded daily
+profile documents have type `client_diagnostics_day`, at most 1000 events / 480KB,
+and IfMatch retry/dedup. Teacher reads return only twelve latest daily records,
+last 200 events each. The UI displays at most 400 newest events.
+
+Setup: `api/setup_client_diagnostics.js --database <shared-throughput-db>
+--student-id <id>` creates only the diagnostics container and enables a seven-day
+trial. It refuses to provision new throughput. Local backend tests can use
+`COSMOS_DIAGNOSTICS_DB_NAME` plus `COSMOS_DIAGNOSTICS_CONTAINER=client_diagnostics_test`
+to isolate temporary trace data from all student records. Normal defaults follow
+`COSMOS_DB_NAME` and `COSMOS_DIAGNOSTICS_CONTAINER` (default `client_diagnostics`).
+Tests: `test_client_diagnostics.js`, `test_client_diagnostics_browser.js`.
+
+Removal: stop/expire enabled accounts, remove script tags/hooks/dashboard tab and
+endpoint/preflight/setup/tests, and remove the dedicated container after the
+retention window if no longer needed. Do not change student analytics or SR data.
 
 ## Update discipline
 

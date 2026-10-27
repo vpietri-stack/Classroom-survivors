@@ -1,5 +1,59 @@
 # Study Mode (UI Rounds A–D + Match; internal functions A/C/D/E/F)
 
+Temporary remote diagnostics: optional handwriting checkpoints and neural worker errors feed the account-enabled recorder. No ink or learner interactions are added. See [Telemetry](14-telemetry.md).
+
+## Handwriting neural/interaction preview (2026-10-22)
+
+23 October final adjustment (2026-10-23e): guides start hidden for every letter.
+Two nontrivial unsuccessful writing attempts automatically show the outline.
+There is no guide button. The internal guide helper respects the effort gate.
+An attempt must have at least HW_MIN_INK raw pixels and a stroke extending more
+than six normalized units, so taps/dots do not unlock help. This is a simple
+input-effort threshold, not an inference of intent or handwriting quality.
+All judged attempts remain captured, while the five-attempt reveal safety net
+also uses this separate meaningful-attempt counter. Any guide/reveal still marks
+the word assisted.
+
+23 October session-skip adjustment (2026-10-23c): skip starts hidden and disabled,
+and the handler also blocks it. A meaningful rejected attempt with the guide
+actually displayed unlocks skipping for the current word and every later word
+in this Study session. Unguided failures, merely displaying a guide, and taps do
+not unlock it. New Study/handwriting sessions reset the in-memory flag; no local
+storage or cross-student carryover. Each click still skips exactly one word.
+The erase controls use self-contained SVG erasers over a single stroke versus a
+whole letter, short Chinese captions `一笔`/`全部`, and explicit accessible labels.
+
+Round C/internal D uses a self-hosted worker recognizer warmed during the
+preceding scramble round. Its 325KB checked/cached weights and runtime live in
+`handwriting_model/`; its README explains development-only results and limits.
+Retraining was evaluated, but the earlier checkpoint with revised calibration
+performed better. The reserved benchmark remains unscored.
+
+The widget checks after a 160ms pen-lift pause; uncertainty appears after another
+540ms while retaining ink. A child can add strokes, freely erase one stroke or
+the whole letter, receive guides after two meaningful failures, and use the
+exact per-word `跳过这个词的书写` after the session's first guided failure.
+Success advances after 140ms and word completion after 450ms. Canvas cap: 230px.
+Pointerdown/clear/undo/guide/target/destroy invalidate asynchronous results.
+Pointercancel retains ink without grading; pointerup records its final endpoint
+even without a move event. Supported coalesced movement samples are retained.
+Lowercase i/j require a real upper dot; repeated stems do not count. A plain
+capital I is acceptable. é uses a readable e body with optional detached accent
+per the reviewed policy; spelling/display keep the accent.
+
+The two-failure automatic guide/five-failure reveal safety net remains, but an unchanged
+drawing is not repeatedly judged by timers. Undo silently checks remaining ink
+for acceptance without adding failure. Any hint/reveal marks the word assisted
+and queues `handwritingAssisted` instead of independent `handwriting`. Skips still
+record neither completion nor SR; no handwriting SR success is introduced.
+Collection remains separately gated and stamped engine 2; geometry alone cannot
+replay neural outcomes or an earlier intermediate fallback pass.
+
+`handwriting_preview.html` exercises the real widget/round with four example
+words, in-memory counts, no account/collector/analytics/API scripts, and an offline
+worker scoped only to the `handwriting_preview` URL prefix. The main update
+worker is unchanged. Physical-device and mainland first-download checks remain.
+
 > **Last verified:** 2026-09-04 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
 
 **Owner files:** `study_mode.js` (1360 lines — the whole subsystem), `index.html` (`#studyModeOverlay`, `#study-game-area`, exit X ~line 327), `style.css` (`.study-*` classes), `sr_engine.js` (content/pair selection helpers called from here), `game.js` (`playTTS`, `goBackFromGameSelection`, the global keydown guard).
@@ -7,6 +61,12 @@
 Study Mode is the structured practice flow: 5 SR-selected words and 5 SR-selected sentences, drilled through five rounds of increasing production difficulty, plus three sub-rounds of sentence matching. Everything lives in one global `STUDY_STATE` and a set of top-level functions; there is no class.
 
 ## New exercise POC (2026-10-13)
+
+A separate [interactive illustrated notes POC](../interactive-notes-poc.md)
+now lives at `interactive_notes_poc.html` for PU3 U9 p111. It shows all four
+original infographic pages with tappable word/sentence audio; it loads no speech
+model and requests no microphone. It does not change
+Study rounds, curriculum availability, SR, student completion or rewards.
 
 `new_exercises_poc.html` is an independent test surface for PU3 Unit 9 page 109.
 Every load or New Set action samples two distinct missing-word boards from M1-M6,
@@ -152,6 +212,7 @@ Containers: `#scramble-slots` (answer) + `#scramble-bank` (source), built by `ne
 - **Pen lifts are legal.** A lift that does not complete the letter is not judged: the widget waits `HW_STROKE_GAP_MS` (1.5s) for the next stroke before the attempt counts (`pendingReject` in `hwCreateTraceBox`). A lift that DOES complete it accepts immediately, so multi-stroke letters need no "done" button. Either case is accepted; capitalisation is not this round's battle.
 - **Scaffold ladder** (`roundDRejectLetter`): attempts 1–2 are a blank box at the `free` profile; from attempt 3 the outline fades in (`roundDTrace.setGuided(true)`) at the `guided` profile — looser on fill and on missing parts (a trace over the outline that stops short must still pass) but STRICTER on cover, because with the outline visible, stray ink off the letter is a worse signal; at attempt 5 (`ROUND_D_GIVE_UP_AFTER`) the letter is revealed as `.hw-slot-revealed` so a child can never dead-end. Erase (`clearRoundD`, or Backspace via `handleRoundDKeyDown`) is free — it does not count as an attempt.
 - Accept → `synthGem`, slot turns `.bg-green-500`, 420ms, next gap. Word complete → `queueExerciseEvent('handwriting','study',word)` and the 1s advance. **Like the old spelling round, this round pushes no `srStudyResults` record** — it affects analytics only, never spaced repetition.
+- **Skip per word:** after the session's first meaningful guided failure, `跳过这个词的书写` (`skipRoundDWord`) skips all remaining handwriting for the current word. It stays available on later words, including before writing on those words. A new session locks it again. A 300ms input lock prevents double taps from skipping a second word. Skipping the final word continues to the sentence round. A skip queues no completed-handwriting event, adds no SR result, and plays no success sound. Already judged traces still go through the existing gated capture path. Destroying the canvas cancels pending pen-lift judgements; the shared `roundDTimer` cancels letter/reveal advances on skip and all pending handwriting advances on exit.
 - `hwCreateTraceBox` owns the canvas and the Pointer Events (`touch-action: none` stops the page scrolling mid-trace) and registers window resize/orientation listeners — `exitStudyMode` destroys the widget or the listeners accumulate across sessions. It also writes `window.__hwLast` (target, verdict, precision, recall, missingPart, stroke counts, extent ratios, the bars in force) after every judgement.
 - **Known limitation, do not "fix" blindly:** in Fredoka the t crossbar is ~2% of the glyph and a single-story a's stem sits where a c's tips flare, so "l for t" and "c for a" cannot be refused by any geometric bar that still accepts good letters. Tune the bars **offline against the downloaded traces** (below) — real ink, and a candidate bar can be scored against every stored letter at once instead of one child at a time. The widget still writes `window.__hwLast` (target, verdict, precision, recall, missingPart, stroke counts, extent ratios, the bars in force) for console diagnosis. A live `?prec=/?recall=/?miss=` harness (`hw_dev_entry.js`) existed on the handwriting test repo during development and was **deleted before shipping**: it bypassed the start screen and could loosen the bars from a URL, so it was fenced to that site and localhost, and then removed rather than left inert in production. Reinstate it there, never here, if live tuning is ever needed. Synthetic pen paths are NOT a substitute for real traces: they proved unable to represent either good or bad letters faithfully (see `test_handwriting_browser.js`'s header).
 - `test_handwriting.js` covers the pure mask maths; `test_handwriting_browser.js` draws pen paths derived from the glyph masks themselves and pins acceptance, the grace window, the stroke-count rule, the scaffold, the dead-end reveal and the `startRoundD()` entry point production actually calls.
@@ -377,4 +438,10 @@ PU1 Unit 2 adds the approved 26 M/36 F boards on existing pages 19 (4/4), 20 (2/
 
 PU1 Unit 3 adds 28 M/36 F boards on existing pages 31 (4/4), 32 (2/2), 33 (4/6), 34 (4/4), 35 (4/6), 36 (3/4), 37 (3/4), and 43 (4/6). Farm animals, adjectives, articles, be/have-got agreement, contractions, animal products and the alpaca reading retain the approved wording and locked initials. F13/F14 include their inline emotion symbols. Existing vocabulary, scrambles, pairs and earlier authored boards are preserved. Unit 4 remains review-only.
 
-PU1 Unit 4 adds 22 M/32 F boards on pages 45 (5/6), 47 (7/10), 48 (4/6), and 54 (6/10). Food symbols, likes/dislikes, do/does, articles, polite requests and ingredient plurals retain the approved placement and first-letter hints. M16 uses I eat two sausages and eggs for breakfast with the initial s locked, removing misleading hot-dog symbols and making the plural target explicit. M21/M23 are omitted without renumbering the other IDs. F22 uses grapeballs -> meatballs. Legacy arrays and earlier boards are preserved; Unit 5 remains review-only.
+PU1 Unit 4 adds 22 M/32 F boards on pages 45 (5/6), 47 (7/10), 48 (4/6), and 54 (6/10). Food symbols, likes/dislikes, do/does, articles, polite requests and ingredient plurals retain the approved placement and first-letter hints. M16 uses I eat two sausages and eggs for breakfast with the initial s locked, removing misleading hot-dog symbols and making the plural target explicit. M21/M23 are omitted without renumbering the other IDs. F22 uses grapeballs -> meatballs. Legacy arrays and earlier boards are preserved.
+
+PU1 Unit 5 adds the approved 28 M/36 F boards on existing pages 57 (5/6), 59 (8/10), 60 (5/6), 61 (6/8), and 63 (4/6). Toys and shapes use simple sentence context instead of picture symbols. M2 uses the Beijing flight wording; M14 locks ballo/heli and supplies only suffix letters. F17/F18 practise balloon/helicopter plurals. M4/M17 contain three blanks; M19-M21 combine want/wants with birthday possessives in four blanks. Existing vocabulary, scrambles, pairs and earlier boards remain unchanged; future pages stay excluded from earlier selections.
+
+PU1 Unit 6 adds the approved 32 M/46 F boards under existing pages 78 (28/40) and 81 (4/6). Transport, animals, there-is/are, suggestions and mixed review retain the approved prefixes and wording. M4/M6 use the teacher's revised travel/car/tree sentences; M11/M12 now practise negative and plural agreement without hints. M25/M26 and F25/F26 remain omitted without renumbering. M31-M34 practise there/their/they're together without initial hints; F41-F48 repair those forms. Legacy vocabulary, scrambles, pairs and earlier boards remain unchanged.
+
+PU1 Unit 7 adds 28 M/36 F boards on existing pages 83 (8/8), 84 (8/12), and 92 (12/16). The four teacher edits retain only b for basketball/baseball, merge M3 into music/piano/guitar, and merge M4 into TV/swim/swimming-pool context. M4's optional per-blank suffixes keep ming locked inside the final box. The keyboard excludes fixed endings; editable input stays separate, grading checks the full word, and CLEAR/backspace/retry preserve the ending. Other boards retain their existing behavior. Earlier vocabulary, scrambles, pairs and authored boards are unchanged.

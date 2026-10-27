@@ -7,6 +7,7 @@ const API_ROUTES = [
     'updateAvatar',
     'getStudents',
     'saveAnalytics',
+    'clientDiagnostics',
     'addStudent',
     'updateStudent',
     'setTargets',

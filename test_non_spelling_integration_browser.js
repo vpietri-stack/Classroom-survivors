@@ -142,7 +142,7 @@ async function waitBoard(page, index) { await page.waitForFunction(i => STUDY_ST
             for (const [unit, pages] of [['1', ['7', '9', '10', '16']], ['2', ['19', '21', '22', '25']], ['3', ['31', '33', '40']], ['4', ['45', '46', '47', '54']], ['5', ['57', '60', '62']], ['6', ['78', '81']], ['7', ['83', '85', '87']], ['8', ['95', '96', '97', '98', '104']], ['9', ['107', '109', '116', '119']]]) {
                 for (const page of pages) items.push(...TEACHING_CONTENT.PU2[unit][page].nonSpellingExercises.filter(e => e.id).map(e => ({ ...e, book: 'PU2', unit, page })));
             }
-            for (const [unit, pages] of [['0', ['5', '7', '8']], ['1', ['9', '10', '11', '12', '13', '16']], ['2', ['19', '20', '21', '22', '23', '26']], ['3', ['31', '32', '33', '34', '35', '36', '37', '43']], ['4', ['45', '47', '48', '54']]]) {
+            for (const [unit, pages] of [['0', ['5', '7', '8']], ['1', ['9', '10', '11', '12', '13', '16']], ['2', ['19', '20', '21', '22', '23', '26']], ['3', ['31', '32', '33', '34', '35', '36', '37', '43']], ['4', ['45', '47', '48', '54']], ['5', ['57', '59', '60', '61', '63']], ['6', ['78', '81']], ['7', ['83', '84', '92']]]) {
                 for (const page of pages) items.push(...TEACHING_CONTENT.PU1[unit][page].nonSpellingExercises.filter(e => e.id).map(e => ({ ...e, book: 'PU1', unit, page })));
             }
             const host = document.querySelector('#grammarGame .minigame-container');
@@ -167,7 +167,7 @@ async function waitBoard(page, index) { await page.waitForFunction(i => STUDY_ST
             if (item.answers) {
                 for (const [index, answer] of item.answers.entries()) {
                     await click(page, '[data-box="' + index + '"]');
-                    await enter(answer.slice((item.prefixes || [])[index]?.length || 0));
+                    await enter(answer.slice((item.prefixes || [])[index]?.length || 0, answer.length - ((item.suffixes || [])[index]?.length || 0)));
                 }
             } else {
                 const index = Number.isInteger(item.wrongIndex) ? item.wrongIndex : item.sentence.split(' ').findIndex(word => word.replace(/[.,!?]+$/, '').toLowerCase() === item.wrongWord);
@@ -200,6 +200,65 @@ async function waitBoard(page, index) { await page.waitForFunction(i => STUDY_ST
                 ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), presentation + ' contraction board fits 319px');
                 await page.screenshot({ path: path.join(screenshots, 'phone-' + presentation + '-contraction-' + id + '.png'), fullPage: true });
             }
+        }
+        const poolBoard = approved.find(e => e.book === 'PU1' && e.unit === '7' && e.id === 'M4');
+        for (const presentation of ['study', 'game']) {
+            await page.evaluate(({ item, presentation }) => {
+                document.getElementById('studyModeOverlay').classList.toggle('hidden', presentation !== 'study');
+                document.getElementById('grammarGame').classList.toggle('hidden', presentation === 'study');
+                const host = presentation === 'study' ? document.getElementById('study-game-area') : document.querySelector('#grammarGame .minigame-container');
+                NonSpellingWidget.mount(host, item, { presentation, onCheck() {}, onNext() {} });
+            }, { item: poolBoard, presentation });
+            ok(await page.locator('[data-box="2"] .nse-suffix').allTextContents().then(parts => parts.join('') === 'ming'), presentation + ' keeps ming visible inside the swimming box');
+            const poolKeys = await page.locator('[data-letter]').evaluateAll(keys => keys.map(key => key.dataset.letter).sort().join(''));
+            ok(poolKeys === 'imstvw', presentation + ' pool keyboard excludes letters supplied only by the fixed ending');
+            await click(page, '[data-box="2"]'); await page.keyboard.press('Backspace'); await click(page, '#check');
+            ok(await page.evaluate(() => !NonSpellingWidget.getState().locked && NonSpellingWidget.getState().input[2] === ''), presentation + ' fixed ending alone cannot submit or be erased');
+            await fillMissing(page, ['tv', 'wim', 'sw']); await click(page, '#check');
+            ok(await page.locator('.nse-suffix.wrong').count() === 0 && await page.locator('[data-box="2"] .letter.wrong').count() > 0, presentation + ' incomplete pool answer grades typed letters without marking the given ending wrong');
+            await page.waitForTimeout(3100);
+            ok(await page.locator('[data-box="2"] .nse-suffix').allTextContents().then(parts => parts.join('') === 'ming'), presentation + ' timed retry retains the fixed ending');
+            await click(page, '[data-box="2"]'); await type(page, 'swim'); await page.keyboard.press('Backspace');
+            ok(await page.evaluate(() => NonSpellingWidget.getState().input[2] === 'swi'), presentation + ' backspace removes typed letters ahead of ming');
+            await click(page, '#clear'); await fillMissing(page, ['tv', 'wim', 'swim']); await click(page, '#check');
+            ok(await page.evaluate(() => NonSpellingWidget.getState().solved), presentation + ' TV / swim / swim plus ming solves through on-screen keys');
+            ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), presentation + ' fixed-ending board fits a 319px phone');
+            await page.screenshot({ path: path.join(screenshots, 'phone-' + presentation + '-pool-ending.png'), fullPage: true });
+        }
+        const homophones = approved.find(e => e.book === 'PU1' && e.unit === '6' && e.id === 'M31');
+        for (const presentation of ['study', 'game']) {
+            await page.evaluate(({ item, presentation }) => {
+                document.getElementById('studyModeOverlay').classList.toggle('hidden', presentation !== 'study');
+                document.getElementById('grammarGame').classList.toggle('hidden', presentation === 'study');
+                const host = presentation === 'study' ? document.getElementById('study-game-area') : document.querySelector('#grammarGame .minigame-container');
+                NonSpellingWidget.mount(host, item, { presentation, onCheck() {}, onNext() {} });
+            }, { item: homophones, presentation });
+            ok(await page.evaluate(() => NonSpellingWidget.getState().input.every(value => value === '')), presentation + ' homophone board has no prefilled hints');
+            ok(await page.locator('[data-letter="\'"]').count() === 1, presentation + ' homophone keyboard includes the apostrophe');
+            await fillMissing(page, ['their', 'there', "they're"]); await click(page, '#check');
+            ok(await page.evaluate(() => !NonSpellingWidget.getState().solved) && await page.locator('.letter.wrong').count() > 0, presentation + ' rejects homophones placed in the wrong grammatical roles');
+            await click(page, '#clear'); await fillMissing(page, homophones.answers); await click(page, '#check');
+            ok(await page.evaluate(() => NonSpellingWidget.getState().solved), presentation + ' accepts there / they-re / their from on-screen keys');
+            ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), presentation + ' three homophones fit a 319px phone');
+        }
+        const toyStarts = approved.find(e => e.book === 'PU1' && e.unit === '5' && e.id === 'M14');
+        for (const presentation of ['study', 'game']) {
+            await page.evaluate(({ item, presentation }) => {
+                document.getElementById('studyModeOverlay').classList.toggle('hidden', presentation !== 'study');
+                document.getElementById('grammarGame').classList.toggle('hidden', presentation === 'study');
+                const host = presentation === 'study' ? document.getElementById('study-game-area') : document.querySelector('#grammarGame .minigame-container');
+                NonSpellingWidget.mount(host, item, { presentation, onCheck() {}, onNext() {} });
+            }, { item: toyStarts, presentation });
+            ok(await page.evaluate(() => NonSpellingWidget.getState().input.join(',') === 'ballo,heli'), presentation + ' preserves both longer toy word starts');
+            const toyKeys = await page.locator('[data-letter]').evaluateAll(keys => keys.map(key => key.dataset.letter).sort().join(''));
+            ok(toyKeys === [...new Set('onscopter')].sort().join(''), presentation + ' toy keyboard contains only the missing suffix letters');
+            await page.keyboard.press('Backspace'); await click(page, '#clear');
+            ok(await page.evaluate(() => NonSpellingWidget.getState().input.join(',') === 'ballo,heli'), presentation + ' backspace and CLEAR retain full toy prefixes');
+            await click(page, '[data-box="0"]'); await type(page, 'ons');
+            await click(page, '[data-box="1"]'); await type(page, 'copter');
+            await click(page, '#check');
+            ok(await page.evaluate(() => NonSpellingWidget.getState().solved), presentation + ' toy suffixes solve using only on-screen keys');
+            ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), presentation + ' longer toy prefixes fit a 319px phone');
         }
         const hinted = approved.find(e => e.unit === '4' && e.id === 'M1');
         for (const presentation of ['study', 'game']) {

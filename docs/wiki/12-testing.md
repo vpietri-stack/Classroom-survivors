@@ -1,5 +1,23 @@
 # Testing
 
+Cancellation regression coverage in `test_class_calendar.js` verifies +10 sessions and seven days, the 23 October–6 November example, consecutive cancellations, preserved start/manual offset, no invented target when none exists, separate group targets and idempotent cancellation retries.
+
+23 October handwriting checks pin initial/direct-call guide gating, exclusion
+of taps, automatic guides after two meaningful failures with no guide button,
+per-letter reset, retained ink and the existing reveal/skip paths. The failure
+that first displays guides must not unlock skip; a later guided failure does.
+Session skip coverage includes initial visibility/handler locks, unguided and
+tap exclusions, a real guided failure, persistence onto later words, and a new
+session reset. The two eraser buttons are exercised through their rendered UI.
+
+`test_handwriting_neural_browser.js` serves the actual preview under a repository
+subpath and checks worker loading, automatic assisted guides, retained ink, undo,
+unfinished dotted letters, pointerup endpoint capture, async skip/destroy races,
+320px layout, offline reload, no external requests and first-download failure
+with the same guide/skip locks. It is part of `npm test`. Existing handwriting/capture
+browser tests cover engine 2 and assisted completion. The dotted-i fixture now
+draws the actual upper dot; its former y-cut accidentally drew another stem.
+
 > **Last verified:** 2026-10-11 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
 
 **Owner files:** `package.json` (`test` script), `test_*.js` (root), `api/test_auth.js`, plus the out-of-chain `vs_*` test family.
@@ -36,6 +54,14 @@ Two extra aliases: `npm run test:td` = `test_td_gate.js && test_td_core.js`. The
 
 ## The stamp guard must stay first
 
+`test_dashboard_non_spelling.js` runs in the root suite and separately with
+`npm run test:dashboard-exercises`. It loads the real dashboard and content
+catalog in Chrome with mocked read-only API responses and blocked external
+traffic. It covers typed exercise labels/details, JSON and archived object
+payloads, SR filters/search/popups, catalog fallback for failed-only boards,
+unknown IDs, legacy rows and escaping. Screenshots use the OS temp folder
+`classroom-dashboard-non-spelling`.
+
 `test_vocab_normalization.js` also runs in `npm test`. It checks the canonical
 comparison/tense/pronoun labels across PU1–3 and Think0–1, role-sensitive
 exceptions, exact translations and continuity of existing image lookups. It
@@ -60,6 +86,8 @@ jsdom harness details that bite: the script order list inside each test **must m
 
 ## Contract tests that pin cross-layer promises
 
+`test_handwriting_browser.js` also checks per-word skipping through the real button: untouched and partially written words, a fresh skip on the next word, double-tap protection, final-word continuation, cancellation of pen-lift/accepted-letter/reveal timers, exit during the skip delay, and no completed-handwriting event or SR result for skipped words.
+
 These exist because their contracts were broken in production; treat failures as regressions, not flakiness:
 
 - `test_session_flush_deadline.js` — the completion-time flush (`flushAnalyticsWithDeadline`) must resolve true when drained and **never hang past the deadline**; cached-profile writer must survive quota errors. Also pins the 2026-09-03a **ack discipline**: full-ack drains the queue / silent-200 keeps the queue / partial-ack keeps the queue.
@@ -83,6 +111,14 @@ These exist because their contracts were broken in production; treat failures as
   a competing-writer retry, duplicate acknowledgement and one session credit,
   plus retention after analytics archival. No live/preview API or child data is
   used by this focused test.
+- `test_interactive_notes_poc.js` and `test_interactive_notes_poc_browser.js`
+  cover the listening-only PU3 U9 p111 original four-page note. They verify every
+  hotspot and its word/sentence audio, all 31 MP3 decodes, natural audio playback,
+  stop/replay/speed/error handling, page zoom and 320px layout, and no model,
+  microphone, progress writes or API/external calls. Browser tests expect a root
+  static server at `127.0.0.1:8093`; an explicit page URL can be passed. See
+  [test boundaries](../interactive-notes-poc.md). The earlier speech-specific POC
+  tests were removed with that superseded interface.
 
 - `test_new_exercises_poc_browser.js` — standalone POC browser checks. Run
   `node test_new_exercises_poc_browser.js` to use the local HTML file, or pass a
@@ -223,3 +259,14 @@ PU1 Unit 2 checks cover all 62 boards, exact per-page counts, complete unique ID
 PU1 Unit 3 checks cover all 64 boards, per-page placement, complete unique IDs, prefix validity, exact inline emotion symbols, alpaca facts, product/come-comes contrasts, scoped SR identities, future-page exclusion and varied rounds. All additions are solved through the real app widget at 319px alongside earlier boards.
 
 PU1 Unit 4 checks enforce 54 boards and per-page totals, M21/M23 exclusions, complete retained IDs, exact M16 breakfast wording with no hot-dog symbols, exact F22 grapeballs repair, three-blank and mixed-prefix boards, unique SR keys, round variety and future-page exclusion. Chrome solves every addition through the real app widget at 319px alongside earlier content.
+
+PU1 Unit 5 checks enforce 28 M/36 F and per-page counts, complete IDs, prefix validity, simple contextual clues, the revised plurals, unique scoped SR keys, round variety and future-page exclusion. Chrome solves every addition at 319px. Dedicated Study/game checks exercise M14's longer ballo/heli prefixes, the exact suffix-only keyboard, prefix retention through backspace/CLEAR and on-screen completion.
+
+PU1 Unit 6 checks enforce 32 M/46 F and per-page counts, exact revised M4/M6/M11/M12 wording, excluded habitat IDs, complete retained IDs, valid locked prefixes, distinct SR keys, future-page exclusion and round variety. All 78 additions solve through the real widget at 319px. Dedicated Study/game checks reject there/their/they're in the wrong grammatical roles, retain unhinted boxes and the apostrophe key, then accept the intended answers from on-screen input.
+
+PU1 Unit 7 checks enforce 28 M/36 F and per-page counts, complete IDs, exact teacher-edited M1/M3/M4/M17 answers and hints, valid suffixes, scoped SR identities and future-page exclusion. Chrome solves all additions at 319px. Study/game suffix checks cover visible locked ming, editable-only keyboard letters, empty-check nudges, per-letter failure feedback, timed retry, backspace/CLEAR and successful full-word grading from on-screen input.
+
+
+## Remote incident diagnostics (2026-10-23)
+
+Remote diagnostics: test_client_diagnostics.js verifies strict token scoping, opt-in/expiry, sanitizing, ack/dedup, concurrency and storage bounds. test_client_diagnostics_browser.js verifies console capture, recovery after reload/delayed return, network failures, account switching, disabled behaviour and the UTF-8 payload budget. Both run in npm test.

@@ -1,5 +1,9 @@
 # Teacher & Admin Dashboards
 
+The handwriting preview adds `handwritingAssisted`, displayed/filterable as
+**Handwriting (with help)** for words completed using a guide/reveal. Independent
+completion remains `handwriting`; skipped words are not completions.
+
 > **Last verified:** 2026-09-27 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
 
 **Owner files:** `teacher_dashboard.html` (488 ln), `teacher_dashboard.js` (818 ln), `teacher_dashboard.css` (1151 ln), `admin_dashboard.js` (958 ln), `geo_export.js` (368 ln), `test_archive_merge_dashboard.js`
@@ -8,11 +12,18 @@ One HTML app shell (`teacher_dashboard.html`), two role views. `teacher_dashboar
 
 ## Files & load order
 
+The BM/admin-only student `Diagnostics` tab loads `diagnostics_dashboard.js`.
+It reads the separate authenticated `clientDiagnostics` endpoint, shows last
+upload and device/profile activity, and can enable a seven-day trial or stop
+recording remotely. All incoming text uses textContent (including error stacks).
+It does not query, merge, or increment learning/session analytics. See
+[Telemetry](14-telemetry.md) for limits and the interpretation of restart clues.
+
 `teacher_dashboard.html:474-486` loads, in order:
 
 1. `config.js`, `frontend_auth.js` (API base, `apiFetch`, app key)
 2. **Inline stub:** `<script>var TEACHING_CONTENT = {}; var AVAILABLE_CONTENT = {};</script>` — the content packs are loaded to serve the **test iframe** (`#testIframe` loads `index.html?testMode=true&…`); the stub exists so pack files parse, and `sr_engine.js`/`teaching_content.js` are deliberately NOT loaded (the dashboard never does SR math itself; it renders `srState` read-only)
-3. All 7 content packs (`content_pu1/2/3.js`, `content_think0/1/2.js`, `content_test.js`)
+3. All 7 content packs (`content_pu1/2/3.js`, `content_think0/1/2.js`, `content_test.js`), then `non_spelling_content.js` to resolve typed exercise SR IDs to authored prompts without running SR selection or changing stored progress.
 4. `teacher_dashboard.js` (declares `let isBM = false` at top level, ~12) then `geo_export.js` (Student Locations panel + location exports; needs `allStudents` from the base script) then `admin_dashboard.js` (declares `let isAdmin = false`, ~6) — **do not redeclare either**; both are top-level `let` shared across the two files
 
 `apiFetch` (defined in `frontend_auth.js`) attaches `X-App-Key` + `X-Auth-Token` automatically — dashboards never hand-roll auth headers.
@@ -47,6 +58,27 @@ flowchart TD
 | **Settings** | `populateSettingsTab()` + `saveStudentSettings()` (admin_dashboard.js ~150/~175); the Student Locations panel sits at the bottom (see below) |
 | **Targets** | `renderTargetsTab()` + `adjustTargetOffset` (admin_dashboard.js ~222/~344) |
 | **SR** | `renderSRTab()` — read-only SR state explorer; per-item popup shows interval/due/last result (admin_dashboard.js ~700-724) |
+
+## Missing Words and Find and Fix (20 October 2026)
+
+Exercises and session details decode both object and JSON-string `itemDetails` for
+`missingWord`/`findAndFix`, showing prompts, answers and book/unit/page/item ID.
+The two types have their own Exercise and SR filters. Searches include readable
+prompts/answers and curriculum IDs. Details wrap and are HTML-escaped; SR links
+encode their JavaScript argument before escaping the HTML attribute.
+
+SR records remain in `srState.sentences`, with their original
+`non-spelling:<type>:<book>:<unit>:<page>:<id>` keys. The display separates them
+from legacy sentences and resolves wording from the latest live/archive event,
+falling back to the shared authored catalog for failures without a completion
+event. Unknown IDs still show type/location/ID. The tab and exercise popup read
+the saved intervals/results directly; they never infer SR records from exercise
+completion events. Both `failure` and legacy `fail` receive failure styling.
+
+`test_dashboard_non_spelling.js` drives the real dashboard with isolated API
+fixtures, covering the reported raw JSON issue, archived object payloads, type
+filters, readable search, SR popup clicks, failed-only catalog resolution,
+unknown IDs, legacy rows and HTML escaping. No student writes are allowed.
 
 ## Archive merge (the reason `getStudentArchive` exists)
 
@@ -109,7 +141,7 @@ The Settings tab's bottom `.admin-panel` ("Student Locations", `teacher_dashboar
 
 `class_calendar.js`/`class_calendar.css` add an admin Class Calendar panel and a month view to the shared dashboard. `api/src/functions/shared/classCalendarCore.js` is the single shared browser/server implementation of Beijing-time scheduling, attendance rates and automatic target rules. Recurrence starts **2026-10-12**, groups are keyed by teacher plus classTime, and weekday/time labels such as `Sun 16:30` recur for 90 minutes. Unparseable labels are reported instead of guessed. Calendar reads materialize a bounded future horizon; persisted classes keep stable IDs and historic roster snapshots. Future unedited class rosters follow group membership. New groups introduced later start on their first calendar-load day, rather than generating an attendance backlog.
 
-The calendar follows the main teacher/class filters. Clicking a class opens rescheduling/cancellation controls. A reschedule changes one occurrence. Classes lock once attendance/cancellation starts. Cancellation extends each existing practice target period by seven days with the goal unchanged; cancellation receipts prevent repeated extensions. A cancelled class can retry unfinished target extensions after a partial failure.
+The calendar follows the main teacher/class filters. Clicking a class opens rescheduling/cancellation controls. A reschedule changes one occurrence. Classes lock once attendance/cancellation starts. Cancellation adds 10 sessions to the group's existing practice target and extends its period by seven days, preserving its start and manual offset, regardless of progress. For example, 10 sessions from 23–30 October becomes 20 from 23 October–6 November. Each distinct subsequent cancellation adds another 10 and seven days; class-ID receipts prevent duplicate increases on retries. A cancelled class can retry unfinished target updates after a partial failure. Previously recorded cancellations are not retroactively rewritten.
 
 **Check attendance** refreshes roster/calendar data and lists only completed classes with unrecorded student attendance, selected by default. Attended/Missed applies to the checked students, oldest classes first. Successful rows disappear immediately, failed rows remain retryable. Each student must have their earlier pending classes recorded before a later class. Recording attendance and changing that student's targets is one ETag-protected Cosmos patch, with a class-ID receipt for retry safety. Attended, or missed without reaching the preceding practice target, creates 10 sessions from class end to the next scheduled class start. Missed after reaching the preceding target adds 10 to that target and preserves its original start, extending its end to the next class. Progress includes deduplicated archived sessions, manual offsets and the same short-loss exclusions as the game.
 

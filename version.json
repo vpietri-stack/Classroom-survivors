@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-19g",
-  "deployedAt": "2026-10-19",
-  "notes": "Compact dashboard refreshes and deltas, bounded calendar reads, batched report and attendance counts; preserve preview curriculum and isolated data."
+  "version": "2026-10-27a",
+  "deployedAt": "2026-10-27",
+  "notes": "Cancelled classes add 10 sessions and seven days; preserve preview curriculum, runtime and isolated data."
 }

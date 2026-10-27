@@ -672,14 +672,15 @@ function renderSRTab() {
 
     // Flatten all SR entries into a single list
     let rows = [];
-    const categoryLabels = { vocab: 'Vocabulary', sentences: 'Sentences', sentencePairs: 'Sentence Pairs' };
+    const detailsIndex = nonSpellingDetailsIndex(currentStudent);
 
     for (const cat of ['vocab', 'sentences', 'sentencePairs']) {
-        if (categoryFilter && cat !== categoryFilter) continue;
         if (!srState[cat]) continue;
         for (const [key, data] of Object.entries(srState[cat])) {
-            if (searchTerm && !key.toLowerCase().includes(searchTerm)) continue;
-            rows.push({ cat, catLabel: categoryLabels[cat], key, ...data });
+            const item = describeSRItem(cat, key, detailsIndex);
+            if (categoryFilter && item.category !== categoryFilter) continue;
+            if (searchTerm && ![key, item.text, item.label, item.location || ''].join(' ').toLowerCase().includes(searchTerm)) continue;
+            rows.push({ ...data, cat, catLabel: item.label, key, item });
         }
     }
 
@@ -697,7 +698,7 @@ function renderSRTab() {
             case 'dueDesc': return (b.dueAfterSession || 0) - (a.dueAfterSession || 0);
             case 'intervalAsc': return (a.interval || 0) - (b.interval || 0);
             case 'intervalDesc': return (b.interval || 0) - (a.interval || 0);
-            case 'key': return a.key.localeCompare(b.key);
+            case 'key': return a.item.text.localeCompare(b.item.text);
             default: return 0;
         }
     });
@@ -706,13 +707,13 @@ function renderSRTab() {
 
     tbody.innerHTML = rows.map(r => {
         const isDue = (r.dueAfterSession || 0) <= currentSession;
-        const resultClass = r.lastResult === 'success' ? 'sr-result-success' : r.lastResult === 'fail' ? 'sr-result-fail' : '';
+        const resultClass = r.lastResult === 'success' ? 'sr-result-success' : ['fail', 'failure'].includes(r.lastResult) ? 'sr-result-fail' : '';
         const dueStr = isDue
             ? `<span class="sr-due-now">Due now (sess ${r.dueAfterSession})</span>`
             : `Session ${r.dueAfterSession}`;
         return `<tr>
             <td><span class="badge badge-type" style="font-size:0.7rem">${r.catLabel}</span></td>
-            <td class="sr-key-cell" title="${r.key.replace(/"/g,'&quot;')}">${r.key}</td>
+            <td class="sr-key-cell${nonSpellingCategory(r.key) ? ' non-spelling-detail' : ''}" title="${_esc(r.key)}">${r.item.html}</td>
             <td><strong>${r.interval || 1}</strong></td>
             <td>${dueStr}</td>
             <td>${r.lastSession ?? '—'}</td>
@@ -730,6 +731,10 @@ function renderSRTab() {
  */
 function getSRKeyForExercise(ex) {
     if (!ex || !ex.exerciseType || !ex.itemDetails) return null;
+    if (ex.exerciseType === 'missingWord' || ex.exerciseType === 'findAndFix') {
+        const details = parseExerciseDetails(ex.itemDetails);
+        return details && nonSpellingCategory(details.key) ? details.key : null;
+    }
     // These types map to SR keys
     const srTypes = ['spelling', 'wordScramble', 'sentenceScramble', 'sentenceMatch'];
     if (!srTypes.includes(ex.exerciseType)) return null;
@@ -763,7 +768,7 @@ function showSRPopup(keyJson) {
     popup.className = 'sr-inline-popup modal-overlay';
     popup.onclick = (e) => { if (e.target === popup) popup.remove(); };
 
-    const catLabels = { vocab: 'Vocabulary', sentences: 'Sentences', sentencePairs: 'Sentence Pairs' };
+    const item = describeSRItem(foundCat || 'sentences', key, nonSpellingDetailsIndex(currentStudent));
     const currentSession = currentStudent.sessionCount || 0;
 
     if (!found) {
@@ -771,7 +776,7 @@ function showSRPopup(keyJson) {
             <div class="modal-header"><h2><i class="fas fa-brain"></i> SR State</h2><button onclick="this.closest('.sr-inline-popup').remove()" class="modal-close">&times;</button></div>
             <div class="modal-body">
                 <p style="color:var(--dash-text-dim);font-style:italic">No SR data found for this item.</p>
-                <p style="color:var(--dash-text-dim);font-size:0.82rem;margin-top:8px">Key: <code>${key}</code></p>
+                <p style="color:var(--dash-text-dim);font-size:0.82rem;margin-top:8px">Key: <code>${_esc(key)}</code></p>
             </div>
         </div>`;
     } else {
@@ -780,8 +785,8 @@ function showSRPopup(keyJson) {
         popup.innerHTML = `<div class="modal-box" style="max-width:480px">
             <div class="modal-header"><h2><i class="fas fa-brain"></i> SR State</h2><button onclick="this.closest('.sr-inline-popup').remove()" class="modal-close">&times;</button></div>
             <div class="modal-body">
-                <div class="sr-popup-item">${key}</div>
-                <div class="sr-popup-category"><span class="badge badge-type">${catLabels[foundCat]}</span></div>
+                <div class="sr-popup-item">${item.html}</div>
+                <div class="sr-popup-category"><span class="badge badge-type">${item.label}</span></div>
                 <div class="sr-popup-grid">
                     <div class="sr-popup-stat"><span class="sr-popup-label">Interval</span><span class="sr-popup-val">${found.interval ?? 1} session(s)</span></div>
                     <div class="sr-popup-stat"><span class="sr-popup-label">Due After Session</span><span class="sr-popup-val ${isDue ? 'sr-due-now' : ''}">${found.dueAfterSession ?? '—'}${isDue ? ' ✓ Due now' : ''}</span></div>

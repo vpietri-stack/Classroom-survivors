@@ -271,7 +271,7 @@ check(!/localStorage/.test(captureSrc.slice(0, captureSrc.indexOf('function read
 // ---------------------------------------------------------------------------
 console.log('\n=== stroke compaction (engine side) ===');
 const hw = require('./handwriting.js');
-eq(hw.HW_ENGINE_VERSION, 1, 'the engine carries a version so stored traces stay interpretable');
+eq(hw.HW_ENGINE_VERSION, 2, 'the neural/gentle-flow engine has a distinct replay version');
 eq(hw.hwCompactStroke([]).length, 0, 'an empty stroke compacts to nothing');
 eq(hw.hwCompactStroke(null).length, 0, 'a null stroke compacts to nothing');
 const three = [{ x: 1.4, y: 2.6 }, { x: 10, y: 20 }, { x: 30.5, y: 40.5 }];

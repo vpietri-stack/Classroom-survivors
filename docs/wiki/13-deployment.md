@@ -1,5 +1,59 @@
 # Deployment & Release Discipline
 
+## Automatic guides preview (2026-10-23e)
+
+Build on current preview/main including PU1 Unit 7 (2026-10-23d). Remove the guide
+button and automatically display guides after two meaningful failed attempts.
+Only a subsequent guided failure unlocks session skip. Publish to preview/main
+only. Refresh the changed study query and narrow preview SW cache; keep unchanged
+recognizer/model source queries so existing checked model caches remain reusable.
+
+## Session skip and erasers preview (2026-10-23c)
+
+Publish to preview/main only, including the normal index.html Study flow and the
+shared account-free handwriting page. Skip is hidden until a meaningful guided
+failure, then remains available for the rest of the Study session. Use distinct
+single-stroke/whole-letter SVG erasers. Recognition weights are unchanged.
+Refresh shared style/study queries, synchronized auth stamps and the narrow
+preview SW. Verify the hosted main entry as well as the account-free test page.
+
+## Guide access preview (2026-10-23b)
+
+Build on current preview/main, including the approved PU1 Unit 6 release. Publish
+only to the preview remote. Gate manual hints after two meaningful failed writing
+attempts, exclude taps and remove automatic guide display at the second failure.
+Weights and recognition decisions are unchanged. Refresh the narrow preview SW
+cache/runtime queries and synchronize all version/auth/index/dashboard stamps.
+
+## Handwriting preview (2026-10-22c)
+
+Publish this handwriting integration to `preview` remote `main` only; production
+requires a later explicit release request. Preserve preview's curriculum/API/data.
+Synchronize the three version/auth/index stamps and dashboard auth reference;
+refresh changed study/handwriting/style/dashboard script cache-busters. Include
+all `handwriting_model/` runtime/manifest/weight files. The account-free
+`handwriting_preview.html` offers a direct test without account data or capture.
+Its offline SW is scoped to the `handwriting_preview` URL prefix, with no change
+to the main app's update worker. On a later preview-shell/runtime change, bump
+the narrow SW cache name and runtime query versions together to avoid stale
+cache-first assets. Model weights are separately keyed by SHA-256.
+The first hosted check exposed a slow cold weight fetch. Release b allows
+30 seconds per background weight attempt plus one retry, while input/hint/skip
+remain usable. A failed warm-up can retry at the next round entry; internal
+`HWRecognition.status()` identifies the failing phase.
+
+## Typed exercise dashboard release (2026-10-20a)
+
+Release the Missing Words/Find and Fix dashboard presentation and SR lookup fix
+to preview first, verify hosted details/filters/popups, then promote the same
+dashboard change on the production remote's existing main. Preserve each site's
+curriculum, feature gates, API routing and isolated data. The dashboard loads its
+own site's existing `non_spelling_content.js` for failed-only SR descriptions;
+this release does not publish preview curriculum to production or rewrite SR
+records. Refresh dashboard JS/CSS cache busters and synchronize version/auth/index
+stamps plus the dashboard auth script reference. Production requires successful
+Pages and Azure workflows and verification of the served dashboard assets.
+
 ## Vocabulary normalization release (2026-10-17a)
 
 Publish to preview first and verify hosted stamps, vocabulary/SR/translation
@@ -340,3 +394,19 @@ histories, retaining their curriculum and API routing. Verify live reopening
 and the new cutoff without uploading synthetic audio to production.
 
 Preview release 2026-10-19e publishes approved PU1 Unit 4 22 M/32 F boards with all teacher annotations applied. The curriculum cache buster, version/auth/index stamps and dashboard auth link advance together. Production and isolated preview API/data are unchanged.
+
+Preview release 2026-10-20b publishes the approved PU1 Unit 5 28 M/36 F boards with contextual toy/shape clues, longer locked prefixes and plural repairs. Build on current preview main to retain the dashboard updates. Refresh the curriculum cache buster in both the app and dashboard, synchronize version/auth/index stamps and the dashboard auth link, and verify hosted files after Pages succeeds. Production and isolated preview API/data are unchanged.
+
+Preview release 2026-10-21a adds the Round C per-word handwriting skip button, labelled `跳过这个词的书写` (skip writing this word). It retains the current preview curriculum and API configuration. Refresh the Study Mode cache buster, synchronize version/auth/index stamps, and verify the hosted files and skip flow after Pages succeeds.
+
+The narrow preview offline worker reuses the checked model cache instead of
+downloading the model a second time during installation.
+
+Preview release 2026-10-23a adds the approved PU1 Unit 6 32 M/46 F boards with all teacher edits and there/their/they're practice. Retain current preview handwriting updates, feature gates and isolated API/data. Synchronize version/auth/index stamps and the dashboard auth link, refresh both app/dashboard curriculum cache busters, and verify hosted files after Pages succeeds. Production is unchanged.
+
+Preview release 2026-10-23d adds approved PU1 Unit 7 28 M/36 F boards and locked-ending support for the teacher's swimming-pool blank. Retain current preview handwriting updates and isolated API/data. Synchronize version/auth/index/dashboard stamps, refresh curriculum cache busters in both entry pages and the shared widget cache buster in index, then verify hosted files after Pages succeeds. Production and Unit 8 content are unchanged.
+
+
+## Cancellation target correction (2026-10-27a)
+
+New class cancellations add 10 sessions as well as seven days to the existing group target. Existing cancellation receipts remain unchanged. Publish independently on current preview/production histories, retaining their curriculum, routes and data; deploy the existing PR #1 API before promoting production. Synchronize the stamp trio and dashboard auth/calendar/core cache busters. Verify the served rule and cancellation retry behaviour without altering real student attendance.

@@ -114,6 +114,7 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
         if (skip.xGt !== undefined) return p.x > skip.xGt;
         if (skip.xLt !== undefined) return p.x < skip.xLt;
         if (skip.yLt !== undefined) return p.y < skip.yLt;
+        if (skip.yGt !== undefined) return p.y > skip.yGt;
         return false;
       };
       const mask = hwGlyphMask(letter);
@@ -229,6 +230,97 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
   ok(entry.backingStore >= entry.boxPx, 'entry: the canvas backing store is scaled for the device');
   ok(entry.gaps >= 1 && typeof entry.target === 'string',
     'entry: a gap is offered straight away (target "' + entry.target + '")');
+  ok(await page.locator('#handwriting-skip').isHidden(), 'entry: skip is hidden before any guided failure');
+
+  // --- skip applies to this word only, including while a letter is pending ---
+  await page.evaluate(() => {
+    STUDY_STATE.words = ['cat', 'dog', 'bird'];
+    STUDY_STATE.currentWordIndex = 0;
+    window.__events = [];
+    window.__skipSRBefore = JSON.stringify(srStudyResults);
+    window.__roundEStarts = 0;
+    window.startRoundE = function () { window.__roundEStarts++; STUDY_STATE.round = 'E'; };
+    // The neural browser suite drives real pen events to unlock this flag.
+    // These fixtures cover the subsequent skip lifecycle and timer races.
+    roundDSkipUnlocked = true;
+    nextRoundDWord();
+  });
+  const skipButton = page.locator('#handwriting-skip');
+  ok(await skipButton.isVisible() && await skipButton.innerText() === '跳过这个词的书写' &&
+    await skipButton.getAttribute('aria-label') === '跳过这个词的书写',
+    'skip: each word offers the simplified-Chinese skip-writing button and accessible label');
+  await page.evaluate(() => {
+    const b = document.getElementById('handwriting-skip');
+    b.click();
+    b.click();
+    skipRoundDWord();
+  });
+  const locked = await page.evaluate(() => ({
+    disabled: document.getElementById('handwriting-skip').disabled,
+    index: STUDY_STATE.currentWordIndex,
+    canvas: !!document.querySelector('.hw-trace-canvas')
+  }));
+  ok(locked.disabled && locked.index === 0 && !locked.canvas,
+    'skip: repeated taps are locked and the abandoned canvas is destroyed');
+  await page.waitForTimeout(350);
+  ok(await page.evaluate(() => STUDY_STATE.currentWordIndex === 1 && roundDWord === 'dog' &&
+    !STUDY_STATE.isTransitioning && !document.getElementById('handwriting-skip').disabled),
+    'skip: advances exactly one word and gives the next word its own skip');
+
+  // Accept a letter, then skip during its 420ms advance. That old callback must
+  // not reset the next word's target/attempt counter after it appears.
+  await page.evaluate(() => {
+    roundDAcceptLetter(roundDSlots[roundDGapOrder[roundDCursor]].char);
+    document.getElementById('handwriting-skip').click();
+  });
+  await page.waitForTimeout(350);
+  await page.evaluate(() => { roundDAttempts = 1; });
+  await page.waitForTimeout(150);
+  ok(await page.evaluate(() => STUDY_STATE.currentWordIndex === 2 && roundDWord === 'bird' &&
+    roundDCursor === 0 && roundDAttempts === 1 && !roundDSlots.some(s => s.filled)),
+    'skip: works after partial handwriting and cancels the old letter advance');
+
+  // Leave incomplete ink in the pen-lift grace window, then skip the final word.
+  await page.evaluate(() => {
+    window.__hwDraw(window.__hwLine(15, 15, 25));
+    document.getElementById('handwriting-skip').click();
+  });
+  await page.waitForTimeout(SETTLE);
+  ok(await page.evaluate(() => STUDY_STATE.currentWordIndex === 3 && STUDY_STATE.round === 'E' &&
+    window.__roundEStarts === 1 && roundDTrace === null),
+    'skip: the last word continues to the next round once, with no late ink callback');
+  ok(await page.evaluate(() => window.__events.length === 0 && JSON.stringify(srStudyResults) === window.__skipSRBefore),
+    'skip: skipped words earn no completed handwriting events or SR results');
+
+  // The reveal delay is longer than the skip delay, so exercise that path too.
+  await loadWord('cat', [0, 1, 2]);
+  await page.evaluate(() => {
+    roundDAttempts = ROUND_D_GIVE_UP_AFTER - 1;
+    roundDEffortAttempts = ROUND_D_GIVE_UP_AFTER;
+    roundDRejectLetter();
+    document.getElementById('handwriting-skip').click();
+  });
+  await page.waitForTimeout(1100);
+  ok(await page.evaluate(() => window.__roundEStarts === 2 && window.__events.length === 0),
+    'skip: cancels the reveal delay without reporting a completed word');
+
+  // Leaving during the skip delay must cancel the pending word advance.
+  await loadWord('cat', [0, 1, 2]);
+  await page.evaluate(() => {
+    window.__savedBack = window.goBackFromGameSelection;
+    window.goBackFromGameSelection = function () {};
+    document.getElementById('handwriting-skip').click();
+    exitStudyMode();
+  });
+  await page.waitForTimeout(400);
+  ok(await page.evaluate(() => !STUDY_STATE.active && STUDY_STATE.currentWordIndex === 0 && window.__roundEStarts === 2),
+    'skip: exiting during the advance cannot start another word or round');
+  await page.evaluate(() => {
+    window.goBackFromGameSelection = window.__savedBack;
+    window.startRoundE = function () {};
+    STUDY_STATE.active = true;
+    document.getElementById('studyModeOverlay').classList.remove('hidden');
+  });
 
   // --- a complete letter is accepted -----------------------------------------
   await loadWord('cat', [0, 1, 2]);
@@ -308,7 +400,7 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
   s = await state();
   ok(s.attempts === 0 && s.cursor === 0,
     'strokes: lifting the pen after the stem is NOT judged as a failed attempt');
-  await page.evaluate((d) => window.__hwDraw(window.__hwPath('i', { yLt: d.cut })), { cut: iDotCut });  // the dot, after a real pause
+  await page.evaluate((d) => window.__hwDraw(window.__hwPath('i', { yGt: d.cut })), { cut: iDotCut });  // the actual dot, after a real pause
   await page.waitForTimeout(SETTLE);
   s = await state();
   ok(s.cursor === 1,
@@ -327,7 +419,7 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
   await page.evaluate((d) => window.__hwDraw(window.__hwLine(64, d.from, d.to)), { from: iDotCut + 4, to: 102 });
   await page.waitForTimeout(SETTLE);
   s = await state();
-  ok(s.guided === true && s.attempts === 2, 'scaffold: the outline fades in after 2 refusals');
+  ok(s.guided === true && s.attempts === 2 && await page.locator('#handwriting-hint').count() === 0, 'scaffold: guides appear automatically after two writing failures with no guide button');
 
   const painted = await page.evaluate(() => {
     const cv = document.querySelector('.hw-trace-canvas');
@@ -360,6 +452,7 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
 
   const giveUp = await page.evaluate(async () => {
     roundDAttempts = ROUND_D_GIVE_UP_AFTER - 1;   // one more refusal triggers the reveal
+    roundDEffortAttempts = ROUND_D_GIVE_UP_AFTER;
     roundDRejectLetter();
     return new Promise(res => setTimeout(() => res({
       slots: roundDSlots.map(x => x.type === 'fixed' ? '#' : (x.filled ? (x.given ? '?' : x.char.toUpperCase()) : '_')).join(''),
@@ -368,8 +461,8 @@ const ADVANCE = 600;   // > the round's 420ms wait before showing the next gap
     }), 1400));
   });
   ok(giveUp.given && giveUp.slots === 'I?', 'dead end: the last letter is revealed rather than blocking the child');
-  ok(giveUp.events.length >= 1 && giveUp.events[giveUp.events.length - 1][0] === 'handwriting',
-    'telemetry: a "handwriting" exercise event is queued when the word completes (' +
+  ok(giveUp.events.length >= 1 && giveUp.events[giveUp.events.length - 1][0] === 'handwritingAssisted',
+    'telemetry: a reveal is counted as assisted handwriting instead of independent completion (' +
     JSON.stringify(giveUp.events.map(e => e[2])) + ')');
 
   // --- a long word is capped, and ERASE is free ------------------------------

@@ -13,7 +13,7 @@ const API_BASE = API_BASE_URL;
 // The version watchdog (startVersionWatchdog) compares this to the live
 // version.json; a mismatch means stale WeChat builds never self-heal or
 // permanently nag. See DEPLOY_VERSION_STAMP.md. Bump BOTH together.
-const APP_VERSION = '2026-10-19g';
+const APP_VERSION = '2026-10-27a';
 
 // --- SESSION TOKEN (c) design) ---
 // The server mints a signed token on login. We store it in localStorage
@@ -44,7 +44,15 @@ async function apiFetch(url, options = {}) {
         options.headers['X-Auth-Token'] = token;
     }
     // NOTE: we no longer append ?creatorId — the server scopes by the token.
-    return fetch(url, options);
+    const diagnosticStart = Date.now();
+    try {
+        const response = await fetch(url, options);
+        if (window.ClientDiagnostics) ClientDiagnostics.network(url, response.status, Date.now() - diagnosticStart);
+        return response;
+    } catch (error) {
+        if (window.ClientDiagnostics) ClientDiagnostics.network(url, 0, Date.now() - diagnosticStart, error);
+        throw error;
+    }
 }
 // --- AUTH & ANALYTICS STATE (Moved to teaching_content.js) ---
 
@@ -408,6 +416,7 @@ function csNewPageSession() {
  * previous one, so callers only pass what they know.
  */
 function csPageHeartbeat(state) {
+    if (window.ClientDiagnostics) ClientDiagnostics.checkpoint('activity', state);
     try {
         if (!csPageSessionId) csNewPageSession();
         let prev = {};
@@ -724,6 +733,7 @@ async function flushAnalytics(opts = {}) {
             ...((resBody && resBody.duplicateEventIds) || [])
         ]);
         const accounted = events.every(e => !e.eventId || acked.has(e.eventId));
+        if (window.ClientDiagnostics) ClientDiagnostics.record('network', 'progress-ack: ' + acked.size + '/' + events.length + ', complete=' + accounted);
         // Confirm-then-clear (2026-09-10, Doris stuck-flag fix): on a fully
         // acked flush the persisted SR flag clears and the confirmed watermark
         // advances past any seq the server reports. A stale resend can never
@@ -1091,6 +1101,7 @@ function showReloginOverlay() {
     };
 
     forceBtn.onclick = async () => {
+        if (window.ClientDiagnostics) ClientDiagnostics.record('app_navigation', 'force-refresh button', true);
         // Unregister all service workers then hard-reload with cache bust
         try {
             const regs = await navigator.serviceWorker.getRegistrations();
@@ -1695,6 +1706,7 @@ function saveActiveUserToCache() {
 }
 
 function finishLogin() {
+    if (window.ClientDiagnostics && !isTestMode) ClientDiagnostics.attach(authActiveUser, APP_VERSION);
     hideAllAuthScreens();
 
     // Redirect teachers and admins to the dashboard
@@ -1854,6 +1866,7 @@ function goBackToProfiles() {
     // Hide start screen and go back to profile selection
     document.getElementById('startScreen').classList.add('hidden');
     document.getElementById('step-greeting').classList.add('hidden');
+    if (window.ClientDiagnostics) ClientDiagnostics.stop(false);
     authActiveUser = null;
     setSessionToken(null); // (c) clear session token on logout
     const savedUsers = JSON.parse(localStorage.getItem('savedUsers') || '[]');

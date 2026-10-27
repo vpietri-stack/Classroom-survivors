@@ -77,6 +77,19 @@ Read-modify-write of the whole student doc; carries the hardest-won concurrency 
 
 ## Environment variables (names only)
 
+### `clientDiagnostics` (temporary, 2026-10-23)
+
+GET/POST and CORS preflight. Always requires a verified session token, including
+when legacy auth enforcement is disabled. GET returns only the actor's enabled
+configuration; privileged `?studentId=<id>&view=events` returns a bounded incident
+history from the student's partition. POST `{action:'configure',enabled,days}`
+is privileged only, capped at 14 days. Student POST batches are scoped to token
+identity, require an active server trial and validated event types/ids/times,
+and return explicit event acknowledgements. Bodies over 24KB / batches over 40
+events are rejected. No writes touch Students; details and device metadata are
+sanitized again server-side. See [Telemetry](14-telemetry.md) for retention,
+queue limits, container setup and environment overrides.
+
 | Var | Set where | Purpose |
 |---|---|---|
 | `COSMOS_ENDPOINT`, `COSMOS_KEY` | Function App settings | Cosmos credentials (values withheld) |
@@ -107,6 +120,8 @@ One workflow: `azure-static-web-apps-brave-bush-0438ab000.yml` ("Azure Static We
 ## Calendar endpoint (12 October 2026)
 
 `GET /classCalendar?through=YYYY-MM-DD` materializes weekly 90-minute classes from 2026-10-12 through a bounded future horizon and returns persisted events. `POST /classCalendar` supports `action: edit` (`eventId`, `etag`, ISO `startTime`, `endTime`), `action: record` (`eventId`, `studentIds`, `status: attended|missed`), and `action: cancel` (`eventId`). App-key and privileged-role gates match the existing dashboard API, including the existing legacy mode when auth enforcement is disabled. Its OPTIONS route is registered in `corsOptions.js`.
+
+For new cancellations, the existing target in that class group gains 10 sessions and seven days; its start, manual offset and other groups remain unchanged. Class-ID receipts ensure retries do not increment the goal again. Existing cancellation receipts are not migrated.
 
 Recording/cancelling returns per-student `results` with updated attendance and targets; successful records are idempotent by class ID. Calendar edits/locks and student attendance+target changes use conditional patches with bounded 412 retries. Practice counts for missed-class carry-over include analytics archives, with event deduplication and short-loss filtering. Classes cannot be edited after attendance/cancellation starts, and future attendance is rejected. Per-student chronological entry is enforced server-side. Calendar documents have `role: classCalendar` so the existing getStudents query excludes them.
 

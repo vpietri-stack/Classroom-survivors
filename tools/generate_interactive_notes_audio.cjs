@@ -12,11 +12,12 @@ async function json(url, options = {}) {
 }
 (async () => {
   fs.mkdirSync(dir, { recursive: true });
-  for (const item of data.pairs.flatMap(p => [p.left, p.right])) {
-    const destination = path.join(dir, item.word + '.mp3');
+  const clips = [...new Map(Object.values(data.clips).filter(clip => clip.kind !== 'word').map(clip => [clip.audio, clip])).values()];
+  for (const item of clips) {
+    const destination = path.join(__dirname, '..', item.audio);
     if (fs.existsSync(destination) && fs.statSync(destination).size > 1000) continue;
-    const result = await json('https://api.soundoftext.com/sounds', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ engine: 'Google', data: { voice: 'en-GB', text: item.sentence } }) });
-    if (!result.success || !result.id) throw new Error('Sound of Text did not accept ' + item.word);
+    const result = await json('https://api.soundoftext.com/sounds', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ engine: 'Google', data: { voice: 'en-GB', text: item.text } }) });
+    if (!result.success || !result.id) throw new Error('Sound of Text did not accept ' + item.id);
     let done = false;
     for (let i = 0; i < 15; i++) {
       await wait(1200);
@@ -28,10 +29,10 @@ async function json(url, options = {}) {
         const bytes = Buffer.from(await r.arrayBuffer());
         const mp3Signature = bytes.subarray(0, 3).toString() === 'ID3' || (bytes[0] === 255 && (bytes[1] & 224) === 224);
         if (bytes.length < 1000 || !mp3Signature) throw new Error('Invalid audio response: ' + r.headers.get('content-type') + ', ' + bytes.length + ' bytes');
-        fs.writeFileSync(destination, bytes); console.log(item.word + ': ' + bytes.length + ' bytes'); done = true; break;
+        fs.writeFileSync(destination, bytes); console.log(item.id + ': ' + bytes.length + ' bytes'); done = true; break;
       }
     }
-    if (!done) throw new Error('MP3 generation timeout for ' + item.word);
+    if (!done) throw new Error('MP3 generation timeout for ' + item.id);
     await wait(1200);
   }
 })().catch(e => { console.error(e.message); process.exitCode = 1; });

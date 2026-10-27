@@ -103,14 +103,14 @@ These exist because their contracts were broken in production; treat failures as
 
 ## Out-of-chain test families (not in `npm test`)
 
-- `test_interactive_notes_poc.js`, `test_interactive_notes_poc_browser.js`, and
-  `test_interactive_notes_engine_browser.js` and
-  `test_interactive_notes_microphone_browser.js` cover the standalone PU3 U9 p111
-  illustrated note: all target pairs and wrong-ending foils, audio gates, actual
-  UI flow and lifecycle races, local progress and teacher-demo persistence, small
-  phone layouts, and a separately identified real-model synthetic-audio smoke
-  test. Browser tests expect a root static server at `127.0.0.1:8093`; an explicit
-  page URL can be passed. See [test boundaries](../interactive-notes-poc.md).
+- `test_interactive_notes_poc.js` and `test_interactive_notes_poc_browser.js`
+  cover the listening-only PU3 U9 p111 original four-page note. They verify every
+  hotspot and its word/sentence audio, all 31 MP3 decodes, natural audio playback,
+  stop/replay/speed/error handling, page zoom and 320px layout, and no model,
+  microphone, progress writes or API/external calls. Browser tests expect a root
+  static server at `127.0.0.1:8093`; an explicit page URL can be passed. See
+  [test boundaries](../interactive-notes-poc.md). The earlier speech-specific POC
+  tests were removed with that superseded interface.
 
 - `test_new_exercises_poc_browser.js` — standalone POC browser checks. Run
   `node test_new_exercises_poc_browser.js` to use the local HTML file, or pass a

@@ -4,56 +4,26 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#086b68">
-  <title>Interactive Notes · PU3 Unit 9 · Classroom Survivors</title>
-  <link rel="stylesheet" href="interactive_notes_poc.css?v=1">
-  <script defer src="speech_scorer.js?v=notes-poc1"></script>
-  <script defer src="speech_recorder.js?v=notes-poc1"></script>
-  <script defer src="speech_engine.js?v=notes-poc1"></script>
-  <script defer src="interactive_notes_data.js?v=1"></script>
-  <script defer src="interactive_notes_core.js?v=1"></script>
-  <script defer src="interactive_notes_poc.js?v=1"></script>
+  <title>PU3 Unit 9 p.111 · 点读预习 · Classroom Survivors</title>
+  <link rel="stylesheet" href="interactive_notes_poc.css?v=2">
+  <script defer src="interactive_notes_data.js?v=2"></script>
+  <script defer src="interactive_notes_poc.js?v=2"></script>
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="./" aria-label="Classroom Survivors 首页"><span class="brand-mark">CS</span><span>Classroom Survivors<small>INTERACTIVE NOTES · 试用版</small></span></a>
-    <button class="quiet-button engine-button" id="engineButton" type="button"><span id="engineDot" class="dot"></span><span id="engineLabel">开启跟读检查</span></button>
+  <header class="toolbar">
+    <div class="toolbar-title"><a href="./">Classroom Survivors</a><span>PU3 · Unit 9 · p.111</span><b>点读预习</b></div>
+    <nav aria-label="跳到预习页"><a href="#page-1">1 语法说明</a><a href="#page-2">2 boring / interesting</a><a href="#page-3">3 frightening / tiring</a><a href="#page-4">4 exciting / surprising</a></nav>
+    <div class="settings"><label>查看 <select id="zoom"><option value="1">适应屏幕</option><option value="1.5">放大 150%</option><option value="2">放大 200%</option></select></label><label><input type="checkbox" id="showAreas"> 显示点读区域</label></div>
   </header>
   <main>
-    <section class="intro">
-      <div><p class="eyebrow">POWER UP 3 <span>UNIT 9 / PAGE 111</span></p><h1>Feelings: <em>-ing</em> or <strong>-ed</strong>?</h1><p class="subtitle">点一点图片，听一句，再自己说一句。</p></div>
-      <div class="progress-box"><span id="progressText">0 / 12 句已跟读通过</span><progress id="progress" max="12" value="0" aria-label="跟读通过进度"></progress><small id="storageStatus">进度保存在本机 · 试用 A</small></div>
-    </section>
-    <section class="rule" aria-label="语法说明">
-      <div><b class="ing">-ing</b><span><strong>什么让你有这种感受？</strong><small>描述引起感受的人、事物或活动。</small></span></div>
-      <span class="rule-arrow" aria-hidden="true">→</span>
-      <div><b class="ed">-ed</b><span><strong>你自己有什么感受？</strong><small>描述人或动物的感受。</small></span></div>
-    </section>
-    <div class="workspace">
-      <section class="notebook" aria-label="插图笔记">
-        <div class="section-heading"><div><p class="eyebrow">EXPLORE THE PAIRS</p><h2>同一个场景，两种说法</h2></div><span id="pairCounter" class="counter">01 / 06</span></div>
-        <nav id="pairTabs" class="pair-tabs" aria-label="选择形容词组"></nav>
-        <div id="exampleCards" class="example-cards"></div>
-        <p class="pair-note" id="pairNote"></p>
-        <div class="pair-footer"><button id="previousPair" class="quiet-button" type="button">← 上一组</button><span>先点图片听示范，再跟读。</span><button id="nextPair" class="quiet-button" type="button">下一组 →</button></div>
-        <details class="grammar-details"><summary>再看一眼语法说明 <span>-ing / -ed 与时间无关</span></summary><div><p><b>人也可以用 -ing。</b> The boy is boring. = 这个男孩很无趣。<br>The boy is bored. = 这个男孩自己感到无聊。</p><p><b>这里的词尾不表示时间。</b> I am excited now. / I was excited yesterday.<br>用前面的 be 动词形式表达时间。</p><a href="interactive_notes_assets/01-grammar-guide.png" target="_blank" rel="noopener">打开完整插图说明 ↗</a></div></details>
-      </section>
-      <aside class="practice" id="practice" aria-label="听读练习">
-        <div class="practice-heading"><p class="eyebrow">LISTEN & SAY</p><span id="practiceBadge">点一张图片</span></div>
-        <h2>轮到你说啦</h2><div id="practiceArt" class="practice-art"></div>
-        <p id="target" class="target">选择左边的一个例句。</p><p id="translation" class="translation">先听示范，再用英语说出来。</p>
-        <div class="steps"><button id="listenButton" class="action listen" disabled type="button"><span>1</span><b>▶ 听示范</b><small id="audioSource">示范音频</small></button><button id="recordButton" class="action record" disabled type="button"><span>2</span><b id="recordLabel">● 我来读</b><small id="recordHint">先完整听一遍</small></button></div>
-        <div class="recording-panel" id="recordingPanel" hidden><div class="mic-meter" aria-hidden="true"><i id="micLevel"></i></div><span id="recordingTime">正在录音 · 0 / 15 秒</span><button id="cancelRecording" type="button" class="text-button">取消录音</button></div>
-        <div class="feedback" id="feedback" role="status" aria-live="polite">点击图片或“听示范”就能开始。</div>
-        <div id="heardWrap" class="heard" hidden><small>刚才听到的是</small><p id="heardText"></p></div>
-        <div class="practice-footer"><button id="replayButton" class="quiet-button" type="button" disabled>▷ 听听我的声音</button><button id="nextExample" class="text-button" type="button" disabled>下一句 →</button></div>
-        <p class="privacy-note">只在你点“我来读”后开启麦克风。<br>跟读录音只在本页临时使用，不上传。</p>
-      </aside>
-    </div>
-    <details class="teacher-tools" id="teacherTools"><summary>老师 / 家长 · 示范音频与试用设置</summary><div class="teacher-grid">
-      <section><h3>替换当前句的示范</h3><p id="teacherTarget">先选择一句例句。</p><p>可录下你的声音，或导入 Sound of Text 的 MP3。只替换当前例句，保存在这台设备。</p><div class="teacher-buttons"><button id="teacherRecord" class="quiet-button" type="button" disabled>● 录制示范</button><label class="file-button">导入音频<input type="file" id="teacherFile" accept="audio/*,.mp3,.m4a,.wav,.ogg" disabled></label><button id="teacherClear" class="text-button" type="button" disabled>恢复原示范</button></div><p id="teacherStatus" role="status"></p><a id="downloadTeacher" hidden>下载当前录音</a></section>
-      <section><h3>试用设置</h3><label>试用进度 <select id="profile"><option value="a">试用 A</option><option value="b">试用 B</option></select></label><label>播放速度 <select id="speed"><option value="1">正常</option><option value="0.8">慢一点</option></select></label><button id="resetProgress" class="text-button" type="button">重置当前试用进度</button><p>通过检查需要完整听过示范，并跟读通过。只听或跳过不会算通过。</p><p>检查使用现有 Whisper 模型和 PU3 句子评分，并确认读到了本句的目标形容词。反馈是识别匹配，不是音素发音分数。</p><p id="engineDetail">模型按需加载，首次约 41 MB；之后复用本机缓存。准备期间可以继续看图、听示范。</p></section>
-    </div></details>
-    <footer class="page-footer"><span>Classroom Survivors · Interactive note POC</span><span>PU3 · Unit 9 · p.111</span></footer>
+    <p class="instructions"><span>♪</span> 点单词听发音；点图片或英文句子听例句。<small>可以重复听。手机上可双指放大，或选择上方的“放大”。</small></p>
+    <div id="pages" class="pages"></div>
+    <footer>Classroom Survivors · 4 页原版预习图 · 听读试用</footer>
   </main>
+  <aside class="player" aria-label="点读播放器">
+    <div class="player-icon" aria-hidden="true">♪</div><div class="player-copy"><p id="nowPlaying">点一下，听一听。</p><small id="playerStatus" role="status" aria-live="polite">单词、图片和英文句子都可以点读。</small></div>
+    <label class="speed-label">速度<select id="speed"><option value="1">正常</option><option value="0.8">慢一点</option></select></label>
+    <button id="replay" type="button" disabled>↻ 再听一次</button><button id="stop" type="button" disabled>■ 停止</button>
+  </aside>
 </body>
 </html>

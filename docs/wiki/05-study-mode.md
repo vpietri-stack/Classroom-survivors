@@ -63,8 +63,9 @@ Study Mode is the structured practice flow: 5 SR-selected words and 5 SR-selecte
 ## New exercise POC (2026-10-13)
 
 A separate [interactive illustrated notes POC](../interactive-notes-poc.md)
-now lives at `interactive_notes_poc.html` for PU3 U9 p111. It explores optional
-tap/listen/repeat learning with the existing speech model. It does not change
+now lives at `interactive_notes_poc.html` for PU3 U9 p111. It shows all four
+original infographic pages with tappable word/sentence audio; it loads no speech
+model and requests no microphone. It does not change
 Study rounds, curriculum availability, SR, student completion or rewards.
 
 `new_exercises_poc.html` is an independent test surface for PU3 Unit 9 page 109.

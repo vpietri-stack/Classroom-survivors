@@ -34,6 +34,52 @@
         'excited = 很期待、很兴奋；surprised = 没想到、很惊讶。', '04-exciting-and-surprising.png', [[37,975,477,301], [550,975,478,301]])
     ]
   };
+  const clips = {};
+  data.pairs.forEach(pair => [pair.left, pair.right].forEach(item => {
+    clips['word-' + item.word] = { id: 'word-' + item.word, kind: 'word', text: item.word, translation: item.meaning, audio: 'interactive_notes_assets/words/' + item.word + '.mp3' };
+    clips['sentence-' + item.word] = { id: 'sentence-' + item.word, kind: 'sentence', text: item.sentence, translation: item.translation, audio: item.audio };
+  }));
+  const intro = [
+    ['puppy', 'The puppy is surprising.', '这只小狗让人惊讶。'],
+    ['girl', 'The girl is surprised.', '女孩感到惊讶。'],
+    ['boy-boring', 'The boy is boring.', '这个男孩很无趣。'],
+    ['boy-bored', 'The boy is bored.', '这个男孩感到无聊。'],
+    ['now', 'I am excited now.', '我现在很兴奋。'],
+    ['past', 'I was excited yesterday.', '我昨天很兴奋。'],
+    ['future', 'I am going to be excited tomorrow.', '我明天会很兴奋。']
+  ];
+  intro.forEach(([id, text, translation]) => {
+    clips['intro-' + id] = { id: 'intro-' + id, kind: 'sentence', text, translation,
+      audio: id === 'boy-bored' ? 'interactive_notes_assets/audio/bored.mp3' : 'interactive_notes_assets/audio/intro-' + id + '.mp3' };
+  });
+  clips['interested-in'] = { id: 'interested-in', kind: 'phrase', text: 'be interested in', translation: '对……感兴趣', audio: 'interactive_notes_assets/audio/interested-in.mp3' };
+  const hotspot = (clip, rect, kind = 'text') => ({ clip, rect, kind });
+  const introSpots = [
+    hotspot('intro-puppy', [24,560,422,224], 'picture'), hotspot('intro-puppy', [25,786,420,45]),
+    hotspot('intro-girl', [613,560,420,224], 'picture'), hotspot('intro-girl', [614,786,419,45]),
+    hotspot('intro-boy-boring', [20,952,315,188], 'picture'), hotspot('intro-boy-boring', [341,993,201,45]),
+    hotspot('intro-boy-bored', [562,952,230,188], 'picture'), hotspot('intro-boy-bored', [797,1011,232,46]),
+    hotspot('intro-now', [237,1228,474,49]), hotspot('intro-past', [237,1279,477,49]), hotspot('intro-future', [237,1329,482,49])
+  ];
+  const coordinates = [
+    { words: [[34,221,320,85],[554,221,310,85],[30,781,381,78],[554,781,335,78]], sentences: [[34,648,475,49],[550,648,474,49],[32,1196,477,50],[546,1196,480,50]] },
+    { words: [[28,210,337,88],[554,210,383,88],[27,790,262,84],[554,790,246,84]], sentences: [[30,652,475,56],[547,652,480,56],[30,1288,477,60],[545,1288,484,60]] },
+    { words: [[34,280,327,110],[554,280,327,110],[30,850,393,86],[553,850,379,86]], sentences: [[35,709,478,55],[549,709,480,55],[33,1283,480,54],[548,1283,479,54]] }
+  ];
+  data.pages = [{ id: 'intro', title: '语法说明', file: '01-grammar-guide.png', width: 1054, height: 1493, hotspots: introSpots }];
+  for (let page = 0; page < 3; page++) {
+    const pairs = data.pairs.slice(page * 2, page * 2 + 2);
+    const examples = pairs.flatMap(pair => [pair.left, pair.right]);
+    const spots = [];
+    examples.forEach((item, index) => {
+      spots.push(hotspot('word-' + item.word, coordinates[page].words[index], 'word'));
+      spots.push(hotspot('sentence-' + item.word, coordinates[page].sentences[index]));
+      spots.push(hotspot('sentence-' + item.word, pairs[Math.floor(index / 2)].crops[index % 2], 'picture'));
+    });
+    if (page === 0) spots.push(hotspot('interested-in', [29,1320,383,53]), hotspot('sentence-interested', [450,1338,570,48]));
+    data.pages.push({ id: 'examples-' + (page + 1), title: pairs.map(p => p.left.word + ' / ' + p.right.word).join(' · '), file: pairs[0].page, width: 1054, height: page === 0 ? 1493 : 1492, hotspots: spots });
+  }
+  data.clips = clips;
   root.InteractiveNotesData = data;
   if (typeof module !== 'undefined' && module.exports) module.exports = data;
 })(typeof window !== 'undefined' ? window : globalThis);

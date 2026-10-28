@@ -1,5 +1,67 @@
 # Speech Recognition & Pronunciation Scoring
 
+Production 2026-10-28d: Study and grammar callers pass their completed sentence tiles to the optional practice gate. The repeated target prompt and separate word-feedback row are omitted. Each microphone attempt resets those tiles to purple immediately; target words heard clearly turn their existing tiles green, while uncertain words stay purple. Word mapping preserves sentence order, repeated words, contractions and punctuation; unexpected target output leaves tiles neutral. Standalone callers without tiles retain their target display. The no-login review page demonstrates the same tile feedback.
+
+
+## Optional speech practice — production 2026-10-28d
+
+`SPEECH_PRACTICE_ENABLED` enables the new shared sentence practice controls on
+the production/preview paths and localhost/file. The disabled flag retains the legacy gate.
+Both Study sentence building and the grammar game use `makeSentenceGate`, so
+they receive the optional practice flow without changing their earned grammar/SR result.
+
+After recording, recognition problems or a microphone error, learners can retry
+or Continue without waiting for three failures. Continue is available while a
+recording is being checked. There is no learner-facing percentage, error chime
+for a transcript mismatch, word grading or pronunciation score. An optional
+disclosure shows what the recogniser may have heard. Recognised attempts use
+the same first-try matching threshold on every retry. Whisper still transcribes
+freely; the target is never supplied as an ASR generation prompt. The shared flow
+also checks target-token evidence in the audio against the same hypotheses on
+silence. `speech_target.js` uses that evidence and independently recognised
+words to supply positive-only word hints. Green means heard by the software;
+all other words stay neutral. It is encouragement, not word-error grading.
+The teacher explicitly prefers accepting some imperfect words to rejecting
+acceptable child readings. The previous strict automatic-grading quality bar
+is not claimed to have been met or used to justify a pronunciation percentage.
+
+`speech_target_data.json` contains aggregate calibration parameters and a public
+curriculum-only CMU dictionary subset; its licence is retained alongside it.
+No student rows, identifiers, recordings or reference labels are published.
+All existing model/runtime files, cache keys and stable library URLs are reused.
+One silence encoder result is retained only when its input features are exactly
+equal; other tensors are released. Decoder steps yield to browser tasks so
+Continue can interrupt. A current native WASM step must finish before cleanup.
+Only one transcription/target check runs at a time. If the small hint assets
+are unavailable, free recognition and optional progression still work.
+
+Record controls suppress duplicate pending permission requests, bound permission
+waiting to 15 seconds and assessment waiting to 30 seconds, and dispose when
+their DOM is removed. `Recorder.cancel()` discards PCM, closes its AudioContext,
+stops tracks, and rejects late permission grants without opening another graph.
+`LocalEngine.transcribe(input, {signal})` requests generation interruption using
+the existing runtime's stopping criterion, suppresses aborted output, and keeps
+one transcription active until the current WASM step finishes. A new recording
+is not queued behind that work. The model stays loaded for the next exercise.
+No new model, runtime, mirror or model-cache version is introduced.
+
+`speech_practice` records a single final practice/unassessed summary, never an
+earned success or pronunciation grade. Detaching a gate without continuing
+disposes resources without inventing completion. Late results and events from a
+previous account are ignored. The temporary capture module still owns all
+consent/quota/date checks; this release does not reopen collection.
+
+The separate preview-only teacher review page `speech_practice_preview.html` uses the actual shared controls
+and current model without login, uploads or progress saving. It is preview-only.
+`test_speech_practice.js` covers both real Study/game callers, progression,
+uncertainty, late results, permission/timeout/disposal, account switching and
+production gating. `test_speech_engine_cancel.js` exercises cancellation and
+model reuse and target checking with actual Whisper/WASM and synthetic audio.
+`test_speech_target.js` checks causal target tokens, silence, public data shape,
+positive-only output and silence-encoder reuse. Physical-phone
+performance remains a separate check.
+
+
 > **Last verified:** 2026-10-05 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
 
 **Owner files:** `speech_engine.js`, `speech_recorder.js`, `speech_scorer.js`, `speech_ui.js`, `speech_debug.js`, `speech_preload.js`, `sr_engine.js`, `test_sr_once_per_session.js`, `models/whisper-tiny.en/`, `api/tune_scorer.js`, `api/analyze_speech.js`, `gen_missing_audio.js`

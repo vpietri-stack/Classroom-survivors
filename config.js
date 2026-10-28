@@ -70,6 +70,13 @@ const THREE_TD_ENABLED = (function () {
     return path.indexOf('/classroom-survivors-preview') === 0;
 })();
 
+// Teacher-approved optional speech practice: live, preview and local development.
+const SPEECH_PRACTICE_ENABLED = (function () {
+    const host = window.location.hostname;
+    return host === 'localhost' || host === '127.0.0.1' || window.location.protocol === 'file:' ||
+        /^\/Classroom-survivors(?:-preview)?(?:\/|$)/i.test(window.location.pathname);
+})();
+
 // Mixed non-spelling exercises are released on live, preview and development.
 const NON_SPELLING_ENABLED = (function () {
     const host = window.location.hostname;

@@ -1,5 +1,8 @@
 # Teacher & Admin Dashboards
 
+Production 2026-10-28d labels/filters `speech_practice` as Speech practice (not graded), with a Not graded attempt badge and no pronunciation-grade claim. Speech attempt, gated and technical events have explicit labels. Optional-practice summaries describe recorded/unassessed completion.
+
+
 Handwriting release 2026-10-23g: `handwritingAssisted` is displayed and filterable
 as "Handwriting (with help)". Automatic guides/reveals use this event instead of
 independent handwriting completion. Existing records are not rewritten.

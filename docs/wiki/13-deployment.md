@@ -1,5 +1,8 @@
 # Deployment & Release Discipline
 
+Production speech release 2026-10-28d is explicitly teacher-approved after preview testing. Apply only the speech feature on current origin/main, enable SPEECH_PRACTICE_ENABLED on the production path, and retain production notes, curricula, API/data and all other gates. Publish origin/main only; keep preview history independent. Synchronize version/auth/index/dashboard-auth and affected script cache busters. Ship speech_target.js, aggregate/public dictionary JSON and its licence; model/runtime bytes and cache keys stay unchanged. Verify Pages assets and the existing Azure deployment workflow.
+
+
 ## Cancellation target correction (2026-10-27a)
 
 New class cancellations add 10 sessions as well as seven days to the existing group target. Existing cancellation receipts remain unchanged. Publish independently on current preview/production histories, retaining their curriculum, routes and data; deploy the existing PR #1 API before promoting production. Synchronize the stamp trio and dashboard auth/calendar/core cache busters. Verify the served rule and cancellation retry behaviour without altering real student attendance.

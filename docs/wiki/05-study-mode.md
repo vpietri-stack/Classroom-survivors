@@ -1,5 +1,8 @@
 # Study Mode (UI Rounds A–D + Match; internal functions A/C/D/E/F)
 
+Production 2026-10-28d promotes the teacher-tested optional speech flow. Round E passes its completed sentence tiles to SpeechUI: each microphone attempt resets them purple, then clearly heard words become green. No repeated sentence prompt or word-feedback row; learners may retry or Continue, including uncertain/technical outcomes. Unscramble SR is earned before speech and never duplicated. See Speech Recognition for the shared flow.
+
+
 Temporary remote diagnostics (2026-10-23): optional `ClientDiagnostics` hooks
 record word/letter/target/validation/accept/reject/skip transitions, including
 neural-worker load failures and prediction timeouts. Hooks are inert for accounts

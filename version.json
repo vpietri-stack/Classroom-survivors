@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-28b",
+  "version": "2026-10-28d",
   "deployedAt": "2026-10-28",
-  "notes": "Approved production release of listening preview notes, page-scoped Study and completion-gated notes library."
+  "notes": "Approved production speech release: target-aware positive hints on completed sentence tiles, optional retry/Continue, existing cached model. Preserve production notes, curriculum and API configuration."
 }

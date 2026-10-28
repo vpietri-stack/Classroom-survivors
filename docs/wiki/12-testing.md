@@ -1,5 +1,8 @@
 # Testing
 
+Production speech promotion adds `test_speech_practice.js`, `test_speech_target.js` and `test_speech_engine_cancel.js` to the required root suite. Browser tests cover live/preview activation, legacy disabled fallback, real Study/game callers, tile reset/ordered hints, optional progression, account switches, timeouts and cancellation. Target tests cover public-only calibration, positive hints, causal token checks and silence. Native tests use synthetic audio with the unchanged Whisper/WASM to verify interruption, single-flight, target checking and model reuse. Recorder tests cover late permissions and discarded audio.
+
+
 Cancellation regression coverage in `test_class_calendar.js` verifies +10 sessions and seven days, the 23 October–6 November example, consecutive cancellations, preserved start/manual offset, no invented target when none exists, separate group targets and idempotent cancellation retries.
 
 23 October handwriting checks pin initial/direct-call guide gating, exclusion

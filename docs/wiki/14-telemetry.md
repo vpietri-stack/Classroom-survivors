@@ -1,5 +1,8 @@
 # Telemetry & Data Delivery
 
+Optional speech practice (production 2026-10-28d) emits one final `speech_practice` summary on Continue, with practice/unassessed completion and targetHintCount; it earns no speech mastery or pronunciation grade. Attempt telemetry uses the fixed first-try threshold with actual retries in practiceAttempt. Late/account-switched results are discarded. Existing consent/quota/date gates remain solely responsible for temporary raw capture; this release does not reopen collection.
+
+
 > **Last verified:** 2026-09-25 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
 
 **Owner files:** `frontend_auth.js` (queue/flush/beacon), `teaching_content.js` (persisted queue, scoped keys), `sr_engine.js` (`extractSRDelta`/`mergeSRDelta`), `api/src/functions/saveAnalytics.js` (acks/archive/diagnostics/delta-merge), `test_session_flush_deadline.js`, `test_auto_archive_analytics.js`

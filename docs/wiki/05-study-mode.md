@@ -437,3 +437,27 @@ PU2 Unit 7 adds 28 M/36 F boards on existing pages 83 (6/8), 85 (10/12) and 87 (
 PU2 Unit 8 adds 29 M/39 F boards on existing pages 95 (4/6), 96 (7/10), 97 (5/6), 98 (6/8) and 104 (7/9). All twelve teacher notes are incorporated: map wording; lunch brought onto the train; lost/found and birthday/gave/hid pairs; sat/was/slept; pedestrian already written; station/park/ticket repairs; M30/F40 omitted. M8 uses grammatical subject wording She and Grandpa. Legacy arrays and earlier units remain unchanged.
 
 PU2 Unit 9 adds 28 M/34 F boards on pages 107 (6/8), 109 (8/10), 116 (8/8), 119 (6/8). All sixteen teacher notes are applied: angry dogs, extra grammar blanks, single-row M13, boring contrast, one-of-the-most chunks, revised F6-F8 and excluded F22/F23. Requested boards now have up to seven blanks with mixed locked prefixes. M8 retains film (correcting firm); M17 retains the necessary is after This. Legacy arrays and earlier units remain unchanged.
+
+### Preview notes and page-scoped Study (production approved 2026-10-28)
+
+`PreviewNotes.onLogin()` opens the registered PU3 U9 p111 four-page reader for
+an unfinished student, whether assigned manually or reached through SR advance.
+The advance loop stops at an unfinished note before evaluating its cooldowns;
+fresh note placement is not overridden by a stale pending local advance.
+The Chinese `开始学习` action (no listening gate) calls
+`initStudyMode({previewNoteId:'pu3-u9-p111'})`: five uniformly shuffled distinct
+items from this page's original 14-word vocab array, plus five random distinct
+boards from `NonSpellingContent.selectPage`. `pageOnly` filters before pooling,
+so older-page due items cannot leak into this introductory session. All four
+types are eligible: 12 scrambles, page-local pair boards, the existing 8 M and
+14 F items. A random five-board draw need not contain every type.
+
+The standard A/C/D/E internals, mixed widgets, first-attempt SR tracking and
+acknowledged flush are reused. No content arrays, approved M/F wording or locked
+prefixes change. Only a fully finished five-word/five-board session carries
+`data.previewNote` on its **single ordinary `sessionType:'study'` event**, so SR
+and weekly targets count it normally and only once. Partial exits retain normal
+observed SR outcomes but do not complete the note. The main-menu `预习笔记`
+button appears only after the first completed preview Study session. The library reopens completed notes in listening-only review mode. A student-scoped
+local mirror covers pending offline delivery; the durable server map is returned
+with the normal login. See [data model](11-data-model.md).

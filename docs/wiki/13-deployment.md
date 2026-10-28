@@ -372,3 +372,14 @@ and the new cutoff without uploading synthetic audio to production.
 ## Handwriting skip production release (21 October 2026)
 
 Release `2026-10-21a` promotes the preview-tested Round C per-word handwriting skip button, labelled `跳过这个词的书写` (skip writing this word). Apply only the feature patch on current production main, preserving production curriculum, API routing and data. Synchronize the version/auth/index stamps and dashboard auth link, refresh the Study Mode cache buster, run the full root test suite, then push explicitly to `origin/main`. Verify both Pages and Azure workflows succeed, compare hosted files against committed bytes, and exercise the skip flow on the live site with API calls intercepted.
+
+## Approved notes production promotion (2026-10-28b)
+
+The user tested and approved the page-triggered four-page listening reader,
+page-scoped Study and completion-gated notes library. Apply only this feature
+onto current origin/main; preserve production curriculum, handwriting, API
+routes and database settings. Enable the registered-note flow on both deployed
+site paths, with separate per-environment local completion mirrors. Synchronize
+release stamps and changed module cache busters. Publish origin/main and verify
+both production Pages and Azure API deployments plus served files. Keep the
+existing draft PR #1 and its isolated preview environment open.

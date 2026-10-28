@@ -244,3 +244,13 @@ PU2 Unit 9 coverage checks 28 M/34 F, per-page totals, exact edited grammar targ
 ## Remote incident diagnostics (2026-10-23)
 
 Remote diagnostics: test_client_diagnostics.js verifies strict token scoping, opt-in/expiry, sanitizing, ack/dedup, concurrency and storage bounds. test_client_diagnostics_browser.js verifies console capture, recovery after reload/delayed return, network failures, account switching, disabled behaviour and the UTF-8 payload budget. Both run in npm test.
+
+The registered-note integration is covered by `test_preview_notes_state.js`,
+`test_preview_notes_api.js` and `test_preview_notes_browser.js` in the root test
+chain. They pin exact existing p111 M1-M8/F1-F14 data, random page-only sampling,
+durable/archival/idempotent completion, actual save-handler etag retry and SR
+delta, automatic/manual placement, the iframe Chinese action, full regular
+Study progression through all four non-spelling types, ordinary target credit,
+partial exits, account isolation and review-library access. The browser harness
+uses a loopback static server and mocked network/handwriting-recognition outcomes;
+it never sends student data to live or preview APIs.

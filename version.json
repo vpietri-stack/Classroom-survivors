@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-27a",
-  "deployedAt": "2026-10-27",
-  "notes": "Cancelled classes add 10 sessions and seven days to the existing group target, preserving progress and idempotent retries."
+  "version": "2026-10-28b",
+  "deployedAt": "2026-10-28",
+  "notes": "Approved production release of listening preview notes, page-scoped Study and completion-gated notes library."
 }

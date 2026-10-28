@@ -238,3 +238,11 @@ curriculum packs, and non_spelling_flow.js after game.js. The flow calls the
 legacy Study renderers at runtime after study_mode.js is loaded. Widget CSS is
 non_spelling_exercises.css. The standalone POC controller/chrome share the same
 curriculum/widget/styles, rather than duplicating exercise implementations.
+
+## Registered preview notes
+
+| Feature | Files |
+|---|---|
+| Registered preview notes | `preview_notes.js/.css`, `api/src/functions/shared/previewNotesCore.js` (preview and production login gate, reviewed-notes library, exact-page Study plan and bounded completion state) |
+
+New lessons follow [Creating another preview lesson](../preview-notes-authoring.md).

@@ -257,3 +257,8 @@ Study progression through all four non-spelling types, ordinary target credit,
 partial exits, account isolation and review-library access. The browser harness
 uses a loopback static server and mocked network/handwriting-recognition outcomes;
 it never sends student data to live or preview APIs.
+
+
+## All-student diagnostic rollout coverage (2026-10-30)
+
+test_practice_telemetry.js covers consecutive runs, completion dedup, mismatched game completion, explicit/inferred exits, BFCache, accounts/tabs, bounded redacted errors and storage failures. test_client_diagnostics_v2.js covers global admin control/expiry/opt-outs, immutable retries, quota vs throttling, history pagination and legacy reads. Browser diagnostics tests verify bounded nonblocking capture, measured RU/storage timing and failed/throttled uploads. Backend integration still requires the isolated local Functions host; never run auth fixture mutations against production.

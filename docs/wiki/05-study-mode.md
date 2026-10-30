@@ -464,3 +464,8 @@ observed SR outcomes but do not complete the note. The main-menu `预习笔记`
 button appears only after the first completed preview Study session. The library reopens completed notes in listening-only review mode. A student-scoped
 local mirror covers pending offline delivery; the durable server map is returned
 with the normal login. See [data model](11-data-model.md).
+
+
+## Permanent session lifecycle (2026-10-30)
+
+After content checks, a real Study start allocates a practice run ID. Exercises and the existing completed-study event link to it. Completion, menu exit, account change and same-tab unfinished-page recovery produce distinct lifecycle records; inferred recovery is only a clue. These records do not grant target/SR credit. Stage breadcrumbs contain no ink, audio or submitted answers.

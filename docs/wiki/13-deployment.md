@@ -386,3 +386,8 @@ site paths, with separate per-environment local completion mirrors. Synchronize
 release stamps and changed module cache busters. Publish origin/main and verify
 both production Pages and Azure API deployments plus served files. Keep the
 existing draft PR #1 and its isolated preview environment open.
+
+
+## Authorized all-student diagnostic trial (2026-10-30)
+
+Publish only diagnostic/lifecycle changes on each environment's existing history, preserving independent curricula, speech experiments, API routes and databases. Validate the isolated preview API and Pages first, then production. Synchronize stamps and changed-script queries. After production host verification, node api/client_diagnostics_ops.js --database Val-EslApp --action enable-all --days 7 starts the approved seven-day window; status measures partial heartbeat RU/performance and reserved volume, stop-all pauses it. The trial expires automatically; low-volume lifecycle persists. This rollout does not provision throughput or alter learner progress.

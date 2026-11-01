@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-28d",
-  "deployedAt": "2026-10-28",
-  "notes": "Approved production speech release: target-aware positive hints on completed sentence tiles, optional retry/Continue, existing cached model. Preserve production notes, curriculum and API configuration."
+  "version": "2026-11-01a",
+  "deployedAt": "2026-11-01",
+  "notes": "Permanent practice lifecycle plus bounded all-student diagnostic trial, immutable uploads and measured RU/performance."
 }

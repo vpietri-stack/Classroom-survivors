@@ -159,6 +159,10 @@ Multi-group support: `updateStudent` accepts validated `classGroups` (up to 20 `
 
 `GET /getTargetReports?teacher=...` is a read-only admin/BM endpoint (legacy no-token mode follows REQUIRE_AUTH). The teacher is required and parameterized. It returns `{teacher, generatedAt, groups:[{teacher,classTime,rows:[{name,avatar,teacher,classTime,completed,goal,startTime,endTime}]}]}`. No credentials, account IDs, or analytics arrays leave the endpoint. Counts include archived sessions from the student partition and the shared calendar count rules; query failures return 500 and never an incomplete successful report. It has a registered CORS preflight and `Cache-Control: no-store`.
 
+## Preview-note completion
+
+saveAnalytics folds valid session/study data.previewNote markers into the bounded user.previewNotes map inside its existing etag retry/write. The regular event, acknowledgements, SR delta and session counter remain the same transaction. Login returns this map through publicUser. No new endpoint or second weekly-target credit is introduced.
+
 
 ## Diagnostic trial controls (2026-10-30)
 

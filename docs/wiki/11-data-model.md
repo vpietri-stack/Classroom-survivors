@@ -174,3 +174,10 @@ session markers on login, without sharing state between accounts/environments.
 The production mirror is `csPreviewNotes:production:<studentId>`; preview and
 local-development mirrors remain separate. The backend map lives in the
 existing environment-specific student record, with no migration.
+
+
+## Practice lifecycle and diagnostic chunks (2026-10-30)
+
+Permanent practice analytics use phase, runId, mode, game, stage/checkpoint metadata and explicit/inferred exit details. They follow normal event acknowledgement and archiving, carry no session credit, and link exercise/completion records through practiceRunId. Existing type guards keep targets unchanged.
+
+The separate client_diagnostics container now stores immutable client_diagnostics_chunk uploads and atomic client_diagnostics_usage daily quota reservations with 14-day TTL. Chunk IDs hash browser plus event IDs. Existing daily documents remain readable. A non-expiring _global/config policy has scope: all_students, enabled, paused and a hard endsAt; per-account opt-outs win. No container/throughput provisioning is part of this rollout.

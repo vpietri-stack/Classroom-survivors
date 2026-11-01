@@ -262,3 +262,9 @@ it never sends student data to live or preview APIs.
 ## All-student diagnostic rollout coverage (2026-10-30)
 
 test_practice_telemetry.js covers consecutive runs, completion dedup, mismatched game completion, explicit/inferred exits, BFCache, accounts/tabs, bounded redacted errors and storage failures. test_client_diagnostics_v2.js covers global admin control/expiry/opt-outs, immutable retries, quota vs throttling, history pagination and legacy reads. Browser diagnostics tests verify bounded nonblocking capture, measured RU/storage timing and failed/throttled uploads. Backend integration still requires the isolated local Functions host; never run auth fixture mutations against production.
+
+## Study recovery checks (preview, 2026-11-01)
+
+This API-staging tree adds test_study_resume.js (shared validation, completion receipts and signed API concurrency) to root npm test. The independent preview frontend tree additionally runs test_study_resume_state.js (SR once and production gate) and test_study_resume_browser.js (real Chrome renderer crash, initial recognition, partial spelling/ink/sentence/typed boards, speech idle recovery, delayed timers, offline/reconnect, empty-storage browser, competing login choice, account isolation, games preserving the offer and exactly one new Study completion). Existing preview-note browser fixtures use resume=0 to exercise legacy notes independently. The speech extraction harness includes Study's actual timer helpers.
+
+Release verification additionally uses temporary, cleaned-up fixture accounts in the isolated local/preview Cosmos containers and actual login/studyResume/saveAnalytics HTTP paths. Verify served preview bytes and the deployed Chinese resume flow. Never mutate a real learner's progress to test recovery.

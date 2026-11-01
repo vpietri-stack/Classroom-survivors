@@ -287,12 +287,41 @@
   }
 
   let transcriber = null;     // cached pipeline
+  let InterruptableStoppingCriteria = null;
+  let transcriptionBusy = false;
+  let inferenceRuntime = null, targetCheckerLoading = null;
+  function targetChecker() {
+    if (!targetCheckerLoading) {
+      targetCheckerLoading = (async function () {
+        const controller = new AbortController(); let timer;
+        try {
+          const parts = await Promise.race([Promise.all([
+            import(new URL('speech_target.js?v=2026-10-28b', location.href).href),
+            fetch(new URL('speech_target_data.json?v=2026-10-28b', location.href).href, { signal: controller.signal }).then(function (response) { if (!response.ok) throw new Error('Target hints unavailable'); return response.json(); })
+          ]), new Promise(function (_, reject) { timer = setTimeout(function () { controller.abort(); reject(new Error('Target hints timed out')); }, 12000); })]);
+          return parts[0].createTargetChecker(transcriber, inferenceRuntime, parts[1]);
+        } finally { clearTimeout(timer); }
+      })().catch(function (error) { targetCheckerLoading = null; throw error; });
+    }
+    return targetCheckerLoading;
+  }
+  function waitForTarget(promise, signal) {
+    if (!signal) return promise;
+    return new Promise(function (resolve, reject) {
+      const abort = function () { signal.removeEventListener('abort', abort); const error = new Error('Target checking cancelled'); error.name = 'AbortError'; reject(error); };
+      if (signal.aborted) return abort(); signal.addEventListener('abort', abort, { once: true });
+      promise.then(function (value) { signal.removeEventListener('abort', abort); resolve(value); }, function (error) { signal.removeEventListener('abort', abort); reject(error); });
+    });
+  }
   let loading = null;          // in-flight promise
   let chosen = null;           // winning weight source {name, base} after probe
 
   // Reset all in-flight load state so SpeechStatus.retry() can start fresh
   // (re-probes mirrors, re-downloads). Called only on a manual retry.
   function resetLoad() {
+    if (transcriptionBusy) return false;
+    if (targetCheckerLoading) targetCheckerLoading.then(function (checker) { checker.dispose(); }, function () {});
+    targetCheckerLoading = null;
     transcriber = null;
     loading = null;
     chosen = null;
@@ -347,19 +376,23 @@
       // compiled-wasm cache valid across app deploys → no ~160s recompile).
       const libBase = await pickLibBase();
       let wasmPath = libBase ? libBase + 'wasm/' : LOCAL_WASM_PATH;
-      let pipeline, env;
+      let pipeline, env, runtime;
       try {
-        ({ pipeline, env } = await import(libBase ? libBase + 'transformers.min.js' : LOCAL_LIB_URL));
+        runtime = await import(libBase ? libBase + 'transformers.min.js' : LOCAL_LIB_URL);
+        ({ pipeline, env } = runtime);
         log('Engine: runtime lib → ' + (libBase ? 'stable lib repo' : 'same-origin'));
       } catch (e) {
         if (!libBase) throw e; // local import failing is fatal (nothing else to try)
         // Stable repo answered the probe but the import still failed — fall
         // back to the matched local pair (lib + wasm must switch TOGETHER).
         log('Engine: stable lib import failed (' + ((e && e.message) || e) + ') → same-origin lib');
-        ({ pipeline, env } = await import(LOCAL_LIB_URL));
+        runtime = await import(LOCAL_LIB_URL);
+        ({ pipeline, env } = runtime);
         wasmPath = LOCAL_WASM_PATH;
       }
 
+      InterruptableStoppingCriteria = runtime.InterruptableStoppingCriteria || null;
+      inferenceRuntime = runtime;
       // Weights from the chosen (fast, CN-reachable) mirror; lib+wasm same-origin.
       // allowRemoteModels stays OFF so the blocked huggingface.co is NEVER contacted.
       env.allowLocalModels = true;
@@ -512,8 +545,24 @@
   }
 
   async function transcribe(input, opts) {
+    opts = opts || {};
+    const signal = opts.signal;
+    function checkCancelled() { if (signal && signal.aborted) { const e = new Error('Speech assessment cancelled'); e.name = 'AbortError'; throw e; } }
+    checkCancelled();
+    // A cancelled call may still be finishing one WASM step. Do not run a
+    // second decoder on the same pipeline or queue more recordings behind it.
+    if (transcriptionBusy) { const e = new Error('Previous recording is still finishing'); e.code = 'SPEECH_BUSY'; throw e; }
+    transcriptionBusy = true;
+    let stopper, interrupt, out, audio, targetAudio;
+    try {
     if (!transcriber) await load();
-    let audio, sampleRate;
+    checkCancelled();
+    if (signal && InterruptableStoppingCriteria) {
+      stopper = new InterruptableStoppingCriteria();
+      interrupt = function () { stopper.interrupt(); };
+      signal.addEventListener('abort', interrupt, { once: true });
+    }
+    let sampleRate;
     if (input instanceof Blob) {
       const { data, sampleRate: sr } = await decodeWav(input);
       audio = data; sampleRate = sr;
@@ -523,6 +572,8 @@
       throw new Error('transcribe: expected a WAV Blob or Float32Array');
     }
     if (sampleRate !== TARGET_SR) audio = resample(audio, sampleRate, TARGET_SR);
+    checkCancelled();
+    if (opts.target) targetAudio = audio;
 
     // --- Audio repeat hack for isolated words ---
     // Whisper tiny.en struggles on very short utterances (~0.3-0.6s single words)
@@ -542,7 +593,7 @@
 
     const t0 = performance.now();
     log('Transcribing audio (wasm) …');
-    const out = await transcriber(audio, {
+    out = await transcriber(audio, {
       // whisper-tiny.en has forced_decoder_ids baked in (English-only), so
       // language/task must NOT be passed here — they'd conflict with the
       // model's own forced tokens and raise "Cannot specify task" errors.
@@ -550,29 +601,52 @@
       best_of: 5,               // beam-5 search: keeps best, drops single-token repetition
       no_repeat_ngram_size: 3,  // blocks "what, what, what" spills from Android speaker echo
       length_penalty: 1.0,
+      ...(stopper ? { stopping_criteria: [stopper] } : {}),
     });
     const timeSec = ((performance.now() - t0) / 1000).toFixed(1);
     let text = (out && out.text ? out.text : '').trim();
+    checkCancelled();
     // MEMORY HYGIENE (2026-09-04): Transformers.js pipeline outputs are tensor
     //-backed objects. They are not auto-released promptly on WebKit; across a
     // long session (10+ gates) they pile up and Safari eventually kills the
     // page (the "forced refresh" pattern). Release eagerly when the API allows.
-    try {
-      if (out && typeof out.dispose === 'function') out.dispose();
-      else if (out && out.logits && typeof out.logits.dispose === 'function') out.logits.dispose();
-    } catch (_) { /* older runtime without dispose — GC will handle it */ }
-    audio = null; // release the (possibly 3×-repeated) Float32 buffer
 
     // Post-pass: catch any residual repetition hallucination (tiny models can still
     // n-gram-loop on TTS echo). If the transcript is literally the same token N+
     // times, treat it as noise / "try again" — never let it score.
     text = collapseRepetition(text);
 
+    let hints = null, targetCheckMs = 0;
+    if (opts.target) {
+      const checkingSince = performance.now();
+      try {
+        const checker = await waitForTarget(targetChecker(), signal); checkCancelled();
+        log('Checking audio against target words …');
+        hints = await checker.check(targetAudio, opts.target, text, signal); checkCancelled();
+      } catch (error) {
+        checkCancelled(); // Cancelled work must not return partial hints.
+        log('Target word hints unavailable; keep the transcription result');
+        hints = { status: 'unavailable', words: [] };
+      }
+      targetCheckMs = Math.round(performance.now() - checkingSince);
+    }
+
     log(`Transcribed in ${timeSec}s → "${text}"`);
     return {
       text,
-      timeSec: parseFloat(timeSec)
+      timeSec: parseFloat(timeSec),
+      ...(hints ? { targetWords: hints.words, targetStatus: hints.status, targetCheckMs: targetCheckMs } : {})
     };
+    } finally {
+      if (signal && interrupt) signal.removeEventListener('abort', interrupt);
+      try {
+        if (out && typeof out.dispose === 'function') out.dispose();
+        else if (out && out.logits && typeof out.logits.dispose === 'function') out.logits.dispose();
+      } catch (_) { /* older runtime without dispose */ }
+      audio = null;
+      targetAudio = null;
+      transcriptionBusy = false;
+    }
   }
 
   global.LocalEngine = {
@@ -580,6 +654,7 @@
     MODEL_SOURCES,
     load,
     transcribe,
+    isBusy: () => transcriptionBusy,
     resetLoad,
     isLoaded: () => !!transcriber,
     chosenSource: () => chosen,

@@ -1,5 +1,8 @@
 # Game Modes & Minigames
 
+Production 2026-10-28d grammar speech checks the accepted sentence actually built and colours its existing completed tiles purple/green. Retry and Continue are optional; no forced pass, red word labels or pronunciation percentage. Scramble rewards/SR remain unchanged.
+
+
 > **Last verified:** 2026-09-04 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
 
 **Owner files:** `game.js` (2345 lines — menus, dispatch, the four DOM minigames, audio stack), `boot.js` (Phaser config, `registerScene`, `activeGameMode`, HiDPI enter/exit), `config.js` (`TD_ENABLED` / `THREE_TD_ENABLED` URL gates), `tower_defense.js` (1808), `gomoku.js` (781), `uno.js` (1821), `index.html` (`#gameSelectionOverlay` ~508, minigame overlays, TD HUD ~663+).

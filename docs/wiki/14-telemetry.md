@@ -1,12 +1,7 @@
 # Telemetry & Data Delivery
 
-Handwriting preview (2026-10-22): `handwritingAssisted` identifies a word completed
-after a hint, outline or reveal; `handwriting` remains independent completion.
-Skips produce neither. Both use the existing queue and string word itemDetails;
-no trace, CNN tensor or confidence vector enters analytics. Dashboard label/filter
-distinguish assistance. The separately gated collector uses engine version 2 to
-identify new recognition rules. The account-free preview loads no collector or
-analytics sender and saves no student progress.
+Optional speech practice (production 2026-10-28d) emits one final `speech_practice` summary on Continue, with practice/unassessed completion and targetHintCount; it earns no speech mastery or pronunciation grade. Attempt telemetry uses the fixed first-try threshold with actual retries in practiceAttempt. Late/account-switched results are discarded. Existing consent/quota/date gates remain solely responsible for temporary raw capture; this release does not reopen collection.
+
 
 > **Last verified:** 2026-09-25 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
 
@@ -185,3 +180,7 @@ curriculum location, stable ID/key, target sentences/answers and submitted respo
 in itemDetails. First-check SR outcomes use namespaced keys in the existing
 sentences bucket, so extractSRDelta and the existing server merge work unchanged.
 Matching remains one presentation board with three independently queued pairs.
+
+## Preview-note Study metadata
+
+A completed page-scoped Study session adds data.previewNote (catalog id, location, version, wordCount and exerciseCount) to the existing session/study event. Exercise events and SR use their normal paths; the same single Study session counts toward the weekly target. Reader taps and repeat visits emit no practice credit. The backend retains a bounded completion map independently of archived analytics.

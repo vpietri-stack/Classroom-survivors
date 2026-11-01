@@ -36,18 +36,6 @@ One Cosmos DB (`Val-EslApp`), one main container (`Students`) holding **everythi
 
 ## Student document shape
 
-### Preview-note completion (2026-10-27, preview API)
-
-`previewNotes` is a small catalog-bounded map, currently
-`{"pu3-u9-p111":{"version":1,"completedAt":"ISO"}}`. The normal `saveAnalytics`
-IfMatch retry loop derives it from valid completed Study events with
-`data.previewNote:{id,version,book,unit,page,wordCount:5,exerciseCount:5}`.
-`shared/previewNotesCore.js` accepts only registered lesson IDs and matching
-location/version/counts; duplicate delivery is idempotent. It writes alongside
-ordinary session/SR changes in the same student-document replace and survives
-analytics archival. Existing `publicUser` returns it on login. No new endpoint,
-container, throughput, recording collection or target-counting rule is added.
-
 Fields written by the API (addStudent.js ~40-57 + later mutations). Client-visible fields only — `password` handling noted separately.
 
 ```jsonc
@@ -164,3 +152,25 @@ keys inside srState.sentences. They add independent histories without a new buck
 or API schema. Old scramble string keys and matching a | b keys stay unchanged.
 New events are missingWord/findAndFix; itemDetails includes stable ID/key,
 curriculum location, sentences, authored answers and submitted response.
+
+### Preview-note completion (production approved 2026-10-28)
+
+`previewNotes` is a small catalog-bounded map, currently
+`{"pu3-u9-p111":{"version":1,"completedAt":"ISO"}}`. The normal `saveAnalytics`
+IfMatch retry loop derives it from valid completed Study events with
+`data.previewNote:{id,version,book,unit,page,wordCount:5,exerciseCount:5}`.
+`shared/previewNotesCore.js` accepts only registered lesson IDs and the matching
+location/version/counts; duplicates merge idempotently. It writes alongside the
+ordinary session/SR changes in the same student-document replace and survives
+analytics archival. `publicUser` already returns it on login. No new endpoint,
+container, throughput or raw recording is introduced.
+
+The preview frontend mirrors this bounded map under
+`csPreviewNotes:preview:<studentId>` (or `csPreviewNotes:local:<studentId>` in dev)
+after queueing the completed session. It merges fresh server progress and recent
+session markers on login, without sharing state between accounts/environments.
+
+
+The production mirror is `csPreviewNotes:production:<studentId>`; preview and
+local-development mirrors remain separate. The backend map lives in the
+existing environment-specific student record, with no migration.

@@ -1,5 +1,7 @@
 # Data Model: Cosmos DB & Client Persistence
 
+Production 2 November: approved Study/Gomoku/UNO recovery and adaptive speech are enabled. See [Speech](08-speech.md) and [Deployment](13-deployment.md) for scope and storage isolation.
+
 > **Last verified:** 2026-09-27 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
 
 **Owner files:** `api/src/functions/shared/db.js`, `api/src/functions/saveAnalytics.js`, `api/src/functions/clearGeo.js`, `teaching_content.js`, `frontend_auth.js`, `api/src/functions/shared/auth.js`

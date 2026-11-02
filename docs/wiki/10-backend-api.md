@@ -1,5 +1,7 @@
 # Backend API: Azure Functions
 
+Production 2 November: approved Study/Gomoku/UNO recovery and adaptive speech are enabled. See [Speech](08-speech.md) and [Deployment](13-deployment.md) for scope and storage isolation.
+
 > **Last verified:** 2026-09-27 · **Part of:** [Classroom-survivors Repo Wiki](README.md)
 
 **Owner files:** `api/src/functions/*.js`, `api/src/functions/shared/*.js`, `api/package.json`, `api/host.json`, `staticwebapp.config.json`, `.github/workflows/azure-static-web-apps-brave-bush-0438ab000.yml`

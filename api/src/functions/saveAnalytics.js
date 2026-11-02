@@ -3,6 +3,8 @@ const { validateApiKey } = require('./shared/validateApiKey');
 const { getContainer } = require('./shared/db');
 const auth = require('./shared/auth');
 const previewNotes = require('./shared/previewNotesCore');
+const studyResume = require('./shared/studyResumeCore');
+const gameResume = require('./shared/gameResumeCore');
 
 const ARCHIVE_TRIGGER_COUNT = 700;
 const RETENTION_DAYS_MS = 90 * 24 * 60 * 60 * 1000; // 90 days
@@ -356,6 +358,11 @@ app.http('saveAnalytics', {
                 if (geoEvents.length) applyGeoSamples(user, geoEvents); // v2 consensus (idempotent on retry)
                 ({ addedCount: added, addedEventIds, duplicateEventIds } = applyEventsWithAck(user.analytics, cleanEvents));
                 previewNotes.apply(user, cleanEvents);
+                studyResume.completion(user, cleanEvents, addedEventIds);
+                gameResume.completion(user, cleanEvents, addedEventIds);
+                // A stale device can retry a recovered game with a newer SR sequence.
+                // Track the actual counter grant independently from event acknowledgement.
+                const recoveryCredit = gameResume.canCredit(cleanEvents, addedEventIds, user);
                 // SR newer-wins (2026-09-10, Doris stuck-flag fix): each client
                 // SR update carries a monotonic srSeq. Stale replays (lost
                 // response retried, beacon+fetch duplicates) must not re-apply
@@ -383,10 +390,11 @@ app.http('saveAnalytics', {
                         user.srState = srState;
                     }
                     if (srSeq !== undefined && srSeq !== null) user.srSeq = srSeq;
-                    if (incrementSession) user.sessionCount = (user.sessionCount || 0) + 1;
+                    if (incrementSession && recoveryCredit) { user.sessionCount = (user.sessionCount || 0) + 1; gameResume.markCredit(user,cleanEvents); }
                     srApplied = true;
-                } else if (incrementSession && (srSeq === undefined || srSeq === null)) {
+                } else if (incrementSession && recoveryCredit && (srSeq === undefined || srSeq === null)) {
                     user.sessionCount = (user.sessionCount || 0) + 1;
+                    gameResume.markCredit(user,cleanEvents);
                     srApplied = true;
                 }
                 sessionCount = user.sessionCount || 0;

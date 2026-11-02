@@ -1,5 +1,7 @@
 # Study Mode (UI Rounds A–D + Match; internal functions A/C/D/E/F)
 
+Production 2 November: approved Study/Gomoku/UNO recovery and adaptive speech are enabled. See [Speech](08-speech.md) and [Deployment](13-deployment.md) for scope and storage isolation.
+
 Production 2026-10-28d promotes the teacher-tested optional speech flow. Round E passes its completed sentence tiles to SpeechUI: each microphone attempt resets them purple, then clearly heard words become green. No repeated sentence prompt or word-feedback row; learners may retry or Continue, including uncertain/technical outcomes. Unscramble SR is earned before speech and never duplicated. See Speech Recognition for the shared flow.
 
 

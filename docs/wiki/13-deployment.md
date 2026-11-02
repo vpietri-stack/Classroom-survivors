@@ -1,5 +1,24 @@
 # Deployment & Release Discipline
 
+## Production speech and interrupted-session recovery — 2 November 2026
+
+The teacher approved production release of the reviewed adaptive word/sentence
+practice and Study/Gomoku/UNO recovery. Speaking after Study Round B and game word
+scramble uses the same generous green/purple words, checkmark badges and approved
+Chinese all/some/none messages. Feedback sits above speech controls, instructions
+below. Unready models skip the step; problems after recording keep Retry/Continue.
+Weights, acceptance settings and resumable cache formats remain frozen.
+
+Recovery restores logical state without audio or credentials, stops interrupted
+microphones, and retains one-time credit/completion receipts. Production uses its
+own API, Students and study_resume storage in the existing Val-EslApp pool; preview
+continues using its staging API, Students-admin-dashboard-preview and
+study_resume_preview. No additional throughput is allocated.
+
+This release preserves production curriculum and listening-only preview notes.
+Additional PU1 Units0–7 exercises, notes speaking, research/collection pages and
+preview-only game prototypes are not promoted. See release validation in Testing.
+
 Production speech release 2026-10-28d is explicitly teacher-approved after preview testing. Apply only the speech feature on current origin/main, enable SPEECH_PRACTICE_ENABLED on the production path, and retain production notes, curricula, API/data and all other gates. Publish origin/main only; keep preview history independent. Synchronize version/auth/index/dashboard-auth and affected script cache busters. Ship speech_target.js, aggregate/public dictionary JSON and its licence; model/runtime bytes and cache keys stay unchanged. Verify Pages assets and the existing Azure deployment workflow.
 
 

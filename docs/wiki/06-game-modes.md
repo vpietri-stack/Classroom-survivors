@@ -1,5 +1,7 @@
 # Game Modes & Minigames
 
+Production 2 November: approved Study/Gomoku/UNO recovery and adaptive speech are enabled. See [Speech](08-speech.md) and [Deployment](13-deployment.md) for scope and storage isolation.
+
 Production 2026-10-28d grammar speech checks the accepted sentence actually built and colours its existing completed tiles purple/green. Retry and Continue are optional; no forced pass, red word labels or pronunciation percentage. Scramble rewards/SR remain unchanged.
 
 

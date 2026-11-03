@@ -1,3 +1,7 @@
+## PU1 page-85 note in the isolated preview API (3 November 2026)
+
+The retained PR-1 preview API now registers `pu1-u7-p85` version 1 at PU1 Unit 7 page 85. The existing five-word/five-exercise completed Study marker derives durable completion alongside PU3 notes, with archive retention and duplicate-event protection. Only this catalog addition is released here; production main, API/data isolation and the branch's other preview behavior remain unchanged.
+
 # Data Model: Cosmos DB & Client Persistence
 
 > **Last verified:** 2026-09-27 · **Part of:** [Classroom-survivors Repo Wiki](README.md)

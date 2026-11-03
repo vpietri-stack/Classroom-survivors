@@ -1,3 +1,7 @@
+## PU1 page 85 production release (3 November 2026)
+
+The shared notes catalog registers PU1 Unit 7 page 85 version 1. Its completed Study event uses the existing note completion record and normal session credit.
+
 # Data Model: Cosmos DB & Client Persistence
 
 Production 2 November: approved Study/Gomoku/UNO recovery and adaptive speech are enabled. See [Speech](08-speech.md) and [Deployment](13-deployment.md) for scope and storage isolation.

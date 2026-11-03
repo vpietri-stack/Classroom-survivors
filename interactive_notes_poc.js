@@ -20,12 +20,21 @@
   function play(id) {
     const clip = lesson.clips[id];
     if (!clip) return;
+    const targetChanged = current !== id;
+    window.dispatchEvent(new CustomEvent('notes-select', { detail: { id, text: clip.text } }));
     stop(); current = id; const token = generation;
-    $('nowPlaying').textContent = clip.text;
+    if (targetChanged) $('nowPlaying').textContent = clip.text;
     $('playerStatus').textContent = '正在播放 · ' + clip.translation;
     delete $('playerStatus').dataset.audioError;
     $('replay').disabled = false; $('stop').disabled = false;
     playing = true; updateActive(id);
+    // The PU1 reader can start the saved MP3 within the tap even if the
+    // browser's media requests to the static host are stalling.
+    const bundled = lesson.id === 'pu1-u7-p85' && window.PU1Page85Audio?.[id];
+    if (bundled && !audioCache.has(clip.audio)) {
+      const bytes = Uint8Array.from(atob(bundled), char => char.charCodeAt(0));
+      audioCache.set(clip.audio, URL.createObjectURL(new Blob([bytes], { type: 'audio/mpeg' })));
+    }
     let usedBlob = audioCache.has(clip.audio);
     function failed(error) {
       if (token !== generation) return;
@@ -79,12 +88,12 @@
   lesson.pages.forEach((page, index) => {
     const article = document.createElement('article'); article.className = 'note-page'; article.id = 'page-' + (index + 1);
     const label = document.createElement('div'); label.className = 'page-label';
-    const number = document.createElement('b'); number.textContent = String(index + 1).padStart(2, '0') + ' / 04';
+    const number = document.createElement('b'); number.textContent = String(index + 1).padStart(2, '0') + ' / ' + String(lesson.pages.length).padStart(2, '0');
     const title = document.createElement('span'); title.textContent = page.title; label.append(number, title);
     const viewport = document.createElement('div'); viewport.className = 'paper-viewport';
     const paper = document.createElement('div'); paper.className = 'paper'; paper.style.aspectRatio = page.width + ' / ' + page.height;
-    const image = document.createElement('img'); image.className = 'page-image'; image.src = 'interactive_notes_assets/' + page.file;
-    image.alt = 'PU3 Unit 9 p.111 预习图，第 ' + (index + 1) + ' 页：' + page.title;
+    const image = document.createElement('img'); image.className = 'page-image'; image.src = (lesson.assetBase || 'interactive_notes_assets/') + page.file;
+    image.alt = (lesson.label || 'PU3 Unit 9 p.111') + ' 预习图，第 ' + (index + 1) + ' 页：' + page.title;
     image.width = page.width; image.height = page.height; image.draggable = false;
     if (index > 0) image.loading = 'lazy';
     paper.append(image);
@@ -126,5 +135,5 @@
   $('replay').addEventListener('click', () => { if (current) play(current); });
   document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); });
   window.addEventListener('pagehide', () => { stop(); audioCache.forEach(url => URL.revokeObjectURL(url)); audioCache.clear(); });
-  window.InteractiveNotesPOC = { snapshot: () => ({ pageCount: lesson.pages.length, currentClip: current, playing, mode: 'listening-only' }) };
+  window.InteractiveNotesPOC = { pause: stop, snapshot: () => ({ pageCount: lesson.pages.length, currentClip: current, playing, mode: 'listening-only' }) };
 })();

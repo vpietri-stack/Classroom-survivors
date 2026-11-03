@@ -1,3 +1,7 @@
+## PU1 page 85 production release (3 November 2026)
+
+The teacher approved promotion of the corrected PU1 Unit 7 page 85 lesson. The production release includes its reader, bundled audio, optional pronunciation and the page 85 Study content with the shared completion catalog.
+
 # Deployment & Release Discipline
 
 ## Production speech and interrupted-session recovery — 2 November 2026

@@ -9,7 +9,7 @@
   const STUDY_ADVANCE_MS = 1200;
   const $ = id => document.getElementById(id);
   let session = [], cursor = 0, input = [], activeBox = 0, selectedWord = null, binnedWord = null;
-  let letters = [], verdict = null, locked = false, solved = false, resetTimer = null, drag = null;
+  let letters = [], verdict = null, locked = false, solved = false, resetTimer = null, drag = null, resetDue = 0;
 
   function shuffle(items) {
     const copy = [...items];
@@ -21,6 +21,8 @@
   }
   function current() { return session[cursor]; }
   function prefix(index) { return current().type === 'missing' ? (current().prefixes || [])[index] || '' : ''; }
+  function suffix(index) { return current().type === 'missing' ? (current().suffixes || [])[index] || '' : ''; }
+  function fullAnswer(index) { return input[index] + suffix(index); }
   function makeButton(className, label, handler) {
     const button = document.createElement('button');
     button.type = 'button';
@@ -44,7 +46,8 @@
     label.textContent = text;
     $('feedback').appendChild(label);
   }
-  function cancelTimer() { clearTimeout(resetTimer); resetTimer = null; }
+  function cancelTimer() { clearTimeout(resetTimer); resetTimer = null; resetDue = 0; }
+  function later(fn,ms) { resetDue=Date.now()+ms; resetTimer=setTimeout(()=>{resetTimer=null;resetDue=0;fn();},ms); }
   function clearDrag() {
     if (drag && drag.ghost) drag.ghost.remove();
     drag = null;
@@ -64,7 +67,7 @@
   function startExercise() {
     const exercise = current();
     const targets = exercise.type === 'missing' ? exercise.answers : [exercise.answer];
-    letters = shuffle([...new Set(targets.map((target, index) => target.slice(prefix(index).length)).join('').toLowerCase())]);
+    letters = shuffle([...new Set(targets.map((target, index) => target.slice(prefix(index).length, target.length - suffix(index).length)).join('').toLowerCase())]);
     $('summary').hidden = true;
     $('sentences').hidden = false;
     $('actions').hidden = false;
@@ -100,7 +103,7 @@
   function answerBox(index, target) {
     const button = makeButton('nse-answer', '', () => chooseBox(index));
     button.dataset.box = index;
-    button.setAttribute('aria-label', '第' + (index + 1) + '个空格：' + (input[index] || '未填写'));
+    button.setAttribute('aria-label', '第' + (index + 1) + '个空格：' + (fullAnswer(index) || '未填写'));
     button.setAttribute('aria-pressed', String(index === activeBox));
     if (index === activeBox && !locked) button.classList.add('active');
     if (verdict && current().type === 'fix') button.classList.add(verdict.word ? 'word-correct' : 'word-wrong');
@@ -110,7 +113,7 @@
       placeholder.setAttribute('aria-hidden', 'true');
       button.appendChild(placeholder);
     } else {
-      const count = verdict ? Math.max(input[index].length, target.length) : input[index].length;
+      const count = verdict ? Math.max(input[index].length, target.length - suffix(index).length) : input[index].length;
       for (let i = 0; i < count; i++) {
         const span = document.createElement('span');
         span.className = 'letter';
@@ -126,9 +129,15 @@
         button.appendChild(placeholder);
       }
     }
+    for (const letter of suffix(index)) {
+      const span = document.createElement('span');
+      span.className = 'letter nse-prefilled nse-suffix';
+      span.textContent = letter;
+      button.appendChild(span);
+    }
     if (verdict) {
-      button.classList.add(input[index] === target ? 'spelling-correct' : 'spelling-wrong');
-      if (input[index] === target && (current().type === 'missing' || verdict.word)) button.classList.add('all-correct');
+      button.classList.add(fullAnswer(index) === target ? 'spelling-correct' : 'spelling-wrong');
+      if (fullAnswer(index) === target && (current().type === 'missing' || verdict.word)) button.classList.add('all-correct');
     }
     return button;
   }
@@ -328,7 +337,7 @@
     if (input.some((value, index) => value.length <= prefix(index).length)) return message('请先填好所有空格。');
     exercise.attempts++;
     if (exercise.type === 'missing') {
-      verdict = { spelling: input.every((value, index) => value === exercise.answers[index]) };
+      verdict = { spelling: input.every((value, index) => fullAnswer(index) === exercise.answers[index]) };
     } else {
       const correctPosition = !Number.isInteger(exercise.wrongIndex) || binnedWord === exercise.wrongIndex;
       verdict = { word: correctPosition && plainWord(exercise.sentence.split(' ')[binnedWord]) === exercise.wrongWord, spelling: input[0] === exercise.answer };
@@ -342,7 +351,7 @@
       exercise.firstAttempt = exercise.attempts === 1;
       renderProgress();
       message(exercise.firstAttempt ? '答对了！' : '答对了！稍后再复习这题。', 'success');
-      if (exercise.presentation === 'study') resetTimer = setTimeout(next, STUDY_ADVANCE_MS);
+      if (exercise.presentation === 'study') later(next, STUDY_ADVANCE_MS);
       else requestAnimationFrame(() => {
         if (current() !== exercise || !solved || !isActive()) return;
         $('result-action').scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
@@ -354,7 +363,7 @@
         : !verdict.word ? '单词选错了，但新单词拼对了。'
         : '单词选对了，请改正红色字母。';
       message(text, 'error');
-      resetTimer = setTimeout(resetAnswer, REVEAL_MS);
+      later(resetAnswer, REVEAL_MS);
     }
   }
   function finishSession() {
@@ -405,7 +414,18 @@
   }
 
 
-  function getState() { return { cursor, input: [...input], activeBox, binnedWord, locked, solved }; }
+  function getState() { return { cursor, input: [...input], activeBox, selectedWord, binnedWord, locked, solved,
+    letters:letters.slice(), verdict:verdict&&{...verdict}, attempts:current()&&current().attempts,
+    firstAttempt:current()&&current().firstAttempt, remainingMs:resetDue?Math.max(0,resetDue-Date.now()):null,
+    message:$('feedback')&&$('feedback').textContent, messageKind:$('feedback')&&$('feedback').classList.contains('success')?'success':$('feedback')&&$('feedback').classList.contains('error')?'error':'' }; }
+  function restoreState(saved) {
+    if(!saved||!Array.isArray(saved.input))return;
+    cancelTimer();input=saved.input.slice();activeBox=saved.activeBox;selectedWord=saved.selectedWord;binnedWord=saved.binnedWord;
+    locked=!!saved.locked;solved=!!saved.solved;letters=saved.letters.slice();verdict=saved.verdict;
+    current().attempts=saved.attempts||0;current().firstAttempt=saved.firstAttempt;current().complete=solved;
+    render();message(saved.message||'',saved.messageKind||'');
+    if(locked&&(!solved||current().presentation==='study'))later(solved?next:resetAnswer,Math.max(0,Math.min(saved.remainingMs==null?100:saved.remainingMs,3000)));
+  }
   function isActive() {
     if (!widgetRoot || !widgetRoot.isConnected) return false;
     const overlay = widgetRoot.closest('.overlay');
@@ -438,6 +458,7 @@
     cursor = 0;
     bindWidget();
     startExercise();
+    if (options.resumeState) restoreState(options.resumeState);
   }
   function handleKeyboard(event) {
     if (!isActive()) return;

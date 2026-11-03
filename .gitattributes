@@ -4,3 +4,8 @@
 # Shell scripts must keep LF: autocrlf checks them out with CRLF on Windows and
 # Git Bash then fails on every line ("$'\r': command not found").
 *.sh text eol=lf
+
+# Byte-verified adaptive speech assets must match published LF JSON.
+models/whisper-tiny.en/*.json text eol=lf
+speech_assets/adaptive-20261029a/*.json text eol=lf
+speech_assets/adaptive-20261029a/*.bin binary

@@ -1,5 +1,16 @@
 # Testing
 
+Production release validation (2 November): root checks use the portable selective
+runner; root npm test remains the complete release gate. It includes production
+API isolation/feature-gate checks, recovery auth/ownership/credit/core/browser
+checks and adaptive asset/cache/app tests. Research-only page tests are excluded
+because their pages are not released. Existing production curriculum checks stay
+in the suite. Backend mocks use npm --prefix api test; live integration requires
+the private test_auth.js, explicit loopback TEST_BASE and confirmed isolated
+Val-EslApp-Test. Hosted production verification is read-only; no learner data is
+used for fixtures. Full logs/receipts stay private under .checks/.
+
+
 Production speech promotion adds `test_speech_practice.js`, `test_speech_target.js` and `test_speech_engine_cancel.js` to the required root suite. Browser tests cover live/preview activation, legacy disabled fallback, real Study/game callers, tile reset/ordered hints, optional progression, account switches, timeouts and cancellation. Target tests cover public-only calibration, positive hints, causal token checks and silence. Native tests use synthetic audio with the unchanged Whisper/WASM to verify interruption, single-flight, target checking and model reuse. Recorder tests cover late permissions and discarded audio.
 
 

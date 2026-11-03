@@ -1,5 +1,24 @@
 # Speech Recognition & Pronunciation Scoring
 
+## Production speech and interrupted-session recovery — 2 November 2026
+
+The teacher approved production release of the reviewed adaptive word/sentence
+practice and Study/Gomoku/UNO recovery. Speaking after Study Round B and game word
+scramble uses the same generous green/purple words, checkmark badges and approved
+Chinese all/some/none messages. Feedback sits above speech controls, instructions
+below. Unready models skip the step; problems after recording keep Retry/Continue.
+Weights, acceptance settings and resumable cache formats remain frozen.
+
+Recovery restores logical state without audio or credentials, stops interrupted
+microphones, and retains one-time credit/completion receipts. Production uses its
+own API, Students and study_resume storage in the existing Val-EslApp pool; preview
+continues using its staging API, Students-admin-dashboard-preview and
+study_resume_preview. No additional throughput is allocated.
+
+This release preserves production curriculum and listening-only preview notes.
+Additional PU1 Units0–7 exercises, notes speaking, research/collection pages and
+preview-only game prototypes are not promoted. See release validation in Testing.
+
 Production 2026-10-28d: Study and grammar callers pass their completed sentence tiles to the optional practice gate. The repeated target prompt and separate word-feedback row are omitted. Each microphone attempt resets those tiles to purple immediately; target words heard clearly turn their existing tiles green, while uncertain words stay purple. Word mapping preserves sentence order, repeated words, contractions and punctuation; unexpected target output leaves tiles neutral. Standalone callers without tiles retain their target display. The no-login review page demonstrates the same tile feedback.
 
 

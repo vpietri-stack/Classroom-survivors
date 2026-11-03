@@ -86,3 +86,13 @@ const NON_SPELLING_ENABLED = (function () {
         || /^192\.168\./.test(host) || /^10\./.test(host) || /^172\.(1[6-9]|2\d|3[01])\./.test(host);
     return (production || preview || local) && new URLSearchParams(window.location.search).get('nonspelling') !== '0';
 })();
+
+// Teacher-approved interrupted-session recovery on live, preview and local.
+const STUDY_RESUME_ENABLED = (() => {
+    const local = window.location.protocol === 'file:' || ['localhost','127.0.0.1'].includes(window.location.hostname);
+    return (local || /^\/Classroom-survivors(?:-preview)?(?:\/|$)/i.test(window.location.pathname))
+        && new URLSearchParams(window.location.search).get('resume') !== '0';
+})();
+
+// Teacher-approved Gomoku and UNO continuation.
+const GAME_RESUME_ENABLED = STUDY_RESUME_ENABLED && new URLSearchParams(window.location.search).get('gameResume') !== '0';

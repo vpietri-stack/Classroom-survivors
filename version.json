@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-01a",
-  "deployedAt": "2026-11-01",
-  "notes": "Permanent practice lifecycle plus bounded all-student diagnostic trial, immutable uploads and measured RU/performance."
+  "version": "2026-11-02c",
+  "deployedAt": "2026-11-02",
+  "notes": "Production: improved local word/sentence speech and interrupted Study/Gomoku/UNO recovery."
 }

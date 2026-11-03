@@ -44,7 +44,7 @@ async function main() {
     await open('different'); assert.equal(await page.locator('.speech-practice-continue').isVisible(), false); checks++;
     await record('different', false);
     assert.equal(await page.locator('.speech-practice-continue').isVisible(), true);
-    assert(!/%|再试一次|错误:/.test(await page.locator('.heard-feedback').innerText())); checks++;
+    assert(!/%|错误:/.test(await page.locator('.heard-feedback').innerText())); checks++;
     await record('match', false); await record('different', false);
     assert.deepEqual(await page.evaluate(() => scores), [1, 1, 1]); checks++;
     await page.locator('.speech-practice-continue').click();
@@ -91,7 +91,7 @@ async function main() {
     await page.addScriptTag({ path: path.join(__dirname, 'teacher_dashboard.js') });
     assert.equal(await page.evaluate(() => exerciseTypeLabel('speech_practice')), 'Speech practice (not graded)');
     assert((await page.evaluate(() => formatItemDetails(finished[0]))).includes('No pronunciation grade')); checks++;
-    // The disabled flag retains the legacy gate as a fallback.
+    // Explicitly disabled practice retains compatibility with the legacy gate.
     await page.evaluate(() => { SPEECH_PRACTICE_ENABLED = false; });
     await record('different'); assert.equal(await page.locator('.speech-practice').count(), 0);
     assert.equal(await page.locator('.speech-gate-btns > button').nth(1).isVisible(), false);
@@ -101,7 +101,7 @@ async function main() {
       const source = fs.readFileSync(path.join(__dirname, file), 'utf8'), start = source.indexOf('function ' + name + '('), end = source.indexOf('\nfunction ', start + 1);
       return source.slice(start, end < 0 ? undefined : end);
     }
-    await page.addScriptTag({ content: caller('study_mode.js', 'checkRoundE') });
+    await page.addScriptTag({ content: fs.readFileSync(path.join(__dirname,'study_mode.js'),'utf8').split('const STUDY_STATE =')[0] + caller('study_mode.js', 'checkRoundE') });
     await page.evaluate(() => {
       SPEECH_PRACTICE_ENABLED = true; window.SpeechStatus = { isReady: () => true }; window.kind = 'different';
       document.body.innerHTML = '<div><div id="sentence-drop-zone"></div><div id="sentence-word-bank"></div><div>controls</div></div>';

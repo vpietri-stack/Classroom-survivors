@@ -246,3 +246,10 @@ curriculum/widget/styles, rather than duplicating exercise implementations.
 | Registered preview notes | `preview_notes.js/.css`, `api/src/functions/shared/previewNotesCore.js` (preview and production login gate, reviewed-notes library, exact-page Study plan and bounded completion state) |
 
 New lessons follow [Creating another preview lesson](../preview-notes-authoring.md).
+
+The PU2 Unit 5 page 59 superlatives reader is `pu2_u5_p59_notes.html`.
+Its registered preview starts a page 59 Study session. Typed exercises moved
+from page 60 retain their original SR keys through `srPage: "60"`.
+
+Page 59 bundles the saved British English MP3s for playback within the tap.
+Its audio manifest records the Sound of Text and Youdao sources.

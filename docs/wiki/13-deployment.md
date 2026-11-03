@@ -414,3 +414,5 @@ existing draft PR #1 and its isolated preview environment open.
 ## Authorized all-student diagnostic trial (2026-10-30)
 
 Publish only diagnostic/lifecycle changes on each environment's existing history, preserving independent curricula, speech experiments, API routes and data containers. Validate the isolated preview API and Pages first, then production. Synchronize stamps and changed-script queries. After production host verification, node api/client_diagnostics_ops.js --database Val-EslApp --action enable-all --days 7 starts the approved seven-day window; status measures partial heartbeat RU/performance and reserved volume, stop-all pauses it. The trial expires automatically; low-volume lifecycle persists. This rollout does not provision throughput or alter learner progress.
+
+Production 2026-11-03j promotes the ten optimized WebP assets and optional adaptive speech on the three registered notes readers. Build on production main and verify hosted assets after deployment. Image budgets are enforced by the release suite.

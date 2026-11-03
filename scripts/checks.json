@@ -1,6 +1,7 @@
 {
   "all": [
     "test_deploy_stamp_sync.js",
+    "scripts/check-notes-images.cjs",
     "test_production_release_gates.js",
     "test_study_resume.js",
     "test_game_resume.js",
@@ -53,6 +54,7 @@
     "test_preview_notes_state.js",
     "test_preview_notes_api.js",
     "test_preview_notes_browser.js",
+    "test_notes_speech_browser.js",
     "test_pu1_u7_preview.js",
     "test_pu1_u7_preview_browser.js",
     "scripts/checks.test.mjs"
@@ -129,7 +131,9 @@
       "tests": [
         "test_preview_notes_state.js",
         "test_preview_notes_api.js",
-        "test_preview_notes_browser.js"
+        "test_preview_notes_browser.js",
+        "test_notes_speech_browser.js",
+        "scripts/check-notes-images.cjs"
       ]
     },
     "api": {

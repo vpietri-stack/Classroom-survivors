@@ -367,3 +367,5 @@ When a remote incident trial is enabled for the active student, the existing __s
 ## Diagnostic stage breadcrumbs (2026-10-30)
 
 The recorder observes microphone request, AudioContext creation, recording start/stop, close request and encoding; optional-practice Continue is also recorded during detailed capture. Permanent checkpoints retain only the latest audio stage. These hooks do not alter recognition/recording and collect no additional audio.
+
+Production 2026-11-03j enables the existing optional adaptive notes speech controller for PU3 U9 p111, PU1 U7 p85 and PU2 U5 p59. Single words, phrases and sentences are eligible. Readers reuse the parent worker when embedded. Recordings and feedback remain local and optional.

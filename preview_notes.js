@@ -9,6 +9,11 @@
             || location.protocol === 'file:' || host === 'localhost' || host === '127.0.0.1';
     }
     const user = () => typeof authActiveUser === 'undefined' ? null : authActiveUser;
+    function remapPlacement(placement) {
+        if (enabled() && placement && placement.book === 'PU1'
+            && String(placement.unit) === '7' && String(placement.page) === '84') placement.page = '85';
+        return placement;
+    }
     const isStudent = student => student && !['teacher', 'BM', 'admin'].includes(student.role);
     const key = student => 'csPreviewNotes:' + (/Classroom-survivors-preview/i.test(location.pathname) ? 'preview:' : /^\/Classroom-survivors(?:\/|$)/i.test(location.pathname) ? 'production:' : 'local:') + student.id;
     function progress(student) {
@@ -25,7 +30,8 @@
     }
     function close() {
         opening = null;
-        if (viewer) { viewer.remove(); viewer = null; }
+        if (viewer) {
+            try { viewer.querySelector('iframe')?.contentWindow?.NotesSpeech?.dispose(); } catch (_) {} viewer.remove(); viewer = null; }
         document.body.classList.remove('preview-notes-open');
     }
     function shell(title) {
@@ -45,11 +51,11 @@
         if (review && !complete(student, id)) return;
         const overlay = shell(note.title + ' · 预习笔记');
         const request = 'note-' + Date.now() + '-' + Math.random().toString(36).slice(2);
-        const frame = document.createElement('iframe'); frame.title = note.title + ' 点读预习'; frame.allow = 'autoplay';
+        const frame = document.createElement('iframe'); frame.title = note.title + ' 点读预习'; frame.allow = note.id === 'pu1-u7-p85' ? 'autoplay; microphone' : 'autoplay';
         opening = { id, review, owner: student.id, request, frame };
         const url = new URL(note.reader, location.href);
         url.searchParams.set('embed', '1'); url.searchParams.set('mode', review ? 'review' : 'intro'); url.searchParams.set('request', request);
-        url.searchParams.set('v', '4'); frame.src = url.href; overlay.append(frame);
+        url.searchParams.set('v', '4'); url.searchParams.set('v', '2026-11-03e'); frame.src = url.href; overlay.append(frame);
     }
     function openLibrary() {
         const student = user();
@@ -111,5 +117,5 @@
             else current.frame.contentWindow.postMessage({ action: 'note-study-error', request: current.request }, location.origin);
         }
     });
-    window.PreviewNotes = { onLogin, close, openLibrary, openNote, blocksAdvance, prepareStudy, completeStudy, markComplete, enabled };
+    window.PreviewNotes = { onLogin, close, openLibrary, openNote, blocksAdvance, prepareStudy, completeStudy, markComplete, enabled, remapPlacement };
 })();

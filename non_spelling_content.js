@@ -1343,7 +1343,34 @@
         }
     };
 
-    const pageCatalogs = { 'PU2:9:107': pu2Unit9Catalogs[107], 'PU2:9:109': pu2Unit9Catalogs[109], 'PU2:9:116': pu2Unit9Catalogs[116], 'PU2:9:119': pu2Unit9Catalogs[119], 'PU2:8:95': pu2Unit8Catalogs[95], 'PU2:8:96': pu2Unit8Catalogs[96], 'PU2:8:97': pu2Unit8Catalogs[97], 'PU2:8:98': pu2Unit8Catalogs[98], 'PU2:8:104': pu2Unit8Catalogs[104], 'PU2:7:83': pu2Unit7Catalogs[83], 'PU2:7:85': pu2Unit7Catalogs[85], 'PU2:7:87': pu2Unit7Catalogs[87], 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
+    const pu1Unit7Page85 = {
+            missing: [
+                {"id": "M9", "sentences": ["I ___ watching television.", "She ___ playing tennis."], "answers": ["am", "is"]},
+                {"id": "M10", "sentences": ["You ___ riding a bike.", "My brother ___ swimming."], "answers": ["are", "is"]},
+                {"id": "M11", "sentences": ["We ___ playing football.", "I ___ eating an apple."], "answers": ["are", "am"]},
+                {"id": "M12", "sentences": ["What ___ she doing?", "What ___ they doing?"], "answers": ["is", "are"]},
+                {"id": "M13", "sentences": ["___ he playing tennis?", "___ you watching television?"], "answers": ["is", "are"]},
+                {"id": "M14", "sentences": ["I'm ___ a picture.", "She's ___ her feet."], "answers": ["painting", "cleaning"], "prefixes": ["p", "c"]},
+                {"id": "M15", "sentences": ["I'm ___ a bike.", "They're ___ in the water."], "answers": ["riding", "swimming"], "prefixes": ["r", "sw"]},
+                {"id": "M16", "sentences": ["Are you swimming? No, I'm ___.", "Is she playing tennis? No, she ___."], "answers": ["not", "isn't"]},
+            ],
+            fix: [
+                {"id": "F9", "sentence": "I is watching television.", "wrongWord": "is", "answer": "am"},
+                {"id": "F10", "sentence": "She are playing tennis.", "wrongWord": "are", "answer": "is"},
+                {"id": "F11", "sentence": "They is riding their bikes.", "wrongWord": "is", "answer": "are"},
+                {"id": "F12", "sentence": "We am watching television.", "wrongWord": "am", "answer": "are"},
+                {"id": "F13", "sentence": "What is she do?", "wrongWord": "do", "answer": "doing"},
+                {"id": "F14", "sentence": "What are he doing?", "wrongWord": "are", "answer": "is"},
+                {"id": "F15", "sentence": "Is you playing football?", "wrongWord": "is", "answer": "are"},
+                {"id": "F16", "sentence": "I'm play tennis.", "wrongWord": "play", "answer": "playing"},
+                {"id": "F17", "sentence": "She's ride a bike.", "wrongWord": "ride", "answer": "riding"},
+                {"id": "F18", "sentence": "They're swiming.", "wrongWord": "swiming", "answer": "swimming"},
+                {"id": "F19", "sentence": "I'm not eat an apple.", "wrongWord": "eat", "answer": "eating"},
+                {"id": "F20", "sentence": "They isn't watching television.", "wrongWord": "isn't", "answer": "aren't"},
+            ],
+        };
+
+    const pageCatalogs = { 'PU1:7:85': pu1Unit7Page85, 'PU2:9:107': pu2Unit9Catalogs[107], 'PU2:9:109': pu2Unit9Catalogs[109], 'PU2:9:116': pu2Unit9Catalogs[116], 'PU2:9:119': pu2Unit9Catalogs[119], 'PU2:8:95': pu2Unit8Catalogs[95], 'PU2:8:96': pu2Unit8Catalogs[96], 'PU2:8:97': pu2Unit8Catalogs[97], 'PU2:8:98': pu2Unit8Catalogs[98], 'PU2:8:104': pu2Unit8Catalogs[104], 'PU2:7:83': pu2Unit7Catalogs[83], 'PU2:7:85': pu2Unit7Catalogs[85], 'PU2:7:87': pu2Unit7Catalogs[87], 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;
@@ -1360,8 +1387,8 @@
                     const authored = pageCatalogs[[book, unit, page].join(':')];
                     if (authored) {
                         content.nonSpellingExercises.push(
-                            ...authored.missing.map(item => ({ ...item, type: 'missing-word' })),
-                            ...authored.fix.map(item => ({ ...item, type: 'find-fix' }))
+                            ...authored.missing.map(item => ({ ...item, ...(content.srPage ? { srPage: content.srPage } : {}), type: 'missing-word' })),
+                            ...authored.fix.map(item => ({ ...item, ...(content.srPage ? { srPage: content.srPage } : {}), type: 'find-fix' }))
                         );
                     }
                 }
@@ -1370,7 +1397,7 @@
     }
 
     function typedKey(item, page) {
-        return ['non-spelling', item.type, page.book, page.unit, page.page, item.id].join(':').toLowerCase();
+        return ['non-spelling', item.type, page.book, page.unit, item.srPage || page.page, item.id].join(':').toLowerCase();
     }
 
     function buildPool(book, unit, page, options = {}) {

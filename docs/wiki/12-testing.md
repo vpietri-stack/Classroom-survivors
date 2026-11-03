@@ -1,3 +1,7 @@
+## PU1 page 85 production release (3 November 2026)
+
+PU1 page 85 checks cover the moved content, stable SR keys, asset mappings and the full preview-note Study flow. The API contract check verifies registration and duplicate-credit protection.
+
 # Testing
 
 Production release validation (2 November): root checks use the portable selective

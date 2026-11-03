@@ -53,6 +53,8 @@
     "test_preview_notes_state.js",
     "test_preview_notes_api.js",
     "test_preview_notes_browser.js",
+    "test_pu1_u7_preview.js",
+    "test_pu1_u7_preview_browser.js",
     "scripts/checks.test.mjs"
   ],
   "groups": {

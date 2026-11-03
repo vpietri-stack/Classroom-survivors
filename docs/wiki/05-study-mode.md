@@ -1,3 +1,7 @@
+## PU1 page 85 production release (3 November 2026)
+
+PU1 Unit 7 page 85 opens the approved three-page present continuous reader with tap audio and optional pronunciation. Study selects five vocabulary items and five non-spelling boards from the moved page content, including the twenty authored boards. Former page 84 placements resolve to page 85 and the typed board SR keys retain their page 84 identity.
+
 # Study Mode (UI Rounds A–D + Match; internal functions A/C/D/E/F)
 
 Production 2 November: approved Study/Gomoku/UNO recovery and adaptive speech are enabled. See [Speech](08-speech.md) and [Deployment](13-deployment.md) for scope and storage isolation.

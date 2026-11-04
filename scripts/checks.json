@@ -46,6 +46,7 @@
     "test_target_reports.js",
     "test_target_reports_browser.js",
     "test_non_spelling_content.js",
+    "test_think0_unit4_distribution.js",
     "test_non_spelling_startup.js",
     "test_non_spelling_integration_browser.js",
     "test_vocab_normalization.js",
@@ -54,6 +55,8 @@
     "test_preview_notes_state.js",
     "test_preview_notes_api.js",
     "test_preview_notes_browser.js",
+    "test_think_parks_preview_browser.js",
+    "test_think_parks_audio.js",
     "test_notes_speech_browser.js",
     "test_pu1_u7_preview.js",
     "test_pu1_u7_preview_browser.js",
@@ -71,6 +74,7 @@
         "test_dashboard_non_spelling.js",
         "test_asset_manifest.js",
         "test_non_spelling_content.js",
+        "test_think0_unit4_distribution.js",
         "test_non_spelling_startup.js",
         "test_non_spelling_integration_browser.js",
         "test_vocab_normalization.js"
@@ -126,12 +130,14 @@
     },
     "notes": {
       "paths": [
-        "^(preview_notes|interactive_notes|notes_speech)[^/]*\\.(js|html|css)$"
+        "^(preview_notes|interactive_notes|notes_speech|think_parks)[^/]*\\.(js|html|css)$"
       ],
       "tests": [
         "test_preview_notes_state.js",
         "test_preview_notes_api.js",
         "test_preview_notes_browser.js",
+        "test_think_parks_preview_browser.js",
+        "test_think_parks_audio.js",
         "test_notes_speech_browser.js",
         "scripts/check-notes-images.cjs"
       ]

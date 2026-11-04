@@ -1,3 +1,7 @@
+## Think Starter Unit 4 page 44 production
+
+Think0 Unit 4 page 44 uses the normal preview catalog and opens automatically for an assigned student until its 25-item recognition and six-paragraph Study session is complete. Completion unlocks the standard notes library. It uses the shared adaptive speech controls on each vocabulary item and article sentence. Study completion earns a normal Study credit and does not update SR. The reader loads images in small grouped packs and audio in two packs. Regular Think0 Unit 4 content is assigned to pages 40, 41, 43 and 44. Page 45 is no longer offered for new assignments. Existing page-45 assignments and resumable sessions retain an internal review boundary and are not automatically rewritten.
+
 ## PU1 page 85 production release (3 November 2026)
 
 PU1 Unit 7 page 85 opens the approved three-page present continuous reader with tap audio and optional pronunciation. Study selects five vocabulary items and five non-spelling boards from the moved page content, including the twenty authored boards. Former page 84 placements resolve to page 85 and the typed board SR keys retain their page 84 identity.

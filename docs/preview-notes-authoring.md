@@ -15,8 +15,8 @@ Keep the approved infographic pages, including the introductory explanation.
 Add aligned click targets to vocabulary words and illustrated sentences. Every
 target should play its matching saved MP3. Check existing audio first; Youdao
 word audio and Sound of Text are the established sources when clips are missing.
-Keep an audio-source manifest. Preview notes are listening-only: no microphone,
-speech grading, or required number of listens. Retain replay, slower playback,
+Keep an audio-source manifest. Preview notes offer listening and can include optional speaking when approved.
+There is no required number of listens or recording attempts. Retain replay, slower playback,
 mobile zoom, and the same-file full-download audio fallback.
 
 ## Register the reader
@@ -51,8 +51,8 @@ when requiring its preview Study to be completed again.
   `previewNotes` map, separately from archived analytics. Local mirrors are
   scoped by student and environment (`production`, `preview`, or `local`).
 - Hide **预习笔记** until the first preview Study has been completed. Afterwards,
-  the main-menu library lets the student reopen studied notes for listening-only
-  review, without forcing another Study session or awarding extra credit.
+  the main-menu library lets the student reopen studied notes for optional listening and speaking
+  practice, without forcing another Study session or awarding extra credit.
 
 ## Verify and publish
 
@@ -67,3 +67,11 @@ assets and API behavior, then promote only the approved feature after the user's
 production approval. Keep curriculum, API routes and student databases separate;
 never promote unrelated preview content. Synchronize the deployment stamps and
 changed asset queries. Preserve the existing isolated preview API PR environment.
+
+## Image publishing workflow
+
+Keep the approved PNG masters. Run `python scripts/export-notes-images.py <master.png> ...` with Pillow installed to export full-resolution WebP at quality 90. Update the lesson's `notes_data.js` manifest to reference the WebP while preserving its dimensions and hotspot coordinates. A registered reader must load that manifest by script tag.
+
+`node scripts/check-notes-images.cjs` checks every registered lesson. It requires WebP, matching image and manifest dimensions, at most 450 KB per image, and at most 1.5 MB of distinct images per lesson. The release suite runs this check automatically. Review the smallest English and Chinese text at phone width and zoom, then tap representative hotspots before publishing. The reader loads the first image eagerly and lazy-loads later images.
+
+Optional approved speaking uses the shared AdaptiveSpeech model and onset-preserving Recorder. All three production readers support single words, phrases and sentences. Speaking does not gate Study or grant credit.

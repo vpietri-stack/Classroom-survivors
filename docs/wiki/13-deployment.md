@@ -424,3 +424,5 @@ Environment 1 uses Val-EslApp / Students-admin-dashboard-preview with STUDY_RESU
 ## Gomoku / UNO recovery preview extension (2026-11-01)
 
 Keep the existing isolated preview deployment: frontend from preview/main to the preview repository only; backend through draft PR #1/admin-dashboard-update to SWA environment 1 only. Add GAME_RESUME_ENABLED=true on environment 1 and reuse study_resume_preview; no new throughput/container is provisioned. Local tests use study_resume_test in Val-EslApp-Test. Production has no game recovery setting. Synchronize stamps and changed script queries, verify served bytes plus both hosted game flows, and await user review before any production rollout.
+
+Production 2026-11-03j promotes the ten optimized WebP assets and optional adaptive speech on the three registered notes readers. Build on production main and verify hosted assets after deployment. Image budgets are enforced by the release suite.

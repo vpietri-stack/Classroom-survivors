@@ -41,7 +41,7 @@ async function fixture(page,id='notes-a',placement=lesson.placement,notes={}){
   await fixture(page);
   await page.locator('#preview-notes-overlay iframe').waitFor();
   ok(true,'manual preview-page assignment automatically opens notes after real finishLogin');
-  ok((await page.locator('#preview-notes-overlay iframe').getAttribute('allow')).includes('microphone')===pu1,'only the PU1 reader is granted microphone access');
+  ok((await page.locator('#preview-notes-overlay iframe').getAttribute('allow')).includes('microphone'),'notes readers allow optional microphone use');
   ok(await page.locator('#preview-notes-button').isHidden(),'library button stays hidden until a preview Study is completed');
   const reader=page.frameLocator('#preview-notes-overlay iframe');
   await reader.locator('.note-page').first().waitFor();

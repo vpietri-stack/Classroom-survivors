@@ -5,13 +5,13 @@ const path = require('node:path');
 const lesson = require('./interactive_notes_data.js');
 let checks = 0;
 const ok = (condition, label) => { assert.ok(condition, label); checks++; };
-ok(lesson.pages.length === 4 && lesson.pages[0].file === '01-grammar-guide.png', 'four original pages, intro first');
+ok(lesson.pages.length === 4 && lesson.pages[0].file === '01-grammar-guide.webp', 'four original pages, intro first');
 ok(Object.values(lesson.clips).filter(x => x.kind === 'word').length === 12, 'all twelve vocabulary words have separate audio');
 ok(Object.keys(lesson.clips).length === 32, 'all vocabulary, examples, intro sentences and phrase present');
 const referenced = new Set();
 for (const page of lesson.pages) {
   const image = fs.readFileSync(path.join(__dirname, 'interactive_notes_assets', page.file));
-  ok(image.readUInt32BE(16) === page.width && image.readUInt32BE(20) === page.height, page.file + ': coordinate dimensions match source');
+  ok(require('./scripts/check-notes-images.cjs').webpDimensions(image).join('x') === [page.width,page.height].join('x'), page.file + ': coordinate dimensions match source');
   for (const spot of page.hotspots) {
     ok(lesson.clips[spot.clip], 'hotspot has a clip');
     const [x, y, w, h] = spot.rect;

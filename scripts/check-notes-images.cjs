@@ -25,6 +25,38 @@ function webpDimensions(bytes) {
 function checkNotesImages() {
     const { catalog } = require('../api/src/functions/shared/previewNotesCore');
     for (const note of catalog) {
+        if (note.id === 'think0-u4-p44') {
+            const scan = fs.readFileSync(path.join(root, 'think_parks_assets/page.webp'));
+            assert.ok(scan.length <= PAGE_LIMIT, 'Parks scan exceeds page limit');
+            assert.deepEqual(webpDimensions(scan), [817, 1108], 'Parks scan dimensions must match hotspots');
+            const context = { window: {} };
+            vm.runInNewContext(fs.readFileSync(path.join(root, 'think_parks_lesson.js'), 'utf8'), context);
+            vm.runInNewContext(fs.readFileSync(path.join(root, 'think_parks_image_index.js'), 'utf8'), context);
+            const groups = new Map();
+            let total = scan.length;
+            for (const word of context.window.ThinkParks.words) {
+                const image = word[3];
+                const [group, offset, length] = context.window.ThinkParksImageIndex[image];
+                if (!groups.has(group)) {
+                    const data = fs.readFileSync(path.join(root, 'think_parks_assets', 'images-' + group + '.bin'));
+                    assert.ok(data.length <= PAGE_LIMIT, 'Parks image group exceeds page limit');
+                    total += data.length;
+                    groups.set(group, data);
+                }
+                const packed = groups.get(group).subarray(offset, offset + length);
+                const source = fs.readFileSync(path.join(root, image));
+                // Git can check out the SVG with CRLF while the packed copy
+                // retains LF, or the reverse. Compare its text canonically.
+                const same = image.endsWith('.svg')
+                    ? packed.toString('utf8').replace(/\r\n/g, '\n') === source.toString('utf8').replace(/\r\n/g, '\n')
+                    : packed.equals(source);
+                assert.ok(same, image + ' does not match its grouped image');
+            }
+            assert.equal(groups.size, 5, 'Parks vocabulary images must have five groups');
+            assert.ok(total <= LESSON_LIMIT, 'Parks images exceed lesson limit');
+            console.log(note.id + ': scan and five image groups, ' + total + ' bytes');
+            continue;
+        }
         const reader = path.join(root, note.reader);
         const html = fs.readFileSync(reader, 'utf8');
         const script = html.match(/<script\b[^>]*\bsrc=["']([^"'?]*notes_data\.js)(?:\?[^"']*)?["']/i)?.[1];

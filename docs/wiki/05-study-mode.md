@@ -13,6 +13,18 @@ credit and normal SR outcomes, persists the version-1 completion marker and
 unlocks review. Curriculum, exercise content, SR keys and recovery are unchanged.
 The browser and isolated preview API register the same catalog entry.
 
+## Three-lesson production release (5 November 2026)
+
+Production includes PU1 U5 p59, PU3 U3 p35 and PU3 U8 p97 with the same approved
+artwork, audio, page-scoped five-word/five-exercise Study and saved review access.
+PU1 U5 p59 includes its existing preview bank of eight missing-word and ten
+find-and-fix boards; other preview-only PU1 curriculum is not part of this release.
+PU3 Unit 3 uses assignment pages 31/33/35/36, with old page-40 placements and
+typed SR identities preserved. Its p35 reader uses the optimized WebP/MP3 assets,
+lazy audio packs and persistent mirror-aware AssetCache. The browser/server note
+catalogs ship together; existing production API, speech and recovery gates remain
+enabled. No student-record migration is needed.
+
 ## PU3 Unit 3 page 35 preview (5 November 2026)
 
 `pu3-u3-p35` assigns the six approved pp.34–35 vocabulary/grammar infographics to

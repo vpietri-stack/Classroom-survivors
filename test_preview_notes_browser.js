@@ -68,6 +68,7 @@ async function fixture(page,id='notes-a',placement=lesson.placement,notes={}){
   await page.evaluate(()=>{
    const pool=NonSpellingContent.buildPool(testNote.book,testNote.unit,testNote.page,{pageOnly:true}).entries.map(e=>e.item);
    STUDY_STATE.nonSpellingExercises=[pool.find(e=>e.id===testNote.missing&&e.type==='missing-word'),pool.find(e=>e.id===testNote.fix&&e.type==='find-fix'),pool.find(e=>e.type==='sentence-scramble'),pool.find(e=>e.type==='sentence-match'),pool.find(e=>e.id===testNote.secondMissing&&e.type==='missing-word')];
+   if(STUDY_STATE.nonSpellingExercises.some(item=>!item))throw new Error('Assigned lesson is missing a required Study board: '+testNote.id);
   });
   for(let i=0;i<5;i++){
    await page.waitForFunction(()=>STUDY_STATE.round==='A'&&!STUDY_STATE.isTransitioning);
@@ -86,7 +87,9 @@ async function fixture(page,id='notes-a',placement=lesson.placement,notes={}){
   ok(true,'regular handwriting round follows the same five vocabulary words');
   // Accept recognition outcomes through the real handwriting-round handler.
   // Recognition accuracy remains covered by the existing handwriting suites.
+  const handwritingDeadline=Date.now()+45000;
   while(await page.evaluate(()=>STUDY_STATE.round==='D')){
+   if(Date.now()>handwritingDeadline)throw new Error('Handwriting did not advance: '+JSON.stringify(await page.evaluate(()=>({round:STUDY_STATE.round,index:STUDY_STATE.currentWordIndex,word:roundDWord,cursor:roundDCursor,gaps:roundDGapOrder.length}))));
    const ready=await page.evaluate(()=>!STUDY_STATE.isTransitioning&&roundDCursor<roundDGapOrder.length);
    if(ready)await page.evaluate(()=>roundDAcceptLetter(roundDSlots[roundDGapOrder[roundDCursor]].char));
    await page.waitForTimeout(170);

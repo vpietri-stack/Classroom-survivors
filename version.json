@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-05d",
+  "version": "2026-11-05g",
   "deployedAt": "2026-11-05",
-  "notes": "Separate article preview vocabulary from regular Study and Game."
+  "notes": "Reduce student startup downloads and open sign-in independently of the lesson runtime."
 }

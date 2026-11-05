@@ -1,3 +1,7 @@
+## Student startup stages
+
+When existing opt-in client diagnostics are enabled, the boot event can include elapsed times for the visible student shell, sign-in request start, successful response, and lesson greeting readiness. The timings contain no credentials.
+
 # Telemetry & Data Delivery
 
 Optional speech practice (production 2026-10-28d) emits one final `speech_practice` summary on Continue, with practice/unassessed completion and targetHintCount; it earns no speech mastery or pronunciation grade. Attempt telemetry uses the fixed first-try threshold with actual retries in practiceAttempt. Late/account-switched results are discarded. Existing consent/quota/date gates remain solely responsible for temporary raw capture; this release does not reopen collection.

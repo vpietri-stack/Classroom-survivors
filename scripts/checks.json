@@ -5,6 +5,7 @@
     "test_production_release_gates.js",
     "test_study_resume.js",
     "test_game_resume.js",
+    "test_student_startup_browser.js",
     "test_game_resume_browser.js",
     "test_study_resume_state.js",
     "test_study_resume_browser.js",

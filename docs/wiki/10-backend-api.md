@@ -1,5 +1,11 @@
 # Backend API: Azure Functions
 
+Preview catalog (5 November 2026): `pu3-u3-p35` registers PU3 Unit 3 app page 35
+at version 1, with the standard five-word/five-exercise Study completion marker.
+The six-image reader is shipped separately on the preview frontend. Existing
+saveAnalytics normalization, atomic completion and duplicate-event handling apply;
+no production deployment or student-record migration is part of this change.
+
 Production 2 November: approved Study/Gomoku/UNO recovery and adaptive speech are enabled. See [Speech](08-speech.md) and [Deployment](13-deployment.md) for scope and storage isolation.
 
 > **Last verified:** 2026-09-27 · **Part of:** [Classroom-survivors Repo Wiki](README.md)

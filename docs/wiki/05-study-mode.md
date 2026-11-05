@@ -1,3 +1,7 @@
+## Speech preparation
+
+Study entry and restoration start the optional speech model in the background. Study exercises can run while the model prepares.
+
 ## Think Starter Unit 4 page 44 production
 
 Think0 Unit 4 page 44 uses the normal preview catalog and opens automatically for an assigned student until its 25-item recognition and six-paragraph Study session is complete. Completion unlocks the standard notes library. It uses the shared adaptive speech controls on each vocabulary item and article sentence. Study completion earns a normal Study credit and does not update SR. The reader loads images in small grouped packs and audio in two packs. Regular Think0 Unit 4 content is assigned to pages 40, 41, 43 and 44. Page 45 is no longer offered for new assignments. Existing page-45 assignments and resumable sessions retain an internal review boundary and are not automatically rewritten.
@@ -483,3 +487,7 @@ After content checks, a real Study start allocates a practice run ID. Exercises 
 ## PU3 Unit 8 page 97 preview API
 The shared preview catalog accepts pu3-u8-p97 Study completion at PU3/8/97 (five words and five exercises), preserving retry deduplication and existing lesson completions. This registration is for the isolated staging API; production requires separate approval.
 
+
+## PU2 Unit 1 The Race
+
+Page 14 opens the literature reader for pages 14–15, with 14 illustrated vocabulary items and five story sections. Recognition uses groups of 5, 5 and 4, followed by five paragraph gap-fills with full reset on error. Completion records 14 words and five exercises, earns Study credit, supports existing checkpoint recovery and leaves SR untouched. The story recording is split into 26 clips bundled for lazy, mirror-aware loading; images use lazy grouped packs. Youdao supplies vocabulary audio except for two Sound of Text fallbacks. Page 14 also has ordinary Study/game material.

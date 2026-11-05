@@ -1,3 +1,7 @@
+## Student startup stages
+
+The student entry point can authenticate before its lesson runtime finishes loading. The authorized account is held until the runtime is ready. The shell displays course loading and a reload option if startup stalls or a required resource fails. The dashboard keeps its existing startup path.
+
 # Authentication, Sessions & Version Watchdog
 
 > **Last verified:** 2026-09-25 · **Part of:** [Classroom-survivors Repo Wiki](README.md)

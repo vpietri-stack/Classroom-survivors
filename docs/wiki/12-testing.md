@@ -1,3 +1,9 @@
+## Student startup coverage
+
+The startup browser fixture holds lesson scripts and styles, checks the real form reaches a mocked login endpoint, then releases the assets and verifies the assigned lesson and distinct timing marks.
+
+The browser startup test intercepts Phaser and speech model requests, then checks that a fresh login form and saved profiles render independently. The game recovery browser suite exercises on-demand UNO loading during a resume.
+
 ## PU1 page 85 production release (3 November 2026)
 
 PU1 page 85 checks cover the moved content, stable SR keys, asset mappings and the full preview-note Study flow. The API contract check verifies registration and duplicate-credit protection.

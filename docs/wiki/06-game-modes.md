@@ -1,3 +1,7 @@
+## Phaser startup
+
+Boot owns shared game state on initial load. The game loader initializes Phaser and registers the three scenes on demand. UNO recovery awaits the same loader before restoring the scene. Gomoku uses the existing canvas path.
+
 # Game Modes & Minigames
 
 Production 2 November: approved Study/Gomoku/UNO recovery and adaptive speech are enabled. See [Speech](08-speech.md) and [Deployment](13-deployment.md) for scope and storage isolation.

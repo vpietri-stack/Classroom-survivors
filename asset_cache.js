@@ -41,6 +41,7 @@
     { prefix: 'sprites/vs/',   token: 'vs-sprites-v3' },
     { prefix: 'images/vocab/', token: 'vocab-v1' },
     { prefix: 'think_parks_assets/', token: 'think-parks-v1' },
+    { prefix: 'pu2_race_assets/', token: 'pu2-race-v1' },
     { prefix: 'audio_mp3/',    token: 'audio-v1' },
     { prefix: 'music/',        token: 'music-v1' },
     { prefix: 'sfx/',          token: 'sfx-v1' }
@@ -333,21 +334,20 @@
     TD_SPRITES: TD_SPRITES,
     VS_SPRITES: VS_SPRITES,
     MUSIC: MUSIC,
-    SFX: SFX
+    SFX: SFX,
+    warmGames: warmGames
   };
 
-  // Game sprites + BGM + SFX recordings: warm up shortly after load (never
-  // competes with critical page assets; the Whisper model streams from a
-  // different host, no contention). Page content: poll until login/class
-  // selection reveals the current page — re-checks cheaply so a mid-session
-  // page change prefetches the new page too.
+  let gamesWarmed = false;
+  function warmGames() {
+    if (gamesWarmed) return;
+    gamesWarmed = true;
+    prefetch(TD_SPRITES, 'td-sprites');
+    prefetch(VS_SPRITES, 'vs-sprites');
+    prefetch(MUSIC, 'music');
+    prefetch(SFX, 'sfx');
+  }
   function start() {
-    setTimeout(function () {
-      prefetch(TD_SPRITES, 'td-sprites');
-      prefetch(VS_SPRITES, 'vs-sprites');
-      prefetch(MUSIC, 'music');
-      prefetch(SFX, 'sfx');
-    }, 2000);
     setInterval(prefetchCurrentPage, 2000);
   }
   if (document.readyState === 'complete') start();

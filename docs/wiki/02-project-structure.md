@@ -1,3 +1,7 @@
+## Student entry point
+
+The Phaser scripts live in an inert template in index.html and execute in order when the game loader requests them. Student Tailwind utilities are served from lib/student-tailwind.css.
+
 # Project Structure & File Map
 
 > **Last verified:** 2026-09-25 · **Part of:** [Classroom-survivors Repo Wiki](README.md)

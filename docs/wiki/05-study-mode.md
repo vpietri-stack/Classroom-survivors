@@ -479,3 +479,8 @@ with the normal login. See [data model](11-data-model.md).
 ## Permanent session lifecycle (2026-10-30)
 
 After content checks, a real Study start allocates a practice run ID. Exercises and the existing completed-study event link to it. Completion, menu exit, account change and same-tab unfinished-page recovery produce distinct lifecycle records; inferred recovery is only a clue. These records do not grant target/SR credit. Stage breadcrumbs contain no ink, audio or submitted answers.
+
+
+## PU2 Unit 1 The Race
+
+Page 14 opens the literature reader for pages 14–15, with 14 illustrated vocabulary items and five story sections. Recognition uses groups of 5, 5 and 4, followed by five paragraph gap-fills with full reset on error. Completion records 14 words and five exercises, earns Study credit, supports existing checkpoint recovery and leaves SR untouched. The story recording is split into 26 clips bundled for lazy, mirror-aware loading; images use lazy grouped packs. Youdao supplies vocabulary audio except for two Sound of Text fallbacks. Page 14 also has ordinary Study/game material.

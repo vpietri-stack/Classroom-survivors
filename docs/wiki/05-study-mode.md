@@ -479,3 +479,7 @@ with the normal login. See [data model](11-data-model.md).
 ## Permanent session lifecycle (2026-10-30)
 
 After content checks, a real Study start allocates a practice run ID. Exercises and the existing completed-study event link to it. Completion, menu exit, account change and same-tab unfinished-page recovery produce distinct lifecycle records; inferred recovery is only a clue. These records do not grant target/SR credit. Stage breadcrumbs contain no ink, audio or submitted answers.
+
+## PU3 Unit 8 page 97 preview API
+The shared preview catalog accepts pu3-u8-p97 Study completion at PU3/8/97 (five words and five exercises), preserving retry deduplication and existing lesson completions. This registration is for the isolated staging API; production requires separate approval.
+

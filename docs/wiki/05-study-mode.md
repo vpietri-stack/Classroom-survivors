@@ -547,3 +547,7 @@ After content checks, a real Study start allocates a practice run ID. Exercises 
 ## PU2 Unit 1 The Race
 
 Page 14 opens the literature reader for pages 14–15, with 14 illustrated vocabulary items and five story sections. Recognition uses groups of 5, 5 and 4, followed by five paragraph gap-fills with full reset on error. Completion records 14 words and five exercises, earns Study credit, supports existing checkpoint recovery and leaves SR untouched. The story recording is split into 26 clips bundled for lazy, mirror-aware loading; images use lazy grouped packs. Youdao supplies vocabulary audio except for two Sound of Text fallbacks. Page 14 also has ordinary Study/game material.
+
+## PU3 Unit 1 The Circus Child preview
+
+The page-14 article lesson registers `pu3-u1-p14`: all 27 approved words in six recognition sets, followed by four story gap-fill boards. The final recognition set has two words. It reuses article Study credit, completion and recovery without adding SR entries. Four cropped textbook sections and 30 original narration clips support the reader. Page 16 remains available.

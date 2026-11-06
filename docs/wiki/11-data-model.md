@@ -187,3 +187,5 @@ existing environment-specific student record, with no migration.
 Permanent practice analytics use phase, runId, mode, game, stage/checkpoint metadata and explicit/inferred exit details. They follow normal event acknowledgement and archiving, carry no session credit, and link exercise/completion records through practiceRunId. Existing type guards keep targets unchanged.
 
 The separate client_diagnostics container now stores immutable client_diagnostics_chunk uploads and atomic client_diagnostics_usage daily quota reservations with 14-day TTL. Chunk IDs hash browser plus event IDs. Existing daily documents remain readable. A non-expiring _global/config policy has scope: all_students, enabled, paused and a hard endsAt; per-account opt-outs win. No container/throughput provisioning is part of this rollout.
+
+The shared preview-note catalog includes `pu3-u1-p14`, version 1, with wordCount 27 and exerciseCount 4; frontend and API must ship the same catalog.

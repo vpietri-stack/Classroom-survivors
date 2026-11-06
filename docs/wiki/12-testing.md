@@ -285,3 +285,5 @@ it never sends student data to live or preview APIs.
 test_practice_telemetry.js covers consecutive runs, completion dedup, mismatched game completion, explicit/inferred exits, BFCache, accounts/tabs, bounded redacted errors and storage failures. test_client_diagnostics_v2.js covers global admin control/expiry/opt-outs, immutable retries, quota vs throttling, history pagination and legacy reads. Browser diagnostics tests verify bounded nonblocking capture, measured RU/storage timing and failed/throttled uploads. Backend integration still requires the isolated local Functions host; never run auth fixture mutations against production.
 
 The production notes release checks registered WebP images, manifest dimensions, the 450 KB image and 1.5 MB lesson budgets, and optional recording controls in all three readers.
+
+`node test_pu3_circus_preview_browser.js` checks the PU3 U1 p14 article reader, all 27 recognition items including the short final set, four gap-fill boards, restored answers, completion credit and unchanged SR. External requests are intercepted.

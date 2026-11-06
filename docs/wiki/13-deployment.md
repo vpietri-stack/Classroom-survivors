@@ -426,3 +426,7 @@ Environment 1 uses Val-EslApp / Students-admin-dashboard-preview with STUDY_RESU
 Keep the existing isolated preview deployment: frontend from preview/main to the preview repository only; backend through draft PR #1/admin-dashboard-update to SWA environment 1 only. Add GAME_RESUME_ENABLED=true on environment 1 and reuse study_resume_preview; no new throughput/container is provisioned. Local tests use study_resume_test in Val-EslApp-Test. Production has no game recovery setting. Synchronize stamps and changed script queries, verify served bytes plus both hosted game flows, and await user review before any production rollout.
 
 Production 2026-11-03j promotes the ten optimized WebP assets and optional adaptive speech on the three registered notes readers. Build on production main and verify hosted assets after deployment. Image budgets are enforced by the release suite.
+
+## The Circus Child production promotion — 6 November 2026
+
+The teacher explicitly approved production release after reviewing the preview. Promote only `pu3-u1-p14` and its 27 illustrated vocabulary items, four textbook sections, original narration and four story gap-fill boards. The vocabulary stays in Article Study and does not enter regular Study/game/SR pools. Frontend and API share the version-1 completion catalog (27 words, four exercises). Preserve production routing, data containers and existing curriculum. Stamp: `2026-11-06b`. Verify both Pages and Azure deployments plus hosted lesson bytes.

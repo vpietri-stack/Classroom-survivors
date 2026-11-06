@@ -297,3 +297,5 @@ This API staging tree includes test_game_resume.js in root npm test. The indepen
 Completion ordering: gameRecoveryCredits retains the last 40 run IDs whose SR counter increment actually applied. The completion event receipt alone never suppresses a delayed first increment; duplicate/newer-sequence deliveries cannot grant it twice. Event-first and progress-first cases are checked separately.
 
 The production notes release checks registered WebP images, manifest dimensions, the 450 KB image and 1.5 MB lesson budgets, and optional recording controls in all three readers.
+
+`node test_pu3_circus_preview_browser.js` checks the PU3 U1 p14 article reader, all 27 recognition items including the short final set, four gap-fill boards, restored answers, completion credit and unchanged SR. External requests are intercepted.

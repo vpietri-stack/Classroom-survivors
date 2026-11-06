@@ -210,4 +210,5 @@ Local key csGameResume_v1_<deployment path>_<studentId> holds snapshot/version/c
 
 Completion ordering: gameRecoveryCredits retains the last 40 run IDs whose SR counter increment actually applied. The completion event receipt alone never suppresses a delayed first increment; duplicate/newer-sequence deliveries cannot grant it twice. Event-first and progress-first cases are checked separately.
 
-The isolated preview API registers `pu3-u1-p14` version 1 with 27 words and four story boards. The same catalog is validated with the complete frontend in the matching preview worktree. Only the Functions API is deployed from this branch.
+The isolated preview API registers `pu3-u1-p14` version 1 with 27 words and four story boards. The same catalog is validated with the complete frontend in the matching preview worktree. It also registers `pu1-u7-p87` version 1 with the normal five-word/five-board completion contract. Only the Functions API is deployed from this branch.
+

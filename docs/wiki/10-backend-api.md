@@ -1,5 +1,11 @@
 # Backend API: Azure Functions
 
+Preview catalog (5 November 2026): `pu3-u3-p35` registers PU3 Unit 3 app page 35
+at version 1, with the standard five-word/five-exercise Study completion marker.
+The six-image reader is shipped separately on the preview frontend. Existing
+saveAnalytics normalization, atomic completion and duplicate-event handling apply;
+no production deployment or student-record migration is part of this change.
+
 Production note catalog (5 November 2026) adds `pu1-u5-p59`, `pu3-u3-p35` and
 `pu3-u8-p97` at version 1. All use the existing five-word/five-exercise completion
 marker and saveAnalytics idempotency. Frontend and Functions ship the same catalog;
@@ -177,3 +183,17 @@ clientDiagnostics retains signed self-upload and privileged history access. POST
 
 
 Hosted preview isolation is configured through Azure environment 1: Val-EslApp/Students-admin-dashboard-preview for profiles and Val-EslApp/client_diagnostics_preview for traces. Production uses Val-EslApp/Students and Val-EslApp/client_diagnostics. Val-EslApp-Test is the separate local integration-test database. Preview container setup shares existing throughput and never provisions an extra offer.
+
+## studyResume (preview, 2026-11-01)
+
+GET/POST /api/studyResume requires a valid signed session even if legacy profile auth is optional. Students can read/write only their own checkpoint; privileged accounts may read a scoped student. POST supports begin, claim, checkpoint and complete. Atomic ETag writes plus baseVersion protect replacing/claiming; writerId and seq reject a stale page and acknowledge an identical retry without rewriting. Completed runs return 410; competing writers return 409. The route is included in CORS OPTIONS.
+
+Disabled unless STUDY_RESUME_ENABLED=true AND COSMOS_STUDY_RESUME_CONTAINER is explicitly configured. It uses COSMOS_DB_NAME and /studentId partitioning. A checkpoint is capped at 60,000 UTF-8 bytes with bounded traversal and rejects HTML/credential-like keys. Normal saveAnalytics records studyRecoveryCompletion in the same profile ETag transaction as an accepted completed Study event; GET suppresses stale checkpoints even if the client never sent complete. Re-delivery cannot award another completion. This feature does not alter exercise/session credit rules.
+
+## gameResume (preview, 2026-11-01)
+
+Signed GET/POST /api/gameResume mirrors Study's begin/claim/checkpoint/complete revision, ETag, writer ownership and completed-tombstone rules. Student writes remain self-only; privileged scoped reads are supported. It is disabled unless GAME_RESUME_ENABLED=true and COSMOS_STUDY_RESUME_CONTAINER is explicitly set. The existing functional container is reused with fixed document ID game, independent of study. CORS OPTIONS includes the route.
+
+Snapshots are schema 1, capped at 60,000 UTF-8 bytes, and validate board/card/continuation shapes with bounded traversal and credential/HTML rejection. saveAnalytics records gameRecoveryCompletion atomically with newly accepted Gomoku/UNO completion. A duplicate recovered completion cannot increment sessionCount again even when a stale device sends a newer SR sequence; ordinary non-recovered credit is unchanged.
+
+Completion ordering: gameRecoveryCredits retains the last 40 run IDs whose SR counter increment actually applied. The completion event receipt alone never suppresses a delayed first increment; duplicate/newer-sequence deliveries cannot grant it twice. Event-first and progress-first cases are checked separately.

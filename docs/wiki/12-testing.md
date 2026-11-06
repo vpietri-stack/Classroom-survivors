@@ -284,6 +284,18 @@ it never sends student data to live or preview APIs.
 
 test_practice_telemetry.js covers consecutive runs, completion dedup, mismatched game completion, explicit/inferred exits, BFCache, accounts/tabs, bounded redacted errors and storage failures. test_client_diagnostics_v2.js covers global admin control/expiry/opt-outs, immutable retries, quota vs throttling, history pagination and legacy reads. Browser diagnostics tests verify bounded nonblocking capture, measured RU/storage timing and failed/throttled uploads. Backend integration still requires the isolated local Functions host; never run auth fixture mutations against production.
 
+## Study recovery checks (preview, 2026-11-01)
+
+This API-staging tree adds test_study_resume.js (shared validation, completion receipts and signed API concurrency) to root npm test. The independent preview frontend tree additionally runs test_study_resume_state.js (SR once and production gate) and test_study_resume_browser.js (real Chrome renderer crash, initial recognition, partial spelling/ink/sentence/typed boards, speech idle recovery, delayed timers, offline/reconnect, empty-storage browser, competing login choice, account isolation, games preserving the offer and exactly one new Study completion). Existing preview-note browser fixtures use resume=0 to exercise legacy notes independently. The speech extraction harness includes Study's actual timer helpers.
+
+Release verification additionally uses temporary, cleaned-up fixture accounts in the isolated local/preview Cosmos containers and actual login/studyResume/saveAnalytics HTTP paths. Verify served preview bytes and the deployed Chinese resume flow. Never mutate a real learner's progress to test recovery.
+
+## Game recovery verification (preview, 2026-11-01)
+
+This API staging tree includes test_game_resume.js in root npm test. The independent preview frontend npm test includes test_game_resume.js (signed authorization, bounded validation, ETag/writer concurrency, tombstones and duplicate credit) and test_game_resume_browser.js (real Chrome renderer crashes, Gomoku boards/difficulty/speed clock, all UNO hands/deck, interrupted questions/speech, animation and stacked-penalty replay once, partial typed/sentence/matching state, remote/offline continuation, account isolation and single completion). Study recovery tests remain in the suite. Verify real isolated HTTP/Cosmos credits with a cleaned temporary fixture, then repeat normal login and both games on the actual hosted preview. Never test by changing real student progress.
+
+Completion ordering: gameRecoveryCredits retains the last 40 run IDs whose SR counter increment actually applied. The completion event receipt alone never suppresses a delayed first increment; duplicate/newer-sequence deliveries cannot grant it twice. Event-first and progress-first cases are checked separately.
+
 The production notes release checks registered WebP images, manifest dimensions, the 450 KB image and 1.5 MB lesson budgets, and optional recording controls in all three readers.
 
 `node test_pu3_circus_preview_browser.js` checks the PU3 U1 p14 article reader, all 27 recognition items including the short final set, four gap-fill boards, restored answers, completion credit and unchanged SR. External requests are intercepted.

@@ -1,6 +1,14 @@
-## PU1 page 85 production release (3 November 2026)
+## PU1 Unit 5 page 59 note in the isolated preview API (5 November 2026)
 
-The shared notes catalog registers PU1 Unit 7 page 85 version 1. Its completed Study event uses the existing note completion record and normal session credit.
+The retained PR-1 API registers `pu1-u5-p59` version 1 at PU1 Unit 5 page 59.
+The existing completed Study marker requires exactly five page vocabulary items
+and five page exercises, retaining normal credit, archive persistence and
+duplicate-event protection. This is a catalog addition only; API contracts,
+production main and the isolated preview data target are unchanged.
+
+## PU1 page-85 note in the isolated preview API (3 November 2026)
+
+The retained PR-1 preview API now registers `pu1-u7-p85` version 1 at PU1 Unit 7 page 85. The existing five-word/five-exercise completed Study marker derives durable completion alongside PU3 notes, with archive retention and duplicate-event protection. Only this catalog addition is released here; production main, API/data isolation and the branch's other preview behavior remain unchanged.
 
 # Data Model: Cosmos DB & Client Persistence
 
@@ -188,4 +196,19 @@ Permanent practice analytics use phase, runId, mode, game, stage/checkpoint meta
 
 The separate client_diagnostics container now stores immutable client_diagnostics_chunk uploads and atomic client_diagnostics_usage daily quota reservations with 14-day TTL. Chunk IDs hash browser plus event IDs. Existing daily documents remain readable. A non-expiring _global/config policy has scope: all_students, enabled, paused and a hard endsAt; per-account opt-outs win. No container/throughput provisioning is part of this rollout.
 
-The shared preview-note catalog includes `pu3-u1-p14`, version 1, with wordCount 27 and exerciseCount 4; frontend and API must ship the same catalog.
+## Functional Study checkpoint (preview, 2026-11-01)
+
+A separate explicitly configured container holds one fixed-id study record per /studentId, with runId, writerId, seq, version and bounded schema-1 snapshot. Snapshots contain plan/content, round indices, partial inputs/ink, attempts, SR outcomes, elapsed active duration and pending timer. No passwords, tokens, HTML, microphone audio or full student history. A complete tombstone retains identity/version but erases answer/ink payload; a subsequent Study replaces it. The profile gains studyRecoveryCompletion {runId, completedAt} atomically with its accepted normal completion. Functional recovery does not expire like optional diagnostics.
+
+Local key csStudyResume_v1_<normalized deployment path>_<studentId> stores active snapshot/version/known completion IDs or a small completed receipt. Completion clears its payload. Root and index.html paths normalize to the same scope. The cloud record supports another browser/device; unsent offline edits are available only on their original device until reconnected. Only one unfinished Study is offered per account. Container indexing excludes snapshot content, including only type and updatedAt for operations.
+
+## Independent game checkpoint (preview, 2026-11-01)
+
+The functional recovery container now also holds id game / type game_resume per student partition. Only the latest unfinished Gomoku/UNO is offered, independently of the Study record. Completion erases the saved payload and retains a tombstone. user.gameRecoveryCompletion contains runId/completedAt. Game completions carry data.gameRunId and stable se_game_<runId>; questions use the original run plus question identity.
+
+Local key csGameResume_v1_<deployment path>_<studentId> holds snapshot/version/completion receipts. State contains logical cards/board/turns, remaining clocks and a bounded serializable continuation; the UI portion contains the current exercise/partial inputs and SR outcomes. No token, password, HTML, audio, scene object or graphics. Cloud saves are coalesced around five seconds; local input saves are immediate. An offline-only save remains on its device until uploaded. This data is separate from optional diagnostic retention.
+
+Completion ordering: gameRecoveryCredits retains the last 40 run IDs whose SR counter increment actually applied. The completion event receipt alone never suppresses a delayed first increment; duplicate/newer-sequence deliveries cannot grant it twice. Event-first and progress-first cases are checked separately.
+
+The isolated preview API registers `pu3-u1-p14` version 1 with 27 words and four story boards. The same catalog is validated with the complete frontend in the matching preview worktree. It also registers `pu1-u7-p87` version 1 with the normal five-word/five-board completion contract. Only the Functions API is deployed from this branch.
+

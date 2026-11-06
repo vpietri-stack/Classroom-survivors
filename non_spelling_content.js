@@ -169,6 +169,17 @@
             { id: 'F28', sentence: 'This is the most dangerous of all the sports. That sport is more dangerous the swimming.', wrongWord: 'the', wrongIndex: 14, answer: 'than' }
         ]
     };
+    // Preserve page-40 board IDs/SR identity while changing lesson placement.
+    const unit3Groups = {
+        31: { missing: [16], fix: [17,18] },
+        33: { missing: [1,2,3,4,5,6,7,8,9,10,17,18,19,20,21,22],
+            fix: [1,2,3,4,5,6,7,8,9,10,21,22,23,24,25,26,28] },
+        35: { missing: [11,12,13,14], fix: [11,12,13,14,15,16,19,20] },
+        36: { missing: [15], fix: [] }
+    };
+    const unit3Catalogs = Object.fromEntries(Object.entries(unit3Groups).map(([page, group]) =>
+        [page, Object.fromEntries(['missing', 'fix'].map(type =>
+            [type, unit3Catalog[type].filter(item => group[type].includes(Number(item.id.slice(1))))]))]));
     const unit4Catalog = {
         missing: [
             {"id": "M1", "sentences": ["She's a ___ singer.", "She sings ___."], "answers": ["beautiful", "beautifully"], "prefixes": ["b", "b"]},
@@ -1376,7 +1387,162 @@
             ],
         };
 
-    const pageCatalogs = { 'PU1:7:85': pu1Unit7Page85, 'PU2:9:107': pu2Unit9Catalogs[107], 'PU2:9:109': pu2Unit9Catalogs[109], 'PU2:9:116': pu2Unit9Catalogs[116], 'PU2:9:119': pu2Unit9Catalogs[119], 'PU2:8:95': pu2Unit8Catalogs[95], 'PU2:8:96': pu2Unit8Catalogs[96], 'PU2:8:97': pu2Unit8Catalogs[97], 'PU2:8:98': pu2Unit8Catalogs[98], 'PU2:8:104': pu2Unit8Catalogs[104], 'PU2:7:83': pu2Unit7Catalogs[83], 'PU2:7:85': pu2Unit7Catalogs[85], 'PU2:7:87': pu2Unit7Catalogs[87], 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:59': pu2Unit5Catalogs[59], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
+    // Approved PU1 U5 p59 boards required by its notes/Study lesson.
+    const pu1Unit5Page59 = {
+    "missing": [
+        {
+            "id": "M6",
+            "sentences": [
+                "I've got a kite. It's ___ kite.",
+                "You've got a car. It's ___ car."
+            ],
+            "answers": [
+                "my",
+                "your"
+            ]
+        },
+        {
+            "id": "M7",
+            "sentences": [
+                "Jim has got a robot. ___ robot is grey.",
+                "Jenny has got a doll. ___ doll is new."
+            ],
+            "answers": [
+                "his",
+                "her"
+            ]
+        },
+        {
+            "id": "M8",
+            "sentences": [
+                "We've got balls. They're ___ balls.",
+                "They've got a bike. It's ___ bike."
+            ],
+            "answers": [
+                "our",
+                "their"
+            ]
+        },
+        {
+            "id": "M9",
+            "sentences": [
+                "Grandma and Grandpa have got a house. ___ house is yellow.",
+                "Jim and I have got a ball. ___ ball is blue."
+            ],
+            "answers": [
+                "their",
+                "our"
+            ]
+        },
+        {
+            "id": "M10",
+            "sentences": [
+                "This is Jenny's car. It's ___ car.",
+                "These are Jim's toys. They're ___ toys."
+            ],
+            "answers": [
+                "her",
+                "his"
+            ]
+        },
+        {
+            "id": "M11",
+            "sentences": [
+                "___ kite is this? It's Jim's.",
+                "___ he? He's Jim."
+            ],
+            "answers": [
+                "whose",
+                "who's"
+            ]
+        },
+        {
+            "id": "M12",
+            "sentences": [
+                "This kite is for Jim. It's ___ kite.",
+                "This doll is for Jenny. It's ___ doll."
+            ],
+            "answers": [
+                "jim's",
+                "jenny's"
+            ]
+        },
+        {
+            "id": "M13",
+            "sentences": [
+                "The cat has got a tail. ___ tail is long.",
+                "___ a toy cat."
+            ],
+            "answers": [
+                "its",
+                "it's"
+            ]
+        }
+    ],
+    "fix": [
+        {
+            "id": "F7",
+            "sentence": "I've got a kite. It's me kite.",
+            "wrongWord": "me",
+            "answer": "my"
+        },
+        {
+            "id": "F8",
+            "sentence": "You've got a car. It's you car.",
+            "wrongWord": "you",
+            "answer": "your"
+        },
+        {
+            "id": "F9",
+            "sentence": "Jim has got a robot. Her robot is grey.",
+            "wrongWord": "her",
+            "answer": "his"
+        },
+        {
+            "id": "F10",
+            "sentence": "Jenny has got a doll. His doll is new.",
+            "wrongWord": "his",
+            "answer": "her"
+        },
+        {
+            "id": "F11",
+            "sentence": "We've got a ball. It's we ball.",
+            "wrongWord": "we",
+            "answer": "our"
+        },
+        {
+            "id": "F12",
+            "sentence": "They've got a bike. It's they bike.",
+            "wrongWord": "they",
+            "answer": "their"
+        },
+        {
+            "id": "F13",
+            "sentence": "This is Jenny's car. It's she car.",
+            "wrongWord": "she",
+            "answer": "her"
+        },
+        {
+            "id": "F14",
+            "sentence": "These are Jim's toys. They're he toys.",
+            "wrongWord": "he",
+            "answer": "his"
+        },
+        {
+            "id": "F15",
+            "sentence": "Who's kite is this? It's Jim's.",
+            "wrongWord": "who's",
+            "answer": "whose"
+        },
+        {
+            "id": "F16",
+            "sentence": "The cat has got a tail. It's tail is long.",
+            "wrongWord": "it's",
+            "answer": "its"
+        }
+    ]
+};
+    const pageCatalogs = { 'PU1:5:59': pu1Unit5Page59, 'PU1:7:85': pu1Unit7Page85, 'PU2:9:107': pu2Unit9Catalogs[107], 'PU2:9:109': pu2Unit9Catalogs[109], 'PU2:9:116': pu2Unit9Catalogs[116], 'PU2:9:119': pu2Unit9Catalogs[119], 'PU2:8:95': pu2Unit8Catalogs[95], 'PU2:8:96': pu2Unit8Catalogs[96], 'PU2:8:97': pu2Unit8Catalogs[97], 'PU2:8:98': pu2Unit8Catalogs[98], 'PU2:8:104': pu2Unit8Catalogs[104], 'PU2:7:83': pu2Unit7Catalogs[83], 'PU2:7:85': pu2Unit7Catalogs[85], 'PU2:7:87': pu2Unit7Catalogs[87], 'PU2:6:78': pu2Unit6Catalogs[78], 'PU2:6:81': pu2Unit6Catalogs[81], 'PU2:5:57': pu2Unit5Catalogs[57], 'PU2:5:59': pu2Unit5Catalogs[59], 'PU2:5:60': pu2Unit5Catalogs[60], 'PU2:5:62': pu2Unit5Catalogs[62], 'PU2:4:45': pu2Unit4Catalogs[45], 'PU2:4:46': pu2Unit4Catalogs[46], 'PU2:4:47': pu2Unit4Catalogs[47], 'PU2:4:54': pu2Unit4Catalogs[54], 'PU2:3:31': pu2Unit3Catalogs[31], 'PU2:3:33': pu2Unit3Catalogs[33], 'PU2:3:40': pu2Unit3Catalogs[40], 'PU2:2:19': pu2Unit2Catalogs[19], 'PU2:2:21': pu2Unit2Catalogs[21], 'PU2:2:22': pu2Unit2Catalogs[22], 'PU2:2:25': pu2Unit2Catalogs[25], 'PU2:1:7': pu2Unit1Catalogs[7], 'PU2:1:9': pu2Unit1Catalogs[9], 'PU2:1:10': pu2Unit1Catalogs[10], 'PU2:1:16': pu2Unit1Catalogs[16], 'PU3:1:16': unit1Catalog, 'PU3:2:28': unit2Catalog, 'PU3:3:31': unit3Catalogs[31], 'PU3:3:33': unit3Catalogs[33], 'PU3:3:35': unit3Catalogs[35], 'PU3:3:36': unit3Catalogs[36], 'PU3:3:40': unit3Catalog, 'PU3:4:54': unit4Catalog, 'PU3:5:57': unit5Catalogs[57], 'PU3:5:59': unit5Catalogs[59], 'PU3:5:66': unit5Catalogs[66], 'PU3:6:69': unit6Catalogs[69], 'PU3:6:71': unit6Catalogs[71], 'PU3:6:73': unit6Catalogs[73], 'PU3:7:83': unit7Catalogs[83], 'PU3:7:85': unit7Catalogs[85], 'PU3:7:87': unit7Catalogs[87], 'PU3:8:95': unit8Catalogs[95], 'PU3:8:97': unit8Catalogs[97], 'PU3:8:98': unit8Catalogs[98], 'PU3:8:99': unit8Catalogs[99], 'PU3:9:107': unit9Catalogs[107], 'PU3:9:109': catalog, 'PU3:9:110': unit9Catalogs[110], 'PU3:9:111': unit9Catalogs[111] };
 
     function normalize() {
         if (typeof TEACHING_CONTENT === 'undefined') return;

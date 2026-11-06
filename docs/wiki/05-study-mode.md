@@ -1,3 +1,62 @@
+## PU1 Unit 5 page 59 grammar preview (5 November 2026)
+
+`pu1-u5-p59` opens `pu1_u5_p59_notes.html` for assigned page-59 students. The
+three approved ownership infographics use original Leo/Mia characters, with 37
+bundled British English word/sentence clips, tap-to-listen, replay, slow playback,
+zoom and the shared optional pronunciation controls. Original illustrations must
+not reuse Friendly Farm character names. Words use Youdao type 1 and sentences
+use Sound of Text en-GB; provenance is recorded beside the assets.
+
+The existing grammar Study selects five of the seven page-59 vocabulary entries
+and five existing page-59 non-spelling boards. Completion earns one normal Study
+credit and normal SR outcomes, persists the version-1 completion marker and
+unlocks review. Curriculum, exercise content, SR keys and recovery are unchanged.
+The browser and isolated preview API register the same catalog entry.
+
+## Three-lesson production release (5 November 2026)
+
+Production includes PU1 U5 p59, PU3 U3 p35 and PU3 U8 p97 with the same approved
+artwork, audio, page-scoped five-word/five-exercise Study and saved review access.
+PU1 U5 p59 includes its existing preview bank of eight missing-word and ten
+find-and-fix boards; other preview-only PU1 curriculum is not part of this release.
+PU3 Unit 3 uses assignment pages 31/33/35/36, with old page-40 placements and
+typed SR identities preserved. Its p35 reader uses the optimized WebP/MP3 assets,
+lazy audio packs and persistent mirror-aware AssetCache. The browser/server note
+catalogs ship together; existing production API, speech and recovery gates remain
+enabled. No student-record migration is needed.
+
+## PU3 Unit 3 page 35 preview (5 November 2026)
+
+`pu3-u3-p35` assigns the six approved pp.34–35 vocabulary/grammar infographics to
+app page 35. Its shared reader includes 53 bundled British English audio clips,
+tap-to-listen, replay, slow playback, zoom and optional existing pronunciation
+practice. The vocabulary clips use Youdao type 1 and sentences use Sound of Text
+en-GB; source metadata stays with the assets. All six images preserve their
+original dimensions and fit the existing WebP lesson budget.
+
+The media loading follow-up reduces six WebP images from 1,452,186 to 1,053,602
+bytes at unchanged dimensions and the 53 mono MP3s from 873,455 to 377,133 bytes.
+The initial media is one image and one audio pack (184,351 bytes), replacing the
+1,371,012-byte first-image/base64-bundle download. AssetCache provides persistent
+mirror/origin-backed media; later pages warm on approach. Study and completion
+versions remain unchanged, so students do not repeat an already completed intro.
+
+The existing intro/Study/library flow selects five words and five non-spelling
+boards strictly from the already approved page-35 bank. Normal completion grants
+one Study credit, preserves the old page-40 typed SR keys and unlocks the lesson
+in the review library. The same version-1 note ID is registered in the isolated
+preview API catalog. Production is a separate release.
+
+## PU3 Unit 8 page 97 grammar preview
+
+The preview catalog registers `pu3-u8-p97` at PU3 Unit 8 page 97 and opens
+`pu3_u8_p97_notes.html` for an assigned student. The approved bilingual infographic
+has bundled British English tap audio and the shared optional pronunciation controls.
+Its normal grammar Study uses five of the seven existing page-97 phrases and five
+existing page-97 non-spelling boards. Completion earns the normal Study credit and
+normal SR outcomes, unlocks review, and uses the existing recovery/completion flow.
+No curriculum placement or SR keys change. Frontend and API share the catalog.
+
 ## Speech preparation
 
 Study entry and restoration start the optional speech model in the background. Study exercises can run while the model prepares.

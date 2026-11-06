@@ -2,7 +2,10 @@
 const assert=require('node:assert/strict'),http=require('node:http'),fs=require('node:fs'),path=require('node:path'),os=require('node:os');
 const {chromium}=require('playwright-core');
 const pu1=process.argv.includes('--pu1');
-const lesson=pu1?{book:'PU1',unit:'7',page:'85',previous:'83',id:'pu1-u7-p85',pageCount:3,missing:'M9',secondMissing:'M16',fix:'F20',srKey:'non-spelling:find-fix:pu1:7:84:f20'}:{book:'PU3',unit:'9',page:'111',previous:'110',id:'pu3-u9-p111',pageCount:4,missing:'M1',secondMissing:'M8',fix:'F14',srKey:'non-spelling:find-fix:pu3:9:111:f14'};
+const pu1p59=process.argv.includes('--pu1-p59');
+const pu3p35=process.argv.includes('--pu3-p35');
+const pu3p97=process.argv.includes('--pu3-p97');
+const lesson=pu1p59?{book:'PU1',unit:'5',page:'59',previous:'57',id:'pu1-u5-p59',pageCount:3,missing:'M6',secondMissing:'M8',fix:'F7',srKey:'non-spelling:find-fix:pu1:5:59:f7'}:pu3p97?{book:'PU3',unit:'8',page:'97',previous:'95',id:'pu3-u8-p97',pageCount:1,missing:'M7',secondMissing:'M8',fix:'F5',srKey:'non-spelling:find-fix:pu3:8:97:f5'}:pu3p35?{book:'PU3',unit:'3',page:'35',previous:'33',id:'pu3-u3-p35',pageCount:6,missing:'M11',secondMissing:'M12',fix:'F16',srKey:'non-spelling:find-fix:pu3:3:40:f16'}:pu1?{book:'PU1',unit:'7',page:'85',previous:'83',id:'pu1-u7-p85',pageCount:3,missing:'M9',secondMissing:'M16',fix:'F20',srKey:'non-spelling:find-fix:pu1:7:84:f20'}:{book:'PU3',unit:'9',page:'111',previous:'110',id:'pu3-u9-p111',pageCount:4,missing:'M1',secondMissing:'M8',fix:'F14',srKey:'non-spelling:find-fix:pu3:9:111:f14'};
 lesson.placement={book:lesson.book,unit:lesson.unit,page:lesson.page};
 const root=__dirname,qa=path.join(os.tmpdir(),'classroom-preview-notes-integration',lesson.id);fs.mkdirSync(qa,{recursive:true});
 let count=0;function ok(value,label){assert.ok(value,label);count++;console.log('PASS '+label);}
@@ -65,6 +68,7 @@ async function fixture(page,id='notes-a',placement=lesson.placement,notes={}){
   await page.evaluate(()=>{
    const pool=NonSpellingContent.buildPool(testNote.book,testNote.unit,testNote.page,{pageOnly:true}).entries.map(e=>e.item);
    STUDY_STATE.nonSpellingExercises=[pool.find(e=>e.id===testNote.missing&&e.type==='missing-word'),pool.find(e=>e.id===testNote.fix&&e.type==='find-fix'),pool.find(e=>e.type==='sentence-scramble'),pool.find(e=>e.type==='sentence-match'),pool.find(e=>e.id===testNote.secondMissing&&e.type==='missing-word')];
+   if(STUDY_STATE.nonSpellingExercises.some(item=>!item))throw new Error('Assigned lesson is missing a required Study board: '+testNote.id);
   });
   for(let i=0;i<5;i++){
    await page.waitForFunction(()=>STUDY_STATE.round==='A'&&!STUDY_STATE.isTransitioning);
@@ -83,7 +87,9 @@ async function fixture(page,id='notes-a',placement=lesson.placement,notes={}){
   ok(true,'regular handwriting round follows the same five vocabulary words');
   // Accept recognition outcomes through the real handwriting-round handler.
   // Recognition accuracy remains covered by the existing handwriting suites.
+  const handwritingDeadline=Date.now()+45000;
   while(await page.evaluate(()=>STUDY_STATE.round==='D')){
+   if(Date.now()>handwritingDeadline)throw new Error('Handwriting did not advance: '+JSON.stringify(await page.evaluate(()=>({round:STUDY_STATE.round,index:STUDY_STATE.currentWordIndex,word:roundDWord,cursor:roundDCursor,gaps:roundDGapOrder.length}))));
    const ready=await page.evaluate(()=>!STUDY_STATE.isTransitioning&&roundDCursor<roundDGapOrder.length);
    if(ready)await page.evaluate(()=>roundDAcceptLetter(roundDSlots[roundDGapOrder[roundDCursor]].char));
    await page.waitForTimeout(170);
@@ -147,3 +153,4 @@ async function fixture(page,id='notes-a',placement=lesson.placement,notes={}){
   await context.close();
  }finally{await browser.close();server.close();}
 })().catch(error=>{console.error(error);server.close();process.exitCode=1;});
+

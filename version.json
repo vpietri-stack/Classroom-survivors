@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-05g",
+  "version": "2026-11-05m",
   "deployedAt": "2026-11-05",
-  "notes": "Reduce student startup downloads and open sign-in independently of the lesson runtime."
+  "notes": "Release PU1 U5 P59, PU3 U3 P35 and PU3 U8 P97 notes; include PU3 Unit 3 grouping and optimized cached media."
 }

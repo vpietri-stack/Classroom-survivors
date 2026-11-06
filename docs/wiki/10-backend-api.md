@@ -6,6 +6,11 @@ The six-image reader is shipped separately on the preview frontend. Existing
 saveAnalytics normalization, atomic completion and duplicate-event handling apply;
 no production deployment or student-record migration is part of this change.
 
+Production note catalog (5 November 2026) adds `pu1-u5-p59`, `pu3-u3-p35` and
+`pu3-u8-p97` at version 1. All use the existing five-word/five-exercise completion
+marker and saveAnalytics idempotency. Frontend and Functions ship the same catalog;
+no schema, container, authentication or student-record migration changes.
+
 Production 2 November: approved Study/Gomoku/UNO recovery and adaptive speech are enabled. See [Speech](08-speech.md) and [Deployment](13-deployment.md) for scope and storage isolation.
 
 > **Last verified:** 2026-09-27 · **Part of:** [Classroom-survivors Repo Wiki](README.md)

@@ -44,6 +44,7 @@
     { prefix: 'pu2_race_assets/', token: 'pu2-race-v1' },
     { prefix: 'pu3_circus_assets/', token: 'pu3-circus-v1' },
     { prefix: 'pu3_u3_p35_assets/', token: 'pu3-u3-p35-v2' },
+    { prefix: 'pu2_u5_p60_assets/', token: 'pu2-u5-p60-v1' },
     { prefix: 'audio_mp3/',    token: 'audio-v1' },
     { prefix: 'music/',        token: 'music-v1' },
     { prefix: 'sfx/',          token: 'sfx-v1' }

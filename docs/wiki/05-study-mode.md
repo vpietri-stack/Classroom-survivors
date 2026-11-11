@@ -551,3 +551,7 @@ Page 14 opens the literature reader for pages 14–15, with 14 illustrated vocab
 ## PU3 Unit 1 The Circus Child preview
 
 The page-14 article lesson registers `pu3-u1-p14`: all 27 approved words in six recognition sets, followed by four story gap-fill boards. The final recognition set has two words. It reuses article Study credit, completion and recovery without adding SR entries. Four cropped textbook sections and 30 original narration clips support the reader. Page 16 remains available.
+
+## PU1 Unit 7 page 87 (11 November 2026)
+
+Page 87 opens the five approved sports vocabulary and permission grammar infographics with 58 British-English clips. Follow-up Study uses five vocabulary items and five exercises from page 87. Unit 7 exercises formerly assigned to page 92 now sit on pages 83, 85, 87 and 91. Page 92 remains a cumulative review boundary for existing assignments. Moved typed exercises retain their original review keys.

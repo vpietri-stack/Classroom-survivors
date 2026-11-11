@@ -6,7 +6,8 @@ const pu1p87=process.argv.includes('--pu1-p87');
 const pu1p59=process.argv.includes('--pu1-p59');
 const pu3p35=process.argv.includes('--pu3-p35');
 const pu3p97=process.argv.includes('--pu3-p97');
-const lesson=pu1p87?{book:'PU1',unit:'7',page:'87',previous:'85',id:'pu1-u7-p87',pageCount:5,missing:'M17',secondMissing:'M26',fix:'F30',srKey:'non-spelling:find-fix:pu1:7:92:f30'}:pu1p59?{book:'PU1',unit:'5',page:'59',previous:'57',id:'pu1-u5-p59',pageCount:3,missing:'M6',secondMissing:'M8',fix:'F7',srKey:'non-spelling:find-fix:pu1:5:59:f7'}:pu3p97?{book:'PU3',unit:'8',page:'97',previous:'95',id:'pu3-u8-p97',pageCount:1,missing:'M7',secondMissing:'M8',fix:'F5',srKey:'non-spelling:find-fix:pu3:8:97:f5'}:pu3p35?{book:'PU3',unit:'3',page:'35',previous:'33',id:'pu3-u3-p35',pageCount:6,missing:'M11',secondMissing:'M12',fix:'F16',srKey:'non-spelling:find-fix:pu3:3:40:f16'}:pu1?{book:'PU1',unit:'7',page:'85',previous:'83',id:'pu1-u7-p85',pageCount:3,missing:'M9',secondMissing:'M16',fix:'F20',srKey:'non-spelling:find-fix:pu1:7:84:f20'}:{book:'PU3',unit:'9',page:'111',previous:'110',id:'pu3-u9-p111',pageCount:4,missing:'M1',secondMissing:'M8',fix:'F14',srKey:'non-spelling:find-fix:pu3:9:111:f14'};
+const pu2p60=process.argv.includes('--pu2-p60');
+const lesson=pu2p60?{book:'PU2',unit:'5',page:'60',previous:'59',id:'pu2-u5-p60',pageCount:3,missing:'M17',secondMissing:'M23',fix:'F23',srKey:'non-spelling:find-fix:pu2:5:60:f23'}:pu1p87?{book:'PU1',unit:'7',page:'87',previous:'85',id:'pu1-u7-p87',pageCount:5,missing:'M17',secondMissing:'M26',fix:'F30',srKey:'non-spelling:find-fix:pu1:7:92:f30'}:pu1p59?{book:'PU1',unit:'5',page:'59',previous:'57',id:'pu1-u5-p59',pageCount:3,missing:'M6',secondMissing:'M8',fix:'F7',srKey:'non-spelling:find-fix:pu1:5:59:f7'}:pu3p97?{book:'PU3',unit:'8',page:'97',previous:'95',id:'pu3-u8-p97',pageCount:1,missing:'M7',secondMissing:'M8',fix:'F5',srKey:'non-spelling:find-fix:pu3:8:97:f5'}:pu3p35?{book:'PU3',unit:'3',page:'35',previous:'33',id:'pu3-u3-p35',pageCount:6,missing:'M11',secondMissing:'M12',fix:'F16',srKey:'non-spelling:find-fix:pu3:3:40:f16'}:pu1?{book:'PU1',unit:'7',page:'85',previous:'83',id:'pu1-u7-p85',pageCount:3,missing:'M9',secondMissing:'M16',fix:'F20',srKey:'non-spelling:find-fix:pu1:7:84:f20'}:{book:'PU3',unit:'9',page:'111',previous:'110',id:'pu3-u9-p111',pageCount:4,missing:'M1',secondMissing:'M8',fix:'F14',srKey:'non-spelling:find-fix:pu3:9:111:f14'};
 lesson.placement={book:lesson.book,unit:lesson.unit,page:lesson.page};
 const root=__dirname,qa=path.join(os.tmpdir(),'classroom-preview-notes-integration',lesson.id);fs.mkdirSync(qa,{recursive:true});
 let count=0;function ok(value,label){assert.ok(value,label);count++;console.log('PASS '+label);}
@@ -138,8 +139,9 @@ async function fixture(page,id='notes-a',placement=lesson.placement,notes={}){
   await page.evaluate(()=>PreviewNotes.close());
   await fixture(page,'notes-server-only',lesson.placement,notes);
   ok(await page.locator('#preview-notes-overlay').count()===0,'server completion works on a fresh account cache');
-  await fixture(page,'notes-advance',{book:lesson.book,unit:lesson.unit,page:lesson.previous},pu1p87?{'pu1-u7-p85':{version:1,completedAt:'2026-11-03T01:00:00Z'}}:{});
-  ok(pu1p87?await page.locator('#preview-notes-button').isVisible():await page.locator('#preview-notes-button').isHidden(),'library button reflects completed earlier notes');
+  const earlierNotes=pu1p87?{'pu1-u7-p85':{version:1,completedAt:'2026-11-03T01:00:00Z'}}:pu2p60?{'pu2-u5-p59':{version:1,completedAt:'2026-11-11T01:00:00Z'}}:{};
+  await fixture(page,'notes-advance',{book:lesson.book,unit:lesson.unit,page:lesson.previous},earlierNotes);
+  ok((pu1p87||pu2p60)?await page.locator('#preview-notes-button').isVisible():await page.locator('#preview-notes-button').isHidden(),'library button reflects completed earlier notes');
   await page.evaluate(()=>{
    PreviewNotes.close();
    const current=getCurrentSession();
@@ -147,7 +149,9 @@ async function fixture(page,id='notes-a',placement=lesson.placement,notes={}){
    for(const type of ['vocab','sentences','sentencePairs'])for(const e of buildItemPool(sorted.slice(0,end+1),type).flatPool)authActiveUser.srState[type][e.key]={lastResult:'success',dueAfterSession:current+999,interval:999};
    finishLogin();
   });
-  ok(await page.evaluate(()=>authActiveUser.page===testNote.page)&&await page.locator('#preview-notes-overlay').isVisible(),'automatic SR advancement stops at the registered page and opens its preview');
+  const advancement = await page.waitForFunction(note=>String(authActiveUser?.page)===String(note.page)&&!!document.querySelector('#preview-notes-overlay iframe'),lesson,{timeout:8000}).then(()=>true,()=>false);
+  const advancementState = await page.evaluate(()=>({page:authActiveUser?.page,overlay:!!document.querySelector('#preview-notes-overlay iframe')}));
+  ok(advancement,'automatic SR advancement stops at the registered page and opens its preview: '+JSON.stringify(advancementState));
   await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(qa,'automatic-intro-phone.png')});
   ok(errors.length===0,'no browser runtime errors: '+errors.join(','));
   console.log(count+' preview-note integration checks passed; '+qa);

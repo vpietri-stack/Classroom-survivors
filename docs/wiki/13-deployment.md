@@ -1,6 +1,6 @@
-## PU1 page 85 production release (3 November 2026)
+## Retained preview API base refresh (3 November 2026)
 
-The teacher approved promotion of the corrected PU1 Unit 7 page 85 lesson. The production release includes its reader, bundled audio, optional pronunciation and the page 85 Study content with the shared completion catalog.
+Before deploying the PU1 page-85 note catalog, merge the current production base into this preview API branch to resolve its package/test conflicts and restore PR-1 deployment eligibility. Keep the production check runner and its additional game-recovery gate test; retain the branch's delayed-credit receipt behavior and preview environment. This is a branch refresh, not a production deployment.
 
 # Deployment & Release Discipline
 
@@ -414,6 +414,16 @@ existing draft PR #1 and its isolated preview environment open.
 ## Authorized all-student diagnostic trial (2026-10-30)
 
 Publish only diagnostic/lifecycle changes on each environment's existing history, preserving independent curricula, speech experiments, API routes and data containers. Validate the isolated preview API and Pages first, then production. Synchronize stamps and changed-script queries. After production host verification, node api/client_diagnostics_ops.js --database Val-EslApp --action enable-all --days 7 starts the approved seven-day window; status measures partial heartbeat RU/performance and reserved volume, stop-all pauses it. The trial expires automatically; low-volume lifecycle persists. This rollout does not provision throughput or alter learner progress.
+
+## Study recovery preview boundary (2026-11-01)
+
+This rollout is preview-only. Frontend is based on preview/main and published only to the Classroom-survivors-preview repository. The API is deployed through existing draft PR #1/admin-dashboard-update to SWA environment 1; never merge that PR merely to update staging. Keep separate histories and all preview speech/curriculum work.
+
+Environment 1 uses Val-EslApp / Students-admin-dashboard-preview with STUDY_RESUME_ENABLED=true and COSMOS_STUDY_RESUME_CONTAINER=study_resume_preview. Local verification uses Val-EslApp-Test / Students / study_resume_test. Containers share database throughput, partition by /studentId and exclude checkpoint contents from indexes. Production has no recovery flag/container setting and frontend config never enables recovery on the production path. User review precedes any later production activation.
+
+## Gomoku / UNO recovery preview extension (2026-11-01)
+
+Keep the existing isolated preview deployment: frontend from preview/main to the preview repository only; backend through draft PR #1/admin-dashboard-update to SWA environment 1 only. Add GAME_RESUME_ENABLED=true on environment 1 and reuse study_resume_preview; no new throughput/container is provisioned. Local tests use study_resume_test in Val-EslApp-Test. Production has no game recovery setting. Synchronize stamps and changed script queries, verify served bytes plus both hosted game flows, and await user review before any production rollout.
 
 Production 2026-11-03j promotes the ten optimized WebP assets and optional adaptive speech on the three registered notes readers. Build on production main and verify hosted assets after deployment. Image budgets are enforced by the release suite.
 

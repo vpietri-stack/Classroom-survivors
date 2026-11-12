@@ -251,6 +251,10 @@ curriculum/widget/styles, rather than duplicating exercise implementations.
 
 New lessons follow [Creating another preview lesson](../preview-notes-authoring.md).
 
+The PU2 Unit 8 page 95 reader, `pu2_u8_p95_notes.html`, pairs four WebP
+infographics with British English audio packs. Its registration uses the existing
+page 95 vocabulary and typed exercises for Study.
+
 The PU2 Unit 5 page 59 superlatives reader is `pu2_u5_p59_notes.html`.
 Its registered preview starts a page 59 Study session. Typed exercises moved
 from page 60 retain their original SR keys through `srPage: "60"`.

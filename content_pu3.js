@@ -806,9 +806,10 @@ TEACHING_CONTENT["PU3"] = {
                 { a: "What are they going to do tomorrow?", b: "They're going to play football." }
             ]
         },
-        "98": {
+        "99": {
             vocab: [
-                "airport", "buildings", "bank", "money", "post office", "stamps", "chemist's", "theatre", "museum", "university", "hotel", "restaurant"
+                "airport", "buildings", "bank", "money", "post office", "stamps", "chemist's", "theatre", "museum", "university", "hotel", "restaurant",
+                "across", "into", "out of", "over", "past", "through", "round"
             ],
             sentences: [
                 "We're going to go to the aiport to catch a plane.",
@@ -820,7 +821,15 @@ TEACHING_CONTENT["PU3"] = {
                 "We're going to the art museum tomorrow.",
                 "My big brother is going to start university in September.",
                 "We're going to stay at a hotel in the north of the city.",
-                "They're going to eat at a Chinese restaurant for dinner."
+                "They're going to eat at a Chinese restaurant for dinner.",
+                "My dog ran across the park.",
+                "A bird flew over the house.",
+                "The children ran into the sea.",
+                "The man walked past the shop.",
+                "We drove through the tunnel.",
+                "The cat jumped over the fence.",
+                "Go round the back of the building.",
+                "She got out of the car and walked away."
             ],
             sentencePairs: [
                 { a: "We go to the aiport ", b: "to catch a plane." },
@@ -832,24 +841,7 @@ TEACHING_CONTENT["PU3"] = {
                 { a: "We're going to the museum tomorrow, ", b: "to see some art." },
                 { a: "My big brother is going to study engineering ", b: "at Tsinghua university." },
                 { a: "We're going to stay at a hotel near the beach", b: "during our holiday." },
-                { a: "They're going to eat at a ", b: "Chinese restaurant for dinner." }
-            ]
-        },
-        "99": {
-            vocab: [
-                "across", "into", "out of", "over", "past", "through", "round"
-            ],
-            sentences: [
-                "My dog ran across the park.",
-                "A bird flew over the house.",
-                "The children ran into the sea.",
-                "The man walked past the shop.",
-                "We drove through the tunnel.",
-                "The cat jumped over the fence.",
-                "Go round the back of the building.",
-                "She got out of the car and walked away."
-            ],
-            sentencePairs: [
+                { a: "They're going to eat at a ", b: "Chinese restaurant for dinner." },
                 { a: "My dog ran across", b: "the park." },
                 { a: "A bird flew", b: "over the house." },
                 { a: "The children ran into", b: "the sea." },
@@ -858,7 +850,7 @@ TEACHING_CONTENT["PU3"] = {
                 { a: "The cat jumped over", b: "the fence." },
                 { a: "Go round", b: "the back of the building." },
                 { a: "She got", b: "out of the car." }
-            ]
+            ],
         },
     },
     "9": {
@@ -1159,7 +1151,7 @@ AVAILABLE_CONTENT["PU3"] = {
     "5": [57, 59, 66],
     "6": [69, 71, 73],
     "7": [83, 85, 87],
-    "8": [95, 97, 98, 99],
+    "8": [95, 97, 99],
     "9": [107, 109, 110, 111, 112]
 };
 

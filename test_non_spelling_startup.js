@@ -16,9 +16,13 @@ for (const file of ['sr_engine.js', 'teaching_content.js', 'content_pu1.js', 'co
     vm.runInContext(fs.readFileSync(path.join(__dirname, file), 'utf8'), sandbox);
 }
 let checked = 0;
+// WB-41 is an ArticleStudy page routed through PreviewNotes; it intentionally
+// has no regular TEACHING_CONTENT entry or non-spelling exercise pool.
+const articleOnlyPages = new Set(['Think0|4|WB-41']);
 for (const book of vm.runInContext('Object.keys(AVAILABLE_CONTENT)', sandbox)) {
     for (const page of sandbox.getSortedPagesForBook(book)) {
-        assert.ok(vm.runInContext('TEACHING_CONTENT[' + JSON.stringify(page.book) + '][' + JSON.stringify(page.unit) + ']?.[' + JSON.stringify(page.page) + ']', sandbox), 'advertised real page must have content: ' + book + ' U' + page.unit + ' p' + page.page);
+        const hasTeachingContent = vm.runInContext('TEACHING_CONTENT[' + JSON.stringify(page.book) + '][' + JSON.stringify(page.unit) + ']?.[' + JSON.stringify(page.page) + ']', sandbox);
+        assert.ok(hasTeachingContent || articleOnlyPages.has([book, page.unit, page.page].join('|')), 'advertised real page must have content: ' + book + ' U' + page.unit + ' p' + page.page);
         let round;
         assert.doesNotThrow(() => { round = sandbox.NonSpellingContent.select(book, page.unit, page.page, 5); }, book + ' U' + page.unit + ' p' + page.page + ' must not crash on a missing earlier page');
         assert.ok(round.length <= 5);

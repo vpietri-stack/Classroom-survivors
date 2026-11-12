@@ -59,6 +59,7 @@
             const parks = STUDY_STATE.parks;
             const index = STUDY_STATE.currentSentenceIndex;
             const [heading, sentences] = lesson.parks[index];
+            const scanSource = settings.scans?.[index] || settings.scan;
             const text = sentences.map(sentence => sentence[0]).join(" ");
             const pattern = new RegExp("\\b(" + lesson.targets[index].join("|") + ")\\b", "gi");
             const matches = Array.from(text.matchAll(pattern));
@@ -87,12 +88,11 @@
             const summary = document.createElement("summary");
             summary.textContent = settings.readerLabel;
             const scan = document.createElement("img");
-            scan.src = settings.scan || "";
+            if (scanSource) scan.src = scanSource;
             scan.alt = settings.readerLabel;
-            scan.width = 817;
-            scan.height = 1108;
+            [scan.width, scan.height] = settings.scanSizes?.[index] || [817, 1108];
             scan.loading = "lazy";
-            if (settings.scan) reader.append(summary, scan);
+            if (scanSource) reader.append(summary, scan);
             const title = document.createElement("h3");
             title.textContent = heading;
             const layout = document.createElement("div");
@@ -161,7 +161,7 @@
                 feedback.textContent = parks.verdict ? parks.verdict.every(Boolean) ? "全部答对了！" : "有些答案需要修改。所有词会回到词库，请再试一次。" : "";
             }
             layout.append(paragraph, dock);
-            if (settings.scan) board.append(reader);
+            if (scanSource) board.append(reader);
             board.append(title, layout, check, feedback);
             $("study-game-area").replaceChildren(board);
             paint();
@@ -211,6 +211,35 @@
         articles["pu3-u9-p112"] = create(window.JasminsDiary, {
             id: "pu3-u9-p112", context: { book: "PU3", unit: "9", page: "112" },
             instruction: "请打开学生用书（Pupil’s Book）第 112 页，参考课本完成填空。用刚学过的单词和短语填空。填完后，点击「检查」。"
+        });
+    }
+    if (window.ThinkWorkbook41) {
+        const lesson = window.ThinkWorkbook41;
+        const assets = "think0_wb41_assets/";
+        const id = "think0-u4-wb41";
+        articles[id] = create({
+            words: lesson.words.map(([text, translation, image]) => [
+                text, translation, image.slice(3, -5), assets + image
+            ]),
+            parks: lesson.sections.map(({ sentences }) => [sentences[0][0], sentences.slice(1)]),
+            targets: [
+                ["million", "next to two rivers", "warm", "dry", "summer", "winter", "plays",
+                    "live music", "country music", "popular", "skiing"],
+                ["province", "east coast", "million", "official language", "island", "winter",
+                    "kilometres", "tunnels", "summer", "warm", "international jazz festival"],
+                ["in the south of France", "at the weekend", "town centre", "buy", "cinema",
+                    "see a film", "volleyball courts", "volleyball", "summer"]
+            ],
+            async audioSource(file) {
+                const path = assets + "audio/" + file;
+                return await window.AssetCache?.getBlobUrl(path, { race: true }) || path;
+            }
+        }, {
+            id, context: { book: "Think0", unit: "4", page: "WB-41" },
+            scans: lesson.sections.map(({ image }) => assets + image),
+            scanSizes: lesson.sections.map(({ size }) => size),
+            readerLabel: "查看这一段课文",
+            instruction: "用词库中的单词和短语填空。需要时可以查看课文。填完后，点击「检查」。"
         });
     }
     window.ArticleStudy = {

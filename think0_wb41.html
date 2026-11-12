@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Think Starter · Unit 4 · WB-41</title>
+  <link rel="stylesheet" href="interactive_notes_poc.css?v=2026-11-03a">
+  <link rel="stylesheet" href="think_parks.css?v=5">
+  <link rel="stylesheet" href="pu2_race.css?v=1">
+  <link rel="stylesheet" href="think0_wb41.css?v=2">
+  <script defer src="asset_cache.js?v=2026-11-12a"></script>
+  <script defer src="think0_wb41_lesson.js?v=2"></script>
+  <script defer src="think0_wb41_reader.js?v=3"></script>
+  <script defer src="notes_speech.js?v=2026-11-03a"></script>
+</head>
+<body>
+  <header class="toolbar">
+    <div class="toolbar-title"><a href="./">Classroom Survivors</a><span>Think Starter · Unit 4 · WB-41</span><b>点读预习</b></div>
+    <nav aria-label="预习内容"><a href="#words">1 预习词汇</a><a href="#article">2 点读文章</a></nav>
+  </header>
+  <main>
+    <section id="words">
+      <h2>1. 预习词汇</h2>
+      <p>点击词卡听发音，然后跟读。</p>
+      <div id="cards" class="cards"></div>
+    </section>
+    <section id="article">
+      <h2>2. 点读文章</h2>
+      <p>点击课本图片里的标题或任意句子听发音。</p>
+      <div id="parts"></div>
+    </section>
+    <div class="reader-study-action"><button type="button" id="reader-study-start">开始学习</button></div>
+  </main>
+  <aside class="player" aria-label="点读播放器">
+    <div class="player-icon" aria-hidden="true">♪</div>
+    <div class="player-copy"><p id="nowPlaying">点一下，听一听。</p><div id="nowTranslation" lang="zh-Hans" aria-live="polite"></div><small id="playerStatus" role="status" aria-live="polite"></small></div>
+    <label class="speed-label">速度<select id="speed"><option value="1">正常</option><option value="0.8">慢一点</option></select></label>
+    <button id="replay" type="button" disabled>↻ 再听一次</button>
+    <button id="stop" type="button" disabled>■ 停止</button>
+  </aside>
+</body>
+</html>

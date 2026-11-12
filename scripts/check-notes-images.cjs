@@ -109,6 +109,55 @@ function checkNotesImages() {
             console.log(note.id + ': scan and five image groups, ' + total + ' bytes');
             continue;
         }
+        if (note.id === 'pu3-u3-p36') {
+            const prefix = 'pu3_u3_p36_story';
+            const folder = path.join(root, prefix + '_assets');
+            const context = { window: {} };
+            vm.runInNewContext(fs.readFileSync(path.join(root, prefix + '_lesson.js'), 'utf8'), context, { timeout: 1000 });
+            const lesson = context.window.WorkYourBody;
+            assert.equal(lesson.words.length, note.wordCount);
+            assert.equal(lesson.sections.length, note.exerciseCount);
+            let total = 0;
+            for (const [, , , file] of lesson.words) {
+                const image = fs.readFileSync(path.join(root, file));
+                webpDimensions(image);
+                assert.ok(image.length <= PAGE_LIMIT, file);
+                total += image.length;
+            }
+            for (const [i, section] of lesson.sections.entries()) {
+                const image = fs.readFileSync(path.join(folder, 'story-' + (i + 1) + '.webp'));
+                assert.ok(image.length <= PAGE_LIMIT, note.id);
+                assert.deepEqual(webpDimensions(image), Array.from(section.dimensions), note.id);
+                total += image.length;
+            }
+            assert.ok(total <= LESSON_LIMIT, `${note.id}: ${total} bytes exceeds ${LESSON_LIMIT}`);
+            console.log(`${note.id}: ${lesson.words.length + lesson.sections.length} WebP images, ${total} bytes`);
+            continue;
+        }
+        if (note.id === 'think0-u4-wb41') {
+            const context = { window: {} };
+            vm.runInNewContext(fs.readFileSync(path.join(root, 'think0_wb41_lesson.js'), 'utf8'), context, { timeout: 1000 });
+            const lesson = context.window.ThinkWorkbook41;
+            const folder = path.join(root, 'think0_wb41_assets');
+            assert.equal(lesson.words.length, note.wordCount);
+            assert.equal(lesson.sections.length, note.exerciseCount);
+            let total = 0;
+            for (const [, , file] of lesson.words) {
+                const image = fs.readFileSync(path.join(folder, file));
+                webpDimensions(image);
+                assert.ok(image.length <= PAGE_LIMIT, file);
+                total += image.length;
+            }
+            for (const section of lesson.sections) {
+                const image = fs.readFileSync(path.join(folder, section.image));
+                assert.ok(image.length <= PAGE_LIMIT, section.image);
+                assert.deepEqual(webpDimensions(image), Array.from(section.size), section.image);
+                total += image.length;
+            }
+            assert.ok(total <= LESSON_LIMIT, `${note.id}: ${total} bytes exceeds ${LESSON_LIMIT}`);
+            console.log(`${note.id}: ${lesson.words.length + lesson.sections.length} WebP images, ${total} bytes`);
+            continue;
+        }
         if (note.reader.endsWith('_story.html')) {
             const prefix = note.reader.slice(0, -5);
             const folder = path.join(root, prefix + '_assets');

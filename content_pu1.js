@@ -1139,10 +1139,12 @@ TEACHING_CONTENT["PU1"] = {
                 { a: "You've got a", b: "doll. It's your doll." },
             ]
         },
-        "60": {
+        "61": {
             vocab: [
                 "balloon", "helicopter", "toy box", "keyboard", "mouse", "computer", "board game", "teddy bear",
-                "ship", "radio", "cool", "new"
+                "ship", "radio", "cool", "new",
+                "Does he want?", "Does she want?", "Yes, he does", "No, he doesn't", "Yes, she does", "No, she doesn't",
+                "he wants", "he doesn't want", "she wants", "she doesn't want"
             ],
             sentences: [
                 "We've got a big white toy ship.",
@@ -1155,23 +1157,6 @@ TEACHING_CONTENT["PU1"] = {
                 "His teddy's blue.",
                 "We've got a cool computer.",
                 "Her balloon is big.",
-            ],
-            sentencePairs: [
-                { a: "I've got a", b: "computer. My computer's cool." },
-                { a: "Jim's got a", b: "toy box. His toy box is purple." },
-                { a: "Jenny's got a", b: "balloon. Her balloon's big." },
-                { a: "We've got", b: "board game. Our board game's new." },
-                { a: "Jenny and Jim have got a", b: "toy ship. Their toy ship's big and white." },
-                { a: "The computer's got a", b: "keyboard. Its keyboard's grey." },
-                { a: "You've got a", b: "helicopter. Your helicopter's small." },
-            ]
-        },
-        "61": {
-            vocab: [
-                "Does he want?", "Does she want?", "Yes, he does", "No, he doesn't", "Yes, she does", "No, she doesn't",
-                "he wants", "he doesn't want", "she wants", "she doesn't want"
-            ],
-            sentences: [
                 "Does he want a plane?",
                 "Does she want some balloons?",
                 "She wants a big purple teddy.",
@@ -1181,6 +1166,13 @@ TEACHING_CONTENT["PU1"] = {
 
             ],
             sentencePairs: [
+                { a: "I've got a", b: "computer. My computer's cool." },
+                { a: "Jim's got a", b: "toy box. His toy box is purple." },
+                { a: "Jenny's got a", b: "balloon. Her balloon's big." },
+                { a: "We've got", b: "board game. Our board game's new." },
+                { a: "Jenny and Jim have got a", b: "toy ship. Their toy ship's big and white." },
+                { a: "The computer's got a", b: "keyboard. Its keyboard's grey." },
+                { a: "You've got a", b: "helicopter. Your helicopter's small." },
                 { a: "Does he want a helicopter?", b: "Yes, he does." },
                 { a: "Does he want a toy house?", b: "No, he doesn't. He wants a helicopter." },
                 { a: "Does she want a teddy bear?", b: "Yes, she does." },
@@ -1819,7 +1811,7 @@ AVAILABLE_CONTENT["PU1"] = {
     "2": [19, 20, 21, 22, 23, 26],
     "3": [31, 32, 33, 34, 35, 36, 37, 43],
     "4": [45, 47, 48, 54],
-    "5": [57, 59, 60, 61, 63],
+    "5": [57, 59, 61, 63],
     "6": [78, 81],
     "7": [83, 85, 87, 91, 92],
     "8": [95, 97, 99],

@@ -1,0 +1,54 @@
+#cards .card {
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+  min-width: 0;
+}
+#cards .card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  margin-bottom: .25rem;
+}
+#cards .card.active {
+  background: #e5f5e9;
+}
+#parts .race-part {
+  max-width: 810px;
+  margin-inline: auto;
+  padding: 0;
+}
+#parts .race-part:nth-child(-n+2) {
+  max-width: 520px;
+}
+.workbook-scan {
+  position: relative;
+}
+#parts .workbook-scan img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: .45rem;
+}
+.workbook-hotspot {
+  position: absolute;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+}
+.workbook-hotspot:hover,
+.workbook-hotspot.active {
+  background: #16aa8b38;
+  box-shadow: inset 0 0 0 1px #00836a;
+}
+#nowTranslation {
+  color: #285858;
+  font-size: .95rem;
+  line-height: 1.45;
+}
+#nowTranslation:empty,
+#playerStatus:empty {
+  display: none;
+}

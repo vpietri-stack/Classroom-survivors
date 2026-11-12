@@ -23,7 +23,7 @@ evaluate(`
     function shuffleArray(items) { return items; }
 `);
 
-assert.deepEqual(Array.from(evaluate("AVAILABLE_CONTENT.Think0['4']")), [40, 41, 43, 44]);
+assert.deepEqual(Array.from(evaluate("AVAILABLE_CONTENT.Think0['4']")), [40, 41, 43, 44, 'WB-41']);
 for (const page of [40, 41, 43, 44]) {
     const counts = evaluate(`({
         words: TEACHING_CONTENT.Think0['4']['${page}'].vocab.length,
@@ -64,7 +64,7 @@ assert.equal(evaluate('authActiveUser.page'), '44', 'removed page 45 cannot beco
 
 const dom = new JSDOM('<select id="settingsPage"></select><select id="addPage"></select>');
 const admin = { document: dom.window.document, Option: dom.window.Option,
-    AVAILABLE_CONTENT: { Think0: { '4': [40, 41, 43, 44] } } };
+    AVAILABLE_CONTENT: { Think0: { '4': [40, 41, 43, 44, 'WB-41'] } } };
 vm.createContext(admin);
 const code = fs.readFileSync('admin_dashboard.js', 'utf8');
 const start = code.indexOf('function populatePageSelect(');

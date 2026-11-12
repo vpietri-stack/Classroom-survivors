@@ -47,6 +47,18 @@ one Study credit, preserves the old page-40 typed SR keys and unlocks the lesson
 in the review library. The same version-1 note ID is registered in the isolated
 preview API catalog. Production is a separate release.
 
+## PU3 Unit 8 pages 98–99 vocabulary and grammar preview
+
+App page 99 opens the five supplied infographics on town vocabulary and movement
+prepositions. The reader uses full-size WebP and five British English audio packs,
+loaded by page through the mirror-aware asset cache. Preview Study draws five
+words and five exercises from the combined page 99 bank and uses the existing
+completion, credit and review flow.
+
+Page 99 combines the former page 98 vocabulary, sentences, pairs and typed boards
+with its existing content. Existing page 98 placements open page 99 on login,
+and the moved typed boards retain their page 98 SR keys.
+
 ## PU3 Unit 8 page 97 grammar preview
 
 The preview catalog registers `pu3-u8-p97` at PU3 Unit 8 page 97 and opens

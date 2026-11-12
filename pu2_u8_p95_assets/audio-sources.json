@@ -1,0 +1,194 @@
+{
+  "map": {
+    "id": "map",
+    "text": "map",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/5ddb7cb0-de63-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 6720
+  },
+  "map-example": {
+    "id": "map-example",
+    "text": "This map shows where the funfair is.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/5e754bb0-de63-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 24000
+  },
+  "trip": {
+    "id": "trip",
+    "text": "trip",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/c2a26c90-cd23-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 7104
+  },
+  "trip-example": {
+    "id": "trip-example",
+    "text": "We're going on a trip to the funfair.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/5e74d680-de63-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 20544
+  },
+  "city-centre": {
+    "id": "city-centre",
+    "text": "city centre",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/5dd86f70-de63-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 11904
+  },
+  "city-centre-example": {
+    "id": "city-centre-example",
+    "text": "There are lots of shops in the city centre.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/5e5567a0-de63-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 24576
+  },
+  "funfair": {
+    "id": "funfair",
+    "text": "funfair",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b5462aa0-cd23-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 8640
+  },
+  "funfair-example": {
+    "id": "funfair-example",
+    "text": "Look! There's a big wheel at the funfair.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/5fe70420-de63-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 26880
+  },
+  "ticket": {
+    "id": "ticket",
+    "text": "ticket",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/5fe99c30-de63-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 9024
+  },
+  "ticket-example": {
+    "id": "ticket-example",
+    "text": "I've got a ticket for the funfair.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/604c0780-de63-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 18624
+  },
+  "ride": {
+    "id": "ride",
+    "text": "ride",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b1868040-c7a1-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 8064
+  },
+  "ride-example": {
+    "id": "ride-example",
+    "text": "The big wheel is my favourite ride.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/614e8360-de63-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 23040
+  },
+  "road": {
+    "id": "road",
+    "text": "road",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/58b7bdb0-d04a-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 7296
+  },
+  "road-example": {
+    "id": "road-example",
+    "text": "This road goes to the funfair.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/61f0b6d0-de63-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 20736
+  },
+  "car-park": {
+    "id": "car-park",
+    "text": "car park",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/4aec32c0-dd7d-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 10944
+  },
+  "car-park-example": {
+    "id": "car-park-example",
+    "text": "We left our car in the car park while we were at the funfair.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/6259d8e0-de63-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 34176
+  },
+  "station": {
+    "id": "station",
+    "text": "station",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/523280d0-d854-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 10176
+  },
+  "station-example": {
+    "id": "station-example",
+    "text": "We're waiting for the train at the station.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/6480d790-de63-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 22464
+  },
+  "catch-a-bus": {
+    "id": "catch-a-bus",
+    "text": "catch a bus",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/6619c710-de63-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 10944
+  },
+  "catch-a-bus-example": {
+    "id": "catch-a-bus-example",
+    "text": "We can catch a bus to the funfair.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/64836fa0-de63-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 22464
+  },
+  "get-on": {
+    "id": "get-on",
+    "text": "get on",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/64e69e40-de63-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 7296
+  },
+  "get-on-example": {
+    "id": "get-on-example",
+    "text": "They're getting on the bus.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/654e12a0-de63-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14400
+  },
+  "get-off": {
+    "id": "get-off",
+    "text": "get off",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/670deb10-de63-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 7680
+  },
+  "get-off-example": {
+    "id": "get-off-example",
+    "text": "They're getting off the train.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/66744320-de63-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15360
+  }
+}

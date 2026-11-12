@@ -137,15 +137,32 @@ async function waitBoard(page, index) { await page.waitForFunction(i => STUDY_ST
         await page.evaluate(() => { startGrammarGame('I washed my hands before I ate lunch.'); });
         ok(await page.locator('#sentence-container').isVisible() && await page.locator('#grammar-actions').isVisible(), 'legacy grammar UI is restored after typed challenges');
         const approved = await page.evaluate(() => {
-            const items = [['1', '16'], ['2', '28'], ['3', '40'], ['4', '54'], ['5', '57'], ['5', '59'], ['5', '66'], ['6', '69'], ['6', '71'], ['6', '73'], ['7', '83'], ['7', '85'], ['7', '87'], ['8', '95'], ['8', '97'], ['8', '98'], ['8', '99'], ['9', '107'], ['9', '110'], ['9', '111']].flatMap(([unit, page]) =>
+            // PU3 Unit 8 P98 boards are now assigned to P99 for Study.
+            const items = [['1', '16'], ['2', '28'], ['3', '40'], ['4', '54'], ['5', '57'], ['5', '59'], ['5', '66'], ['6', '69'], ['6', '71'], ['6', '73'], ['7', '83'], ['7', '85'], ['7', '87'], ['8', '95'], ['8', '97'], ['8', '99'], ['9', '107'], ['9', '110'], ['9', '111']].flatMap(([unit, page]) =>
                 TEACHING_CONTENT.PU3[unit][page].nonSpellingExercises.filter(e => e.id).map(e => ({ ...e, book: 'PU3', unit, page })));
             for (const [unit, pages] of [['1', ['7', '9', '10', '16']], ['2', ['19', '21', '22', '25']], ['3', ['31', '33', '40']], ['4', ['45', '46', '47', '54']], ['5', ['57', '60', '62']], ['6', ['78', '81']], ['7', ['83', '85', '87']], ['8', ['95', '96', '97', '98', '104']], ['9', ['107', '109', '116', '119']]]) {
                 for (const page of pages) items.push(...TEACHING_CONTENT.PU2[unit][page].nonSpellingExercises.filter(e => e.id).map(e => ({ ...e, book: 'PU2', unit, page })));
             }
+            // Keep this real-browser sweep bounded to exercise pages touched by
+            // the current batch; the broader selector regression covers legacy pools.
+            const affectedPages = new Set(['PU2|8|95', 'PU3|8|99']);
+            const affected = items.filter(item => affectedPages.has([item.book, item.unit, item.page].join('|')));
+            // Retain the contraction rendering regression's two established fixtures.
+            affected.push(...items.filter(item => item.book === 'PU3' && item.unit === '8' && item.page === '97' && ['M5', 'M6'].includes(item.id)));
+            // Retain the hinted-initial keyboard regression's fixture as well.
+            const hintedFixture = items.find(item => item.unit === '4' && item.id === 'M1');
+            if (hintedFixture) affected.push(hintedFixture);
+            for (const [unit, id] of [['4', 'M12'], ['3', 'F28'], ['1', 'M19']]) {
+                const regressionFixture = items.find(item => item.unit === unit && item.id === id);
+                if (regressionFixture) affected.push(regressionFixture);
+            }
+            if (!affected.some(item => item.book === 'PU3' && item.unit === '8' && item.page === '99')) {
+                throw new Error('PU3 Unit 8 page 99 must contribute browser-tested exercises');
+            }
             const host = document.querySelector('#grammarGame .minigame-container');
             host.replaceChildren();
             document.getElementById('grammarGame').classList.add('nse-typed');
-            return items;
+            return affected;
         });
         const translationCoverage = await page.evaluate(() => ['110', '111'].map(page => {
             const data = TEACHING_CONTENT.PU3[9][page];

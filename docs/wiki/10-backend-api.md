@@ -5,6 +5,9 @@ Production note catalog (5 November 2026) adds `pu1-u5-p59`, `pu3-u3-p35` and
 marker and saveAnalytics idempotency. Frontend and Functions ship the same catalog;
 no schema, container, authentication or student-record migration changes.
 
+The PU3 Unit 8 pages 98–99 candidate registers `pu3-u8-p99` at assignment page
+99 with version 1 and the same five-word/five-exercise completion marker.
+
 Production 2 November: approved Study/Gomoku/UNO recovery and adaptive speech are enabled. See [Speech](08-speech.md) and [Deployment](13-deployment.md) for scope and storage isolation.
 
 > **Last verified:** 2026-09-27 · **Part of:** [Classroom-survivors Repo Wiki](README.md)

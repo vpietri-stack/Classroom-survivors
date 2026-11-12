@@ -106,7 +106,9 @@ assert.ok(!content.buildPool('PU3', 6, 73).entries.some(e => e.item.unit === '7'
 const unit8 = content.buildPool('PU3', 8, 99).entries.filter(e => e.item.id && e.item.unit === '8').map(e => e.item);
 assert.equal(unit8.filter(e => e.answers).length, 23, 'Unit 8 has 23 approved missing boards');
 assert.equal(unit8.filter(e => e.answer).length, 32, 'Unit 8 has 32 approved fixes');
-for (const [page, missing, fixes] of [['95', 4, 4], ['97', 8, 10], ['98', 6, 10], ['99', 5, 8]]) {
+assert.equal(unit8.filter(e => String(e.srPage) === '98' && e.answers).length, 6, 'page 98 missing boards retain their SR page in page 99');
+assert.equal(unit8.filter(e => String(e.srPage) === '98' && e.answer).length, 10, 'page 98 fix boards retain their SR page in page 99');
+for (const [page, missing, fixes] of [['95', 4, 4], ['97', 8, 10], ['98', 0, 0], ['99', 11, 18]]) {
     assert.equal(unit8.filter(e => e.page === page && e.answers).length, missing, page + ' missing count');
     assert.equal(unit8.filter(e => e.page === page && e.answer).length, fixes, page + ' fix count');
     assert.ok(!content.buildPool('PU3', 8, page).entries.some(e => e.item.unit === '8' && Number(e.item.page) > Number(page)), 'later Unit 8 pages never appear early');

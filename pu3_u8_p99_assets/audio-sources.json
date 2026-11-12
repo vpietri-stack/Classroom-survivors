@@ -1,0 +1,303 @@
+[
+  {
+    "id": "buildings",
+    "text": "buildings",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/1406da10-d433-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 6575
+  },
+  {
+    "id": "airport",
+    "text": "airport",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/107cfbc0-d1dd-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 6314
+  },
+  {
+    "id": "bank",
+    "text": "bank",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/76938660-dbd6-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 5139
+  },
+  {
+    "id": "money",
+    "text": "money",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/9f9386d0-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 4878
+  },
+  {
+    "id": "post-office",
+    "text": "post office",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/054d4e30-cb84-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 8535
+  },
+  {
+    "id": "stamps",
+    "text": "stamps",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/43198a60-cef6-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 6053
+  },
+  {
+    "id": "chemists",
+    "text": "chemist's",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/1071b120-d1dd-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 6706
+  },
+  {
+    "id": "see-buildings",
+    "text": "We're going to see the tall buildings in New York.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/a29750f0-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 16894
+  },
+  {
+    "id": "catch-plane",
+    "text": "We're going to catch a plane at the airport.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/a2955520-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15327
+  },
+  {
+    "id": "get-money",
+    "text": "We're going to go to the bank to get some money.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/a2b5fc80-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 16241
+  },
+  {
+    "id": "buy-stamps",
+    "text": "Then we're going to go to the post office to buy some stamps.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/a36157b0-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 21073
+  },
+  {
+    "id": "get-medicine",
+    "text": "We need to find a chemist's to get some medicine.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/a5c7d060-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 18331
+  },
+  {
+    "id": "theatre",
+    "text": "theatre",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b55daa40-cd23-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 5792
+  },
+  {
+    "id": "museum",
+    "text": "museum",
+    "source": "Existing British English clip",
+    "sourcePath": "think_parks_assets/word-museum.mp3",
+    "bytes": 10547
+  },
+  {
+    "id": "university",
+    "text": "university",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/fe105c90-cae6-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 8404
+  },
+  {
+    "id": "hotel",
+    "text": "hotel",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/a581c6b0-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 6053
+  },
+  {
+    "id": "restaurant",
+    "text": "restaurant",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/3ce143d0-db18-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 7620
+  },
+  {
+    "id": "watch-show",
+    "text": "Let's go to the theatre to watch a show.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/a69336b0-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15327
+  },
+  {
+    "id": "see-art",
+    "text": "We're going to visit a museum and see some art.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/a9dfc9a0-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 17547
+  },
+  {
+    "id": "study-university",
+    "text": "My brother is going to study at Beijing University next year.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/a87f0120-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 23555
+  },
+  {
+    "id": "stay-hotel",
+    "text": "We're going to stay at a brilliant hotel in New York.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/a87c4200-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 18722
+  },
+  {
+    "id": "have-burger",
+    "text": "We're going to have a burger at the restaurant.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/a88f2dc0-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15196
+  },
+  {
+    "id": "across",
+    "text": "across",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/8ab7c400-cf6d-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 5792
+  },
+  {
+    "id": "through",
+    "text": "through",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/f298ab30-c84b-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 5139
+  },
+  {
+    "id": "over",
+    "text": "over",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/3c290a90-de3d-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 5531
+  },
+  {
+    "id": "across-bridge",
+    "text": "Go across Black Bridge to the park.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/ab2ce310-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13890
+  },
+  {
+    "id": "across-road",
+    "text": "Walk across the road to the museum.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/6b3d8c00-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14151
+  },
+  {
+    "id": "through-gate",
+    "text": "Go through North Gate to get into the park.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/ab334bb0-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15196
+  },
+  {
+    "id": "through-trees",
+    "text": "Walk through the trees to the lake.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/ab3e9650-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 12322
+  },
+  {
+    "id": "over-hill",
+    "text": "Go over Orange Hill to the lake.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/ad841980-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13629
+  },
+  {
+    "id": "over-fence",
+    "text": "He kicked the ball over the fence.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/ada38860-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13629
+  },
+  {
+    "id": "into",
+    "text": "into",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/ebae4580-d748-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 5531
+  },
+  {
+    "id": "out-of",
+    "text": "out of",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/c4e27790-dac3-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 5139
+  },
+  {
+    "id": "into-park",
+    "text": "Go into the park through North Gate.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/ae71d4e0-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13890
+  },
+  {
+    "id": "into-hotel",
+    "text": "Walk into the hotel and ask at the desk.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/af4159e0-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 16763
+  },
+  {
+    "id": "out-of-park",
+    "text": "Come out of the park and turn right.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b0209650-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13759
+  },
+  {
+    "id": "out-of-house",
+    "text": "The boy is running out of the house.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b0250320-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13629
+  },
+  {
+    "id": "round",
+    "text": "round",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b1255c20-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 5531
+  },
+  {
+    "id": "past",
+    "text": "past",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/69653420-d113-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 5531
+  },
+  {
+    "id": "round-lake",
+    "text": "Walk round the lake to the museum.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b20b9d70-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13759
+  },
+  {
+    "id": "round-fields",
+    "text": "Run round Apple Fields and go to the bridge.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b322b2c0-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 17155
+  },
+  {
+    "id": "past-museum",
+    "text": "Go past the museum. The hotel is on your left.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b3b5cb00-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 20551
+  },
+  {
+    "id": "past-bank",
+    "text": "Walk past the bank and turn left at the post office.",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b5956070-de58-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 19898
+  }
+]

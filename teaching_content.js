@@ -231,7 +231,7 @@ function getSortedPagesForBook(book) {
             if (b === 'PU3' && unit === '3' && legacyPU3 && !pages.some(page => String(page) === '40')) {
                 pages.push(40);
             }
-            pages.sort((a, b) => parseInt(a) - parseInt(b));
+            pages.sort((a, b) => (parseInt(a) || Infinity) - (parseInt(b) || Infinity));
             pages.forEach(page => {
                 sorted.push({ book: b, unit, page: page.toString(), absIndex: absIndex++ });
             });

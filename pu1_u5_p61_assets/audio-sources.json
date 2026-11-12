@@ -1,0 +1,386 @@
+{
+  "computer": {
+    "id": "computer",
+    "text": "computer",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/53ba2b30-cd30-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 10176
+  },
+  "this-is-my-computer": {
+    "id": "this-is-my-computer",
+    "text": "This is my computer.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/49bbe180-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15360
+  },
+  "keyboard": {
+    "id": "keyboard",
+    "text": "keyboard",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/7e0c5e10-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 9984
+  },
+  "my-keyboard-is-white": {
+    "id": "my-keyboard-is-white",
+    "text": "My keyboard is white.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/7f317d20-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15936
+  },
+  "mouse": {
+    "id": "mouse",
+    "text": "mouse",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/51e6ce50-dc24-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 8640
+  },
+  "my-mouse-is-blue": {
+    "id": "my-mouse-is-blue",
+    "text": "My mouse is blue.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/7e90d050-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15744
+  },
+  "teddy": {
+    "id": "teddy",
+    "text": "teddy",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/8411cf70-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 8256
+  },
+  "i-ve-got-a-brown-teddy": {
+    "id": "i-ve-got-a-brown-teddy",
+    "text": "I've got a brown teddy.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/82fc19b0-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15360
+  },
+  "board-game": {
+    "id": "board-game",
+    "text": "board game",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/6dc4d670-ce2e-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 10560
+  },
+  "we-re-playing-a-board-game": {
+    "id": "we-re-playing-a-board-game",
+    "text": "We're playing a board game.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/84935b80-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 17664
+  },
+  "box": {
+    "id": "box",
+    "text": "box",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/36ed2ab0-c908-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 7680
+  },
+  "my-toys-are-in-the-box": {
+    "id": "my-toys-are-in-the-box",
+    "text": "My toys are in the box.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/865afc20-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 16320
+  },
+  "balloon": {
+    "id": "balloon",
+    "text": "balloon",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/06588ae0-d40f-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 8064
+  },
+  "i-ve-got-a-yellow-balloon": {
+    "id": "i-ve-got-a-yellow-balloon",
+    "text": "I've got a yellow balloon.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/8aec1d00-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15744
+  },
+  "helicopter": {
+    "id": "helicopter",
+    "text": "helicopter",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/8bdd33c0-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 11520
+  },
+  "my-toy-helicopter-is-my-favourite-toy": {
+    "id": "my-toy-helicopter-is-my-favourite-toy",
+    "text": "My toy helicopter is my favourite toy!",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/8e885690-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 26304
+  },
+  "ship": {
+    "id": "ship",
+    "text": "ship",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/974db030-d2c4-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 7296
+  },
+  "my-toy-ship-is-big": {
+    "id": "my-toy-ship-is-big",
+    "text": "My toy ship is big.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/904fa910-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15744
+  },
+  "radio": {
+    "id": "radio",
+    "text": "radio",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/605a0f10-cacc-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 9216
+  },
+  "this-is-my-radio": {
+    "id": "this-is-my-radio",
+    "text": "This is my radio.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/921797d0-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15360
+  },
+  "new": {
+    "id": "new",
+    "text": "new",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/92e80730-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 7296
+  },
+  "this-is-my-new-radio": {
+    "id": "this-is-my-new-radio",
+    "text": "This is my new radio.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/93af00b0-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 17856
+  },
+  "old": {
+    "id": "old",
+    "text": "old",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/94c7eac0-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 7680
+  },
+  "this-is-my-old-radio": {
+    "id": "this-is-my-old-radio",
+    "text": "This is my old radio.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/96121e00-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 17280
+  },
+  "want": {
+    "id": "want",
+    "text": "want",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/716bd9c0-c86d-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 8640
+  },
+  "i-want-a-teddy": {
+    "id": "i-want-a-teddy",
+    "text": "I want a teddy.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/958f3260-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13056
+  },
+  "she-wants-a-board-game": {
+    "id": "she-wants-a-board-game",
+    "text": "She wants a board game.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/977b23e0-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 16896
+  },
+  "what-do-you-want-for-your-birthday": {
+    "id": "what-do-you-want-for-your-birthday",
+    "text": "What do you want for your birthday?",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/96f503f0-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 19200
+  },
+  "what-does-she-want-for-her-birthday": {
+    "id": "what-does-she-want-for-her-birthday",
+    "text": "What does she want for her birthday?",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/97d10c10-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 19776
+  },
+  "do-you-want-a-helicopter": {
+    "id": "do-you-want-a-helicopter",
+    "text": "Do you want a helicopter?",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/9876c1f0-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15360
+  },
+  "yes-i-do": {
+    "id": "yes-i-do",
+    "text": "Yes, I do.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/706a30c0-caa8-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13824
+  },
+  "i-want-a-helicopter": {
+    "id": "i-want-a-helicopter",
+    "text": "I want a helicopter.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/98b5edd0-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13824
+  },
+  "does-he-want-a-teddy": {
+    "id": "does-he-want-a-teddy",
+    "text": "Does he want a teddy?",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/99c5b020-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13824
+  },
+  "no-he-doesn-t": {
+    "id": "no-he-doesn-t",
+    "text": "No, he doesn't.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/9a830cb0-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 16704
+  },
+  "he-doesn-t-want-a-teddy": {
+    "id": "he-doesn-t-want-a-teddy",
+    "text": "He doesn't want a teddy.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/9c69a700-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15744
+  },
+  "do": {
+    "id": "do",
+    "text": "do",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/00c2e8d0-c70a-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 6336
+  },
+  "does": {
+    "id": "does",
+    "text": "does",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/68913080-cf8d-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 7296
+  },
+  "don-t": {
+    "id": "don-t",
+    "text": "don't",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/4b33fd90-cb1b-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 6720
+  },
+  "doesn-t": {
+    "id": "doesn-t",
+    "text": "doesn't",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/9d5b32f0-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 8256
+  },
+  "do-you-like-kites": {
+    "id": "do-you-like-kites",
+    "text": "Do you like kites?",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/9db9f4c0-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13824
+  },
+  "does-she-want-a-kite": {
+    "id": "does-she-want-a-kite",
+    "text": "Does she want a kite?",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/9dcc9260-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14016
+  },
+  "what-do-you-want": {
+    "id": "what-do-you-want",
+    "text": "What do you want?",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/9ee5f1a0-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 11520
+  },
+  "what-does-she-want": {
+    "id": "what-does-she-want",
+    "text": "What does she want?",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/a08ceae0-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 12864
+  },
+  "we-don-t-like-this-game": {
+    "id": "we-don-t-like-this-game",
+    "text": "We don't like this game.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/a05a4220-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14784
+  },
+  "she-doesn-t-want-to-play-this-game": {
+    "id": "she-doesn-t-want-to-play-this-game",
+    "text": "She doesn't want to play this game.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/a05f4b30-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 20160
+  },
+  "she-plays-football": {
+    "id": "she-plays-football",
+    "text": "She plays football.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/a06e8d70-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14400
+  },
+  "does-she-play-football": {
+    "id": "does-she-play-football",
+    "text": "Does she play football?",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/a11a5dd0-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14016
+  },
+  "she-doesn-t-play-football": {
+    "id": "she-doesn-t-play-football",
+    "text": "She doesn't play football.",
+    "source": "soundoftext",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/a1b47af0-de6c-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 16896
+  }
+}

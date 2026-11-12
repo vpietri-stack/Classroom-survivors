@@ -10,8 +10,13 @@
     }
     const user = () => typeof authActiveUser === 'undefined' ? null : authActiveUser;
     function remapPlacement(placement) {
-        if (enabled() && placement && placement.book === 'PU1'
-            && String(placement.unit) === '7' && String(placement.page) === '84') placement.page = '85';
+        if (!enabled() || !placement) return placement;
+        if (placement.book === 'PU1' && String(placement.unit) === '7'
+            && String(placement.page) === '84') placement.page = '85';
+        if (placement.book === 'PU1' && String(placement.unit) === '5'
+            && String(placement.page) === '60') placement.page = '61';
+        if (placement.book === 'PU3' && String(placement.unit) === '8'
+            && String(placement.page) === '98') placement.page = '99';
         return placement;
     }
     const isStudent = student => student && !['teacher', 'BM', 'admin'].includes(student.role);

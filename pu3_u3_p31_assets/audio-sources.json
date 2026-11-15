@@ -1,0 +1,227 @@
+[
+  {
+    "file": "pu3_u3_p31_assets/audio/neck.mp3",
+    "text": "neck",
+    "reusedFrom": "pu3_u3_p36_story_assets/audio/word-neck.mp3"
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/neck-example.mp3",
+    "text": "I've got a scarf round my neck.",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=I%27ve+got+a+scarf+round+my+neck."
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/shoulder.mp3",
+    "text": "shoulder",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=shoulder"
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/shoulder-example.mp3",
+    "text": "I'm carrying a bag on my shoulder.",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=I%27m+carrying+a+bag+on+my+shoulder."
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/back.mp3",
+    "text": "back",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=back"
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/back-example.mp3",
+    "text": "The number on my back is seven.",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=The+number+on+my+back+is+seven."
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/elbow.mp3",
+    "text": "elbow",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=elbow"
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/elbow-example.mp3",
+    "text": "I'm bending my elbow.",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=I%27m+bending+my+elbow."
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/finger.mp3",
+    "text": "finger",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=finger"
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/finger-example.mp3",
+    "text": "I'm pointing at a bird with my finger.",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=I%27m+pointing+at+a+bird+with+my+finger."
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/stomach.mp3",
+    "text": "stomach",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=stomach"
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/stomach-example.mp3",
+    "text": "I'm putting my hand on my stomach.",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=I%27m+putting+my+hand+on+my+stomach."
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/knee.mp3",
+    "text": "knee",
+    "reusedFrom": "pu3_u3_p36_story_assets/audio/word-knee.mp3"
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/knee-example.mp3",
+    "text": "I'm bending my knees.",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=I%27m+bending+my+knees."
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/toe.mp3",
+    "text": "toe",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=toe"
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/toe-example.mp3",
+    "text": "I'm touching my toes.",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=I%27m+touching+my+toes."
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/bandage.mp3",
+    "text": "bandage",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=bandage"
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/bandage-example.mp3",
+    "text": "I've got a bandage on my knee.",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=I%27ve+got+a+bandage+on+my+knee."
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/do-exercise.mp3",
+    "text": "do exercise",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=do+exercise"
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/do-exercise-example.mp3",
+    "text": "We're doing exercise in the park.",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=We%27re+doing+exercise+in+the+park."
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/cut.mp3",
+    "text": "cut",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=cut"
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/cut-example.mp3",
+    "text": "I've got a small cut on my finger.",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=I%27ve+got+a+small+cut+on+my+finger."
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/hurt.mp3",
+    "text": "hurt",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=hurt"
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/hurt-example.mp3",
+    "text": "My knee hurts.",
+    "reusedFrom": "pu3_u3_p35_assets/audio/knee-hurts.mp3"
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/indonesia.mp3",
+    "text": "Indonesia",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=Indonesia"
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/indonesia-example.mp3",
+    "text": "Indonesia has over 17,000 islands.",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=Indonesia+has+over+17%2C000+islands."
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/flag.mp3",
+    "text": "flag",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=flag"
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/flag-example.mp3",
+    "text": "Red on top, white below.",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=Red+on+top%2C+white+below."
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/komodo-dragon.mp3",
+    "text": "Komodo dragon",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=Komodo+dragon"
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/komodo-dragon-example.mp3",
+    "text": "The Komodo dragon is the world's largest living lizard.",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=The+Komodo+dragon+is+the+world%27s+largest+living+lizard."
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/indonesian.mp3",
+    "text": "Indonesian",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=Indonesian"
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/indonesian-example.mp3",
+    "text": "The national language is Indonesian.",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=The+national+language+is+Indonesian."
+  },
+  {
+    "file": "pu3_u3_p31_assets/audio/hello.mp3",
+    "text": "Hello!",
+    "provider": "Google Translate TTS",
+    "locale": "en-GB",
+    "sourceUrl": "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=Hello%21"
+  }
+]

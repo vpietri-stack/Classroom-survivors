@@ -1,0 +1,272 @@
+[
+  {
+    "id": "cereal",
+    "text": "cereal",
+    "translation": "早餐麦片",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=cereal",
+    "bytes": 14445
+  },
+  {
+    "id": "cereal-example",
+    "text": "I'm pouring milk on my cereal.",
+    "translation": "我正在往麦片里倒牛奶。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/5cf92940-e0a3-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 20736
+  },
+  {
+    "id": "pancake",
+    "text": "pancake",
+    "translation": "煎饼",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=pancake",
+    "bytes": 13485
+  },
+  {
+    "id": "pancake-example",
+    "text": "There are two pancakes on my plate.",
+    "translation": "我的盘子里有两张煎饼。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/5cf3f920-e0a3-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 21696
+  },
+  {
+    "id": "strawberries",
+    "text": "strawberries",
+    "translation": "草莓",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=strawberries",
+    "bytes": 37430
+  },
+  {
+    "id": "strawberries-example",
+    "text": "I'm putting strawberries in a bowl.",
+    "translation": "我正在把草莓放进碗里。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/5cf70660-e0a3-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 21504
+  },
+  {
+    "id": "strawberry",
+    "text": "a strawberry",
+    "translation": "一个草莓",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=a+strawberry",
+    "bytes": 24480
+  },
+  {
+    "id": "noodles",
+    "text": "noodles",
+    "translation": "面条",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=noodles",
+    "bytes": 12138
+  },
+  {
+    "id": "noodles-example",
+    "text": "I'm eating noodles with chopsticks.",
+    "translation": "我正在用筷子吃面条。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/5cf6b840-e0a3-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 21696
+  },
+  {
+    "id": "yoghurt",
+    "text": "yoghurt",
+    "translation": "酸奶",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=yoghurt",
+    "bytes": 11949
+  },
+  {
+    "id": "yoghurt-example",
+    "text": "My yoghurt has strawberries in it.",
+    "translation": "我的酸奶里有草莓。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/5eff0b60-e0a3-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 22656
+  },
+  {
+    "id": "sauce",
+    "text": "sauce",
+    "translation": "酱；酱汁",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=sauce",
+    "bytes": 11373
+  },
+  {
+    "id": "sauce-example",
+    "text": "I'm putting chocolate sauce on my pancake.",
+    "translation": "我正在往煎饼上淋巧克力酱。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/5f085a30-e0a3-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 25536
+  },
+  {
+    "id": "chocolate-sauce",
+    "text": "chocolate sauce",
+    "translation": "巧克力酱",
+    "kind": "word",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/7ef60720-e0a3-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 12864
+  },
+  {
+    "id": "tea",
+    "text": "tea",
+    "translation": "茶",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=tea",
+    "bytes": 9631
+  },
+  {
+    "id": "tea-example",
+    "text": "I'm pouring tea into a cup.",
+    "translation": "我正在往杯子里倒茶。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/60af2c60-e0a3-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 17856
+  },
+  {
+    "id": "coffee",
+    "text": "coffee",
+    "translation": "咖啡",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=coffee",
+    "bytes": 11949
+  },
+  {
+    "id": "coffee-example",
+    "text": "That's Dad's cup of coffee.",
+    "translation": "那杯咖啡是爸爸的。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/60d292e0-e0a3-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 17664
+  },
+  {
+    "id": "milkshake",
+    "text": "milkshake",
+    "translation": "奶昔",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=milkshake",
+    "bytes": 27309
+  },
+  {
+    "id": "milkshake-example",
+    "text": "I'm drinking a strawberry milkshake.",
+    "translation": "我正在喝草莓奶昔。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/617143e0-e0a3-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 23616
+  },
+  {
+    "id": "a-cup-of",
+    "text": "a cup of",
+    "translation": "一杯……",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=a+cup+of",
+    "bytes": 30107
+  },
+  {
+    "id": "a-cup-of-example",
+    "text": "Here's a cup of coffee.",
+    "translation": "这是一杯咖啡。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/61f281d0-e0a3-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14400
+  },
+  {
+    "id": "a-glass-of",
+    "text": "a glass of",
+    "translation": "一玻璃杯……",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=a+glass+of",
+    "bytes": 31804
+  },
+  {
+    "id": "a-glass-of-example",
+    "text": "This is a glass of strawberry milkshake.",
+    "translation": "这是一杯草莓奶昔。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/62a5a530-e0a3-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 25344
+  },
+  {
+    "id": "a-bottle-of",
+    "text": "a bottle of",
+    "translation": "一瓶……",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=a+bottle+of",
+    "bytes": 122060
+  },
+  {
+    "id": "a-bottle-of-example",
+    "text": "There's a bottle of chocolate sauce.",
+    "translation": "那里有一瓶巧克力酱。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/63046700-e0a3-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 20544
+  },
+  {
+    "id": "a-bowl-of",
+    "text": "a bowl of",
+    "translation": "一碗……",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=a+bowl+of",
+    "bytes": 27918
+  },
+  {
+    "id": "a-bowl-of-example",
+    "text": "I've got a bowl of cereal.",
+    "translation": "我有一碗麦片。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/6361c940-e0a3-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 17280
+  },
+  {
+    "id": "offer",
+    "text": "Would you like a glass of water?",
+    "translation": "你想喝杯水吗？",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/2de16d50-d1ff-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 16896
+  },
+  {
+    "id": "reply",
+    "text": "Yes, please.",
+    "translation": "好的，谢谢。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/63dec170-e0a3-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 12864
+  }
+]

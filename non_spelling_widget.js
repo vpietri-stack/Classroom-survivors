@@ -22,7 +22,16 @@
   function current() { return session[cursor]; }
   function prefix(index) { return current().type === 'missing' ? (current().prefixes || [])[index] || '' : ''; }
   function suffix(index) { return current().type === 'missing' ? (current().suffixes || [])[index] || '' : ''; }
-  function fullAnswer(index) { return input[index] + suffix(index); }
+  function givenPositions(index) { return current().givenPositions?.[index] || []; }
+  function withGivenLetters(index, missing) {
+    const letters = [...missing];
+    for (const position of givenPositions(index)) {
+      if (position >= letters.length && !verdict) break;
+      letters.splice(position, 0, current().answers[index][position]);
+    }
+    return letters.join('');
+  }
+  function fullAnswer(index) { return withGivenLetters(index, input[index]) + suffix(index); }
   function makeButton(className, label, handler) {
     const button = document.createElement('button');
     button.type = 'button';
@@ -67,7 +76,7 @@
   function startExercise() {
     const exercise = current();
     const targets = exercise.type === 'missing' ? exercise.answers : [exercise.answer];
-    letters = shuffle([...new Set(targets.map((target, index) => target.slice(prefix(index).length, target.length - suffix(index).length)).join('').toLowerCase())]);
+    letters = shuffle([...new Set(targets.map((target, index) => [...target].slice(prefix(index).length, target.length - suffix(index).length).filter((_, position) => !givenPositions(index).includes(position + prefix(index).length)).join('')).join('').toLowerCase())]);
     $('summary').hidden = true;
     $('sentences').hidden = false;
     $('actions').hidden = false;
@@ -107,7 +116,20 @@
     button.setAttribute('aria-pressed', String(index === activeBox));
     if (index === activeBox && !locked) button.classList.add('active');
     if (verdict && current().type === 'fix') button.classList.add(verdict.word ? 'word-correct' : 'word-wrong');
-    if (!input[index] && !verdict) {
+    const fixed = givenPositions(index);
+    if (fixed.length) {
+      let cursor = 0;
+      for (let i = 0; i < target.length; i++) {
+        const span = document.createElement('span');
+        span.className = 'letter';
+        const given = fixed.includes(i);
+        const letter = given ? target[i] : input[index][cursor++];
+        span.textContent = letter || '−';
+        if (given || i < prefix(index).length) span.classList.add('nse-prefilled');
+        else if (verdict) span.classList.add(letter === target[i] ? 'correct' : 'wrong');
+        button.appendChild(span);
+      }
+    } else if (!input[index] && !verdict) {
       const placeholder = document.createElement('span');
       placeholder.className = 'nse-empty';
       placeholder.setAttribute('aria-hidden', 'true');
@@ -263,7 +285,9 @@
   function typeLetter(letter) {
     if (locked || !letters.includes(letter) || (current().type === 'fix' && binnedWord === null)) return;
     const target = current().type === 'missing' ? current().answers[activeBox] : current().answer;
-    if (input[activeBox].length >= Math.max(12, target.length)) return;
+    const fixed = givenPositions(activeBox);
+    const limit = fixed.length ? target.length - fixed.length : Math.max(12, target.length);
+    if (input[activeBox].length >= limit) return;
     input[activeBox] += letter;
     message('');
     render();

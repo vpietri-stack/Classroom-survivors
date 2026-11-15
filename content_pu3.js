@@ -303,21 +303,55 @@ TEACHING_CONTENT["PU3"] = {
         }
     },
     "2": {
-        "28": {
+        "19": {
             vocab: [
-                // Food and drink
-                'milkshake', 'strawberry', 'noodles', 'yoghurt', 'chocolate sauce', 'cereal',
-                'pancakes', 'coffee', 'tea', 'soup', 'rice', 'salad',
-
-                // Past simple irregular verbs
-                "build - built", "grow up - grew up", "teach - taught", "see - saw",
-                "drive - drove", "give - gave", "write - wrote", "tell - told", "take - took", "have - had",
-
-                // Relative clause words
-                'who', 'which', 'where', 'when',
-
-                // Other
-                'place', 'woman', 'mountain', 'kitchen', 'funfair', 'lunch'
+                "milkshake",
+                "strawberry",
+                "noodles",
+                "yoghurt",
+                "chocolate sauce",
+                "cereal",
+                "pancakes",
+                "coffee",
+                "tea",
+                "soup",
+                "rice",
+                "salad"
+            ],
+            sentences: [
+                "I'm eating a bowl of cereal.",
+                "There are two pancakes on my plate.",
+                "I'm putting strawberries in my yoghurt.",
+                "There's a bottle of chocolate sauce on the table.",
+                "Mum is drinking a cup of tea.",
+                "Dad would like a cup of coffee.",
+                "I'm drinking a strawberry milkshake.",
+                "There's a bowl of noodles on the table.",
+                "I'm making a salad for lunch.",
+                "Would you like a glass of milk?",
+                "Would you like some chocolate sauce on your pancakes?"
+            ],
+            sentencePairs: [
+                {"a":"Would you like some milk with your cereal?","b":"Yes, please."},
+                {"a":"Would you like a cup of tea?","b":"No, thank you. Can I get a cup of coffee, please?"},
+                {"a":"What would you like on your pancakes?","b":"Some chocolate sauce, please."},
+                {"a":"What do you usually have for breakfast?","b":"I usually have cereal with milk."},
+                {"a":"What's in your yoghurt?","b":"There are some strawberries in it."},
+                {"a":"What's in the bowl?","b":"Noodles."},
+                {"a":"Is Dad drinking tea?","b":"No, he's drinking coffee."},
+                {"a":"Would you like noodles or salad?","b":"Salad, please."}
+            ]
+        },
+        "21": {
+            vocab: [
+                "who",
+                "which",
+                "where",
+                "place",
+                "woman",
+                "mountain",
+                "kitchen",
+                "lunch"
             ],
             sentences: [
                 "It's the place where I studied.",
@@ -329,7 +363,30 @@ TEACHING_CONTENT["PU3"] = {
                 "She's the girl who gave me a milkshake.",
                 "That's the park where we had a picnic.",
                 "It's the café which sells the best pancakes.",
-                "He's the boy who wrote the story.",
+                "He's the boy who wrote the story."
+            ],
+            sentencePairs: [
+                {"a":"What's this place?","b":"It's the place where I studied."},
+                {"a":"Who is cooking in the kitchen?","b":"My mum is."},
+                {"a":"Which mountains did you climb?","b":"The tall ones with snow on them."}
+            ]
+        },
+        "23": {
+            vocab: [
+                "build - built",
+                "grow up - grew up",
+                "teach - taught",
+                "see - saw",
+                "drive - drove",
+                "give - gave",
+                "write - wrote",
+                "tell - told",
+                "take - took",
+                "have - had",
+                "when",
+                "funfair"
+            ],
+            sentences: [
                 "When we finished lunch, we went to the funfair.",
                 "When I saw the strawberries, I bought some.",
                 "When she drove to the shop, she bought some cereal.",
@@ -342,16 +399,14 @@ TEACHING_CONTENT["PU3"] = {
                 "They saw a woman making chocolate sauce."
             ],
             sentencePairs: [
-                { a: "What's this place?", b: "It's the place where I studied." },
-                { a: "Who is cooking in the kitchen?", b: "My mum is." },
-                { a: "Which mountains did you climb?", b: "The tall ones with snow on them." },
-                { a: "What did you do when you finished lunch?", b: "When we finished lunch, we went to the funfair." },
-                { a: "Who taught you how to swim?", b: "My dad taught me." },
-                { a: "Where did you grow up?", b: "I grew up in this town." },
-                { a: "What did she give you?", b: "She gave me a milkshake." },
-                { a: "What did you have for dinner?", b: "We had rice and noodles." }
+                {"a":"What did you do when you finished lunch?","b":"When we finished lunch, we went to the funfair."},
+                {"a":"Who taught you how to swim?","b":"My dad taught me."},
+                {"a":"Where did you grow up?","b":"I grew up in this town."},
+                {"a":"What did she give you?","b":"She gave me a milkshake."},
+                {"a":"What did you have for dinner?","b":"We had rice and noodles."}
             ]
-        }
+        },
+        "28": { vocab: [], sentences: [], sentencePairs: [] }
     },
     "3": {
         "40": {
@@ -1145,7 +1200,7 @@ TEACHING_CONTENT["PU3"] = {
 AVAILABLE_CONTENT["PU3"] = {
     "0": [5],
     "1": [14, 16],
-    "2": [28],
+    "2": [19, 21, 23, 28],
     "3": [31, 33, 35, 36],
     "4": [54],
     "5": [57, 59, 66],

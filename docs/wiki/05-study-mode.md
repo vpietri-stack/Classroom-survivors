@@ -551,6 +551,11 @@ local mirror covers pending offline delivery; the durable server map is returned
 with the normal login. See [data model](11-data-model.md).
 
 
+PU3 Unit 3 p31 registers the four-page A healthy body listening reader,
+including the Indonesia panel. Its introductory Study reuses the nine existing
+body words and the five existing page-31 boards (one scramble, one match,
+one missing-word board, and two find/fix boards).
+
 ## Permanent session lifecycle (2026-10-30)
 
 After content checks, a real Study start allocates a practice run ID. Exercises and the existing completed-study event link to it. Completion, menu exit, account change and same-tab unfinished-page recovery produce distinct lifecycle records; inferred recovery is only a clue. These records do not grant target/SR credit. Stage breadcrumbs contain no ink, audio or submitted answers.

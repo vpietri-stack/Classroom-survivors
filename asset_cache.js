@@ -52,6 +52,7 @@
     { prefix: 'pu1_u5_p61_assets/', token: 'pu1-u5-p61-v1' },
     { prefix: 'pu2_u5_p60_assets/', token: 'pu2-u5-p60-v1' },
     { prefix: 'pu2_u8_p95_assets/', token: 'pu2-u8-p95-v1' },
+    { prefix: 'pu3_u2_p19_assets/', token: 'pu3-u2-p19-v1' },
     { prefix: 'audio_mp3/',    token: 'audio-v1' },
     { prefix: 'music/',        token: 'music-v1' },
     { prefix: 'sfx/',          token: 'sfx-v1' }

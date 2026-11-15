@@ -30,7 +30,7 @@ includes('PU2', '4', '46', ['big - bigger than', 'good - better than']);
 includes('PU3', '3', '40', ['big - the biggest', 'beautiful - more beautiful than', 'beautiful - the most beautiful']);
 includes('PU3', '4', '54', ['well - better than', 'badly - worse than', 'quickly - more quickly than']);
 includes('PU1', '7', '85', ['eat - eating', 'paint - painting']);
-includes('PU3', '2', '28', ['grow up - grew up', 'build - built']);
+includes('PU3', '2', '23', ['grow up - grew up', 'build - built']);
 includes('Think1', '6', '58', ['put - put', 'read - read']);
 includes('PU1', '6', '81', ['I - my', 'he - his', 'she - her', 'they - their']);
 includes('PU2', '4', '54', ['I - my - mine', 'he - his - his', 'she - her - hers']);

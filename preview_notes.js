@@ -14,6 +14,7 @@
     const BOOK_ORDER = ['PU1', 'PU2', 'PU3', 'Think0', 'Think1', 'Think2'];
     const UNIT_TITLES = {
         PU1: {
+            0: { en: 'Hello', zh: '你好' },
             1: { en: 'Our new school', zh: '我们的新学校' },
             2: { en: 'All about us', zh: '关于我们' },
             3: { en: 'Fun on the farm', zh: '农场的乐趣' },
@@ -25,6 +26,7 @@
             9: { en: 'Happy holidays', zh: '快乐假期' }
         },
         PU2: {
+            0: { en: 'Meet the family', zh: '认识这一家' },
             1: { en: 'A day on the farm', zh: '农场的一天' },
             2: { en: 'My week', zh: '我的一周' },
             3: { en: 'Party time!', zh: '派对时间！' },
@@ -36,6 +38,7 @@
             9: { en: 'A big change', zh: '大变化' }
         },
         PU3: {
+            0: { en: 'Welcome to Diversicus', zh: '欢迎来到 Diversicus' },
             1: { en: 'Practice time', zh: '练习时间' },
             2: { en: 'What’s for breakfast?', zh: '早餐吃什么？' },
             3: { en: 'A healthy body', zh: '健康的身体' },
@@ -67,21 +70,57 @@
         'pu1-u7-p85': [{ label: 'PB p.85', src: 'images/notes_thumbs/pu1-u7-p85-pb-p85.webp' }, { label: 'AB p.85', src: 'images/notes_thumbs/pu1-u7-p85-ab-p85.webp' }],
         'pu1-u7-p87': [{ label: 'PB p.86', src: 'images/notes_thumbs/pu1-u7-p87-pb-p86.webp' }, { label: 'PB p.87', src: 'images/notes_thumbs/pu1-u7-p87-pb-p87.webp' }, { label: 'AB p.86', src: 'images/notes_thumbs/pu1-u7-p87-ab-p86.webp' }, { label: 'AB p.87', src: 'images/notes_thumbs/pu1-u7-p87-ab-p87.webp' }],
         'pu2-u1-p14': [{ label: 'PB p.14', src: 'images/notes_thumbs/pu2-u1-p14-pb-p14.webp' }, { label: 'PB p.15', src: 'images/notes_thumbs/pu2-u1-p14-pb-p15.webp' }, { label: 'AB p.14', src: 'images/notes_thumbs/pu2-u1-p14-ab-p14.webp' }, { label: 'AB p.15', src: 'images/notes_thumbs/pu2-u1-p14-ab-p15.webp' }],
+        'pu2-u2-p19': [{ label: 'PB p.19', src: 'images/notes_thumbs/pu2-u2-p19-pb-p19.webp' }, { label: 'AB p.19', src: 'images/notes_thumbs/pu2-u2-p19-ab-p19.webp' }],
         'pu2-u5-p59': [{ label: 'PB p.59', src: 'images/notes_thumbs/pu2-u5-p59-pb-p59.webp' }, { label: 'AB p.59', src: 'images/notes_thumbs/pu2-u5-p59-ab-p59.webp' }],
         'pu2-u5-p60': [{ label: 'PB p.60', src: 'images/notes_thumbs/pu2-u5-p60-pb-p60.webp' }, { label: 'PB p.61', src: 'images/notes_thumbs/pu2-u5-p60-pb-p61.webp' }, { label: 'AB p.60', src: 'images/notes_thumbs/pu2-u5-p60-ab-p60.webp' }, { label: 'AB p.61', src: 'images/notes_thumbs/pu2-u5-p60-ab-p61.webp' }],
         'pu2-u8-p95': [{ label: 'PB p.95', src: 'images/notes_thumbs/pu2-u8-p95-pb-p95.webp' }, { label: 'AB p.95', src: 'images/notes_thumbs/pu2-u8-p95-ab-p95.webp' }],
+        'pu3-u1-p7': [{ label: 'PB p.7', src: 'images/notes_thumbs/pu3-u1-p7-pb-p7.webp' }, { label: 'AB p.7', src: 'images/notes_thumbs/pu3-u1-p7-ab-p7.webp' }],
+        'pu3-u1-p9': [{ label: 'PB p.9', src: 'images/notes_thumbs/pu3-u1-p9-pb-p9.webp' }, { label: 'AB p.9', src: 'images/notes_thumbs/pu3-u1-p9-ab-p9.webp' }],
+        'pu3-u1-p11': [{ label: 'PB p.10', src: 'images/notes_thumbs/pu3-u1-p11-pb-p10.webp' }, { label: 'PB p.11', src: 'images/notes_thumbs/pu3-u1-p11-pb-p11.webp' }, { label: 'AB p.10', src: 'images/notes_thumbs/pu3-u1-p11-ab-p10.webp' }, { label: 'AB p.11', src: 'images/notes_thumbs/pu3-u1-p11-ab-p11.webp' }],
         'pu3-u1-p14': [{ label: 'PB p.14', src: 'images/notes_thumbs/pu3-u1-p14-pb-p14.webp' }, { label: 'PB p.15', src: 'images/notes_thumbs/pu3-u1-p14-pb-p15.webp' }, { label: 'AB p.14', src: 'images/notes_thumbs/pu3-u1-p14-ab-p14.webp' }, { label: 'AB p.15', src: 'images/notes_thumbs/pu3-u1-p14-ab-p15.webp' }],
         'pu3-u2-p19': [{ label: 'PB p.19', src: 'images/notes_thumbs/pu3-u2-p19-pb-p19.webp' }, { label: 'AB p.19', src: 'images/notes_thumbs/pu3-u2-p19-ab-p19.webp' }],
         'pu3-u3-p31': [{ label: 'PB p.31', src: 'images/notes_thumbs/pu3-u3-p31-pb-p31.webp' }, { label: 'AB p.31', src: 'images/notes_thumbs/pu3-u3-p31-ab-p31.webp' }],
         'pu3-u3-p35': [{ label: 'PB p.34', src: 'images/notes_thumbs/pu3-u3-p35-pb-p34.webp' }, { label: 'PB p.35', src: 'images/notes_thumbs/pu3-u3-p35-pb-p35.webp' }, { label: 'AB p.34', src: 'images/notes_thumbs/pu3-u3-p35-ab-p34.webp' }, { label: 'AB p.35', src: 'images/notes_thumbs/pu3-u3-p35-ab-p35.webp' }],
+        'pu1-u7-p88': [{ label: 'PB p.88', src: 'images/notes_thumbs/pu1-u7-p88-pb-p88.webp' }, { label: 'PB p.89', src: 'images/notes_thumbs/pu1-u7-p88-pb-p89.webp' }, { label: 'AB p.88', src: 'images/notes_thumbs/pu1-u7-p88-ab-p88.webp' }, { label: 'AB p.89', src: 'images/notes_thumbs/pu1-u7-p88-ab-p89.webp' }],
         'pu3-u3-p36': [{ label: 'PB p.36', src: 'images/notes_thumbs/pu3-u3-p36-pb-p36.webp' }, { label: 'AB p.36', src: 'images/notes_thumbs/pu3-u3-p36-ab-p36.webp' }],
+        'pu3-u3-p38': [{ label: 'PB p.38', src: 'images/notes_thumbs/pu3-u3-p38-pb-p38.webp' }, { label: 'PB p.39', src: 'images/notes_thumbs/pu3-u3-p38-pb-p39.webp' }, { label: 'AB p.38', src: 'images/notes_thumbs/pu3-u3-p38-ab-p38.webp' }, { label: 'AB p.39', src: 'images/notes_thumbs/pu3-u3-p38-ab-p39.webp' }],
         'pu3-u8-p97': [{ label: 'PB p.97', src: 'images/notes_thumbs/pu3-u8-p97-pb-p97.webp' }, { label: 'AB p.97', src: 'images/notes_thumbs/pu3-u8-p97-ab-p97.webp' }],
         'pu3-u8-p99': [{ label: 'PB p.98', src: 'images/notes_thumbs/pu3-u8-p99-pb-p98.webp' }, { label: 'PB p.99', src: 'images/notes_thumbs/pu3-u8-p99-pb-p99.webp' }, { label: 'AB p.98', src: 'images/notes_thumbs/pu3-u8-p99-ab-p98.webp' }, { label: 'AB p.99', src: 'images/notes_thumbs/pu3-u8-p99-ab-p99.webp' }],
         'pu3-u9-p111': [{ label: 'PB p.111', src: 'images/notes_thumbs/pu3-u9-p111-pb-p111.webp' }, { label: 'AB p.111', src: 'images/notes_thumbs/pu3-u9-p111-ab-p111.webp' }],
         'pu3-u9-p112': [{ label: 'PB p.112', src: 'images/notes_thumbs/pu3-u9-p112-pb-p112.webp' }, { label: 'PB p.113', src: 'images/notes_thumbs/pu3-u9-p112-pb-p113.webp' }, { label: 'AB p.112', src: 'images/notes_thumbs/pu3-u9-p112-ab-p112.webp' }, { label: 'AB p.113', src: 'images/notes_thumbs/pu3-u9-p112-ab-p113.webp' }],
         'pu3-u9-p114': [{ label: 'PB p.114', src: 'images/notes_thumbs/pu3-u9-p114-pb-p114.webp' }, { label: 'PB p.115', src: 'images/notes_thumbs/pu3-u9-p114-pb-p115.webp' }, { label: 'AB p.114', src: 'images/notes_thumbs/pu3-u9-p114-ab-p114.webp' }, { label: 'AB p.115', src: 'images/notes_thumbs/pu3-u9-p114-ab-p115.webp' }],
         'think0-u4-p44': [{ label: 'SB p.44', src: 'images/notes_thumbs/think0-u4-p44-sb-p44.webp' }],
-        'think0-u4-wb41': [{ label: 'WB p.41', src: 'images/notes_thumbs/think0-u4-wb41-wb-p41.webp' }]
+        'think0-u4-wb41': [{ label: 'WB p.41', src: 'images/notes_thumbs/think0-u4-wb41-wb-p41.webp' }],
+        'pu1-u0-p5': [{ label: 'PB p.5', src: 'images/notes_thumbs/pu1-u0-p5-pb-p5.webp' }],
+        'pu1-u1-p8': [{ label: 'PB p.8', src: 'images/notes_thumbs/pu1-u1-p8-pb-p8.webp' }],
+        'pu1-u2-p20': [{ label: 'PB p.20', src: 'images/notes_thumbs/pu1-u2-p20-pb-p20.webp' }],
+        'pu1-u3-p32': [{ label: 'PB p.32', src: 'images/notes_thumbs/pu1-u3-p32-pb-p32.webp' }],
+        'pu1-u4-p46': [{ label: 'PB p.46', src: 'images/notes_thumbs/pu1-u4-p46-pb-p46.webp' }],
+        'pu1-u5-p58': [{ label: 'PB p.58', src: 'images/notes_thumbs/pu1-u5-p58-pb-p58.webp' }],
+        'pu1-u6-p70': [{ label: 'PB p.70', src: 'images/notes_thumbs/pu1-u6-p70-pb-p70.webp' }],
+        'pu1-u7-p84': [{ label: 'PB p.84', src: 'images/notes_thumbs/pu1-u7-p84-pb-p84.webp' }],
+        'pu1-u8-p96': [{ label: 'PB p.96', src: 'images/notes_thumbs/pu1-u8-p96-pb-p96.webp' }],
+        'pu1-u9-p108': [{ label: 'PB p.108', src: 'images/notes_thumbs/pu1-u9-p108-pb-p108.webp' }],
+        'pu2-u0-p5': [{ label: 'PB p.5', src: 'images/notes_thumbs/pu2-u0-p5-pb-p5.webp' }],
+        'pu2-u1-p8': [{ label: 'PB p.8', src: 'images/notes_thumbs/pu2-u1-p8-pb-p8.webp' }],
+        'pu2-u2-p20': [{ label: 'PB p.20', src: 'images/notes_thumbs/pu2-u2-p20-pb-p20.webp' }],
+        'pu2-u3-p32': [{ label: 'PB p.32', src: 'images/notes_thumbs/pu2-u3-p32-pb-p32.webp' }],
+        'pu2-u4-p46': [{ label: 'PB p.46', src: 'images/notes_thumbs/pu2-u4-p46-pb-p46.webp' }],
+        'pu2-u5-p58': [{ label: 'PB p.58', src: 'images/notes_thumbs/pu2-u5-p58-pb-p58.webp' }],
+        'pu2-u6-p70': [{ label: 'PB p.70', src: 'images/notes_thumbs/pu2-u6-p70-pb-p70.webp' }],
+        'pu2-u7-p84': [{ label: 'PB p.84', src: 'images/notes_thumbs/pu2-u7-p84-pb-p84.webp' }],
+        'pu2-u8-p96': [{ label: 'PB p.96', src: 'images/notes_thumbs/pu2-u8-p96-pb-p96.webp' }],
+        'pu2-u9-p108': [{ label: 'PB p.108', src: 'images/notes_thumbs/pu2-u9-p108-pb-p108.webp' }],
+        'pu3-u0-p5': [{ label: 'PB p.5', src: 'images/notes_thumbs/pu3-u0-p5-pb-p5.webp' }],
+        'pu3-u1-p8': [{ label: 'PB p.8', src: 'images/notes_thumbs/pu3-u1-p8-pb-p8.webp' }],
+        'pu3-u2-p20': [{ label: 'PB p.20', src: 'images/notes_thumbs/pu3-u2-p20-pb-p20.webp' }],
+        'pu3-u3-p32': [{ label: 'PB p.32', src: 'images/notes_thumbs/pu3-u3-p32-pb-p32.webp' }],
+        'pu3-u4-p46': [{ label: 'PB p.46', src: 'images/notes_thumbs/pu3-u4-p46-pb-p46.webp' }],
+        'pu3-u5-p58': [{ label: 'PB p.58', src: 'images/notes_thumbs/pu3-u5-p58-pb-p58.webp' }],
+        'pu3-u6-p70': [{ label: 'PB p.70', src: 'images/notes_thumbs/pu3-u6-p70-pb-p70.webp' }],
+        'pu3-u7-p84': [{ label: 'PB p.84', src: 'images/notes_thumbs/pu3-u7-p84-pb-p84.webp' }],
+        'pu3-u8-p96': [{ label: 'PB p.96', src: 'images/notes_thumbs/pu3-u8-p96-pb-p96.webp' }],
+        'pu3-u9-p108': [{ label: 'PB p.108', src: 'images/notes_thumbs/pu3-u9-p108-pb-p108.webp' }]
     };
 
     function enabled() {
@@ -231,7 +270,7 @@
     function openNote(id, review, returnView) {
         const student = user(), note = core.find(id);
         if (!enabled() || !isStudent(student) || !note) return;
-        if (!review && (!core.atPage(student) || core.atPage(student).id !== id)) return;
+        if (!review && (note.libraryOnly || !core.atPage(student) || core.atPage(student).id !== id)) return;
         const actions = returnView
             ? [{ label: '← 返回目录', className: 'preview-notes-back-btn', onClick: () => openLibrary(returnView) }]
             : [];
@@ -304,7 +343,7 @@
             const grid = el('div', 'preview-notes-grid');
             tree.books.forEach(entry => {
                 const isCurrentBook = !!(assignment && assignment.book === entry.book);
-                const doneCount = entry.units.reduce((sum, u) => sum + u.notes.filter(n => done[n.id]).length, 0);
+                const doneCount = entry.units.reduce((sum, u) => sum + u.notes.filter(n => !n.libraryOnly && done[n.id]).length, 0);
                 const btn = el('button', 'preview-notes-card preview-notes-book-card' + (isCurrentBook ? ' is-current' : ''));
                 btn.type = 'button';
                 btn.dataset.book = entry.book;
@@ -342,7 +381,8 @@
             const grid = el('div', 'preview-notes-grid');
             selectedBook.units.forEach(u => {
                 const isCurrentUnit = !!(assignment && assignment.book === selectedBook.book && assignment.unit === u.unit);
-                const doneCount = u.notes.filter(n => done[n.id]).length;
+                const studyNotes = u.notes.filter(n => !n.libraryOnly);
+                const doneCount = studyNotes.filter(n => done[n.id]).length;
                 const uMeta = unitMeta(selectedBook.book, u.unit);
                 const btn = el('button', 'preview-notes-card preview-notes-unit-card' + (isCurrentUnit ? ' is-current' : ''));
                 btn.type = 'button';
@@ -352,7 +392,7 @@
                 titleRow.append(el('span', 'preview-notes-card-title', unitHeadingText(selectedBook.book, u.unit)));
                 if (isCurrentUnit) titleRow.append(el('span', 'preview-notes-badge badge-current', '当前单元'));
                 const unitZh = uMeta ? '第 ' + u.unit + ' 单元：' + uMeta.zh + ' · ' : '第 ' + u.unit + ' 单元 · ';
-                const metaText = unitZh + u.notes.length + ' 篇笔记' + (doneCount ? ' · 已预习 ' + doneCount + '/' + u.notes.length : '');
+                const metaText = unitZh + u.notes.length + ' 篇笔记' + (doneCount ? ' · 已预习 ' + doneCount + '/' + studyNotes.length : '');
                 main.append(titleRow, el('span', 'preview-notes-card-meta', metaText));
                 btn.append(main, el('span', 'preview-notes-chevron', '›'));
                 btn.onclick = () => openLibrary({ view: 'unit', book: selectedBook.book, unit: u.unit });
@@ -475,7 +515,7 @@
     }
     function prepareStudy(id) {
         const student = user(), note = core.find(id);
-        if (!enabled() || !isStudent(student) || !note || !core.atPage(student) || core.atPage(student).id !== id) return null;
+        if (!enabled() || !isStudent(student) || !note || note.libraryOnly || !core.atPage(student) || core.atPage(student).id !== id) return null;
         if (!selectedClassContent || !core.atPage(selectedClassContent) || core.atPage(selectedClassContent).id !== id) return null;
         const article = window.ArticleStudy?.get(id);
         if (article) {

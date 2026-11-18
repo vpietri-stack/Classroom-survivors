@@ -245,25 +245,11 @@ TEACHING_CONTENT["PU3"] = {
         }
     },
     "1": {
-        "16": {
+        "7": {
+            srPage: "16",
             vocab: [
-                // Telling the time
-                "o'clock", 'half past', 'midday', 'midnight',
-
-                // Activity verbs
-                'catch', 'dance', 'laugh', 'shout', 'dress up', 'jump', 'hop', 'skip', 'climb',
-
-                // Numbers 13–19
-                'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen',
-
-                // Numbers 20–90 (tens)
-                'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety',
-
-                // Question words (review)
-                'who', 'what', 'when', 'where', 'which', 'why', 'how',
-
-                // Past ability
-                "am - was", "is - was", "are - were", "can - could", "can't - couldn't"
+                "o'clock", "half past", "quarter past", "midday", "midnight",
+                "breakfast", "a snack", "lunch", "dinner"
             ],
             sentences: [
                 "What time is it? It's three o'clock.",
@@ -271,6 +257,41 @@ TEACHING_CONTENT["PU3"] = {
                 "What time is it? It's half past seven.",
                 "What time is it? It's midday.",
                 "What time is it? It's midnight.",
+                "I have breakfast at seven o'clock.",
+                "We play outside at quarter past ten.",
+                "We have dinner at half past six."
+            ],
+            sentencePairs: [
+                { a: "What time is it?", b: "It's half past twelve." },
+                { a: "What time do you have breakfast?", b: "At half past seven in the morning." },
+                { a: "What time do you have dinner?", b: "At half past six in the evening." }
+            ]
+        },
+        "9": {
+            srPage: "16",
+            vocab: [
+                'who', 'what', 'when', 'where', 'which', 'why', 'how',
+                'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen',
+                'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'
+            ],
+            sentences: [
+                "How many apples are there? There are thirteen.",
+                "How many children are there? There are seventeen.",
+                "There are twenty books on the shelf.",
+                "There are fifty students in the school.",
+                "There are ninety pages in the book."
+            ],
+            sentencePairs: [
+                { a: "How many books are there?", b: "There are twenty books." }
+            ]
+        },
+        "11": {
+            srPage: "16",
+            vocab: [
+                'catch', 'dance', 'laugh', 'shout', 'dress up', 'jump', 'hop', 'skip', 'climb',
+                "am - was", "is - was", "are - were", "can - could", "can't - couldn't"
+            ],
+            sentences: [
                 "I could hop on one leg when I was four.",
                 "I couldn't skip when I was young.",
                 "She could climb a tree when she was six.",
@@ -283,24 +304,19 @@ TEACHING_CONTENT["PU3"] = {
                 "When I was young, I could run very fast.",
                 "When she was four, she couldn't skip.",
                 "Who could hop on one leg? I could!",
-                "What could you do when you were five?",
-                "How many apples are there? There are thirteen.",
-                "How many children are there? There are seventeen.",
-                "There are twenty books on the shelf.",
-                "There are fifty students in the school.",
-                "There are ninety pages in the book."
+                "What could you do when you were five?"
             ],
             sentencePairs: [
-                { a: "What time is it?", b: "It's half past twelve." },
-                { a: "What time do you have breakfast?", b: "At half past seven in the morning." },
                 { a: "Could you skip when you were four?", b: "No, I couldn't." },
                 { a: "Could she climb a tree when she was six?", b: "Yes, she could." },
                 { a: "What could you do when you were young?", b: "I could hop on one leg." },
                 { a: "Could he dance when he was five?", b: "No, he couldn't." },
-                { a: "When could you catch a ball?", b: "I could catch a ball when I was seven." },
-                { a: "How many books are there?", b: "There are twenty books." }
+                { a: "When could you catch a ball?", b: "I could catch a ball when I was seven." }
             ]
-        }
+        },
+        "14": { srPage: "16", vocab: [], sentences: [], sentencePairs: [] },
+        // Keep existing P16 placements as cumulative review.
+        "16": { vocab: [], sentences: [], sentencePairs: [] }
     },
     "2": {
         "19": {
@@ -1199,9 +1215,9 @@ TEACHING_CONTENT["PU3"] = {
 
 AVAILABLE_CONTENT["PU3"] = {
     "0": [5],
-    "1": [14, 16],
+    "1": [7, 9, 11, 14, 16],
     "2": [19, 21, 23, 28],
-    "3": [31, 33, 35, 36],
+    "3": [31, 33, 35, 36, 38],
     "4": [54],
     "5": [57, 59, 66],
     "6": [69, 71, 73],
@@ -1210,9 +1226,9 @@ AVAILABLE_CONTENT["PU3"] = {
     "9": [107, 109, 110, 111, 112]
 };
 
-// Article Study owns recognition and story exercises; no new SR items.
-TEACHING_CONTENT.PU3["1"]["14"] = { vocab: [], sentences: [], sentencePairs: [] };
-
 // pu3-u9-p114 uses Article Study and contributes no new SR content.
 AVAILABLE_CONTENT["PU3"]["9"] = [107, 109, 110, 111, 112, 114];
 TEACHING_CONTENT["PU3"]["9"]["114"] = { vocab: [], sentences: [], sentencePairs: [] };
+
+// Page 38 uses Article Study and contributes no new SR content.
+TEACHING_CONTENT.PU3["3"]["38"] = { vocab: [], sentences: [], sentencePairs: [] };

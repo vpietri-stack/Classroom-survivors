@@ -37,22 +37,29 @@
   // Version token per path prefix — bump ONE group when its files change and
   // only that group re-downloads. Unmatched paths fall into the 'misc' group.
   var GROUP_VERSIONS = [
+    { prefix: 'pu1_u7_p88_assets/', token: 'pu1-u7-p88-v2' },
     { prefix: 'sprites/td/',   token: 'td-sprites-v1' },
     { prefix: 'sprites/vs/',   token: 'vs-sprites-v3' },
     { prefix: 'images/vocab/', token: 'vocab-v1' },
     { prefix: 'think0_wb41_assets/', token: 'think0-wb41-v1' },
     { prefix: 'think_parks_assets/', token: 'think-parks-v1' },
     { prefix: 'pu2_race_assets/', token: 'pu2-race-v1' },
+    { prefix: 'pu3_u1_p11_assets/', token: 'pu3-u1-p11-v1' },
     { prefix: 'pu3_circus_assets/', token: 'pu3-circus-v1' },
+    { prefix: 'pu3_u1_p7_assets/', token: 'pu3-u1-p7-v1' },
+    { prefix: 'pu3_u1_p9_assets/', token: 'pu3-u1-p9-v1' },
     { prefix: 'pu3_u9_p114_story_assets/', token: 'pu3-u9-p114-v1' },
     { prefix: 'pu3_u3_p36_story_assets/', token: 'pu3-u3-p36-v1' },
+    { prefix: 'pu3_u3_p38_story_assets/', token: 'pu3-u3-p38-v2' },
     { prefix: 'pu1_u7_p87_assets/', token: 'pu1-u7-p87-v1' },
     { prefix: 'pu3_u3_p35_assets/', token: 'pu3-u3-p35-v2' },
     { prefix: 'pu3_u8_p99_assets/', token: 'pu3-u8-p99-v1' },
     { prefix: 'pu1_u5_p61_assets/', token: 'pu1-u5-p61-v1' },
     { prefix: 'pu2_u5_p60_assets/', token: 'pu2-u5-p60-v1' },
+    { prefix: 'pu2_u2_p19_assets/', token: 'pu2-u2-p19-v1' },
     { prefix: 'pu2_u8_p95_assets/', token: 'pu2-u8-p95-v1' },
     { prefix: 'pu3_u2_p19_assets/', token: 'pu3-u2-p19-v1' },
+    { prefix: 'friendly_farm_assets/', token: 'friendly-farm-v1' },
     { prefix: 'audio_mp3/',    token: 'audio-v1' },
     { prefix: 'music/',        token: 'music-v1' },
     { prefix: 'sfx/',          token: 'sfx-v1' }
@@ -223,7 +230,9 @@
   // Paths are stored raw ("audio_mp3/Yes, he does.mp3"); encode per segment
   // for the actual request URL (spaces/commas in the hand-recorded filenames).
   function encodePath(path) {
-    return path.split('/').map(encodeURIComponent).join('/');
+    var q = path.indexOf('?');
+    var base = q === -1 ? path : path.slice(0, q);
+    return base.split('/').map(encodeURIComponent).join('/') + (q === -1 ? '' : path.slice(q));
   }
 
   function fetchWithTimeout(url) {

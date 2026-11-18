@@ -1,0 +1,424 @@
+[
+  {
+    "id": "jump",
+    "text": "jump",
+    "translation": "跳；跳跃",
+    "kind": "word",
+    "audio": "pu3_u1_p11_assets/audio/jump.mp3",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=jump",
+    "bytes": 9631
+  },
+  {
+    "id": "hop",
+    "text": "hop",
+    "translation": "单脚跳",
+    "kind": "word",
+    "audio": "pu3_u1_p11_assets/audio/hop.mp3",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=hop",
+    "bytes": 28805
+  },
+  {
+    "id": "skip",
+    "text": "skip",
+    "translation": "跳绳",
+    "kind": "word",
+    "audio": "pu3_u1_p11_assets/audio/skip.mp3",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=skip",
+    "bytes": 13869
+  },
+  {
+    "id": "dance",
+    "text": "dance",
+    "translation": "跳舞",
+    "kind": "word",
+    "audio": "pu3_u1_p11_assets/audio/dance.mp3",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=dance",
+    "bytes": 10989
+  },
+  {
+    "id": "dress-up",
+    "text": "dress up",
+    "translation": "装扮；打扮成……",
+    "kind": "word",
+    "audio": "pu3_u1_p11_assets/audio/dress-up.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/a1b97f60-d79a-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 9216
+  },
+  {
+    "id": "climb",
+    "text": "climb",
+    "translation": "爬；攀爬",
+    "kind": "word",
+    "audio": "pu3_u1_p11_assets/audio/climb.mp3",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=climb",
+    "bytes": 10221
+  },
+  {
+    "id": "catch",
+    "text": "catch",
+    "translation": "接住；抓住",
+    "kind": "word",
+    "reusedFrom": "pu1_u7_p87_assets/audio/catch.mp3",
+    "audio": "pu3_u1_p11_assets/audio/catch.mp3",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=catch",
+    "bytes": 11949
+  },
+  {
+    "id": "shout",
+    "text": "shout",
+    "translation": "大声喊",
+    "kind": "word",
+    "audio": "pu3_u1_p11_assets/audio/shout.mp3",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=shout",
+    "bytes": 10989
+  },
+  {
+    "id": "laugh",
+    "text": "laugh",
+    "translation": "笑；笑出声",
+    "kind": "word",
+    "audio": "pu3_u1_p11_assets/audio/laugh.mp3",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=laugh",
+    "bytes": 11373
+  },
+  {
+    "id": "jump-line",
+    "text": "I'm jumping over a line.",
+    "translation": "我正跳过一条线。",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/jump-line.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/5fd54420-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 16704
+  },
+  {
+    "id": "hop-leg",
+    "text": "I'm hopping on one leg.",
+    "translation": "我正在单脚跳。",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/hop-leg.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/5feb1610-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15744
+  },
+  {
+    "id": "skip-playground",
+    "text": "She's skipping in the playground.",
+    "translation": "她正在操场上跳绳。",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/skip-playground.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/6035dab0-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 19584
+  },
+  {
+    "id": "dance-together",
+    "text": "We're dancing together.",
+    "translation": "我们正在一起跳舞。",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/dance-together.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/608e8200-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14784
+  },
+  {
+    "id": "dress-clown",
+    "text": "I'm dressing up as a clown.",
+    "translation": "我正在打扮成小丑。",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/dress-clown.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/60e92520-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15936
+  },
+  {
+    "id": "climb-ladder",
+    "text": "He's climbing a ladder.",
+    "translation": "他正在爬梯子。",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/climb-ladder.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/611e17d0-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14784
+  },
+  {
+    "id": "catch-ball",
+    "text": "I can catch the ball.",
+    "translation": "我能接住球。",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/catch-ball.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/6289b5c0-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14016
+  },
+  {
+    "id": "shout-name",
+    "text": "She's shouting my name.",
+    "translation": "她正在大声喊我的名字。",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/shout-name.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/62b9ed80-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 17280
+  },
+  {
+    "id": "laugh-picture",
+    "text": "We're laughing at a funny picture.",
+    "translation": "我们看到一张有趣的图片，笑了起来。",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/laugh-picture.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/62dfec10-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 19200
+  },
+  {
+    "id": "can",
+    "text": "can",
+    "translation": "现在会",
+    "kind": "word",
+    "reusedFrom": "pu1_u7_p87_assets/audio/can.mp3",
+    "audio": "pu3_u1_p11_assets/audio/can.mp3",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=can",
+    "bytes": 10413
+  },
+  {
+    "id": "cant",
+    "text": "can't",
+    "translation": "现在不会",
+    "kind": "word",
+    "audio": "pu3_u1_p11_assets/audio/cant.mp3",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=can%27t",
+    "bytes": 11093
+  },
+  {
+    "id": "could",
+    "text": "could",
+    "translation": "以前会",
+    "kind": "word",
+    "audio": "pu3_u1_p11_assets/audio/could.mp3",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=could",
+    "bytes": 9645
+  },
+  {
+    "id": "couldnt",
+    "text": "couldn't",
+    "translation": "以前不会",
+    "kind": "word",
+    "audio": "pu3_u1_p11_assets/audio/couldnt.mp3",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=couldn%27t",
+    "bytes": 10467
+  },
+  {
+    "id": "skip-five",
+    "text": "When I was five, I couldn't skip.",
+    "translation": "我五岁时还不会跳绳。",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/skip-five.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/647fe070-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 21504
+  },
+  {
+    "id": "skip-seven",
+    "text": "I'm seven now, and I can skip.",
+    "translation": "我现在七岁了，已经会跳绳了。",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/skip-seven.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/6480f1e0-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 24000
+  },
+  {
+    "id": "catch-five",
+    "text": "I could catch a ball when I was five.",
+    "translation": "我五岁时就会接球了。",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/catch-five.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/64827880-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 23040
+  },
+  {
+    "id": "bike-seven",
+    "text": "I'm seven now, and I can't ride a bike.",
+    "translation": "我现在七岁了，还不会骑自行车。",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/bike-seven.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/6482edb0-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 26304
+  },
+  {
+    "id": "am",
+    "text": "am",
+    "translation": "现在式，搭配 I",
+    "kind": "word",
+    "audio": "pu3_u1_p11_assets/audio/am.mp3",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=am",
+    "bytes": 9645
+  },
+  {
+    "id": "is",
+    "text": "is",
+    "translation": "现在式，搭配 he / she",
+    "kind": "word",
+    "audio": "pu3_u1_p11_assets/audio/is.mp3",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=is",
+    "bytes": 9453
+  },
+  {
+    "id": "are",
+    "text": "are",
+    "translation": "现在式，搭配 you / we / they",
+    "kind": "word",
+    "audio": "pu3_u1_p11_assets/audio/are.mp3",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=are",
+    "bytes": 9453
+  },
+  {
+    "id": "was",
+    "text": "was",
+    "translation": "过去式，搭配 I / he / she",
+    "kind": "word",
+    "audio": "pu3_u1_p11_assets/audio/was.mp3",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=was",
+    "bytes": 7568
+  },
+  {
+    "id": "were",
+    "text": "were",
+    "translation": "过去式，搭配 you / we / they",
+    "kind": "word",
+    "audio": "pu3_u1_p11_assets/audio/were.mp3",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=were",
+    "bytes": 12480
+  },
+  {
+    "id": "dance-four",
+    "text": "She was four then. She could dance.",
+    "translation": "她那时四岁，已经会跳舞了。",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/dance-four.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/67afc3a0-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 25536
+  },
+  {
+    "id": "dance-seven",
+    "text": "She is seven now. She can dance and skate.",
+    "translation": "她现在七岁了，会跳舞，也会滑冰。",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/dance-seven.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/67e5c7c0-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 31296
+  },
+  {
+    "id": "swim-six",
+    "text": "We could swim when we were six.",
+    "translation": "我们六岁时就会游泳了。",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/swim-six.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/686a6110-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 19776
+  },
+  {
+    "id": "dance-five",
+    "text": "I could dance, but I couldn't skate when I was five.",
+    "translation": "我五岁时会跳舞，但还不会滑冰。",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/dance-five.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/68753680-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 31680
+  },
+  {
+    "id": "was-five",
+    "text": "I was five",
+    "translation": "我那时五岁",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/was-five.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/68805a10-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14784
+  },
+  {
+    "id": "couldnt-skip",
+    "text": "I couldn't skip",
+    "translation": "我那时不会跳绳",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/couldnt-skip.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/697a2360-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 11136
+  },
+  {
+    "id": "guitar-question",
+    "text": "Could you play the guitar when you were six?",
+    "translation": "你六岁时会弹吉他吗？",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/guitar-question.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/69dd5200-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 22656
+  },
+  {
+    "id": "yes-could",
+    "text": "Yes, I could.",
+    "translation": "会。",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/yes-could.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/6a2be730-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13440
+  },
+  {
+    "id": "bike-question",
+    "text": "Could you ride a bike when you were six?",
+    "translation": "你六岁时会骑自行车吗？",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/bike-question.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/6a8b1e30-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 20544
+  },
+  {
+    "id": "no-couldnt",
+    "text": "No, I couldn't.",
+    "translation": "不会。",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/no-couldnt.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/6aa4c0b0-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14784
+  },
+  {
+    "id": "at-six",
+    "text": "at six",
+    "translation": "六岁时",
+    "kind": "sentence",
+    "audio": "pu3_u1_p11_assets/audio/at-six.mp3",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/6b467ef0-e335-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 10176
+  }
+]

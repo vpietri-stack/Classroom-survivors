@@ -1,0 +1,592 @@
+[
+  {
+    "id": "oclock",
+    "audioPack": [
+      1,
+      0,
+      6967
+    ],
+    "text": "o’clock",
+    "locale": "en-GB",
+    "provider": "Youdao British English",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=o%27clock",
+    "bytes": 6967,
+    "studyFile": "audio_mp3/o'clock.mp3"
+  },
+  {
+    "id": "half-past",
+    "audioPack": [
+      1,
+      6967,
+      7882
+    ],
+    "text": "half past",
+    "locale": "en-GB",
+    "reusedFrom": "audio_mp3/half past.mp3",
+    "bytes": 7882
+  },
+  {
+    "id": "quarter-past",
+    "audioPack": [
+      1,
+      14849,
+      7359
+    ],
+    "text": "quarter past",
+    "locale": "en-GB",
+    "reusedFrom": "audio_mp3/quarter past.mp3",
+    "bytes": 7359
+  },
+  {
+    "id": "time-0700",
+    "audioPack": [
+      1,
+      22208,
+      8404
+    ],
+    "text": "seven o’clock",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5b308d80-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 8404
+  },
+  {
+    "id": "time-1900",
+    "audioPack": [
+      1,
+      22208,
+      8404
+    ],
+    "text": "seven o’clock",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5b308d80-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 8404
+  },
+  {
+    "id": "time-0800",
+    "audioPack": [
+      1,
+      30612,
+      6967
+    ],
+    "text": "eight o’clock",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5b303f60-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 6967
+  },
+  {
+    "id": "time-2000",
+    "audioPack": [
+      1,
+      30612,
+      6967
+    ],
+    "text": "eight o’clock",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5b303f60-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 6967
+  },
+  {
+    "id": "time-0630",
+    "audioPack": [
+      1,
+      37579,
+      9971
+    ],
+    "text": "half past six",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5b2eb8c0-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 9971
+  },
+  {
+    "id": "time-1830",
+    "audioPack": [
+      1,
+      37579,
+      9971
+    ],
+    "text": "half past six",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5b2eb8c0-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 9971
+  },
+  {
+    "id": "time-0930",
+    "audioPack": [
+      1,
+      47550,
+      9971
+    ],
+    "text": "half past nine",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5b655920-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 9971
+  },
+  {
+    "id": "time-2130",
+    "audioPack": [
+      1,
+      47550,
+      9971
+    ],
+    "text": "half past nine",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5b655920-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 9971
+  },
+  {
+    "id": "time-0615",
+    "audioPack": [
+      1,
+      57521,
+      10624
+    ],
+    "text": "quarter past six",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5b2ce400-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 10624
+  },
+  {
+    "id": "time-1815",
+    "audioPack": [
+      1,
+      57521,
+      10624
+    ],
+    "text": "quarter past six",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5b2ce400-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 10624
+  },
+  {
+    "id": "time-1015",
+    "audioPack": [
+      1,
+      68145,
+      9188
+    ],
+    "text": "quarter past ten",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5b2f7c10-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 9188
+  },
+  {
+    "id": "time-2215",
+    "audioPack": [
+      1,
+      68145,
+      9188
+    ],
+    "text": "quarter past ten",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5b2f7c10-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 9188
+  },
+  {
+    "id": "example-0700",
+    "audioPack": [
+      1,
+      77333,
+      12714
+    ],
+    "text": "I have breakfast at seven o’clock.",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5c438420-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 12714
+  },
+  {
+    "id": "example-1900",
+    "audioPack": [
+      1,
+      90047,
+      12714
+    ],
+    "text": "We have dinner at seven o’clock.",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5d052670-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 12714
+  },
+  {
+    "id": "example-0800",
+    "audioPack": [
+      1,
+      102761,
+      12322
+    ],
+    "text": "I go to school at eight o’clock.",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5d297750-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 12322
+  },
+  {
+    "id": "example-2000",
+    "audioPack": [
+      1,
+      115083,
+      10886
+    ],
+    "text": "I read a book at eight o’clock.",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5df8fc50-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 10886
+  },
+  {
+    "id": "example-0630",
+    "audioPack": [
+      1,
+      125969,
+      14412
+    ],
+    "text": "I feed my cat at half past six.",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5d9cab80-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14412
+  },
+  {
+    "id": "example-1830",
+    "audioPack": [
+      1,
+      140381,
+      14412
+    ],
+    "text": "We have dinner at half past six.",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5dda29b0-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14412
+  },
+  {
+    "id": "example-0930",
+    "audioPack": [
+      1,
+      154793,
+      13237
+    ],
+    "text": "I have a snack at half past nine.",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5e14e8c0-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13237
+  },
+  {
+    "id": "example-2130",
+    "audioPack": [
+      1,
+      168030,
+      15065
+    ],
+    "text": "I brush my teeth at half past nine.",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5e610cf0-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15065
+  },
+  {
+    "id": "example-0615",
+    "audioPack": [
+      1,
+      183095,
+      17547
+    ],
+    "text": "Dad makes breakfast at quarter past six.",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5f279140-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 17547
+  },
+  {
+    "id": "example-1815",
+    "audioPack": [
+      1,
+      200642,
+      14412
+    ],
+    "text": "We get home at quarter past six.",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5f738e60-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14412
+  },
+  {
+    "id": "example-1015",
+    "audioPack": [
+      1,
+      215054,
+      15718
+    ],
+    "text": "We play outside at quarter past ten.",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5fb72710-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15718
+  },
+  {
+    "id": "example-2215",
+    "audioPack": [
+      1,
+      230772,
+      17416
+    ],
+    "text": "Dad turns off the light at quarter past ten.",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5fd66ee0-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 17416
+  },
+  {
+    "id": "what-time",
+    "audioPack": [
+      1,
+      248188,
+      8143
+    ],
+    "text": "What time is it?",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/601e7460-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 8143
+  },
+  {
+    "id": "its-quarter-past-six",
+    "audioPack": [
+      1,
+      256331,
+      10624
+    ],
+    "text": "It’s quarter past six.",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/607f0af0-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 10624
+  },
+  {
+    "id": "midday",
+    "audioPack": [
+      2,
+      0,
+      9318
+    ],
+    "text": "midday",
+    "locale": "en-GB",
+    "provider": "Youdao British English",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=midday",
+    "bytes": 9318,
+    "studyFile": "audio_mp3/midday.mp3"
+  },
+  {
+    "id": "half-past-twelve",
+    "audioPack": [
+      2,
+      9318,
+      9971
+    ],
+    "text": "half past twelve",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/61231320-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 9971
+  },
+  {
+    "id": "midnight",
+    "audioPack": [
+      2,
+      19289,
+      7490
+    ],
+    "text": "midnight",
+    "locale": "en-GB",
+    "provider": "Youdao British English",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=midnight",
+    "bytes": 7490,
+    "studyFile": "audio_mp3/midnight.mp3"
+  },
+  {
+    "id": "lunch-at-midday",
+    "audioPack": [
+      2,
+      26779,
+      11147
+    ],
+    "text": "We eat lunch at midday.",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/61aa4480-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 11147
+  },
+  {
+    "id": "lunch-at-half-past-twelve",
+    "audioPack": [
+      2,
+      37926,
+      13237
+    ],
+    "text": "Lunch is at half past twelve.",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/62190be0-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13237
+  },
+  {
+    "id": "asleep-at-midnight",
+    "audioPack": [
+      2,
+      51163,
+      10233
+    ],
+    "text": "I’m asleep at midnight.",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/62d9c3d0-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 10233
+  },
+  {
+    "id": "breakfast",
+    "audioPack": [
+      3,
+      0,
+      7098
+    ],
+    "text": "breakfast",
+    "locale": "en-GB",
+    "provider": "Youdao British English",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=breakfast",
+    "bytes": 7098,
+    "studyFile": "audio_mp3/breakfast.mp3"
+  },
+  {
+    "id": "a-snack",
+    "audioPack": [
+      3,
+      7098,
+      6706
+    ],
+    "text": "a snack",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/624fac40-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 6706,
+    "studyFile": "audio_mp3/a snack.mp3"
+  },
+  {
+    "id": "lunch",
+    "audioPack": [
+      3,
+      13804,
+      6445
+    ],
+    "text": "lunch",
+    "locale": "en-GB",
+    "provider": "Youdao British English",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=lunch",
+    "bytes": 6445,
+    "studyFile": "audio_mp3/lunch.mp3"
+  },
+  {
+    "id": "dinner",
+    "audioPack": [
+      3,
+      20249,
+      5922
+    ],
+    "text": "dinner",
+    "locale": "en-GB",
+    "provider": "Youdao British English",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=dinner",
+    "bytes": 5922,
+    "studyFile": "audio_mp3/dinner.mp3"
+  },
+  {
+    "id": "breakfast-at-half-past-seven",
+    "audioPack": [
+      3,
+      26171,
+      13890
+    ],
+    "text": "I have breakfast at half past seven.",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/63101610-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13890
+  },
+  {
+    "id": "morning-snack",
+    "audioPack": [
+      3,
+      40061,
+      13237
+    ],
+    "text": "I have an apple for my morning snack.",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/63221770-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13237
+  },
+  {
+    "id": "afternoon-snack",
+    "audioPack": [
+      3,
+      53298,
+      16633
+    ],
+    "text": "I have some yoghurt for my afternoon snack.",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/636fe950-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 16633
+  },
+  {
+    "id": "lunch-at-school",
+    "audioPack": [
+      3,
+      69931,
+      9188
+    ],
+    "text": "I have lunch at school.",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/63f17560-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 9188
+  },
+  {
+    "id": "dinner-at-half-past-six",
+    "audioPack": [
+      3,
+      79119,
+      14412
+    ],
+    "text": "We have dinner at half past six.",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/5dda29b0-e330-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14412
+  },
+  {
+    "id": "what-time-breakfast",
+    "audioPack": [
+      3,
+      93531,
+      12192
+    ],
+    "text": "What time do you have breakfast?",
+    "locale": "en-GB",
+    "provider": "Sound of Text",
+    "sourceUrl": "https://files.soundoftext.com/47f20520-d6a4-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 12192
+  }
+]

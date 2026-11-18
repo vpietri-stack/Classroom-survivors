@@ -8,7 +8,7 @@ s.window = s; vm.createContext(s);
 for (const file of ['sr_engine.js','teaching_content.js','content_pu1.js','non_spelling_content.js']) vm.runInContext(fs.readFileSync(path.join(__dirname,file),'utf8'),s);
 const content = vm.runInContext('TEACHING_CONTENT.PU1[7][85]',s);
 assert.equal(vm.runInContext('TEACHING_CONTENT.PU1[7][84]',s),undefined);
-assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(AVAILABLE_CONTENT.PU1[7])',s)),[83,85,87,91,92]);
+assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(AVAILABLE_CONTENT.PU1[7])',s)),[83,85,87,88,91,92]);
 assert.equal(content.vocab.length,37); assert.equal(content.sentences.length,29); assert.equal(content.sentencePairs.length,14);
 const entries = s.NonSpellingContent.buildPool('PU1',7,85,{pageOnly:true}).entries;
 assert.equal(entries.filter(e=>e.item.type==='missing-word').length,12);

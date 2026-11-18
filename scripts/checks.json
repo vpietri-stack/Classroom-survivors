@@ -79,7 +79,8 @@
     "test_pu2_u5_p60_notes.js",
     "test_pu2_u5_p60_preview_browser.js",
     "test_pu2_u5_p60_media_browser.js",
-    "test_pu2_u5_p60_cache_browser.js"
+    "test_pu2_u5_p60_cache_browser.js",
+    "test_friendly_farm_notes_browser.js"
   ],
   "groups": {
     "content": {
@@ -150,7 +151,8 @@
     },
     "notes": {
       "paths": [
-        "^(preview_notes|interactive_notes|notes_speech|think_parks|pu2_race)[^/]*\\.(js|html|css)$"
+        "^(preview_notes|interactive_notes|notes_speech|think_parks|pu2_race|friendly_farm)[^/]*\\.(js|html|css)$",
+        "^friendly_farm_assets/"
       ],
       "tests": [
         "test_preview_notes_state.js",
@@ -173,7 +175,8 @@
         "test_pu2_u5_p60_notes.js",
         "test_pu2_u5_p60_preview_browser.js",
         "test_pu2_u5_p60_media_browser.js",
-        "test_pu2_u5_p60_cache_browser.js"
+        "test_pu2_u5_p60_cache_browser.js",
+        "test_friendly_farm_notes_browser.js"
       ]
     },
     "api": {

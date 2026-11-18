@@ -91,7 +91,7 @@ async function fixture(page,id='notes-a',placement=lesson.placement,notes={}){
   await page.waitForTimeout(500);
   ok(!await page.locator('#preview-notes-overlay').count(),'completed assignment no longer opens automatically');
   await page.locator('#preview-notes-button').click();
-  await page.locator('.preview-notes-library button').filter({hasText:'Power Up 2'}).click();
+  await page.locator('.preview-notes-library button[data-note-id="pu2-u1-p14"]').click();
   await page.frameLocator('#preview-notes-overlay iframe').getByRole('button',{name:'返回主界面',exact:true}).waitFor();
   ok(true,'completed preview is available in the notes library');
   ok(!errors.length,'no browser errors: '+errors.join('; '));

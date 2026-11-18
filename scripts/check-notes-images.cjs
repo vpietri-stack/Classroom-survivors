@@ -109,12 +109,7 @@ function checkNotesImages() {
             console.log(note.id + ': scan and five image groups, ' + total + ' bytes');
             continue;
         }
-        if (note.id === 'pu3-u3-p36') {
-            const prefix = 'pu3_u3_p36_story';
-            const folder = path.join(root, prefix + '_assets');
-            const context = { window: {} };
-            vm.runInNewContext(fs.readFileSync(path.join(root, prefix + '_lesson.js'), 'utf8'), context, { timeout: 1000 });
-            const lesson = context.window.WorkYourBody;
+        function checkArticleWebPs(note, lesson, folder, storySections = lesson.sections) {
             assert.equal(lesson.words.length, note.wordCount);
             assert.equal(lesson.sections.length, note.exerciseCount);
             let total = 0;
@@ -124,14 +119,26 @@ function checkNotesImages() {
                 assert.ok(image.length <= PAGE_LIMIT, file);
                 total += image.length;
             }
-            for (const [i, section] of lesson.sections.entries()) {
+            for (const [i, section] of storySections.entries()) {
                 const image = fs.readFileSync(path.join(folder, 'story-' + (i + 1) + '.webp'));
                 assert.ok(image.length <= PAGE_LIMIT, note.id);
                 assert.deepEqual(webpDimensions(image), Array.from(section.dimensions), note.id);
                 total += image.length;
             }
             assert.ok(total <= LESSON_LIMIT, `${note.id}: ${total} bytes exceeds ${LESSON_LIMIT}`);
-            console.log(`${note.id}: ${lesson.words.length + lesson.sections.length} WebP images, ${total} bytes`);
+            console.log(`${note.id}: ${lesson.words.length + storySections.length} WebP images, ${total} bytes`);
+        }
+        if (note.id === 'pu3-u3-p36') {
+            const prefix = 'pu3_u3_p36_story';
+            const context = { window: {} };
+            vm.runInNewContext(fs.readFileSync(path.join(root, prefix + '_lesson.js'), 'utf8'), context, { timeout: 1000 });
+            checkArticleWebPs(note, context.window.WorkYourBody, path.join(root, prefix + '_assets'));
+            continue;
+        }
+        if (note.id === 'pu1-u7-p88') {
+            const context = { window: {} };
+            vm.runInNewContext(fs.readFileSync(path.join(root, 'pu1_u7_p88_lesson.js'), 'utf8'), context, { timeout: 1000 });
+            checkArticleWebPs(note, context.window.BodyPower, path.join(root, 'pu1_u7_p88_assets'), context.window.BodyPower.readingSections);
             continue;
         }
         if (note.id === 'think0-u4-wb41') {
@@ -164,7 +171,12 @@ function checkNotesImages() {
             const context = { window: {} };
             vm.runInNewContext(fs.readFileSync(path.join(root, prefix + '_lesson.js'), 'utf8'), context, { timeout: 1000 });
             const lesson = context.window['Story_' + prefix];
-            const index = JSON.parse(fs.readFileSync(path.join(folder, 'image-index.json'), 'utf8'));
+            const indexPath = path.join(folder, 'image-index.json');
+            if (!fs.existsSync(indexPath)) {
+                checkArticleWebPs(note, lesson, folder);
+                continue;
+            }
+            const index = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
             assert.equal(lesson.words.length, note.wordCount);
             assert.equal(lesson.sections.length, note.exerciseCount);
             assert.equal(Object.keys(index).length, note.wordCount);
@@ -194,6 +206,42 @@ function checkNotesImages() {
             continue;
         }
 
+        if (note.reader.startsWith('friendly_farm_notes.html?')) {
+            const id = new URLSearchParams(note.reader.split('?')[1]).get('id');
+            const { ALLOWED_IDS } = require('../friendly_farm_loader.js');
+            assert.ok(ALLOWED_IDS.has(id), `${note.id}: id ${id} missing from ALLOWED_IDS`);
+            const dataPath = path.join(root, 'friendly_farm_assets', id, 'data.js');
+            const context = { window: {} };
+            vm.runInNewContext(fs.readFileSync(dataPath, 'utf8'), context, { timeout: 1000 });
+            const lesson = context.window.InteractiveNotesData;
+            assert.ok(lesson?.pages?.length === 1, `${note.id}: expected 1 page`);
+            const page = lesson.pages[0];
+            assert.ok(page.file.endsWith('.webp'), `${note.id}: ${page.file} must be WebP`);
+            const assetDir = path.resolve(root, lesson.assetBase);
+            const imgBytes = fs.readFileSync(path.join(assetDir, page.file));
+            assert.ok(imgBytes.length <= PAGE_LIMIT, `${note.id}/${page.file}: ${imgBytes.length} bytes exceeds ${PAGE_LIMIT}`);
+            assert.deepEqual(webpDimensions(imgBytes), [page.width, page.height], `${note.id}: dimensions mismatch`);
+            assert.ok(Array.isArray(page.hotspots) && page.hotspots.length > 0, `${note.id}: missing hotspots`);
+            for (const h of page.hotspots) {
+                const [x, y, w, hgt] = h.rect || [];
+                assert.ok(w > 0 && hgt > 0 && x >= 0 && y >= 0 && x + w <= page.width && y + hgt <= page.height, `${note.id}: hotspot out of bounds for ${h.clip}`);
+                assert.ok(lesson.clips && lesson.clips[h.clip], `${note.id}: missing clip ${h.clip}`);
+            }
+            const binPath = path.join(assetDir, 'audio-1.bin');
+            const binBytes = fs.readFileSync(binPath);
+            for (const clip of Object.values(lesson.clips || {})) {
+                assert.ok(Array.isArray(clip.audioPack) && clip.audioPack[0] === '1', `${note.id}/${clip.id}: invalid audioPack`);
+                const [, offset, length] = clip.audioPack;
+                assert.ok(length >= 1500 && offset >= 0 && offset + length <= binBytes.length, `${note.id}/${clip.id}: audioPack slice out of bounds`);
+            }
+            const thumbPath = path.join(root, 'images', 'notes_thumbs', `${id}-pb-p${note.page}.webp`);
+            assert.ok(fs.existsSync(thumbPath), `${note.id}: missing thumbnail ${thumbPath}`);
+            assert.deepEqual(webpDimensions(fs.readFileSync(thumbPath)), [150, 189], `${note.id}: thumbnail dimensions mismatch`);
+            const total = imgBytes.length + binBytes.length;
+            assert.ok(total <= LESSON_LIMIT, `${note.id}: ${total} bytes exceeds ${LESSON_LIMIT}`);
+            console.log(`${note.id}: 1 WebP + audio-1.bin, ${total} bytes`);
+            continue;
+        }
         const reader = path.join(root, note.reader);
         const html = fs.readFileSync(reader, 'utf8');
         const script = html.match(/<script\b[^>]*\bsrc=["']([^"'?]*notes_data\.js)(?:\?[^"']*)?["']/i)?.[1];

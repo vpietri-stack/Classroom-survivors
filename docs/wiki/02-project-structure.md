@@ -261,3 +261,5 @@ from page 60 retain their original SR keys through `srPage: "60"`.
 
 Page 59 bundles the saved British English MP3s for playback within the tap.
 Its audio manifest records the Sound of Text and Youdao sources.
+
+Power Up 1–3 Units 0–9 story pages (30 lessons across *The Friendly Farm* and *Diversicus*) register in `previewNotesCore.js` with `libraryOnly: true` and share `friendly_farm_notes.html`, `friendly_farm_loader.js`, `friendly_farm_assets/<id>/` (`page.webp`, `audio-1.bin`, `data.js`), and `150x189` thumbnails in `images/notes_thumbs/`.

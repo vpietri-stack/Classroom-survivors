@@ -468,12 +468,12 @@ Due matching pairs remain reviewable even when cooldown partners are needed to
 fill the three-pair board. Those partially cooled boards may win on SR priority,
 but cannot be pulled solely to meet the type-variety quota.
 
-PU3 Unit 1 page 16 now contains the 20 missing-word and 22 find/fix boards approved
-on 2026-10-14. Past/present ability boards contrast could/couldn't with can/can't
-in statements, replacing the rejected yes/no drills. The target-only reusable
-keyboard includes an apostrophe for contractions; physical straight/curly
-apostrophes both enter the same ASCII character used by the authored answers.
-Vocabulary, legacy sentences/pairs and Unit 9 content are retained unchanged.
+PU3 Unit 1 assigns telling time to page 7, question words and number review to
+page 9, and action verbs and past ability to page 11. Page 14 has the two
+Anastasia boards in regular Study alongside the separate story preview.
+The 20 missing-word and 22 find/fix boards retain their page-16 SR keys.
+Page 16 remains available for cumulative review with no directly assigned items.
+The typed keyboard accepts straight or curly apostrophes in contractions.
 
 PU3 Unit 2 page 28 contains the 16 missing-word and 20 find/fix boards approved
 on 2026-10-14. M2 pairs the café where breakfast happens with the pancakes which
@@ -546,7 +546,7 @@ prefixes change. Only a fully finished five-word/five-board session carries
 `data.previewNote` on its **single ordinary `sessionType:'study'` event**, so SR
 and weekly targets count it normally and only once. Partial exits retain normal
 observed SR outcomes but do not complete the note. The main-menu `预习笔记`
-button is shown for all logged-in students and opens a Book (`Think0` labeled as `Think S`) -> Unit -> Note library derived automatically from `PreviewNotesState.catalog` (jumping straight to the student's assigned unit when that unit has notes, with a shortcut back to it from the all-books menu). Completed and browsed notes open in listening-only review mode, while an uncompleted note at the student's assigned page keeps `开始预习`. A student-scoped
+button is shown for all logged-in students and opens a Book (`Think0` labeled as `Think S`) -> Unit -> Note library derived automatically from `PreviewNotesState.catalog` (jumping straight to the student's assigned unit when that unit has notes, with a shortcut back to it from the all-books menu). Completed and browsed notes open in listening-only review mode, while an uncompleted note at the student's assigned page keeps `开始预习`. Entries marked `libraryOnly: true` (including the 30 PU1–PU3 Units 0–9 comic-story notes) appear in the library only, open strictly in `review` mode (`点读查看` / `返回主界面`), and never auto-open, gate placement (`atPage`), launch Study, or record completion markers. A student-scoped
 local mirror covers pending offline delivery; the durable server map is returned
 with the normal login. See [data model](11-data-model.md).
 
@@ -565,6 +565,26 @@ After content checks, a real Study start allocates a practice run ID. Exercises 
 
 Page 14 opens the literature reader for pages 14–15, with 14 illustrated vocabulary items and five story sections. Recognition uses groups of 5, 5 and 4, followed by five paragraph gap-fills with full reset on error. Completion records 14 words and five exercises, earns Study credit, supports existing checkpoint recovery and leaves SR untouched. The story recording is split into 26 clips bundled for lazy, mirror-aware loading; images use lazy grouped packs. Youdao supplies vocabulary audio except for two Sound of Text fallbacks. Page 14 also has ordinary Study/game material.
 
+## PU3 Unit 1 page 7 preview
+
+The Telling the time reader opens for PU3 Unit 1 p.7. Its three illustrated pages have British English audio for vocabulary, clock faces and examples. Preview Study uses the page 7 vocabulary and exercise pool. Reused missing-word and find/fix boards share their page 16 SR keys, and the cumulative page 16 material remains available.
+
+## PU3 Unit 1 page 9 question words
+
+Page 9 opens eight interactive grammar infographics with British-English
+audio for the question words and illustrated question-and-answer examples.
+The introductory Study draws five words and five page-9 boards from existing
+Unit 1 question-word practice. Page 16 keeps its cumulative review, and the
+shared missing-word and find-and-fix boards keep their page-16 SR keys.
+
+## PU3 Unit 1 pages 10–11 vocabulary and grammar preview
+
+Page 11 opens the six infographic pages in `pu3_u1_p11_notes.html`, covering
+circus action verbs and the contrast between present and past ability.
+Follow-up Study draws five words from the nine action verbs and five boards
+from the existing Unit 1 action and ability exercises assigned to page 11.
+Page 16 remains cumulative, and the reused typed boards retain page-16 SR keys.
+
 ## PU3 Unit 1 The Circus Child preview
 
 The page-14 article lesson registers `pu3-u1-p14`: all 27 approved words in six recognition sets, followed by four story gap-fill boards. The final recognition set has two words. It reuses article Study credit, completion and recovery without adding SR entries. Four cropped textbook sections and 30 original narration clips support the reader. Page 16 remains available.
@@ -572,3 +592,16 @@ The page-14 article lesson registers `pu3-u1-p14`: all 27 approved words in six 
 ## PU1 Unit 7 page 87 (11 November 2026)
 
 Page 87 opens the five approved sports vocabulary and permission grammar infographics with 58 British-English clips. Follow-up Study uses five vocabulary items and five exercises from page 87. Unit 7 exercises formerly assigned to page 92 now sit on pages 83, 85, 87 and 91. Page 92 remains a cumulative review boundary for existing assignments. Moved typed exercises retain their original review keys.
+
+
+## PU1 Unit 7 Body Power
+
+Page 88 registers 21 approved illustrated vocabulary items and three section gap-fills. The reader uses one cropped pupil-book page 89 scan, with titles, wrapped sentences and the question bubble directly tappable. ArticleStudy owns recognition, recovery and Study credit. Its items stay in the lesson manifest and never enter regular Study/game content or SR. Narration uses Fish Audio S2.1 Pro Free through OpenRouter with the teacher’s reference voice. Vocabulary uses Youdao with Sound of Text fallback. Assets use the persistent mirror-aware cache and lazy loading.
+
+PU1 Unit 7 page 88 also has an empty curriculum placement entry so it appears in teacher and student page selectors. The article manifest supplies its preview Study material.
+
+The teacher assignment cascade reads AVAILABLE_CONTENT, maintained separately from TEACHING_CONTENT. PU1 Unit 7 includes 88 in both so the Body Power placement is selectable.
+
+Body Power cloze matching uses a regular-expression literal to preserve word boundaries. It blanks repeated occurrences in headings and paragraphs, uses whole taught phrases where possible, and leaves the intervening words of make … strong visible while blanking make, bones, muscles and strong individually.
+
+Body Power library thumbnails cover PB 88–89 and AB 88–89. Sentence 6 reuses the UK-pronounced Vitamin D phrase from sentence 7. Narration bundle and persistent cache revision refresh together.

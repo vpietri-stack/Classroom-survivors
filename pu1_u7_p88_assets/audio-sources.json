@@ -1,0 +1,213 @@
+[
+  {
+    "key": "stretch",
+    "text": "stretch",
+    "source": "Youdao British English",
+    "bytes": 9021
+  },
+  {
+    "key": "warm-up",
+    "text": "warm-up",
+    "source": "Youdao British English",
+    "bytes": 9165
+  },
+  {
+    "key": "power",
+    "text": "power",
+    "source": "Youdao British English",
+    "bytes": 7869
+  },
+  {
+    "key": "strong",
+    "text": "strong",
+    "source": "Youdao British English",
+    "bytes": 9165
+  },
+  {
+    "key": "exercise",
+    "text": "exercise",
+    "source": "Youdao British English",
+    "bytes": 11469
+  },
+  {
+    "key": "every-day",
+    "text": "every day",
+    "source": "Youdao British English",
+    "bytes": 10829
+  },
+  {
+    "key": "need-to",
+    "text": "need to",
+    "source": "Youdao British English",
+    "bytes": 15633
+  },
+  {
+    "key": "look-after-your-body",
+    "text": "look after your body",
+    "source": "Sound of Text en-GB",
+    "bytes": 10893
+  },
+  {
+    "key": "bones",
+    "text": "bones",
+    "source": "Youdao British English",
+    "bytes": 9453
+  },
+  {
+    "key": "muscles",
+    "text": "muscles",
+    "source": "Youdao British English",
+    "bytes": 10173
+  },
+  {
+    "key": "make-strong",
+    "text": "make strong",
+    "source": "Sound of Text en-GB",
+    "bytes": 8733
+  },
+  {
+    "key": "play-outside",
+    "text": "play outside",
+    "source": "Youdao British English",
+    "bytes": 11238
+  },
+  {
+    "key": "vitamin-d",
+    "text": "vitamin D",
+    "source": "Youdao British English",
+    "bytes": 8445
+  },
+  {
+    "key": "come-from",
+    "text": "come from",
+    "source": "Youdao British English",
+    "bytes": 10086
+  },
+  {
+    "key": "remember-to",
+    "text": "remember to",
+    "source": "Youdao British English",
+    "bytes": 10893
+  },
+  {
+    "key": "in-the-sun",
+    "text": "in the sun",
+    "source": "Youdao British English",
+    "bytes": 10950
+  },
+  {
+    "key": "important-for",
+    "text": "important for",
+    "source": "Sound of Text en-GB",
+    "bytes": 10317
+  },
+  {
+    "key": "diet",
+    "text": "diet",
+    "source": "Youdao British English",
+    "bytes": 8013
+  },
+  {
+    "key": "drink-more-water",
+    "text": "drink more water",
+    "source": "Youdao British English",
+    "bytes": 13110
+  },
+  {
+    "key": "sun-cream",
+    "text": "sun cream. Use sun cream.",
+    "source": "Sound of Text en-GB",
+    "bytes": 18525
+  },
+  {
+    "key": "healthy",
+    "text": "healthy",
+    "source": "Youdao British English",
+    "bytes": 8301
+  },
+  {
+    "clip": 2,
+    "text": "Exercise",
+    "source": "OpenRouter fish-audio/s2.1-pro-free:free; teacher reference audio",
+    "bytes": 7581,
+    "reference": "Teacher-provided recording, first 25 seconds; original reference kept outside repository"
+  },
+  {
+    "clip": 4,
+    "text": "Running, playing football, riding a bike and dancing help make your bones and muscles strong.",
+    "source": "OpenRouter fish-audio/s2.1-pro-free:free; teacher reference audio",
+    "bytes": 46317,
+    "reference": "Teacher-provided recording, first 25 seconds; original reference kept outside repository"
+  },
+  {
+    "clip": 3,
+    "text": "Children need to exercise every day.",
+    "source": "OpenRouter fish-audio/s2.1-pro-free:free; teacher reference audio",
+    "bytes": 22989,
+    "reference": "Teacher-provided recording, first 25 seconds; original reference kept outside repository"
+  },
+  {
+    "clip": 1,
+    "text": "Body Power",
+    "source": "OpenRouter fish-audio/s2.1-pro-free:free; teacher reference audio",
+    "bytes": 8589,
+    "reference": "Teacher-provided recording, first 25 seconds; original reference kept outside repository"
+  },
+  {
+    "clip": 7,
+    "text": "Vitamin D comes from the sun.",
+    "source": "OpenRouter fish-audio/s2.1-pro-free:free; teacher reference audio",
+    "bytes": 18813,
+    "reference": "Teacher-provided recording, first 25 seconds; original reference kept outside repository"
+  },
+  {
+    "clip": 6,
+    "text": "Vitamin D is important for your bones.",
+    "source": "OpenRouter fish-audio/s2.1-pro-free:free; teacher reference audio",
+    "bytes": 20973,
+    "reference": "Teacher-provided recording, first 25 seconds; original reference kept outside repository",
+    "edit": "UK Vitamin D phrase reused from sentence 7, joined to original sentence 6 at is"
+  },
+  {
+    "clip": 9,
+    "text": "Drink water",
+    "source": "OpenRouter fish-audio/s2.1-pro-free:free; teacher reference audio",
+    "bytes": 8445,
+    "reference": "Teacher-provided recording, first 25 seconds; original reference kept outside repository"
+  },
+  {
+    "clip": 5,
+    "text": "Play outside",
+    "source": "OpenRouter fish-audio/s2.1-pro-free:free; teacher reference audio",
+    "bytes": 13629,
+    "reference": "Teacher-provided recording, first 25 seconds; original reference kept outside repository"
+  },
+  {
+    "clip": 8,
+    "text": "It’s good to play outside, but remember to use sun cream when you are in the sun!",
+    "source": "OpenRouter fish-audio/s2.1-pro-free:free; teacher reference audio",
+    "bytes": 40845,
+    "reference": "Teacher-provided recording, first 25 seconds; original reference kept outside repository"
+  },
+  {
+    "clip": 10,
+    "text": "It’s important to drink a lot of water.",
+    "source": "OpenRouter fish-audio/s2.1-pro-free:free; teacher reference audio",
+    "bytes": 15789,
+    "reference": "Teacher-provided recording, first 25 seconds; original reference kept outside repository"
+  },
+  {
+    "clip": 11,
+    "text": "Drink more water when you do exercise and when it’s hot.",
+    "source": "OpenRouter fish-audio/s2.1-pro-free:free; teacher reference audio",
+    "bytes": 30909,
+    "reference": "Teacher-provided recording, first 25 seconds; original reference kept outside repository"
+  },
+  {
+    "clip": 12,
+    "text": "Are you looking after your bones and muscles?",
+    "source": "OpenRouter fish-audio/s2.1-pro-free:free; teacher reference audio",
+    "bytes": 17949,
+    "reference": "Teacher-provided recording, first 25 seconds; original reference kept outside repository"
+  }
+]

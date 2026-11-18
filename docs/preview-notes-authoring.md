@@ -33,6 +33,11 @@ is shared by browser and server: ship both when registering another lesson.
 Avoid changing an existing lesson's ID; deliberately increment its version only
 when requiring its preview Study to be completed again.
 
+Also add the textbook/workbook page thumbnails (`150×189` WebP) under
+`images/notes_thumbs/` (e.g. `<id>-pb-p<N>.webp` and `<id>-ab-p<N>.webp`, or
+`sb`/`wb` for Think) and register them in `NOTE_THUMBS` in `preview_notes.js`
+so the **预习笔记** library displays the page thumbnails for the new note.
+
 ## Preserve the student flow
 
 - On login, an unfinished registered page opens automatically, whether assigned

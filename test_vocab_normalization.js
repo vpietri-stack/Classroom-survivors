@@ -35,7 +35,7 @@ includes('Think1', '6', '58', ['put - put', 'read - read']);
 includes('PU1', '6', '81', ['I - my', 'he - his', 'she - her', 'they - their']);
 includes('PU2', '4', '54', ['I - my - mine', 'he - his - his', 'she - her - hers']);
 includes('PU2', '6', '78', ["am - was", "is - was", "are - were", "am not - wasn't", "isn't - wasn't", "aren't - weren't"]);
-includes('PU3', '1', '16', ['can - could', "can't - couldn't"]);
+includes('PU3', '1', '11', ['can - could', "can't - couldn't"]);
 // Early PU1 retains the original beginner-facing forms by teacher request.
 includes('PU1', '0', '5', ['your']);
 includes('PU1', '0', '8', ['my']);

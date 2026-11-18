@@ -1,0 +1,42 @@
+{
+  "01-how-how-much-how-many": {
+    "source": "01-how-how-much-how-many.png",
+    "sourceSha256": "52814ac06b6161928064540614ea9b132708a91649d45bcb7b6fef12d941167b",
+    "webpSha256": "13b4368e3c4050a1a91aaf21f923689a04da7b0bf46a2e688262de886d1a3a00"
+  },
+  "02-how-far-how-old": {
+    "source": "02-how-far-how-old.png",
+    "sourceSha256": "11a652842836867c0d9c59215320cba92caafc78b6f8c255678f8af8174fc0e7",
+    "webpSha256": "2b6a97ef4e8dce87b357561bab53617a07c9576866e6c1e8495959ee73ef184b"
+  },
+  "03-how-often-how-long": {
+    "source": "03-how-often-how-long.png",
+    "sourceSha256": "34e007682f496f9e1fe62c676ab9137e37c1c6b5d351099fa3ba67b24c190107",
+    "webpSha256": "a1928aa3d4280289dd78c4c55e069b919c59aedf96271b4feda8aa85fc9878b5"
+  },
+  "04-how-soon-how-come": {
+    "source": "04-how-soon-how-come.png",
+    "sourceSha256": "a780729b9f0c58580ebcb77ac53a3861500d5768810f0638d275f04f7665bbc8",
+    "webpSha256": "bbae9007689468f3a35811e4ce7d3d91ef84f83b12edeaa9f31b2e1c6064705d"
+  },
+  "05-what-which": {
+    "source": "05-what-which.png",
+    "sourceSha256": "a13d11c0441497b2103f12ffee4cb58ab78ffff98c8486d8fbd8b36b4c81d466",
+    "webpSha256": "01bc49d00dbabf328c1d80196599364f32fb37152e38790a1330f7363051afa8"
+  },
+  "06-what-time-when": {
+    "source": "06-what-time-when.png",
+    "sourceSha256": "41370ba8f7c78628e4ac71d2eb3de07b22be61ae3811c2cb22cab94279387807",
+    "webpSha256": "941348114ad818dcbca5907fb51c720502d8fb365974d462123f2b97fffd16d5"
+  },
+  "07-where-why": {
+    "source": "07-where-why.png",
+    "sourceSha256": "f25242febac257dde01222de77eff997f3fcae8a7d18fe3e2dbf08d2e2470f16",
+    "webpSha256": "c8eea1aad90f850271ef5966a545764f1934e9e88c3701d819f9f030b4f9e49f"
+  },
+  "08-who-whose": {
+    "source": "08-who-whose.png",
+    "sourceSha256": "56ec6c3cef169cbfde9e2b3926303aac6068b9d6b7cd24fdb2de7cf48ec0bf59",
+    "webpSha256": "e4111e940c6c47ed7e039101c58794500f2c975a054dbfe850a1074f097437b5"
+  }
+}

@@ -16,3 +16,11 @@
 .parks-check { margin-top: .75rem; padding: .65rem 1.5rem; }
 .parks-check:disabled { opacity: .55; cursor: default; }
 @media (max-width: 500px) { .parks-cloze-layout { grid-template-columns: 1fr; } }
+
+.komodo-script { display: grid; align-content: start; gap: .65rem; }
+.komodo-script-turn { display: grid; grid-template-columns: 7rem minmax(0, 1fr); gap: .45rem .8rem; }
+.komodo-script-turn > strong { color: #fde68a; line-height: 1.85; }
+.komodo-script-turn > p { margin: 0; line-height: 1.85; }
+@media (max-width: 500px) {
+    .komodo-script-turn { grid-template-columns: 1fr; gap: .1rem; }
+}

@@ -2,6 +2,23 @@
 // Contains simplified Chinese translations for vocabulary and sentences
 
 const LOCAL_TRANSLATIONS = {
+    // Power Up 3 Unit 1 p.7
+    "o'clock": "整点",
+    "midday": "正午",
+    "midnight": "午夜",
+    "a snack": "点心／加餐",
+    "What time is it? It's half past twelve.": "现在几点？现在十二点半。",
+    "What time is it? It's midday.": "现在几点？现在是中午十二点。",
+    "What time is it? It's midnight.": "现在几点？现在是半夜十二点。",
+    "I have breakfast at seven o'clock.": "我早上七点吃早餐。",
+    "We play outside at quarter past ten.": "我们上午十点一刻在外面玩。",
+    "We have dinner at half past six.": "我们傍晚六点半吃晚饭。",
+    "It's half past twelve.": "现在十二点半。",
+    "What time do you have breakfast?": "你几点吃早餐？",
+    "At half past seven in the morning.": "早上七点半。",
+    "What time do you have dinner?": "你几点吃晚饭？",
+    "At half past six in the evening.": "傍晚六点半。",
+
     // Regular vocabulary from the article and story pages
     "public park": "向公众开放的公园",
     "almost": "将近",

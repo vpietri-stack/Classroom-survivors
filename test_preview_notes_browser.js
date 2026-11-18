@@ -162,7 +162,7 @@ async function fixture(page,id='notes-a',placement=lesson.placement,notes={}){
   await page.evaluate(()=>PreviewNotes.close());
   await fixture(page,'notes-b');ok(await page.locator('#preview-notes-overlay').isVisible(),'another student does not inherit completion');
   await page.evaluate(()=>PreviewNotes.close());
-  await fixture(page,'notes-no-unit',{book:'PU1',unit:'1',page:'11'},{});
+  await fixture(page,'notes-no-unit',{book:'Think2',unit:'1',page:'19'},{});
   await page.locator('#preview-notes-button').click();
   ok((await page.locator('#preview-notes-overlay h2').textContent()).includes('全部教材') && await page.locator('.preview-notes-shortcut-btn').count()===0,'assigned unit without notes opens all-books menu and hides current-unit shortcut');
   await page.evaluate(()=>PreviewNotes.close());

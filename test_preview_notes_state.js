@@ -81,7 +81,7 @@ for (const [pathname, prefix] of [['/Classroom-survivors/', 'production:'], ['/C
   const tree = context.PreviewNotes.buildCatalogTree();
   ok(tree.books.map(b => b.book).join(',') === 'PU1,PU2,PU3,Think0,PU4', 'catalog tree orders books cleanly and automatically includes future books');
   const pu3Units = tree.books.find(b => b.book === 'PU3').units.map(u => u.unit);
-  ok(pu3Units.join(',') === '1,2,3,8,9,10', 'units sort numerically including unit 10');
+  ok(pu3Units.join(',') === '0,1,2,3,4,5,6,7,8,9,10', 'units sort numerically including unit 0 and unit 10');
   const thinkUnits = tree.books.find(b => b.book === 'Think0').units[0].notes.map(n => n.page);
   ok(thinkUnits.join(',') === '44,WB-41', 'student book pages appear before workbook pages within a unit');
   for (const note of core.catalog) {
@@ -89,8 +89,23 @@ for (const [pathname, prefix] of [['/Classroom-survivors/', 'production:'], ['/C
     ok(meta && meta.en && meta.zh, 'unit metadata has English and Chinese titles for ' + note.id);
     ok(/[\u4e00-\u9fff]/.test(note.title) && /[A-Za-z]/.test(note.title), 'catalog note title is bilingual for ' + note.id);
   }
-  const thumbMap = vm.runInContext('JSON.stringify(PreviewNotesState.catalog.map(n => n.id))', context);
-  const srcMatch = fs.readFileSync('preview_notes.js', 'utf8').match(/images\/notes_thumbs\/[^'"]+\.webp/g) || [];
-  ok(srcMatch.length >= 56 && srcMatch.every(rel => fs.existsSync(rel)), 'all book page thumbnails exist on disk');
+  const { ALLOWED_IDS } = require('./friendly_farm_loader.js');
+  ok(ALLOWED_IDS.size === 30, 'friendly_farm_loader exposes 30 allowed lesson ids');
+  for (const id of ALLOWED_IDS) {
+    const note = core.catalog.find(n => n.id === id);
+    ok(note && note.libraryOnly === true, id + ' exists in catalog as libraryOnly');
+    ok(note.reader === 'friendly_farm_notes.html?id=' + id, id + ' uses shared comic reader URL');
+    ok(!core.atPage(note.book, note.unit, note.page), id + ' never gates student placement atPage');
+    const fakeEntry = { [id]: { version: note.version, completedAt: '2026-01-01T00:00:00.000Z' } };
+    ok(!core.normalize(fakeEntry)[id], id + ' is ignored by normalize');
+    const fakeEvent = [{ type: 'session', sessionType: 'study', timestamp: '2026-01-01T00:00:00.000Z', data: { previewNote: { id, version: note.version, book: note.book, unit: note.unit, page: note.page, wordCount: 5, exerciseCount: 5 } } }];
+    ok(!core.fromEvents(fakeEvent)[id], id + ' is ignored by fromEvents');
+  }
+  const previewNotesSrc = fs.readFileSync('preview_notes.js', 'utf8');
+  for (const note of core.catalog) {
+    ok(previewNotesSrc.includes(`'${note.id}':`) || previewNotesSrc.includes(`"${note.id}":`), 'NOTE_THUMBS has thumbnail entry for ' + note.id);
+  }
+  const srcMatch = previewNotesSrc.match(/images\/notes_thumbs\/[^'"]+\.webp/g) || [];
+  ok(srcMatch.length >= 86 && srcMatch.every(rel => fs.existsSync(rel)), 'all book page thumbnails exist on disk');
 }
 console.log(checks+' preview-note state/content checks passed');

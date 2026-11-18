@@ -1,0 +1,272 @@
+[
+  {
+    "id": "week",
+    "text": "week",
+    "translation": "周；星期",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=week",
+    "bytes": 9840
+  },
+  {
+    "id": "week-example",
+    "text": "There are seven days in a week.",
+    "translation": "一周有七天。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/000fafd0-e321-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 19200
+  },
+  {
+    "id": "monday",
+    "text": "Monday",
+    "translation": "星期一",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=Monday",
+    "bytes": 11757
+  },
+  {
+    "id": "monday-example",
+    "text": "Monday is the first school day of the week.",
+    "translation": "星期一是一周中上学的第一天。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/059a24d0-e321-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 25344
+  },
+  {
+    "id": "tuesday",
+    "text": "Tuesday",
+    "translation": "星期二",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=Tuesday",
+    "bytes": 12138
+  },
+  {
+    "id": "tuesday-example",
+    "text": "I play football on Tuesday afternoons.",
+    "translation": "我每周二下午踢足球。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/0b7aa910-e321-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 24576
+  },
+  {
+    "id": "wednesday",
+    "text": "Wednesday",
+    "translation": "星期三",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=Wednesday",
+    "bytes": 12556
+  },
+  {
+    "id": "wednesday-example",
+    "text": "I go swimming on Wednesday mornings.",
+    "translation": "我星期三早上去游泳。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/1164a330-e321-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 23040
+  },
+  {
+    "id": "thursday",
+    "text": "Thursday",
+    "translation": "星期四",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=Thursday",
+    "bytes": 12556
+  },
+  {
+    "id": "thursday-example",
+    "text": "I have art class on Thursdays.",
+    "translation": "我每周四上美术课。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/1722ab50-e321-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 20160
+  },
+  {
+    "id": "friday",
+    "text": "Friday",
+    "translation": "星期五",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=Friday",
+    "bytes": 12556
+  },
+  {
+    "id": "friday-example",
+    "text": "On Friday evenings, I go to a book club.",
+    "translation": "我星期五晚上去读书俱乐部。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/1cf15540-e321-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 27264
+  },
+  {
+    "id": "saturday",
+    "text": "Saturday",
+    "translation": "星期六",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=Saturday",
+    "bytes": 11720
+  },
+  {
+    "id": "saturday-example",
+    "text": "I feed the fish on Saturdays.",
+    "translation": "我每周六喂鱼。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/2302d490-e321-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 20544
+  },
+  {
+    "id": "sunday",
+    "text": "Sunday",
+    "translation": "星期日",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=Sunday",
+    "bytes": 12333
+  },
+  {
+    "id": "sunday-example",
+    "text": "I do my homework on Sundays.",
+    "translation": "我每周日做作业。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/28c9b650-e321-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 21696
+  },
+  {
+    "id": "weekend",
+    "text": "weekend",
+    "translation": "周末",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=weekend",
+    "bytes": 12556
+  },
+  {
+    "id": "weekend-example",
+    "text": "Saturday and Sunday are the weekend.",
+    "translation": "星期六和星期日是周末。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/2dfce390-e321-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 22656
+  },
+  {
+    "id": "before",
+    "text": "before",
+    "translation": "在……之前",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=before",
+    "bytes": 10884
+  },
+  {
+    "id": "before-example-1",
+    "text": "Monday comes before Tuesday.",
+    "translation": "星期一在星期二之前。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/332c8e60-e321-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 21120
+  },
+  {
+    "id": "before-example-2",
+    "text": "Wednesday comes before Thursday.",
+    "translation": "星期三在星期四之前。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/363ab8c0-e321-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 22080
+  },
+  {
+    "id": "before-example-3",
+    "text": "Friday comes before Saturday.",
+    "translation": "星期五在星期六之前。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/3874a330-e321-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 22080
+  },
+  {
+    "id": "between",
+    "text": "between",
+    "translation": "在……之间",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=between",
+    "bytes": 11949
+  },
+  {
+    "id": "between-example-1",
+    "text": "Tuesday comes between Monday and Wednesday.",
+    "translation": "星期二在星期一和星期三之间。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/3b607880-e321-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 27840
+  },
+  {
+    "id": "between-example-2",
+    "text": "Thursday comes between Wednesday and Friday.",
+    "translation": "星期四在星期三和星期五之间。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/3d21fea0-e321-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 27456
+  },
+  {
+    "id": "between-example-3",
+    "text": "Saturday comes between Friday and Sunday.",
+    "translation": "星期六在星期五和星期日之间。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/3f0d53e0-e321-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 27456
+  },
+  {
+    "id": "after",
+    "text": "after",
+    "translation": "在……之后",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=after",
+    "bytes": 10049
+  },
+  {
+    "id": "after-example-1",
+    "text": "Tuesday comes after Monday.",
+    "translation": "星期二在星期一之后。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/42ce5380-e321-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 20544
+  },
+  {
+    "id": "after-example-2",
+    "text": "Saturday comes after Friday.",
+    "translation": "星期六在星期五之后。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/452e1570-e321-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 21504
+  },
+  {
+    "id": "after-example-3",
+    "text": "Sunday comes after Saturday.",
+    "translation": "星期日在星期六之后。",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/46f540e0-e321-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 20736
+  }
+]

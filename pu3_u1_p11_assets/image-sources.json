@@ -1,0 +1,32 @@
+{
+  "A1-jump-hop-skip": {
+    "source": "A1-jump-hop-skip.png",
+    "sourceSha256": "b7c762908f3a8ab6aabb5b13c18e2cb2305352effcb3223477908ea130e07241",
+    "webpSha256": "1cde664ee72a10305146fbcadbbf3b46ba07403872a55ff6047bf007e108d1fc"
+  },
+  "A2-dance-dress-up-climb": {
+    "source": "A2-dance-dress-up-climb.png",
+    "sourceSha256": "1be9ec42918614b3d056a92c210306effd6e64774f9ce9ce0c6530ab97f5ca41",
+    "webpSha256": "57d2d7f34e1763f5ea61abbeddec2f28d684263e6d207f8865bee04f5fe0a30e"
+  },
+  "A3-catch-shout-laugh": {
+    "source": "A3-catch-shout-laugh.png",
+    "sourceSha256": "96164f2d6cc5a9bde8c22ac666b15e8aeb28dc97dc0b5fd487395919a8aff044",
+    "webpSha256": "ca9f3b3a3c968e203ba4937789d3c2af8a1a91384f4670a30aebb9e4e6275305"
+  },
+  "B1-can-or-could": {
+    "source": "B1-can-or-could.png",
+    "sourceSha256": "e0ecfa6d60f1905a19b3cc5b5f850247cea80699e70227e911a8a0697713b0f9",
+    "webpSha256": "e7d9172a4070ada92be186d8b112e53beb7eee210ef15dbafe29bc7716b8079c"
+  },
+  "B2-am-is-are-was-were": {
+    "source": "B2-am-is-are-was-were.png",
+    "sourceSha256": "91a2dc06810b4857a666a09ee0c6145ea0a7f68ff0b9be0687ea41b333bec31d",
+    "webpSha256": "d254b0cfedb813d8463fe2b82c8088c337f971768f71eb24a6c06802d84dfacc"
+  },
+  "B3-could-you-questions": {
+    "source": "B3-could-you-questions.png",
+    "sourceSha256": "a87f676c4c2bc1279599828e0d2bb656dfd47af4cc5a9bed7c943ef4ac2ab2ac",
+    "webpSha256": "11478821c04951b72d1015045fd2ff40c29fb20358b1e706ed23f4e228ba1c24"
+  }
+}

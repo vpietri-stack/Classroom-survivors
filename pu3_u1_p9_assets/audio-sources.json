@@ -1,0 +1,443 @@
+[
+  {
+    "id": "how",
+    "text": "How",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=how",
+    "bytes": 4956,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "how-much",
+    "text": "How much",
+    "kind": "word",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b54ea990-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 5269,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "how-many",
+    "text": "How many",
+    "kind": "word",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b54ed0a0-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 4956,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-1-example-1",
+    "text": "How do you go to school? — I go by car.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/8f933d10-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14883,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-1-example-2",
+    "text": "How do you get to the park? — I walk.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b5845f90-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 12584,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-1-example-3",
+    "text": "How much water is in the bottle? — Half a litre.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b552ef50-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15823,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-1-example-4",
+    "text": "How many students are there? — There are six students.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b54c3890-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 17077,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "how-far",
+    "text": "How far",
+    "kind": "word",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b5868270-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 4643,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "how-old",
+    "text": "How old",
+    "kind": "word",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/cfc42230-d2e4-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 5061,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-2-example-1",
+    "text": "How far is the school from here? — About five kilometres.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b8e4c8a0-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 19062,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-2-example-2",
+    "text": "How far is the park from your house? — About one kilometre.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b8758c10-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 19794,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-2-example-3",
+    "text": "How old are you? — I’m thirty-seven.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b9470ce0-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 12584,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-2-example-4",
+    "text": "How old is your sister? — She’s eight.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b9104570-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 12793,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "how-often",
+    "text": "How often",
+    "kind": "word",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/68220c40-e0aa-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 5583,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "how-long",
+    "text": "How long",
+    "kind": "word",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b91f3990-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 4643,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-3-example-1",
+    "text": "How often do you clean your teeth? — I clean my teeth twice a day.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/b9d6f0d0-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 19271,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-3-example-2",
+    "text": "How often do you play football? — Once a week.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/bb62c0f0-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14987,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-3-example-3",
+    "text": "How long is the class? — One hour and twenty minutes.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/bb5f1770-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 17390,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-3-example-4",
+    "text": "How long is the rope? — It’s two metres long.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/bb6272d0-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14674,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "how-soon",
+    "text": "How soon",
+    "kind": "word",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/bb5e5420-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 5061,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "how-come",
+    "text": "How come",
+    "kind": "word",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/bb6c0fc0-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 4852,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-4-example-1",
+    "text": "How soon can you finish your homework today? — I can finish in about thirty minutes.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/bbdd2110-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 24287,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-4-example-2",
+    "text": "How soon can we eat? — In ten minutes.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/bbfd2c30-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14465,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-4-example-3",
+    "text": "How come you’re late for class? — Because my mum forgot we had class today.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/bca9bfe0-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 21883,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-4-example-4",
+    "text": "How come your shoes are wet? — Because I jumped in a puddle.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/bdbc1a40-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 16868,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "what",
+    "text": "What",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=what",
+    "bytes": 5165,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "which",
+    "text": "Which",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=which",
+    "bytes": 4956,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-5-example-1",
+    "text": "What is Diversicus? — It’s a circus.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/be75cd50-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14256,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-5-example-2",
+    "text": "What do you want for breakfast? — I want an egg.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/beb6f500-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14987,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-5-example-3",
+    "text": "Which phones do you prefer, iPhones or Huawei phones? — Neither. I prefer Xiaomi phones.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/be8117f0-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 33377,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-5-example-4",
+    "text": "Which hat do you want, the red one or the blue one? — The red one, please.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/be8eac80-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 24600,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "what-time",
+    "text": "What time",
+    "kind": "word",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/12824420-d089-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 5269,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "when",
+    "text": "When",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=when",
+    "bytes": 5374,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-6-example-1",
+    "text": "What time do you usually get up on Saturdays? — I usually get up at six o’clock.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/c01636e0-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 23869,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-6-example-2",
+    "text": "What time does the show start? — At half past two.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/c14bf7c0-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 16659,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-6-example-3",
+    "text": "When does summer start? — Summer starts in June here.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/c1688070-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 17286,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-6-example-4",
+    "text": "When do you go swimming? — On Sundays.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/c17a0ca0-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13315,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "where",
+    "text": "Where",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=where",
+    "bytes": 4016,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "why",
+    "text": "Why",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=why",
+    "bytes": 5583,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-7-example-1",
+    "text": "Where is the naughty student? — He’s in the bin.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/c237b750-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14883,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-7-example-2",
+    "text": "Where are my shoes? — They’re under the bed.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/c2a80550-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13420,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-7-example-3",
+    "text": "Why is this student in the bin? — Because he was naughty.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/c30c4560-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 17599,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-7-example-4",
+    "text": "Why are you opening your umbrella? — Because it’s raining.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/c31e94e0-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15509,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "who",
+    "text": "Who",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=who",
+    "bytes": 4852,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "whose",
+    "text": "Whose",
+    "kind": "word",
+    "source": "Youdao British English (type=1)",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=Whose",
+    "bytes": 5374,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-8-example-1",
+    "text": "Who ate my sandwich? — I did. Sorry! I was really hungry.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/c3901b60-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 23869,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-8-example-2",
+    "text": "Who is your English teacher? — Ms Brown.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/c3fd5c20-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13420,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-8-example-3",
+    "text": "Whose book is it? — It’s mine. It’s my book.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/c5cb8c70-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14987,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  },
+  {
+    "id": "page-8-example-4",
+    "text": "Whose bag is this? — It’s my sister’s.",
+    "kind": "sentence",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/c4d25f60-e331-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 12793,
+    "encoding": "MP3 mono 22050 Hz 32 kbit/s"
+  }
+]

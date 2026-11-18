@@ -298,3 +298,5 @@ test_practice_telemetry.js covers consecutive runs, completion dedup, mismatched
 The production notes release checks registered WebP images, manifest dimensions, the 450 KB image and 1.5 MB lesson budgets, and optional recording controls in all three readers.
 
 `node test_pu3_circus_preview_browser.js` checks the PU3 U1 p14 article reader, all 27 recognition items including the short final set, four gap-fill boards, restored answers, completion credit and unchanged SR. External requests are intercepted.
+
+`node test_friendly_farm_notes_browser.js` checks that `libraryOnly` PU1–PU3 comic-story notes never auto-open or block Study, open in `review` mode with speech practice enabled, persist and reload offline via `AssetCache` (`friendly-farm-v1/`), and handle invalid `?id=` parameters without runtime errors. `scripts/check-notes-images.cjs` also verifies all 30 Friendly Farm bundles' WebP/hotspot bounds, `audio-1.bin` slice offsets, thumbnail dimensions, and budget limits, as well as article-study readers (`BodyPower` / unpacked `_story.html` lessons without `image-index.json`).

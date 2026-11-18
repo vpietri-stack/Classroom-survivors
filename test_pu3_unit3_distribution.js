@@ -15,7 +15,7 @@ evaluate(`authActiveUser = { id: 'fixture', book: 'PU3', unit: '3', page: '31',
     function getCurrentSession() { return 0; }
     function shuffleArray(items) { return items; }`);
 const pages = [31,33,35,36];
-assert.deepEqual(Array.from(evaluate('AVAILABLE_CONTENT.PU3[3]')), pages);
+assert.deepEqual(Array.from(evaluate('AVAILABLE_CONTENT.PU3[3]')), [31,33,35,36,38]);
 const unit = evaluate('TEACHING_CONTENT.PU3[3]');
 assert.ok(unit[36].sentences.includes('He hurt his elbow.'));
 assert.ok(unit[36].sentences.includes('My shoulder is sore.'));
@@ -51,13 +51,13 @@ assert.ok(evaluate("getSortedPagesForBook('PU3').some(p => p.unit === '3' && p.p
 assert.equal(sandbox.NonSpellingContent.buildPool('PU3', 3, 40, { pageOnly: true }).entries.filter(e => e.item.id).length, 49);
 assert.equal(evaluate("getStudyContentSR('PU3', '3', '40', 'vocab', 5).length"), 5);
 // A restored old checkpoint may keep its old boundary without assigning new users to it.
-evaluate("authActiveUser.page = '36';");
+evaluate("authActiveUser.page = '38';");
 const auth = fs.readFileSync('frontend_auth.js', 'utf8');
 vm.runInContext(auth.slice(auth.indexOf('function checkAndAdvancePageIfAllOnCooldown()'),
     auth.indexOf('function reapplyPendingPageAdvance()')), sandbox);
 evaluate('getSRPriority = () => ({ group: 4 }); window.PreviewNotes = { blocksAdvance: () => false };');
 assert.equal(evaluate('checkAndAdvancePageIfAllOnCooldown()'), false);
-assert.equal(evaluate('authActiveUser.page'), '36');
+assert.equal(evaluate('authActiveUser.page'), '38');
 const dom = new JSDOM('<select id="settingsPage"></select><select id="addPage"></select>');
 const admin = { document: dom.window.document, Option: dom.window.Option, AVAILABLE_CONTENT: { PU3: { 3: pages } } };
 vm.createContext(admin);

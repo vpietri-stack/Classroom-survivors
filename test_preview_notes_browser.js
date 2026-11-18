@@ -15,7 +15,7 @@ const server=http.createServer((req,res)=>{
   const file=path.resolve(root,'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname));
   if(!file.startsWith(root+path.sep)){res.writeHead(403);res.end();return;}
   const p=file.endsWith(path.sep)?path.join(file,'index.html'):file;
-  fs.readFile(p,(error,bytes)=>{if(error){res.writeHead(404);res.end();return;}res.setHeader('Content-Type',({'js':'text/javascript','css':'text/css','html':'text/html','png':'image/png','woff2':'font/woff2','mp3':'audio/mpeg'})[path.extname(p).slice(1)]||'application/octet-stream');res.end(bytes);});
+  fs.readFile(p,(error,bytes)=>{if(error){res.writeHead(404);res.end();return;}res.setHeader('Content-Type',({'js':'text/javascript','css':'text/css','html':'text/html','png':'image/png','webp':'image/webp','woff2':'font/woff2','mp3':'audio/mpeg'})[path.extname(p).slice(1)]||'application/octet-stream');res.end(bytes);});
 });
 async function fixture(page,id='notes-a',placement=lesson.placement,notes={}){
  await page.evaluate(({id,placement,notes})=>{
@@ -47,7 +47,7 @@ async function fixture(page,id='notes-a',placement=lesson.placement,notes={}){
   await page.locator('#preview-notes-overlay iframe').waitFor();
   ok(true,'manual preview-page assignment automatically opens notes after real finishLogin');
   ok((await page.locator('#preview-notes-overlay iframe').getAttribute('allow')).includes('microphone'),'notes readers allow optional microphone use');
-  ok(await page.locator('#preview-notes-button').isHidden(),'library button stays hidden until a preview Study is completed');
+  ok(await page.locator('#preview-notes-button').isVisible(),'all students can access the preview notes library even before completing any note');
   const reader=page.frameLocator('#preview-notes-overlay iframe');
   await reader.locator('.note-page').first().waitFor();
   ok(await reader.locator('.note-page').count()===lesson.pageCount,'integrated reader includes all approved original pages');
@@ -132,16 +132,45 @@ async function fixture(page,id='notes-a',placement=lesson.placement,notes={}){
   const notes=await page.evaluate(()=>authActiveUser.previewNotes);
   await fixture(page,'notes-a',lesson.placement,notes);
   ok(await page.locator('#preview-notes-overlay').count()===0,'completed page uses normal login');
-  await page.locator('#preview-notes-button').click();await page.locator('.preview-notes-library button').click();
+  await page.locator('#preview-notes-button').click();
+  ok((await page.locator('#preview-notes-overlay h2').textContent()) === '预习笔记 · ' + lesson.book.replace(/^PU(\d+)$/, 'Power Up $1') + ' · Unit ' + lesson.unit, 'clicking notes button opens assigned unit');
+  await page.locator('.preview-notes-library button[data-note-id="' + lesson.id + '"]').click();
   ok((await page.frameLocator('#preview-notes-overlay iframe').locator('#reader-study-start').textContent())==='返回主界面','studied notes reopen in listening-only review mode');
+  await page.locator('.preview-notes-back-btn').click();
+  await page.waitForFunction(() => [...document.querySelectorAll('.preview-notes-thumb img')].every(img => img.complete && img.naturalWidth > 0));
+  ok(await page.locator('.preview-notes-note-card[data-note-id="' + lesson.id + '"] .preview-notes-thumb').count() >= 2, 'note card renders PB and AB book page thumbnails');
+  await page.screenshot({path:path.join(qa,'library-assigned-unit.png')});
+  await page.locator('.preview-notes-nav button', { hasText: '全部教材' }).click();
+  await page.screenshot({path:path.join(qa,'library-all-books.png')});
+  ok(await page.locator('.preview-notes-book-card[data-book="Think0"]').textContent().then(t => t.includes('Think S') && !t.includes('Think0')), 'Think0 renders as Think S in the books menu');
+  await page.locator('.preview-notes-book-card[data-book="PU1"]').click();
+  await page.screenshot({path:path.join(qa,'library-pu1-units.png')});
+  ok((await page.locator('.preview-notes-unit-card[data-unit="5"]').textContent()).includes('Happy birthday!') && (await page.locator('.preview-notes-unit-card[data-unit="5"]').textContent()).includes('生日快乐'), 'unit selection shows bilingual printed textbook unit title');
+  await page.locator('.preview-notes-unit-card[data-unit="5"]').click();
+  await page.waitForFunction(() => [...document.querySelectorAll('.preview-notes-thumb img')].every(img => img.complete && img.naturalWidth > 0));
+  await page.screenshot({path:path.join(qa,'library-pu1-u5-notes.png')});
+  ok(await page.locator('.preview-notes-note-card[data-note-id="pu1-u5-p61"] .preview-notes-thumb').count() === 4, 'spread note renders PB and AB p.60-61 thumbnails side by side');
+  await page.locator('.preview-notes-nav button', { hasText: '全部教材' }).click();
+  await page.locator('.preview-notes-shortcut-btn').click();
+  ok((await page.locator('#preview-notes-overlay h2').textContent()).includes('Unit ' + lesson.unit), 'shortcut button returns student directly to their assigned unit');
+  await page.locator('.preview-notes-nav button', { hasText: '全部教材' }).click();
+  await page.locator('.preview-notes-book-card[data-book="Think0"]').click();
+  await page.locator('.preview-notes-unit-card[data-unit="4"]').click();
+  await page.locator('.preview-notes-note-card[data-note-id="think0-u4-p44"]').click();
+  await page.frameLocator('#preview-notes-overlay iframe').getByRole('button', { name: '返回主界面', exact: true }).waitFor();
+  ok(true, 'uncompleted notes in other units open in read-only review mode');
   await page.evaluate(()=>PreviewNotes.close());
   await fixture(page,'notes-b');ok(await page.locator('#preview-notes-overlay').isVisible(),'another student does not inherit completion');
+  await page.evaluate(()=>PreviewNotes.close());
+  await fixture(page,'notes-no-unit',{book:'PU1',unit:'1',page:'11'},{});
+  await page.locator('#preview-notes-button').click();
+  ok((await page.locator('#preview-notes-overlay h2').textContent()).includes('全部教材') && await page.locator('.preview-notes-shortcut-btn').count()===0,'assigned unit without notes opens all-books menu and hides current-unit shortcut');
   await page.evaluate(()=>PreviewNotes.close());
   await fixture(page,'notes-server-only',lesson.placement,notes);
   ok(await page.locator('#preview-notes-overlay').count()===0,'server completion works on a fresh account cache');
   const earlierNotes=pu1p87?{'pu1-u7-p85':{version:1,completedAt:'2026-11-03T01:00:00Z'}}:pu2p60?{'pu2-u5-p59':{version:1,completedAt:'2026-11-11T01:00:00Z'}}:{};
   await fixture(page,'notes-advance',{book:lesson.book,unit:lesson.unit,page:lesson.previous},earlierNotes);
-  ok((pu1p87||pu2p60)?await page.locator('#preview-notes-button').isVisible():await page.locator('#preview-notes-button').isHidden(),'library button reflects completed earlier notes');
+  ok(await page.locator('#preview-notes-button').isVisible(),'library button stays visible for all students');
   await page.evaluate(()=>{
    PreviewNotes.close();
    const current=getCurrentSession();

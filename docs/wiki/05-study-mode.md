@@ -546,7 +546,7 @@ prefixes change. Only a fully finished five-word/five-board session carries
 `data.previewNote` on its **single ordinary `sessionType:'study'` event**, so SR
 and weekly targets count it normally and only once. Partial exits retain normal
 observed SR outcomes but do not complete the note. The main-menu `预习笔记`
-button appears only after the first completed preview Study session. The library reopens completed notes in listening-only review mode. A student-scoped
+button is shown for all logged-in students and opens a Book (`Think0` labeled as `Think S`) -> Unit -> Note library derived automatically from `PreviewNotesState.catalog` (jumping straight to the student's assigned unit when that unit has notes, with a shortcut back to it from the all-books menu). Completed and browsed notes open in listening-only review mode, while an uncompleted note at the student's assigned page keeps `开始预习`. A student-scoped
 local mirror covers pending offline delivery; the durable server map is returned
 with the normal login. See [data model](11-data-model.md).
 

@@ -63,4 +63,34 @@ for (const [pathname, prefix] of [['/Classroom-survivors/', 'production:'], ['/C
   context.location.pathname = '/another-project/';
   ok(!context.PreviewNotes.enabled(), 'unrelated hosted paths stay disabled');
 }
+{
+  const saved = {};
+  const dynamicCatalog = core.catalog.concat([
+    { id: 'pu4-u10-p100', book: 'PU4', unit: '10', page: '100', version: 1, title: 'Power Up 4 · Unit 10 · 第100页', reader: 'pu3_u2_p19_notes.html' },
+    { id: 'pu3-u10-p120', book: 'PU3', unit: '10', page: '120', version: 1, title: 'Power Up 3 · Unit 10 · 第120页', reader: 'pu3_u2_p19_notes.html' }
+  ]);
+  const dynamicCore = { ...core, catalog: dynamicCatalog };
+  const context = { window: null, PreviewNotesState: dynamicCore, console, location: { pathname: '/Classroom-survivors/', hostname: 'vpietri-stack.github.io', protocol: 'https:' },
+    authActiveUser: { id: 'student-a', role: 'student', previewNotes: {} },
+    document: { getElementById: () => null }, addEventListener() {},
+    localStorage: { getItem: () => null, setItem: (key, value) => { saved[key] = value; } } };
+  context.window = context; vm.createContext(context);
+  vm.runInContext(fs.readFileSync('preview_notes.js', 'utf8'), context);
+  ok(context.PreviewNotes.bookLabel('Think0') === 'Think S', 'Think0 book displays as Think S');
+  ok(context.PreviewNotes.bookLabel('PU1') === 'Power Up 1' && context.PreviewNotes.bookLabel('PU3') === 'Power Up 3', 'Power Up books keep readable names');
+  const tree = context.PreviewNotes.buildCatalogTree();
+  ok(tree.books.map(b => b.book).join(',') === 'PU1,PU2,PU3,Think0,PU4', 'catalog tree orders books cleanly and automatically includes future books');
+  const pu3Units = tree.books.find(b => b.book === 'PU3').units.map(u => u.unit);
+  ok(pu3Units.join(',') === '1,2,3,8,9,10', 'units sort numerically including unit 10');
+  const thinkUnits = tree.books.find(b => b.book === 'Think0').units[0].notes.map(n => n.page);
+  ok(thinkUnits.join(',') === '44,WB-41', 'student book pages appear before workbook pages within a unit');
+  for (const note of core.catalog) {
+    const meta = context.PreviewNotes.unitMeta(note.book, note.unit);
+    ok(meta && meta.en && meta.zh, 'unit metadata has English and Chinese titles for ' + note.id);
+    ok(/[\u4e00-\u9fff]/.test(note.title) && /[A-Za-z]/.test(note.title), 'catalog note title is bilingual for ' + note.id);
+  }
+  const thumbMap = vm.runInContext('JSON.stringify(PreviewNotesState.catalog.map(n => n.id))', context);
+  const srcMatch = fs.readFileSync('preview_notes.js', 'utf8').match(/images\/notes_thumbs\/[^'"]+\.webp/g) || [];
+  ok(srcMatch.length >= 56 && srcMatch.every(rel => fs.existsSync(rel)), 'all book page thumbnails exist on disk');
+}
 console.log(checks+' preview-note state/content checks passed');

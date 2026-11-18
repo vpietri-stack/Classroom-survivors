@@ -127,7 +127,7 @@ const server = http.createServer((req, res) => {
         ok(await page.locator('#preview-notes-overlay').count() === 0 && await page.locator('#preview-notes-button').isVisible(), 'completed assigned notes retain library without automatic popup');
         await login(); await notesOpen('no saved sessions retain normal automatic notes');
         await page.evaluate(() => PreviewNotes.close());
-        ok(await page.locator('#preview-notes-button').isHidden(), 'existing eligibility rule still hides library until a note has been completed');
+        ok(await page.locator('#preview-notes-button').isVisible(), 'all students retain access to the notes library even before completing any note');
 
         await login({ study, game, notes: history, delayGame: true }); await page.locator('#study-resume-dialog').waitFor();
         await page.locator('#study-resume-no').click();

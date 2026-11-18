@@ -43,7 +43,7 @@ async function fixture(page,id='notes-a',placement=lesson.placement,notes={}){
   await fixture(page,'unrelated',{book:'PU1',unit:'1',page:'11'});
   await page.waitForTimeout(500);
   ok(!await page.locator('#preview-notes-overlay').count(),'other placement has no automatic Parks notes');
-  ok(await page.locator('#preview-notes-button').isHidden(),'unrelated students have no preview link');
+  ok(await page.locator('#preview-notes-button').isVisible(),'unrelated students can still browse the notes library');
   await fixture(page,'parks');
   await page.locator('#preview-notes-overlay iframe').waitFor();
   const reader=page.frameLocator('#preview-notes-overlay iframe');
@@ -82,7 +82,7 @@ async function fixture(page,id='notes-a',placement=lesson.placement,notes={}){
   await page.waitForTimeout(500);
   ok(!await page.locator('#preview-notes-overlay').count(),'completed assignment no longer opens automatically');
   await page.locator('#preview-notes-button').click();
-  await page.locator('.preview-notes-library button').filter({hasText:lesson.title}).click();
+  await page.locator('.preview-notes-library button[data-note-id="' + lesson.id + '"]').click();
   await page.frameLocator('#preview-notes-overlay iframe').getByRole('button',{name:'返回主界面',exact:true}).waitFor();
   ok(true,'completed preview is available in the notes library');
   ok(!errors.length,'no browser errors: '+errors.join('; '));

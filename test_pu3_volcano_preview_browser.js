@@ -45,7 +45,7 @@ async function fixture(page,id='notes-a',placement=lesson.placement,notes={}){
   await fixture(page,'unrelated',{book:'PU1',unit:'1',page:'11'});
   await page.waitForTimeout(500);
   ok(!await page.locator('#preview-notes-overlay').count(),'other placement has no automatic Parks notes');
-  ok(await page.locator('#preview-notes-button').isHidden(),'unrelated students have no preview link');
+  ok(await page.locator('#preview-notes-button').isVisible(),'unrelated students can still browse the notes library');
   await fixture(page,'circus');
   await page.locator('#preview-notes-overlay iframe').waitFor();
   const reader=page.frameLocator('#preview-notes-overlay iframe');

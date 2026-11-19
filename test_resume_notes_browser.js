@@ -80,7 +80,7 @@ const server = http.createServer((req, res) => {
         async function ordered(label) {
             ok(await page.evaluate(() => {
                 const buttons = [...document.querySelector('#preview-notes-button').parentElement.children];
-                return buttons.map(b => b.id || b.getAttribute('onclick')).join('|') === 'initStudyMode()|showGameSelection()|preview-notes-button|game-resume-button|study-resume-button';
+                return buttons.map(b => b.id || b.getAttribute('onclick')).join('|') === 'initStudyMode()|showGameSelection()|preview-notes-button|picture-books-button|game-resume-button|study-resume-button';
             }), label);
         }
         await login({ study, notes: history });

@@ -1,0 +1,61 @@
+{
+  "voice": "Teacher's own recordings, supplied for this lesson",
+  "encoding": "Mono MP3 at 44.1 kHz, original voice and pace",
+  "letter-sounds.mp3": {
+    "source": "phonics a-ah-apple.m4a",
+    "start": 3.5,
+    "end": 6.95
+  },
+  "apple": {
+    "source": "phonics a-ah-apple.m4a",
+    "recording.mp3": "Full recording",
+    "word.mp3": {
+      "start": 1.38,
+      "end": 2.2
+    },
+    "sequence.mp3": {
+      "source": "recording.mp3",
+      "start": 8.1,
+      "end": 11.45
+    }
+  },
+  "axe": {
+    "source": "phonics - a-ah-axe.m4a",
+    "recording.mp3": "Full recording",
+    "word.mp3": {
+      "start": 0.44,
+      "end": 1.49
+    },
+    "sequence.mp3": {
+      "source": "recording.mp3",
+      "start": 6.55,
+      "end": 10.85
+    }
+  },
+  "alligator": {
+    "source": "phonics a-ah-alligator.m4a",
+    "recording.mp3": "Full recording",
+    "word.mp3": {
+      "start": 0.78,
+      "end": 1.96
+    },
+    "sequence.mp3": {
+      "source": "recording.mp3",
+      "start": 7.2,
+      "end": 11.2
+    }
+  },
+  "astronaut": {
+    "source": "phonics a-ah-astronaut.m4a",
+    "recording.mp3": "Full recording",
+    "word.mp3": {
+      "start": 1.59,
+      "end": 2.8
+    },
+    "sequence.mp3": {
+      "source": "recording.mp3",
+      "start": 8.2,
+      "end": 12.2
+    }
+  }
+}

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Phonics 1 · A a · Study</title>
+<link rel="stylesheet" href="fonts/fonts.css"><link rel="stylesheet" href="lib/student-tailwind.css?v=1"><link rel="stylesheet" href="lib/fontawesome/css/all.min.css?v=1"><link rel="stylesheet" href="style.css?v=2026-10-23f"><link rel="stylesheet" href="phonics1_u1_a_study.css?v=2">
+<script defer src="config.js"></script><script defer src="speech_recorder.js"></script><script defer src="speech_adaptive_app.js"></script><script defer src="speech_scorer.js"></script><script defer src="speech_ui.js?v=phonics4"></script>
+<script defer src="handwriting_model/preprocess.js"></script><script defer src="handwriting_model/decision.js"></script><script defer src="handwriting_recognition.js"></script><script defer src="handwriting.js"></script><script defer src="sr_engine.js"></script><script defer src="study_mode.js?v=phonics2"></script>
+<script defer src="media/phonics/p1-u1/playback-data.js?v=study1"></script><script defer src="phonics1_u1_a_study.js?v=4"></script>
+</head><body>
+<div id="studyModeOverlay" class="overlay bg-gradient-to-br from-slate-900 to-slate-800 z-50 flex flex-col items-center overflow-y-auto">
+<div class="w-full max-w-4xl flex flex-col items-center px-2 sm:px-4 py-2">
+<p class="trial-note">Phonics 1 · A a · 本地练习试用 <span id="round-progress"></span></p>
+<h2 id="study-title" class="text-xl sm:text-3xl text-yellow-400 font-bold mb-1">Study Mode</h2>
+<p id="study-instruction" class="text-base sm:text-lg text-gray-300 mb-3 text-center"></p>
+<button id="replay" type="button" class="audio-play-btn" aria-label="再听一次"><i class="fas fa-volume-up" aria-hidden="true"></i></button>
+<p id="meaning" class="translation-hint"></p>
+<div id="study-game-area" class="w-full flex-grow flex flex-col items-center"></div>
+<div id="speech-controls"><div id="nowPlaying" class="speech-target-words"></div><p id="playerStatus" class="sr-only" role="status"></p><div id="speech-buttons"></div></div>
+<div class="study-actions"><p id="feedback" role="status"></p><button id="continue" class="game-btn bg-green-500 py-3 px-6" type="button">继续</button></div>
+</div>
+<a href="phonics1_u1_a_notes.html?page=5" aria-label="关闭练习，返回预习" class="fixed top-3 right-3 w-10 h-10 flex items-center justify-center rounded-full bg-gray-800/80 text-gray-400 hover:text-white hover:bg-gray-700 text-xl z-50"><i class="fas fa-times" aria-hidden="true"></i></a>
+</div></body></html>

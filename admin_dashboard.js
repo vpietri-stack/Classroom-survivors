@@ -68,7 +68,7 @@ function populateBookSelect(selId, currentVal) {
     const sel = document.getElementById(selId);
     sel.innerHTML = '<option value="">—</option>';
     Object.keys(AVAILABLE_CONTENT).sort().forEach(b => {
-        sel.innerHTML += `<option value="${b}" ${b===currentVal?'selected':''}>${b}</option>`;
+        sel.innerHTML += `<option value="${b}" ${b===currentVal?'selected':''}>${b === 'Phonics1' ? 'Phonics 1' : b}</option>`;
     });
 }
 
@@ -87,7 +87,8 @@ function populatePageSelect(selId, book, unit, currentVal) {
     if (!book || !unit || !AVAILABLE_CONTENT[book] || !AVAILABLE_CONTENT[book][unit]) return;
     AVAILABLE_CONTENT[book][unit].forEach(p => {
         const ps = String(p);
-        sel.innerHTML += `<option value="${ps}" ${ps===String(currentVal)?'selected':''}>${ps}</option>`;
+        const label = book === 'Phonics1' && ps === '4' ? 'Page 4 - Picture book: The Big Bag' : book === 'Phonics1' ? `Page ${ps} - ${PhonicsContent.page(ps).letter.toUpperCase()} ${PhonicsContent.page(ps).letter}` : ps;
+        sel.innerHTML += `<option value="${ps}" ${ps===String(currentVal)?'selected':''}>${label}</option>`;
     });
     // Preserve retired review-page assignments when editing unrelated settings.
     const existingReview = (book === 'Think0' && String(unit) === '4' && String(currentVal) === '45')

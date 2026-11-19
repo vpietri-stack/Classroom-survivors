@@ -144,7 +144,7 @@
         }, 12000);
     </script>
     <script src="config.js?v=2026-11-02c"></script>
-    <script src="frontend_auth.js?v=2026-11-18a"></script>
+    <script src="frontend_auth.js?v=2026-11-19a"></script>
     <script>
         if (typeof startStudentShell === 'function') startStudentShell();
     </script>
@@ -260,6 +260,8 @@
                         onclick="showGameSelection()">我想边学边玩</button>
                     <button id="preview-notes-button" class="game-btn text-xl bg-teal-700 hover:bg-teal-600 w-full hidden"
                         onclick="PreviewNotes.openLibrary()">预习笔记</button>
+                    <button id="picture-books-button" class="game-btn text-xl bg-teal-700 hover:bg-teal-600 w-full hidden"
+                        onclick="PreviewNotes.openPictureBooks()">故事书</button>
                     <button id="game-resume-button" class="game-btn text-xl bg-green-600 w-full hidden" onclick="GameRecovery.resume()">继续上次游戏</button>
                     <button id="study-resume-button" class="game-btn text-xl bg-green-600 w-full hidden" onclick="StudyRecovery.resume()">继续上次学习</button>
                 </div>
@@ -785,10 +787,12 @@
     <script defer fetchpriority="low" data-student-runtime src="api/src/functions/shared/studyResumeCore.js?v=2026-11-01c"></script>
     <script defer fetchpriority="low" data-student-runtime src="api/src/functions/shared/gameResumeCore.js?v=2026-11-01f"></script>
     <script defer fetchpriority="low" data-student-runtime src="game_recovery.js?v=2026-11-12b"></script>
-    <script defer fetchpriority="low" data-student-runtime src="study_recovery.js?v=2026-11-12b"></script>
+    <script defer fetchpriority="low" data-student-runtime src="study_recovery.js?v=2026-11-19a"></script>
     <link rel="stylesheet" href="study_recovery.css?v=2026-11-01c">
-    <script defer fetchpriority="low" data-student-runtime src="teaching_content.js?v=2026-11-12d"></script>
-    <script defer fetchpriority="low" data-student-runtime src="content_pu1.js?v=2026-11-18a"></script>
+    <script defer fetchpriority="low" data-student-runtime src="teaching_content.js?v=2026-11-19a"></script>
+    <script defer fetchpriority="low" data-student-runtime src="phonics_content.js?v=2026-11-19a"></script>
+    <script defer fetchpriority="low" data-student-runtime src="content_phonics1.js?v=2026-11-19a"></script>
+    <script defer fetchpriority="low" data-student-runtime src="content_pu1.js?v=2026-11-19a"></script>
     <script defer fetchpriority="low" data-student-runtime src="content_pu2.js?v=2026-11-12a"></script>
     <script defer fetchpriority="low" data-student-runtime src="content_pu3.js?v=2026-11-18a"></script>
     <script defer fetchpriority="low" data-student-runtime src="content_think0.js?v=2026-11-12d"></script>
@@ -797,9 +801,9 @@
     <script defer fetchpriority="low" data-student-runtime src="content_test.js?v=2026-07-25a"></script>
     <script defer fetchpriority="low" data-student-runtime src="non_spelling_content.js?v=2026-11-18a"></script>
     <script defer fetchpriority="low" data-student-runtime src="non_spelling_widget.js?v=2026-11-15"></script>
-    <script defer fetchpriority="low" data-student-runtime src="api/src/functions/shared/previewNotesCore.js?v=2026-11-18a"></script>
-    <script defer fetchpriority="low" data-student-runtime src="preview_notes.js?v=2026-11-18a"></script>
-    <link rel="stylesheet" href="preview_notes.css?v=2026-11-18">
+    <script defer fetchpriority="low" data-student-runtime src="api/src/functions/shared/previewNotesCore.js?v=2026-11-19a"></script>
+    <script defer fetchpriority="low" data-student-runtime src="preview_notes.js?v=2026-11-19a"></script>
+    <link rel="stylesheet" href="preview_notes.css?v=2026-11-19a">
     <script defer fetchpriority="low" data-student-runtime src="class_config.js?v=2026-11-03e"></script>
     <script defer fetchpriority="low" data-student-runtime src="boot.js?v=startup-1"></script>
     <script defer fetchpriority="low" data-student-runtime src="bgm.js?v=2"></script>
@@ -809,8 +813,8 @@
     <script defer fetchpriority="low" data-student-runtime src="speech_scorer.js?v=4"></script>
     <script defer fetchpriority="low" data-student-runtime src="speech_recorder.js?v=2026-11-02c"></script>
     <script defer fetchpriority="low" data-student-runtime src="speech_engine.js?v=12"></script>
-    <script defer fetchpriority="low" data-student-runtime src="speech_adaptive_app.js?v=2026-11-01f"></script>
-    <script defer fetchpriority="low" data-student-runtime src="speech_ui.js?v=2026-11-02c"></script>
+    <script defer fetchpriority="low" data-student-runtime src="speech_adaptive_app.js?v=2026-11-19a"></script>
+    <script defer fetchpriority="low" data-student-runtime src="speech_ui.js?v=2026-11-19a"></script>
     <!-- TEMPORARY (research, 2026-10-11 → 2026-10-26): stores the WAV the
          recogniser received for CONSENTED students only, so candidate ASR
          models can be evaluated against real classroom voices. Inert unless the
@@ -944,12 +948,12 @@
         .td-play-again-btn:hover { background: #66bb6a; }
     </style>
 
-    <script defer fetchpriority="low" data-student-runtime src="game.js?v=2026-11-12b"></script>
+    <script defer fetchpriority="low" data-student-runtime src="game.js?v=2026-11-19a"></script>
     <script defer fetchpriority="low" data-student-runtime src="non_spelling_flow.js?v=2026-11-02c"></script>
     <!-- Mirror-aware asset cache: prefetch + IndexedDB for TD sprites, vocab
          images and hand-recorded MP3s (fast first load in CN; survives WeChat
          cache eviction). Must load BEFORE tower_defense.js reads AssetCache. -->
-    <script defer fetchpriority="low" data-student-runtime src="asset_cache.js?v=2026-11-18a"></script>
+    <script defer fetchpriority="low" data-student-runtime src="asset_cache.js?v=2026-11-19a"></script>
     <!-- Handwriting round (study Round C): mask geometry + trace box. Must load
          before study_mode.js, which calls hwEnsureFont()/hwCreateTraceBox(). -->
     <script defer fetchpriority="low" data-student-runtime src="handwriting_model/preprocess.js?v=2026-10-23c"></script>
@@ -960,7 +964,7 @@
          removal checklist in docs/wiki/05-study-mode.md). Inert unless the server
          enables it for this student. -->
     <script defer fetchpriority="low" data-student-runtime src="handwriting_sample_capture.js?v=2026-10-12a"></script>
-    <link rel="stylesheet" href="think_parks_study.css?v=komodo-script">
+    <link rel="stylesheet" href="think_parks_study.css?v=2026-11-19a">
     <script defer fetchpriority="low" data-student-runtime src="think_parks_lesson.js?v=1"></script>
     <script defer fetchpriority="low" data-student-runtime src="think_parks_audio.js?v=2"></script>
     <script defer fetchpriority="low" data-student-runtime src="jasmins_diary_lesson.js?v=2"></script>
@@ -972,14 +976,22 @@
     <script defer fetchpriority="low" data-student-runtime src="pu3_circus_study.js?v=1"></script>
     <script defer fetchpriority="low" data-student-runtime src="pu3_u9_p114_story_lesson.js?v=2026-11-11b"></script>
     <script defer fetchpriority="low" data-student-runtime src="pu3_u9_p114_story_study.js?v=2026-11-11b"></script>
+    <script defer fetchpriority="low" data-student-runtime src="pu1_u7_p90_lesson.js?v=2026-11-19a"></script>
+    <script defer fetchpriority="low" data-student-runtime src="pu1_u7_p90_study.js?v=2026-11-19a"></script>
     <script defer fetchpriority="low" data-student-runtime src="pu1_u7_p88_lesson.js?v=2"></script>
     <script defer fetchpriority="low" data-student-runtime src="pu1_u7_p88_study.js?v=1"></script>
     <script defer fetchpriority="low" data-student-runtime src="pu3_u3_p36_story_lesson.js?v=2026-11-12d"></script>
     <script defer fetchpriority="low" data-student-runtime src="pu3_u3_p36_story_study.js?v=2026-11-12d"></script>
     <script defer fetchpriority="low" data-student-runtime src="pu3_u3_p38_story_lesson.js?v=3"></script>
     <script defer fetchpriority="low" data-student-runtime src="pu3_u3_p38_story_study.js?v=2"></script>
-    <script defer fetchpriority="low" data-student-runtime src="study_mode.js?v=startup-1"></script>
-    <script defer fetchpriority="low" data-student-runtime src="study_runtime.js?v=startup-1"></script>
+    <script defer fetchpriority="low" data-student-runtime src="study_mode.js?v=2026-11-19a"></script>
+    <script defer fetchpriority="low" data-student-runtime src="study_runtime.js?v=2026-11-19a"></script>
+    <script defer fetchpriority="low" data-student-runtime src="phonics_study.js?v=2026-11-19a"></script>
+    <script defer fetchpriority="low" data-student-runtime src="phonics_picture_book_content.js?v=2026-11-19a"></script>
+    <script defer fetchpriority="low" data-student-runtime src="picture_book_page_turn.js?v=2026-11-19a"></script>
+    <script defer fetchpriority="low" data-student-runtime src="phonics_picture_book_study.js?v=2026-11-19a"></script>
+    <link rel="stylesheet" href="phonics_picture_book_study.css?v=2026-11-19a">
+    <link rel="stylesheet" href="phonics_study.css?v=2026-11-19a">
     <template id="phaser-scripts">
         <script src="phaser.min.js"></script>
         <script src="vampire_survivors.js?v=2026-11-01a"></script>

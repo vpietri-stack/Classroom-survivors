@@ -4,6 +4,7 @@
     if (!core) return; // A missing optional note asset must not break login.
     let viewer = null, opening = null, pendingLogin = null, loginReady = false;
     const BOOK_LABELS = {
+        Phonics1: 'Phonics 1',
         PU1: 'Power Up 1',
         PU2: 'Power Up 2',
         PU3: 'Power Up 3',
@@ -11,8 +12,9 @@
         Think1: 'Think 1',
         Think2: 'Think 2'
     };
-    const BOOK_ORDER = ['PU1', 'PU2', 'PU3', 'Think0', 'Think1', 'Think2'];
+    const BOOK_ORDER = ['Phonics1', 'PU1', 'PU2', 'PU3', 'Think0', 'Think1', 'Think2'];
     const UNIT_TITLES = {
+        Phonics1: { 1: { en: 'Letters and sounds', zh: '字母与发音' } },
         PU1: {
             0: { en: 'Hello', zh: '你好' },
             1: { en: 'Our new school', zh: '我们的新学校' },
@@ -65,12 +67,18 @@
         }
     };
     const NOTE_THUMBS = {
+        'phonics1-u1-p1': [{ label: 'A a', src: 'media/phonics/p1-u1/letter-pictures.webp' }],
+        'phonics1-u1-p2': [{ label: 'B b', src: 'media/phonics/p1-u1/b/letter-pictures.webp' }],
+        'phonics1-u1-p3': [{ label: 'C c', src: 'media/phonics/p1-u1/c/letter-pictures.webp' }],
+        'phonics1-u1-picture-book-p4': [{ label: 'The Big Bag', src: 'media/phonics/p1-u1-picture-book/page-01-master.webp' }],
+        'phonics1-u2-p5': [{ label: 'D d', src: 'media/phonics/p1-u1/d/letter-pictures.webp' }],
         'pu1-u5-p59': [{ label: 'PB p.59', src: 'images/notes_thumbs/pu1-u5-p59-pb-p59.webp' }, { label: 'AB p.59', src: 'images/notes_thumbs/pu1-u5-p59-ab-p59.webp' }],
         'pu1-u5-p61': [{ label: 'PB p.60', src: 'images/notes_thumbs/pu1-u5-p61-pb-p60.webp' }, { label: 'PB p.61', src: 'images/notes_thumbs/pu1-u5-p61-pb-p61.webp' }, { label: 'AB p.60', src: 'images/notes_thumbs/pu1-u5-p61-ab-p60.webp' }, { label: 'AB p.61', src: 'images/notes_thumbs/pu1-u5-p61-ab-p61.webp' }],
         'pu1-u7-p85': [{ label: 'PB p.85', src: 'images/notes_thumbs/pu1-u7-p85-pb-p85.webp' }, { label: 'AB p.85', src: 'images/notes_thumbs/pu1-u7-p85-ab-p85.webp' }],
         'pu1-u7-p87': [{ label: 'PB p.86', src: 'images/notes_thumbs/pu1-u7-p87-pb-p86.webp' }, { label: 'PB p.87', src: 'images/notes_thumbs/pu1-u7-p87-pb-p87.webp' }, { label: 'AB p.86', src: 'images/notes_thumbs/pu1-u7-p87-ab-p86.webp' }, { label: 'AB p.87', src: 'images/notes_thumbs/pu1-u7-p87-ab-p87.webp' }],
         'pu2-u1-p14': [{ label: 'PB p.14', src: 'images/notes_thumbs/pu2-u1-p14-pb-p14.webp' }, { label: 'PB p.15', src: 'images/notes_thumbs/pu2-u1-p14-pb-p15.webp' }, { label: 'AB p.14', src: 'images/notes_thumbs/pu2-u1-p14-ab-p14.webp' }, { label: 'AB p.15', src: 'images/notes_thumbs/pu2-u1-p14-ab-p15.webp' }],
         'pu2-u2-p19': [{ label: 'PB p.19', src: 'images/notes_thumbs/pu2-u2-p19-pb-p19.webp' }, { label: 'AB p.19', src: 'images/notes_thumbs/pu2-u2-p19-ab-p19.webp' }],
+        'pu2-u2-p21': [{ label: 'PB p.21', src: 'images/notes_thumbs/pu2-u2-p21-pb-p21.webp' }, { label: 'AB p.21', src: 'images/notes_thumbs/pu2-u2-p21-ab-p21.webp' }],
         'pu2-u5-p59': [{ label: 'PB p.59', src: 'images/notes_thumbs/pu2-u5-p59-pb-p59.webp' }, { label: 'AB p.59', src: 'images/notes_thumbs/pu2-u5-p59-ab-p59.webp' }],
         'pu2-u5-p60': [{ label: 'PB p.60', src: 'images/notes_thumbs/pu2-u5-p60-pb-p60.webp' }, { label: 'PB p.61', src: 'images/notes_thumbs/pu2-u5-p60-pb-p61.webp' }, { label: 'AB p.60', src: 'images/notes_thumbs/pu2-u5-p60-ab-p60.webp' }, { label: 'AB p.61', src: 'images/notes_thumbs/pu2-u5-p60-ab-p61.webp' }],
         'pu2-u8-p95': [{ label: 'PB p.95', src: 'images/notes_thumbs/pu2-u8-p95-pb-p95.webp' }, { label: 'AB p.95', src: 'images/notes_thumbs/pu2-u8-p95-ab-p95.webp' }],
@@ -79,8 +87,10 @@
         'pu3-u1-p11': [{ label: 'PB p.10', src: 'images/notes_thumbs/pu3-u1-p11-pb-p10.webp' }, { label: 'PB p.11', src: 'images/notes_thumbs/pu3-u1-p11-pb-p11.webp' }, { label: 'AB p.10', src: 'images/notes_thumbs/pu3-u1-p11-ab-p10.webp' }, { label: 'AB p.11', src: 'images/notes_thumbs/pu3-u1-p11-ab-p11.webp' }],
         'pu3-u1-p14': [{ label: 'PB p.14', src: 'images/notes_thumbs/pu3-u1-p14-pb-p14.webp' }, { label: 'PB p.15', src: 'images/notes_thumbs/pu3-u1-p14-pb-p15.webp' }, { label: 'AB p.14', src: 'images/notes_thumbs/pu3-u1-p14-ab-p14.webp' }, { label: 'AB p.15', src: 'images/notes_thumbs/pu3-u1-p14-ab-p15.webp' }],
         'pu3-u2-p19': [{ label: 'PB p.19', src: 'images/notes_thumbs/pu3-u2-p19-pb-p19.webp' }, { label: 'AB p.19', src: 'images/notes_thumbs/pu3-u2-p19-ab-p19.webp' }],
+        'pu3-u2-p21': [{ label: 'PB p.21', src: 'images/notes_thumbs/pu3-u2-p21-pb-p21.webp' }, { label: 'AB p.21', src: 'images/notes_thumbs/pu3-u2-p21-ab-p21.webp' }],
         'pu3-u3-p31': [{ label: 'PB p.31', src: 'images/notes_thumbs/pu3-u3-p31-pb-p31.webp' }, { label: 'AB p.31', src: 'images/notes_thumbs/pu3-u3-p31-ab-p31.webp' }],
         'pu3-u3-p35': [{ label: 'PB p.34', src: 'images/notes_thumbs/pu3-u3-p35-pb-p34.webp' }, { label: 'PB p.35', src: 'images/notes_thumbs/pu3-u3-p35-pb-p35.webp' }, { label: 'AB p.34', src: 'images/notes_thumbs/pu3-u3-p35-ab-p34.webp' }, { label: 'AB p.35', src: 'images/notes_thumbs/pu3-u3-p35-ab-p35.webp' }],
+        'pu1-u7-p90': [{ label: 'PB p.90', src: 'images/notes_thumbs/pu1-u7-p90-pb-p90.webp' }, { label: 'PB p.91', src: 'images/notes_thumbs/pu1-u7-p90-pb-p91.webp' }, { label: 'AB p.90', src: 'images/notes_thumbs/pu1-u7-p90-ab-p90.webp' }, { label: 'AB p.91', src: 'images/notes_thumbs/pu1-u7-p90-ab-p91.webp' }],
         'pu1-u7-p88': [{ label: 'PB p.88', src: 'images/notes_thumbs/pu1-u7-p88-pb-p88.webp' }, { label: 'PB p.89', src: 'images/notes_thumbs/pu1-u7-p88-pb-p89.webp' }, { label: 'AB p.88', src: 'images/notes_thumbs/pu1-u7-p88-ab-p88.webp' }, { label: 'AB p.89', src: 'images/notes_thumbs/pu1-u7-p88-ab-p89.webp' }],
         'pu3-u3-p36': [{ label: 'PB p.36', src: 'images/notes_thumbs/pu3-u3-p36-pb-p36.webp' }, { label: 'AB p.36', src: 'images/notes_thumbs/pu3-u3-p36-ab-p36.webp' }],
         'pu3-u3-p38': [{ label: 'PB p.38', src: 'images/notes_thumbs/pu3-u3-p38-pb-p38.webp' }, { label: 'PB p.39', src: 'images/notes_thumbs/pu3-u3-p38-pb-p39.webp' }, { label: 'AB p.38', src: 'images/notes_thumbs/pu3-u3-p38-ab-p38.webp' }, { label: 'AB p.39', src: 'images/notes_thumbs/pu3-u3-p38-ab-p39.webp' }],
@@ -232,6 +242,44 @@
         try { cached = JSON.parse(localStorage.getItem(key(student)) || '{}'); } catch (_) {}
         return core.merge(student.previewNotes, cached, core.fromEvents(student.analytics));
     }
+    function pictureBooks(student) {
+        let cached = {};
+        if (!student) return cached;
+        try { cached = JSON.parse(localStorage.getItem(key(student) + ':pictureBooks') || '{}'); } catch (_) {}
+        return core.mergePictureBooks(student.pictureBooks, cached, core.pictureBooksFromEvents(student.analytics), progress(student));
+    }
+    function refreshPictureBooksButton() {
+        const student = user(), button = document.getElementById('picture-books-button');
+        const visible = enabled() && isStudent(student) && !(typeof isTestMode !== 'undefined' && isTestMode)
+            && Object.keys(pictureBooks(student)).length > 0;
+        if (button) button.classList.toggle('hidden', !visible);
+    }
+    function rememberPictureBook(student, note) {
+        if (user()?.id !== student.id || note.kind !== 'picture-book' || (typeof isTestMode !== 'undefined' && isTestMode)) return;
+        const accessed = pictureBooks(student), firstVisit = !accessed[note.id];
+        student.pictureBooks = core.mergePictureBooks(accessed, { [note.id]: { firstOpenedAt: new Date().toISOString() } });
+        try { localStorage.setItem(key(student) + ':pictureBooks', JSON.stringify(student.pictureBooks)); } catch (_) {}
+        if (firstVisit && typeof queuePictureBookAccessEvent === 'function') queuePictureBookAccessEvent(note.id);
+        if (typeof saveActiveUserToCache === 'function') saveActiveUserToCache();
+        refreshPictureBooksButton();
+    }
+    function openPictureBooks({ forceList = false } = {}) {
+        const student = user();
+        if (!enabled() || !isStudent(student) || (typeof isTestMode !== 'undefined' && isTestMode)) return;
+        const accessed = pictureBooks(student);
+        const notes = core.catalog.filter(note => note.kind === 'picture-book' && accessed[note.id]);
+        if (notes.length === 1 && !forceList) { openNote(notes[0].id, true, { pictureBooks: true }); return; }
+        const overlay = shell('故事书'), scroll = el('div', 'preview-notes-scroll'), grid = el('div', 'picture-books-grid');
+        if (!notes.length) grid.append(el('p', 'preview-notes-empty', '打开一本故事书后，就可以在这里找到它。'));
+        notes.forEach(note => {
+            const button = el('button', 'picture-book-cover'); button.type = 'button';
+            const cover = noteThumbs(note)[0];
+            if (cover) { const image = el('img'); image.src = cover.src; image.alt = note.storyTitle || note.title; image.loading = 'lazy'; button.append(image); }
+            button.append(el('span', 'picture-book-title', note.storyTitle || note.title));
+            button.onclick = () => openNote(note.id, true, { pictureBooks: true }); grid.append(button);
+        });
+        scroll.append(grid); overlay.append(scroll);
+    }
     function complete(student, id) { return !!progress(student)[id]; }
     function blocksAdvance(student, page) {
         if (!enabled() || typeof isTestMode !== 'undefined' && isTestMode || !isStudent(student)) return false;
@@ -272,15 +320,20 @@
         if (!enabled() || !isStudent(student) || !note) return;
         if (!review && (note.libraryOnly || !core.atPage(student) || core.atPage(student).id !== id)) return;
         const actions = returnView
-            ? [{ label: '← 返回目录', className: 'preview-notes-back-btn', onClick: () => openLibrary(returnView) }]
+            ? [{ label: returnView.pictureBooks ? '← 故事书' : '← 返回目录', className: 'preview-notes-back-btn', onClick: () => returnView.pictureBooks ? openPictureBooks({ forceList: true }) : openLibrary(returnView) }]
             : [];
         const overlay = shell(note.title + ' · 预习笔记', actions);
+        if (note.book === 'Phonics1' && note.page !== '4') window.PhonicsContent?.warm(PhonicsContent.page(note.page).letter).catch(() => {});
         const request = 'note-' + Date.now() + '-' + Math.random().toString(36).slice(2);
         const frame = document.createElement('iframe'); frame.title = note.title + ' 点读预习'; frame.allow = 'autoplay; microphone';
         opening = { id, review: !!review, owner: student.id, request, frame };
         const url = new URL(note.reader, location.href);
         url.searchParams.set('embed', '1'); url.searchParams.set('mode', review ? 'review' : 'intro'); url.searchParams.set('request', request);
-        url.searchParams.set('v', '2026-11-05m'); frame.src = url.href; overlay.append(frame);
+        url.searchParams.set('v', '2026-11-05m');
+        frame.addEventListener('load', () => {
+            if (opening?.frame === frame && opening.owner === user()?.id) rememberPictureBook(student, note);
+        }, { once: true });
+        frame.src = url.href; overlay.append(frame);
     }
     function makeShortcutButton(assignment, unitNotes) {
         const btn = el('button', 'preview-notes-shortcut-btn');
@@ -492,6 +545,7 @@
         onMainMenu();
     }
     function onMainMenu() {
+        refreshPictureBooksButton();
         if (!loginReady || !pendingLogin || user() !== pendingLogin) return;
         if (document.getElementById('startScreen')?.classList.contains('hidden')
             || document.getElementById('step-greeting')?.classList.contains('hidden')
@@ -506,9 +560,12 @@
         close(); const student = user(), button = document.getElementById('preview-notes-button');
         const active = enabled() && isStudent(student) && !(typeof isTestMode !== 'undefined' && isTestMode);
         if (button) button.classList.toggle('hidden', !active);
+        refreshPictureBooksButton();
         pendingLogin = active ? student : null; loginReady = !defer;
         if (!active) return;
         student.previewNotes = progress(student);
+        student.pictureBooks = pictureBooks(student);
+        refreshPictureBooksButton();
         const note = core.atPage(student);
         if (note?.id === 'think0-u4-p44' && window.ThinkParks) ThinkParks.prefetchAudio('words');
         onMainMenu();
@@ -530,6 +587,14 @@
     }
     function completeStudy() {
         const student = user(), state = typeof STUDY_STATE === 'undefined' ? null : STUDY_STATE, context = state && state.previewNote;
+        if (context?.id === window.PhonicsPictureBookContent?.id && student && context.owner === student.id && state.active && state.pictureBook?.completed) {
+            const { owner, ...marker } = context;
+            return { ...marker, wordCount: 14, exerciseCount: 10 };
+        }
+        if (context?.book === 'Phonics1' && student && context.owner === student.id && state.active && state.phonics?.completed && state.words.length === 4) {
+            const { owner, ...marker } = context;
+            return { ...marker, wordCount: 4, exerciseCount: 4 };
+        }
         const article = window.ArticleStudy?.get(context?.id);
         if (article) {
             if (!student || context.owner !== student.id || !state.active
@@ -562,5 +627,5 @@
             else current.frame.contentWindow.postMessage({ action: 'note-study-error', request: current.request }, location.origin);
         }
     });
-    window.PreviewNotes = { isReader: frame => !!opening && opening.frame.contentWindow === frame && user()?.id === opening.owner, onLogin, continueLogin, onMainMenu, close, openLibrary, openNote, blocksAdvance, prepareStudy, completeStudy, markComplete, enabled, remapPlacement, bookLabel, unitMeta, buildCatalogTree };
+    window.PreviewNotes = { isReader: frame => !!opening && opening.frame.contentWindow === frame && user()?.id === opening.owner, onLogin, continueLogin, onMainMenu, close, openLibrary, openPictureBooks, openNote, blocksAdvance, prepareStudy, completeStudy, markComplete, enabled, remapPlacement, bookLabel, unitMeta, buildCatalogTree };
 })();

@@ -1,3 +1,9 @@
+## Phonics 1 local candidate (19 November 2026)
+
+`Phonics1` Unit 1 pages 1–4 assign A a, B b, C c, and D d through the normal teacher selector. Their registered readers use the teacher’s recordings and open before the corresponding Study. `phonics_study.js` renders the approved four-word A–D flow inside the full app’s Study overlay, using its speech gate, handwriting round, sounds, theme control, analytics queue, session credit, and recovery. Letters follow the selected words and have no SR entries. Only first-presentation word outcomes in phonics Round C update `phonics1:word:<word>` keys. The remaining word pool advances when fewer than four words are eligible, with the next preview required before Study or games. At the final authored page, cooldown entries fill a short pool.
+
+The recovery snapshot stores phonics state inside the existing bounded `state` object. Internal round IDs use the existing A/C/E/D identifiers to preserve the API contract. New four-word/four-exercise completion markers are registered in the shared note catalog. Local review uses the hosted preview/test API. Publishing must verify these catalog markers, SR, credit, recovery, and assignment updates against the candidate API. This section documents a local candidate.
+
 ## PU1 Unit 5 page 59 grammar preview (5 November 2026)
 
 `pu1-u5-p59` opens `pu1_u5_p59_notes.html` for assigned page-59 students. The

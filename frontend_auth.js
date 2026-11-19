@@ -14,7 +14,7 @@ var authActiveUser = null;
 // The version watchdog (startVersionWatchdog) compares this to the live
 // version.json; a mismatch means stale WeChat builds never self-heal or
 // permanently nag. See DEPLOY_VERSION_STAMP.md. Bump BOTH together.
-const APP_VERSION = '2026-11-18a';
+const APP_VERSION = '2026-11-19a';
 
 // --- SESSION TOKEN (c) design) ---
 // The server mints a signed token on login. We store it in localStorage
@@ -123,8 +123,10 @@ function finalizeSession(sessionResults, shouldIncrementSession = true, studyRun
     const canonical = new Map();
     for (const r of sessionResults) {
         if (!r || !r.type || r.key === undefined || r.key === null) continue;
-        const id = r.type + '|' + r.key;
-        if (!canonical.has(id)) canonical.set(id, r);
+        const result = typeof selectedClassContent !== 'undefined' && selectedClassContent?.book === 'Phonics1' && r.type === 'vocab' && !String(r.key).startsWith('phonics1:word:')
+            ? { ...r, key: 'phonics1:word:' + r.key } : r;
+        const id = result.type + '|' + result.key;
+        if (!canonical.has(id)) canonical.set(id, result);
     }
     const merged = Array.from(canonical.values());
     if (merged.length === 0) return;
@@ -158,7 +160,7 @@ function finalizeSession(sessionResults, shouldIncrementSession = true, studyRun
     if (typeof persistPendingSR === 'function') persistPendingSR(); // survive app-kill between here and successful flush
 
     // Check if we need to auto-advance the page
-    checkAndAdvancePageIfAllOnCooldown();
+    if (shouldIncrementSession || authActiveUser.book !== 'Phonics1') checkAndAdvancePageIfAllOnCooldown();
 }
 
 function startExerciseTracking() {
@@ -261,6 +263,21 @@ function queueSessionEvent(sessionType, data) {
         authActiveUser.analytics.push(event);
         saveActiveUserToCache();
     }
+    scheduleAnalyticsFlush();
+}
+
+// A story opening uses the durable, owner-scoped event queue, without a Study
+// completion, target credit, recovery completion, or SR/session increment.
+function queuePictureBookAccessEvent(id) {
+    if (!authActiveUser || isTestMode || window.PreviewNotesState?.find(id)?.kind !== 'picture-book') return;
+    if (analyticsQueue.length >= 500) analyticsQueue.splice(0, analyticsQueue.length - 499);
+    const event = { type: 'picture-book-access', data: { id }, timestamp: new Date().toISOString(),
+        eventId: 'pb_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10), ownerId: authActiveUser.id, ps: csPageSessionId };
+    analyticsQueue.push(event);
+    persistAnalyticsQueue();
+    if (!authActiveUser.analytics) authActiveUser.analytics = [];
+    authActiveUser.analytics.push(event);
+    saveActiveUserToCache();
     scheduleAnalyticsFlush();
 }
 
@@ -1871,12 +1888,13 @@ function finishLogin() {
     if (authActiveUser) {
         selectedStudent = authActiveUser.fullName || authActiveUser.name;
         if (authActiveUser.book && authActiveUser.unit && authActiveUser.page) {
+            window.PhonicsPictureBookStudy?.retryAdvance();
             // Priority: Directly use content assigned from DB
             // STICKY ADVANCE first (2026-09-08): a previously-decided advance
             // is applied, not re-litigated — then the normal check runs.
             if (!(window.PreviewNotes && PreviewNotes.blocksAdvance(authActiveUser, authActiveUser))
                 && typeof reapplyPendingPageAdvance === 'function') reapplyPendingPageAdvance();
-            checkAndAdvancePageIfAllOnCooldown();
+            if (authActiveUser.book !== 'Phonics1') checkAndAdvancePageIfAllOnCooldown();
             loadContent();
         } else if (authActiveUser.classTime) {
             // Fallback: Resolve via classTime mapping
@@ -2124,6 +2142,8 @@ function checkAndAdvancePageIfAllOnCooldown() {
     if (!authActiveUser || !authActiveUser.srState) return false;
     
     if (!authActiveUser.book || !authActiveUser.unit || !authActiveUser.page) return false;
+    if (authActiveUser.book === 'Phonics1' && window.StudyRecovery?.hasPendingFor(authActiveUser)
+        && !(typeof STUDY_STATE !== 'undefined' && STUDY_STATE.srFinalized)) return false;
 
     let book = authActiveUser.book;
     let unit = authActiveUser.unit.toString();
@@ -2133,6 +2153,7 @@ function checkAndAdvancePageIfAllOnCooldown() {
     const currentSession = getCurrentSession();
 
     while (true) {
+        if (book === 'Phonics1' && unit === '1' && page === '4') break;
         if (window.PreviewNotes && PreviewNotes.blocksAdvance(authActiveUser, { book, unit, page })) break;
         const sortedPages = getSortedPagesForBook(book);
         const activePageIndex = sortedPages.findIndex(
@@ -2174,7 +2195,8 @@ function checkAndAdvancePageIfAllOnCooldown() {
             });
         }
         
-        if ((vocabPool.length > 0 && vocabAllCooldown) || 
+        const phonicsShort = book === 'Phonics1' && vocabPool.filter(entry => getSRPriority(entry.key, authActiveUser.srState.vocab || {}, currentSession).group !== 4).length < 4;
+        if (phonicsShort || (vocabPool.length > 0 && vocabAllCooldown) ||
             (sentencesPool.length > 0 && sentencesAllCooldown) || 
             (pairsPool.length > 0 && pairsAllCooldown)) {
             

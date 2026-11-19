@@ -4,10 +4,12 @@
     const clone = value => JSON.parse(JSON.stringify(value));
     const ids = ['words','sentences','remainingWordsRoundA','currentWordIndex','currentSentenceIndex','round',
         'subRound','sentencePairs','pairAttempts','pairQueued','nonSpellingExercises','currentNonSpellingIndex',
-        'previewNote','parks','_mixedActive','_typedRecorded','isTransitioning','_roundCFrozen','_roundEFrozen','srFinalized'];
+        'previewNote','parks','pictureBook','phonics','_mixedActive','_typedRecorded','isTransitioning','_roundCFrozen','_roundEFrozen','srFinalized'];
     const $ = id => document.getElementById(id);
     const nodes = selector => Array.from(document.querySelectorAll(selector));
     function capture() {
+        if (STUDY_STATE.phonics) w.PhonicsStudy?.capture();
+        if (STUDY_STATE.pictureBook) w.PhonicsPictureBookStudy?.capture();
         const state = {};
         ids.forEach(k => { if (STUDY_STATE[k] !== undefined) state[k] = clone(STUDY_STATE[k]); });
         const gate = document.querySelector('#study-game-area .speech-sentence-gate');
@@ -39,6 +41,8 @@
             practice: w.PracticeTelemetry && PracticeTelemetry.snapshot ? PracticeTelemetry.snapshot() : null };
     }
     function cancel() {
+        w.PhonicsStudy?.cancel();
+        w.PhonicsPictureBookStudy?.cancel();
         studyRuntimeEpoch++; studyCancelPending(); clearTimeout(roundDTimer);
         w.ArticleStudy?.pause();
         nodes('#study-game-area .speech-rec-btn').forEach(e => { if(e.disposeSpeech)e.disposeSpeech(); });
@@ -78,6 +82,13 @@
         srStudyResults = clone(saved.srResults || []); srUsedPairKeys = new Set(saved.usedPairKeys || []);
         showStudyModeScreen();
         const s = saved.state, ui = saved.ui;
+        if (s.pictureBook || s.phonics) {
+            if (w.PracticeTelemetry?.resume) PracticeTelemetry.resume(saved.practice || { id: saved.runId, mode: 'study', game: 'study', startedAt: new Date(saved.createdAt).toISOString() });
+            const restored = s.pictureBook ? w.PhonicsPictureBookStudy.restore(saved) : w.PhonicsStudy.restore(saved);
+            exerciseAttempts = saved.exercise.attempts; exerciseStartTime = Date.now() - saved.exercise.elapsedMs;
+            $('studyModeOverlay').scrollTop = ui.scroll || 0;
+            return restored;
+        }
         if (s.round === 'A') startRoundA(true);
         else if (s.parks) w.ArticleStudy.active(s).renderCloze();
         else if (s.round === 'C') nextRoundCWord();

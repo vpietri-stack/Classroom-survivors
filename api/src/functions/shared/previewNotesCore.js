@@ -1,7 +1,14 @@
 (function (root) {
     'use strict';
-    const catalog = [{ id: 'pu1-u7-p88', book: 'PU1', unit: '7', page: '88', version: 1,
+    const phonicsNotes = ['a', 'b', 'c', 'd'].map((letter, index) => ({
+        id: letter === 'd' ? 'phonics1-u2-p5' : `phonics1-u1-p${index + 1}`, book: 'Phonics1', unit: letter === 'd' ? '2' : '1', page: letter === 'd' ? '5' : String(index + 1), version: 1,
+        title: `Phonics 1 · Unit ${letter === 'd' ? 2 : 1} · Page ${letter === 'd' ? 5 : index + 1} - ${letter.toUpperCase()} ${letter}`,
+        reader: `phonics1_letter_notes.html?letter=${letter}`, wordCount: 4, exerciseCount: 4
+    }));
+    const catalog = [...phonicsNotes, { id: 'phonics1-u1-picture-book-p4', kind: 'picture-book', storyTitle: 'The Big Bag', book: 'Phonics1', unit: '1', page: '4', version: 1, title: 'Phonics 1 · Unit 1 · Page 4 · The Big Bag（大包）', reader: 'phonics1_u1_picture_book_review.html', wordCount: 14, exerciseCount: 10 }, { id: 'pu1-u7-p88', book: 'PU1', unit: '7', page: '88', version: 1,
         title: 'Power Up 1 · Unit 7 · 第88页 · Body Power（身体的力量）', reader: 'pu1_u7_p88.html', wordCount: 21, exerciseCount: 3 },
+        { id: 'pu1-u7-p90', book: 'PU1', unit: '7', page: '90', version: 1,
+            title: 'Power Up 1 · Unit 7 · 第90–91页 · A good friend（一个好朋友）', reader: 'pu1_u7_p90.html', wordCount: 19, exerciseCount: 6 },
         {"id": "pu3-u9-p114", "book": "PU3", "unit": "9", "page": "114", "version": 1, "title": "Power Up 3 · Unit 9 · 第114–115页 · The Story of Popocatepetl and Iztaccihuatl（火山传说故事）", "reader": "pu3_u9_p114_story.html", "wordCount": 21, "exerciseCount": 3},
         { id: 'pu3-u9-p111', book: 'PU3', unit: '9', page: '111', version: 1,
         title: 'Power Up 3 · Unit 9 · 第111页 · -ed / -ing adjective endings（以 -ed 和 -ing 结尾的形容词）', reader: 'interactive_notes_poc.html' },
@@ -15,6 +22,8 @@
         title: 'Power Up 1 · Unit 7 · 第85页 · Present continuous（现在进行时）', reader: 'pu1_u7_p85_notes.html' },
         { id: 'pu2-u2-p19', book: 'PU2', unit: '2', page: '19', version: 1,
         title: 'Power Up 2 · Unit 2 · 第19页 · Days of the week · before, between, after（星期名称与先后介词）', reader: 'pu2_u2_p19_notes.html' },
+        { id: 'pu2-u2-p21', book: 'PU2', unit: '2', page: '21', version: 1,
+        title: 'Power Up 2 · Unit 2 · 第21页 · How often? & Adverbs of frequency（频率问句与频率副词）', reader: 'pu2_u2_p21_notes.html' },
         { id: 'pu2-u5-p59', book: 'PU2', unit: '5', page: '59', version: 1,
         title: 'Power Up 2 · Unit 5 · 第59页 · Superlative adjectives（形容词最高级）', reader: 'pu2_u5_p59_notes.html' },
         { id: 'pu2-u5-p60', book: 'PU2', unit: '5', page: '60', version: 1,
@@ -25,6 +34,8 @@
         title: 'Power Up 3 · Unit 1 · 第7页 · Telling the time（时间表达与三餐）', reader: 'pu3_u1_p7_notes.html' },
         { id: 'pu3-u2-p19', book: 'PU3', unit: '2', page: '19', version: 1,
         title: 'Power Up 3 · Unit 2 · 第19页 · What’s for breakfast?（食物与饮品）', reader: 'pu3_u2_p19_notes.html' },
+        { id: 'pu3-u2-p21', book: 'PU3', unit: '2', page: '21', version: 1,
+        title: 'Power Up 3 · Unit 2 · 第21页 · Who, which and where（用 who、which、where 描述人、事物和地点）', reader: 'pu3_u2_p21_notes.html' },
         { id: 'pu3-u8-p97', book: 'PU3', unit: '8', page: '97', version: 1,
         title: 'Power Up 3 · Unit 8 · 第97页 · Future with be going to（be going to 将来时）', reader: 'pu3_u8_p97_notes.html' },
         { id: 'pu3-u8-p99', book: 'PU3', unit: '8', page: '99', version: 1,
@@ -116,7 +127,7 @@
         const result = {};
         for (const note of catalog) {
             if (note.libraryOnly) continue;
-            const entry = value && value[note.id];
+            const entry = value && (value[note.id] || (note.id === 'phonics1-u2-p5' ? value['phonics1-u1-p4'] : null));
             if (entry && entry.version === note.version && Number.isFinite(Date.parse(entry.completedAt)))
                 result[note.id] = { version: note.version, completedAt: new Date(entry.completedAt).toISOString() };
         }
@@ -140,12 +151,38 @@
             if (!result[id] || entry.completedAt < result[id].completedAt) result[id] = entry;
         return result;
     }
+    // Access is independent of completion/version: a child keeps a familiar
+    // story even if its exercises or preview notes are revised later.
+    function mergePictureBooks(...sources) {
+        const result = {};
+        for (const source of sources) for (const note of catalog) {
+            if (note.kind !== 'picture-book') continue;
+            const entry = source && source[note.id];
+            const when = entry && (entry.firstOpenedAt || entry.completedAt);
+            if (!Number.isFinite(Date.parse(when))) continue;
+            const firstOpenedAt = new Date(when).toISOString();
+            if (!result[note.id] || firstOpenedAt < result[note.id].firstOpenedAt) result[note.id] = { firstOpenedAt };
+        }
+        return result;
+    }
+    function pictureBooksFromEvents(events) {
+        const accessed = {};
+        for (const event of Array.isArray(events) ? events : []) {
+            if (event?.type !== 'picture-book-access' || find(event.data?.id)?.kind !== 'picture-book'
+                || !Number.isFinite(Date.parse(event.timestamp))) continue;
+            const firstOpenedAt = new Date(event.timestamp).toISOString();
+            if (!accessed[event.data.id] || firstOpenedAt < accessed[event.data.id].firstOpenedAt) accessed[event.data.id] = { firstOpenedAt };
+        }
+        return mergePictureBooks(accessed, fromEvents(events));
+    }
     function apply(user, events) {
         const progress = merge(user.previewNotes, fromEvents(events));
         if (Object.keys(progress).length) user.previewNotes = progress;
+        const pictureBooks = mergePictureBooks(user.pictureBooks, pictureBooksFromEvents(events), progress);
+        if (Object.keys(pictureBooks).length) user.pictureBooks = pictureBooks;
         return progress;
     }
-    const api = { catalog, find, atPage, normalize, fromEvents, merge, apply };
+    const api = { catalog, find, atPage, normalize, fromEvents, merge, apply, mergePictureBooks, pictureBooksFromEvents };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     else root.PreviewNotesState = api;
 })(typeof window !== 'undefined' ? window : globalThis);

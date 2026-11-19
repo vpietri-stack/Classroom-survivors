@@ -40,6 +40,8 @@ so the **预习笔记** library displays the page thumbnails for the new note.
 
 ## Preserve the student flow
 
+New lesson-specific Study variants reuse the regular Study overlay, styling, and speech/handwriting controls. Use the actual `SpeechUI.makeSentenceGate` panel and the production saved-theme/default-dark behavior. Keep custom round rules within those interfaces when building a local trial.
+
 - On login, an unfinished registered page opens automatically, whether assigned
   by the teacher or reached through SR advancement. Advancement pauses there.
 - The final **开始学习** button has no listening requirement. It starts five
@@ -80,3 +82,37 @@ Keep the approved PNG masters. Run `python scripts/export-notes-images.py <maste
 `node scripts/check-notes-images.cjs` checks every registered lesson. It requires WebP, matching image and manifest dimensions, at most 450 KB per image, and at most 1.5 MB of distinct images per lesson. The release suite runs this check automatically. Review the smallest English and Chinese text at phone width and zoom, then tap representative hotspots before publishing. The reader loads the first image eagerly and lazy-loads later images.
 
 Optional approved speaking uses the shared AdaptiveSpeech model and onset-preserving Recorder. All three production readers support single words, phrases and sentences. Speaking does not gate Study or grant credit.
+
+## Picture-book main-menu shortcut
+
+Register picture books with `kind: 'picture-book'` and a short `storyTitle` in
+`previewNotesCore.js`; provide a cover through the ordinary note thumbnails.
+They remain in the usual book/unit catalog. The main menu also shows 故事书
+immediately below 预习笔记 once that student has opened at least one picture
+book. One known story opens directly; several show a large cover chooser.
+The shortcut opens the existing preview in review mode, with a route back to
+the story chooser, and does not change the student's assignment.
+
+A successfully loaded reader records the first opening, without requiring audio,
+recording, or Study completion. Access is stored separately from note completion:
+`pictureBooks[noteId] = { firstOpenedAt }`, scoped locally by account/environment.
+Known completed picture-book notes and their valid Study analytics also provide
+historical access evidence. Older unfinished previews had no opening record;
+opening them once with this feature adds them to the shortcut.
+
+`picture-book-access` events (`data.id`, timestamp, stable eventId, ownerId) use
+the existing durable analytics queue and retries. They are not session events,
+do not finish recovery, grant target/Study credit, increment sessions, or change
+SR. `PreviewNotesState.apply` merges valid catalog picture-book access into the
+student record during the existing ETag-protected analytics save; the login
+response already includes that field. Access survives catalog version changes.
+Unknown/non-picture-book IDs are ignored, and every frontend refresh/load checks
+the active account. Preview access can also be reconstructed from retained
+analytics while the hosted preview API is still running its previous catalog.
+
+For publication, verify candidate-API access persistence across sign-out/device
+changes and analytics retention, a fresh account's hidden button, account swaps,
+first opening without completion, completed-book backfill, the one/many-story
+routes, and no credit/SR/assignment changes. These server changes require the
+candidate API with isolated student data; the local-review build does not run
+automated checks or browser walkthroughs.

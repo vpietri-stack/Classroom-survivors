@@ -808,6 +808,7 @@ function applyVsPromo() {
 }
 
 function showGameSelection() {
+    if (window.PhonicsStudy?.requirePreview()) return;
     window.SpeechStatus?.start?.();
     window.AssetCache?.warmGames();
     if(window.GameRecovery)GameRecovery.pause();

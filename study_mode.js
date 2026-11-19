@@ -83,11 +83,16 @@ function showStudyNotice(msg) {
 // Entry point
 function initStudyMode(options = {}) {
     window.SpeechStatus?.start?.();
+    const phonicsSelected = typeof selectedClassContent !== 'undefined' && selectedClassContent?.book === 'Phonics1';
+    const picturePlan = window.PhonicsPictureBookStudy?.prepare(options);
+    if (window.PhonicsPictureBookStudy?.isSelected() && !picturePlan) return false;
+    const phonicsPlan = phonicsSelected && !picturePlan ? window.PhonicsStudy?.prepare(options) : null;
+    if (phonicsSelected && !phonicsPlan && !picturePlan) return false;
     if(window.GameRecovery)GameRecovery.pause();
     const article = window.ArticleStudy?.get(options.previewNoteId);
     const parks = article && authActiveUser && !isTestMode && (!authActiveUser.role || authActiveUser.role === "student");
     if (article && !parks) return false;
-    const notePlan = window.PreviewNotes && options.previewNoteId ? PreviewNotes.prepareStudy(options.previewNoteId) : null;
+    const notePlan = picturePlan || (phonicsPlan ? { words: phonicsPlan.words, context: phonicsPlan.context } : window.PreviewNotes && options.previewNoteId ? PreviewNotes.prepareStudy(options.previewNoteId) : null);
     if (options.previewNoteId && !notePlan) return false;
     if (window.ClientDiagnostics) ClientDiagnostics.checkpoint('study-start', { mode: 'study', active: true, word: '', letter: '' });
     if (window.NonSpellingFlow) NonSpellingFlow.cleanupStudy();
@@ -100,12 +105,12 @@ function initStudyMode(options = {}) {
     }
 
     // Get Spaced Repetition Content (SR-aware)
-    const SR_WORDS = parks ? article.words.slice(0, 5).map(word => word[0]) : notePlan ? notePlan.words : getStudyContentSR(book, unit, page, 'vocab', 5);
-    const mixed = parks ? null : notePlan ? notePlan.exercises : window.NonSpellingFlow ? NonSpellingFlow.prepareStudy(book, unit, page) : null;
-    const SR_SENTENCES = parks || mixed ? [] : getStudyContentSR(book, unit, page, 'sentences', 5);
+    const SR_WORDS = picturePlan ? picturePlan.words : phonicsPlan ? phonicsPlan.words : parks ? article.words.slice(0, 5).map(word => word[0]) : notePlan ? notePlan.words : getStudyContentSR(book, unit, page, 'vocab', 5);
+    const mixed = picturePlan || phonicsPlan || parks ? null : notePlan ? notePlan.exercises : window.NonSpellingFlow ? NonSpellingFlow.prepareStudy(book, unit, page) : null;
+    const SR_SENTENCES = picturePlan || phonicsPlan || parks || mixed ? [] : getStudyContentSR(book, unit, page, 'sentences', 5);
     const sentenceCount = mixed ? mixed.length : SR_SENTENCES.length;
 
-    if (!parks && (SR_WORDS.length < 5 || sentenceCount < 5)) {
+    if (!picturePlan && !phonicsPlan && !parks && (SR_WORDS.length < 5 || sentenceCount < 5)) {
         if (SR_WORDS.length === 0 || sentenceCount === 0) {
             showStudyNotice("Not enough content for Study Mode on this page yet.");
             return;
@@ -133,11 +138,13 @@ function initStudyMode(options = {}) {
     STUDY_STATE.sentences = SR_SENTENCES.slice(0, 5);
     STUDY_STATE.nonSpellingExercises = mixed;
     STUDY_STATE.parks = parks ? { set: 0 } : null;
+    STUDY_STATE.pictureBook = picturePlan ? picturePlan.state : null;
+    STUDY_STATE.phonics = phonicsPlan ? phonicsPlan.state : null;
     STUDY_STATE.previewNote = notePlan ? notePlan.context : null;
     STUDY_STATE._mixedActive = false;
 
     showStudyModeScreen();
-    startRoundA();
+    if (picturePlan) PhonicsPictureBookStudy.render(); else if (phonicsPlan) PhonicsStudy.render(); else startRoundA();
     if (window.StudyRecovery) StudyRecovery.begin();
     return true;
 }
@@ -577,6 +584,7 @@ function startRoundD() {
 }
 
 function nextRoundDWord(saved) {
+    if (STUDY_STATE.phonics) window.PhonicsStudy?.beforeHandwriting();
     if (saved) roundDSkipUnlocked = !!saved.skip;
     clearTimeout(roundDTimer);
     if (STUDY_STATE.currentWordIndex >= STUDY_STATE.words.length) {
@@ -609,7 +617,7 @@ function nextRoundDWord(saved) {
         </div>
     `;
     showTranslation('roundD-translation', word);
-    showVocabImage('roundD-image', word);
+    if (!STUDY_STATE.phonics) showVocabImage('roundD-image', word);
 
     // Slots are 1:1 with the word's characters. Punctuation and spaces stay
     // visible and fixed; a RANDOM subset of the letters (max ROUND_D_MAX_GAPS)
@@ -627,7 +635,7 @@ function nextRoundDWord(saved) {
     roundDSlots = word.split('').map(ch => punct.includes(ch)
         ? { type: 'fixed', char: ch }
         : { type: 'letter', char: ch, gap: false, filled: false, given: false });
-    roundDGapOrder = hwPickGaps(word, ROUND_D_MAX_GAPS);
+    roundDGapOrder = STUDY_STATE.phonics ? [0] : hwPickGaps(word, ROUND_D_MAX_GAPS);
     roundDGapOrder.forEach(i => { roundDSlots[i].gap = true; });
     roundDCursor = 0;
     hwCaptureBeginWord(word);
@@ -646,7 +654,13 @@ function nextRoundDWord(saved) {
         roundDTrace.restoreTrace(saved.trace);
         roundDTargetShownAt = Date.now() - (saved.targetElapsedMs || 0);
         roundDStatus(saved.status || '继续完成这个字母');
-    } else { roundDShowTarget(); playTTS(); }
+        if (STUDY_STATE.phonics) {
+            roundDGuided = true; roundDHadHelp = true;
+            roundDTrace.setGuided(true);
+            roundDStatus('沿着提示写一写');
+        }
+    } else { roundDShowTarget(); if (STUDY_STATE.phonics && window.PhonicsStudy) PhonicsStudy.playAudio(); else playTTS(); }
+    if (STUDY_STATE.phonics) window.PhonicsStudy?.handwritingAssets();
 }
 
 let roundDWord = '';
@@ -712,12 +726,13 @@ function roundDShowTarget() {
     if (roundDCursor >= roundDGapOrder.length) { roundDWordComplete(); return; }
     roundDAttempts = 0;
     roundDEffortAttempts = 0;
-    roundDGuided = false;
+    roundDGuided = !!STUDY_STATE.phonics;
+    if (roundDGuided) roundDHadHelp = true;
     roundDTargetShownAt = Date.now();
-    roundDTrace.setGuided(false);
+    roundDTrace.setGuided(roundDGuided);
     diagHandwriting('handwriting-target-start');
     roundDTrace.setTarget(roundDSlots[roundDGapOrder[roundDCursor]].char);
-    roundDStatus('先自己写一写；试写两次后会出现提示');
+    roundDStatus(roundDGuided ? '沿着提示写一写' : '先自己写一写；试写两次后会出现提示');
     diagHandwriting('handwriting-target-ready');
     renderRoundDSlots();
 }
@@ -849,6 +864,7 @@ function clearRoundD() {
 }
 
 function finishRoundD() {
+    if (STUDY_STATE.phonics) { PhonicsStudy.complete(); return; }
     if (roundDTrace) { roundDTrace.destroy(); roundDTrace = null; }
     startRoundE();
 }
@@ -1361,7 +1377,7 @@ async function finishStudySession() {
     const previewOwner = previewNote && STUDY_STATE.previewNote.owner;
     const completedStudyStart = STUDY_STATE.startTime;
     STUDY_STATE.srFinalized = true;
-    if (!parks) finalizeSession(srStudyResults, true, window.StudyRecovery && StudyRecovery.runId());
+    if (!parks && !STUDY_STATE.pictureBook) finalizeSession(srStudyResults, true, window.StudyRecovery && StudyRecovery.runId());
 
     queueSessionEvent('study', {
         durationMs: durationMs,
@@ -1370,6 +1386,7 @@ async function finishStudySession() {
         ...(parks ? { studyContent: ArticleStudy.active(STUDY_STATE).context } : {})
     });
     if (previewNote && window.PreviewNotes) PreviewNotes.markComplete(previewNote);
+    if (STUDY_STATE.pictureBook?.completed && previewNote) PhonicsPictureBookStudy.advance();
     // FIX (2026-08-25, "Doris refresh"): AWAIT the delivery of the session
     // record + SR state BEFORE showing the completion screen. On iPad/iOS the
     // page process can restart within ~1s of completion (WeChat/Safari WebKit
@@ -1396,7 +1413,7 @@ async function finishStudySession() {
             ${messageHtml}
             
             <div class="flex flex-col gap-3 items-center w-full">
-                <button onclick="${parks ? `PreviewNotes.openNote('${ArticleStudy.active(STUDY_STATE).id}', false)` : "initStudyMode()"}" class="game-btn bg-blue-600 text-lg sm:text-xl w-full">再学习一下</button>
+                <button onclick="${STUDY_STATE.pictureBook ? `PreviewNotes.openNote('${PhonicsPictureBookContent.id}', true)` : parks ? `PreviewNotes.openNote('${ArticleStudy.active(STUDY_STATE).id}', false)` : "initStudyMode()"}" class="game-btn bg-blue-600 text-lg sm:text-xl w-full">再学习一下</button>
                 <button onclick="showGameSelection()" class="game-btn bg-orange-500 text-lg sm:text-xl w-full">边玩边学</button>
             </div>
         </div>
@@ -1408,6 +1425,7 @@ function exitStudyMode() {
     if (window.StudyRecovery) StudyRecovery.pause();
     studyRuntimeEpoch++; studyCancelPending();
     if (window.StudyRuntime) StudyRuntime.cancel();
+    window.PhonicsStudy?.cancel();
     if (window.PracticeTelemetry) PracticeTelemetry.interrupt('study_exit', false);
     if (window.NonSpellingFlow) NonSpellingFlow.cleanupStudy();
     // Abandoning mid-session must not lose observed results (failures are
@@ -1419,6 +1437,8 @@ function exitStudyMode() {
     }
     STUDY_STATE.active = false; // so the game-mode keydown listener resumes
     STUDY_STATE.previewNote = null;
+    STUDY_STATE.phonics = null;
+    STUDY_STATE.pictureBook = null;
     STUDY_STATE.parks = null;
     clearTimeout(roundDTimer);
     // A word abandoned halfway is still worth keeping: the letters a child gave
@@ -1451,9 +1471,9 @@ function updateStudyProgress() {
     const mixed = !!STUDY_STATE.nonSpellingExercises;
     const parks = STUDY_STATE.parks;
     const article = parks && ArticleStudy.active(STUDY_STATE);
-    const rounds = article ? [...Array(article.setCount).fill('A'), ...Array(article.exerciseCount).fill('E')] : mixed ? STUDY_ROUNDS.slice(0, 4) : STUDY_ROUNDS;
-    const currentRound = mixed && STUDY_STATE.round === 'F' ? 'E' : STUDY_STATE.round;
-    const currentIdx = parks
+    const rounds = STUDY_STATE.pictureBook ? Array(PhonicsPictureBookContent.pages.length).fill('A') : STUDY_STATE.phonics ? ['A', 'B', 'C', 'D'] : article ? [...Array(article.setCount).fill('A'), ...Array(article.exerciseCount).fill('E')] : mixed ? STUDY_ROUNDS.slice(0, 4) : STUDY_ROUNDS;
+    const currentRound = STUDY_STATE.phonics ? STUDY_STATE.phonics.stage : mixed && STUDY_STATE.round === 'F' ? 'E' : STUDY_STATE.round;
+    const currentIdx = STUDY_STATE.pictureBook ? (STUDY_STATE.pictureBook.completed ? rounds.length : STUDY_STATE.pictureBook.index) : parks
         ? STUDY_STATE.srFinalized ? rounds.length : currentRound === 'A' ? parks.set : article.setCount + STUDY_STATE.currentSentenceIndex
         : rounds.indexOf(currentRound);
     let bar = document.getElementById('study-progress-indicator');
@@ -1469,7 +1489,7 @@ function updateStudyProgress() {
     bar.innerHTML = rounds.map((r, i) => {
         const isActive = i === currentIdx;
         const isDone = i < currentIdx;
-        const label = mixed && r === 'E' ? 'Non-spelling' : STUDY_ROUND_LABELS[r] || r;
+        const label = STUDY_STATE.phonics ? STUDY_STATE.phonics.labels[r] : mixed && r === 'E' ? 'Non-spelling' : STUDY_ROUND_LABELS[r] || r;
         let classes = 'flex-1 h-2 rounded-full transition-all duration-300';
         if (isDone) classes += ' bg-green-400';
         else if (isActive) classes += ' bg-yellow-400 animate-pulse';
@@ -1488,6 +1508,7 @@ function playHappySound() {
 // --- KEYBOARD SUPPORT ---
 window.addEventListener('keydown', (e) => {
     if (!STUDY_STATE.active) return;
+    if (STUDY_STATE.pictureBook || (STUDY_STATE.phonics && STUDY_STATE.round !== 'D')) return;
 
     if (STUDY_STATE.round === 'C') {
         handleRoundCKeyDown(e.key);

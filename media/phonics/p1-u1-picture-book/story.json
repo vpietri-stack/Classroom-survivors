@@ -1,0 +1,152 @@
+{
+  "title": "The Big Bag",
+  "book": "Phonics1",
+  "unit": 1,
+  "curriculumPage": 4,
+  "pages": [
+    {
+      "page": 1,
+      "text": "The bear has a big bag.",
+      "image": "page-01-master.webp",
+      "master": "page-01-master.png",
+      "prompt": "Use case: illustration-story. ONE landscape 3:2 children's picture book illustration, page 1 of The Big Bag, for ages 2â€“5. A round cinnamon-brown bear with cream muzzle, tiny black eyes, round ears and rust-red scarf stands beside a shoulder-high cobalt/teal-blue canvas backpack with rounded top zipper, front pocket, shoulder straps, ochre lining, and one cream star patch. Smiling bear rests one paw on the bag. Simple grassy patch, pale warm-cream paper and distant green brushstrokes. Original hand-painted gouache and watercolor, colored-pencil edges, matte texture, warm faces and flat soft shapes. Whole bear and bag visible; lower18% softly empty cream for separate HTML caption. No text, watermark, other characters or inventory.",
+      "narration": "page-01-recorded-v1.mp3",
+      "narrationSeconds": 3.54,
+      "meaning": "小熊有一个大包。",
+      "requiredWords": [
+        "bear",
+        "bag"
+      ]
+    },
+    {
+      "page": 2,
+      "text": "What is in the bag?",
+      "image": "page-02-master.webp",
+      "master": "page-02-master.png",
+      "prompt": "Use case: illustration-story. Create ONE NEW storybook illustration for page 2, not a collage or a grid. Reference image is the visual identity and art-style reference ONLY, not a scene to repeat. Match EXACTLY its cinnamon-brown rounded bear, cream muzzle, tiny black eyes, blush cheeks, round ears, rust-red scarf, and cobalt/teal-blue backpack with ochre lining, rounded top zipper, front pocket, shoulder straps and ONE cream star patch. Match the same hand-painted gouache/watercolor, colored-pencil edges, tactile warm-cream paper, flat soft shapes, gentle grassy setting and rich muted colors. This is a continuous picture book for ages 2â€“5. NEW SCENE: The same bear has opened the top zipper of the same backpack and leans forward, looking curiously down into its shadowy ochre-lined opening with a puzzled, intrigued expression. One paw holds the edge open. No contents are visible yet. Show the bag's cream star patch, front pocket and shoulder straps. Composition: landscape 3:2, same dimensions/proportions as reference, spacious readable silhouettes, all key objects within frame, lower 18% softly empty cream for a separate caption. Story text for your understanding only: \"What is in the bag?\". DO NOT PRINT ANY TEXT, letters, caption, title, page numbers, logos or watermark. No 3D, photorealism, clipart or extra untaught objects. Preserve character and bag identity while changing the pose/composition to show this new story beat.",
+      "narration": "page-02-recorded-v1.mp3",
+      "narrationSeconds": 2.54,
+      "meaning": "包里有什么？",
+      "requiredWords": [
+        "bag"
+      ]
+    },
+    {
+      "page": 3,
+      "text": "Look! An apple, and a banana!",
+      "image": "page-03-master.webp",
+      "master": "page-03-master.png",
+      "prompt": "Use case: illustration-story. Create ONE NEW storybook illustration for page 3, not a collage or a grid. Reference image is the visual identity and art-style reference ONLY, not a scene to repeat. Match EXACTLY its cinnamon-brown rounded bear, cream muzzle, tiny black eyes, blush cheeks, round ears, rust-red scarf, and cobalt/teal-blue backpack with ochre lining, rounded top zipper, front pocket, shoulder straps and ONE cream star patch. Match the same hand-painted gouache/watercolor, colored-pencil edges, tactile warm-cream paper, flat soft shapes, gentle grassy setting and rich muted colors. This is a continuous picture book for ages 2â€“5. NEW SCENE: The same bear smiles in delighted discovery beside the OPEN backpack. One bright RED APPLE and one curved YELLOW BANANA emerge above its open top, clearly separate and readily identifiable, as if gently lifted out by magic. Only these two inventory items are present. No other objects from the story. Keep bear and bag visible. Composition: landscape 3:2, same dimensions/proportions as reference, spacious readable silhouettes, all key objects within frame, lower 18% softly empty cream for a separate caption. Story text for your understanding only: \"Look! An apple, and a banana!\". DO NOT PRINT ANY TEXT, letters, caption, title, page numbers, logos or watermark. No 3D, photorealism, clipart or extra untaught objects. Preserve character and bag identity while changing the pose/composition to show this new story beat.",
+      "narration": "page-03-recorded-v1.mp3",
+      "narrationSeconds": 5.1,
+      "meaning": "看！一个苹果，还有一根香蕉！",
+      "requiredWords": [
+        "apple",
+        "banana"
+      ]
+    },
+    {
+      "page": 4,
+      "text": "Look! A ball, and a cup!",
+      "image": "page-04-master.webp",
+      "master": "page-04-master.png",
+      "prompt": "Use case: illustration-story. Create ONE NEW storybook illustration for page 4, not a collage or a grid. Reference image is the visual identity and art-style reference ONLY, not a scene to repeat. Match EXACTLY its cinnamon-brown rounded bear, cream muzzle, tiny black eyes, blush cheeks, round ears, rust-red scarf, and cobalt/teal-blue backpack with ochre lining, rounded top zipper, front pocket, shoulder straps and ONE cream star patch. Match the same hand-painted gouache/watercolor, colored-pencil edges, tactile warm-cream paper, flat soft shapes, gentle grassy setting and rich muted colors. This is a continuous picture book for ages 2â€“5. NEW SCENE: The same bear smiles beside the OPEN backpack as one round colorful toy BALL and one warm yellow CUP WITH A HANDLE are revealed at its opening. Ball is a simple red and sky-blue play ball; cup is visibly a ceramic mug with a distinct curved handle, not a drinking glass. Only these two inventory items are present. Keep bear and bag visible. Composition: landscape 3:2, same dimensions/proportions as reference, spacious readable silhouettes, all key objects within frame, lower 18% softly empty cream for a separate caption. Story text for your understanding only: \"Look! A ball, and a cup!\". DO NOT PRINT ANY TEXT, letters, caption, title, page numbers, logos or watermark. No 3D, photorealism, clipart or extra untaught objects. Preserve character and bag identity while changing the pose/composition to show this new story beat.",
+      "narration": "page-04-recorded-v1.mp3",
+      "narrationSeconds": 4.52,
+      "meaning": "看！一个球，还有一个杯子！",
+      "requiredWords": [
+        "ball",
+        "cup"
+      ]
+    },
+    {
+      "page": 5,
+      "text": "Look! An axe, and a cactus!",
+      "image": "page-05-master.webp",
+      "master": "page-05-master.png",
+      "prompt": "Use case: illustration-story. Create ONE NEW storybook illustration for page 5, not a collage or a grid. Reference image is the visual identity and art-style reference ONLY, not a scene to repeat. Match EXACTLY its cinnamon-brown rounded bear, cream muzzle, tiny black eyes, blush cheeks, round ears, rust-red scarf, and cobalt/teal-blue backpack with ochre lining, rounded top zipper, front pocket, shoulder straps and ONE cream star patch. Match the same hand-painted gouache/watercolor, colored-pencil edges, tactile warm-cream paper, flat soft shapes, gentle grassy setting and rich muted colors. This is a continuous picture book for ages 2â€“5. NEW SCENE: The same bear has an amused surprised expression beside the OPEN backpack. A small recognizable AXE with a wooden handle and silver head and a green branching CACTUS in a simple small terracotta pot emerge from the bag opening. The axe is a resting household tool, no character holds or swings it. Both objects are very clearly separate. Only these two inventory items are present, and the bear's paws rest on the bag. Composition: landscape 3:2, same dimensions/proportions as reference, spacious readable silhouettes, all key objects within frame, lower 18% softly empty cream for a separate caption. Story text for your understanding only: \"Look! An axe, and a cactus!\". DO NOT PRINT ANY TEXT, letters, caption, title, page numbers, logos or watermark. No 3D, photorealism, clipart or extra untaught objects. Preserve character and bag identity while changing the pose/composition to show this new story beat.",
+      "narration": "page-05-recorded-v1.mp3",
+      "narrationSeconds": 4.28,
+      "meaning": "看！一把斧头，还有一棵仙人掌！",
+      "requiredWords": [
+        "axe",
+        "cactus"
+      ]
+    },
+    {
+      "page": 6,
+      "text": "Look! A cat, and a caterpillar!",
+      "image": "page-06-master.webp",
+      "master": "page-06-master.png",
+      "prompt": "Use case: illustration-story. Create ONE NEW storybook illustration for page 6, not a collage or a grid. Reference image is the visual identity and art-style reference ONLY, not a scene to repeat. Match EXACTLY its cinnamon-brown rounded bear, cream muzzle, tiny black eyes, blush cheeks, round ears, rust-red scarf, and cobalt/teal-blue backpack with ochre lining, rounded top zipper, front pocket, shoulder straps and ONE cream star patch. Match the same hand-painted gouache/watercolor, colored-pencil edges, tactile warm-cream paper, flat soft shapes, gentle grassy setting and rich muted colors. This is a continuous picture book for ages 2â€“5. NEW SCENE: The same bear discovers a friendly ginger-striped CAT with a white chest peeking out of the OPEN backpack, while a plump green CATERPILLAR with several rounded body segments and tiny legs crawls on the front top edge of the bag, large enough to recognize. Cat and caterpillar are unmistakably different animals, both clear and prominent. Bear smiles. Only those animals plus bear and backpack, no other inventory. Composition: landscape 3:2, same dimensions/proportions as reference, spacious readable silhouettes, all key objects within frame, lower 18% softly empty cream for a separate caption. Story text for your understanding only: \"Look! A cat, and a caterpillar!\". DO NOT PRINT ANY TEXT, letters, caption, title, page numbers, logos or watermark. No 3D, photorealism, clipart or extra untaught objects. Preserve character and bag identity while changing the pose/composition to show this new story beat.",
+      "narration": "page-06-recorded-v1.mp3",
+      "narrationSeconds": 4.16,
+      "meaning": "看！一只猫，还有一条毛毛虫！",
+      "requiredWords": [
+        "cat",
+        "caterpillar"
+      ]
+    },
+    {
+      "page": 7,
+      "text": "What?! An alligator on a bike!",
+      "image": "page-07-master.webp",
+      "master": "page-07-master.png",
+      "prompt": "Use case: illustration-story. Create ONE NEW storybook illustration for page 7, not a collage or a grid. Reference image is the visual identity and art-style reference ONLY, not a scene to repeat. Match EXACTLY its cinnamon-brown rounded bear, cream muzzle, tiny black eyes, blush cheeks, round ears, rust-red scarf, and cobalt/teal-blue backpack with ochre lining, rounded top zipper, front pocket, shoulder straps and ONE cream star patch. Match the same hand-painted gouache/watercolor, colored-pencil edges, tactile warm-cream paper, flat soft shapes, gentle grassy setting and rich muted colors. This is a continuous picture book for ages 2â€“5. NEW SCENE: The same bear stands to the left with wide delighted eyes and a small surprised O mouth. A friendly long-snouted GREEN ALLIGATOR rides a small RED BICYCLE magically out from the OPEN blue backpack to the right. This is one single alligator actually RIDING one bike, not standing beside it: front paws on the handlebars, rear feet at the pedals, tail trailing behind. BOTH full bicycle wheels, handlebars, saddle, pedals and complete alligator clearly visible, coherent anatomy. Backpack retains its recognizable front star patch. No other characters or inventory. Humorous wondrous reveal, never frightening. Composition: landscape 3:2, same dimensions/proportions as reference, spacious readable silhouettes, all key objects within frame, lower 18% softly empty cream for a separate caption. Story text for your understanding only: \"What?! An alligator on a bike!\". DO NOT PRINT ANY TEXT, letters, caption, title, page numbers, logos or watermark. No 3D, photorealism, clipart or extra untaught objects. Preserve character and bag identity while changing the pose/composition to show this new story beat.",
+      "narration": "page-07-recorded-v1.mp3",
+      "narrationSeconds": 4.57,
+      "meaning": "什么？！一只骑自行车的短吻鳄！",
+      "requiredWords": [
+        "alligator",
+        "bike"
+      ]
+    },
+    {
+      "page": 8,
+      "text": "What?! An astronaut with a camera!",
+      "image": "page-08-master.webp",
+      "master": "page-08-master.png",
+      "prompt": "Use case: illustration-story. Create ONE NEW storybook illustration for page 8, not a collage or a grid. Reference image is the visual identity and art-style reference ONLY, not a scene to repeat. Match EXACTLY its cinnamon-brown rounded bear, cream muzzle, tiny black eyes, blush cheeks, round ears, rust-red scarf, and cobalt/teal-blue backpack with ochre lining, rounded top zipper, front pocket, shoulder straps and ONE cream star patch. Match the same hand-painted gouache/watercolor, colored-pencil edges, tactile warm-cream paper, flat soft shapes, gentle grassy setting and rich muted colors. This is a continuous picture book for ages 2â€“5. NEW SCENE: The same bear looks upward in amazement beside the OPEN backpack as a friendly human ASTRONAUT emerges from it. Astronaut wears a clearly recognizable WHITE spacesuit with rounded helmet and visible friendly face, holding a distinct black-and-silver CAMERA with one large circular lens, preparing to photograph the bear. Astronaut, camera, bear and blue star-patch bag are clearly readable, no other characters or inventory, no printed logos or flags. Composition: landscape 3:2, same dimensions/proportions as reference, spacious readable silhouettes, all key objects within frame, lower 18% softly empty cream for a separate caption. Story text for your understanding only: \"What?! An astronaut with a camera!\". DO NOT PRINT ANY TEXT, letters, caption, title, page numbers, logos or watermark. No 3D, photorealism, clipart or extra untaught objects. Preserve character and bag identity while changing the pose/composition to show this new story beat.",
+      "narration": "page-08-recorded-v1.mp3",
+      "narrationSeconds": 4.41,
+      "meaning": "什么？！一位拿着相机的宇航员！",
+      "requiredWords": [
+        "astronaut",
+        "camera"
+      ]
+    },
+    {
+      "page": 9,
+      "text": "Where is the bear?",
+      "image": "page-09-master.webp",
+      "master": "page-09-master.png",
+      "prompt": "Use case: illustration-story. Create ONE NEW storybook illustration for page 9, not a collage or a grid. Reference image is the visual identity and art-style reference ONLY, not a scene to repeat. Match EXACTLY its cinnamon-brown rounded bear, cream muzzle, tiny black eyes, blush cheeks, round ears, rust-red scarf, and cobalt/teal-blue backpack with ochre lining, rounded top zipper, front pocket, shoulder straps and ONE cream star patch. Match the same hand-painted gouache/watercolor, colored-pencil edges, tactile warm-cream paper, flat soft shapes, gentle grassy setting and rich muted colors. This is a continuous picture book for ages 2â€“5. NEW SCENE: The bear has COMPLETELY DISAPPEARED. Show ONLY the SAME large OPEN blue backpack with ochre lining and cream star patch sitting on the same quiet grassy patch. Empty space to its left emphasizes the absence of the bear. No bear, no paw, no scarf, no eyes peeking out, no other characters or inventory items. A quiet playful page-turn mystery, not gloomy. Composition: landscape 3:2, same dimensions/proportions as reference, spacious readable silhouettes, all key objects within frame, lower 18% softly empty cream for a separate caption. Story text for your understanding only: \"Where is the bear?\". DO NOT PRINT ANY TEXT, letters, caption, title, page numbers, logos or watermark. No 3D, photorealism, clipart or extra untaught objects. Preserve character and bag identity while changing the pose/composition to show this new story beat.",
+      "narration": "page-09-recorded-v1.mp3",
+      "narrationSeconds": 1.9,
+      "meaning": "小熊在哪里？",
+      "requiredWords": [
+        "bear"
+      ]
+    },
+    {
+      "page": 10,
+      "text": "Look! The bear is in the bag!",
+      "image": "page-10-master.webp",
+      "master": "page-10-master.png",
+      "prompt": "Use case: illustration-story. Create ONE NEW storybook illustration for page 10, not a collage or a grid. Reference image is the visual identity and art-style reference ONLY, not a scene to repeat. Match EXACTLY its cinnamon-brown rounded bear, cream muzzle, tiny black eyes, blush cheeks, round ears, rust-red scarf, and cobalt/teal-blue backpack with ochre lining, rounded top zipper, front pocket, shoulder straps and ONE cream star patch. Match the same hand-painted gouache/watercolor, colored-pencil edges, tactile warm-cream paper, flat soft shapes, gentle grassy setting and rich muted colors. This is a continuous picture book for ages 2â€“5. NEW SCENE: Surprise ending: the SAME cinnamon-brown bear is now INSIDE the SAME blue backpack. Its smiling cream-muzzled head, round ears, rust-red scarf, and two paws pop playfully out of the top opening. Its entire lower body is inside the bag and not standing beside it. The cream star patch and front pocket on the bag are fully visible. Bear looks happily at the reader. Only bear and bag, no other inventory. Warm joyful humorous ending. Composition: landscape 3:2, same dimensions/proportions as reference, spacious readable silhouettes, all key objects within frame, lower 18% softly empty cream for a separate caption. Story text for your understanding only: \"Look! The bear is in the bag!\". DO NOT PRINT ANY TEXT, letters, caption, title, page numbers, logos or watermark. No 3D, photorealism, clipart or extra untaught objects. Preserve character and bag identity while changing the pose/composition to show this new story beat.",
+      "narration": "page-10-recorded-v1.mp3",
+      "narrationSeconds": 4.261,
+      "meaning": "看！小熊在包里！",
+      "requiredWords": [
+        "bear",
+        "bag"
+      ]
+    }
+  ],
+  "narration": {
+    "voice": "teacher original recording",
+    "sourceKind": "teacher recording",
+    "delivery": "Natural recorded voice, pitch and tempo preserved; consistent playback volume.",
+    "masterSHA256": "70b3be7a873b5b905b7548eb107b650cafd86adeec18c81a63e8ab787e733016"
+  }
+}

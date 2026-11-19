@@ -386,6 +386,10 @@ function nonSpellingDetailsIndex(student) {
 }
 
 function describeSRItem(cat, key, index) {
+    if (cat === 'vocab' && String(key).startsWith('phonics1:word:')) {
+        const word = key.slice('phonics1:word:'.length);
+        return { category: cat, label: 'Phonics 1', text: word, html: _esc(word) };
+    }
     const typed = cat === 'sentences' && nonSpellingCategory(key);
     if (!typed) return { category: cat, label: { vocab: 'Vocabulary', sentences: 'Sentences', sentencePairs: 'Sentence Pairs' }[cat], text: key, html: _esc(key) };
     const parts = key.split(':');

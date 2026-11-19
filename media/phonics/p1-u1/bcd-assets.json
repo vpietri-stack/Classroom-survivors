@@ -1,0 +1,459 @@
+{
+  "book": "Phonics 1",
+  "unit": 1,
+  "audioStatus": "Teacher recordings paired for all 16 words",
+  "timingStatus": "Speech/silence cue alignment, awaiting teacher review",
+  "rectFormat": "x,y,width,height",
+  "font": "Fredoka, bold, self-hosted project font",
+  "pages": [
+    {
+      "page": 2,
+      "letter": "B b",
+      "diagram": "b/letter-pictures.webp",
+      "compartmentsPerLetter": 5,
+      "words": [
+        {
+          "word": "banana",
+          "initial": "b",
+          "frames": 128,
+          "durationMs": 15140,
+          "initialRect": [
+            122,
+            471,
+            56,
+            80
+          ],
+          "endingRect": [
+            180,
+            496,
+            298,
+            55
+          ],
+          "audio": "awaiting teacher recording",
+          "picture": "b/banana/picture.webp",
+          "wordCard": "b/banana/word.webp",
+          "gif": "b/banana/banana-phonics-smooth.gif",
+          "animatedWebP": "b/banana/banana-phonics-smooth.webp",
+          "master": "b/banana/illustration-master.png"
+        },
+        {
+          "word": "ball",
+          "initial": "b",
+          "frames": 128,
+          "durationMs": 15140,
+          "initialRect": [
+            209,
+            471,
+            56,
+            80
+          ],
+          "endingRect": [
+            267,
+            471,
+            127,
+            80
+          ],
+          "audio": "awaiting teacher recording",
+          "picture": "b/ball/picture.webp",
+          "wordCard": "b/ball/word.webp",
+          "gif": "b/ball/ball-phonics-smooth.gif",
+          "animatedWebP": "b/ball/ball-phonics-smooth.webp",
+          "master": "b/ball/illustration-master.png"
+        },
+        {
+          "word": "bear",
+          "initial": "b",
+          "frames": 128,
+          "durationMs": 15140,
+          "initialRect": [
+            190,
+            471,
+            56,
+            80
+          ],
+          "endingRect": [
+            248,
+            494,
+            163,
+            59
+          ],
+          "audio": "awaiting teacher recording",
+          "picture": "b/bear/picture.webp",
+          "wordCard": "b/bear/word.webp",
+          "gif": "b/bear/bear-phonics-smooth.gif",
+          "animatedWebP": "b/bear/bear-phonics-smooth.webp",
+          "master": "b/bear/illustration-master.png"
+        },
+        {
+          "word": "bag",
+          "initial": "b",
+          "frames": 128,
+          "durationMs": 15140,
+          "initialRect": [
+            213,
+            471,
+            56,
+            80
+          ],
+          "endingRect": [
+            271,
+            495,
+            115,
+            79
+          ],
+          "audio": "awaiting teacher recording",
+          "picture": "b/bag/picture.webp",
+          "wordCard": "b/bag/word.webp",
+          "gif": "b/bag/bag-phonics-smooth.gif",
+          "animatedWebP": "b/bag/bag-phonics-smooth.webp",
+          "master": "b/bag/illustration-master.png"
+        },
+        {
+          "word": "bike",
+          "initial": "b",
+          "frames": 128,
+          "durationMs": 15140,
+          "initialRect": [
+            203,
+            471,
+            56,
+            80
+          ],
+          "endingRect": [
+            263,
+            471,
+            136,
+            82
+          ],
+          "audio": "awaiting teacher recording",
+          "picture": "b/bike/picture.webp",
+          "wordCard": "b/bike/word.webp",
+          "gif": "b/bike/bike-phonics-smooth.gif",
+          "animatedWebP": "b/bike/bike-phonics-smooth.webp",
+          "master": "b/bike/illustration-master.png"
+        }
+      ],
+      "capitalRect": [
+        117,
+        198,
+        163,
+        204
+      ],
+      "lowercaseRect": [
+        338,
+        188,
+        149,
+        214
+      ]
+    },
+    {
+      "page": 3,
+      "letter": "C c",
+      "diagram": "c/letter-pictures.webp",
+      "compartmentsPerLetter": 5,
+      "words": [
+        {
+          "word": "cat",
+          "initial": "c",
+          "frames": 128,
+          "durationMs": 15140,
+          "initialRect": [
+            222,
+            495,
+            50,
+            57
+          ],
+          "endingRect": [
+            275,
+            477,
+            105,
+            74
+          ],
+          "audio": "awaiting teacher recording",
+          "picture": "c/cat/picture.webp",
+          "wordCard": "c/cat/word.webp",
+          "gif": "c/cat/cat-phonics-smooth.gif",
+          "animatedWebP": "c/cat/cat-phonics-smooth.webp",
+          "master": "c/cat/illustration-master.png"
+        },
+        {
+          "word": "cup",
+          "initial": "c",
+          "frames": 128,
+          "durationMs": 15140,
+          "initialRect": [
+            215,
+            495,
+            50,
+            57
+          ],
+          "endingRect": [
+            270,
+            496,
+            116,
+            78
+          ],
+          "audio": "awaiting teacher recording",
+          "picture": "c/cup/picture.webp",
+          "wordCard": "c/cup/word.webp",
+          "gif": "c/cup/cup-phonics-smooth.gif",
+          "animatedWebP": "c/cup/cup-phonics-smooth.webp",
+          "master": "c/cup/illustration-master.png"
+        },
+        {
+          "word": "caterpillar",
+          "initial": "c",
+          "frames": 128,
+          "durationMs": 15140,
+          "initialRect": [
+            39,
+            495,
+            50,
+            57
+          ],
+          "endingRect": [
+            92,
+            471,
+            469,
+            103
+          ],
+          "audio": "awaiting teacher recording",
+          "picture": "c/caterpillar/picture.webp",
+          "wordCard": "c/caterpillar/word.webp",
+          "gif": "c/caterpillar/caterpillar-phonics-smooth.gif",
+          "animatedWebP": "c/caterpillar/caterpillar-phonics-smooth.webp",
+          "master": "c/caterpillar/illustration-master.png"
+        },
+        {
+          "word": "cactus",
+          "initial": "c",
+          "frames": 128,
+          "durationMs": 15140,
+          "initialRect": [
+            140,
+            495,
+            50,
+            57
+          ],
+          "endingRect": [
+            193,
+            477,
+            268,
+            75
+          ],
+          "audio": "awaiting teacher recording",
+          "picture": "c/cactus/picture.webp",
+          "wordCard": "c/cactus/word.webp",
+          "gif": "c/cactus/cactus-phonics-smooth.gif",
+          "animatedWebP": "c/cactus/cactus-phonics-smooth.webp",
+          "master": "c/cactus/illustration-master.png"
+        },
+        {
+          "word": "camera",
+          "initial": "c",
+          "frames": 128,
+          "durationMs": 15140,
+          "initialRect": [
+            120,
+            495,
+            50,
+            57
+          ],
+          "endingRect": [
+            173,
+            494,
+            306,
+            59
+          ],
+          "audio": "awaiting teacher recording",
+          "picture": "c/camera/picture.webp",
+          "wordCard": "c/camera/word.webp",
+          "gif": "c/camera/camera-phonics-smooth.gif",
+          "animatedWebP": "c/camera/camera-phonics-smooth.webp",
+          "master": "c/camera/illustration-master.png"
+        }
+      ],
+      "capitalRect": [
+        117,
+        195,
+        176,
+        209
+      ],
+      "lowercaseRect": [
+        347,
+        252,
+        132,
+        151
+      ]
+    },
+    {
+      "page": 4,
+      "letter": "D d",
+      "diagram": "d/letter-pictures.webp",
+      "compartmentsPerLetter": 6,
+      "words": [
+        {
+          "word": "dog",
+          "initial": "d",
+          "frames": 128,
+          "durationMs": 15140,
+          "initialRect": [
+            211,
+            471,
+            56,
+            80
+          ],
+          "endingRect": [
+            271,
+            494,
+            115,
+            80
+          ],
+          "audio": "awaiting teacher recording",
+          "picture": "d/dog/picture.webp",
+          "wordCard": "d/dog/word.webp",
+          "gif": "d/dog/dog-phonics-smooth.gif",
+          "animatedWebP": "d/dog/dog-phonics-smooth.webp",
+          "master": "d/dog/illustration-master.png"
+        },
+        {
+          "word": "door",
+          "initial": "d",
+          "frames": 128,
+          "durationMs": 15140,
+          "initialRect": [
+            187,
+            471,
+            56,
+            80
+          ],
+          "endingRect": [
+            247,
+            494,
+            165,
+            58
+          ],
+          "audio": "awaiting teacher recording",
+          "picture": "d/door/picture.webp",
+          "wordCard": "d/door/word.webp",
+          "gif": "d/door/door-phonics-smooth.gif",
+          "animatedWebP": "d/door/door-phonics-smooth.webp",
+          "master": "d/door/illustration-master.png"
+        },
+        {
+          "word": "dice",
+          "initial": "d",
+          "frames": 128,
+          "durationMs": 15140,
+          "initialRect": [
+            201,
+            471,
+            56,
+            80
+          ],
+          "endingRect": [
+            263,
+            471,
+            135,
+            82
+          ],
+          "audio": "awaiting teacher recording",
+          "picture": "d/dice/picture.webp",
+          "wordCard": "d/dice/word.webp",
+          "gif": "d/dice/dice-phonics-smooth.gif",
+          "animatedWebP": "d/dice/dice-phonics-smooth.webp",
+          "master": "d/dice/illustration-master.png"
+        },
+        {
+          "word": "donut",
+          "initial": "d",
+          "frames": 128,
+          "durationMs": 15140,
+          "initialRect": [
+            157,
+            471,
+            56,
+            80
+          ],
+          "endingRect": [
+            217,
+            477,
+            227,
+            75
+          ],
+          "audio": "awaiting teacher recording",
+          "picture": "d/donut/picture.webp",
+          "wordCard": "d/donut/word.webp",
+          "gif": "d/donut/donut-phonics-smooth.gif",
+          "animatedWebP": "d/donut/donut-phonics-smooth.webp",
+          "master": "d/donut/illustration-master.png"
+        },
+        {
+          "word": "dolphin",
+          "initial": "d",
+          "frames": 128,
+          "durationMs": 15140,
+          "initialRect": [
+            120,
+            471,
+            56,
+            80
+          ],
+          "endingRect": [
+            180,
+            471,
+            298,
+            103
+          ],
+          "audio": "awaiting teacher recording",
+          "picture": "d/dolphin/picture.webp",
+          "wordCard": "d/dolphin/word.webp",
+          "gif": "d/dolphin/dolphin-phonics-smooth.gif",
+          "animatedWebP": "d/dolphin/dolphin-phonics-smooth.webp",
+          "master": "d/dolphin/illustration-master.png"
+        },
+        {
+          "word": "dinosaur",
+          "initial": "d",
+          "frames": 128,
+          "durationMs": 15140,
+          "initialRect": [
+            88,
+            471,
+            56,
+            80
+          ],
+          "endingRect": [
+            150,
+            471,
+            361,
+            81
+          ],
+          "audio": "awaiting teacher recording",
+          "picture": "d/dinosaur/picture.webp",
+          "wordCard": "d/dinosaur/word.webp",
+          "gif": "d/dinosaur/dinosaur-phonics-smooth.gif",
+          "animatedWebP": "d/dinosaur/dinosaur-phonics-smooth.webp",
+          "master": "d/dinosaur/illustration-master.png"
+        }
+      ],
+      "capitalRect": [
+        110,
+        198,
+        178,
+        204
+      ],
+      "lowercaseRect": [
+        340,
+        188,
+        148,
+        214
+      ]
+    }
+  ],
+  "generation": {
+    "tool": "built-in image_gen",
+    "wordPrompt": "Educational phonics vocabulary asset for {word}. Friendly polished childrenâ€™s educational illustration with soft realistic shading, clear recognisable silhouette, rich natural colours. Isolated on pure white, centred, entire subject visible. No words, letters, captions, watermark, border, extra characters or scenery.",
+    "diagramPrompt": "Uppercase and lowercase outlined letter diagrams, each divided into one spacious compartment per listed word, with a matching pictogram in each compartment."
+  }
+}

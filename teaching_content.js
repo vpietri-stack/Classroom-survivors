@@ -7,6 +7,7 @@ const AVAILABLE_CONTENT = {};
  */
 
 const BOOK_SERIES = {
+    "Phonics1": ["Phonics1"],
     "PU1": ["PU1"],
     "PU2": ["PU2"],
     "PU3": ["PU3"],
@@ -477,7 +478,7 @@ function buildItemPool(pages, type) {
 
         const pageItems = [];
         content[type].forEach(item => {
-            const k = itemKey(item);
+            const k = p.book === 'Phonics1' && type === 'vocab' ? 'phonics1:word:' + itemKey(item) : itemKey(item);
             if (seen.has(k)) return;
             seen.add(k);
             const entry = { item, key: k, pageAbsIndex: p.absIndex };

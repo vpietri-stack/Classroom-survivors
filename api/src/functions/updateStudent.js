@@ -57,6 +57,16 @@ app.http('updateStudent', {
             if (items.length === 0) return { status: 404, body: 'Student not found.' };
 
             const user = items[0];
+            if (body.pictureBookAdvance !== undefined) {
+                const advance = body.pictureBookAdvance;
+                const valid = advance?.id === 'phonics1-u1-picture-book-p4'
+                    && advance.from?.book === 'Phonics1' && String(advance.from.unit) === '1' && String(advance.from.page) === '4'
+                    && Object.keys(fields).length === 3 && fields.book === 'Phonics1' && String(fields.unit) === '2' && String(fields.page) === '5';
+                if (!valid) return { status: 400, body: 'Invalid picture-book destination.' };
+                const atSource = user.book === 'Phonics1' && String(user.unit) === '1' && String(user.page) === '4';
+                const atDestination = user.book === 'Phonics1' && String(user.unit) === '2' && String(user.page) === '5';
+                if (!atSource && !atDestination) return { status: 409, jsonBody: { reason: 'assignment_changed', student: auth.publicUser(user) } };
+            }
             if (body.expectedTargets !== undefined && JSON.stringify(body.expectedTargets) !== JSON.stringify(user.targets || [])) {
                 return { status: 409, body: 'Targets changed. Refresh the dashboard and retry.' };
             }
@@ -88,7 +98,7 @@ app.http('updateStudent', {
                 .map(key => ({ op: 'set', path: '/' + key, value: fields[key] }));
             for (let i = 0; i < operations.length; i += 10) {
                 const result = await getContainer().item(user.id, user.studentId === undefined ? undefined : user.studentId).patch(operations.slice(i, i + 10),
-                    changes.targets || changes.classGroups || changes.teacher || changes.classTime ? {accessCondition:{type:'IfMatch',condition:user._etag}} : undefined);
+                    body.pictureBookAdvance || changes.targets || changes.classGroups || changes.teacher || changes.classTime ? {accessCondition:{type:'IfMatch',condition:user._etag}} : undefined);
                 if (result.resource) user._etag = result.resource._etag;
             }
 

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Phonics 1 · B C D 素材预览</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; height: 100vh; height: 100dvh; display: flex; flex-direction: column; background: #f7f5ee; color: #29382f; font-family: "Trebuchet MS", "Microsoft YaHei", sans-serif; padding: 14px; }
+    header, footer { display: flex; gap: 12px; align-items: center; justify-content: center; flex-wrap: wrap; flex-shrink: 0; }
+    button { font: inherit; cursor: pointer; border: 1px solid #d3ddcf; border-radius: 10px; padding: 9px 15px; background: white; color: inherit; touch-action: manipulation; }
+    button[aria-current="page"] { color: white; background: #315e42; }
+    button:focus-visible { outline: 3px solid #df952c; }
+    button:disabled { opacity: .3; }
+    #word-tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin: 12px 0; }
+    #word-tabs button { font-size: 13px; padding: 7px 10px; }
+    main { flex: 1; min-height: 0; max-width: 1100px; width: 100%; margin: auto; display: flex; justify-content: center; align-items: center; gap: 20px; }
+    main > img { width: 100%; height: 100%; object-fit: contain; background: white; border-radius: 20px; }
+    .card { width: 49%; min-height: 0; max-height: 100%; display: flex; flex-direction: column; border-radius: 20px; background: white; padding: 12px; }
+    .card img { width: 100%; min-height: 0; max-height: 58vh; object-fit: contain; }
+    .card span { padding: 8px 0 0; font-size: 13px; }
+    footer { padding: 12px 0 0; }
+    .status { margin: 8px 0 0; text-align: center; color: #68756b; font-size: 12px; }
+    @media(max-width:600px) { main { gap: 8px; } .card { padding: 6px; } button { padding: 8px 11px; } }
+  </style>
+</head>
+<body>
+  <header aria-label="选择字母页"><button data-letter="b">第2页 · B b</button><button data-letter="c">第3页 · C c</button><button data-letter="d">第4页 · D d</button></header>
+  <nav id="word-tabs" aria-label="选择素材"></nav>
+  <main id="artwork"></main>
+  <footer><button id="previous" aria-label="上一张">←</button><span id="current"></span><button id="next" aria-label="下一张">→</button></footer>
+  <p class="status">点击动画卡查看动态效果 · 等待老师录音后对齐声音与动画</p>
+  <script>
+    const groups = { b: ['banana','ball','bear','bag','bike'], c: ['cat','cup','caterpillar','cactus','camera'], d: ['dog','door','dice','donut','dolphin','dinosaur'] };
+    let letter = 'b';
+    let index = 0;
+    const root = 'media/phonics/p1-u1/';
+    function render() {
+      document.querySelectorAll('[data-letter]').forEach(button => {
+        if (button.dataset.letter === letter) button.setAttribute('aria-current','page');
+        else button.removeAttribute('aria-current');
+      });
+      const items = ['字母', ...groups[letter]];
+      const tabs = document.getElementById('word-tabs');
+      tabs.replaceChildren();
+      items.forEach((item, position) => {
+        const button = document.createElement('button');
+        button.textContent = item;
+        if (position === index) button.setAttribute('aria-current','page');
+        button.onclick = () => { index = position; render(); };
+        tabs.append(button);
+      });
+      const art = document.getElementById('artwork');
+      art.replaceChildren();
+      if (index === 0) {
+        const image = new Image();
+        image.src = `${root}${letter}/letter-pictures.webp`;
+        image.alt = `${letter.toUpperCase()} ${letter} 字母图片`;
+        art.append(image);
+      } else {
+        const word = items[index];
+        const path = `${root}${letter}/${word}/`;
+        const staticCard = document.createElement('div'); staticCard.className = 'card';
+        staticCard.innerHTML = `<img src="${path}word.webp" alt="${word}"><span>静态图</span>`;
+        const animation = document.createElement('button'); animation.className = 'card';
+        animation.innerHTML = `<img src="${path}picture.webp" alt="${word} 字母动画"><span>▶ 播放动画</span>`;
+        let playing = false;
+        animation.onclick = () => {
+          playing = !playing;
+          animation.querySelector('img').src = path + (playing ? `${word}-phonics-smooth.gif` : 'picture.webp');
+          animation.querySelector('span').textContent = playing ? '■ 停止动画' : '▶ 播放动画';
+        };
+        art.append(staticCard, animation);
+      }
+      document.getElementById('current').textContent = items[index];
+      document.getElementById('previous').disabled = index === 0;
+      document.getElementById('next').disabled = index === items.length - 1;
+    }
+    document.querySelectorAll('[data-letter]').forEach(button => { button.onclick = () => { letter = button.dataset.letter; index = 0; render(); }; });
+    document.getElementById('previous').onclick = () => { index--; render(); };
+    document.getElementById('next').onclick = () => { index++; render(); };
+    render();
+  </script>
+</body>
+</html>

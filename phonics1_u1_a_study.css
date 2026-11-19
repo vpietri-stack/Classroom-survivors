@@ -1,0 +1,23 @@
+[hidden] { display: none !important; }
+.trial-note { font-size: 12px; opacity: .65; margin: 6px 0; }
+#study-game-area { margin: 12px 0; }
+.target-card { background: white; border-radius: 16px; padding: 10px; max-width: 360px; width: 100%; }
+.target-card img { display: block; width: 100%; max-height: 30vh; object-fit: contain; }
+.target-card.letter-target { max-width: 620px; }
+.choice-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--gap-md); width: 100%; }
+.choice img { display: block; height: min(24vh, 210px); width: 100%; object-fit: contain; background: white; border-radius: 12px; }
+.choice .emoji { display: block; font-size: clamp(40px, 8vw, 80px); }
+.choice .label { display: block; font-size: var(--answer-font); padding: 8px; }
+.choice { width: 29%; min-width: 95px; }
+body.kid-friendly .choice.correct { background: #16a34a !important; color: white !important; }
+.choice.wrong { animation: shake .3s; }
+.choice.text-only { min-height: 90px; }
+.speech-practice { text-align: center; width: 100%; }
+.study-actions { text-align: center; width: 100%; }
+#feedback { margin: 10px 0; }
+.summary { width: 100%; text-align: center; }
+.summary table { margin: 18px auto; width: 100%; max-width: 650px; }
+.summary td, .summary th { padding: 10px; border-bottom: 1px solid #bca894; }
+.summary button { margin: 12px; }
+#roundD-image { width: 180px; height: 180px; }
+body.kid-friendly .speech-target-word:not(.heard) { color: #694c78; }

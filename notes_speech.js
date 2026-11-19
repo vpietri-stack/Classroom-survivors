@@ -23,14 +23,15 @@
   }
   function discard() { if (recordingURL) URL.revokeObjectURL(recordingURL); recordingURL = null; replay.disabled = true; }
   function render(words) {
+    const displayText = target.displayText || target.text;
     caption.replaceChildren(); let index = 0, offset = 0;
-    for (const match of target.text.matchAll(/[\p{L}\p{N}]+(?:['’\-][\p{L}\p{N}]+)*/gu)) {
-      caption.append(document.createTextNode(target.text.slice(offset, match.index)));
+    for (const match of displayText.matchAll(/[\p{L}\p{N}]+(?:['’\-][\p{L}\p{N}]+)*/gu)) {
+      caption.append(document.createTextNode(displayText.slice(offset, match.index)));
       const span = document.createElement('span'); span.textContent = match[0];
       if (words && words[index]?.heardClear === true) span.className = 'notes-heard';
       caption.append(span); index++; offset = match.index + match[0].length;
     }
-    caption.append(document.createTextNode(target.text.slice(offset)));
+    caption.append(document.createTextNode(displayText.slice(offset)));
   }
   function script(src) {
     return new Promise((resolve, reject) => { const el = document.createElement('script'); el.src = src; el.onload = resolve; el.onerror = () => { el.remove(); reject(new Error('load')); }; document.head.append(el); });
@@ -57,10 +58,10 @@
       if (!blob || blob.size < 1000) { message('录音太短了，再试一次吧。'); return; }
       discard(); recordingURL = URL.createObjectURL(blob); replay.disabled = false;
       assessment = new AbortController(); timer = setTimeout(() => { cancel(); message('这次等得有点久，可以再试一次。'); }, 90000);
-      const result = await api.engine.transcribe(blob, { target: target.text, signal: assessment.signal });
+      const result = await api.engine.transcribe(blob, { target: target.text, assessmentProfile: target.assessmentProfile, signal: assessment.signal });
       if (ticket !== generation) return;
-      render(result.targetWords);
-      message(result.targetStatus === 'unavailable' ? '暂时没能检查这些词。可以听自己的录音，或再试一次。' : '绿色是听清的词。可以听自己的录音，或再读一次。');
+      render(target.pictureBookPage && window.PhonicsPictureBookContent ? PhonicsPictureBookContent.assess(result.text, PhonicsPictureBookContent.pages[target.pictureBookPage - 1], result) : result.targetWords);
+      message(result.phonicsAudioDetected === false ? '没有听到清楚的声音，请靠近麦克风再读一次。' : result.targetStatus === 'unavailable' ? '暂时没能检查这些词。可以听自己的录音，或再试一次。' : '绿色是听清的词。可以听自己的录音，或再读一次。');
     } catch (_) { if (ticket === generation) message('这次没听清。可以听自己的录音，或再试一次。'); }
     finally { if (ticket === generation) { clearTimeout(timer); assessment = null; idle(); } }
   }
@@ -68,7 +69,8 @@
     if (phase === 'recording') { finish(generation, await engine()); return; }
     if (!canPractice() || phase !== 'idle') return;
     cancel(); const ticket = generation; discard(); render();
-    window.InteractiveNotesPOC.pause();
+    if (window.InteractiveNotesPOC.prepareRecording) window.InteractiveNotesPOC.prepareRecording();
+    else window.InteractiveNotesPOC.pause();
     phase = 'preparing'; mic.disabled = true; message('正在准备语音，首次使用可能需要等一会儿…');
     timer = setTimeout(() => { cancel(); message('语音准备得有点久，可以再点麦克风重试。'); }, 300000);
     try {
@@ -80,6 +82,7 @@
       recorder = new api.Recorder({ preserveOnset: true }); await recorder.start();
       if (ticket !== generation) return;
       clearTimeout(timer); phase = 'recording'; mic.disabled = false; mic.textContent = '■ 停止录音'; mic.setAttribute('aria-label', '停止录音'); mic.setAttribute('aria-pressed', 'true');
+      window.InteractiveNotesPOC.recordingStarted?.();
       message('正在录音，读完再点一次麦克风。');
       timer = setTimeout(() => { if (ticket === generation) finish(ticket, api); }, 20000);
     } catch (error) {

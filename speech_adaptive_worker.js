@@ -1,7 +1,9 @@
 import {prepareAdaptiveAssets} from './speech_adaptive_assets.js?v=5';
 import {compactLexicon,decide} from './speech_adaptive_core.js?v=1';
 import {words,disposeTensors,stats} from './speech_target.js?v=2026-10-28b';
-import {evidence,warmZeroContexts} from './speech_adaptive_evidence.js?v=1';
+import {evidence,warmZeroContexts} from './speech_adaptive_evidence.js?v=2';
+import {verifyPhonics} from './phonics_speech_evidence.js?v=3';
+import {speechSegments} from './phonics_speech_segments.js?v=1';
 let runtime,pipe,vad,assets,lexicon,contextSeconds=8,loading;
 async function load(id){
  if(pipe&&vad)return;if(loading)return loading;
@@ -25,13 +27,54 @@ async function speechPresence(audio){
  try{for(let i=0;i<audio.length+4096;i+=512){const frame=new Float32Array(576);frame.set(context);frame.set(audio.subarray(i,Math.min(audio.length,i+512)),64);context=frame.slice(-64);const input=new Tensor('float32',frame,[1,576]);let out;try{out=await vad.sessions.model.run({input:input.ort_tensor,state:state.ort_tensor,sr:sr.ort_tensor});state.dispose();state=new Tensor(out.stateN);const probability=new Tensor(out.output);scores.push(probability.data[0]);probability.dispose();}finally{input.dispose();}}return scores;}finally{state.dispose();sr.dispose();}
 }
 let busy=false;
-self.onmessage=async e=>{const {id,action,audio,target}=e.data;if(busy){postMessage({id,error:'A recording is already being checked'});return;}busy=true;try{
+self.onmessage=async e=>{const {id,action,audio,target,assessmentProfile}=e.data;if(busy){postMessage({id,error:'A recording is already being checked'});return;}busy=true;try{
  await load(id);if(action==='load'){postMessage({id,ready:true,assetBytes:assets.total,networkBytes:assets.networkBytes,reusedBytes:assets.reusedBytes,configuration:assets.config.id});return;}
  const targetWords=words(target||'');if(!(audio instanceof Float32Array)||!targetWords.length||targetWords.length>40||audio.some(x=>!Number.isFinite(x)))throw Error('Choose a short English word or sentence');const audioStats=stats(audio),started=performance.now();
  const neutral=()=>({status:'unassessed',targetWords:targetWords.map(w=>({text:w.text,heardClear:false,basis:null})),transcript:'',audioStats,totalMs:performance.now()-started});
  if(audioStats.seconds<assets.config.audio.minimumSeconds||audioStats.seconds>assets.config.audio.maximumSeconds){postMessage({id,...neutral()});return;}
  const vadScores=await speechPresence(audio);if(Math.max(...vadScores)<assets.config.vad.thresholdMax){postMessage({id,...neutral(),vadMax:Math.max(...vadScores)});return;}
  const isWord=targetWords.length===1;contextSeconds=isWord?assets.config.word.contextMinimumSec:assets.config.sentence.contextMinimumSec;
- const result=await evidence(pipe,runtime,audio,target,[],isWord?assets.config.generation.maxWordTokens:assets.config.generation.maxSentenceTokens),targetResult=decide(result,vadScores,lexicon,assets.calibration,assets.config);
- postMessage({id,status:'checked',targetWords:targetResult,transcript:result.transcript,audioStats,totalMs:performance.now()-started,contextMinimumSec:contextSeconds,vadMax:Math.max(...vadScores),sharedEncoderVerified:result.sharedEncoderVerifiedByRunCount,configuration:assets.config.id});
+ const phonicsProfile=assessmentProfile==='phonics1'||assessmentProfile==='phonics1-initial';
+ const generationOptions=phonicsProfile?{repetition_penalty:1.2,no_repeat_ngram_size:3}:{};
+ const maximumTokens=isWord?assets.config.generation.maxWordTokens:assets.config.generation.maxSentenceTokens;
+ let result=await evidence(pipe,runtime,audio,target,[],maximumTokens,generationOptions),targetResult=decide(result,vadScores,lexicon,assets.calibration,assets.config);
+ const initials=text=>words(text).map(w=>({text:w.normal,phones:[...new Set((lexicon[w.normal]||[]).map(p=>p[0]))]}));
+ let phonicsInitials=phonicsProfile?initials(result.transcript):undefined,phonicsAlternatives,phonicsSoundUnassessed=false,phonicsWordTranscript,phonicsWordInitials;
+ if(phonicsProfile){
+  if(assessmentProfile==='phonics1-initial'&&targetWords.length===3){
+   const spans=speechSegments(audio,12),last=spans.at(-1);
+   if(last){const decoded=await pipe(audio.slice(last.start,last.end),{...generationOptions,max_new_tokens:16});phonicsWordTranscript=decoded.text;phonicsWordInitials=initials(decoded.text);}
+  }
+  const inspect=(r,t)=>verifyPhonics({text:r.transcript,targetWords:t,targetStatus:'checked',phonicsInitials:initials(r.transcript),phonicsWordTranscript,phonicsWordInitials},audio,target,assessmentProfile==='phonics1-initial');
+  const primary=inspect(result,targetResult);
+  if(!primary.targetWords.every(w=>w.heardClear)){
+   const alternate=await evidence(pipe,runtime,audio,target,[],maximumTokens,{repetition_penalty:1.05,no_repeat_ngram_size:6}),alternateTargets=decide(alternate,vadScores,lexicon,assets.calibration,assets.config),secondary=inspect(alternate,alternateTargets);
+   phonicsAlternatives=[result.transcript,alternate.transcript];
+   if(secondary.targetWords.filter(w=>w.heardClear).length>primary.targetWords.filter(w=>w.heardClear).length){result=alternate;targetResult=alternateTargets;phonicsInitials=initials(result.transcript);}
+  }
+  const chosen=inspect(result,targetResult),heard=words(result.transcript.replace(/\[[^\]]*\]|\([^)]*\)|\*[^*]*\*/g,' ').replace(/[-–—]/g,' '));
+  if(targetWords.length===3&&chosen.targetWords[0].heardClear&&!chosen.targetWords[1].heardClear&&chosen.targetWords[2].heardClear&&heard.length>=2){
+   const spans=speechSegments(audio);
+   // A missing isolated sound may have been swallowed by phrase decoding.
+   // Re-read only an actual middle acoustic chunk; no target enters generation.
+   for(const span of spans.slice(1,-1)){
+    if(span.end-span.start>16000)continue;
+    for(const options of [generationOptions,{repetition_penalty:1.05,no_repeat_ngram_size:6}]){
+     const decoded=await pipe(audio.slice(span.start,span.end),{...options,max_new_tokens:12});
+     const candidate={...result,transcript:heard[0].text+' '+decoded.text+' '+heard.slice(1).map(w=>w.text).join(' ')};
+     if(inspect(candidate,targetResult).targetWords.every(w=>w.heardClear)){
+      phonicsAlternatives||=[];phonicsAlternatives.push(candidate.transcript);result=candidate;phonicsInitials=initials(result.transcript);break;
+     }
+    }
+    if(inspect(result,targetResult).targetWords.every(w=>w.heardClear))break;
+   }
+   const final=inspect(result,targetResult);
+   phonicsSoundUnassessed=assessmentProfile==='phonics1-initial'&&spans.length>=3&&final.targetWords[0].heardClear&&!final.targetWords[1].heardClear&&final.targetWords[2].heardClear;
+  }
+  if(assessmentProfile==='phonics1-initial'&&targetWords.length===5){
+   const final=inspect(result,targetResult);
+   if(final.targetWords.slice(0,2).every(w=>w.heardClear)&&!final.targetWords.slice(2).every(w=>w.heardClear)&&speechSegments(audio).length>=3)phonicsSoundUnassessed=true;
+  }
+ }
+ postMessage({id,status:'checked',targetWords:targetResult,transcript:result.transcript,phonicsInitials,phonicsWordTranscript,phonicsWordInitials,phonicsAlternatives,phonicsSoundUnassessed,audioStats,totalMs:performance.now()-started,contextMinimumSec:contextSeconds,vadMax:Math.max(...vadScores),sharedEncoderVerified:result.sharedEncoderVerifiedByRunCount,configuration:assets.config.id});
  }catch(e){postMessage({id,error:String(e.message||e).slice(0,400)});}finally{busy=false;}};

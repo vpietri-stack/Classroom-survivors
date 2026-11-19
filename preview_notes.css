@@ -405,3 +405,10 @@
         margin-left: 0;
     }
 }
+
+/* The story shortcut bypasses the curriculum tree, while reusing its reader. */
+.picture-books-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,320px)); justify-content:center; gap:24px; padding:20px; }
+#preview-notes-overlay .picture-book-cover { display:flex; flex-direction:column; align-items:center; gap:14px; padding:16px; border-radius:20px; background:#fff8e9; color:#46352b; box-shadow:0 5px 18px #0002; }
+.picture-book-cover img { width:100%; aspect-ratio:3/2; object-fit:contain; border-radius:12px; }
+.picture-book-title { font-size:clamp(24px,4vw,34px); font-weight:700; text-align:center; }
+@media(max-width:360px) { .picture-books-grid { grid-template-columns:minmax(0,1fr);padding:12px; } }

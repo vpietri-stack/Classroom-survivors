@@ -36,7 +36,7 @@
   }
   function startWorker() {
     if (worker) return;
-    const instance = new Worker('speech_adaptive_worker.js?v=5' + (preferLocal ? '&local=1' : ''), { type: 'module' });
+    const instance = new Worker('speech_adaptive_worker.js?v=7' + (preferLocal ? '&local=1' : ''), { type: 'module' });
     worker = instance;
     instance.onmessage = e => {
       if (worker !== instance || !pending || e.data.id !== pending.id) return;
@@ -100,11 +100,22 @@
       // Cancelling a gate detaches its wait but leaves reusable preparation running.
       await abortable(load(options.onProgress), signal);
       const audio = await pcm(blob);
+      const initialFocus = options.assessmentProfile === 'phonics1-initial';
+      const phonics = options.assessmentProfile === 'phonics1' || initialFocus
+        ? await import('./phonics_speech_evidence.js?v=3') : null;
+      if (signal?.aborted) throw error('Speech cancelled', 'SPEECH_ABORTED');
+      if (phonics) {
+        const quiet = phonics.verifyPhonics({ text: '', targetStatus: 'unassessed' }, audio, options.target);
+        if (!quiet.phonicsAudioDetected) return quiet;
+      }
       if (signal?.aborted) throw error('Speech cancelled', 'SPEECH_ABORTED');
       abort = () => reset(error('Speech cancelled', 'SPEECH_ABORTED'));
       signal?.addEventListener('abort', abort, { once: true });
-      const r = await request('assess', { audio, target: options.target }, 5000);
-      return { text: r.transcript, targetWords: r.targetWords, targetStatus: r.status, targetCheckMs: r.totalMs, configuration: r.configuration };
+      const r = await request('assess', { audio, target: options.target, assessmentProfile: options.assessmentProfile }, 5000);
+      const result = { text: r.transcript, targetWords: r.targetWords, targetStatus: r.status, targetCheckMs: r.totalMs, configuration: r.configuration };
+      if (!phonics) return result;
+      const verified = phonics.verifyPhonics({ ...result, phonicsInitials: r.phonicsInitials, phonicsWordTranscript: r.phonicsWordTranscript, phonicsWordInitials: r.phonicsWordInitials, phonicsAlternatives: r.phonicsAlternatives }, audio, options.target, initialFocus);
+      return r.phonicsSoundUnassessed ? { ...verified, targetStatus: 'unavailable', phonicsSoundUnassessed: true } : verified;
     } finally { signal?.removeEventListener('abort', abort); assessing = false; }
   }
   if (enabled) {

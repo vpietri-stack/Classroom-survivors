@@ -241,6 +241,14 @@
         if(w.StudyRuntime&&typeof STUDY_STATE!=='undefined'&&STUDY_STATE.active)StudyRuntime.suspend();
         afterOffer=null;owner='';offer=null;snapshot=null;action=null;menu();
     }
-    w.StudyRecovery={onLogin,begin,capture,pause,complete,decorate,resume,detach,restoreMenuContent,
+    function hasPendingFor(student) {
+        if (!student) return false;
+        if (owner === student.id && (active || offer)) return true;
+        try {
+            const stored = JSON.parse(localStorage.getItem('csStudyResume_v1_' + scope + '_' + student.id) || 'null');
+            return stored?.status === 'active' && !!(stored.snapshot?.state?.phonics || stored.snapshot?.state?.pictureBook);
+        } catch (_) { return false; }
+    }
+    w.StudyRecovery={onLogin,begin,capture,pause,complete,decorate,resume,detach,restoreMenuContent,hasPendingFor,
         runId:()=>snapshot&&snapshot.runId||null,active:()=>active,flush,enabled};
 })(window);

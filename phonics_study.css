@@ -1,0 +1,11 @@
+.phonics-letter-picture { display: block; width: min(95%, 650px); max-height: 34vh; object-fit: contain; background: white; border-radius: 14px; }
+.phonics-word-picture { display: block; width: min(70vw, 300px); max-height: 34vh; object-fit: contain; background: white; border-radius: 14px; }
+.phonics-option { width: 30%; min-width: 90px; }
+.phonics-text-option { width: auto; min-width: min(100%, 180px); flex: 1 1 180px; }
+#studyModeOverlay.phonics-study-active > div:first-child { max-width: min(96vw, 1600px); }
+#studyModeOverlay.phonics-study-active #study-game-area { max-width: 100%; }
+#studyModeOverlay .phonics-text-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); }
+#studyModeOverlay .phonics-text-option { width: 100%; min-width: 0; font-size: clamp(3rem, 6vw, 5rem); line-height: 1.25; padding: 1.25rem; min-height: clamp(110px, 16vh, 180px); white-space: nowrap; }
+.phonics-option img { width: 100%; height: min(28vh, 210px); object-fit: contain; }
+#studyModeOverlay .phonics-option.correct { background: #16a34a !important; color: white !important; }
+#studyModeOverlay .phonics-focus-letter { color: #d71920; background: #fff5f0; border-radius: .12em; }

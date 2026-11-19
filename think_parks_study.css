@@ -24,3 +24,24 @@
 @media (max-width: 500px) {
     .komodo-script-turn { grid-template-columns: 1fr; gap: .1rem; }
 }
+
+.good-friend-cloze-scroll { overflow-x: auto; margin-bottom: .8rem; }
+.good-friend-cloze-page { position: relative; min-width: 600px; container-type: inline-size; background: #fff; }
+.good-friend-cloze-page img { display: block; width: 100%; height: auto; }
+.good-friend-cloze-page .good-friend-scan-gap {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid #926c18;
+    border-radius: .2rem;
+    background: #fff8dd;
+    color: #2e2308;
+    font: 600 1.9cqw / 1 Georgia, serif;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.good-friend-scan-gap[aria-pressed="true"] { outline: 2px solid #007267; z-index: 1; }
+.good-friend-cloze-page .parks-right { background: #166534; color: #fff; }
+.good-friend-cloze-page .parks-wrong { background: #991b1b; color: #fff; }

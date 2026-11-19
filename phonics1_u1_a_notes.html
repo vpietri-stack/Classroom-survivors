@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Phonics 1 · A a</title>
+  <link rel="stylesheet" href="phonics1_u1_a_notes.css?v=study1">
+  <script src="phonics_content.js?v=full-app-1" defer></script>
+  <script src="phonics1_u1_a_notes.js?v=full-app-1" defer></script>
+  <script src="notes_speech.js?v=study1" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="course">Phonics 1 <span>Unit 1</span></div>
+    <h1 id="page-title">A a</h1>
+    <button id="speed" type="button" aria-label="播放速度">1×</button>
+  </header>
+  <main id="pages" aria-label="A 字母预习">
+    <section class="page intro" aria-labelledby="page-title">
+      <button class="listen-card letter-card" type="button" data-audio="letter-sounds.mp3" aria-label="听字母 A 的名称和发音">
+        <img src="media/phonics/p1-u1/letter-pictures.webp" alt="大写 A 和小写 a，每个字母里都有苹果、斧头、短吻鳄和宇航员四幅图" width="1774" height="887">
+        <span class="card-caption"><span class="play-icon" aria-hidden="true">▶</span> 听字母和发音</span>
+      </button>
+    </section>
+  </main>
+  <a id="audio-fallback" hidden>打开音频</a>
+  <footer class="navigation" aria-label="翻页">
+    <button id="previous" type="button" aria-label="上一页">←</button>
+    <nav id="page-tabs" aria-label="选择页面"></nav>
+    <button id="next" type="button" aria-label="下一页">→</button>
+  </footer>
+  <a id="start-practice" class="start-practice" href="phonics1_u1_a_study.html" hidden>开始练习</a>
+  <aside class="player" aria-label="点读播放器和录音练习">
+    <div class="player-copy">
+      <p id="nowPlaying">点一下，听一听。</p>
+      <p id="meaning">点击图片查看中文意思</p>
+      <small id="playerStatus" role="status" aria-live="polite">可以听发音，也可以点麦克风试读。</small>
+    </div>
+    <button id="replay" type="button" disabled>↻ 再听一次</button>
+    <button id="stop" type="button" disabled>■ 停止</button>
+  </aside>
+</body>
+</html>

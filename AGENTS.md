@@ -5,6 +5,20 @@ Start at `docs/wiki/01-overview.md` and read the owning pages for the task; the 
 is a router, not a requirement to load every page. Update a page when its documented
 behavior, contract or workflow changes; avoid duplicate permanent handoff narratives.
 
+## Children's speech feedback
+
+Picture-book page turns should feel like paper: a slower curl with a soft rustle,
+not a fast flat flip. Use subtle bounded variation in motion and soft rustles,
+avoid immediate repeats, and keep narration clear of the turn sound.
+When the teacher supplies a whole-story recording, use it
+directly and split by page; preserve natural pitch/tempo unless asked otherwise.
+
+Speech checks should reward recognisable attempts, not demand adult pronunciation.
+Phonics 1 targets ages 2–5: focus on the letter name, taught sound and word onset,
+be generous about the remainder, and keep feedback encouraging with bounded retries.
+Do not award green for silence or unrelated gibberish. Preserve these safeguards
+when relaxing recognition; validate the balance with teacher microphone review.
+
 ## Isolation and staging
 
 Use one feature branch/worktree. The shared main checkout may contain another

@@ -37,6 +37,7 @@
   // Version token per path prefix — bump ONE group when its files change and
   // only that group re-downloads. Unmatched paths fall into the 'misc' group.
   var GROUP_VERSIONS = [
+    { prefix: 'pu1_u7_p90_assets/', token: 'pu1-u7-p90-v2' },
     { prefix: 'pu1_u7_p88_assets/', token: 'pu1-u7-p88-v2' },
     { prefix: 'sprites/td/',   token: 'td-sprites-v1' },
     { prefix: 'sprites/vs/',   token: 'vs-sprites-v3' },
@@ -56,8 +57,10 @@
     { prefix: 'pu3_u8_p99_assets/', token: 'pu3-u8-p99-v1' },
     { prefix: 'pu1_u5_p61_assets/', token: 'pu1-u5-p61-v1' },
     { prefix: 'pu2_u5_p60_assets/', token: 'pu2-u5-p60-v1' },
+    { prefix: 'pu2_u2_p21_assets/', token: 'pu2-u2-p21-v1' },
     { prefix: 'pu2_u2_p19_assets/', token: 'pu2-u2-p19-v1' },
     { prefix: 'pu2_u8_p95_assets/', token: 'pu2-u8-p95-v1' },
+    { prefix: 'pu3_u2_p21_assets/', token: 'pu3-u2-p21-v1' },
     { prefix: 'pu3_u2_p19_assets/', token: 'pu3-u2-p19-v1' },
     { prefix: 'friendly_farm_assets/', token: 'friendly-farm-v1' },
     { prefix: 'audio_mp3/',    token: 'audio-v1' },

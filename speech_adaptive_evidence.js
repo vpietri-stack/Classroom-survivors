@@ -3,7 +3,7 @@ const zeroCache=new Map();
 export async function warmZeroContexts(pipe,runtime,contexts,setContext){
  for(const seconds of contexts){setContext(seconds);const features=await pipe.processor(new Float32Array(16000));try{const key='input_features|'+features.input_features.dims.join(',');if(zeroCache.has(key))continue;const raw=await pipe.model.sessions.model.run({input_features:features.input_features.ort_tensor});zeroCache.set(key,{encoded:new runtime.Tensor(raw.last_hidden_state),scores:new Map()});}finally{disposeTensors(features);}}
 }
-export async function evidence(pipe,runtime,audio,text,foils=[],maxTokens=96){
+export async function evidence(pipe,runtime,audio,text,foils=[],maxTokens=96,generationOptions={}){
  const start=performance.now(),Tensor=runtime.Tensor,whisper=pipe.model.config.model_type==='whisper',prefix=whisper?[50257,50362]:[1],eos=whisper?50256:2,features=await pipe.processor(audio);
  // Whisper expects its normal leading-space BPE token. Moonshine's tokenizer
  // inserts that boundary itself; a literal extra space creates an unwanted token.
@@ -24,7 +24,7 @@ export async function evidence(pipe,runtime,audio,text,foils=[],maxTokens=96){
  }
  try{const encStart=performance.now();actual=await encode(features);const encodeMs=performance.now()-encStart,genStart=performance.now();
   // Shared encoded audio: generation receives no target, prompt, forced target tokens or alternatives.
-  const beforeGeneration=encoderRuns,generated=await pipe.model.generate({...features,encoder_outputs:actual,max_new_tokens:maxTokens,do_sample:false,return_dict_in_generate:true});const transcript=pipe.tokenizer.batch_decode(generated.sequences,{skip_special_tokens:true})[0];disposeTensors(generated,new Set(),new Set([actual]));const asrMs=performance.now()-genStart,generationEncoderRuns=encoderRuns-beforeGeneration;
+  const beforeGeneration=encoderRuns,generated=await pipe.model.generate({...features,encoder_outputs:actual,max_new_tokens:maxTokens,do_sample:false,...generationOptions,return_dict_in_generate:true});const transcript=pipe.tokenizer.batch_decode(generated.sequences,{skip_special_tokens:true})[0];disposeTensors(generated,new Set(),new Set([actual]));const asrMs=performance.now()-genStart,generationEncoderRuns=encoderRuns-beforeGeneration;
   if(generationEncoderRuns!==0)throw Error('Shared encoder bypass failed: '+generationEncoderRuns+' extra encoding passes');
   nullFeatures=await pipe.processor(new Float32Array(audio.length));const zeroKey=key+'|'+nullFeatures[key].dims.join(',');if(zeroCache.has(zeroKey)){zero=zeroCache.get(zeroKey);zeroCache.delete(zeroKey);zeroCache.set(zeroKey,zero);}else{zero={encoded:await encode(nullFeatures),scores:new Map()};zeroCache.set(zeroKey,zero);while(zeroCache.size>4){const first=zeroCache.keys().next().value;disposeTensors(zeroCache.get(first).encoded);zeroCache.delete(first);}}
   const scored=[];for(const phrase of [...new Set([text,...foils])]){const a=await score(actual,phrase);let z=zero.scores.get(phrase);if(!z){z=await score(zero.encoded,phrase);zero.scores.set(phrase,z);while(zero.scores.size>256)zero.scores.delete(zero.scores.keys().next().value);}scored.push({text:phrase,actual:a,silence:z,gainMean:a.meanLogProb-z.meanLogProb,gainFullMean:a.fullMeanLogProb-z.fullMeanLogProb});}

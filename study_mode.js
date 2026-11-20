@@ -1116,6 +1116,38 @@ function checkRoundE() {
 
 
 // --- ROUND E: Sentence Matching ---
+const STUDY_MATCH_SUB_ROUNDS = 3;
+
+function isMixedStudyMatch() {
+    const item = STUDY_STATE.nonSpellingExercises?.[STUDY_STATE.currentNonSpellingIndex];
+    return item?.type === 'sentence-match';
+}
+
+function studyMatchSubRound() {
+    const round = STUDY_STATE.subRound;
+    // Keep the current board playable if a legacy checkpoint lost its counter.
+    return Number.isInteger(round) && round >= 1 && round <= STUDY_MATCH_SUB_ROUNDS
+        ? round
+        : STUDY_MATCH_SUB_ROUNDS;
+}
+
+function updateStudyMatchHeading() {
+    updateStudyUI(`Round E${STUDY_STATE.subRound}: Sentence Matching`, 'Match each question with its answer.');
+}
+
+function advanceStudyMatch() {
+    if (!STUDY_STATE.active || STUDY_STATE.round !== 'F' || STUDY_STATE.srFinalized) return;
+    STUDY_STATE.isTransitioning = false;
+    if (isMixedStudyMatch()) {
+        STUDY_STATE._mixedActive = true;
+        NonSpellingFlow.advanceStudy();
+        return;
+    }
+    STUDY_STATE.subRound = studyMatchSubRound() + 1;
+    startExerciseTracking();
+    nextRoundFSubRound();
+}
+
 function startRoundF() {
     STUDY_STATE.round = 'F';
     STUDY_STATE.subRound = 1; // Initialize sub-round counter
@@ -1124,12 +1156,12 @@ function startRoundF() {
 }
 
 function nextRoundFSubRound() {
-    if (STUDY_STATE.subRound > 3) {
+    if (STUDY_STATE.subRound > STUDY_MATCH_SUB_ROUNDS) {
         finishStudySession();
         return;
     }
 
-    updateStudyUI(`Round E${STUDY_STATE.subRound}: Sentence Matching`, "Match each question with its answer.");
+    updateStudyMatchHeading();
 
     // Get sentence pairs using SR-aware same-page selection, excluding pairs
     // already shown in an earlier Round F sub-round this session.
@@ -1151,7 +1183,7 @@ function nextRoundFSubRound() {
         // end Round F cleanly.
         // No unseen pairs left anywhere up to the current page (rare: a first page
         // with only 3 pairs). Don't repeat already-seen pairs — end Round F cleanly.
-        STUDY_STATE.subRound = 4;
+        STUDY_STATE.subRound = STUDY_MATCH_SUB_ROUNDS + 1;
         finishStudySession();
         return;
     }
@@ -1248,7 +1280,6 @@ function returnTileToDock(tile) {
 }
 
 function checkRoundF() {
-    const mixedSession = STUDY_STATE._mixedActive ? STUDY_STATE.startTime : null;
     if (STUDY_STATE.isTransitioning) return;
     const pairs = STUDY_STATE.sentencePairs;
     const slots = document.querySelectorAll('.sentence-b-slot');
@@ -1310,16 +1341,7 @@ function checkRoundF() {
         STUDY_STATE.isTransitioning = true;
         playHappySound();
         // Note: The individual pairs were already queued during the check above.
-        studyLater('match_next', () => {
-            if (mixedSession !== null && (!STUDY_STATE.active || STUDY_STATE.startTime !== mixedSession)) return;
-            STUDY_STATE.isTransitioning = false;
-            if (mixedSession !== null) NonSpellingFlow.advanceStudy();
-            else {
-                STUDY_STATE.subRound++;
-                startExerciseTracking();
-                nextRoundFSubRound();
-            }
-        }, 1500);
+        studyLater('match_next', advanceStudyMatch, 1500);
     } else {
         STUDY_STATE.isTransitioning = true;
         synthError();

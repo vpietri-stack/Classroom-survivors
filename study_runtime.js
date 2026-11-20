@@ -65,7 +65,7 @@
         if (name === 'handwriting_word') return () => { STUDY_STATE.currentWordIndex++; STUDY_STATE.isTransitioning = false; startExerciseTracking(); nextRoundDWord(); };
         if (name === 'sentence_next') return advanceRoundESentence;
         if (name === 'sentence_reset') return clearRoundE;
-        if (name === 'match_next') return () => { STUDY_STATE.isTransitioning = false; if (STUDY_STATE._mixedActive) NonSpellingFlow.advanceStudy(); else { STUDY_STATE.subRound++; startExerciseTracking(); nextRoundFSubRound(); } };
+        if (name === 'match_next') return advanceStudyMatch;
         if (name === 'match_reset') return () => { resetRoundF(); STUDY_STATE.isTransitioning = false; };
         return null;
     }
@@ -82,6 +82,12 @@
         srStudyResults = clone(saved.srResults || []); srUsedPairKeys = new Set(saved.usedPairKeys || []);
         showStudyModeScreen();
         const s = saved.state, ui = saved.ui;
+        const matching = s.round === 'F';
+        const mixedMatch = matching && isMixedStudyMatch();
+        if (matching) {
+            STUDY_STATE._mixedActive = mixedMatch;
+            if (!mixedMatch) STUDY_STATE.subRound = studyMatchSubRound();
+        }
         if (s.pictureBook || s.phonics) {
             if (w.PracticeTelemetry?.resume) PracticeTelemetry.resume(saved.practice || { id: saved.runId, mode: 'study', game: 'study', startedAt: new Date(saved.createdAt).toISOString() });
             const restored = s.pictureBook ? w.PhonicsPictureBookStudy.restore(saved) : w.PhonicsStudy.restore(saved);
@@ -93,14 +99,15 @@
         else if (s.parks) w.ArticleStudy.active(s).renderCloze();
         else if (s.round === 'C') nextRoundCWord();
         else if (s.round === 'D') nextRoundDWord(saved.handwriting);
-        else if (s._mixedActive) NonSpellingFlow.restoreStudy(ui.typed);
+        else if (STUDY_STATE._mixedActive) NonSpellingFlow.restoreStudy(ui.typed);
         else if (s.round === 'E') nextRoundESentence();
         else renderRoundF();
         // Renderers initialize their controls; restore their saved lock/attempt state afterwards.
         ['isTransitioning','_roundCFrozen','_roundEFrozen','_typedRecorded'].forEach(k => { STUDY_STATE[k] = s[k]; });
         exerciseAttempts = saved.exercise.attempts; exerciseStartTime = Date.now() - saved.exercise.elapsedMs;
         currentTTSWord = ui.tts;
-        updateStudyUI(ui.title, ui.instruction);
+        if (!matching) updateStudyUI(ui.title, ui.instruction);
+        else if (!mixedMatch) updateStudyMatchHeading();
         if (s.round === 'A') {
             const map = new Map(nodes('#roundA-container button').map(e => [e.textContent,e]));
             ui.aOrder.forEach(text => { if (map.has(text)) $('roundA-container').appendChild(map.get(text)); });

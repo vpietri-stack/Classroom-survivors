@@ -151,7 +151,52 @@ async function crash(context,page){const crashed=page.waitForEvent('crash');cons
  const rapid=await browser.newContext({viewport:{width:390,height:844}});await routes(rapid);const quick=await open(rapid);delayGET=1500;await login(quick);
  await quick.evaluate(()=>{initStudyMode();STUDY_STATE.words=['want'];STUDY_STATE.nonSpellingExercises=null;STUDY_STATE.sentences=['I want a pen.'];startRoundC();});await quick.locator('#scramble-bank button').filter({hasText:/^w$/}).click();await quick.waitForTimeout(80);
  const rapidSave=await saved(quick);ok(rapidSave.snapshot.state.round==='C'&&rapidSave.snapshot.ui.cSlots.map(s=>s.text).join('')==='w','fast practice input is checkpointed before the remote login check finishes');
- await quick.waitForTimeout(1600);delayGET=0;await rapid.close();
+ await quick.waitForTimeout(1600);delayGET=0;
+ // A mixed board with a lost mode flag must continue its plan, even if CHECK was pending.
+ await quick.evaluate(() => {
+     const pairs = [{ a: 'What is it?', b: 'It is a pen.' }];
+     STUDY_STATE.nonSpellingExercises = [
+         { type: 'sentence-match', pairs },
+         { type: 'sentence-scramble', sentence: 'It is a cat.' }
+     ];
+     NonSpellingFlow.beginStudy();
+     selectBTile(document.querySelector('.sentence-b-tile'));
+     handleSlotClick(0);
+     checkRoundF();
+     const checkpoint = StudyRuntime.capture();
+     delete checkpoint.state._mixedActive;
+     delete checkpoint.state.subRound;
+     checkpoint.ui.title = 'Round ENaN: Sentence Matching';
+     checkpoint.pending = { action: 'match_next', remainingMs: 0 };
+     StudyRuntime.restore(checkpoint);
+ });
+ await quick.waitForFunction(() => STUDY_STATE.currentNonSpellingIndex === 1);
+ ok(await quick.evaluate(() => STUDY_STATE._mixedActive && STUDY_STATE.round === 'E'),
+     'a restored mixed match with a missing mode flag advances to the next planned exercise');
+ // A legacy checkpoint can contain null because JSON serializes NaN that way.
+ await quick.evaluate(() => {
+     STUDY_STATE.nonSpellingExercises = null;
+     STUDY_STATE._mixedActive = false;
+     STUDY_STATE.round = 'F';
+     STUDY_STATE.subRound = NaN;
+     STUDY_STATE.isTransitioning = false;
+     STUDY_STATE.pairQueued = [false];
+     renderRoundF();
+     selectBTile(document.querySelector('.sentence-b-tile'));
+     handleSlotClick(0);
+     const checkpoint = StudyRuntime.capture();
+     checkpoint.ui.title = 'Round ENaN: Sentence Matching';
+     StudyRuntime.restore(checkpoint);
+ });
+ ok(await quick.locator('#study-title').textContent() === 'Round E3: Sentence Matching',
+     'a legacy matching checkpoint with an invalid counter shows a valid final round');
+ ok(await quick.locator('.sentence-b-slot .sentence-b-tile').count() === 1,
+     'repairing the legacy round counter keeps the placed answer');
+ await quick.getByRole('button', { name: 'CHECK', exact: true }).click();
+ await quick.waitForFunction(() => document.getElementById('study-title').textContent === 'Session Complete');
+ ok(await quick.evaluate(() => STUDY_STATE.srFinalized),
+     'solving the repaired matching board reaches the normal completion screen');
+ await rapid.close();
  await fresh.close();
  console.log('Study resume browser: '+checks+' checks passed.');await context.close();
  }finally{await browser.close();server.close();}

@@ -343,6 +343,7 @@ The bars above were tuned against synthetic pen paths, and nothing was ever kept
 - `renderRoundF (~1017)`: question rows (`.sentence-a` + `.sentence-b-slot`), shuffled answer dock `#sentence-b-dock`. Tiles MOVE between dock and slots (same DOM node) — the dock never depletes.
 - `selectBTile (~1061)` selects (yellow ring); `handleSlotClick (~1071)` places into a slot or returns a placed tile via `returnTileToDock (~1092)`.
 - `checkRoundF (~1099)`: text-match per slot; each pair's SR result is queued once (`pairQueued`) with `firstAttempt = pairAttempts === 1`; failures recorded at the first wrong check per pair. All correct → 1.5s advance to the next sub-round; else 2s `resetRoundF (~1183)`.
+- Live and restored boards share the same completion handler. A saved mixed matching board follows the current exercise in the saved plan. If a legacy board has lost its round number, it resumes as E3 with its existing tiles and attempt history and finishes after the board is solved.
 
 ## CHECK → reveal → reset (shared anti-cheese pattern)
 

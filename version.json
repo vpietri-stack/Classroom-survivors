@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-24g",
+  "version": "2026-11-24h",
   "deployedAt": "2026-11-24",
-  "notes": "Production: Option 1 speech grader, animated stars + chimes, and Find & Fix speech"
+  "notes": "Production: fix Study Sentence Match freeze after wrong check"
 }

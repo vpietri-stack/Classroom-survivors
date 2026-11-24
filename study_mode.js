@@ -1355,6 +1355,7 @@ function checkRoundF() {
         }
 
         // Reset after 2 seconds
+        const mixedSession = STUDY_STATE._mixedActive ? STUDY_STATE.startTime : null;
         studyLater('match_reset', () => {
             if (mixedSession !== null && (!STUDY_STATE.active || STUDY_STATE.startTime !== mixedSession)) return;
             resetRoundF();

@@ -942,7 +942,7 @@ TEACHING_CONTENT["PU2"] = {
             ]
         },
         "62": {
-            vocab: [],
+            vocab: ["carnivore", "omnivore", "herbivore", "meat", "plant"],
             sentences: [
                 "Lions are carnivores.",
                 "Pandas are herbivores.",

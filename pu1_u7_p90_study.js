@@ -1,7 +1,7 @@
-(function (lesson) {
+window.registerScannedArticleStudy = function (lesson, options) {
     "use strict";
     const audio = new Audio();
-    const context = {"book": "PU1", "unit": "7", "page": "90"};
+    const { context, id, assets, scanLabel, instructions } = options;
     const words = new Map(lesson.words.map(word => [word[0], word]));
     const $ = id => document.getElementById(id);
 
@@ -43,11 +43,9 @@
         const parks = STUDY_STATE.parks;
         const index = STUDY_STATE.currentSentenceIndex;
         const section = lesson.sections[index];
-        const text = section.clozeText;
-        const pattern = new RegExp(lesson.patterns[index], "gi");
-        const matches = Array.from(text.matchAll(pattern));
-        const answers = matches.map(match => match[0]);
-        if (!parks.slots) {
+        const text = section.clozeText || section.sentences.map(sentence => sentence.text).join(" ");
+        const answers = section.answers || Array.from(text.matchAll(new RegExp(lesson.patterns[index], "gi")), match => match[0]);
+        if (parks.slots?.length !== answers.length) {
             parks.slots = answers.map(() => null);
             parks.dock = answers.map((_, i) => i);
             for (let i = parks.dock.length - 1; i > 0; i--) {
@@ -58,7 +56,7 @@
             parks.verdict = null;
         }
 
-        updateStudyUI("课文填空 · " + (index + 1) + " / " + lesson.sections.length, "请查看本页的课本第 90–91 页，填完所有空格后，再点击「检查」。");
+        updateStudyUI("课文填空 · " + (index + 1) + " / " + lesson.sections.length, instructions);
         const board = document.createElement("div");
         board.className = "parks-cloze";
         const reader = document.createElement("details");
@@ -71,8 +69,8 @@
         const summary = document.createElement("summary");
         summary.textContent = "查看这一段课文";
         const scan = document.createElement("img");
-        scan.src = "pu1_u7_p90_assets/story-" + (index + 1) + ".webp";
-        scan.alt = "Power Up 1 课本第 90–91 页";
+        scan.src = assets + "story-" + (index + 1) + ".webp";
+        scan.alt = scanLabel;
         [scan.width, scan.height] = lesson.sections[index].dimensions;
         scan.loading = "lazy";
         reader.append(summary, scan);
@@ -83,7 +81,7 @@
         const page = document.createElement("div");
         page.className = "good-friend-cloze-page";
         const maskedScan = scan.cloneNode();
-        maskedScan.alt = index === 0 ? "A good friend · 课文填空" : "第 " + (index + 1) + " 段课文填空";
+        maskedScan.alt = (section.title || "第 " + (index + 1) + " 段") + " · 课文填空";
         page.append(maskedScan);
         viewport.append(page);
         const [width, height] = section.dimensions;
@@ -96,7 +94,7 @@
             const correct = parks.verdict.every(Boolean);
             if (correct) {
                 playHappySound();
-                queueExerciseEvent("missingWord", "study", { id: "pu1-u7-p90-paragraph-" + (index + 1), book: context.book, unit: context.unit, page: context.page,
+                queueExerciseEvent("missingWord", "study", { id: id + "-paragraph-" + (index + 1), book: context.book, unit: context.unit, page: context.page,
                     sentences: [text], answers, response: parks.slots.map(tile => answers[tile]) });
             } else {
                 synthError();
@@ -183,7 +181,16 @@
         renderCloze();
     }
 
-    window.GoodFriendLessonStudy = { id: "pu1-u7-p90", context, setCount: Math.ceil(lesson.words.length / 5), exerciseCount: lesson.sections.length, words: lesson.words, recognitionComplete, playWord, showWord,
+    const study = { id, context, setCount: Math.ceil(lesson.words.length / 5), exerciseCount: lesson.sections.length, words: lesson.words, recognitionComplete, playWord, showWord,
         renderCloze, reset, next, pause: () => audio.pause() };
-    window.ArticleStudy.register("pu1-u7-p90", window.GoodFriendLessonStudy);
-})(window.GoodFriendLesson);
+    window.ArticleStudy.register(id, study);
+    return study;
+};
+
+window.GoodFriendLessonStudy = window.registerScannedArticleStudy(window.GoodFriendLesson, {
+    id: "pu1-u7-p90",
+    context: { book: "PU1", unit: "7", page: "90" },
+    assets: "pu1_u7_p90_assets/",
+    scanLabel: "Power Up 1 课本第 90–91 页",
+    instructions: "请查看本页的课本第 90–91 页，填完所有空格后，再点击「检查」。",
+});

@@ -37,6 +37,7 @@
   // Version token per path prefix — bump ONE group when its files change and
   // only that group re-downloads. Unmatched paths fall into the 'misc' group.
   var GROUP_VERSIONS = [
+    { prefix: 'pu3_u8_p100_assets/', token: 'pu3-u8-p100-v1' },
     { prefix: 'pu1_u7_p90_assets/', token: 'pu1-u7-p90-v2' },
     { prefix: 'pu1_u7_p88_assets/', token: 'pu1-u7-p88-v2' },
     { prefix: 'sprites/td/',   token: 'td-sprites-v1' },

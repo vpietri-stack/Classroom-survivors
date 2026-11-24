@@ -1222,9 +1222,12 @@ AVAILABLE_CONTENT["PU3"] = {
     "5": [57, 59, 66],
     "6": [69, 71, 73],
     "7": [83, 85, 87],
-    "8": [95, 97, 99],
+    "8": [95, 97, 99, 100],
     "9": [107, 109, 110, 111, 112]
 };
+
+// Page 100 uses Article Study and contributes no new SR content.
+TEACHING_CONTENT.PU3["8"]["100"] = { vocab: [], sentences: [], sentencePairs: [] };
 
 // pu3-u9-p114 uses Article Study and contributes no new SR content.
 AVAILABLE_CONTENT["PU3"]["9"] = [107, 109, 110, 111, 112, 114];

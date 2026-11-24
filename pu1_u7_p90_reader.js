@@ -6,8 +6,8 @@
         return;
     }
 
-    const lesson = parent.GoodFriendLesson || window.GoodFriendLesson;
-    const assets = "pu1_u7_p90_assets/";
+    const lesson = window.HomeSweetHomeLesson || parent.GoodFriendLesson || window.GoodFriendLesson;
+    const assets = lesson.assets || "pu1_u7_p90_assets/";
     const query = new URLSearchParams(location.search);
     const request = query.get("request");
     const review = query.get("mode") === "review";

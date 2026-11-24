@@ -7,6 +7,8 @@
     }));
     const catalog = [...phonicsNotes, { id: 'phonics1-u1-picture-book-p4', kind: 'picture-book', storyTitle: 'The Big Bag', book: 'Phonics1', unit: '1', page: '4', version: 1, title: 'Phonics 1 · Unit 1 · Page 4 · The Big Bag（大包）', reader: 'phonics1_u1_picture_book_review.html', wordCount: 14, exerciseCount: 10 }, { id: 'pu1-u7-p88', book: 'PU1', unit: '7', page: '88', version: 1,
         title: 'Power Up 1 · Unit 7 · 第88页 · Body Power（身体的力量）', reader: 'pu1_u7_p88.html', wordCount: 21, exerciseCount: 3 },
+        { id: 'pu3-u8-p100', book: 'PU3', unit: '8', page: '100', version: 1,
+            title: 'Power Up 3 · Unit 8 · 第100–101页 · Home, sweet home（还是家里好）', reader: 'pu3_u8_p100.html', wordCount: 39, exerciseCount: 3 },
         { id: 'pu1-u7-p90', book: 'PU1', unit: '7', page: '90', version: 1,
             title: 'Power Up 1 · Unit 7 · 第90–91页 · A good friend（一个好朋友）', reader: 'pu1_u7_p90.html', wordCount: 19, exerciseCount: 6 },
         {"id": "pu3-u9-p114", "book": "PU3", "unit": "9", "page": "114", "version": 1, "title": "Power Up 3 · Unit 9 · 第114–115页 · The Story of Popocatepetl and Iztaccihuatl（火山传说故事）", "reader": "pu3_u9_p114_story.html", "wordCount": 21, "exerciseCount": 3},

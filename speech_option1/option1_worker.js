@@ -18,7 +18,8 @@ import {
 
 const ZIPA_CACHE_NAME = 'speech-option1-zipa-v1';
 const ZIPA_BASE = new URL('./zipa/', import.meta.url).href;
-const ZIPA_RAW_MIRROR = 'https://gh-proxy.com/https://raw.githubusercontent.com/vpietri-stack/Classroom-survivors-preview/main/speech_option1/zipa/';
+const ZIPA_REPO = /\/Classroom-survivors-preview(?:\/|$)/i.test(self.location.pathname) ? 'Classroom-survivors-preview' : 'Classroom-survivors';
+const ZIPA_RAW_MIRROR = `https://gh-proxy.com/https://raw.githubusercontent.com/vpietri-stack/${ZIPA_REPO}/main/speech_option1/zipa/`;
 
 let runtime, pipe, vad, zipaModel, assets, lexicon, zipaVocab, zipaIdToTok;
 let contextSeconds = 8;

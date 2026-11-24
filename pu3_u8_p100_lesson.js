@@ -809,47 +809,11 @@ window.HomeSweetHomeLesson = {
       "gaps": [
         [
           [
-            18,
-            204,
-            123,
-            30,
-            "Fact file"
-          ]
-        ],
-        [
-          [
-            143,
-            204,
-            193,
-            30,
-            "New York City"
-          ]
-        ],
-        [
-          [
             28,
             263,
             99,
             26,
             "Location"
-          ]
-        ],
-        [
-          [
-            238,
-            263,
-            156,
-            26,
-            "North-east coast"
-          ]
-        ],
-        [
-          [
-            537,
-            263,
-            190,
-            26,
-            "the Atlantic Ocean"
           ]
         ],
         [
@@ -863,29 +827,11 @@ window.HomeSweetHomeLesson = {
         ],
         [
           [
-            279,
-            307,
-            174,
-            25,
-            "square kilometres"
-          ]
-        ],
-        [
-          [
             28,
             347,
             123,
             25,
             "Population"
-          ]
-        ],
-        [
-          [
-            237,
-            347,
-            239,
-            25,
-            "Around 8.5 million people"
           ]
         ],
         [
@@ -908,96 +854,6 @@ window.HomeSweetHomeLesson = {
         ],
         [
           [
-            305,
-            428,
-            109,
-            26,
-            "skyscrapers"
-          ]
-        ],
-        [
-          [
-            538,
-            428,
-            171,
-            26,
-            "high-rise buildings"
-          ]
-        ],
-        [
-          [
-            286,
-            459,
-            95,
-            25,
-            "busy city"
-          ]
-        ],
-        [
-          [
-            238,
-            530,
-            106,
-            24,
-            "Manhattan"
-          ]
-        ],
-        [
-          [
-            517,
-            530,
-            123,
-            25,
-            "Times Square"
-          ]
-        ],
-        [
-          [
-            237,
-            560,
-            191,
-            25,
-            "The Statue of Liberty"
-          ]
-        ],
-        [
-          [
-            517,
-            560,
-            254,
-            25,
-            "The Museum of Modern Art"
-          ]
-        ],
-        [
-          [
-            238,
-            591,
-            148,
-            25,
-            "Brooklyn Bridge"
-          ]
-        ],
-        [
-          [
-            517,
-            591,
-            119,
-            25,
-            "Central Park"
-          ]
-        ],
-        [
-          [
-            237,
-            622,
-            238,
-            28,
-            "The Empire State Building"
-          ]
-        ],
-        [
-          [
             27,
             528,
             108,
@@ -1014,27 +870,11 @@ window.HomeSweetHomeLesson = {
         ]
       ],
       "answers": [
-        "Fact file",
-        "New York City",
         "Location",
-        "North-east coast",
-        "the Atlantic Ocean",
         "Size",
-        "square kilometres",
         "Population",
-        "Around 8.5 million people",
         "Climate",
         "characteristics",
-        "skyscrapers",
-        "high-rise buildings",
-        "busy city",
-        "Manhattan",
-        "Times Square",
-        "The Statue of Liberty",
-        "The Museum of Modern Art",
-        "Brooklyn Bridge",
-        "Central Park",
-        "The Empire State Building",
         "Places of interest"
       ]
     },

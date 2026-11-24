@@ -45,7 +45,7 @@ window.registerScannedArticleStudy = function (lesson, options) {
         const section = lesson.sections[index];
         const text = section.clozeText || section.sentences.map(sentence => sentence.text).join(" ");
         const answers = section.answers || Array.from(text.matchAll(new RegExp(lesson.patterns[index], "gi")), match => match[0]);
-        if (!parks.slots) {
+        if (parks.slots?.length !== answers.length) {
             parks.slots = answers.map(() => null);
             parks.dock = answers.map((_, i) => i);
             for (let i = parks.dock.length - 1; i > 0; i--) {

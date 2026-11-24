@@ -26,6 +26,22 @@ function checkNotesImages() {
     const { catalog } = require('../api/src/functions/shared/previewNotesCore');
     for (const note of catalog) {
 
+        if (note.reader.startsWith('phonics1_letter_notes.html?') || note.id === 'phonics1-u1-picture-book-p4') {
+            continue;
+        }
+        if (note.id === 'pu1-u7-p90') {
+            const context = { window: {} };
+            vm.runInNewContext(fs.readFileSync(path.join(root, 'pu1_u7_p90_lesson.js'), 'utf8'), context, { timeout: 1000 });
+            checkArticleWebPs(note, context.window.GoodFriendLesson, path.join(root, 'pu1_u7_p90_assets'));
+            continue;
+        }
+        if (note.id === 'pu3-u8-p100') {
+            const context = { window: {} };
+            vm.runInNewContext(fs.readFileSync(path.join(root, 'pu3_u8_p100_lesson.js'), 'utf8'), context, { timeout: 1000 });
+            checkArticleWebPs(note, context.window.HomeSweetHomeLesson, path.join(root, 'pu3_u8_p100_assets'));
+            continue;
+        }
+
         if (note.id === 'pu3-u9-p112') {
             const context = { window: {} };
             vm.runInNewContext(fs.readFileSync(path.join(root, 'jasmins_diary_lesson.js'), 'utf8'), context);

@@ -81,6 +81,7 @@
         'pu2-u2-p21': [{ label: 'PB p.21', src: 'images/notes_thumbs/pu2-u2-p21-pb-p21.webp' }, { label: 'AB p.21', src: 'images/notes_thumbs/pu2-u2-p21-ab-p21.webp' }],
         'pu2-u5-p59': [{ label: 'PB p.59', src: 'images/notes_thumbs/pu2-u5-p59-pb-p59.webp' }, { label: 'AB p.59', src: 'images/notes_thumbs/pu2-u5-p59-ab-p59.webp' }],
         'pu2-u5-p60': [{ label: 'PB p.60', src: 'images/notes_thumbs/pu2-u5-p60-pb-p60.webp' }, { label: 'PB p.61', src: 'images/notes_thumbs/pu2-u5-p60-pb-p61.webp' }, { label: 'AB p.60', src: 'images/notes_thumbs/pu2-u5-p60-ab-p60.webp' }, { label: 'AB p.61', src: 'images/notes_thumbs/pu2-u5-p60-ab-p61.webp' }],
+        'pu2-u5-p62': [{ label: 'PB p.62', src: 'pu2_u5_p62_assets/01-what-do-animals-eat.webp' }, { label: 'PB p.63', src: 'pu2_u5_p62_assets/02-mammals-birds-fish.webp' }],
         'pu2-u8-p95': [{ label: 'PB p.95', src: 'images/notes_thumbs/pu2-u8-p95-pb-p95.webp' }, { label: 'AB p.95', src: 'images/notes_thumbs/pu2-u8-p95-ab-p95.webp' }],
         'pu3-u1-p7': [{ label: 'PB p.7', src: 'images/notes_thumbs/pu3-u1-p7-pb-p7.webp' }, { label: 'AB p.7', src: 'images/notes_thumbs/pu3-u1-p7-ab-p7.webp' }],
         'pu3-u1-p9': [{ label: 'PB p.9', src: 'images/notes_thumbs/pu3-u1-p9-pb-p9.webp' }, { label: 'AB p.9', src: 'images/notes_thumbs/pu3-u1-p9-ab-p9.webp' }],

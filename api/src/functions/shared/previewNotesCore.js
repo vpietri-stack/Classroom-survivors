@@ -28,6 +28,8 @@
         title: 'Power Up 2 · Unit 5 · 第59页 · Superlative adjectives（形容词最高级）', reader: 'pu2_u5_p59_notes.html' },
         { id: 'pu2-u5-p60', book: 'PU2', unit: '5', page: '60', version: 1,
         title: 'Power Up 2 · Unit 5 · 第60–61页 · Action verbs & Prepositions: above, below, near, opposite（动作动词与方位介词）', reader: 'pu2_u5_p60_notes.html' },
+        { id: 'pu2-u5-p62', book: 'PU2', unit: '5', page: '62', version: 1,
+        title: 'Power Up 2 · Unit 5 · 第62–63页 · Animal diets, groups and continents（动物的食物、种类和分布）', reader: 'pu2_u5_p62_notes.html' },
         { id: 'pu2-u8-p95', book: 'PU2', unit: '8', page: '95', version: 1,
         title: 'Power Up 2 · Unit 8 · 第95页 · A day trip（一日游词汇）', reader: 'pu2_u8_p95_notes.html' },
         { id: 'pu3-u1-p7', book: 'PU3', unit: '1', page: '7', version: 1,

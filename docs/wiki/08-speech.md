@@ -373,3 +373,11 @@ When a remote incident trial is enabled for the active student, the existing __s
 The recorder observes microphone request, AudioContext creation, recording start/stop, close request and encoding; optional-practice Continue is also recorded during detailed capture. Permanent checkpoints retain only the latest audio stage. These hooks do not alter recognition/recording and collect no additional audio.
 
 Production 2026-11-03j enables the existing optional adaptive notes speech controller for PU3 U9 p111, PU1 U7 p85 and PU2 U5 p59. Single words, phrases and sentences are eligible. Readers reuse the parent worker when embedded. Recordings and feedback remain local and optional.
+
+The six Think 1 Unit 9 scan readers also use `notes_speech.js` and the app’s
+adaptive grader. Selecting a scan cue or a playback segment sets the recording
+target. The controller’s optional `renderFeedback` adapter colors the words
+within the selected target while keeping the expression and word controls
+interactive. The standard controller handles recording replay, cancellation,
+stars and chimes. Reference word playback interrupts active recording, and
+closing the scan player disposes of the current recording.

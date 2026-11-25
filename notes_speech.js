@@ -2,6 +2,7 @@
   'use strict';
   if (!(/^\/Classroom-survivors(?:-preview)?(?:\/|$)/i.test(location.pathname) || ['localhost', '127.0.0.1'].includes(location.hostname))) return;
   const player = document.querySelector('.player'), caption = document.getElementById('nowPlaying');
+  if (!player || !caption) return;
   const controls = document.createElement('div'); controls.className = 'notes-speech';
   const mic = document.createElement('button'), replay = document.createElement('button'), status = document.createElement('small');
   mic.id = 'notes-mic'; mic.type = replay.type = 'button'; mic.textContent = '🎤 试着读'; mic.disabled = true;
@@ -23,6 +24,7 @@
   }
   function discard() { if (recordingURL) URL.revokeObjectURL(recordingURL); recordingURL = null; replay.disabled = true; }
   function render(words) {
+    if (window.InteractiveNotesPOC?.renderFeedback?.(words, target)) return;
     const displayText = target.displayText || target.text;
     caption.replaceChildren(); let index = 0, offset = 0;
     for (const match of displayText.matchAll(/[\p{L}\p{N}]+(?:['’\-][\p{L}\p{N}]+)*/gu)) {
@@ -122,8 +124,16 @@
   });
   window.addEventListener('notes-select', event => {
     const changed = !target || target.id !== event.detail.id;
+    const interrupted = phase !== 'idle';
     cancel(); target = event.detail; idle();
-    if (changed) { discard(); message(canPractice() ? '点麦克风试读，读完再点一次停止。' : '先点一个单词或句子，再点麦克风试读。'); }
+    if (changed) discard();
+    if (changed || interrupted) message(canPractice() ? '点麦克风试读，读完再点一次停止。' : '先点一个单词或句子，再点麦克风试读。');
+  });
+  window.addEventListener('notes-playback', () => {
+    if (phase === 'idle' && !ownAudio) return;
+    const interrupted = phase !== 'idle';
+    cancel();
+    if (interrupted) message('已停止录音。可以继续点读或试读。');
   });
   document.getElementById('stop').addEventListener('click', () => { cancel(); message('已停止。可以继续点读或试读。'); });
   document.addEventListener('visibilitychange', () => { if (document.hidden && (phase === 'recording' || ownAudio)) { cancel(); discard(); message('已停止录音。'); } });

@@ -79,7 +79,7 @@ for (const [pathname, prefix] of [['/Classroom-survivors/', 'production:'], ['/C
   ok(context.PreviewNotes.bookLabel('Think0') === 'Think S', 'Think0 book displays as Think S');
   ok(context.PreviewNotes.bookLabel('PU1') === 'Power Up 1' && context.PreviewNotes.bookLabel('PU3') === 'Power Up 3', 'Power Up books keep readable names');
   const tree = context.PreviewNotes.buildCatalogTree();
-  ok(tree.books.map(b => b.book).join(',') === 'Phonics1,PU1,PU2,PU3,Think0,PU4', 'catalog tree orders books cleanly and automatically includes future books');
+  ok(tree.books.map(b => b.book).join(',') === 'Phonics1,PU1,PU2,PU3,Think0,Think1,PU4', 'catalog tree orders books cleanly and automatically includes future books');
   const pu3Units = tree.books.find(b => b.book === 'PU3').units.map(u => u.unit);
   ok(pu3Units.join(',') === '0,1,2,3,4,5,6,7,8,9,10', 'units sort numerically including unit 0 and unit 10');
   const thinkUnits = tree.books.find(b => b.book === 'Think0').units[0].notes.map(n => n.page);

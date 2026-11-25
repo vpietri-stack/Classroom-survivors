@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-25b",
+  "version": "2026-11-25c",
   "deployedAt": "2026-11-25",
-  "notes": "Production: fast initial load with background parallel sound-grader and tab-switch download preservation"
+  "notes": "Production: Think 1 Unit 9 scan readers, adaptive speech grading, and page 84 practice bank"
 }

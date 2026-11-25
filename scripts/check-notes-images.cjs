@@ -258,6 +258,42 @@ function checkNotesImages() {
             console.log(`${note.id}: 1 WebP + audio-1.bin, ${total} bytes`);
             continue;
         }
+        if (note.reader.startsWith('think1_u9_reader.html?')) {
+            const slug = new URLSearchParams(note.reader.split('?')[1]).get('page');
+            const assetDir = path.join(root, 'think1_u9_reader_assets');
+            const manifest = JSON.parse(fs.readFileSync(path.join(assetDir, `${slug}.json`), 'utf8'));
+            assert.ok(manifest.scan && manifest.scan.endsWith('.webp'), `${note.id}: scan must be WebP`);
+            const imgBytes = fs.readFileSync(path.join(assetDir, manifest.scan));
+            assert.ok(imgBytes.length <= PAGE_LIMIT, `${note.id}/${manifest.scan}: ${imgBytes.length} bytes exceeds ${PAGE_LIMIT}`);
+            const [imgW, imgH] = webpDimensions(imgBytes);
+            assert.ok(imgW >= manifest.width && imgH >= manifest.height, `${note.id}: WebP (${imgW}x${imgH}) smaller than manifest (${manifest.width}x${manifest.height})`);
+            const packSizes = new Map();
+            const checkAudio = (ref, label) => {
+                assert.ok(Array.isArray(ref) && ref.length === 3, `${note.id}/${label}: invalid audio ref`);
+                const [pack, offset, length] = ref;
+                if (!packSizes.has(pack)) packSizes.set(pack, fs.statSync(path.join(assetDir, pack)).size);
+                assert.ok(length > 0 && offset >= 0 && offset + length <= packSizes.get(pack), `${note.id}/${label}: audio slice out of bounds`);
+            };
+            assert.ok(Array.isArray(manifest.cues) && manifest.cues.length > 0, `${note.id}: missing cues`);
+            for (const cue of manifest.cues) {
+                for (const [x, y, w, h] of cue.rects || []) {
+                    assert.ok(w > 0 && h > 0 && x >= 0 && y >= 0 && x + w <= 1.001 && y + h <= 1.001, `${note.id}: normalized rect out of bounds for ${cue.id}`);
+                }
+                checkAudio(cue.audio, cue.id);
+                for (const p of cue.parts || []) checkAudio(p[2], `${cue.id}/part`);
+                for (const t of cue.terms || []) {
+                    if (t.audio) checkAudio(t.audio, `${cue.id}/term`);
+                    for (const w of t.words || []) if (w.audio) checkAudio(w.audio, `${cue.id}/word`);
+                }
+            }
+            const thumbPath = path.join(root, 'images', 'notes_thumbs', `think1-u9-${slug}.webp`);
+            assert.ok(fs.existsSync(thumbPath), `${note.id}: missing thumbnail ${thumbPath}`);
+            assert.ok(webpDimensions(fs.readFileSync(thumbPath))[0] > 0, `${note.id}: invalid thumbnail`);
+            let total = imgBytes.length;
+            for (const sz of packSizes.values()) total += sz;
+            console.log(`${note.id}: 1 WebP + ${packSizes.size} audio packs, ${total} bytes`);
+            continue;
+        }
         const reader = path.join(root, note.reader);
         const html = fs.readFileSync(reader, 'utf8');
         const script = html.match(/<script\b[^>]*\bsrc=["']([^"'?]*notes_data\.js)(?:\?[^"']*)?["']/i)?.[1];

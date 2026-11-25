@@ -1,0 +1,136 @@
+:root {
+    color-scheme: light;
+    font-family: system-ui, "Microsoft YaHei", sans-serif;
+    color: #23352e;
+    background: #f7f5ef;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    margin: 0;
+    height: 100vh;
+    height: 100dvh;
+}
+button, select { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, select:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid #28609b;
+    outline-offset: 2px;
+}
+.toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .55rem;
+    min-height: 2.65rem;
+    padding: .3rem clamp(.55rem, 2vw, 1rem);
+    border-bottom: 1px solid #d9e1d8;
+    background: #fffefa;
+}
+.toolbar p { margin: 0; color: #536357; font-size: .86rem; }
+.toolbar button, .playback button, .playback select, #parts button, #wordButtons button, #closePlayer {
+    min-height: 2rem;
+    padding: .25rem .6rem;
+    border: 1px solid #d2ded1;
+    border-radius: .45rem;
+    background: #eef4eb;
+    color: #225541;
+}
+.toolbar button { flex-shrink: 0; font-size: .85rem; }
+#viewport {
+    min-width: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    background: #eceee9;
+}
+#scanStatus { margin: 1rem; }
+#scan {
+    position: relative;
+    width: clamp(var(--reading-width, 900px), 100%, 1010px);
+    margin: 0 auto;
+    background: #fff;
+}
+#scan.fit { width: min(100%, 1010px); }
+#pageImage { display: block; width: 100%; height: auto; user-select: none; }
+#hotspots { position: absolute; inset: 0; pointer-events: none; }
+.hotspot {
+    position: absolute;
+    min-width: 0;
+    min-height: 0;
+    border: 0;
+    border-radius: .16rem;
+    padding: 0;
+    background: transparent;
+    pointer-events: auto;
+    -webkit-tap-highlight-color: transparent;
+}
+@media (hover: hover) {
+    .hotspot:hover { background: #37a0e436; }
+}
+.hotspot.selected { background: #ffd34c52; box-shadow: inset 0 0 0 1px #b27b23a6; }
+#player {
+    width: min(100%, 65rem);
+    max-height: 51vh;
+    max-height: 51dvh;
+    overflow: auto;
+    margin: 0 auto;
+    border: 1px solid #d9e1d8;
+    border-radius: .8rem .8rem 0 0;
+    padding: .6rem clamp(.55rem, 2.5vw, 1rem) max(.65rem, env(safe-area-inset-bottom));
+    background: #fffefa;
+    box-shadow: 0 -.12rem .8rem #21342b24;
+}
+.selection { display: flex; gap: .5rem; align-items: flex-start; justify-content: space-between; }
+#nowPlaying { margin: 0; font: 1.12rem/1.46 Georgia, serif; }
+#closePlayer { flex: 0 0 auto; font-size: 1.1rem; }
+#translation { margin: .15rem 0; color: #405c50; line-height: 1.45; }
+#parts, #partButtons, #wordButtons, .playback {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+    align-items: center;
+}
+#parts, #wordButtons, .playback { margin-top: .42rem; }
+#parts > span, .playback label, #audioStatus { color: #50645a; font-size: .89rem; }
+#parts button[aria-pressed="true"] { background: #235842; color: white; }
+.term {
+    cursor: pointer;
+    border-radius: .14rem;
+    text-decoration: underline dotted #698474;
+    text-underline-offset: .18em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+}
+.term.in-part { background: #dcebe3; }
+.term[aria-pressed="true"], #wordButtons button[aria-pressed="true"], #translation mark {
+    color: #302a18;
+    background: #f4dfa5;
+}
+
+.notes-speech {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .35rem;
+    border-top: 1px solid #dce5dc;
+    margin-top: .48rem;
+    padding-top: .48rem;
+}
+.notes-speech button {
+    min-height: 2rem;
+    padding: .25rem .6rem;
+    border: 1px solid #d2ded1;
+    border-radius: .45rem;
+    background: #eef4eb;
+    color: #225541;
+}
+.notes-speech button:disabled { opacity: .56; cursor: default; }
+.notes-speech #notes-mic { background: #086b68; color: #fff; }
+.notes-speech #notes-mic[aria-pressed="true"] { background: #b83d3d; }
+#notes-speech-status { color: #50645a; font-size: .86rem; }
+#nowPlaying [data-word-start] { border-radius: .14rem; }
+.notes-heard { color: #16783d; background: #e0f5e6; }
+.notes-grade-yellow { color: #854d0e; background: #fef9c3; }
+.notes-grade-red { color: #991b1b; background: #fee2e2; }

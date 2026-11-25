@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Think 1 · Unit 9 · 预习笔记</title>
+    <link rel="stylesheet" href="think1_u9_reader.css?v=2">
+    <script defer src="asset_cache.js?v=2026-11-24i"></script>
+    <script defer src="think1_u9_reader.js?v=2"></script>
+    <script defer src="notes_speech.js?v=think1-u9-grader1"></script>
+</head>
+<body>
+    <header class="toolbar">
+        <p id="pageLabel"></p>
+        <button type="button" id="fit" hidden aria-pressed="false">适合屏幕</button>
+    </header>
+    <main id="viewport" tabindex="0" aria-label="课本扫描页">
+        <p id="scanStatus" role="status">正在打开课本……</p>
+        <div id="scan" hidden>
+            <img id="pageImage" draggable="false" decoding="async" alt="">
+            <div id="hotspots" lang="en"></div>
+        </div>
+    </main>
+    <aside id="player" class="player" aria-label="朗读、翻译与试读" hidden>
+        <div class="selection">
+            <p id="nowPlaying" lang="en"></p>
+            <button type="button" id="closePlayer" aria-label="收起朗读面板">×</button>
+        </div>
+        <p id="translation" aria-live="polite"></p>
+        <div id="wordButtons" lang="en" aria-label="单词发音" hidden></div>
+        <div id="parts" hidden>
+            <span>分段听</span>
+            <div id="partButtons" role="group" aria-label="句子片段"></div>
+        </div>
+        <div class="playback">
+            <label>语速
+                <select id="speed">
+                    <option value="0.6">超慢</option>
+                    <option value="0.75">慢速</option>
+                    <option value="1" selected>正常</option>
+                    <option value="1.15">稍快</option>
+                </select>
+            </label>
+            <button type="button" id="replay">再听整句</button>
+            <button type="button" id="stop">停止</button>
+            <small id="audioStatus" role="status"></small>
+        </div>
+    </aside>
+</body>
+</html>

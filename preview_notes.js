@@ -51,6 +51,7 @@
             8: { en: 'City break', zh: '城市短途游' },
             9: { en: 'Let’s travel!', zh: '去旅行吧！' }
         },
+        Think1: { 9: { en: 'Wild and Wonderful', zh: '奇妙的大自然' } },
         Think0: {
             1: { en: 'All together', zh: '欢聚一堂' },
             2: { en: 'I’m excited', zh: '我很兴奋' },
@@ -132,7 +133,13 @@
         'pu3-u6-p70': [{ label: 'PB p.70', src: 'images/notes_thumbs/pu3-u6-p70-pb-p70.webp' }],
         'pu3-u7-p84': [{ label: 'PB p.84', src: 'images/notes_thumbs/pu3-u7-p84-pb-p84.webp' }],
         'pu3-u8-p96': [{ label: 'PB p.96', src: 'images/notes_thumbs/pu3-u8-p96-pb-p96.webp' }],
-        'pu3-u9-p108': [{ label: 'PB p.108', src: 'images/notes_thumbs/pu3-u9-p108-pb-p108.webp' }]
+        'pu3-u9-p108': [{ label: 'PB p.108', src: 'images/notes_thumbs/pu3-u9-p108-pb-p108.webp' }],
+        'think1-u9-wild': [{ label: 'SB p.85', src: 'images/notes_thumbs/think1-u9-wild.webp' }],
+        'think1-u9-extreme': [{ label: 'SB p.88', src: 'images/notes_thumbs/think1-u9-extreme.webp' }],
+        'think1-u9-dialogue': [{ label: 'SB p.90', src: 'images/notes_thumbs/think1-u9-dialogue.webp' }],
+        'think1-u9-community': [{ label: 'SB p.91', src: 'images/notes_thumbs/think1-u9-community.webp' }],
+        'think1-u9-pole': [{ label: 'WB p.86', src: 'images/notes_thumbs/think1-u9-pole.webp' }],
+        'think1-u9-email': [{ label: 'WB p.87', src: 'images/notes_thumbs/think1-u9-email.webp' }]
     };
 
     function enabled() {

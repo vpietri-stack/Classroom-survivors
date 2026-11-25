@@ -558,6 +558,21 @@ local mirror covers pending offline delivery; the durable server map is returned
 with the normal login. See [data model](11-data-model.md).
 
 
+Think 1 Unit 9 registers six library-only scan readers for SB pp.85, 88, 90
+and 91 and WB pp.86 and 87. Each catalog card uses its own textbook thumbnail.
+The shared `think1_u9_reader.html` opens one scan with position-based sentence
+hotspots. The two full pages keep the surrounding exercises visible while
+restricting hotspots to the assigned passages and writing tips. The player
+opens from a hotspot and offers variable-speed sentence playback, segmented
+clips, Chinese highlighting and BaiduFanyi word and expression audio. The scan
+starts at reading size with horizontal scrolling on narrow screens and a fit
+control. Scan data and audio packs load on demand through `AssetCache` and the
+reader uses the existing library-only route without Study or completion.
+
+Think 1 Unit 9 p.84 is the assignable practice placement for the whole unit.
+It has 55 vocabulary entries, 27 scrambles, 16 sentence matches, 16 find-and-fix
+items and 14 two-sentence missing-word boards in the ordinary practice pool.
+
 PU3 Unit 3 p31 registers the four-page A healthy body listening reader,
 including the Indonesia panel. Its introductory Study reuses the nine existing
 body words and the five existing page-31 boards (one scramble, one match,

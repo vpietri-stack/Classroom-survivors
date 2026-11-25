@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-24j",
-  "deployedAt": "2026-11-24",
-  "notes": "Production: use actual PB/AB page thumbnails for PU2 p.62-63 and PU3 p.100-101 preview notes"
+  "version": "2026-11-25a",
+  "deployedAt": "2026-11-25",
+  "notes": "Production: lower iOS peak memory and increase sound-grader download timeout"
 }

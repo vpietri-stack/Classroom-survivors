@@ -22,7 +22,7 @@ const ZIPA_RAW_MIRROR=`https://gh-proxy.com/https://raw.githubusercontent.com/vp
 const TINY_WORDS=new Set(['a','an','the','to','of','in','on','at','is','it','am','are','be','do','for','or','and','but','as','by','up']);
 
 let runtime,pipe,vad,zipaModel,assets,lexicon,zipaVocab,zipaIdToTok,contextSeconds=8,loading;
-let zipaNetworkBytes=0,zipaReusedBytes=0,zipaTotalBytes=0;
+let zipaNetworkBytes=0,zipaReusedBytes=0,zipaTotalBytes=0,zipaError='';
 
 async function fetchWithTimeout(url,timeoutMs=25000){
  const ctrl=new AbortController();
@@ -59,7 +59,7 @@ async function downloadZipaChunked(id){
    for(const u of urls){
     try{
      postMessage({id,log:`Downloading sound grader (${(downloaded/1048576).toFixed(1)} / ${(manifest.totalBytes/1048576).toFixed(1)} MB)…`,progress:45+Math.round((downloaded/manifest.totalBytes)*45)});
-     const b=await fetchWithTimeout(u,30000);
+     const b=await fetchWithTimeout(u,90000);
      if(b.byteLength!==part.bytes||await sha256(b)!==part.sha256)throw Error('Chunk verification failed');
      buf=b;networkBytes+=part.bytes;
      try{await cache?.put(cacheKey,new Response(buf.slice(0),{headers:{'Content-Type':'application/octet-stream'}}));}catch(_){}
@@ -82,13 +82,8 @@ async function load(id){
    const scaled=typeof p.progress==='number'?{...p,progress:Math.round(p.progress*0.45)}:p;
    postMessage({id,...scaled});
   },{preferLocal});
-  let zipaAsset=null;
-  try{
-   zipaAsset=await downloadZipaChunked(id);
-   zipaNetworkBytes=zipaAsset.networkBytes;zipaReusedBytes=zipaAsset.reusedBytes;zipaTotalBytes=zipaAsset.totalBytes;
-  }catch(_){zipaAsset=null;}
   const originalFetch=self.fetch.bind(self);
-  let zipaBytesRef=zipaAsset?.bytes||null;
+  let zipaBytesRef=null;
   self.fetch=(input,init)=>{
    const url=typeof input==='string'?input:input instanceof URL?input.href:input.url,path=url.split('?')[0];
    let key;
@@ -103,25 +98,39 @@ async function load(id){
   };
   try{
    const base=new URL('./lib/',import.meta.url).href;
-   postMessage({id,log:'Speech files are ready. Starting the local speech engine…',progress:92});
+   postMessage({id,log:'Speech files are ready. Starting the local speech engine…',progress:46});
    runtime=await import(base+'transformers.min.js?v=4');
    const {env}=runtime;env.allowLocalModels=true;env.allowRemoteModels=false;env.useBrowserCache=false;env.localModelPath=new URL('./models/',import.meta.url).href;env.backends.onnx.wasm.wasmPaths=base+'wasm/';env.backends.onnx.wasm.numThreads=1;env.backends.onnx.wasm.proxy=false;
-   postMessage({id,log:'Preparing the local speech checks…',progress:94});
+   postMessage({id,log:'Preparing the local speech checks…',progress:48});
    pipe=await runtime.pipeline('automatic-speech-recognition','whisper-tiny.en',{device:'wasm',dtype:'q8'});
    const original=pipe.processor,wrapped=async(audio,...args)=>{const f=await original(audio,...args),x=f.input_features,n=x.dims[2],frames=Math.min(n,Math.max(contextSeconds*100,Math.ceil((audio.length/16000+.25)*2)*50));if(frames<n){const data=new Float32Array(x.dims[1]*frames);for(let j=0;j<x.dims[1];j++)data.set(x.data.subarray(j*n,j*n+frames),j*frames);f.input_features=new runtime.Tensor('float32',data,[1,x.dims[1],frames]);x.dispose();}return f;};
    Object.assign(wrapped,original);wrapped.feature_extractor=original.feature_extractor;pipe.processor=wrapped;
    vad=await runtime.AutoModel.from_pretrained('silero-vad-v5',{device:'wasm',dtype:'fp32'});lexicon=compactLexicon(assets.lexicon);
    if(assets.calibration.id!==assets.config.id)throw Error('Speech configuration mismatch');
-   postMessage({id,log:'Warming up the word and sentence checks…',progress:96});
+   // Release Whisper/VAD raw buffers (~71 MB) BEFORE downloading or loading ZIPA to stay well inside iOS WebKit memory limits.
+   assets.buffers.clear();
+   postMessage({id,log:'Warming up the word and sentence checks…',progress:50});
    await warmZeroContexts(pipe,runtime,[assets.config.word.contextMinimumSec,assets.config.sentence.contextMinimumSec],seconds=>{contextSeconds=seconds;});
+   try{
+    const zipaAsset=await downloadZipaChunked(id);
+    zipaNetworkBytes=zipaAsset.networkBytes;zipaReusedBytes=zipaAsset.reusedBytes;zipaTotalBytes=zipaAsset.totalBytes;
+    zipaBytesRef=zipaAsset.bytes;
+   }catch(err){
+    zipaBytesRef=null;
+    zipaError='download: '+String(err?.message||err).slice(0,200);
+   }
    if(zipaBytesRef){
     try{
-     postMessage({id,log:'Starting sound grader…',progress:98});
+     postMessage({id,log:'Starting sound grader…',progress:96});
      zipaModel=await runtime.AutoModel.from_pretrained('zipa-w8',{device:'wasm',dtype:'fp32'});
-    }catch(_){zipaModel=null;}
+    }catch(err){
+     zipaModel=null;
+     zipaError='init: '+String(err?.message||err).slice(0,200);
+    }finally{
+     zipaBytesRef=null;
+    }
    }
   }finally{
-   // Constructors have consumed their verified model bytes. Release those copies.
    zipaBytesRef=null;assets.buffers.clear();self.fetch=originalFetch;
   }
  })();try{await loading;}catch(e){loading=null;throw e;}
@@ -157,7 +166,7 @@ self.onmessage=async e=>{
  try{
   await load(id);
   if(action==='load'){
-   postMessage({id,ready:true,assetBytes:assets.total+zipaTotalBytes,networkBytes:assets.networkBytes+zipaNetworkBytes,reusedBytes:assets.reusedBytes+zipaReusedBytes,configuration:assets.config.id,zipaReady:Boolean(zipaModel)});
+   postMessage({id,ready:true,assetBytes:assets.total+zipaTotalBytes,networkBytes:assets.networkBytes+zipaNetworkBytes,reusedBytes:assets.reusedBytes+zipaReusedBytes,configuration:assets.config.id,zipaReady:Boolean(zipaModel),zipaError});
    return;
   }
   const targetWords=words(target||'');
@@ -209,7 +218,7 @@ self.onmessage=async e=>{
     if(final.targetWords.slice(0,2).every(w=>w.heardClear)&&!final.targetWords.slice(2).every(w=>w.heardClear)&&speechSegments(audio).length>=3)phonicsSoundUnassessed=true;
    }
   }
-  let pronunciation=null;
+  let pronunciation=null,zipaAssessError='';
   if(zipaModel&&zipaIdToTok){
    try{
     let whisperWordProbs;
@@ -242,8 +251,8 @@ self.onmessage=async e=>{
     pronunciation.stars=(redWords.length===0&&(yellowWords.length===0||oneTinyYellowOk))
      ?3
      :((pronunciation.overall>=55||(greenOrYellow*2>=targetResult.length&&redWords.length<targetResult.length))?2:1);
-   }catch(_){pronunciation=null;}
+   }catch(err){pronunciation=null;zipaAssessError=String(err?.message||err).slice(0,200);}
   }
-  postMessage({id,status:'checked',targetWords:targetResult,transcript:result.transcript,pronunciation,phonicsInitials,phonicsWordTranscript,phonicsWordInitials,phonicsAlternatives,phonicsSoundUnassessed,audioStats,totalMs:performance.now()-started,contextMinimumSec:contextSeconds,vadMax:Math.max(...vadScores),sharedEncoderVerified:result.sharedEncoderVerifiedByRunCount,configuration:assets.config.id});
+  postMessage({id,status:'checked',targetWords:targetResult,transcript:result.transcript,pronunciation,zipaError,zipaAssessError,phonicsInitials,phonicsWordTranscript,phonicsWordInitials,phonicsAlternatives,phonicsSoundUnassessed,audioStats,totalMs:performance.now()-started,contextMinimumSec:contextSeconds,vadMax:Math.max(...vadScores),sharedEncoderVerified:result.sharedEncoderVerifiedByRunCount,configuration:assets.config.id});
  }catch(e){postMessage({id,error:String(e.message||e).slice(0,400)});}finally{busy=false;}
 };

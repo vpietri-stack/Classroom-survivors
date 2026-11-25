@@ -36,13 +36,15 @@
   }
   function startWorker() {
     if (worker) return;
-    const instance = new Worker('speech_adaptive_worker.js?v=11' + (preferLocal ? '&local=1' : ''), { type: 'module' });
+    const instance = new Worker('speech_adaptive_worker.js?v=12' + (preferLocal ? '&local=1' : ''), { type: 'module' });
     worker = instance;
     instance.onmessage = e => {
       if (worker !== instance || !pending || e.data.id !== pending.id) return;
       const r = e.data, p = pending;
       if (r.progress !== undefined) { emit(Math.min(99, r.progress), '正在准备朗读功能'); return; }
-      if (r.log) { emit(99, '正在启动朗读功能'); return; }
+      if (r.log) { w.__speechLog?.(r.log); emit(99, '正在启动朗读功能'); return; }
+      if (r.ready) w.__speechLog?.('Speech ready (zipa=' + Boolean(r.zipaReady) + (r.zipaError ? ', ' + r.zipaError : '') + ')');
+      if (r.zipaAssessError) w.__speechLog?.('ZIPA assess error: ' + r.zipaAssessError);
       if (r.error && recover(r.error)) return;
       clearTimeout(p.timer); pending = null;
       if (r.error) p.reject(error(r.error, 'SPEECH_PREPARATION'));
@@ -111,7 +113,7 @@
       if (signal?.aborted) throw error('Speech cancelled', 'SPEECH_ABORTED');
       abort = () => reset(error('Speech cancelled', 'SPEECH_ABORTED'));
       signal?.addEventListener('abort', abort, { once: true });
-      const r = await request('assess', { audio, target: options.target, assessmentProfile: options.assessmentProfile }, 10000);
+      const r = await request('assess', { audio, target: options.target, assessmentProfile: options.assessmentProfile }, 15000);
       const result = { text: r.transcript, targetWords: r.targetWords, targetStatus: r.status, pronunciation: r.pronunciation, targetCheckMs: r.totalMs, configuration: r.configuration };
       if (!phonics) return result;
       const verified = phonics.verifyPhonics({ ...result, phonicsInitials: r.phonicsInitials, phonicsWordTranscript: r.phonicsWordTranscript, phonicsWordInitials: r.phonicsWordInitials, phonicsAlternatives: r.phonicsAlternatives }, audio, options.target, initialFocus);

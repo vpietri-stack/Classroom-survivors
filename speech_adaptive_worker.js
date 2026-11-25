@@ -21,7 +21,7 @@ const ZIPA_REPO=/\/Classroom-survivors-preview(?:\/|$)/i.test(self.location.path
 const ZIPA_RAW_MIRROR=`https://gh-proxy.com/https://raw.githubusercontent.com/vpietri-stack/${ZIPA_REPO}/main/speech_option1/zipa/`;
 const TINY_WORDS=new Set(['a','an','the','to','of','in','on','at','is','it','am','are','be','do','for','or','and','but','as','by','up']);
 
-let runtime,pipe,vad,zipaModel,assets,lexicon,zipaVocab,zipaIdToTok,contextSeconds=8,loading;
+let runtime,pipe,vad,zipaModel,assets,lexicon,zipaVocab,zipaIdToTok,contextSeconds=8,loading,zipaLoading=null;
 let zipaNetworkBytes=0,zipaReusedBytes=0,zipaTotalBytes=0,zipaError='';
 
 async function fetchWithTimeout(url,timeoutMs=25000){
@@ -34,56 +34,89 @@ async function fetchWithTimeout(url,timeoutMs=25000){
  }finally{clearTimeout(timer);}
 }
 
-async function downloadZipaChunked(id){
+async function downloadZipaChunked(){
  let cache=null;
  try{cache=await caches.open(ZIPA_CACHE_NAME);}catch(_){}
- const manifest=await(await fetch(new URL('manifest.json?v=1',ZIPA_BASE).href,{cache:'no-cache'})).json();
- const tokText=await(await fetch(new URL('tokens.txt?v=1',ZIPA_BASE).href,{cache:'no-cache'})).text();
+ const [manifest,tokText]=await Promise.all([
+  fetch(new URL('manifest.json?v=1',ZIPA_BASE).href,{cache:'no-cache'}).then(r=>r.json()),
+  fetch(new URL('tokens.txt?v=1',ZIPA_BASE).href,{cache:'no-cache'}).then(r=>r.text())
+ ]);
  ({vocab:zipaVocab,idToTok:zipaIdToTok}=parseZipaTokens(tokText));
- const out=new Uint8Array(manifest.totalBytes);
- let offset=0,downloaded=0,networkBytes=0,reusedBytes=0;
+ let networkBytes=0,reusedBytes=0;
  const isLocalHost=['localhost','127.0.0.1'].includes(self.location.hostname);
- for(const part of manifest.parts){
+ const parts=await Promise.all(manifest.parts.map(async part=>{
   const cacheKey=new URL(`${part.sha256}/${part.name}`,ZIPA_BASE).href;
-  let buf=null;
   try{
    const saved=await cache?.match(cacheKey);
    if(saved){
     const b=await saved.arrayBuffer();
-    if(b.byteLength===part.bytes&&await sha256(b)===part.sha256){buf=b;reusedBytes+=part.bytes;}
+    if(b.byteLength===part.bytes&&await sha256(b)===part.sha256){reusedBytes+=part.bytes;return b;}
    }
   }catch(_){}
-  if(!buf){
-   const urls=isLocalHost?[new URL(part.name,ZIPA_BASE).href]:[new URL(part.name,ZIPA_BASE).href,ZIPA_RAW_MIRROR+part.name];
-   let lastErr=null;
-   for(const u of urls){
-    try{
-     postMessage({id,log:`Downloading sound grader (${(downloaded/1048576).toFixed(1)} / ${(manifest.totalBytes/1048576).toFixed(1)} MB)…`,progress:45+Math.round((downloaded/manifest.totalBytes)*45)});
-     const b=await fetchWithTimeout(u,90000);
-     if(b.byteLength!==part.bytes||await sha256(b)!==part.sha256)throw Error('Chunk verification failed');
-     buf=b;networkBytes+=part.bytes;
-     try{await cache?.put(cacheKey,new Response(buf.slice(0),{headers:{'Content-Type':'application/octet-stream'}}));}catch(_){}
-     break;
-    }catch(err){lastErr=err;}
-   }
-   if(!buf)throw Error(`Could not download ${part.name}: ${String(lastErr?.message||lastErr)}`);
+  const urls=isLocalHost?[new URL(part.name,ZIPA_BASE).href]:[new URL(part.name,ZIPA_BASE).href,ZIPA_RAW_MIRROR+part.name];
+  let lastErr=null;
+  for(const u of urls){
+   try{
+    const b=await fetchWithTimeout(u,90000);
+    if(b.byteLength!==part.bytes||await sha256(b)!==part.sha256)throw Error('Chunk verification failed');
+    networkBytes+=part.bytes;
+    try{await cache?.put(cacheKey,new Response(b.slice(0),{headers:{'Content-Type':'application/octet-stream'}}));}catch(_){}
+    return b;
+   }catch(err){lastErr=err;}
   }
-  out.set(new Uint8Array(buf),offset);offset+=part.bytes;downloaded+=part.bytes;
-  postMessage({id,log:reusedBytes===manifest.totalBytes?'Reusing saved sound grader…':`Downloading sound grader (${(downloaded/1048576).toFixed(1)} / ${(manifest.totalBytes/1048576).toFixed(1)} MB)…`,progress:45+Math.round((downloaded/manifest.totalBytes)*45)});
- }
+  throw Error(`Could not download ${part.name}: ${String(lastErr?.message||lastErr)}`);
+ }));
+ const out=new Uint8Array(manifest.totalBytes);
+ let offset=0;
+ for(const buf of parts){out.set(new Uint8Array(buf),offset);offset+=buf.byteLength;}
  return {bytes:out,networkBytes,reusedBytes,totalBytes:manifest.totalBytes};
+}
+
+function ensureZipa(){
+ if(zipaModel)return Promise.resolve(zipaModel);
+ if(zipaLoading)return zipaLoading;
+ zipaLoading=(async()=>{
+  let zipaBytesRef=null;
+  try{
+   const zipaAsset=await downloadZipaChunked();
+   zipaNetworkBytes=zipaAsset.networkBytes;zipaReusedBytes=zipaAsset.reusedBytes;zipaTotalBytes=zipaAsset.totalBytes;
+   zipaBytesRef=zipaAsset.bytes;
+   while(busy)await new Promise(r=>setTimeout(r,150));
+   const originalFetch=self.fetch.bind(self);
+   self.fetch=(input,init)=>{
+    const url=typeof input==='string'?input:input instanceof URL?input.href:input.url,path=url.split('?')[0];
+    if(path.endsWith('/models/zipa-w8/config.json'))return Promise.resolve(new Response('{"model_type":"silero_vad","architectures":["PreTrainedModel"]}',{headers:{'Content-Type':'application/json'}}));
+    if(path.endsWith('/models/zipa-w8/onnx/model.onnx')&&zipaBytesRef)return Promise.resolve(new Response(zipaBytesRef,{headers:{'Content-Type':'application/octet-stream'}}));
+    return originalFetch(input,init);
+   };
+   try{
+    zipaModel=await runtime.AutoModel.from_pretrained('zipa-w8',{device:'wasm',dtype:'fp32'});
+    zipaError='';
+    postMessage({log:'Sound grader ready (stars & 3-color active)'});
+    return zipaModel;
+   }finally{
+    zipaBytesRef=null;
+    self.fetch=originalFetch;
+   }
+  }catch(err){
+   zipaModel=null;
+   zipaError=String(err?.message||err).slice(0,200);
+   postMessage({log:'Sound grader skipped: '+zipaError});
+   return null;
+  }finally{
+   zipaBytesRef=null;
+   zipaLoading=null;
+  }
+ })();
+ return zipaLoading;
 }
 
 async function load(id){
  if(pipe&&vad)return;if(loading)return loading;
  loading=(async()=>{
   const preferLocal=new URL(location.href).searchParams.has('local');
-  assets=await prepareAdaptiveAssets(p=>{
-   const scaled=typeof p.progress==='number'?{...p,progress:Math.round(p.progress*0.45)}:p;
-   postMessage({id,...scaled});
-  },{preferLocal});
+  assets=await prepareAdaptiveAssets(p=>postMessage({id,...p}),{preferLocal});
   const originalFetch=self.fetch.bind(self);
-  let zipaBytesRef=null;
   self.fetch=(input,init)=>{
    const url=typeof input==='string'?input:input instanceof URL?input.href:input.url,path=url.split('?')[0];
    let key;
@@ -91,47 +124,25 @@ async function load(id){
    else if(path.endsWith('/ort-wasm-simd-threaded.jsep.wasm'))key='runtime/ort-wasm-simd-threaded.jsep.wasm';
    else if(path===assets.vadBase+'config.json')return Promise.resolve(new Response('{"model_type":"silero_vad","architectures":["PreTrainedModel"]}',{headers:{'Content-Type':'application/json'}}));
    else if(path===assets.vadBase+'onnx/model.onnx')key='silero_vad_v5.onnx';
-   else if(path.endsWith('/models/zipa-w8/config.json'))return Promise.resolve(new Response('{"model_type":"silero_vad","architectures":["PreTrainedModel"]}',{headers:{'Content-Type':'application/json'}}));
-   else if(path.endsWith('/models/zipa-w8/onnx/model.onnx')&&zipaBytesRef)return Promise.resolve(new Response(zipaBytesRef,{headers:{'Content-Type':'application/octet-stream'}}));
    if(key&&assets.buffers.has(key))return Promise.resolve(new Response(assets.buffers.get(key),{headers:{'Content-Type':path.endsWith('.wasm')?'application/wasm':path.endsWith('.json')?'application/json':'application/octet-stream'}}));
    return originalFetch(input,init);
   };
   try{
    const base=new URL('./lib/',import.meta.url).href;
-   postMessage({id,log:'Speech files are ready. Starting the local speech engine…',progress:46});
+   postMessage({id,log:'Speech files are ready. Starting the local speech engine…',progress:92});
    runtime=await import(base+'transformers.min.js?v=4');
    const {env}=runtime;env.allowLocalModels=true;env.allowRemoteModels=false;env.useBrowserCache=false;env.localModelPath=new URL('./models/',import.meta.url).href;env.backends.onnx.wasm.wasmPaths=base+'wasm/';env.backends.onnx.wasm.numThreads=1;env.backends.onnx.wasm.proxy=false;
-   postMessage({id,log:'Preparing the local speech checks…',progress:48});
+   postMessage({id,log:'Preparing the local speech checks…',progress:94});
    pipe=await runtime.pipeline('automatic-speech-recognition','whisper-tiny.en',{device:'wasm',dtype:'q8'});
    const original=pipe.processor,wrapped=async(audio,...args)=>{const f=await original(audio,...args),x=f.input_features,n=x.dims[2],frames=Math.min(n,Math.max(contextSeconds*100,Math.ceil((audio.length/16000+.25)*2)*50));if(frames<n){const data=new Float32Array(x.dims[1]*frames);for(let j=0;j<x.dims[1];j++)data.set(x.data.subarray(j*n,j*n+frames),j*frames);f.input_features=new runtime.Tensor('float32',data,[1,x.dims[1],frames]);x.dispose();}return f;};
    Object.assign(wrapped,original);wrapped.feature_extractor=original.feature_extractor;pipe.processor=wrapped;
    vad=await runtime.AutoModel.from_pretrained('silero-vad-v5',{device:'wasm',dtype:'fp32'});lexicon=compactLexicon(assets.lexicon);
    if(assets.calibration.id!==assets.config.id)throw Error('Speech configuration mismatch');
-   // Release Whisper/VAD raw buffers (~71 MB) BEFORE downloading or loading ZIPA to stay well inside iOS WebKit memory limits.
    assets.buffers.clear();
-   postMessage({id,log:'Warming up the word and sentence checks…',progress:50});
+   postMessage({id,log:'Warming up the word and sentence checks…',progress:97});
    await warmZeroContexts(pipe,runtime,[assets.config.word.contextMinimumSec,assets.config.sentence.contextMinimumSec],seconds=>{contextSeconds=seconds;});
-   try{
-    const zipaAsset=await downloadZipaChunked(id);
-    zipaNetworkBytes=zipaAsset.networkBytes;zipaReusedBytes=zipaAsset.reusedBytes;zipaTotalBytes=zipaAsset.totalBytes;
-    zipaBytesRef=zipaAsset.bytes;
-   }catch(err){
-    zipaBytesRef=null;
-    zipaError='download: '+String(err?.message||err).slice(0,200);
-   }
-   if(zipaBytesRef){
-    try{
-     postMessage({id,log:'Starting sound grader…',progress:96});
-     zipaModel=await runtime.AutoModel.from_pretrained('zipa-w8',{device:'wasm',dtype:'fp32'});
-    }catch(err){
-     zipaModel=null;
-     zipaError='init: '+String(err?.message||err).slice(0,200);
-    }finally{
-     zipaBytesRef=null;
-    }
-   }
   }finally{
-   zipaBytesRef=null;assets.buffers.clear();self.fetch=originalFetch;
+   assets.buffers.clear();self.fetch=originalFetch;
   }
  })();try{await loading;}catch(e){loading=null;throw e;}
 }
@@ -166,6 +177,8 @@ self.onmessage=async e=>{
  try{
   await load(id);
   if(action==='load'){
+   if(e.data.waitForZipa){busy=false;await ensureZipa();}
+   else{void ensureZipa();}
    postMessage({id,ready:true,assetBytes:assets.total+zipaTotalBytes,networkBytes:assets.networkBytes+zipaNetworkBytes,reusedBytes:assets.reusedBytes+zipaReusedBytes,configuration:assets.config.id,zipaReady:Boolean(zipaModel),zipaError});
    return;
   }

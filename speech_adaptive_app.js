@@ -36,9 +36,10 @@
   }
   function startWorker() {
     if (worker) return;
-    const instance = new Worker('speech_adaptive_worker.js?v=12' + (preferLocal ? '&local=1' : ''), { type: 'module' });
+    const instance = new Worker('speech_adaptive_worker.js?v=13' + (preferLocal ? '&local=1' : ''), { type: 'module' });
     worker = instance;
     instance.onmessage = e => {
+      if (worker === instance && e.data && e.data.id === undefined && e.data.log) { w.__speechLog?.(e.data.log); return; }
       if (worker !== instance || !pending || e.data.id !== pending.id) return;
       const r = e.data, p = pending;
       if (r.progress !== undefined) { emit(Math.min(99, r.progress), '正在准备朗读功能'); return; }

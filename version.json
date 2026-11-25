@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-25a",
+  "version": "2026-11-25b",
   "deployedAt": "2026-11-25",
-  "notes": "Production: lower iOS peak memory and increase sound-grader download timeout"
+  "notes": "Production: fast initial load with background parallel sound-grader and tab-switch download preservation"
 }

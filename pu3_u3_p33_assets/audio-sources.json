@@ -1,0 +1,154 @@
+[
+  {
+    "id": "mia-ben",
+    "text": "Mia is as tall as Ben.",
+    "translation": "米娅和本一样高。",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/23d54f90-e4bd-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13125
+  },
+  {
+    "id": "leo-ben",
+    "text": "Leo isn't as tall as Ben.",
+    "translation": "利奥没有本那么高。",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/23d1cd20-e4bd-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 12885
+  },
+  {
+    "id": "equal-balls",
+    "text": "The blue ball is as big as the red ball.",
+    "translation": "蓝色的球和红色的球一样大。",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/23d21b40-e4bd-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 16125
+  },
+  {
+    "id": "not-as-strong",
+    "text": "I'm not as strong as my sister.",
+    "translation": "我的力气没有姐姐那么大。",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/23d68810-e4bd-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 11925
+  },
+  {
+    "id": "bigger-ball",
+    "text": "The blue ball is bigger than the red ball.",
+    "translation": "蓝色的球比红色的球大。",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/23f051a0-e4bd-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15525
+  },
+  {
+    "id": "stronger-sister",
+    "text": "My sister is stronger than me.",
+    "translation": "姐姐的力气比我大。",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/25983540-e4bd-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13725
+  },
+  {
+    "id": "funnier-sister",
+    "text": "My sister is funnier than my brother.",
+    "translation": "姐姐比哥哥更有趣。",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/259a7f30-e4bd-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14445
+  },
+  {
+    "id": "more-interesting",
+    "text": "This book is more interesting than that book.",
+    "translation": "这本书比那本书更有趣。",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/25bbc2d0-e4bd-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 16245
+  },
+  {
+    "id": "strongest",
+    "text": "Dad is the strongest person in my family.",
+    "translation": "爸爸是我家力气最大的人。",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/25f48610-e4bd-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 16725
+  },
+  {
+    "id": "biggest",
+    "text": "The green ball is the biggest of the three.",
+    "translation": "绿色的球是三个球里最大的。",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/277b4d20-e4bd-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14925
+  },
+  {
+    "id": "loudest",
+    "text": "My brother is the loudest person in my family.",
+    "translation": "哥哥是我家嗓门最大的人。",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/272a6e00-e4bd-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 17445
+  },
+  {
+    "id": "most-interesting",
+    "text": "This is the most interesting book of the three.",
+    "translation": "这是三本书里最有趣的一本。",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/281d5980-e4bd-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 16125
+  },
+  {
+    "id": "leo-mia",
+    "text": "Leo isn't as tall as Mia.",
+    "translation": "利奥没有米娅那么高。",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/276ef110-e4bd-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 14685
+  },
+  {
+    "id": "ben-leo",
+    "text": "Ben is taller than Leo.",
+    "translation": "本比利奥高。",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/27b76bc0-e4bd-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 11445
+  },
+  {
+    "id": "dad-tallest",
+    "text": "Dad is the tallest of the four.",
+    "translation": "爸爸是四个人里最高的。",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/290ebe60-e4bd-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 12645
+  },
+  {
+    "id": "tall-forms",
+    "text": "tall, taller, tallest",
+    "translation": "高、更高、最高",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/292d42e0-e4bd-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 13485
+  },
+  {
+    "id": "big-forms",
+    "text": "big, bigger, biggest",
+    "translation": "大、更大、最大",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/293afe80-e4bd-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 12285
+  },
+  {
+    "id": "funny-forms",
+    "text": "funny, funnier, funniest",
+    "translation": "有趣、更有趣、最有趣",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/29b5fae0-e4bd-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 15285
+  },
+  {
+    "id": "interesting-forms",
+    "text": "interesting, more interesting, most interesting",
+    "translation": "有趣、更有趣、最有趣",
+    "source": "Sound of Text en-GB",
+    "sourceUrl": "https://files.soundoftext.com/2a5c25f0-e4bd-11f1-9564-05a2f3b61c77.mp3",
+    "bytes": 20685
+  }
+]

@@ -1,0 +1,174 @@
+{
+  "shapes-around-us": {
+    "source": "Sound of Text",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/2471cba0-e8b8-11f1-9564-05a2f3b61c77.mp3",
+    "text": "Shapes around us",
+    "bytes": 15300
+  },
+  "shape": {
+    "source": "Youdao type 1",
+    "voice": "en-GB",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=shape",
+    "text": "shape",
+    "bytes": 10911
+  },
+  "look-at-these-shapes": {
+    "source": "Sound of Text",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/246c4d60-e8b8-11f1-9564-05a2f3b61c77.mp3",
+    "text": "Look at these shapes!",
+    "bytes": 14255
+  },
+  "circle": {
+    "source": "Power Up 1 Pupil’s Book CD2 Track 28",
+    "voice": "official",
+    "start": 15.02,
+    "end": 16.03,
+    "text": "circle",
+    "bytes": 8613
+  },
+  "i-can-see-two-circles": {
+    "source": "Sound of Text",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/24717d80-e8b8-11f1-9564-05a2f3b61c77.mp3",
+    "text": "I can see two circles.",
+    "bytes": 18644
+  },
+  "square": {
+    "source": "Power Up 1 Pupil’s Book CD2 Track 28",
+    "voice": "official",
+    "start": 21.17,
+    "end": 22.2,
+    "text": "square",
+    "bytes": 8822
+  },
+  "the-window-is-a-square": {
+    "source": "Sound of Text",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/2536c950-e8b8-11f1-9564-05a2f3b61c77.mp3",
+    "text": "The window is a square.",
+    "bytes": 16972
+  },
+  "triangle": {
+    "source": "Power Up 1 Pupil’s Book CD2 Track 28",
+    "voice": "official",
+    "start": 27.68,
+    "end": 28.97,
+    "text": "triangle",
+    "bytes": 10911
+  },
+  "the-sail-is-a-triangle": {
+    "source": "Sound of Text",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/25716150-e8b8-11f1-9564-05a2f3b61c77.mp3",
+    "text": "The sail is a triangle.",
+    "bytes": 18644
+  },
+  "rectangle": {
+    "source": "Power Up 1 Pupil’s Book CD2 Track 28",
+    "voice": "official",
+    "start": 34.37,
+    "end": 35.65,
+    "text": "rectangle",
+    "bytes": 10702
+  },
+  "the-door-is-a-rectangle": {
+    "source": "Sound of Text",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/2571af70-e8b8-11f1-9564-05a2f3b61c77.mp3",
+    "text": "The door is a rectangle.",
+    "bytes": 18017
+  },
+  "what-shapes-can-you-see": {
+    "source": "Sound of Text",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/246ebe60-e8b8-11f1-9564-05a2f3b61c77.mp3",
+    "text": "What shapes can you see?",
+    "bytes": 16763
+  },
+  "i-can-see-two-squares": {
+    "source": "Sound of Text",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/26f2aa20-e8b8-11f1-9564-05a2f3b61c77.mp3",
+    "text": "I can see two squares.",
+    "bytes": 18644
+  },
+  "my-shape-robot": {
+    "source": "Sound of Text",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/27afb890-e8b8-11f1-9564-05a2f3b61c77.mp3",
+    "text": "My shape robot",
+    "bytes": 15091
+  },
+  "its-head-is-a-blue-square": {
+    "source": "Sound of Text",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/28643b80-e8b8-11f1-9564-05a2f3b61c77.mp3",
+    "text": "Its head is a blue square.",
+    "bytes": 18017
+  },
+  "its-eyes-are-two-circles": {
+    "source": "Sound of Text",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/2882e710-e8b8-11f1-9564-05a2f3b61c77.mp3",
+    "text": "Its eyes are two circles.",
+    "bytes": 18226
+  },
+  "its-nose-is-a-red-triangle": {
+    "source": "Sound of Text",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/28d796c0-e8b8-11f1-9564-05a2f3b61c77.mp3",
+    "text": "Its nose is a red triangle.",
+    "bytes": 21151
+  },
+  "its-body-is-an-orange-rectangle": {
+    "source": "Sound of Text",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/29d3f820-e8b8-11f1-9564-05a2f3b61c77.mp3",
+    "text": "Its body is an orange rectangle.",
+    "bytes": 23450
+  },
+  "arms": {
+    "source": "Youdao type 1",
+    "voice": "en-GB",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=arms",
+    "text": "arms",
+    "bytes": 11956
+  },
+  "legs": {
+    "source": "Youdao type 1",
+    "voice": "en-GB",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=legs",
+    "text": "legs",
+    "bytes": 12374
+  },
+  "feet": {
+    "source": "Youdao type 1",
+    "voice": "en-GB",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=feet",
+    "text": "feet",
+    "bytes": 11956
+  },
+  "mouth": {
+    "source": "Youdao type 1",
+    "voice": "en-GB",
+    "sourceUrl": "https://dict.youdao.com/dictvoice?type=1&audio=mouth",
+    "text": "mouth",
+    "bytes": 10702
+  },
+  "a-circle": {
+    "source": "Sound of Text",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/2cba7640-e8b8-11f1-9564-05a2f3b61c77.mp3",
+    "text": "a circle",
+    "bytes": 10285
+  },
+  "two-circles": {
+    "source": "Sound of Text",
+    "voice": "en-GB",
+    "sourceUrl": "https://files.soundoftext.com/2c328190-e8b8-11f1-9564-05a2f3b61c77.mp3",
+    "text": "two circles",
+    "bytes": 13210
+  }
+}

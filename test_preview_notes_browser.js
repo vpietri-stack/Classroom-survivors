@@ -168,7 +168,7 @@ async function fixture(page,id='notes-a',placement=lesson.placement,notes={}){
   await page.evaluate(()=>PreviewNotes.close());
   await fixture(page,'notes-server-only',lesson.placement,notes);
   ok(await page.locator('#preview-notes-overlay').count()===0,'server completion works on a fresh account cache');
-  const earlierNotes=pu1p87?{'pu1-u7-p85':{version:1,completedAt:'2026-11-03T01:00:00Z'}}:pu2p60?{'pu2-u5-p59':{version:1,completedAt:'2026-11-11T01:00:00Z'}}:{};
+  const earlierNotes=pu1p87?{'pu1-u7-p85':{version:1,completedAt:'2026-11-03T01:00:00Z'}}:pu2p60?{'pu2-u5-p59':{version:1,completedAt:'2026-11-11T01:00:00Z'}}:pu3p35?{'pu3-u3-p31':{version:1,completedAt:'2026-11-15T01:00:00Z'},'pu3-u3-p33':{version:1,completedAt:'2026-11-25T01:00:00Z'}}:{};
   await fixture(page,'notes-advance',{book:lesson.book,unit:lesson.unit,page:lesson.previous},earlierNotes);
   ok(await page.locator('#preview-notes-button').isVisible(),'library button stays visible for all students');
   await page.evaluate(()=>{

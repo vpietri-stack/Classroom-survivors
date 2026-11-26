@@ -1695,15 +1695,7 @@ if (typeof config !== 'undefined' && config.scene) {
 // GLOBAL HOOKS (wired into DOM buttons in index.html)
 // ============================================================
 function triggerTowerDefense() {
-    if (typeof TD_ENABLED !== 'undefined' && !TD_ENABLED) {
-        applyTowerDefenseGate();
-        const picker = document.getElementById('gameSelectionOverlay');
-        if (picker && picker.classList.contains('hidden')) {
-            if (typeof showGameSelection === 'function') showGameSelection();
-            else picker.classList.remove('hidden');
-        }
-        return;
-    }
+    if (typeof TD_ENABLED === 'undefined' || !TD_ENABLED) return;
 
     activeGameMode = 'TowerDefense';
     ['startScreen', 'gameSelectionOverlay', 'gomokuScreen', 'gomokuGameOverScreen',
@@ -1783,22 +1775,6 @@ function tdReturnToMenu() {
     else { const e = document.getElementById('gameSelectionOverlay'); if (e) e.classList.remove('hidden'); }
     // Restore main game HUD visibility for other modes
     const mainHud = document.getElementById('hud'); if (mainHud) mainHud.classList.remove('hidden');
-}
-
-function applyTowerDefenseGate() {
-    if (typeof TD_ENABLED !== 'undefined' && TD_ENABLED) return;
-    const btn = document.getElementById('towerDefenseBtn');
-    if (!btn) return;
-    btn.disabled = true;
-    btn.classList.remove('bg-green-600', 'hover:bg-green-500');
-    btn.classList.add('bg-gray-600', 'opacity-60', 'cursor-not-allowed', 'grayscale');
-    let sub = btn.querySelector('.td-coming-soon');
-    if (!sub) {
-        sub = document.createElement('span');
-        sub.className = 'td-coming-soon block text-sm font-normal mt-1 opacity-80';
-        btn.appendChild(sub);
-    }
-    sub.textContent = 'Coming soon — not ready yet';
 }
 
 // Legacy compat stubs

@@ -228,7 +228,7 @@ Key methods in `tower_defense.js`:
 Global hooks (bottom of file, ~lines 1056–1156):
 - `triggerTowerDefense()` — hides a list of DOM overlays **including `hud`**, starts the scene.
 - `tdStartESL()`, `tdCreditCoins(n)`, `tdReturnToMenu()` (restores `#hud` on exit).
-- `applyTowerDefenseGate()` — disables the button when `TD_ENABLED` is false.
+- The button starts disabled in `index.html`. `applyTowerDefenseGate()` enables it where `TD_ENABLED` permits play.
 - Legacy stubs: `tdBuild`, `tdUpgrade`, `tdEarnCoins`, `tdCloseMenu` (no-ops/compat).
 
 ---

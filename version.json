@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-25d",
-  "deployedAt": "2026-11-25",
-  "notes": "Production: PU3 U2 p.23, PU3 U3 p.33, PU1 U5 p.63, and PU2 U8 p.97 preview notes"
+  "version": "2026-11-26a",
+  "deployedAt": "2026-11-26",
+  "notes": "Production: Disable Tower Defense from the first render"
 }

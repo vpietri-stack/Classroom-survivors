@@ -40,7 +40,7 @@ flowchart TD
     G1 --> MINI
 ```
 
-`showGameSelection (~803)` is the canonical "return to menu" that also acts as a reset: it hides every screen, cancels pending UNO stop timers, stops `MainScene`/`UnoScene`, calls `exitHiDpi()` (boot.js) to restore the shared canvas to CSS-px RESIZE, hides the canvas + VS buttons, clears the minigame countdown, sets `activeGameMode = null`, then shows `#gameSelectionOverlay` and calls `applyVsPromo()` (the once-per-user "new improved VS" badge — [Vampire Survivors](07-vampire-survivors.md)) and `applyTowerDefenseGate()`.
+`showGameSelection (~803)` is the canonical "return to menu" that also acts as a reset: it hides every screen, cancels pending UNO stop timers, stops `MainScene`/`UnoScene`, calls `exitHiDpi()` (boot.js) to restore the shared canvas to CSS-px RESIZE, hides the canvas + VS buttons, clears the minigame countdown, sets `activeGameMode = null`, then shows `#gameSelectionOverlay` and calls `applyVsPromo()` (the once-per-user "new improved VS" badge — [Vampire Survivors](07-vampire-survivors.md)) and reapplies the Tower Defense menu gate.
 
 `goBackFromGameSelection (~2336)` hides the submenu and shows `#startScreen` with `step-greeting` visible — it is the **dashboard return**, also used by `exitStudyMode` ([Study Mode](05-study-mode.md)).
 
@@ -109,7 +109,7 @@ Vertical Plants-vs-Zombies-style "School vs Zombies" lane defense. `TowerDefense
 
 **ESL contract (do not break):** HUD 📖 ANSWER button → `tdStartESL()` (~1763, shows `#tdSlowOverlay`) → `scene.startESL() (~1434)` sets `eslSlowActive=true` and calls `startMiniGame('spelling','towerdefense')` → `claimReward` routes to `tdCreditCoins(success ? 50 : 0)` (`game.js ~1132`) → `scene.onESLComplete (~1442)`: +50 coins, slow lingers 2s, overlay hides.
 
-**Gate** (`config.js ~45`, `applyTowerDefenseGate` tower_defense.js ~1788): `TD_ENABLED` is runtime URL-derived — `?td=1`/`?td=0` overrides, localhost/`file://` enabled, path starting `/classroom-survivors-preview` enabled, live site disabled (button disabled + greyed + "Coming soon", trigger a no-op). Merge-safe: no per-branch flag to carry. `THREE_TD_ENABLED` (config.js ~61) similarly gates the `three_td.html` button, but hides it entirely instead of greying. Handoff detail (art plan, sprite wiring, balance status) lives in `TD_HANDOFF_QODERCN.md` at the repo root — read it before touching TD.
+**Gate** (`config.js` and `index.html`): `TD_ENABLED` is runtime URL-derived — the button starts disabled with "Coming soon", then enables on the preview path, localhost, or `file://`. `?td=0` turns it off on those targets. Production blocks direct launches as well as button clicks. Merge-safe: no per-branch flag to carry. `THREE_TD_ENABLED` (config.js ~61) similarly gates the `three_td.html` button, but hides it entirely instead of greying. Handoff detail (art plan, sprite wiring, balance status) lives in `TD_HANDOFF_QODERCN.md` at the repo root — read it before touching TD.
 
 ## Gomoku (`gomoku.js`, 781 lines)
 

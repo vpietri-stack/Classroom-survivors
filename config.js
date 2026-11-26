@@ -41,17 +41,16 @@ function getAppKey() {
 // (vpietri-stack.github.io), so we key off the PATH:
 //   preview: /Classroom-survivors-preview/  -> enabled
 //   live:    /Classroom-survivors/          -> disabled
-// Localhost / file:// (local dev, opening index.html directly) -> enabled,
-// and ?td=1 forces it on anywhere for quick manual checks.
+// Localhost and file:// enable local testing. ?td=0 can disable any target.
 // ============================================================
 const TD_ENABLED = (function () {
     const path = window.location.pathname.toLowerCase();
     const params = new URLSearchParams(window.location.search);
-    if (params.has('td')) return params.get('td') !== '0'; // ?td=0 can force off
+    if (params.get('td') === '0') return false;
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return true;
     if (window.location.protocol === 'file:') return true;
     // Preview deploy path -> enabled. Everything else (incl. live) -> disabled.
-    return path.indexOf('/classroom-survivors-preview') === 0;
+    return path === '/classroom-survivors-preview' || path.startsWith('/classroom-survivors-preview/');
 })();
 
 // ============================================================

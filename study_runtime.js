@@ -4,9 +4,16 @@
     const clone = value => JSON.parse(JSON.stringify(value));
     const ids = ['words','sentences','remainingWordsRoundA','currentWordIndex','currentSentenceIndex','round',
         'subRound','sentencePairs','pairAttempts','pairQueued','nonSpellingExercises','currentNonSpellingIndex',
-        'previewNote','parks','pictureBook','phonics','_mixedActive','_typedRecorded','isTransitioning','_roundCFrozen','_roundEFrozen','srFinalized'];
+        'previewNote','parks','pictureBook','phonics','act3','_mixedActive','_typedRecorded','isTransitioning','_roundCFrozen','_roundEFrozen','srFinalized'];
     const $ = id => document.getElementById(id);
     const nodes = selector => Array.from(document.querySelectorAll(selector));
+    function sMissing() {
+        if (STUDY_STATE.act3?.stage !== 'C') return null;
+        return {
+            slots: nodes('#act3-missing-slots [data-gap]').map(e => ({ text: e.innerText, cls: e.className })),
+            bank: nodes('#act3-missing-bank button').map(e => e.dataset.char || e.innerText)
+        };
+    }
     function capture() {
         if (STUDY_STATE.phonics) w.PhonicsStudy?.capture();
         if (STUDY_STATE.pictureBook) w.PhonicsPictureBookStudy?.capture();
@@ -19,6 +26,7 @@
             aOrder: nodes('#roundA-container button').map(e => e.textContent),
             cSlots: nodes('#scramble-slots .study-slot').map(e => ({ text: e.innerText, cls: e.className })),
             cBank: nodes('#scramble-bank button').map(e => e.dataset.char || e.innerText),
+            act3Missing: sMissing(),
             eSlots: nodes('#sentence-drop-zone .sentence-slot').map(e => e.firstElementChild ? { text: e.firstElementChild.dataset.word, cls: e.firstElementChild.className } : null),
             eBank: nodes('#sentence-word-bank > .study-word-tile').map(e => ({ text: e.dataset.word, cls: e.className })),
             fDock: nodes('#sentence-b-dock .sentence-b-tile').map(e => Number(e.dataset.correctIndex)),
@@ -31,7 +39,7 @@
         return { state, content: clone(typeof selectedClassContent !== 'undefined' && selectedClassContent || {}),
             elapsedMs: Math.max(0, Date.now() - STUDY_STATE.startTime),
             exercise: { attempts: exerciseAttempts, elapsedMs: Math.max(0, Date.now() - exerciseStartTime) }, ui,
-            handwriting: STUDY_STATE.round === 'D' ? { slots: clone(roundDSlots), gaps: roundDGapOrder.slice(), cursor: roundDCursor,
+            handwriting: STUDY_STATE.round === 'D' && $('handwriting-trace') ? { slots: clone(roundDSlots), gaps: roundDGapOrder.slice(), cursor: roundDCursor,
                 attempts: roundDAttempts, effort: roundDEffortAttempts, guided: roundDGuided, help: roundDHadHelp, skip: roundDSkipUnlocked,
                 targetElapsedMs: Math.max(0, Date.now() - roundDTargetShownAt), trace: roundDTrace && roundDTrace.exportRecovery(),
                 status: $('handwriting-status') && $('handwriting-status').textContent } : null,
@@ -45,6 +53,7 @@
         w.PhonicsPictureBookStudy?.cancel();
         studyRuntimeEpoch++; studyCancelPending(); clearTimeout(roundDTimer);
         w.ArticleStudy?.pause();
+        w.Act3Study?.cancel?.();
         nodes('#study-game-area .speech-rec-btn').forEach(e => { if(e.disposeSpeech)e.disposeSpeech(); });
         clearTimeout(STUDY_STATE._roundEResetTimer); STUDY_STATE._roundEResetTimer = null;
         nodes('#scramble-slots .study-slot').forEach(e => { clearTimeout(e._resetTimer); e._resetTimer = null; });
@@ -67,9 +76,12 @@
         if (name === 'sentence_reset') return clearRoundE;
         if (name === 'match_next') return advanceStudyMatch;
         if (name === 'match_reset') return () => { resetRoundF(); STUDY_STATE.isTransitioning = false; };
+        if (name === 'act3_c_next') return () => w.Act3Study?.advanceMissingWord?.();
+        if (name === 'act3_c_reset') return () => w.Act3Study?.clearMissing?.();
+        if (name === 'act3_d_next') return () => w.Act3Study?.advanceRecognition?.();
         return null;
     }
-    function restore(saved) {
+    function restore(saved, options = {}) {
         w.SpeechStatus?.start?.();
         cancel();
         if (w.PreviewNotes) PreviewNotes.close();
@@ -79,10 +91,12 @@
         Object.assign(STUDY_STATE, clone(saved.state), { active: true, srFinalized: false, startTime: Date.now() - saved.elapsedMs });
         // Selection remains the original session's location; profile assignment is untouched.
         selectedClassContent = clone(saved.content);
-        srStudyResults = clone(saved.srResults || []); srUsedPairKeys = new Set(saved.usedPairKeys || []);
-        showStudyModeScreen();
+        if (!options.game) {
+            srStudyResults = clone(saved.srResults || []); srUsedPairKeys = new Set(saved.usedPairKeys || []);
+            showStudyModeScreen();
+        }
         const s = saved.state, ui = saved.ui;
-        const matching = s.round === 'F';
+        const matching = !s.act3 && s.round === 'F';
         const mixedMatch = matching && isMixedStudyMatch();
         if (matching) {
             STUDY_STATE._mixedActive = mixedMatch;
@@ -95,10 +109,11 @@
             $('studyModeOverlay').scrollTop = ui.scroll || 0;
             return restored;
         }
-        if (s.round === 'A') startRoundA(true);
+        if (s.act3 && s.act3.stage !== 'B' && s.act3.stage !== 'E') w.Act3Study?.restore?.(saved);
+        else if (s.round === 'A') startRoundA(true);
         else if (s.parks) w.ArticleStudy.active(s).renderCloze();
         else if (s.round === 'C') nextRoundCWord();
-        else if (s.round === 'D') nextRoundDWord(saved.handwriting);
+        else if (s.round === 'D') { if (saved.handwriting) nextRoundDWord(saved.handwriting); else startRoundD(); }
         else if (STUDY_STATE._mixedActive) NonSpellingFlow.restoreStudy(ui.typed);
         else if (s.round === 'E') nextRoundESentence();
         else renderRoundF();
@@ -108,12 +123,12 @@
         currentTTSWord = ui.tts;
         if (!matching) updateStudyUI(ui.title, ui.instruction);
         else if (!mixedMatch) updateStudyMatchHeading();
-        if (s.round === 'A') {
+        if (!s.act3 && s.round === 'A') {
             const map = new Map(nodes('#roundA-container button').map(e => [e.textContent,e]));
             ui.aOrder.forEach(text => { if (map.has(text)) $('roundA-container').appendChild(map.get(text)); });
             showStudyRecognitionClue(ui.tts);
         }
-        if (s.round === 'C') {
+        if (!s.act3 && s.round === 'C') {
             nodes('#scramble-slots .study-slot').forEach((e,i) => { const v=ui.cSlots[i]; if(v){e.innerText=v.text;e.className=v.cls;} });
             $('scramble-bank').replaceChildren();
             ui.cBank.forEach(char => { const b=document.createElement('button');b.className='study-letter-btn';b.innerText=char;b.dataset.char=char;b.onclick=()=>addLetterToSlot(char,b,currentTTSWord);$('scramble-bank').appendChild(b); });
@@ -125,16 +140,16 @@
             ui.eBank.forEach((v,i) => { const b=createWordTile(v.text,i);b.className=v.cls;$('sentence-word-bank').appendChild(b); });
             if (saved.speech) mountStudySpeechGate(saved.speech);
         }
-        if (s.round === 'F') {
+        if (!s.act3 && s.round === 'F') {
             const map = new Map(nodes('#study-game-area .sentence-b-tile').map(e=>[Number(e.dataset.correctIndex),e]));
             nodes('#study-game-area .sentence-b-slot').forEach((e,i)=>{const tile=map.get(ui.fSlots[i]);if(tile){e.replaceChildren(tile);}});
             ui.fDock.forEach(i=>{if(map.has(i))$('sentence-b-dock').appendChild(map.get(i));});
             ui.fTiles.forEach(v=>{const e=map.get(v.index);if(e){e.className=v.cls;e.style.backgroundColor=v.color;}});
             selectedBTile = map.get(ui.fSelected) || null;
         }
-        if (w.PracticeTelemetry && PracticeTelemetry.resume) PracticeTelemetry.resume(saved.practice || { id:saved.runId,mode:'study',game:'study',startedAt:new Date(saved.createdAt).toISOString() });
+        if (!options.game && w.PracticeTelemetry && PracticeTelemetry.resume) PracticeTelemetry.resume(saved.practice || { id:saved.runId,mode:'study',game:'study',startedAt:new Date(saved.createdAt).toISOString() });
         let pending = saved.pending;
-        if (!pending && !saved.speech && !ui.typed) {
+        if (!pending && !saved.speech && !ui.typed && !s.act3) {
             if (s.round === 'C' && s.isTransitioning) pending={action:'scramble_next',remainingMs:100};
             else if (s.round === 'C' && s._roundCFrozen) pending={action:'scramble_reset',remainingMs:5000};
             else if (s.round === 'E' && !s.parks && s.isTransitioning) { mountStudySpeechGate(null); }

@@ -84,7 +84,7 @@ for (const [hostname, pathname, prefix] of [
   ok(context.PreviewNotes.bookLabel('Think0') === 'Think S', 'Think0 book displays as Think S');
   ok(context.PreviewNotes.bookLabel('PU1') === 'Power Up 1' && context.PreviewNotes.bookLabel('PU3') === 'Power Up 3', 'Power Up books keep readable names');
   const tree = context.PreviewNotes.buildCatalogTree();
-  ok(tree.books.map(b => b.book).join(',') === 'Phonics1,PU1,PU2,PU3,Think0,Think1,PU4', 'catalog tree orders books cleanly and automatically includes future books');
+  ok(tree.books.map(b => b.book).join(',') === 'Phonics1,Act3,PU1,PU2,PU3,Think0,Think1,PU4', 'catalog tree orders books cleanly and automatically includes future books');
   const pu3Units = tree.books.find(b => b.book === 'PU3').units.map(u => u.unit);
   ok(pu3Units.join(',') === '0,1,2,3,4,5,6,7,8,9,10', 'units sort numerically including unit 0 and unit 10');
   const thinkUnits = tree.books.find(b => b.book === 'Think0').units[0].notes.map(n => n.page);
@@ -110,7 +110,13 @@ for (const [hostname, pathname, prefix] of [
   }
   const previewNotesSrc = fs.readFileSync('preview_notes.js', 'utf8');
   for (const note of core.catalog) {
-    ok(previewNotesSrc.includes(`'${note.id}':`) || previewNotesSrc.includes(`"${note.id}":`), 'NOTE_THUMBS has thumbnail entry for ' + note.id);
+    if (Array.isArray(note.thumbs)) {
+      ok(note.thumbs.length > 0 && note.thumbs.every(thumb => thumb.label && thumb.src && fs.existsSync(thumb.src)),
+        'catalog thumbnails have labels and assets for ' + note.id);
+    } else {
+      ok(previewNotesSrc.includes(`'${note.id}':`) || previewNotesSrc.includes(`"${note.id}":`),
+        'NOTE_THUMBS has thumbnail entry for ' + note.id);
+    }
   }
   const srcMatch = previewNotesSrc.match(/images\/notes_thumbs\/[^'"]+\.webp/g) || [];
   ok(srcMatch.length >= 86 && srcMatch.every(rel => fs.existsSync(rel)), 'all book page thumbnails exist on disk');

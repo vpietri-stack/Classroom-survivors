@@ -5,6 +5,7 @@
     let viewer = null, opening = null, pendingLogin = null, loginReady = false;
     const BOOK_LABELS = {
         Phonics1: 'Phonics 1',
+        Act3: 'Act 3',
         PU1: 'Power Up 1',
         PU2: 'Power Up 2',
         PU3: 'Power Up 3',
@@ -12,9 +13,10 @@
         Think1: 'Think 1',
         Think2: 'Think 2'
     };
-    const BOOK_ORDER = ['Phonics1', 'PU1', 'PU2', 'PU3', 'Think0', 'Think1', 'Think2'];
+    const BOOK_ORDER = ['Phonics1', 'Act3', 'PU1', 'PU2', 'PU3', 'Think0', 'Think1', 'Think2'];
     const UNIT_TITLES = {
         Phonics1: { 1: { en: 'Letters and sounds', zh: '字母与发音' } },
+        Act3: { 1: { en: 'Exploring My Town', zh: '探索我的城镇' }, 2: { en: 'Going to the Library', zh: '去图书馆' } },
         PU1: {
             0: { en: 'Hello', zh: '你好' },
             1: { en: 'Our new school', zh: '我们的新学校' },
@@ -599,16 +601,25 @@
         const student = user(), note = core.find(id);
         if (!enabled() || !isStudent(student) || !note || note.libraryOnly || !core.atPage(student) || core.atPage(student).id !== id) return null;
         if (!selectedClassContent || !core.atPage(selectedClassContent) || core.atPage(selectedClassContent).id !== id) return null;
+        const context = { id: note.id, owner: student.id, book: note.book, unit: note.unit, page: note.page, version: note.version };
+        if (note.book === 'Act3') {
+            const words = getStudyContentSR(note.book, note.unit, note.page, 'vocab', 5);
+            const sentences = getStudyContentSR(note.book, note.unit, note.page, 'sentences', 5);
+            if (!window.Act3Study || words.length !== 5 || sentences.length !== 5) {
+                showStudyNotice('这一页的学习内容暂时没有准备好，请稍后再试。');
+                return null;
+            }
+            return { words, sentences, exercises: null, context };
+        }
         const article = window.ArticleStudy?.get(id);
         if (article) {
-            return { words: article.words.slice(0, 5).map(word => word[0]), exercises: null,
-                context: { id: note.id, owner: student.id, book: note.book, unit: note.unit, page: note.page, version: note.version } };
+            return { words: article.words.slice(0, 5).map(word => word[0]), exercises: null, context };
         }
         const content = TEACHING_CONTENT[note.book]?.[note.unit]?.[note.page];
         const words = shuffleArray(Array.from(new Set(content?.vocab || []))).slice(0, 5);
         const exercises = NonSpellingContent.selectPage(note.book, note.unit, note.page, 5);
         if (words.length !== 5 || exercises.length !== 5) { showStudyNotice('这一页的学习内容暂时没有准备好，请稍后再试。'); return null; }
-        return { words, exercises, context: { id: note.id, owner: student.id, book: note.book, unit: note.unit, page: note.page, version: note.version } };
+        return { words, exercises, context };
     }
     function completeStudy() {
         const student = user(), state = typeof STUDY_STATE === 'undefined' ? null : STUDY_STATE, context = state && state.previewNote;
@@ -619,6 +630,12 @@
         if (context?.book === 'Phonics1' && student && context.owner === student.id && state.active && state.phonics?.completed && state.words.length === 4) {
             const { owner, ...marker } = context;
             return { ...marker, wordCount: 4, exerciseCount: 4 };
+        }
+        if (context?.book === 'Act3') {
+            if (!student || context.owner !== student.id || !state.active || state.act3?.stage !== 'E'
+                || state.words.length !== 5 || state.sentences.length !== 5 || state.currentSentenceIndex !== 5) return null;
+            const { owner, ...marker } = context;
+            return { ...marker, wordCount: 5, exerciseCount: 5 };
         }
         const article = window.ArticleStudy?.get(context?.id);
         if (article) {

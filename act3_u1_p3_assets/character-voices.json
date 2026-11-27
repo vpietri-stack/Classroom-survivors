@@ -1,0 +1,26 @@
+{
+  "model": "fish-audio/s2.1-pro-free:free",
+  "accent": "en-GB",
+  "characters": {
+    "yellow-bow": {
+      "character": "Mia, girl with the yellow bow",
+      "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+      "profile": "Lulu British Girl"
+    },
+    "blue-jumper": {
+      "character": "Boy in the blue jumper",
+      "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+      "profile": "Boy2"
+    },
+    "green-jumper": {
+      "character": "Boy in the green jumper",
+      "voice_id": "96a25a2fa849476b82376e84bee45aa1",
+      "profile": "Male"
+    },
+    "teacher": {
+      "character": "Teacher in teal cardigan",
+      "voice_id": "00866e8eac9f42e8ae7c8ba9a29c6060",
+      "profile": "British female 1"
+    }
+  }
+}

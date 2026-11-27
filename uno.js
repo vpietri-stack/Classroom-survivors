@@ -1596,17 +1596,22 @@ class UnoScene extends Phaser.Scene {
     }
 
     updateUnoESLDisplay() {
-        const rem = Math.max(0, UNO_ESL_TIME_LIMIT - (Date.now() - unoESLTimerStart));
+        const act3 = window.Act3Game?.active();
+        const elapsed = act3 ? Act3Game.elapsedUno() : Date.now() - unoESLTimerStart;
+        const rem = Math.max(0, UNO_ESL_TIME_LIMIT - elapsed);
         const s = Math.ceil(rem / 1000);
         const el = document.getElementById('uno-esl-timer');
         if (el) { el.innerText = '⏱ ' + s + 's'; el.style.color = s <= 5 ? '#ef4444' : '#fdd835'; }
-        if (rem <= 0 && !unoESLTimedOut) unoESLTimedOut = true;
+        if (rem <= 0) {
+            unoESLTimedOut = true;
+            if (act3 && !Act3Game.paused()) claimReward(false);
+        }
     }
 
     handleESLResult(success) {
         if (unoESLTimerInterval) { clearInterval(unoESLTimerInterval); unoESLTimerInterval = null; }
         document.getElementById('unoESLOverlay').classList.add('hidden');
-        const timedOut = (Date.now() - unoESLTimerStart) > UNO_ESL_TIME_LIMIT;
+        const timedOut = (unoESLTimedOut && selectedClassContent?.book === 'Act3') || (Date.now() - unoESLTimerStart) > UNO_ESL_TIME_LIMIT;
         unoStartTime = Date.now();
 
         if (unoESLContext === 'draw') {
@@ -1772,6 +1777,7 @@ function completeUnoESLQuestion(success) {
 }
 
 function triggerUno() {
+    window.Act3Game?.reset();
     const launch=++unoLaunchEpoch;
     if(window.StudyRecovery)StudyRecovery.pause();
     if(window.GameRecovery&&!(window.GameRuntime&&GameRuntime.restoring()))GameRecovery.pause();
@@ -1841,7 +1847,9 @@ function triggerUno() {
 
 function exitUnoGame() {
     unoLaunchEpoch++;
+    const resumable = window.GameRecovery?.active();
     if(window.GameRecovery&&!(window.GameRuntime&&GameRuntime.restoring()))GameRecovery.pause();
+    window.Act3Game?.leaveRun(resumable);
     if (window.PracticeTelemetry) PracticeTelemetry.interrupt('game_exit', false);
     console.log('[DEBUG] exitUnoGame called, game:', !!game, 'isActive:', (game && game.scene) ? game.scene.isActive('UnoScene') : false);
     unoGameActive = false;

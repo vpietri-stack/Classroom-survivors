@@ -1,0 +1,173 @@
+{
+  "voiceMap": "../act3_u1_p3_assets/character-voices.json",
+  "clips": {
+    "listen": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Listen to your teacher!",
+          "speaker": "teacher",
+          "voice_id": "00866e8eac9f42e8ae7c8ba9a29c6060",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795688589-OUGM541A2yclE25qqkjA"
+        }
+      ]
+    },
+    "open-books": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Open your books!",
+          "speaker": "teacher",
+          "voice_id": "00866e8eac9f42e8ae7c8ba9a29c6060",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795688589-gjPv0wzs9srSKY5My5gu"
+        }
+      ]
+    },
+    "close-books": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Close your books!",
+          "speaker": "teacher",
+          "voice_id": "00866e8eac9f42e8ae7c8ba9a29c6060",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795688589-NS7f5pAG1DBhF9Z7h0de"
+        }
+      ]
+    },
+    "walk": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Walk slowly!",
+          "speaker": "teacher",
+          "voice_id": "00866e8eac9f42e8ae7c8ba9a29c6060",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795688588-RjxjvBeyPGZXC6rjBBz2"
+        }
+      ]
+    },
+    "marker": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Pick up a marker!",
+          "speaker": "teacher",
+          "voice_id": "00866e8eac9f42e8ae7c8ba9a29c6060",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795688590-MqcpllvZmK7aPZYb6slY"
+        }
+      ]
+    },
+    "mia": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Don't run! Walk slowly!",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699362-EIVWu32x4qooIruMzpyQ"
+        }
+      ]
+    },
+    "tom": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Look! I have a book!",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795688591-AxSlRD89XFzbwUrtSyqV"
+        }
+      ]
+    },
+    "quiet": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Tom, be quiet!",
+          "speaker": "teacher",
+          "voice_id": "00866e8eac9f42e8ae7c8ba9a29c6060",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795694098-eSZ9LODdHvE4SdUa0e4r",
+          "leadIn": "Short synthesized shushing sound"
+        }
+      ]
+    },
+    "no-run": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Don't run!",
+          "speaker": "teacher",
+          "voice_id": "00866e8eac9f42e8ae7c8ba9a29c6060",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795688592-fEJdVRafkHOxKVGEdqHl"
+        }
+      ]
+    },
+    "open": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "close": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "walk slowly": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "pick up": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "library-exchange": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Don't run! Walk slowly!",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699362-EIVWu32x4qooIruMzpyQ"
+        },
+        {
+          "script": "Look! I have a book!",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795688591-AxSlRD89XFzbwUrtSyqV"
+        },
+        {
+          "script": "Tom, be quiet!",
+          "speaker": "teacher",
+          "voice_id": "00866e8eac9f42e8ae7c8ba9a29c6060",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795694098-eSZ9LODdHvE4SdUa0e4r",
+          "leadIn": "Short synthesized shushing sound"
+        }
+      ]
+    },
+    "book-exchange": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Look! I have a book!",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795688591-AxSlRD89XFzbwUrtSyqV"
+        },
+        {
+          "script": "Tom, be quiet!",
+          "speaker": "teacher",
+          "voice_id": "00866e8eac9f42e8ae7c8ba9a29c6060",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795694098-eSZ9LODdHvE4SdUa0e4r",
+          "leadIn": "Short synthesized shushing sound"
+        }
+      ]
+    }
+  }
+}

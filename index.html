@@ -144,7 +144,7 @@
         }, 12000);
     </script>
     <script src="config.js?v=2026-11-27a"></script>
-    <script src="frontend_auth.js?v=2026-11-27e"></script>
+    <script src="frontend_auth.js?v=2026-11-27f"></script>
     <script>
         if (typeof startStudentShell === 'function') startStudentShell();
     </script>
@@ -370,6 +370,7 @@
     <div id="studyModeOverlay"
         class="overlay hidden bg-gradient-to-br from-slate-900 to-slate-800 z-50 flex flex-col items-center overflow-y-auto">
         <div class="w-full max-w-4xl flex flex-col items-center px-2 sm:px-4 py-2">
+            <div id="act3-game-timer" class="hidden text-sm text-yellow-300" aria-live="off"></div>
             <h2 id="study-title" class="text-xl sm:text-3xl text-yellow-400 font-bold mb-1">Study Mode</h2>
             <p id="study-instruction" class="text-base sm:text-lg text-gray-300 mb-3 text-center">Instruction</p>
 
@@ -379,7 +380,7 @@
         </div>
 
         <button
-            onclick="exitStudyMode()"
+            id="study-close" onclick="exitStudyMode()"
             aria-label="Close" class="fixed top-3 right-3 w-10 h-10 flex items-center justify-center rounded-full bg-gray-800/80 text-gray-400 hover:text-white hover:bg-gray-700 text-xl z-50 transition-colors"><i
                 class="fas fa-times"></i></button>
     </div>
@@ -782,15 +783,15 @@
         </div>
     </div>
 
-    <script defer fetchpriority="low" data-student-runtime src="translations.js?v=2026-11-25c"></script>
+    <script defer fetchpriority="low" data-student-runtime src="translations.js?v=2026-11-27f"></script>
     <script defer fetchpriority="low" data-student-runtime src="sr_engine.js?v=2026-11-11a"></script>
     <script defer fetchpriority="low" data-student-runtime src="practice_telemetry.js?v=2026-11-02c"></script>
     <script defer fetchpriority="low" data-student-runtime src="api/src/functions/shared/studyResumeCore.js?v=2026-11-01c"></script>
     <script defer fetchpriority="low" data-student-runtime src="api/src/functions/shared/gameResumeCore.js?v=2026-11-01f"></script>
-    <script defer fetchpriority="low" data-student-runtime src="game_recovery.js?v=2026-11-12b"></script>
+    <script defer fetchpriority="low" data-student-runtime src="game_recovery.js?v=2026-11-27f"></script>
     <script defer fetchpriority="low" data-student-runtime src="study_recovery.js?v=2026-11-19a"></script>
     <link rel="stylesheet" href="study_recovery.css?v=2026-11-01c">
-    <script defer fetchpriority="low" data-student-runtime src="teaching_content.js?v=2026-11-19a"></script>
+    <script defer fetchpriority="low" data-student-runtime src="teaching_content.js?v=2026-11-27f"></script>
     <script defer fetchpriority="low" data-student-runtime src="phonics_content.js?v=2026-11-19a"></script>
     <script defer fetchpriority="low" data-student-runtime src="content_phonics1.js?v=2026-11-19a"></script>
     <script defer fetchpriority="low" data-student-runtime src="content_pu1.js?v=2026-11-19a"></script>
@@ -800,15 +801,16 @@
     <script defer fetchpriority="low" data-student-runtime src="content_think1.js?v=2026-11-25c"></script>
     <script defer fetchpriority="low" data-student-runtime src="content_think2.js?v=2026-07-25a"></script>
     <script defer fetchpriority="low" data-student-runtime src="content_test.js?v=2026-07-25a"></script>
+    <script defer fetchpriority="low" data-student-runtime src="content_act3.js?v=2026-11-27f"></script>
     <script defer fetchpriority="low" data-student-runtime src="non_spelling_content.js?v=2026-11-25c"></script>
     <script defer fetchpriority="low" data-student-runtime src="non_spelling_widget.js?v=2026-11-24g"></script>
-    <script defer fetchpriority="low" data-student-runtime src="api/src/functions/shared/previewNotesCore.js?v=pu2-u8-p97-v1"></script>
-    <script defer fetchpriority="low" data-student-runtime src="preview_notes.js?v=2026-11-27a"></script>
+    <script defer fetchpriority="low" data-student-runtime src="api/src/functions/shared/previewNotesCore.js?v=2026-11-27f"></script>
+    <script defer fetchpriority="low" data-student-runtime src="preview_notes.js?v=2026-11-27f"></script>
     <link rel="stylesheet" href="preview_notes.css?v=2026-11-19a">
     <script defer fetchpriority="low" data-student-runtime src="class_config.js?v=2026-11-03e"></script>
     <script defer fetchpriority="low" data-student-runtime src="boot.js?v=startup-1"></script>
     <script defer fetchpriority="low" data-student-runtime src="bgm.js?v=2"></script>
-    <script defer fetchpriority="low" data-student-runtime src="gomoku.js?v=2026-11-02c"></script>
+    <script defer fetchpriority="low" data-student-runtime src="gomoku.js?v=2026-11-27f"></script>
 
     <!-- ===== Speech-recognition engine (self-contained, global: LocalEngine / Recorder / Scorer) ===== -->
     <script defer fetchpriority="low" data-student-runtime src="speech_scorer.js?v=4"></script>
@@ -949,12 +951,12 @@
         .td-play-again-btn:hover { background: #66bb6a; }
     </style>
 
-    <script defer fetchpriority="low" data-student-runtime src="game.js?v=2026-11-19a"></script>
+    <script defer fetchpriority="low" data-student-runtime src="game.js?v=2026-11-27f"></script>
     <script defer fetchpriority="low" data-student-runtime src="non_spelling_flow.js?v=2026-11-02c"></script>
     <!-- Mirror-aware asset cache: prefetch + IndexedDB for TD sprites, vocab
          images and hand-recorded MP3s (fast first load in CN; survives WeChat
          cache eviction). Must load BEFORE tower_defense.js reads AssetCache. -->
-    <script defer fetchpriority="low" data-student-runtime src="asset_cache.js?v=2026-11-27a"></script>
+    <script defer fetchpriority="low" data-student-runtime src="asset_cache.js?v=2026-11-27f"></script>
     <!-- Handwriting round (study Round C): mask geometry + trace box. Must load
          before study_mode.js, which calls hwEnsureFont()/hwCreateTraceBox(). -->
     <script defer fetchpriority="low" data-student-runtime src="handwriting_model/preprocess.js?v=2026-10-23c"></script>
@@ -986,8 +988,10 @@
     <script defer fetchpriority="low" data-student-runtime src="pu3_u3_p36_story_study.js?v=2026-11-12d"></script>
     <script defer fetchpriority="low" data-student-runtime src="pu3_u3_p38_story_lesson.js?v=3"></script>
     <script defer fetchpriority="low" data-student-runtime src="pu3_u3_p38_story_study.js?v=2"></script>
-    <script defer fetchpriority="low" data-student-runtime src="study_mode.js?v=2026-11-24h"></script>
-    <script defer fetchpriority="low" data-student-runtime src="study_runtime.js?v=2026-11-20a"></script>
+    <script defer fetchpriority="low" data-student-runtime src="act3_study.js?v=2026-11-27f"></script>
+    <script defer fetchpriority="low" data-student-runtime src="act3_game.js?v=2026-11-27f"></script>
+    <script defer fetchpriority="low" data-student-runtime src="study_mode.js?v=2026-11-27f"></script>
+    <script defer fetchpriority="low" data-student-runtime src="study_runtime.js?v=2026-11-27f"></script>
     <script defer fetchpriority="low" data-student-runtime src="phonics_study.js?v=2026-11-19a"></script>
     <script defer fetchpriority="low" data-student-runtime src="phonics_picture_book_content.js?v=2026-11-19a"></script>
     <script defer fetchpriority="low" data-student-runtime src="picture_book_page_turn.js?v=2026-11-19a"></script>
@@ -996,11 +1000,11 @@
     <link rel="stylesheet" href="phonics_study.css?v=2026-11-19a">
     <template id="phaser-scripts">
         <script src="phaser.min.js"></script>
-        <script src="vampire_survivors.js?v=2026-11-01a"></script>
-        <script src="uno.js?v=2026-11-02c"></script>
+        <script src="vampire_survivors.js?v=2026-11-27f"></script>
+        <script src="uno.js?v=2026-11-27f"></script>
         <script src="tower_defense.js?v=2026-11-26a"></script>
     </template>
-    <script defer fetchpriority="low" data-student-runtime src="game_runtime.js?v=startup-1"></script>
+    <script defer fetchpriority="low" data-student-runtime src="game_runtime.js?v=2026-11-27f"></script>
     <script id="game-selection-gates">
         function applyTowerDefenseGate() {
             if (typeof TD_ENABLED === 'undefined' || !TD_ENABLED) return;

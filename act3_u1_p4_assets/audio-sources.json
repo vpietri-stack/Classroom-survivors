@@ -1,0 +1,200 @@
+{
+  "voiceMap": "../act3_u1_p3_assets/character-voices.json",
+  "clips": {
+    "bakery": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "ask-bakery": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Where is the bakery?",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699343-eI7BZSOIAg5j8bFTUtmK"
+        }
+      ]
+    },
+    "fire-station": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "ask-fire-station": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Where is the fire station?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795678226-PE6VEoOMQIk9g9H8FQQx"
+        }
+      ]
+    },
+    "hospital": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "ask-hospital": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Where is the hospital?",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699342-XFTPyhCEe8E0ddb3zzbR"
+        }
+      ]
+    },
+    "toy-store": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "ask-toy-store-vocab": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Where is the toy store?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795678228-HTTCl6L3qTmINip8iRea"
+        }
+      ]
+    },
+    "police-station": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "ask-police-station": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Where is the police station?",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699345-aW1xAGl4CeZYqmCdFs2V"
+        }
+      ]
+    },
+    "next-to": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "next-school": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "It's next to the school.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795678229-WykIqKV9tAkgCrtd7g3j"
+        }
+      ]
+    },
+    "exchange-1": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Where is the bakery?",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699343-eI7BZSOIAg5j8bFTUtmK"
+        },
+        {
+          "script": "It's next to the school.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795678229-WykIqKV9tAkgCrtd7g3j"
+        }
+      ]
+    },
+    "ask-museum": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Where is the museum?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795678228-qLy4p0iC1pJ6Op3ZRXpy"
+        }
+      ]
+    },
+    "next-hospital": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "It's next to the hospital.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699346-KyCoGaXXNprI4gt5iAjE"
+        }
+      ]
+    },
+    "exchange-2": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Where is the museum?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795678228-qLy4p0iC1pJ6Op3ZRXpy"
+        },
+        {
+          "script": "It's next to the hospital.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699346-KyCoGaXXNprI4gt5iAjE"
+        }
+      ]
+    },
+    "ask-toy-store": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Where is the toy store?",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699345-ALOJfGWDpaybOcNl0TQD"
+        }
+      ]
+    },
+    "next-library": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "It's next to the library.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795678230-nqimLdM2iL4Lqx32yfZn"
+        }
+      ]
+    },
+    "exchange-3": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Where is the toy store?",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699345-ALOJfGWDpaybOcNl0TQD"
+        },
+        {
+          "script": "It's next to the library.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795678230-nqimLdM2iL4Lqx32yfZn"
+        }
+      ]
+    }
+  }
+}

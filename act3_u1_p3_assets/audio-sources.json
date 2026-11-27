@@ -1,0 +1,281 @@
+{
+  "morning": {
+    "source": "Youdao English audio (type=1)",
+    "file": "morning.mp3"
+  },
+  "afternoon": {
+    "source": "Youdao English audio (type=1)",
+    "file": "afternoon.mp3"
+  },
+  "evening": {
+    "source": "Youdao English audio (type=1)",
+    "file": "evening.mp3"
+  },
+  "zoo": {
+    "source": "Youdao English audio (type=1)",
+    "file": "zoo.mp3"
+  },
+  "library": {
+    "source": "Youdao English audio (type=1)",
+    "file": "library.mp3"
+  },
+  "museum": {
+    "source": "Youdao English audio (type=1)",
+    "file": "museum.mp3"
+  },
+  "airport": {
+    "source": "Youdao English audio (type=1)",
+    "file": "airport.mp3"
+  },
+  "supermarket": {
+    "source": "Youdao English audio (type=1)",
+    "file": "supermarket.mp3"
+  },
+  "good-morning": {
+    "source": "OpenRouter Fish Audio Free",
+    "model": "fish-audio/s2.1-pro-free:free",
+    "turns": [
+      {
+        "speaker": "yellow-bow",
+        "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+        "generation_id": "gen-tts-1795699340-0V3HsXs9vVxQFADeHNFj",
+        "script": "Good morning!",
+        "model": "fish-audio/s2.1-pro-free:free"
+      }
+    ]
+  },
+  "good-afternoon": {
+    "source": "OpenRouter Fish Audio Free",
+    "model": "fish-audio/s2.1-pro-free:free",
+    "turns": [
+      {
+        "speaker": "yellow-bow",
+        "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+        "generation_id": "gen-tts-1795699340-exOpKWVDT9KeT91qW2Mn",
+        "script": "Good afternoon!",
+        "model": "fish-audio/s2.1-pro-free:free"
+      }
+    ]
+  },
+  "good-evening": {
+    "source": "OpenRouter Fish Audio Free",
+    "model": "fish-audio/s2.1-pro-free:free",
+    "turns": [
+      {
+        "speaker": "yellow-bow",
+        "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+        "generation_id": "gen-tts-1795699340-Ru2k8PIORT8qv5FG4Oxo",
+        "script": "Good evening!",
+        "model": "fish-audio/s2.1-pro-free:free"
+      }
+    ]
+  },
+  "going-zoo": {
+    "source": "OpenRouter Fish Audio Free",
+    "model": "fish-audio/s2.1-pro-free:free",
+    "turns": [
+      {
+        "speaker": "blue-jumper",
+        "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+        "generation_id": "gen-tts-1795675949-uVyPmKSdLmFdBvynvMzn"
+      }
+    ]
+  },
+  "going-library": {
+    "source": "OpenRouter Fish Audio Free",
+    "model": "fish-audio/s2.1-pro-free:free",
+    "turns": [
+      {
+        "speaker": "blue-jumper",
+        "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+        "generation_id": "gen-tts-1795675950-2sHSInldXJ0zBuG3cV1m"
+      }
+    ]
+  },
+  "going-museum": {
+    "source": "OpenRouter Fish Audio Free",
+    "model": "fish-audio/s2.1-pro-free:free",
+    "turns": [
+      {
+        "speaker": "blue-jumper",
+        "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+        "generation_id": "gen-tts-1795675949-RWzi1YxVmqNHIDoQ3y49"
+      }
+    ]
+  },
+  "going-airport": {
+    "source": "OpenRouter Fish Audio Free",
+    "model": "fish-audio/s2.1-pro-free:free",
+    "turns": [
+      {
+        "speaker": "blue-jumper",
+        "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+        "generation_id": "gen-tts-1795675949-1LLieQbaHaahS7cbLNWj"
+      }
+    ]
+  },
+  "going-supermarket": {
+    "source": "OpenRouter Fish Audio Free",
+    "model": "fish-audio/s2.1-pro-free:free",
+    "turns": [
+      {
+        "speaker": "blue-jumper",
+        "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+        "generation_id": "gen-tts-1795675952-XEH3BUqME11upzY6bG9o"
+      }
+    ]
+  },
+  "ask-zoo": {
+    "source": "OpenRouter Fish Audio Free",
+    "model": "fish-audio/s2.1-pro-free:free",
+    "turns": [
+      {
+        "speaker": "yellow-bow",
+        "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+        "generation_id": "gen-tts-1795699352-JmhJilKM6XFCjYaJM0vk",
+        "script": "Where are you going?",
+        "model": "fish-audio/s2.1-pro-free:free"
+      }
+    ]
+  },
+  "greet-question": {
+    "source": "OpenRouter Fish Audio Free",
+    "model": "fish-audio/s2.1-pro-free:free",
+    "turns": [
+      {
+        "speaker": "yellow-bow",
+        "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+        "generation_id": "gen-tts-1795699340-0V3HsXs9vVxQFADeHNFj",
+        "script": "Good morning!",
+        "model": "fish-audio/s2.1-pro-free:free"
+      },
+      {
+        "speaker": "yellow-bow",
+        "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+        "generation_id": "gen-tts-1795699352-JmhJilKM6XFCjYaJM0vk",
+        "script": "Where are you going?",
+        "model": "fish-audio/s2.1-pro-free:free"
+      }
+    ]
+  },
+  "answer-and-ask": {
+    "source": "OpenRouter Fish Audio Free",
+    "model": "fish-audio/s2.1-pro-free:free",
+    "turns": [
+      {
+        "speaker": "blue-jumper",
+        "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+        "generation_id": "gen-tts-1795675949-uVyPmKSdLmFdBvynvMzn"
+      },
+      {
+        "speaker": "blue-jumper",
+        "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+        "generation_id": "gen-tts-1795675953-iCZqBrSKL490l5eESCrb"
+      }
+    ]
+  },
+  "me-too": {
+    "source": "OpenRouter Fish Audio Free",
+    "model": "fish-audio/s2.1-pro-free:free",
+    "turns": [
+      {
+        "speaker": "yellow-bow",
+        "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+        "generation_id": "gen-tts-1795699343-FTB34yRrjTQl9poqOp1I",
+        "script": "Me, too!",
+        "model": "fish-audio/s2.1-pro-free:free"
+      }
+    ]
+  },
+  "lets-go": {
+    "source": "OpenRouter Fish Audio Free",
+    "model": "fish-audio/s2.1-pro-free:free",
+    "turns": [
+      {
+        "speaker": "blue-jumper",
+        "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+        "generation_id": "gen-tts-1795675954-sev052iuWqqcSe7Bn3yJ"
+      }
+    ]
+  },
+  "join": {
+    "source": "OpenRouter Fish Audio Free",
+    "model": "fish-audio/s2.1-pro-free:free",
+    "turns": [
+      {
+        "speaker": "yellow-bow",
+        "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+        "generation_id": "gen-tts-1795699343-FTB34yRrjTQl9poqOp1I",
+        "script": "Me, too!",
+        "model": "fish-audio/s2.1-pro-free:free"
+      },
+      {
+        "speaker": "blue-jumper",
+        "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+        "generation_id": "gen-tts-1795675954-sev052iuWqqcSe7Bn3yJ"
+      }
+    ]
+  },
+  "ask-library": {
+    "source": "OpenRouter Fish Audio Free",
+    "model": "fish-audio/s2.1-pro-free:free",
+    "turns": [
+      {
+        "speaker": "yellow-bow",
+        "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+        "generation_id": "gen-tts-1795699352-JmhJilKM6XFCjYaJM0vk",
+        "script": "Where are you going?",
+        "model": "fish-audio/s2.1-pro-free:free"
+      }
+    ]
+  },
+  "library-exchange": {
+    "source": "OpenRouter Fish Audio Free",
+    "model": "fish-audio/s2.1-pro-free:free",
+    "turns": [
+      {
+        "speaker": "yellow-bow",
+        "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+        "generation_id": "gen-tts-1795699352-JmhJilKM6XFCjYaJM0vk",
+        "script": "Where are you going?",
+        "model": "fish-audio/s2.1-pro-free:free"
+      },
+      {
+        "speaker": "blue-jumper",
+        "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+        "generation_id": "gen-tts-1795675950-2sHSInldXJ0zBuG3cV1m"
+      }
+    ]
+  },
+  "ask-museum": {
+    "source": "OpenRouter Fish Audio Free",
+    "model": "fish-audio/s2.1-pro-free:free",
+    "turns": [
+      {
+        "speaker": "yellow-bow",
+        "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+        "generation_id": "gen-tts-1795699352-JmhJilKM6XFCjYaJM0vk",
+        "script": "Where are you going?",
+        "model": "fish-audio/s2.1-pro-free:free"
+      }
+    ]
+  },
+  "museum-exchange": {
+    "source": "OpenRouter Fish Audio Free",
+    "model": "fish-audio/s2.1-pro-free:free",
+    "turns": [
+      {
+        "speaker": "yellow-bow",
+        "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+        "generation_id": "gen-tts-1795699352-JmhJilKM6XFCjYaJM0vk",
+        "script": "Where are you going?",
+        "model": "fish-audio/s2.1-pro-free:free"
+      },
+      {
+        "speaker": "blue-jumper",
+        "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+        "generation_id": "gen-tts-1795675949-RWzi1YxVmqNHIDoQ3y49"
+      }
+    ]
+  }
+}

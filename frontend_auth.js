@@ -14,7 +14,7 @@ var authActiveUser = null;
 // The version watchdog (startVersionWatchdog) compares this to the live
 // version.json; a mismatch means stale WeChat builds never self-heal or
 // permanently nag. See DEPLOY_VERSION_STAMP.md. Bump BOTH together.
-const APP_VERSION = '2026-11-27e';
+const APP_VERSION = '2026-11-27f';
 
 // --- SESSION TOKEN (c) design) ---
 // The server mints a signed token on login. We store it in localStorage
@@ -123,6 +123,9 @@ function finalizeSession(sessionResults, shouldIncrementSession = true, studyRun
     const canonical = new Map();
     for (const r of sessionResults) {
         if (!r || !r.type || r.key === undefined || r.key === null) continue;
+        if (typeof selectedClassContent !== 'undefined' && selectedClassContent?.book === 'Act3'
+            && !((r.type === 'vocab' && String(r.key).startsWith('act3:recognition:'))
+                || (r.type === 'sentences' && String(r.key).startsWith('act3:scramble:')))) continue;
         const result = typeof selectedClassContent !== 'undefined' && selectedClassContent?.book === 'Phonics1' && r.type === 'vocab' && !String(r.key).startsWith('phonics1:word:')
             ? { ...r, key: 'phonics1:word:' + r.key } : r;
         const id = result.type + '|' + result.key;
@@ -1892,8 +1895,7 @@ function finishLogin() {
             // Priority: Directly use content assigned from DB
             // STICKY ADVANCE first (2026-09-08): a previously-decided advance
             // is applied, not re-litigated — then the normal check runs.
-            if (!(window.PreviewNotes && PreviewNotes.blocksAdvance(authActiveUser, authActiveUser))
-                && typeof reapplyPendingPageAdvance === 'function') reapplyPendingPageAdvance();
+            if (typeof reapplyPendingPageAdvance === 'function') reapplyPendingPageAdvance();
             if (authActiveUser.book !== 'Phonics1') checkAndAdvancePageIfAllOnCooldown();
             loadContent();
         } else if (authActiveUser.classTime) {
@@ -2148,13 +2150,13 @@ function checkAndAdvancePageIfAllOnCooldown() {
     let book = authActiveUser.book;
     let unit = authActiveUser.unit.toString();
     let page = authActiveUser.page.toString();
-    
+    const from = { book, unit, page };
+
     let advanced = false;
     const currentSession = getCurrentSession();
 
     while (true) {
         if (book === 'Phonics1' && unit === '1' && page === '4') break;
-        if (window.PreviewNotes && PreviewNotes.blocksAdvance(authActiveUser, { book, unit, page })) break;
         const sortedPages = getSortedPagesForBook(book);
         const activePageIndex = sortedPages.findIndex(
             p => p.book === book && p.unit === unit && p.page === page
@@ -2166,7 +2168,7 @@ function checkAndAdvancePageIfAllOnCooldown() {
         
         const vocabPool = buildItemPool(candidatePages, 'vocab').flatPool;
         const sentencesPool = buildItemPool(candidatePages, 'sentences').flatPool;
-        const pairsPool = buildItemPool(candidatePages, 'sentencePairs').flatPool;
+        const pairsPool = book === 'Act3' ? [] : buildItemPool(candidatePages, 'sentencePairs').flatPool;
 
         let vocabAllCooldown = false;
         if (vocabPool.length > 0) {
@@ -2233,8 +2235,9 @@ function checkAndAdvancePageIfAllOnCooldown() {
         // re-decided "stay". Persist the pending page alongside the SR state
         // so it survives app-kill AND re-applies on next login until the
         // server confirms it.
+        const receipt = JSON.stringify({ book, unit, page, studentId: authActiveUser.id, from });
         try {
-            localStorage.setItem('csPendingPageAdvance', JSON.stringify({ book, unit, page }));
+            localStorage.setItem('csPendingPageAdvance', receipt);
         } catch { /* non-fatal */ }
 
         // Fire-and-forget update to backend
@@ -2247,7 +2250,9 @@ function checkAndAdvancePageIfAllOnCooldown() {
             })
         }).then(res => {
             if (res && res.ok) {
-                try { localStorage.removeItem('csPendingPageAdvance'); } catch { /* non-fatal */ }
+                try {
+                    if (localStorage.getItem('csPendingPageAdvance') === receipt) localStorage.removeItem('csPendingPageAdvance');
+                } catch { /* non-fatal */ }
             } else {
                 console.warn('auto page-advance not confirmed — will retry on next login');
             }
@@ -2273,6 +2278,16 @@ function reapplyPendingPageAdvance() {
         const pending = JSON.parse(raw);
         window.PreviewNotes?.remapPlacement(pending);
         if (!pending || !pending.book) return false;
+        const samePage = (a, b) => a.book === b.book && String(a.unit) === String(b.unit) && String(a.page) === String(b.page);
+        const pages = getSortedPagesForBook(authActiveUser.book);
+        const currentIndex = pages.findIndex(page => samePage(page, authActiveUser));
+        const targetIndex = pages.findIndex(page => samePage(page, pending));
+        const sameAssignment = !pending.from || samePage(pending.from, authActiveUser);
+        if ((pending.studentId && pending.studentId !== authActiveUser.id) ||
+            !sameAssignment || currentIndex < 0 || targetIndex <= currentIndex) {
+            localStorage.removeItem('csPendingPageAdvance');
+            return false;
+        }
         authActiveUser.book = pending.book;
         authActiveUser.unit = pending.unit;
         authActiveUser.page = pending.page;
@@ -2286,7 +2301,9 @@ function reapplyPendingPageAdvance() {
             })
         }).then(res => {
             if (res && res.ok) {
-                try { localStorage.removeItem('csPendingPageAdvance'); } catch { /* non-fatal */ }
+                try {
+                    if (localStorage.getItem('csPendingPageAdvance') === raw) localStorage.removeItem('csPendingPageAdvance');
+                } catch { /* non-fatal */ }
             }
         }).catch(() => {}); // stays pending; retried next login
         return true;

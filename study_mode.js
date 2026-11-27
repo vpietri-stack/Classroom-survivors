@@ -12,13 +12,14 @@ function studyLater(action, callback, ms) {
         if (epoch !== studyRuntimeEpoch) return;
         studyPendingTimer = null; STUDY_STATE._resumePending = null;
         callback();
-        if (window.StudyRecovery) StudyRecovery.capture();
+        if (window.Act3Game?.active()) window.GameRuntime?.tick(); else window.StudyRecovery?.capture();
     }, ms);
-    if (window.StudyRecovery) StudyRecovery.capture();
+    if (window.Act3Game?.active()) window.GameRuntime?.tick(); else window.StudyRecovery?.capture();
     return studyPendingTimer;
 }
 function advanceRoundESentence() {
     if (!STUDY_STATE.active) return;
+    if (window.Act3Game?.active()) { Act3Game.ready(); return; }
     STUDY_STATE.currentSentenceIndex++;
     startExerciseTracking(); STUDY_STATE.isTransitioning = false; STUDY_STATE._roundEFrozen = false;
     nextRoundESentence();
@@ -31,7 +32,8 @@ function mountStudySpeechGate(saved) {
     if (controls) controls.style.display = 'none';
     const bank = document.getElementById('sentence-word-bank');
     bank.replaceChildren(); bank.classList.remove('bg-gray-700/50'); bank.classList.add('bg-transparent');
-    bank.appendChild(SpeechUI.makeSentenceGate({ target: Array.from(drop.children).map(s => s.dataset.expected).join(' '),
+    window.Act3Game?.pauseDeadline();
+    bank.appendChild(SpeechUI.makeSentenceGate({ mode: window.Act3Game?.active() ? 'game' : 'study', target: Array.from(drop.children).map(s => s.dataset.expected).join(' '),
         wordTiles: Array.from(drop.children).map(s => s.firstElementChild), level: 2,
         resumeState: saved || null, onDone: advanceRoundESentence }));
 }
@@ -96,6 +98,10 @@ function initStudyMode(options = {}) {
     if (options.previewNoteId && !notePlan) return false;
     if (window.ClientDiagnostics) ClientDiagnostics.checkpoint('study-start', { mode: 'study', active: true, word: '', letter: '' });
     if (window.NonSpellingFlow) NonSpellingFlow.cleanupStudy();
+    // A fresh Act 3 session follows the assignment, including an SR move-up.
+    if (!options.previewNoteId && selectedClassContent?.book === 'Act3' && authActiveUser?.book === 'Act3') {
+        selectedClassContent = { book: 'Act3', unit: String(authActiveUser.unit), page: String(authActiveUser.page) };
+    }
     // Determine book/unit/page from current selection
     let book = "PU1", unit = "0", page = "5";
     if (typeof selectedClassContent !== 'undefined' && selectedClassContent) {
@@ -105,9 +111,11 @@ function initStudyMode(options = {}) {
     }
 
     // Get Spaced Repetition Content (SR-aware)
+    const isAct3 = book === 'Act3';
     const SR_WORDS = picturePlan ? picturePlan.words : phonicsPlan ? phonicsPlan.words : parks ? article.words.slice(0, 5).map(word => word[0]) : notePlan ? notePlan.words : getStudyContentSR(book, unit, page, 'vocab', 5);
-    const mixed = picturePlan || phonicsPlan || parks ? null : notePlan ? notePlan.exercises : window.NonSpellingFlow ? NonSpellingFlow.prepareStudy(book, unit, page) : null;
-    const SR_SENTENCES = picturePlan || phonicsPlan || parks || mixed ? [] : getStudyContentSR(book, unit, page, 'sentences', 5);
+    const mixed = isAct3 || picturePlan || phonicsPlan || parks ? null : notePlan ? notePlan.exercises : window.NonSpellingFlow ? NonSpellingFlow.prepareStudy(book, unit, page) : null;
+    const SR_SENTENCES = picturePlan || phonicsPlan || parks || mixed ? []
+        : notePlan?.sentences || getStudyContentSR(book, unit, page, 'sentences', 5);
     const sentenceCount = mixed ? mixed.length : SR_SENTENCES.length;
 
     if (!picturePlan && !phonicsPlan && !parks && (SR_WORDS.length < 5 || sentenceCount < 5)) {
@@ -140,11 +148,12 @@ function initStudyMode(options = {}) {
     STUDY_STATE.parks = parks ? { set: 0 } : null;
     STUDY_STATE.pictureBook = picturePlan ? picturePlan.state : null;
     STUDY_STATE.phonics = phonicsPlan ? phonicsPlan.state : null;
+    STUDY_STATE.act3 = isAct3 && window.Act3Study ? Act3Study.createState() : null;
     STUDY_STATE.previewNote = notePlan ? notePlan.context : null;
     STUDY_STATE._mixedActive = false;
 
     showStudyModeScreen();
-    if (picturePlan) PhonicsPictureBookStudy.render(); else if (phonicsPlan) PhonicsStudy.render(); else startRoundA();
+    if (picturePlan) PhonicsPictureBookStudy.render(); else if (phonicsPlan) PhonicsStudy.render(); else if (STUDY_STATE.act3) Act3Study.start(); else startRoundA();
     if (window.StudyRecovery) StudyRecovery.begin();
     return true;
 }
@@ -575,7 +584,7 @@ function startRoundD() {
     STUDY_STATE.round = 'D';
     STUDY_STATE.currentWordIndex = 0;
     roundDSkipUnlocked = false;
-    updateStudyUI("Round C: Handwriting", "Write the missing letters.");
+    updateStudyUI(STUDY_STATE.act3 ? "Round B: Handwriting" : "Round C: Handwriting", "Write the missing letters.");
     startExerciseTracking();
     // Fredoka must be loaded before the first glyph mask is built, otherwise the
     // outline (and so the scoring target) would be a fallback font's shape.
@@ -616,8 +625,8 @@ function nextRoundDWord(saved) {
             </div>
         </div>
     `;
-    showTranslation('roundD-translation', word);
-    if (!STUDY_STATE.phonics) showVocabImage('roundD-image', word);
+    showTranslation('roundD-translation', word, STUDY_STATE.act3 ? 'Act3' : undefined);
+    if (!STUDY_STATE.phonics) showVocabImage('roundD-image', word, STUDY_STATE.act3 ? 'Act3' : undefined);
 
     // Slots are 1:1 with the word's characters. Punctuation and spaces stay
     // visible and fixed; a RANDOM subset of the letters (max ROUND_D_MAX_GAPS)
@@ -635,7 +644,9 @@ function nextRoundDWord(saved) {
     roundDSlots = word.split('').map(ch => punct.includes(ch)
         ? { type: 'fixed', char: ch }
         : { type: 'letter', char: ch, gap: false, filled: false, given: false });
-    roundDGapOrder = STUDY_STATE.phonics ? [0] : hwPickGaps(word, ROUND_D_MAX_GAPS);
+    roundDGapOrder = STUDY_STATE.act3 && typeof getAct3GapIndices === 'function'
+        ? getAct3GapIndices(word)
+        : STUDY_STATE.phonics ? [0] : hwPickGaps(word, ROUND_D_MAX_GAPS);
     roundDGapOrder.forEach(i => { roundDSlots[i].gap = true; });
     roundDCursor = 0;
     hwCaptureBeginWord(word);
@@ -651,6 +662,10 @@ function nextRoundDWord(saved) {
     roundDTrace.measure();
 
     if (saved) {
+        if (STUDY_STATE.act3) {
+            roundDGuided = true;
+            roundDTrace.setGuided(true);
+        }
         roundDTrace.restoreTrace(saved.trace);
         roundDTargetShownAt = Date.now() - (saved.targetElapsedMs || 0);
         roundDStatus(saved.status || '继续完成这个字母');
@@ -724,10 +739,11 @@ function renderRoundDSlots() {
 function roundDShowTarget() {
     if (STUDY_STATE.round !== 'D' || STUDY_STATE.isTransitioning) return;
     if (roundDCursor >= roundDGapOrder.length) { roundDWordComplete(); return; }
+    const act3Guide = !!STUDY_STATE.act3;
     roundDAttempts = 0;
     roundDEffortAttempts = 0;
-    roundDGuided = !!STUDY_STATE.phonics;
-    if (roundDGuided) roundDHadHelp = true;
+    roundDGuided = !!(STUDY_STATE.phonics || STUDY_STATE.act3);
+    if (STUDY_STATE.phonics) roundDHadHelp = true;
     roundDTargetShownAt = Date.now();
     roundDTrace.setGuided(roundDGuided);
     diagHandwriting('handwriting-target-start');
@@ -824,8 +840,10 @@ function roundDWordComplete() {
     renderRoundDSlots();
     playHappySound();
     // Hints/reveals are assisted practice, not an independent answer.
-    queueExerciseEvent(roundDHadHelp ? 'handwritingAssisted' : 'handwriting', 'study', roundDWord);
+    const game = window.Act3Game?.active();
+    queueExerciseEvent(roundDHadHelp ? 'handwritingAssisted' : 'handwriting', game ? 'game' : 'study', roundDWord);
     hwCaptureEndWord();
+    if (game) { Act3Game.wordSpeech(roundDWord, 'handwriting-slots'); return; }
     advanceRoundDWord(450);
 }
 
@@ -839,6 +857,7 @@ function skipRoundDWord() {
     roundDTrace.destroy();
     roundDTrace = null;
     hwCaptureEndWord();
+    if (window.Act3Game?.active()) { claimReward(false); return; }
     // Briefly lock the button so a double tap cannot skip the next word too.
     advanceRoundDWord(300);
 }
@@ -866,6 +885,7 @@ function clearRoundD() {
 function finishRoundD() {
     if (STUDY_STATE.phonics) { PhonicsStudy.complete(); return; }
     if (roundDTrace) { roundDTrace.destroy(); roundDTrace = null; }
+    if (STUDY_STATE.act3 && window.Act3Study) { Act3Study.enter('C'); return; }
     startRoundE();
 }
 
@@ -913,24 +933,29 @@ function startRoundE() {
     if (STUDY_STATE.nonSpellingExercises && window.NonSpellingFlow) { NonSpellingFlow.beginStudy(); return; }
     STUDY_STATE.round = 'E';
     STUDY_STATE.currentSentenceIndex = 0;
-    updateStudyUI("Round D: Sentence Scramble", "Order the words.");
+    updateStudyUI(STUDY_STATE.act3 ? "Round E: Sentence Scramble" : "Round D: Sentence Scramble",
+        STUDY_STATE.act3 ? "Listen and order the words." : "Order the words.");
     startExerciseTracking();
     nextRoundESentence();
 }
 
 function nextRoundESentence() {
     if (STUDY_STATE.currentSentenceIndex >= STUDY_STATE.sentences.length) {
-        if (STUDY_STATE._mixedActive) NonSpellingFlow.advanceStudy();
+        if (STUDY_STATE.act3) finishStudySession();
+        else if (STUDY_STATE._mixedActive) NonSpellingFlow.advanceStudy();
         else startRoundF();
         return;
     }
 
     let sentence = STUDY_STATE.sentences[STUDY_STATE.currentSentenceIndex];
     if (Array.isArray(sentence)) sentence = sentence[0];
+    const act3Listen = !!STUDY_STATE.act3;
+    if (act3Listen) currentTTSWord = sentence;
 
     const container = document.getElementById('study-game-area');
     container.innerHTML = `
         <div class="flex flex-col gap-3 w-full max-w-2xl mx-auto px-2">
+             ${act3Listen ? '<button id="act3-sentence-audio" aria-label="Play Audio" class="audio-play-btn mx-auto"><i class="fas fa-volume-up"></i></button>' : ''}
              <div id="roundE-translation" class="translation-hint hidden"></div>
              <div id="sentence-drop-zone" class="bg-gray-800/50 p-4 rounded-xl min-h-[80px] flex flex-wrap gap-[var(--gap-sm)] items-center justify-center border-2 border-dashed border-gray-500">
                 <!-- Word slots -->
@@ -946,7 +971,7 @@ function nextRoundESentence() {
              </div>
         </div>
     `;
-    showTranslation('roundE-translation', sentence);
+    showTranslation('roundE-translation', sentence, act3Listen ? 'Act3' : undefined);
 
     // Build fixed word-slots (one per token, in order).
     const tokens = sentence.split(' ');
@@ -983,6 +1008,10 @@ function nextRoundESentence() {
     };
 
     STUDY_STATE._roundEFrozen = false;
+    if (act3Listen) {
+        document.getElementById('act3-sentence-audio').onclick = () => playTTS('Act3');
+        playTTS('Act3');
+    }
 }
 
 function createWordTile(word, id) {
@@ -1054,6 +1083,14 @@ function clearRoundE() {
     STUDY_STATE._roundEFrozen = false;
 }
 
+function recordStudySentenceSR(item, firstAttempt) {
+    if (window.Act3Game?.active()) {
+        Act3Game.record('sentences', item, firstAttempt);
+        return;
+    }
+    srStudyResults.push({ type: 'sentences', key: STUDY_STATE.act3 ? act3SRKey('sentences', item) : itemKey(item), firstAttempt });
+}
+
 function checkRoundE() {
     if (STUDY_STATE.isTransitioning || STUDY_STATE._roundEFrozen) return;
     const dropZone = document.getElementById('sentence-drop-zone');
@@ -1079,8 +1116,10 @@ function checkRoundE() {
         STUDY_STATE.isTransitioning = true;
         STUDY_STATE._roundEFrozen = true;
         playHappySound();
-        srStudyResults.push({ type: 'sentences', key: itemKey(STUDY_STATE.sentences[STUDY_STATE.currentSentenceIndex]), firstAttempt: exerciseAttempts === 1 });
-        queueExerciseEvent('sentenceScramble', 'study', STUDY_STATE.sentences[STUDY_STATE.currentSentenceIndex]);
+        const item = STUDY_STATE.sentences[STUDY_STATE.currentSentenceIndex];
+        window.Act3Game?.pauseDeadline();
+        recordStudySentenceSR(item, exerciseAttempts === 1);
+        queueExerciseEvent('sentenceScramble', window.Act3Game?.active() ? 'game' : 'study', item);
 
         // Speech step: now that the sentence is built correctly, ask the student
         // to say it aloud (Whisper). Skipped silently if the model isn't ready
@@ -1105,7 +1144,7 @@ function checkRoundE() {
         synthError();
         // Record SR failure at the FIRST wrong check (parity with game mode).
         if (exerciseAttempts === 1) {
-            srStudyResults.push({ type: 'sentences', key: itemKey(STUDY_STATE.sentences[STUDY_STATE.currentSentenceIndex]), firstAttempt: false });
+            recordStudySentenceSR(STUDY_STATE.sentences[STUDY_STATE.currentSentenceIndex], false);
         }
         incrementExerciseAttempts();
         dropZone.classList.add('border-red-500');
@@ -1451,6 +1490,7 @@ function exitStudyMode() {
     window.PhonicsStudy?.cancel();
     if (window.PracticeTelemetry) PracticeTelemetry.interrupt('study_exit', false);
     if (window.NonSpellingFlow) NonSpellingFlow.cleanupStudy();
+    if (window.Act3Study) Act3Study.cancel();
     // Abandoning mid-session must not lose observed results (failures are
     // recorded at the first wrong check). Partial sessions don't advance the
     // session counter; the completed case is handled by finishStudySession.
@@ -1463,6 +1503,7 @@ function exitStudyMode() {
     STUDY_STATE.phonics = null;
     STUDY_STATE.pictureBook = null;
     STUDY_STATE.parks = null;
+    STUDY_STATE.act3 = null;
     clearTimeout(roundDTimer);
     // A word abandoned halfway is still worth keeping: the letters a child gave
     // up on are the ones the recognition needs to learn from.
@@ -1486,17 +1527,20 @@ function updateStudyUI(title, subtitle) {
     // Restart telemetry (2026-08-26a): keep the kill-surviving breadcrumb
     // current so a WebKit process restart can be correlated with the round
     // the student was on. Best-effort, no-op if unavailable.
-    if (typeof csPageHeartbeat === 'function') csPageHeartbeat({ mode: 'study', round: STUDY_STATE.round });
+    if (typeof csPageHeartbeat === 'function' && !window.Act3Game?.active()) csPageHeartbeat({ mode: 'study', round: STUDY_STATE.round });
     updateStudyProgress();
 }
 
 function updateStudyProgress() {
     const mixed = !!STUDY_STATE.nonSpellingExercises;
     const parks = STUDY_STATE.parks;
+    const act3 = STUDY_STATE.act3;
     const article = parks && ArticleStudy.active(STUDY_STATE);
-    const rounds = STUDY_STATE.pictureBook ? Array(PhonicsPictureBookContent.pages.length).fill('A') : STUDY_STATE.phonics ? ['A', 'B', 'C', 'D'] : article ? [...Array(article.setCount).fill('A'), ...Array(article.exerciseCount).fill('E')] : mixed ? STUDY_ROUNDS.slice(0, 4) : STUDY_ROUNDS;
-    const currentRound = STUDY_STATE.phonics ? STUDY_STATE.phonics.stage : mixed && STUDY_STATE.round === 'F' ? 'E' : STUDY_STATE.round;
-    const currentIdx = STUDY_STATE.pictureBook ? (STUDY_STATE.pictureBook.completed ? rounds.length : STUDY_STATE.pictureBook.index) : parks
+    const rounds = act3 ? ['A', 'B', 'C', 'D', 'E'] : STUDY_STATE.pictureBook ? Array(PhonicsPictureBookContent.pages.length).fill('A') : STUDY_STATE.phonics ? ['A', 'B', 'C', 'D'] : article ? [...Array(article.setCount).fill('A'), ...Array(article.exerciseCount).fill('E')] : mixed ? STUDY_ROUNDS.slice(0, 4) : STUDY_ROUNDS;
+    const currentRound = act3 ? act3.stage : STUDY_STATE.phonics ? STUDY_STATE.phonics.stage : mixed && STUDY_STATE.round === 'F' ? 'E' : STUDY_STATE.round;
+    const currentIdx = act3
+        ? (STUDY_STATE.srFinalized ? rounds.length : rounds.indexOf(currentRound))
+        : STUDY_STATE.pictureBook ? (STUDY_STATE.pictureBook.completed ? rounds.length : STUDY_STATE.pictureBook.index) : parks
         ? STUDY_STATE.srFinalized ? rounds.length : currentRound === 'A' ? parks.set : article.setCount + STUDY_STATE.currentSentenceIndex
         : rounds.indexOf(currentRound);
     let bar = document.getElementById('study-progress-indicator');
@@ -1512,7 +1556,7 @@ function updateStudyProgress() {
     bar.innerHTML = rounds.map((r, i) => {
         const isActive = i === currentIdx;
         const isDone = i < currentIdx;
-        const label = STUDY_STATE.phonics ? STUDY_STATE.phonics.labels[r] : mixed && r === 'E' ? 'Non-spelling' : STUDY_ROUND_LABELS[r] || r;
+        const label = act3 ? (act3.labels[r] || r) : STUDY_STATE.phonics ? STUDY_STATE.phonics.labels[r] : mixed && r === 'E' ? 'Non-spelling' : STUDY_ROUND_LABELS[r] || r;
         let classes = 'flex-1 h-2 rounded-full transition-all duration-300';
         if (isDone) classes += ' bg-green-400';
         else if (isActive) classes += ' bg-yellow-400 animate-pulse';
@@ -1533,7 +1577,9 @@ window.addEventListener('keydown', (e) => {
     if (!STUDY_STATE.active) return;
     if (STUDY_STATE.pictureBook || (STUDY_STATE.phonics && STUDY_STATE.round !== 'D')) return;
 
-    if (STUDY_STATE.round === 'C') {
+    if (STUDY_STATE.act3 && STUDY_STATE.act3.stage === 'C' && window.Act3Study) {
+        Act3Study.handleKeyDown(e.key);
+    } else if (STUDY_STATE.round === 'C') {
         handleRoundCKeyDown(e.key);
     } else if (STUDY_STATE.round === 'D') {
         handleRoundDKeyDown(e.key);

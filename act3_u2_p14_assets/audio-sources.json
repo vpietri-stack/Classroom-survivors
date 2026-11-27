@@ -1,0 +1,428 @@
+{
+  "voiceMap": "../act3_u1_p3_assets/character-voices.json",
+  "clips": {
+    "hello": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Hello, boys and girls.",
+          "speaker": "teacher",
+          "voice_id": "00866e8eac9f42e8ae7c8ba9a29c6060",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696759-nrQw32grMtW22f2vu114"
+        }
+      ]
+    },
+    "class-hi": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Hi, teacher!",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696759-KmEC5IyFJkUCcNgpYII2"
+        },
+        {
+          "script": "Hi, teacher!",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699372-EN4gFp4arMnNEpiQsGvK"
+        }
+      ]
+    },
+    "intro": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "This is our new classmate, Ellie.",
+          "speaker": "teacher",
+          "voice_id": "00866e8eac9f42e8ae7c8ba9a29c6060",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696760-2ffddqWlz8Kg0gDncxw6"
+        }
+      ]
+    },
+    "meet": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Nice to meet you.",
+          "speaker": "ellie",
+          "voice_id": "0fb243f412c34809861fee2650cf23f7",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696758-KZZfquISp9G7Qkfz5rVy"
+        }
+      ]
+    },
+    "too": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Nice to meet you, too.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699368-0MndcCyMEFBKbJIqfAlw"
+        }
+      ]
+    },
+    "show": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Show Ellie the classroom.",
+          "speaker": "teacher",
+          "voice_id": "00866e8eac9f42e8ae7c8ba9a29c6060",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696761-ZLsxnJsZ63zPWjGHyhXa"
+        }
+      ]
+    },
+    "classroom": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "This is our classroom.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699369-YX5ogsqsUBhQfDUd2Y2P"
+        }
+      ]
+    },
+    "board": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "This is our board.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696762-blnpwIG5ULqXAmU73uVI"
+        }
+      ]
+    },
+    "notebooks": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "We have notebooks.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699369-uZFlt6KQgg7BRN9Qwl1u"
+        }
+      ]
+    },
+    "markers": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "We have markers.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696764-Cm9O5KJW1qd3adS1Sr6E"
+        }
+      ]
+    },
+    "chair": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "This is your chair.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699507-nuvKVuNFSJ54RO6ccEIp"
+        }
+      ]
+    },
+    "thanks": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Thank you!",
+          "speaker": "ellie",
+          "voice_id": "0fb243f412c34809861fee2650cf23f7",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696764-0cCSHL5FVRCFTHZIrFkQ"
+        }
+      ]
+    },
+    "ask": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Is this your backpack?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696766-G7IlfgtwW5mqIDg1HtHv"
+        }
+      ]
+    },
+    "bag": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "No, it isn't. My backpack isn't small.",
+          "speaker": "ellie",
+          "voice_id": "0fb243f412c34809861fee2650cf23f7",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795697310-1E7riASFk6PfmyULFdcb"
+        },
+        {
+          "script": "My backpack is big and blue.",
+          "speaker": "ellie",
+          "voice_id": "0fb243f412c34809861fee2650cf23f7",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795697310-vXhRo3LSjPmWYvGkchOm"
+        }
+      ]
+    },
+    "snacks": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "I have snacks for you.",
+          "speaker": "ellie",
+          "voice_id": "0fb243f412c34809861fee2650cf23f7",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696766-LwLSuT2Jx9x8me7gD7Wh"
+        }
+      ]
+    },
+    "class-thanks": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Thank you!",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699371-vRxx5YWGeF4nA5pBwweB"
+        },
+        {
+          "script": "Thank you!",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696769-Gbhp0TN6sVeNi7R2CE7t"
+        }
+      ]
+    },
+    "greeting": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Hello, boys and girls.",
+          "speaker": "teacher",
+          "voice_id": "00866e8eac9f42e8ae7c8ba9a29c6060",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696759-nrQw32grMtW22f2vu114"
+        },
+        {
+          "script": "Hi, teacher!",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696759-KmEC5IyFJkUCcNgpYII2"
+        },
+        {
+          "script": "Hi, teacher!",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699372-EN4gFp4arMnNEpiQsGvK"
+        }
+      ]
+    },
+    "introduction": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "This is our new classmate, Ellie.",
+          "speaker": "teacher",
+          "voice_id": "00866e8eac9f42e8ae7c8ba9a29c6060",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696760-2ffddqWlz8Kg0gDncxw6"
+        },
+        {
+          "script": "Nice to meet you.",
+          "speaker": "ellie",
+          "voice_id": "0fb243f412c34809861fee2650cf23f7",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696758-KZZfquISp9G7Qkfz5rVy"
+        }
+      ]
+    },
+    "tour-invitation": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Nice to meet you, too.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699368-0MndcCyMEFBKbJIqfAlw"
+        },
+        {
+          "script": "Show Ellie the classroom.",
+          "speaker": "teacher",
+          "voice_id": "00866e8eac9f42e8ae7c8ba9a29c6060",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696761-ZLsxnJsZ63zPWjGHyhXa"
+        }
+      ]
+    },
+    "doorway": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "This is our classroom.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699369-YX5ogsqsUBhQfDUd2Y2P"
+        },
+        {
+          "script": "This is our board.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696762-blnpwIG5ULqXAmU73uVI"
+        }
+      ]
+    },
+    "supplies": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "We have notebooks.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699369-uZFlt6KQgg7BRN9Qwl1u"
+        },
+        {
+          "script": "We have markers.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696764-Cm9O5KJW1qd3adS1Sr6E"
+        }
+      ]
+    },
+    "desk": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "This is your chair.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699507-nuvKVuNFSJ54RO6ccEIp"
+        },
+        {
+          "script": "Thank you!",
+          "speaker": "ellie",
+          "voice_id": "0fb243f412c34809861fee2650cf23f7",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696764-0cCSHL5FVRCFTHZIrFkQ"
+        }
+      ]
+    },
+    "backpack-exchange": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Is this your backpack?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696766-G7IlfgtwW5mqIDg1HtHv"
+        },
+        {
+          "script": "No, it isn't. My backpack isn't small.",
+          "speaker": "ellie",
+          "voice_id": "0fb243f412c34809861fee2650cf23f7",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795697310-1E7riASFk6PfmyULFdcb"
+        },
+        {
+          "script": "My backpack is big and blue.",
+          "speaker": "ellie",
+          "voice_id": "0fb243f412c34809861fee2650cf23f7",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795697310-vXhRo3LSjPmWYvGkchOm"
+        }
+      ]
+    },
+    "snack-exchange": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "I have snacks for you.",
+          "speaker": "ellie",
+          "voice_id": "0fb243f412c34809861fee2650cf23f7",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696766-LwLSuT2Jx9x8me7gD7Wh"
+        },
+        {
+          "script": "Thank you!",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699371-vRxx5YWGeF4nA5pBwweB"
+        },
+        {
+          "script": "Thank you!",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795696769-Gbhp0TN6sVeNi7R2CE7t"
+        }
+      ]
+    },
+    "word-hello": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "word-boys and girls": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "word-new classmate": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "word-nice to meet you": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "word-show": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "word-thank you": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "word-pencil": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "title-1": {
+      "source": "OpenRouter Fish Audio Free",
+      "voice": "Saved user voice clone"
+    },
+    "title-2": {
+      "source": "OpenRouter Fish Audio Free",
+      "voice": "Saved user voice clone"
+    },
+    "title-3": {
+      "source": "OpenRouter Fish Audio Free",
+      "voice": "Saved user voice clone"
+    },
+    "title-4": {
+      "source": "OpenRouter Fish Audio Free",
+      "voice": "Saved user voice clone"
+    }
+  }
+}

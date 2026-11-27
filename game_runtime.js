@@ -9,7 +9,7 @@
     function tick(){if(w.GameRecovery&&!restoring)GameRecovery.capture();}
     function later(kind,fn,ms){clearTimeout(pendingTimer);const token=epoch;pending={kind,due:Date.now()+ms};pendingTimer=setTimeout(()=>{if(token!==epoch)return;pending=null;pendingTimer=null;fn();tick();},ms);tick();return pendingTimer;}
     function cancelQuestion(){epoch++;clearTimeout(pendingTimer);pendingTimer=null;pending=null;clearInterval(recTimer);}
-    function cancel(){cancelQuestion();clearInterval(minigameCountdownInterval);if (typeof unoESLTimerInterval !== 'undefined') { clearInterval(unoESLTimerInterval); unoESLTimerInterval=null; }
+    function cancel(){w.Act3Game?.close();cancelQuestion();clearInterval(minigameCountdownInterval);if (typeof unoESLTimerInterval !== 'undefined') { clearInterval(unoESLTimerInterval); unoESLTimerInterval=null; }
         all('.speech-rec-btn').forEach(b=>{if(b.disposeSpeech)b.disposeSpeech();});
         ['spellingGame','grammarGame'].forEach(id=>{const e=$(id);clearTimeout(e._spellingResetTimer);clearTimeout(e._grammarResetTimer);});
         if(w.NonSpellingFlow)NonSpellingFlow.cleanupGame();
@@ -19,6 +19,7 @@
         ['gomokuScreen','unoScreen','unoESLOverlay','unoTensionOverlay','spellingGame','wordRecGame','grammarGame','sentenceMatchGame'].forEach(id=>$(id)?.classList.add('hidden'));
     }
     function mini(){
+        if (w.Act3Game?.active()) return Act3Game.snapshot();
         const id=['spellingGame','wordRecGame','grammarGame','sentenceMatchGame'].find(id=>!$(id).classList.contains('hidden'));
         if(!id)return null;
         const e=$(id), result={id,data:{...e.dataset},tts:currentTTSWord,first:isFirstAttempt,question,
@@ -35,11 +36,11 @@
     function unoData(s){return {deck:clone(s.deck),discard:clone(s.discard),players:clone(s.players),playerNames:s.playerNames.slice(),currentPlayer:s.currentPlayer,direction:s.direction,
         pendingStack:s.pendingStack,pendingStackType:s.pendingStackType,snapEnabled:s.snapEnabled,freePlay:s.freePlay,vulnerable:s.vulnerable.slice(),isProcessing:s.isProcessing,
         winner:unoWinner,elapsed:unoAccumulatedTime+(unoESLTimerInterval?0:Math.max(0,Date.now()-unoStartTime)),eslContext:unoESLContext,
-        eslElapsed:unoESLContext?Math.max(0,Date.now()-unoESLTimerStart):0,eslActive:!!unoESLTimerInterval,status:$('uno-status').textContent};}
+        eslElapsed:unoESLContext?(w.Act3Game?.active()?Act3Game.elapsedUno():Math.max(0,Date.now()-unoESLTimerStart)):0,eslActive:!!unoESLTimerInterval,status:$('uno-status').textContent};}
     function checkpointUno(s,kind,args){if(!enabled()||restoring)return;s._recoveryBase=unoData(s);s._recoveryTask={kind,args:clone(args||[]),at:Date.now()};tick();}
     function capture(){const mode=current();if(!mode)throw Error('No active game');let state;
         if(mode==='gomoku')state={board:clone(gomokuBoard),mode:gomokuMode,difficulty:gomokuDifficulty,turn:gomokuTurn,last:lastGomokuMove,pendingMove:pendingGomokuMove,viewport:{...gomokuViewport},
-            elapsed:gomokuAccumulatedTime+(gomokuTurn==='minigame'?0:Math.max(0,Date.now()-gomokuStartTime)),speedInterval:currentGomokuSpeedIntervalTime,speedRemaining:Math.max(0,gomokuNextAiTime-Date.now()),aiRemaining:Math.max(0,gomokuAiDue-Date.now()),status:$('gomoku-status')?.textContent||''};
+            elapsed:gomokuAccumulatedTime+(gomokuTurn==='minigame'?0:Math.max(0,Date.now()-gomokuStartTime)),speedInterval:currentGomokuSpeedIntervalTime,speedRemaining:w.Act3Game?.speedRemaining()??Math.max(0,gomokuNextAiTime-Date.now()),aiRemaining:Math.max(0,gomokuAiDue-Date.now()),status:$('gomoku-status')?.textContent||''};
         else {const s=scene();state=s._recoveryBase?clone(s._recoveryBase):unoData(s);state.task=s._recoveryTask?clone(s._recoveryTask):{kind:'turn',args:[]};
             if(state.task.kind==='turn')state.aiRemaining=s._recoveryAiTimer?Math.max(0,s._recoveryAiTimer.getRemaining()):0;
             if(state.task.kind==='next')state.task.remaining=Math.max(0,state.task.args[2]-(Date.now()-state.task.at));
@@ -47,11 +48,13 @@
         }
         const s=scene(), frozen=mode==='uno'&&s&&s._recoveryTask&&!['turn','esl'].includes(s._recoveryTask.kind);
         return {game:mode,state,elapsedMs:state.elapsed,content:clone(selectedClassContent),exercise:{attempts:Math.max(1,exerciseAttempts),elapsedMs:Math.max(0,Date.now()-exerciseStartTime)},
-            ui:{mini:frozen?null:mini(),totalQuest:totalMinigameTimeMs,failures:Array.from(srInSessionFailures),successes:Array.from(srInSessionSuccesses),last:clone(srLastServedKey),question},
+            ui:{mini:frozen?null:mini(),totalQuest:totalMinigameTimeMs,failures:Array.from(srInSessionFailures),successes:Array.from(srInSessionSuccesses),last:clone(srLastServedKey),question,act3Cycle:w.Act3Game?.getCycle()||null},
             srResults:clone(srGameResults),usedPairKeys:[],practice:w.PracticeTelemetry&&PracticeTelemetry.snapshot?PracticeTelemetry.snapshot():null};
     }
     function readyResult(id){const map={spellingGame:['spelling-actions','spelling-result-action'],wordRecGame:['rec-options','rec-result-action'],grammarGame:['grammar-actions','grammar-result-action'],sentenceMatchGame:['sentencematch-actions','sentencematch-result-action']};const [a,r]=map[id];$(a).classList.add('hidden');$(r).classList.remove('hidden');$(r).replaceChildren();const b=document.createElement('button');b.className='game-btn bg-green-500 text-2xl py-4 px-8';b.textContent='CONTINUE!';b.onclick=()=>claimReward(true);$(r).appendChild(b);}
-    function restoreMini(saved){if(!saved)return;claimed=false;question=saved.question||0;rewardContext=current()==='gomoku'?'gomoku':'uno';currentTTSWord=saved.tts;
+    function restoreMini(saved){if(!saved)return;claimed=false;
+        if (saved.id==='act3' && w.Act3Game) { Act3Game.restore(saved,current()); return; }
+        question=saved.question||0;rewardContext=current()==='gomoku'?'gomoku':'uno';currentTTSWord=saved.tts;
         if(saved.typed&&w.NonSpellingFlow)NonSpellingFlow.restoreGame(saved.typed);
         else if(saved.id==='spellingGame'){startSpellingGame(saved.data.targetWord);Object.assign($('spellingGame').dataset,saved.data);$('spelling-keyboard').dataset.built='false';if(saved.resultReady||saved.speech)readyResult(saved.id);buildSpellingSlots();buildSpellingKeyboard();buildSpellingSlots();if(saved.speech)mountGameWordSpeechGate(saved.speech);}
         else if(saved.id==='wordRecGame') {startWordRecGame(saved.tts);clearInterval(recTimer);$('rec-options').replaceChildren();saved.choices.forEach(v=>{const b=document.createElement('button');b.className=v.cls;b.textContent=v.text;b.onclick=()=>checkWordRec(v.text,saved.tts,b);$('rec-options').appendChild(b);});recTimeLeft=saved.recLeft;$('rec-timer-bar').style.width=recTimeLeft+'%';if(!saved.resultReady&&recTimeLeft>0)recTimer=setInterval(()=>{recTimeLeft--; $('rec-timer-bar').style.width=Math.max(0,recTimeLeft)+'%';if(recTimeLeft<=0){clearInterval(recTimer);isFirstAttempt=false;}},50);}
@@ -61,7 +64,7 @@
         isFirstAttempt=saved.first;minigameStartTime=Date.now()-saved.elapsed;startMinigameCountdown(null);
         if(saved.pending){const resets={spelling:()=>clearSpelling(),grammar:clearGrammar,rec:startWordRecGame,match:()=>{all('.gm-sentence-b-tile').forEach(returnGameModeTileToDock);all('.gm-sentence-b-slot').forEach(e=>{e.replaceChildren();const t=document.createElement('span');t.textContent='Tap to place';e.appendChild(t);});}};const fn=resets[saved.pending.kind];if(fn)later(saved.pending.kind,fn,saved.pending.remaining);}
     }
-    function applyCommon(saved){selectedClassContent=clone(saved.content);srGameResults=clone(saved.srResults);srInSessionFailures=new Set(saved.ui.failures);srInSessionSuccesses=new Set(saved.ui.successes);srLastServedKey=clone(saved.ui.last);totalMinigameTimeMs=saved.ui.totalQuest;question=saved.ui.question||0;exerciseAttempts=saved.exercise.attempts;exerciseStartTime=Date.now()-saved.exercise.elapsedMs;}
+    function applyCommon(saved){selectedClassContent=clone(saved.content);srGameResults=clone(saved.srResults);srInSessionFailures=new Set(saved.ui.failures);srInSessionSuccesses=new Set(saved.ui.successes);srLastServedKey=clone(saved.ui.last);totalMinigameTimeMs=saved.ui.totalQuest;question=saved.ui.question||0;w.Act3Game?.setCycle(saved.ui.act3Cycle);exerciseAttempts=saved.exercise.attempts;exerciseStartTime=Date.now()-saved.exercise.elapsedMs;}
     async function restore(saved){suspend();if(w.PreviewNotes)PreviewNotes.close();const serial=++restoreSerial,runtimeEpoch=epoch;restoring=true;applyCommon(saved);
         try {
         w.SpeechStatus?.start?.();
@@ -71,6 +74,7 @@
             triggerGomoku(saved.state.mode);clearInterval(gomokuSpeedInterval);clearTimeout(gomokuAiTimeout);const s=saved.state;
             gomokuBoard=clone(s.board);gomokuMode=s.mode;gomokuDifficulty=s.difficulty;gomokuTurn=s.turn;lastGomokuMove=s.last;pendingGomokuMove=s.pendingMove;gomokuViewport={...s.viewport};gomokuAccumulatedTime=s.elapsed;gomokuStartTime=Date.now();currentGomokuSpeedIntervalTime=s.speedInterval;drawGomokuBoard();updateGomokuStatus(s.status);
             if(s.mode==='speed')startGomokuSpeedClock(s.speedRemaining);else if(s.turn==='ai')scheduleGomokuAi(s.aiRemaining);
+            w.Act3Game?.setCycle(saved.ui.act3Cycle);
             restoreMini(saved.ui.mini);
         }else {unoRestore=saved;triggerUno();await new Promise((resolve,reject)=>{let n=0;const timer=setInterval(()=>{if(epoch!==runtimeEpoch){clearInterval(timer);reject(Error('Recovery cancelled'));return;}if(!unoRestore){clearInterval(timer);resolve();}else if(++n>300){clearInterval(timer);reject(Error('UNO did not initialize'));}},50);});}
         applyCommon(saved);

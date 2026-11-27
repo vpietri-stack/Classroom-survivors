@@ -2951,6 +2951,7 @@ class MainScene extends Phaser.Scene {
         // students never saw a sentence puzzle
         this.puzzleWantSentence = !this.puzzleWantSentence;
         const wantSentence = this.puzzleWantSentence;
+        if (selectedClassContent?.book === 'Act3') return this.pickAct3WalkingPuzzle(wantSentence);
 
         const srPick = (kind) => {
             try {
@@ -2994,6 +2995,28 @@ class MainScene extends Phaser.Scene {
                 if (words.length < 2 || words.length > 12) continue;
                 return { text, mode: 'sentence', tokens: words };
             }
+        }
+        return null;
+    }
+
+    pickAct3WalkingPuzzle(wantSentence) {
+        const { book, unit, page } = selectedClassContent;
+        const tokenizeWord = text => text.match(/[a-z]/gi) || [];
+        const tokenizeSentence = text => text.trim().split(/\s+/);
+        const eligibleWord = text => typeof text === 'string' && /^[a-z]+(?:['’][a-z]+)?$/i.test(text)
+            && tokenizeWord(text).length >= 2 && tokenizeWord(text).length <= 4;
+        const eligibleSentence = text => typeof text === 'string'
+            && tokenizeSentence(text).length >= 2 && tokenizeSentence(text).length <= 12;
+
+        const kinds = wantSentence ? ['sentences', 'vocab'] : ['vocab', 'sentences'];
+        for (const kind of kinds) {
+            const word = kind === 'vocab';
+            const eligible = word ? eligibleWord : eligibleSentence;
+            const fresh = text => eligible(text) && !this.puzzleDone.has(text);
+            const pick = filter => getGameItemSR(book, String(unit), String(page), kind,
+                srInSessionFailures, srInSessionSuccesses, null, { act3: true, eligible: filter });
+            const text = pick(fresh) || pick(eligible);
+            if (text) return { text, mode: word ? 'word' : 'sentence', tokens: word ? tokenizeWord(text) : tokenizeSentence(text) };
         }
         return null;
     }
@@ -3243,7 +3266,7 @@ class MainScene extends Phaser.Scene {
         const zh = (typeof getLocalTranslation === 'function') ? getLocalTranslation(p.item.text) : '';
         zhEl.textContent = zh || '✨ 拼出它！Walk the boxes in order!';
 
-        const punct = [' ', '-', '.', '?', '!', ',', "'"];
+        const punct = [' ', '-', '.', '?', '!', ',', "'", '’'];
         const filled = p.attempt.map(b => b.tokenValue);
         // ESL minigame reveal colors (Tailwind green-500 / red-500): during
         // the check, each filled slot shows green (right) or red (wrong)
@@ -3837,6 +3860,7 @@ function startGameFromIntro() {
 }
 
 function triggerVampireSurvivors() {
+    window.Act3Game?.reset();
     if (window.PracticeTelemetry) PracticeTelemetry.start('game', 'vampireSurvivors');
     activeGameMode = 'VS';
     
@@ -3984,6 +4008,7 @@ function showPowerUpSelection(context) {
 
 // --- VS EXIT & REPLAY FUNCTIONS ---
 function exitVampireSurvivors() {
+    window.Act3Game?.leaveRun(false);
     if (window.PracticeTelemetry) PracticeTelemetry.interrupt('game_exit', false);
     // Stop the VS game and return to game selection
     if (minigameCountdownInterval) {

@@ -454,6 +454,10 @@ function makeUser() {
   posts = [];
   sandbox.authActiveUser = makeUser();
   vm.runInContext('authActiveUser = __user; analyticsQueue = [];', Object.assign(sandbox, { __user: sandbox.authActiveUser }));
+  sandbox.getSortedPagesForBook = () => [
+    { book: 'PU1', unit: '3', page: '43' },
+    { book: 'PU1', unit: '4', page: '48' }
+  ];
   // Directly exercise the persist/confirm contract: simulate an advance that
   // the server never confirms (fetch hang), then a fresh login.
   vm.runInContext(`

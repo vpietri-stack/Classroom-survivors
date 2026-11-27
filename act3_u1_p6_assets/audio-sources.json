@@ -1,0 +1,297 @@
+{
+  "voiceMap": "../act3_u1_p3_assets/character-voices.json",
+  "clips": {
+    "museum": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "museum-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "We're going to the museum.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795683738-uOdDh96yfXjJkrsSbX6T"
+        }
+      ]
+    },
+    "guide": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "guide-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "We're going to see a guide.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795683737-77EC6RSOhrVLuoMMEdVr"
+        }
+      ]
+    },
+    "librarian": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "librarian-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "We're going to see a librarian.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795683737-WfYo9GQ028SznolXcCgQ"
+        }
+      ]
+    },
+    "firefighter": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "firefighter-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "We're going to see a firefighter.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795683737-uZALaGSnIDKVDtFkYlMu"
+        }
+      ]
+    },
+    "doctor": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "doctor-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "We're going to see a doctor.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795683739-0xoyRqRhAPAHwmn0B00T"
+        }
+      ]
+    },
+    "cashier": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "cashier-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "He's a cashier.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795683740-g8CqJk09Cx786ZFmhg2t"
+        }
+      ]
+    },
+    "police-officer": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "police-officer-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "He's a police officer.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795683740-N6jI0zgW4YiUzaTriAiT"
+        }
+      ]
+    },
+    "teacher": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "teacher-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "She's a teacher.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699355-oAxDmZ41c0xvLMXlLDiJ"
+        }
+      ]
+    },
+    "d000": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Where are you going?",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699356-DGOZjY0Qf7Je02XxIRuP"
+        }
+      ]
+    },
+    "d001": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "We're going to the museum.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795683742-n2VBxZT6IrJf5Ky7GKBH"
+        }
+      ]
+    },
+    "exchange-1-1": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Where are you going?",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699356-DGOZjY0Qf7Je02XxIRuP"
+        },
+        {
+          "script": "We're going to the museum.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795683742-n2VBxZT6IrJf5Ky7GKBH"
+        }
+      ]
+    },
+    "d010": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Who are you going to see?",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699356-Ec3g1EmzFeCzHuK9R0Tm"
+        }
+      ]
+    },
+    "d011": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "We're going to see a guide.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795683743-puhooPVqXbmsinENyCfq"
+        }
+      ]
+    },
+    "exchange-1-2": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Who are you going to see?",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699356-Ec3g1EmzFeCzHuK9R0Tm"
+        },
+        {
+          "script": "We're going to see a guide.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795683743-puhooPVqXbmsinENyCfq"
+        }
+      ]
+    },
+    "d100": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Where are you going?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795683744-D6CuCGxn1azFjdttaddX"
+        }
+      ]
+    },
+    "d101": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "We're going to the library.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699356-F44VFgKwIKBCehkL4Snm"
+        }
+      ]
+    },
+    "exchange-2-1": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Where are you going?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795683744-D6CuCGxn1azFjdttaddX"
+        },
+        {
+          "script": "We're going to the library.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699356-F44VFgKwIKBCehkL4Snm"
+        }
+      ]
+    },
+    "d110": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Who are you going to see?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795683744-DsyhCU5s2WBJgwxZ3iOp"
+        }
+      ]
+    },
+    "d111": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "We're going to see a librarian.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699357-VCn9BR4O3uF7VptrT13g"
+        }
+      ]
+    },
+    "exchange-2-2": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Who are you going to see?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795683744-DsyhCU5s2WBJgwxZ3iOp"
+        },
+        {
+          "script": "We're going to see a librarian.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699357-VCn9BR4O3uF7VptrT13g"
+        }
+      ]
+    }
+  }
+}

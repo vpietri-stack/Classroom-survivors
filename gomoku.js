@@ -76,6 +76,7 @@ function showGomokuModeSelection() {
 }
 
 function triggerGomoku(mode = gomokuMode) {
+    window.Act3Game?.reset();
     if(window.StudyRecovery)StudyRecovery.pause();
     if(window.GameRecovery&&!(window.GameRuntime&&GameRuntime.restoring()))GameRecovery.pause();
     if (window.PracticeTelemetry && !(window.GameRuntime&&GameRuntime.restoring())) PracticeTelemetry.start('game', 'gomoku');
@@ -511,6 +512,11 @@ function completeGomokuMove(success) {
 function speedAiTurn() {
     if (!gomokuGameActive) return;
 
+    if (window.Act3Game?.active()) {
+        if (Act3Game.paused()) return;
+        claimReward(false);
+    }
+
     // Reset timer for next move
     gomokuNextAiTime = Date.now() + currentGomokuSpeedIntervalTime;
 
@@ -700,6 +706,7 @@ function scoreLine(line, p) {
 // --- GAME OVER ---
 async function endGomokuGame(result) {
     if(!gomokuGameActive)return;
+    window.Act3Game?.close();
     clearTimeout(gomokuAiTimeout);
     gomokuGameActive = false;
     clearInterval(window.gomokuTimerInterval);
@@ -779,7 +786,9 @@ async function endGomokuGame(result) {
 }
 
 function exitGomokuGame() {
+    const resumable = window.GameRecovery?.active();
     if(window.GameRecovery)GameRecovery.pause();
+    window.Act3Game?.leaveRun(resumable);
     clearTimeout(gomokuAiTimeout);
     if (window.PracticeTelemetry) PracticeTelemetry.interrupt('game_exit', false);
     gomokuGameActive = false;

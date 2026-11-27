@@ -14,6 +14,7 @@ const BOOK_SERIES = {
     "Think0": ["Think0"],
     "Think1": ["Think1"],
     "Think2": ["Think2"],
+    "Act3": ["Act3"],
     "test": ["test"]
 };
 
@@ -464,6 +465,11 @@ function getWeightedItemForGame(book, unit, page, type) {
  * and a pagesWithItems structure from a set of sorted page objects.
  * Pages are processed newest-first so the current page "claims" shared items.
  */
+function act3SRKey(type, item) {
+    const exercise = type === 'vocab' ? 'recognition' : 'scramble';
+    return `act3:${exercise}:${itemKey(item)}`;
+}
+
 function buildItemPool(pages, type) {
     const seen = new Set();
     const flatPool = [];
@@ -478,7 +484,8 @@ function buildItemPool(pages, type) {
 
         const pageItems = [];
         content[type].forEach(item => {
-            const k = p.book === 'Phonics1' && type === 'vocab' ? 'phonics1:word:' + itemKey(item) : itemKey(item);
+            const k = p.book === 'Act3' && type !== 'sentencePairs' ? act3SRKey(type, item)
+                : p.book === 'Phonics1' && type === 'vocab' ? 'phonics1:word:' + itemKey(item) : itemKey(item);
             if (seen.has(k)) return;
             seen.add(k);
             const entry = { item, key: k, pageAbsIndex: p.absIndex };
@@ -498,7 +505,7 @@ function buildItemPool(pages, type) {
  * Falls back to legacy algorithm if no SR data is available.
  */
 function getStudyContentSR(book, unit, page, type, count) {
-    if (!authActiveUser || !authActiveUser.srState) {
+    if (book !== 'Act3' && (!authActiveUser || !authActiveUser.srState)) {
         // No SR state — use legacy function
         return getSpacedRepetitionContent(book, unit, page, type, true, count);
     }
@@ -514,7 +521,7 @@ function getStudyContentSR(book, unit, page, type, count) {
     // All pages up to and including current page
     const candidatePages = sortedPages.slice(0, activePageIndex + 1);
     const { flatPool } = buildItemPool(candidatePages, type);
-    const srTypeState = authActiveUser.srState[type === 'vocab' ? 'vocab' : 'sentences'] || {};
+    const srTypeState = authActiveUser?.srState?.[type === 'vocab' ? 'vocab' : 'sentences'] || {};
 
     return selectItemsSR(flatPool, count, srTypeState, getCurrentSession(), activePageIndex);
 }
@@ -630,8 +637,8 @@ function getStudySentencePairsSubRoundSR(book, unit, page, usedPairKeys, preferP
  * @param {string} [avoidKey]  last-served key, delayed one pick (no back-to-back repeats)
  * @returns {*} a single item value (string)
  */
-function getGameItemSR(book, unit, page, type, inSessionFailures, inSessionSuccesses, avoidKey) {
-    if (!authActiveUser || !authActiveUser.srState) {
+function getGameItemSR(book, unit, page, type, inSessionFailures, inSessionSuccesses, avoidKey, { act3 = false, eligible } = {}) {
+    if (!act3 && (!authActiveUser || !authActiveUser.srState)) {
         return getWeightedItemForGame(book, unit, page, type);
     }
 
@@ -639,17 +646,28 @@ function getGameItemSR(book, unit, page, type, inSessionFailures, inSessionSucce
     const activePageIndex = sortedPages.findIndex(
         p => p.book === book && p.unit === unit && p.page === page.toString()
     );
-    if (activePageIndex === -1) return getWeightedItemForGame(book, unit, page, type);
+    if (activePageIndex === -1) return eligible ? undefined : getWeightedItemForGame(book, unit, page, type);
 
     const candidatePages = sortedPages.slice(0, activePageIndex + 1);
     const { flatPool } = buildItemPool(candidatePages, type);
     const srKey = type === 'vocab' ? 'vocab' : 'sentences';
-    const srTypeState = authActiveUser.srState[srKey] || {};
+    const srTypeState = authActiveUser?.srState?.[srKey] || {};
+    // The legacy Act 3 games keep their original item picker.
+    const pool = book === 'Act3' && !act3
+        ? flatPool.map(entry => ({ ...entry, key: itemKey(entry.item) }))
+        : flatPool;
 
+    const candidates = eligible ? pool.filter(entry => eligible(entry.item)) : pool;
+    const session = getCurrentSession();
     const selected = selectItemsSR(
-        flatPool, 1, srTypeState, getCurrentSession(), activePageIndex, inSessionFailures, inSessionSuccesses, avoidKey
+        candidates, 1, srTypeState, session, activePageIndex, inSessionFailures, inSessionSuccesses, avoidKey
     );
-    return selected[0];
+    if (selected.length || !eligible) return selected[0];
+
+    // Keep filtered challenges playable when all eligible items are cooling down.
+    const cooldown = sortPoolBySR(candidates, srTypeState, session, activePageIndex,
+        inSessionFailures, inSessionSuccesses)._cooldown;
+    return cooldown.sort((a, b) => a.priority.dueAfterSession - b.priority.dueAfterSession)[0]?.item;
 }
 
 /**

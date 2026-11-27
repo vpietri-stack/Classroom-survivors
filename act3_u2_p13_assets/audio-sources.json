@@ -1,0 +1,309 @@
+{
+  "voiceMap": "../act3_u1_p3_assets/character-voices.json",
+  "clips": {
+    "colour-q": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "What colour is your eraser?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795695597-g11h9tiL2Bc2OLxya9o7"
+        }
+      ]
+    },
+    "colour-a": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "My eraser is yellow.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699362-lRQ6qQNtHHqrd5aMiRdz"
+        }
+      ]
+    },
+    "eraser-q": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Is this your eraser?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795695597-33ZED0YZNwLdKVD6vkgC"
+        }
+      ]
+    },
+    "crayon-q": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Is this your crayon?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795695597-6ZAiAUAFNDRUgh3e00Mw"
+        }
+      ]
+    },
+    "backpack-q": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Is this your backpack?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795695602-ufrpcHKjDdvVAalaBSUb"
+        }
+      ]
+    },
+    "eraser-no": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "No, it isn't. My eraser isn't blue.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699364-DAPfLK9w0UlfOsNL4UCw"
+        }
+      ]
+    },
+    "crayon-no": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "No, it isn't. My crayon isn't red.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699364-gzK4mkS9UFMkDEAan1JG"
+        }
+      ]
+    },
+    "backpack-no": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "No, it isn't. My backpack isn't small.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699367-IlQaULiVW6vMNMc2jO3g"
+        }
+      ]
+    },
+    "yes": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Yes, it is!",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699365-EojOW6vy8WHeMQK1kwz9"
+        }
+      ]
+    },
+    "no": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "No, it isn't.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699367-rB3pbz8RVs7EorJERHJR"
+        }
+      ]
+    },
+    "pattern": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Is this your...?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795695606-kM57eoV79SHZsdniLMjI"
+        }
+      ]
+    },
+    "colour-exchange": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "What colour is your eraser?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795695597-g11h9tiL2Bc2OLxya9o7"
+        },
+        {
+          "script": "My eraser is yellow.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699362-lRQ6qQNtHHqrd5aMiRdz"
+        }
+      ]
+    },
+    "eraser-first": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Is this your eraser?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795695597-33ZED0YZNwLdKVD6vkgC"
+        },
+        {
+          "script": "No, it isn't. My eraser isn't blue.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699364-DAPfLK9w0UlfOsNL4UCw"
+        }
+      ]
+    },
+    "eraser-second": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Is this your eraser?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795695597-33ZED0YZNwLdKVD6vkgC"
+        },
+        {
+          "script": "Yes, it is!",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699365-EojOW6vy8WHeMQK1kwz9"
+        }
+      ]
+    },
+    "crayon-first": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Is this your crayon?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795695597-6ZAiAUAFNDRUgh3e00Mw"
+        },
+        {
+          "script": "No, it isn't. My crayon isn't red.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699364-gzK4mkS9UFMkDEAan1JG"
+        }
+      ]
+    },
+    "crayon-second": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Is this your crayon?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795695597-6ZAiAUAFNDRUgh3e00Mw"
+        },
+        {
+          "script": "Yes, it is!",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699365-EojOW6vy8WHeMQK1kwz9"
+        }
+      ]
+    },
+    "backpack-first": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Is this your backpack?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795695602-ufrpcHKjDdvVAalaBSUb"
+        },
+        {
+          "script": "No, it isn't. My backpack isn't small.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699367-IlQaULiVW6vMNMc2jO3g"
+        }
+      ]
+    },
+    "backpack-second": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Is this your backpack?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795695602-ufrpcHKjDdvVAalaBSUb"
+        },
+        {
+          "script": "Yes, it is!",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699365-EojOW6vy8WHeMQK1kwz9"
+        }
+      ]
+    },
+    "eraser": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "glue stick": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "notebook": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "crayon": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "backpack": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "red": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "yellow": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "blue": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "green": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "orange": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "purple": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "big": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "small": {
+      "source": "Youdao English audio (type=1)"
+    }
+  }
+}

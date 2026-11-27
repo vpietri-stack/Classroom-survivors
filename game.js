@@ -6,28 +6,35 @@ let GRAMMAR_SENTENCES = [];
 
 // --- GLOBAL STATE (activeGameMode, game declared in boot.js) ---
 
-// --- TRANSLATION SYSTEM (LOCAL) ---
-function getLocalTranslation(text) {
-    if (!text || typeof LOCAL_TRANSLATIONS === 'undefined') return '';
-    const key = text.trim();
-    return LOCAL_TRANSLATIONS[key] || '';
+function getSelectedContentBook() {
+    return typeof selectedClassContent === 'undefined' ? undefined : selectedClassContent?.book;
 }
 
-function showTranslation(elementId, text) {
+// --- TRANSLATION SYSTEM (LOCAL) ---
+function getLocalTranslation(text, book = getSelectedContentBook()) {
+    if (!text) return '';
+    const key = text.trim();
+    if (book === 'Act3' && typeof ACT3_TRANSLATIONS !== 'undefined' && Object.prototype.hasOwnProperty.call(ACT3_TRANSLATIONS, key)) {
+        return ACT3_TRANSLATIONS[key];
+    }
+    return typeof LOCAL_TRANSLATIONS === 'undefined' ? '' : LOCAL_TRANSLATIONS[key] || '';
+}
+
+function showTranslation(elementId, text, book) {
     const el = document.getElementById(elementId);
     if (!el) return;
 
     el.textContent = "";
     el.classList.add('hidden');
 
-    const cn = getLocalTranslation(text);
+    const cn = getLocalTranslation(text, book);
     if (cn) {
         el.textContent = cn;
         el.classList.remove('hidden');
     }
 }
 
-function showVocabImage(elementId, word) {
+function showVocabImage(elementId, word, book = getSelectedContentBook()) {
     const el = document.getElementById(elementId);
     if (!el) return;
 
@@ -41,7 +48,8 @@ function showVocabImage(elementId, word) {
     // belief no such files existed; the vocab-naming block in
     // test_asset_manifest.js now pins this against drifting again.
     const filename = word.trim().toLowerCase().replace(/ /g, '-');
-    const imagePath = `images/vocab/${filename}.png`;
+    const act3Path = book === 'Act3' && typeof getAct3VocabImagePath === 'function' ? getAct3VocabImagePath(word) : '';
+    const imagePath = act3Path || `images/vocab/${filename}.png`;
 
     // Resolve through AssetCache (gh-proxy mirror + IndexedDB): instant blob:
     // URL when cached, downloads-and-caches otherwise (fast in CN, survives
@@ -634,7 +642,14 @@ const synthSplash = () => {
     o.start(now + 0.05); o.stop(now + 0.23);
 };
 let currentTTSWord = "";
-const playTTS = () => {
+let activeAct3Recording = null;
+let act3RecordingRequest = 0;
+const playTTS = (book = getSelectedContentBook()) => {
+    const recordingRequest = ++act3RecordingRequest;
+    if (activeAct3Recording) {
+        activeAct3Recording.pause();
+        activeAct3Recording = null;
+    }
     if (!currentTTSWord) return;
     const text = currentTTSWord;
 
@@ -647,6 +662,7 @@ const playTTS = () => {
             if (settled) return;
             settled = true;
             clearTimeout(timer);
+            audio.pause();
             console.warn(`${label} ${reason}`);
             onFail();
         };
@@ -658,6 +674,7 @@ const playTTS = () => {
         audio.onerror = () => fail("error");
         audio.play().catch(e => fail("play failed: " + e));
         const timer = setTimeout(() => fail("timeout"), timeoutMs);
+        return audio;
     };
 
     // Preferred order (field feedback 2026-07-28): the hand-recorded MP3s are
@@ -723,7 +740,30 @@ const playTTS = () => {
         }
     };
 
-    playCachedMP3();
+    const act3Path = book === 'Act3' && typeof getAct3SentenceAudioPath === 'function'
+        ? getAct3SentenceAudioPath(text)
+        : '';
+    if (!act3Path) {
+        playCachedMP3();
+        return;
+    }
+
+    const plainUrl = act3Path.split('/').map(encodeURIComponent).join('/');
+    const cached = window.AssetCache?.getBlobUrl
+        ? AssetCache.getBlobUrl(act3Path, { race: true })
+        : Promise.resolve(null);
+    const isCurrent = () => recordingRequest === act3RecordingRequest && currentTTSWord === text;
+    const playRecording = url => {
+        if (!isCurrent()) return;
+        activeAct3Recording = tryAudioWithTimeout(url || plainUrl, "Act 3 recording", () => {
+            if (isCurrent()) playCachedMP3();
+        }, 5000);
+    };
+    const timer = setTimeout(() => playRecording(null), 2500);
+    cached.catch(() => null).then(url => {
+        clearTimeout(timer);
+        if (!activeAct3Recording) playRecording(url);
+    });
 };
 
 // --- PHASER STATE (game declared in boot.js) ---
@@ -813,6 +853,7 @@ function showGameSelection() {
     window.AssetCache?.warmGames();
     if(window.GameRecovery)GameRecovery.pause();
     if(window.GameRuntime&&GameRuntime.isActive())GameRuntime.suspend();
+    window.Act3Game?.close();
     // Reset all screens
     const screens = ['startScreen', 'gomokuScreen', 'gomokuGameOverScreen', 'gameOverScreen', 'gameIntroOverlay', 'vsCharSelect', 'studentManagerOverlay', 'studyModeOverlay', 'unoScreen', 'unoGameOverScreen', 'spellingGame', 'wordRecGame', 'sentenceMatchGame', 'levelUpMenu'];
     screens.forEach(id => {
@@ -1079,6 +1120,7 @@ function startMinigameCountdown(scene) {
         if (recTimer) recTimer.textContent = timeString;
         if (grammarTimer) grammarTimer.textContent = timeString;
         if (sentencematchTimer) sentencematchTimer.textContent = timeString;
+        window.Act3Game?.updateTimer();
 
         // NOTE: no survival-time deduction here. The VS scene is PAUSED while
         // a minigame is open, so accumulatedTime is already frozen — the old
@@ -1100,6 +1142,7 @@ function startMiniGame(type, context) {
     startMinigameCountdown(scene);
 
     try {
+        if (window.Act3Game?.start(context)) return;
         if ((type === 'scramble' || type === 'sentencematch') && window.NonSpellingFlow && NonSpellingFlow.startGame()) return;
         if (type === 'spelling') startSpellingGame();
         else if (type === 'wordrec') startWordRecGame();
@@ -1116,6 +1159,7 @@ function startMiniGame(type, context) {
 
 function claimReward(success) {
     if(window.GameRuntime&&!GameRuntime.claim())return;
+    window.Act3Game?.finish(success);
     if (window.NonSpellingFlow) NonSpellingFlow.cleanupGame();
     // Stop countdown timer
     if (minigameCountdownInterval) {

@@ -1,0 +1,294 @@
+{
+  "voiceMap": "../act3_u1_p3_assets/character-voices.json",
+  "clips": {
+    "pilot": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "pilot-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "He's a pilot.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795681724-RuskqW6MfHMMHMUgYbDL"
+        }
+      ]
+    },
+    "librarian": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "librarian-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "She's a librarian.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699348-whOSkF304ZRskIuKvv3g"
+        }
+      ]
+    },
+    "shop-assistant": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "shop-assistant-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "She's a shop assistant.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699348-gY0CZ34MN1b57JVBSs4r"
+        }
+      ]
+    },
+    "zookeeper": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "zookeeper-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "He's a zookeeper.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795681724-x1o2FbfnMcM9AdOCjX3F"
+        }
+      ]
+    },
+    "guide": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "guide-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "She's a guide.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699351-KTg67F2pJXeXZsJweNKH"
+        }
+      ]
+    },
+    "baker": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "baker-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "He's a baker.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795681726-ibC108TMdzG9luv2JEfJ"
+        }
+      ]
+    },
+    "firefighter": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "firefighter-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "He's a firefighter.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795681727-CjeR3fHmC8Ai1HOkvQmP"
+        }
+      ]
+    },
+    "doctor": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "doctor-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "She's a doctor.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699350-XZ4eP4B4buPweIR9bUof"
+        }
+      ]
+    },
+    "cashier": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "cashier-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "He's a cashier.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795681729-C9ewGPm4CTPk1riffYQn"
+        }
+      ]
+    },
+    "police-officer": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "police-officer-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "He's a police officer.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795681728-YaNw8RHeLNOnKyvE0v46"
+        }
+      ]
+    },
+    "teacher": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "teacher-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "She's a teacher.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699351-r9gGxLqqIzFAqFsYKzHw"
+        }
+      ]
+    },
+    "ask-he": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "What does he do?",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699352-qYxnyKrNOxzzggbouYk4"
+        }
+      ]
+    },
+    "exchange-1": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "What does he do?",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699352-qYxnyKrNOxzzggbouYk4"
+        },
+        {
+          "script": "He's a pilot.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795681724-RuskqW6MfHMMHMUgYbDL"
+        }
+      ]
+    },
+    "ask-she": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "What does she do?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795681731-qLONO4LHVxmBLUptPjGL"
+        }
+      ]
+    },
+    "exchange-2": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "What does she do?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795681731-qLONO4LHVxmBLUptPjGL"
+        },
+        {
+          "script": "She's a guide.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699351-KTg67F2pJXeXZsJweNKH"
+        }
+      ]
+    },
+    "intro": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "This is Leo.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699354-XLCfx48v3ImYmPBkhZIu"
+        }
+      ]
+    },
+    "ask-he-checkout": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "What does he do?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795681731-pktTGrlSMdwghCTK0aw0"
+        }
+      ]
+    },
+    "cashier-dialogue": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "He's a cashier.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699354-ZLaMgAbi6HxS5dQIlgQZ"
+        }
+      ]
+    },
+    "exchange-3": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "This is Leo.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699354-XLCfx48v3ImYmPBkhZIu"
+        },
+        {
+          "script": "What does he do?",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795681731-pktTGrlSMdwghCTK0aw0"
+        },
+        {
+          "script": "He's a cashier.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699354-ZLaMgAbi6HxS5dQIlgQZ"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,229 @@
+{
+  "voiceMap": "../act3_u1_p3_assets/character-voices.json",
+  "teacherVoice": {
+    "character": "Teacher in teal cardigan",
+    "voice_id": "00866e8eac9f42e8ae7c8ba9a29c6060",
+    "profile": "British female 1"
+  },
+  "clips": {
+    "classroom": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "classroom-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "This is our classroom.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699358-PvMKyBrVrEGgXRQSiKPW"
+        }
+      ]
+    },
+    "chair": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "chair-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "This is my chair.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795685604-RaEHpi0QKjnP4YUkAdRN"
+        }
+      ]
+    },
+    "board": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "board-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Look at the board.",
+          "speaker": "teacher",
+          "voice_id": "00866e8eac9f42e8ae7c8ba9a29c6060",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795686470-B16g7tS9n8QGRUi8eToL"
+        }
+      ]
+    },
+    "classmate": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "classmate-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "This is my classmate.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699359-nxjERufZF3eztOjRIagi"
+        }
+      ]
+    },
+    "teacher": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "teacher-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "This is our teacher.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699360-XxMIQ9TRvxNbb0OELhGT"
+        }
+      ]
+    },
+    "library": {
+      "source": "Youdao English audio (type=1)"
+    },
+    "library-example": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "This is our library.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699360-2p1O8CjCJrFgmnYKvjpW"
+        }
+      ]
+    },
+    "d000": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Hi!",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699360-OHHJ7Wh8Pi35gXIi7cmV"
+        }
+      ]
+    },
+    "d001": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "We're classmates.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795685607-nDliL1vxpllMxpNQGQMu"
+        }
+      ]
+    },
+    "exchange-0-1": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Hi!",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699360-OHHJ7Wh8Pi35gXIi7cmV"
+        },
+        {
+          "script": "We're classmates.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795685607-nDliL1vxpllMxpNQGQMu"
+        }
+      ]
+    },
+    "d010": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "This is my chair.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795685608-9jV5JHc6EFfcouz1xzz1"
+        }
+      ]
+    },
+    "d011": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "This is our classroom.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699362-QtLBA8CqmlBXHRMH4llM"
+        }
+      ]
+    },
+    "exchange-0-2": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "This is my chair.",
+          "speaker": "blue-jumper",
+          "voice_id": "73aa9245cccb43fe9f1e533657cb2150",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795685608-9jV5JHc6EFfcouz1xzz1"
+        },
+        {
+          "script": "This is our classroom.",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699362-QtLBA8CqmlBXHRMH4llM"
+        }
+      ]
+    },
+    "d020": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "This is our library.",
+          "speaker": "teacher",
+          "voice_id": "00866e8eac9f42e8ae7c8ba9a29c6060",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795686275-j0DR6PMsYBkzZQVqr9Ia"
+        }
+      ]
+    },
+    "d021": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "Look at the books!",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699362-AMRvEqUZRpDt3yPdzSmO"
+        }
+      ]
+    },
+    "exchange-0-3": {
+      "source": "OpenRouter Fish Audio Free",
+      "turns": [
+        {
+          "script": "This is our library.",
+          "speaker": "teacher",
+          "voice_id": "00866e8eac9f42e8ae7c8ba9a29c6060",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795686275-j0DR6PMsYBkzZQVqr9Ia"
+        },
+        {
+          "script": "Look at the books!",
+          "speaker": "yellow-bow",
+          "voice_id": "e68b8afb0d4d43d99ddf52bf5e44f054",
+          "model": "fish-audio/s2.1-pro-free:free",
+          "generation_id": "gen-tts-1795699362-AMRvEqUZRpDt3yPdzSmO"
+        }
+      ]
+    }
+  }
+}

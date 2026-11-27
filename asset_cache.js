@@ -43,6 +43,15 @@
     { prefix: 'sprites/td/',   token: 'td-sprites-v1' },
     { prefix: 'sprites/vs/',   token: 'vs-sprites-v3' },
     { prefix: 'images/vocab/', token: 'vocab-v1' },
+    { prefix: 'media/act3/', token: 'act3-v1' },
+    { prefix: 'act3_u2_p14_assets/', token: 'act3-u2-p14-v1' },
+    { prefix: 'act3_u2_p13_assets/', token: 'act3-u2-p13-v1' },
+    { prefix: 'act3_u2_p12_assets/', token: 'act3-u2-p12-v1' },
+    { prefix: 'act3_u2_p11_assets/', token: 'act3-u2-p11-v1' },
+    { prefix: 'act3_u1_p6_assets/', token: 'act3-u1-p6-v1' },
+    { prefix: 'act3_u1_p5_assets/', token: 'act3-u1-p5-v1' },
+    { prefix: 'act3_u1_p4_assets/', token: 'act3-u1-p4-v1' },
+    { prefix: 'act3_u1_p3_assets/', token: 'act3-u1-p3-v1' },
     { prefix: 'think0_wb41_assets/', token: 'think0-wb41-v1' },
     { prefix: 'think_parks_assets/', token: 'think-parks-v1' },
     { prefix: 'pu2_race_assets/', token: 'pu2-race-v1' },
@@ -360,14 +369,18 @@
       if (!pageData) return;
       prefetchedPages[pageKey] = true;
       var paths = [];
+      var act3 = scc.book === 'Act3';
       (pageData.vocab || []).forEach(function (w) {
         var word = (typeof w === 'string') ? w : (w && w.word) || '';
         if (!word) return;
-        paths.push(vocabImagePath(word));
+        var act3Image = act3 && typeof getAct3VocabImagePath === 'function' && getAct3VocabImagePath(word);
+        paths.push(act3Image || vocabImagePath(word));
         paths.push(audioPath(word));
       });
       (pageData.sentences || []).forEach(function (s) {
-        if (typeof s === 'string' && s) paths.push(audioPath(s));
+        if (typeof s !== 'string' || !s) return;
+        var act3Audio = act3 && typeof getAct3SentenceAudioPath === 'function' && getAct3SentenceAudioPath(s);
+        paths.push(act3Audio || audioPath(s));
       });
       (pageData.sentencePairs || []).forEach(function (p) {
         if (p && p.a) paths.push(audioPath(p.a));

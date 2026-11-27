@@ -1,3 +1,49 @@
+## Act3 vocabulary and sentence audio
+
+Act3 Units 1–2 use book-specific Chinese glosses and illustrations where defined.
+Other vocabulary uses the shared lookup. In Round E, Act3 plays the bundled
+teacher-voice clone of the exact sentence before falling back to standard TTS.
+Current-page prefetch uses the same Act3 asset paths as playback.
+
+## Act3 Unit 1 page 3 vocabulary and grammar preview
+
+The page 3 assignment opens the five illustrated vocabulary and dialogue
+sheets in the shared tap-to-listen reader. Tapping words, examples, and speakers
+plays cached British English clips with Chinese captions. Vocabulary uses Youdao.
+Sentences and dialogue use Fish Audio Free, with a pinned voice for each
+speaking character. Starting Study from the
+preview uses the existing five Act3 rounds and spaced-repetition selection.
+The preview completion marker is issued after five vocabulary items and five
+sentence scrambles in that session. Publishing must verify assignment and
+completion persistence against the candidate API.
+
+## Act3 Unit 1 page 4 vocabulary and grammar preview
+
+The page 4 assignment opens three sheets for town places and “next to”.
+The reader uses British Youdao word audio and the same Fish Audio character
+voices as page 3. The existing Act3 Study flow records preview completion.
+
+## Act3 Unit 1 page 5 vocabulary and grammar preview
+
+The page 5 assignment opens four illustrated jobs vocabulary sheets and one
+dialogue sheet. Tapping a speech bubble plays its turn, and tapping the scene
+plays the full exchange. The reader uses the page 3 voice cast, British Youdao
+for isolated vocabulary, and the existing Act3 Study completion flow.
+
+## Act3 Unit 1 page 6 vocabulary and grammar preview
+
+The page 6 assignment opens three vocabulary sheets and two illustrated
+dialogue sheets contrasting where someone is going with who they will see.
+The reader uses British Youdao word audio, the established Fish Audio
+character voices, and the existing Act3 Study completion flow.
+
+## Act3 Unit 2 page 11 vocabulary and grammar preview
+
+This assignment opens three illustrated sheets on school vocabulary and
+my / our. The tap-to-listen reader uses British Youdao for vocabulary and Fish
+Audio Free for sentences, with a distinct British teacher voice for the last
+library conversation. Start Study follows the existing Act3 flow.
+
 ## Phonics 1 local candidate (19 November 2026)
 
 `Phonics1` Unit 1 pages 1–4 assign A a, B b, C c, and D d through the normal teacher selector. Their registered readers use the teacher’s recordings and open before the corresponding Study. `phonics_study.js` renders the approved four-word A–D flow inside the full app’s Study overlay, using its speech gate, handwriting round, sounds, theme control, analytics queue, session credit, and recovery. Letters follow the selected words and have no SR entries. Only first-presentation word outcomes in phonics Round C update `phonics1:word:<word>` keys. The remaining word pool advances when fewer than four words are eligible, with the next preview required before Study or games. At the final authored page, cooldown entries fill a short pool.

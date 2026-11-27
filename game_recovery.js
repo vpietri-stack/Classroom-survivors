@@ -195,7 +195,7 @@
         if(observed)return;observed=true;
         const defer=()=>{if(active)Promise.resolve().then(capture);};
         ['click','keydown','input','pointerup','pointercancel'].forEach(name=>document.addEventListener(name,defer,true));
-        ['spellingGame','wordRecGame','grammarGame','sentenceMatchGame'].forEach(id=>{const area=document.getElementById(id);if(area)new MutationObserver(defer).observe(area,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class','disabled','hidden']});});
+        ['spellingGame','wordRecGame','grammarGame','sentenceMatchGame','studyModeOverlay'].forEach(id=>{const area=document.getElementById(id);if(area)new MutationObserver(defer).observe(area,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class','disabled','hidden']});});
         setInterval(()=>{if(active&&document.visibilityState!=='hidden')capture();},5000);
         document.addEventListener('visibilitychange',()=>{capture();if(document.visibilityState==='hidden'){finalSave();flush();}});
         w.addEventListener('pagehide',()=>{capture();finalSave();flush();});w.addEventListener('online',()=>schedule(0));

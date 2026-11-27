@@ -1,11 +1,11 @@
 /**
- * CORS helpers for browser clients (GitHub Pages, local dev servers).
- * GitHub Pages origin has no path — both production and preview repos share
- * https://vpietri-stack.github.io
+ * Both Pages addresses are allowed during the domain cutover.
+ * The legacy production and preview project paths share one browser origin.
  */
 
 const ALLOWED_ORIGINS = new Set([
     'https://vpietri-stack.github.io',
+    'https://banban.quest',
 ]);
 
 const ALLOWED_ORIGIN_PREFIXES = [
@@ -21,12 +21,9 @@ function isAllowedOrigin(origin) {
 
 function getCorsHeaders(request) {
     const origin = request?.headers?.get?.('Origin') || '';
-    const allowOrigin = isAllowedOrigin(origin)
-        ? origin
-        : 'https://vpietri-stack.github.io';
-
     return {
-        'Access-Control-Allow-Origin': allowOrigin,
+        ...(isAllowedOrigin(origin) ? { 'Access-Control-Allow-Origin': origin } : {}),
+        'Vary': 'Origin',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, X-App-Key, X-Creator-Id, X-Auth-Token, Authorization',
         'Access-Control-Max-Age': '86400',

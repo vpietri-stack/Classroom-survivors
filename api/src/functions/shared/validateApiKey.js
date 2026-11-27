@@ -6,13 +6,14 @@
  *
  * A request is accepted when ANY of:
  *   1. the sent key matches the configured key, OR
- *   2. it comes from one of our own frontend origins (GitHub Pages / SWA). Those
+ *   2. it comes from one of our own frontend origins (banban.quest, GitHub Pages, or SWA). Those
  *      are the legitimate client; if app-config.json is missing/unreachable the
  *      call must still succeed, OR
  *   3. it is a localhost dev request with no key, OR
  *   4. no key is configured at all (dev fallback).
  */
 const OWN_ORIGINS = [
+    /^https:\/\/banban\.quest(?:\/|$)/i,
     /vpietri-stack\.github\.io$/i,
     /azurestaticapps\.net$/i,
 ];

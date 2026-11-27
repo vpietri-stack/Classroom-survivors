@@ -106,6 +106,11 @@ resolution, non-mutating reads, interval/lapse preservation and sparse deltas.
 
 `test_deploy_stamp_sync.js` asserts the three deploy stamps are byte-identical (`version.json` version == `frontend_auth.js` `APP_VERSION` == `index.html` `frontend_auth.js?v=`). It is intentionally the first command in the chain so drift fails the whole run. Never reorder, never bypass. (Why: red update banner for all users — see [Auth/Versioning](04-auth-versioning.md).)
 
+The production gate and notes tests cover the custom-domain root alongside
+the legacy and preview paths. The isolated client integration checks actual
+preflights for both public frontend origins and localhost, and verifies that a
+similar-looking domain receives no CORS allowance.
+
 ## Harness styles (know which one you're extending)
 
 | Harness | Files | How it works |
@@ -117,7 +122,7 @@ resolution, non-mutating reads, interval/lapse preservation and sparse deltas.
 
 jsdom harness details that bite: the script order list inside each test **must mirror index.html** — adding a new production script means updating the tests' `order` arrays; tests eval scripts as one concatenated blob so cross-file top-level bindings resolve; `file://` URL is used so relative asset paths resolve.
 
-**Any page code that calls the API must have `apiFetch` stubbed in the Playwright harnesses.** From `file://` a real call goes to the production Functions app and dies on CORS (the allowlist is `vpietri-stack.github.io` / `azurestaticapps.net`), which surfaces as a `runtime: no JS errors` failure — and worse, the test has just talked to live infrastructure. This bit when the handwriting round started asking `/api/handwritingCaptureConfig`; both handwriting harnesses now install a stub that records the requests instead of sending them, which is also how the collection's "nothing leaves the device when capture is off" and "traces never ride `saveAnalytics`" assertions are proven.
+**Any page code that calls the API must have `apiFetch` stubbed in the Playwright harnesses.** From `file://` a real call goes to the production Functions app and dies on CORS (the browser origin is `null`), which surfaces as a `runtime: no JS errors` failure — and worse, the test has just talked to live infrastructure. This bit when the handwriting round started asking `/api/handwritingCaptureConfig`; both handwriting harnesses now install a stub that records the requests instead of sending them, which is also how the collection's "nothing leaves the device when capture is off" and "traces never ride `saveAnalytics`" assertions are proven.
 
 ## Contract tests that pin cross-layer promises
 

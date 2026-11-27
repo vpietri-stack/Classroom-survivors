@@ -220,12 +220,14 @@
   }
 
   // --- Mirrors (same host logic as speech_engine's rawRepoBase) --------------
-  // On *.github.io: gh-proxy (CN-fast, CORS:*) first, same-origin fallback.
+  // On GitHub Pages (including banban.quest): gh-proxy first, then same-origin.
   // Anywhere else (localhost / file:// / future hosts): same-origin only.
   function sources() {
     var h = (location.hostname || '').toLowerCase();
     var out = [];
-    if (h.endsWith('.github.io')) {
+    if (h === 'banban.quest') {
+      out.push('https://gh-proxy.com/https://raw.githubusercontent.com/vpietri-stack/Classroom-survivors/main/');
+    } else if (h.endsWith('.github.io')) {
       var owner = h.slice(0, -'.github.io'.length);
       var repo = (location.pathname || '').split('/').filter(Boolean)[0];
       if (owner && repo) {

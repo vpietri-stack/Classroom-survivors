@@ -27,24 +27,42 @@ async function main() {
     // 1. Login as alice (browser would POST {login,password})
     const loginRes = await fetch(`${BASE}/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-App-Key': appKey },
+        headers: {
+            'Content-Type': 'application/json',
+            'X-App-Key': appKey,
+            'Origin': 'https://banban.quest'
+        },
         body: JSON.stringify({ login: 'alice', password: 'alice123' })
     });
     const loginData = await loginRes.json();
     const token = loginData.token;
     log(loginRes.status === 200 && !!token, 'login returns token (client captures data.token)', 'status=' + loginRes.status);
+    log(loginRes.headers.get('Access-Control-Allow-Origin') === 'https://banban.quest',
+        'login response allows the new origin');
 
     // 2. CORS preflight must advertise Authorization (browser will block header otherwise)
-    const preflight = await fetch(`${BASE}/saveAnalytics`, {
+    for (const origin of ['http://localhost:7074', 'https://vpietri-stack.github.io', 'https://banban.quest']) {
+        const preflight = await fetch(`${BASE}/saveAnalytics`, {
+            method: 'OPTIONS',
+            headers: {
+                'Origin': origin,
+                'Access-Control-Request-Method': 'POST',
+                'Access-Control-Request-Headers': 'Authorization, X-App-Key, Content-Type'
+            }
+        });
+        const allowHeaders = preflight.headers.get('Access-Control-Allow-Headers') || '';
+        log(preflight.ok && preflight.headers.get('Access-Control-Allow-Origin') === origin &&
+            /Authorization/i.test(allowHeaders), 'CORS preflight supports ' + origin);
+    }
+
+    const unknownOrigin = await fetch(`${BASE}/login`, {
         method: 'OPTIONS',
         headers: {
-            'Origin': 'http://localhost:7074',
-            'Access-Control-Request-Method': 'POST',
-            'Access-Control-Request-Headers': 'Authorization, X-App-Key, Content-Type'
+            'Origin': 'https://banban.quest.example',
+            'Access-Control-Request-Method': 'POST'
         }
     });
-    const allowHeaders = preflight.headers.get('Access-Control-Allow-Headers') || '';
-    log(/Authorization/i.test(allowHeaders), 'CORS preflight allows Authorization header', allowHeaders);
+    log(!unknownOrigin.headers.has('Access-Control-Allow-Origin'), 'CORS rejects a similar-looking origin');
 
     // 3. Client attaches Bearer (exactly like apiFetch) + does NOT add ?creatorId
     //    saveAnalytics with a body that still carries studentId (legacy field) -> server

@@ -6,6 +6,8 @@ const API_ROUTES = [
     'changePassword',
     'updateAvatar',
     'getStudents',
+    'getStudentArchive',
+    'clearGeo',
     'saveAnalytics',
     'clientDiagnostics',
     'studyResume', 'gameResume',

@@ -151,9 +151,10 @@
         'think1-u9-email': [{ label: 'WB p.87', src: 'images/notes_thumbs/think1-u9-email.webp' }]
     };
 
+    const isBanbanProduction = () => location.hostname === 'banban.quest';
     function enabled() {
         const host = location.hostname;
-        return /^\/Classroom-survivors(?:-preview)?(?:\/|$)/i.test(location.pathname)
+        return isBanbanProduction() || /^\/Classroom-survivors(?:-preview)?(?:\/|$)/i.test(location.pathname)
             || location.protocol === 'file:' || host === 'localhost' || host === '127.0.0.1';
     }
     const user = () => typeof authActiveUser === 'undefined' ? null : authActiveUser;
@@ -168,7 +169,13 @@
         return placement;
     }
     const isStudent = student => student && !['teacher', 'BM', 'admin'].includes(student.role);
-    const key = student => 'csPreviewNotes:' + (/Classroom-survivors-preview/i.test(location.pathname) ? 'preview:' : /^\/Classroom-survivors(?:\/|$)/i.test(location.pathname) ? 'production:' : 'local:') + student.id;
+    function key(student) {
+        let environment = 'local';
+        if (isBanbanProduction()) environment = 'production';
+        else if (/Classroom-survivors-preview/i.test(location.pathname)) environment = 'preview';
+        else if (/^\/Classroom-survivors(?:\/|$)/i.test(location.pathname)) environment = 'production';
+        return 'csPreviewNotes:' + environment + ':' + student.id;
+    }
     function bookLabel(book) {
         const raw = String(book || '');
         if (BOOK_LABELS[raw]) return BOOK_LABELS[raw];

@@ -137,7 +137,11 @@ flowchart TD
 - **`env.allowRemoteModels = false`** (`speech_engine.js:356-358`) — huggingface.co is *never* contacted.
 
 ### Weight hosting / mirror fallback (GFW-aware)
-`MODEL_SOURCES` (`speech_engine.js:222-231`), probed via a 6s `config.json` fetch (`pickSource`, :297):
+`MODEL_SOURCES` is probed via a 6s `config.json` fetch in `pickSource`.
+The legacy project URL and `banban.quest` use the same mirror order below.
+At the custom domain, Whisper uses the local copy of its matched JS and WASM
+runtime pair. Cached model weights are scoped to the browser origin.
+
 1. **ModelScope** (`modelscope.cn`, Alibaba) — mainland CDN, CORS open, ~2.4 MB/s from CN (measured 2026-07-27)
 2. **gh-proxy.com** — serves the full 30 MB decoder (jsDelivr 403s at 20 MB; hf-mirror redirects to blocked HF; ghproxy.net dead at 0.01 MB/s)
 3. **Same-origin** (GitHub Pages)

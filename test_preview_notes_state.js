@@ -49,9 +49,13 @@ for(let i=0;i<200;i++) {
 ok(seenTypes.size === 4 && seenBoards.size >= 30, 'random sampling reaches all types and existing boards');
 const m8 = pool.find(e=>e.item.type==='missing-word' && e.item.id==='M8').item;
 ok(m8.answers.join('/') === 'frightened/frightening' && m8.prefixes.join('/') === 'f/f', 'existing answers and locked prefixes unchanged');
-for (const [pathname, prefix] of [['/Classroom-survivors/', 'production:'], ['/Classroom-survivors-preview/', 'preview:']]) {
+for (const [hostname, pathname, prefix] of [
+  ['vpietri-stack.github.io', '/Classroom-survivors/', 'production:'],
+  ['vpietri-stack.github.io', '/Classroom-survivors-preview/', 'preview:'],
+  ['banban.quest', '/', 'production:']
+]) {
   const saved = {};
-  const context = { window: null, PreviewNotesState: core, console, location: { pathname, hostname: 'vpietri-stack.github.io', protocol: 'https:' },
+  const context = { window: null, PreviewNotesState: core, console, location: { pathname, hostname, protocol: 'https:' },
     authActiveUser: { id: 'same-student', role: 'student', previewNotes: {} },
     document: { getElementById: () => null }, addEventListener() {},
     localStorage: { getItem: () => null, setItem: (key, value) => { saved[key] = value; } } };
@@ -60,6 +64,7 @@ for (const [pathname, prefix] of [['/Classroom-survivors/', 'production:'], ['/C
   ok(context.PreviewNotes.enabled(), 'registered notes enabled at deployed site path ' + pathname);
   context.PreviewNotes.markComplete(marker);
   ok(!!saved['csPreviewNotes:' + prefix + 'same-student'], 'completion cache stays in its deployed environment');
+  context.location.hostname = 'vpietri-stack.github.io';
   context.location.pathname = '/another-project/';
   ok(!context.PreviewNotes.enabled(), 'unrelated hosted paths stay disabled');
 }

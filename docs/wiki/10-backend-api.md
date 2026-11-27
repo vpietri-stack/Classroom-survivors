@@ -37,7 +37,7 @@ All HTTP triggers use `authLevel: 'anonymous'` — real gating is two applicatio
 | `saveSpeechSample.js` | POST | `saveSpeechSample` | ⏳ **Temporary (until 2026-10-26).** Stores one consented student's WAV + scorer metadata into the `speech_samples` container. Window-, consent-, size- and cap-enforced server-side; 410 once the window closes | App key + token (consent keyed on `token.sub`) |
 | `handwritingCaptureConfig.js` | GET | `handwritingCaptureConfig` | ⏳ **Temporary (until 2027-01-31).** Tells the signed-in client whether it may record+upload handwriting traces, so a student who is not being recorded never sends anything. Returns `{enabled, open, endsAt, maxPerDay}`; fails closed on any error | App key + token |
 | `saveHandwritingSample.js` | POST | `saveHandwritingSample` | ⏳ **Temporary (until 2027-01-31).** Stores one word's pen strokes + the verdicts the shipped geometry reached, into the `handwriting_samples` container. Window-, enable-, size- and daily-cap-enforced server-side; 410 once the window closes. Deliberately NOT routed through `saveAnalytics` (see [Study mode](05-study-mode.md)) | App key + token (identity from `token.sub`) |
-| `corsHooks.js` | OPTIONS | (one per API route) | Preflight responders via `app.http('options_<route>')` loop | none |
+| `corsOptions.js` | OPTIONS | (one per API route) | Preflight responders via `app.http('options_<route>')` loop | none |
 | `corsHooks.js` (hook) | — | — | `app.hook.postInvocation` wraps every HTTP response with CORS headers (`withCors`) | — |
 
 **Key design facts:**
@@ -51,7 +51,7 @@ All HTTP triggers use `authLevel: 'anonymous'` — real gating is two applicatio
 
 ### Layer 1 — App key (`shared/validateApiKey.js`)
 
-Validates `X-App-Key` header (or `?appKey=` for sendBeacon) against env `APP_API_KEY`. **The key ships to the browser in `app-config.json`, so it is not a real secret** — it only deters casual direct API callers. Accepts ANY of: correct key · request Origin/Referer matching own origins (`vpietri-stack.github.io`, `*.azurestaticapps.net`) · localhost Origin without a key · no key configured (dev fallback). Note: only Origin/Referer are checked for localhost — `request.url` inside the Functions host is always the internal `http://localhost:<port>`, so trusting it would whitelist everything.
+Validates `X-App-Key` header (or `?appKey=` for sendBeacon) against env `APP_API_KEY`. **The key ships to the browser in `app-config.json`, so it is not a real secret** — it only deters casual direct API callers. Accepts ANY of: correct key · request Origin/Referer matching own origins (`banban.quest`, `vpietri-stack.github.io`, `*.azurestaticapps.net`) · localhost Origin without a key · no key configured (dev fallback). Note: only Origin/Referer are checked for localhost — `request.url` inside the Functions host is always the internal `http://localhost:<port>`, so trusting it would whitelist everything.
 
 The key is injected at deploy time by the GitHub Actions workflow from repo secret `APP_CLIENT_KEY` (workflow step "Inject client app config"). `app-config.json` is gitignored and never committed.
 
@@ -66,7 +66,13 @@ The key is injected at deploy time by the GitHub Actions workflow from repo secr
 
 ### Layer 3 — CORS (`shared/cors.js`, `staticwebapp.config.json`)
 
-Allowed origin: `https://vpietri-stack.github.io` (both production and preview repos share the origin — no path component) + `localhost`/`127.0.0.1` prefixes for dev. `corsHooks.js` registers OPTIONS handlers per route and a post-invocation hook adding CORS headers to all responses; `staticwebapp.config.json` duplicates the headers at the SWA edge for `/api/*`.
+Browser origins are `https://banban.quest`, `https://vpietri-stack.github.io`
+(the legacy production and preview project paths share an origin), and the
+existing HTTP localhost/127.0.0.1 development origins. The Functions allowlist
+returns the matching origin with `Vary: Origin`. `corsOptions.js` handles
+preflights and `corsHooks.js` adds CORS headers to API responses. Keep origin
+headers out of both SWA routing config and Functions host config so a single
+static origin cannot replace the request-specific result.
 
 ## `saveAnalytics` deep dive (the most important endpoint)
 

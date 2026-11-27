@@ -109,10 +109,14 @@ flowchart TD
 
 | Export | Behavior |
 |---|---|
-| `API_BASE_URL` (config.js:6) | `http://localhost:7074/api` on localhost/127.0.0.1, else `https://brave-bush-0438ab000.7.azurestaticapps.net/api`. |
+| `API_BASE_URL` | Local Functions on localhost/127.0.0.1, the preview API at the preview project path, and the production API on both production addresses. |
 | `getAppKey()` (config.js:20) | One-time promise fetching git-ignored `app-config.json` → `APP_API_KEY`; empty string on failure (dev fallback: API accepts empty key). The key is injected at CI deploy time (workflow step "Inject client app config"). |
 | `TD_ENABLED` (config.js:45) | Runtime, merge-safe: `?td=` param → localhost/file:// → true only on the `/Classroom-survivors-preview/` path. Cannot be a per-branch constant, because merging preview→main would carry the wrong value. |
 | `THREE_TD_ENABLED` (config.js:61) | Same detection; when false the 3D menu button is *removed from the DOM* (index.html inline script ~887–898), not greyed out. |
+
+`banban.quest` uses the same released speech, mixed exercises, Study recovery
+and game recovery as the legacy GitHub Pages project path. The prototype
+gates and preview API stay tied to the preview project path.
 
 ## 4. Class config (`class_config.js`)
 
@@ -298,7 +302,7 @@ The GFW reality: GitHub Pages assets (sprites ~5 MB, MP3s) are throttled from ma
 and WeChat evicts the HTTP cache. `asset_cache.js` solves it with the mirror pattern proven by
 the 41 MB Whisper download (header comment asset_cache.js:1–29):
 
-1. **Mirror-first fetch** (`sources()`, asset_cache.js:196): on `*.github.io` pages, try
+1. **Mirror-first fetch** (`sources()`): on `*.github.io` and `banban.quest`, try
    `https://gh-proxy.com/https://raw.githubusercontent.com/<owner>/<repo>/main/…` first, then
    same-origin. Elsewhere: same-origin only.
 2. **IndexedDB permanent cache** (`asset-cache` DB, `files` store; `cacheGet`/`cachePut`,

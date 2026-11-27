@@ -88,15 +88,56 @@ flowchart LR
     SWA --> API["https://brave-bush-0438ab000.7.azurestaticapps.net/api"]
 ```
 
-The Pages site URL above is verified against the repo itself: the SWA workflow's stub
-`index.html` literally points to it (workflow line 35), `config.js:11` targets the SWA API
-hostname, and `staticwebapp.config.json` sets `Access-Control-Allow-Origin:
-https://vpietri-stack.github.io`. Note there is **no dedicated Pages workflow file** —
+The SWA stub links to the legacy Pages address above. `config.js` routes
+production sessions to the SWA API. The API's Functions choose CORS headers
+for each request. There is **no dedicated Pages workflow file**.
 GitHub Pages deploy-from-branch is configured in repo Settings (source: `main`, root), evidenced
 by `.nojekyll` at root and the absence of any `pages-build` workflow; the only tracked workflow
 is the Azure SWA one.
 
 <!-- VERIFY: the exact Pages configuration (branch + folder) lives in GitHub repo Settings, not in the repo — confirm in the UI if precision is required. A preview repo serves /Classroom-survivors-preview/ (config.js:52 keys TD gating off that path). -->
+
+## Custom-domain cutover
+
+1. Verify `banban.quest` in the GitHub account's Pages settings using its TXT
+   record in Porkbun. Keep that record after verification and capture the
+   existing apex and `www` records before changing web routing.
+2. Release the approved compatibility change while the old address still
+   serves production. Complete the release wrapper's integration and hosted
+   checks first. On the hosted Azure API, send real browser-style OPTIONS
+   requests to `login` and `saveAnalytics` with `Origin`,
+   `Access-Control-Request-Method: POST`, and
+   `Access-Control-Request-Headers: content-type,x-app-key,x-auth-token`.
+   Check that the response allows each requesting origin separately
+   (`https://vpietri-stack.github.io` and `https://banban.quest`). Also confirm
+   an unauthenticated API response carries the matching origin. Azure's edge
+   used to answer browser preflights directly with the legacy static header,
+   so an isolated Functions pass alone cannot verify this behavior.
+3. Set the *repository* Pages custom domain to `banban.quest`. The branch
+   publishing source writes a root `CNAME` commit. Pull its resulting production
+   ref before the next release. In Porkbun replace the parking records for the
+   apex with four A records (`185.199.108.153`, `185.199.109.153`,
+   `185.199.110.153`, and `185.199.111.153`). Set `www` to CNAME
+   `vpietri-stack.github.io`. Confirm the authoritative answers and turn on
+   Enforce HTTPS when it is available. Verify that HTTP and `www` end up on
+   the HTTPS apex and that both old homepage URLs still reach the app.
+4. On mainland Wi-Fi and Android mobile data with VPN off, open the link
+   from WeChat. Confirm sign-in with an existing synthetic account, current
+   assignment, previous synced progress, a newly saved exercise visible in the
+   dashboard, lesson audio and a first-use speech exercise. Also check the
+   iPad and desktop. Families should expect one fresh sign-in. Finish and
+   sync old-origin practice before switching because browser-local queues,
+   unfinished attempts and downloads stay scoped to the old origin.
+5. If the service misses the agreed rollback deadline, remove the Pages
+   custom domain and confirm the source branch no longer has its `CNAME`.
+   Restore the previous DNS records and retain domain ownership verification.
+   Check the legacy app and API again
+   before announcing availability. Cached redirects can take time to clear.
+   If the compatibility release itself regresses the old app, revert that
+   release through the normal production workflow before changing the domain.
+
+[GitHub Pages custom-domain setup](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site)
+and [domain verification](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/verifying-your-custom-domain-for-github-pages).
 
 ## 1. GitHub Actions workflows
 

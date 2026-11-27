@@ -201,13 +201,13 @@
   // Resolve WHICH GitHub Pages repo we are running on, so the proxies point at
   // the SAME repo that's serving the page (promotion-safe: the same code works
   // on the preview site AND the live site without editing at deploy time).
-  // The site is served from https://vpietri-stack.github.io/<repo>/ (a user/org
-  // Pages host + project path), so we derive the repo from the pathname. If the
-  // host isn't *.github.io (local dev / custom domain), we skip the proxies and
-  // rely on the same-origin fallback below.
+  // banban.quest is the production Pages site at its root. The github.io
+  // project sites still use their first path segment to choose their repo.
+  // Other hosts use their own copy of the assets and the ModelScope fallback.
   function rawRepoBase() {
     const h = (location.hostname || '').toLowerCase();
-    if (!h.endsWith('.github.io')) return null; // local dev / unknown host → same-origin only
+    if (h === 'banban.quest') return 'raw.githubusercontent.com/vpietri-stack/Classroom-survivors/main/';
+    if (!h.endsWith('.github.io')) return null;
     const owner = h.slice(0, -'.github.io'.length); // e.g. 'vpietri-stack'
     if (!owner) return null;
     // First pathname segment is the repo, e.g. '/Classroom-survivors-preview/' → 'Classroom-survivors-preview'.
@@ -393,7 +393,7 @@
 
       InterruptableStoppingCriteria = runtime.InterruptableStoppingCriteria || null;
       inferenceRuntime = runtime;
-      // Weights from the chosen (fast, CN-reachable) mirror; lib+wasm same-origin.
+      // Weights from the selected mirror; lib and wasm come from the same host.
       // allowRemoteModels stays OFF so the blocked huggingface.co is NEVER contacted.
       env.allowLocalModels = true;
       env.allowRemoteModels = false;

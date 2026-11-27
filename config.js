@@ -3,12 +3,17 @@
 // Loaded before all other scripts in index.html and teacher_dashboard.html
 // ============================================================
 
+const IS_BANBAN_PRODUCTION = window.location.hostname === 'banban.quest';
+const IS_PREVIEW_PATH = !IS_BANBAN_PRODUCTION && /^\/Classroom-survivors-preview(?:\/|$)/i.test(window.location.pathname);
+const IS_RELEASED_SITE = IS_BANBAN_PRODUCTION || IS_PREVIEW_PATH ||
+    /^\/Classroom-survivors(?:\/|$)/i.test(window.location.pathname);
+
 const API_BASE_URL = (
     window.location.hostname === 'localhost' ||
     window.location.hostname === '127.0.0.1'
 )
     ? 'http://localhost:7074/api'
-    : /^\/Classroom-survivors-preview(?:\/|$)/i.test(window.location.pathname)
+    : IS_PREVIEW_PATH
         ? 'https://brave-bush-0438ab000-1.eastasia.7.azurestaticapps.net/api'
         : 'https://brave-bush-0438ab000.7.azurestaticapps.net/api';
 
@@ -40,7 +45,7 @@ function getAppKey() {
 // DEPLOY TARGET at runtime from the URL. Both sites share the same hostname
 // (vpietri-stack.github.io), so we key off the PATH:
 //   preview: /Classroom-survivors-preview/  -> enabled
-//   live:    /Classroom-survivors/          -> disabled
+//   live:    /Classroom-survivors/ or banban.quest -> disabled
 // Localhost and file:// enable local testing. ?td=0 can disable any target.
 // ============================================================
 const TD_ENABLED = (function () {
@@ -50,7 +55,7 @@ const TD_ENABLED = (function () {
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return true;
     if (window.location.protocol === 'file:') return true;
     // Preview deploy path -> enabled. Everything else (incl. live) -> disabled.
-    return path === '/classroom-survivors-preview' || path.startsWith('/classroom-survivors-preview/');
+    return IS_PREVIEW_PATH;
 })();
 
 // ============================================================
@@ -66,30 +71,27 @@ const THREE_TD_ENABLED = (function () {
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return true;
     if (window.location.protocol === 'file:') return true;
     // Preview deploy path -> visible. Everything else (incl. live) -> absent.
-    return path.indexOf('/classroom-survivors-preview') === 0;
+    return !IS_BANBAN_PRODUCTION && path.indexOf('/classroom-survivors-preview') === 0;
 })();
 
 // Teacher-approved optional speech practice: live, preview and local development.
 const SPEECH_PRACTICE_ENABLED = (function () {
     const host = window.location.hostname;
-    return host === 'localhost' || host === '127.0.0.1' || window.location.protocol === 'file:' ||
-        /^\/Classroom-survivors(?:-preview)?(?:\/|$)/i.test(window.location.pathname);
+    return host === 'localhost' || host === '127.0.0.1' || window.location.protocol === 'file:' || IS_RELEASED_SITE;
 })();
 
 // Mixed non-spelling exercises are released on live, preview and development.
 const NON_SPELLING_ENABLED = (function () {
     const host = window.location.hostname;
-    const preview = /^\/Classroom-survivors-preview(?:\/|$)/i.test(window.location.pathname);
-    const production = /^\/Classroom-survivors(?:\/|$)/i.test(window.location.pathname);
     const local = window.location.protocol === 'file:' || host === 'localhost' || host === '127.0.0.1'
         || /^192\.168\./.test(host) || /^10\./.test(host) || /^172\.(1[6-9]|2\d|3[01])\./.test(host);
-    return (production || preview || local) && new URLSearchParams(window.location.search).get('nonspelling') !== '0';
+    return (IS_RELEASED_SITE || local) && new URLSearchParams(window.location.search).get('nonspelling') !== '0';
 })();
 
 // Teacher-approved interrupted-session recovery on live, preview and local.
 const STUDY_RESUME_ENABLED = (() => {
     const local = window.location.protocol === 'file:' || ['localhost','127.0.0.1'].includes(window.location.hostname);
-    return (local || /^\/Classroom-survivors(?:-preview)?(?:\/|$)/i.test(window.location.pathname))
+    return (local || IS_RELEASED_SITE)
         && new URLSearchParams(window.location.search).get('resume') !== '0';
 })();
 

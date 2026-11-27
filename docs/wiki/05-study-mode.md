@@ -535,6 +535,11 @@ PU2 Unit 9 adds 28 M/34 F boards on pages 107 (6/8), 109 (8/10), 116 (8/8), 119 
 
 ### Preview notes and page-scoped Study (production approved 2026-10-28)
 
+Registered notes and their production cache namespace are enabled at both the
+legacy GitHub Pages project path and the `banban.quest` site root. The browser
+still stores each origin's cache separately. Server-saved completion follows
+the student account.
+
 `PreviewNotes.onLogin()` opens the registered PU3 U9 p111 four-page reader for
 an unfinished student, whether assigned manually or reached through SR advance.
 The advance loop stops at an unfinished note before evaluating its cooldowns;

@@ -114,7 +114,7 @@ is the Azure SWA one.
    answers these requests at its edge and may return `*` on `OPTIONS`.
    Verify an unauthenticated GET to `login` returns 401 with exactly the
    requesting origin for each of the two sites. Send one GET with an
-   unrelated origin and expect 403 without `Access-Control-Allow-Origin`.
+   unrelated origin and expect 403 with neither that origin nor `*` allowed.
    The Nov 27 deployment passed isolated Functions checks and still broke
    both browser origins at the Azure edge. The restored static rules
    re-enabled the GitHub Pages origin. Check hosted headers before touching DNS.

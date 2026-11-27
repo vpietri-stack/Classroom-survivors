@@ -37,13 +37,11 @@ async function invoke({ origin, method = 'POST', functionName = 'login', content
 
 async function main() {
     const config = require('./staticwebapp.config.json');
-    const [preflight, legacy] = config.routes;
+    const [preflight] = config.routes;
     assert.equal(preflight.route, '/api/*');
-    assert.deepEqual(preflight.methods, ['OPTIONS']);
     assert.equal(preflight.headers['Access-Control-Allow-Origin'], '*');
     assert.match(preflight.headers['Access-Control-Allow-Headers'], /X-Auth-Token/);
     assert.ok(!preflight.headers['Access-Control-Allow-Credentials']);
-    assert.equal(legacy.headers['Access-Control-Allow-Origin'], 'https://vpietri-stack.github.io');
     assert.notEqual(config.globalHeaders['Access-Control-Allow-Origin'], '*');
 
     for (const origin of ['https://banban.quest', 'https://vpietri-stack.github.io', 'http://localhost:7074']) {
@@ -64,7 +62,7 @@ async function main() {
         assert.deepEqual(await invoke(request), { called: false, status: 403, allowOrigin: undefined });
     }
 
-    console.log('Azure API preflight scope, origin enforcement, and analytics beacon path passed.');
+    console.log('Azure API path policy, origin enforcement, and analytics beacon path passed.');
 }
 
 main().catch(error => {

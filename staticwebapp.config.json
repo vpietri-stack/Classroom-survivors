@@ -2,23 +2,12 @@
     "routes": [
         {
             "route": "/api/*",
-            "methods": ["OPTIONS"],
             "allowedRoles": ["anonymous"],
             "headers": {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
                 "Access-Control-Allow-Headers": "Content-Type, X-App-Key, X-Creator-Id, X-Auth-Token, Authorization",
                 "Access-Control-Max-Age": "600"
-            }
-        },
-        {
-            "route": "/api/*",
-            "allowedRoles": ["anonymous"],
-            "headers": {
-                "Access-Control-Allow-Origin": "https://vpietri-stack.github.io",
-                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Allow-Headers": "Content-Type, X-App-Key, X-Creator-Id, X-Auth-Token, Authorization",
-                "Access-Control-Max-Age": "86400"
             }
         }
     ],

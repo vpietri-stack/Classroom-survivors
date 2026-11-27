@@ -36,7 +36,7 @@
   }
   function startWorker() {
     if (worker) return;
-    const instance = new Worker('speech_adaptive_worker.js?v=14' + (preferLocal ? '&local=1' : ''), { type: 'module' });
+    const instance = new Worker('speech_adaptive_worker.js?v=15' + (preferLocal ? '&local=1' : ''), { type: 'module' });
     worker = instance;
     instance.onmessage = e => {
       if (worker === instance && e.data && e.data.id === undefined && e.data.log) { w.__speechLog?.(e.data.log); return; }

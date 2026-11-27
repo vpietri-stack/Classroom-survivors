@@ -1,4 +1,4 @@
-import {prepareAdaptiveAssets,sha256} from './speech_adaptive_assets.js?v=6';
+import {downloadVerifiedAsset, prepareAdaptiveAssets, verifiedCachedAsset} from './speech_adaptive_assets.js?v=7';
 import {compactLexicon,decide,sentenceFeatures,binaryProbability} from './speech_adaptive_core.js?v=1';
 import {expectedWordSimilarity} from './speech_adaptive_phonetic.js?v=1';
 import {words,disposeTensors,stats} from './speech_target.js?v=2026-10-28b';
@@ -17,59 +17,64 @@ import {
 
 const ZIPA_CACHE_NAME='speech-option1-zipa-v1';
 const ZIPA_BASE=new URL('./speech_option1/zipa/',import.meta.url).href;
-const ZIPA_REPO=/\/Classroom-survivors-preview(?:\/|$)/i.test(self.location.pathname)?'Classroom-survivors-preview':'Classroom-survivors';
-const ZIPA_RAW_MIRROR=`https://gh-proxy.com/https://raw.githubusercontent.com/vpietri-stack/${ZIPA_REPO}/main/speech_option1/zipa/`;
 const TINY_WORDS=new Set(['a','an','the','to','of','in','on','at','is','it','am','are','be','do','for','or','and','but','as','by','up']);
 
 let runtime,pipe,vad,zipaModel,assets,lexicon,zipaVocab,zipaIdToTok,contextSeconds=8,loading,zipaLoading=null;
-let zipaNetworkBytes=0,zipaReusedBytes=0,zipaTotalBytes=0,zipaError='';
+let zipaNetworkBytes=0,zipaReusedBytes=0,zipaTotalBytes=0,zipaError='',zipaRetryAt=0;
 
-async function fetchWithTimeout(url,timeoutMs=25000){
- const ctrl=new AbortController();
- const timer=setTimeout(()=>ctrl.abort(),timeoutMs);
- try{
-  const resp=await fetch(url,{signal:ctrl.signal,cache:'no-cache'});
-  if(!resp.ok)throw Error(`HTTP ${resp.status}`);
-  return await resp.arrayBuffer();
- }finally{clearTimeout(timer);}
+async function fetchZipaMetadata(name, parse) {
+ const url = new URL(name, ZIPA_BASE);
+ const controller = new AbortController();
+ const timer = setTimeout(() => controller.abort(), 25000);
+ try {
+  const response = await fetch(url, { signal: controller.signal, cache: 'no-cache' });
+  if (!response.ok) throw Error('Could not load ' + name + ' (HTTP ' + response.status + ')');
+  return await parse(response);
+ } finally {
+  clearTimeout(timer);
+ }
 }
 
-async function downloadZipaChunked(){
- let cache=null;
- try{cache=await caches.open(ZIPA_CACHE_NAME);}catch(_){}
- const [manifest,tokText]=await Promise.all([
-  fetch(new URL('manifest.json?v=1',ZIPA_BASE).href,{cache:'no-cache'}).then(r=>r.json()),
-  fetch(new URL('tokens.txt?v=1',ZIPA_BASE).href,{cache:'no-cache'}).then(r=>r.text())
+async function downloadZipaChunked() {
+ let cache;
+ try { cache = await caches.open(ZIPA_CACHE_NAME); } catch (_) {}
+ const [manifest, tokens] = await Promise.all([
+  fetchZipaMetadata('manifest.json?v=2', response => response.json()),
+  fetchZipaMetadata('tokens.txt?v=1', response => response.text())
  ]);
- ({vocab:zipaVocab,idToTok:zipaIdToTok}=parseZipaTokens(tokText));
- let networkBytes=0,reusedBytes=0;
- const isLocalHost=['localhost','127.0.0.1'].includes(self.location.hostname);
- const parts=await Promise.all(manifest.parts.map(async part=>{
-  const cacheKey=new URL(`${part.sha256}/${part.name}`,ZIPA_BASE).href;
-  try{
-   const saved=await cache?.match(cacheKey);
-   if(saved){
-    const b=await saved.arrayBuffer();
-    if(b.byteLength===part.bytes&&await sha256(b)===part.sha256){reusedBytes+=part.bytes;return b;}
-   }
-  }catch(_){}
-  const urls=isLocalHost?[new URL(part.name,ZIPA_BASE).href]:[new URL(part.name,ZIPA_BASE).href,ZIPA_RAW_MIRROR+part.name];
-  let lastErr=null;
-  for(const u of urls){
-   try{
-    const b=await fetchWithTimeout(u,90000);
-    if(b.byteLength!==part.bytes||await sha256(b)!==part.sha256)throw Error('Chunk verification failed');
-    networkBytes+=part.bytes;
-    try{await cache?.put(cacheKey,new Response(b.slice(0),{headers:{'Content-Type':'application/octet-stream'}}));}catch(_){}
-    return b;
-   }catch(err){lastErr=err;}
-  }
-  throw Error(`Could not download ${part.name}: ${String(lastErr?.message||lastErr)}`);
- }));
- const out=new Uint8Array(manifest.totalBytes);
- let offset=0;
- for(const buf of parts){out.set(new Uint8Array(buf),offset);offset+=buf.byteLength;}
- return {bytes:out,networkBytes,reusedBytes,totalBytes:manifest.totalBytes};
+ const chunkBytes = 1024 * 1024;
+ if (manifest.schema !== 1 || manifest.chunkBytes !== chunkBytes || !Array.isArray(manifest.parts)
+   || manifest.parts.length !== 4 || manifest.parts.some((part, index) =>
+     part.name !== `model.w8.part${index}.bin` || !Number.isSafeInteger(part.bytes)
+     || part.bytes < 1 || part.bytes > 20 * chunkBytes
+     || !Array.isArray(part.chunks) || part.chunks.length !== Math.ceil(part.bytes / chunkBytes))
+   || manifest.parts.reduce((sum, part) => sum + part.bytes, 0) !== manifest.totalBytes) {
+  throw Error('Sound grader file list is out of date');
+ }
+
+ const { vocab, idToTok } = parseZipaTokens(tokens);
+ const bytes = new Uint8Array(manifest.totalBytes);
+ let networkBytes = 0, reusedBytes = 0, offset = 0;
+ for (const part of manifest.parts) {
+  const oldCacheKey = new URL(part.sha256 + '/' + part.name, ZIPA_BASE).href;
+  let data;
+  try {
+   const saved = await cache?.match(oldCacheKey);
+   if (saved) data = await verifiedCachedAsset(await saved.arrayBuffer(), part);
+  } catch (_) {}
+
+  if (data) reusedBytes += data.byteLength;
+  else data = await downloadVerifiedAsset({ ...part, url: 'speech_option1/zipa/' + part.name }, {
+   cache, cacheBase: ZIPA_BASE, chunkBytes, timeoutMs: 45000,
+   onNetworkBytes: length => { networkBytes += length; },
+   onSegment: (length, reused) => { if (reused) reusedBytes += length; }
+  });
+  bytes.set(data, offset);
+  offset += data.byteLength;
+ }
+ zipaVocab = vocab;
+ zipaIdToTok = idToTok;
+ return { bytes, networkBytes, reusedBytes, totalBytes: manifest.totalBytes };
 }
 
 function ensureZipa(){
@@ -78,6 +83,7 @@ function ensureZipa(){
  zipaLoading=(async()=>{
   let zipaBytesRef=null;
   try{
+   postMessage({log:'Preparing the sound grader in the background…'});
    const zipaAsset=await downloadZipaChunked();
    zipaNetworkBytes=zipaAsset.networkBytes;zipaReusedBytes=zipaAsset.reusedBytes;zipaTotalBytes=zipaAsset.totalBytes;
    zipaBytesRef=zipaAsset.bytes;
@@ -100,8 +106,9 @@ function ensureZipa(){
    }
   }catch(err){
    zipaModel=null;
+   zipaRetryAt=Date.now()+30000;
    zipaError=String(err?.message||err).slice(0,200);
-   postMessage({log:'Sound grader skipped: '+zipaError});
+   postMessage({log:'Sound grader paused: '+zipaError});
    return null;
   }finally{
    zipaBytesRef=null;
@@ -184,6 +191,7 @@ self.onmessage=async e=>{
   }
   const targetWords=words(target||'');
   if(!(audio instanceof Float32Array)||!targetWords.length||targetWords.length>40||audio.some(x=>!Number.isFinite(x)))throw Error('Choose a short English word or sentence');
+  if(!zipaModel&&!zipaLoading&&Date.now()>=zipaRetryAt)void ensureZipa();
   const audioStats=stats(audio),started=performance.now();
   const neutral=()=>({status:'unassessed',targetWords:targetWords.map(w=>({text:w.text,heardClear:false,basis:null})),transcript:'',pronunciation:{hasSpeech:false,overall:0,stars:0,headline:''},audioStats,totalMs:performance.now()-started});
   if(audioStats.seconds<assets.config.audio.minimumSeconds||audioStats.seconds>assets.config.audio.maximumSeconds){postMessage({id,...neutral()});return;}

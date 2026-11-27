@@ -12,6 +12,14 @@ every range is still checked against its manifest hash. The browser caches
 verified assets per site, so the move from the old GitHub address requires a
 fresh download on the new origin.
 
+The 70 MB ZIPA sound grader prepares in the background after the recognizer
+becomes ready. It uses the same verified range downloader with 1 MiB segments,
+starting with the mirror on BanBan. The worker can resume from saved segments
+when it is reopened and can still use verified whole parts from the earlier
+cache. After an interrupted download, a later speech assessment can restart
+preparation in the background. Recognition readiness is separate from ZIPA
+readiness.
+
 ## Production speech and interrupted-session recovery — 2 November 2026
 
 The teacher approved production release of the reviewed adaptive word/sentence

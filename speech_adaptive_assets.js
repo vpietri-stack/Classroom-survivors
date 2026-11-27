@@ -37,6 +37,82 @@ export function adaptiveAssetSources(file, base = appBase) {
  // Try the byte-verified mirror first for files that need multiple ranges.
  return onBanban && file.bytes > CHUNK ? [mirror, local, raw] : [local, mirror, raw];
 }
+export async function downloadVerifiedAsset(file, {
+ cache, cacheBase = assetBase, chunkBytes = CHUNK, timeoutMs = 20000,
+ fetcher = globalThis.fetch.bind(globalThis), routes = adaptiveAssetSources(file),
+ onDownload = () => {}, onNetworkBytes = () => {}, onSegment = () => {}
+} = {}) {
+ const output = new Uint8Array(file.bytes);
+ const count = Math.ceil(file.bytes / chunkBytes);
+ const unhealthy = new Set();
+ let next = 0;
+
+ async function getSegment(start, end, expectedHash) {
+  const length = end - start + 1;
+  const cacheKey = new URL('__chunks__/' + file.sha256 + '/' + start, cacheBase).href;
+  try {
+   const cached = await cache?.match(cacheKey);
+   if (cached) {
+    const bytes = new Uint8Array(await cached.arrayBuffer());
+    if (bytes.byteLength === length && await sha256(bytes) === expectedHash) return { bytes, reused: true };
+    await cache.delete(cacheKey);
+   }
+  } catch (_) {}
+
+  let error;
+  const available = routes.filter(url => !unhealthy.has(url));
+  for (const url of available.length ? available : routes) {
+   const controller = new AbortController();
+   const timer = setTimeout(() => controller.abort(), timeoutMs);
+   try {
+    const segmentUrl = new URL(url);
+    segmentUrl.searchParams.set('part', start + '-' + end);
+    onDownload();
+    const response = await fetcher(segmentUrl.href, {
+     headers: { Range: `bytes=${start}-${end}` }, signal: controller.signal
+    });
+    const range = response.headers.get('Content-Range');
+    if (!response.ok || (response.status !== 206 && length !== file.bytes)
+      || (range && range !== `bytes ${start}-${end}/${file.bytes}`)) {
+     await response.body?.cancel();
+     throw Error('Invalid download range');
+    }
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    onNetworkBytes(bytes.byteLength);
+    if (bytes.byteLength !== length || await sha256(bytes) !== expectedHash) {
+     throw Error('Download segment did not match ' + file.name);
+    }
+    try { await cache?.put(cacheKey, new Response(bytes.slice(0))); } catch (_) {}
+    return { bytes, reused: false };
+   } catch (failure) {
+    error = failure;
+    unhealthy.add(url);
+   } finally {
+    clearTimeout(timer);
+   }
+  }
+  throw Error('Could not finish ' + file.name + '. Verified parts are saved for Retry. ' + String(error?.message || ''));
+ }
+
+ async function downloadSegments() {
+  while (next < count) {
+   const index = next++;
+   const start = index * chunkBytes;
+   const end = Math.min(file.bytes, start + chunkBytes) - 1;
+   const expectedHash = file.chunks?.[index];
+   if (!expectedHash) throw Error('Missing verified download segment for ' + file.name);
+   const { bytes, reused } = await getSegment(start, end, expectedHash);
+   output.set(bytes, start);
+   onSegment(bytes.byteLength, reused);
+  }
+ }
+ const completed = await Promise.allSettled(Array.from({ length: Math.min(4, count) }, downloadSegments));
+ const failed = completed.find(result => result.status === 'rejected');
+ if (failed) throw failed.reason;
+ if (await sha256(output) !== file.sha256) throw Error(file.name + ' did not match its verified file list.');
+ return output;
+}
+
 export async function prepareAdaptiveAssets(progress=()=>{},options={}){
  const fetcher=options.fetch||globalThis.fetch.bind(globalThis),controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);let manifest;
  try{const response=await fetcher(new URL('manifest.json?v=5',assetBase),{signal:controller.signal,cache:'no-cache'});if(!response.ok)throw Error('Speech asset list unavailable');manifest=await response.json();}finally{clearTimeout(timer);}
@@ -44,22 +120,18 @@ export async function prepareAdaptiveAssets(progress=()=>{},options={}){
  let cache;try{cache=await caches.open('speech-adaptive-assets-v1');}catch(_){}
  const buffers=new Map(),total=manifest.files.reduce((sum,f)=>sum+f.bytes,0);let done=0,networkBytes=0,reusedBytes=0;
  const notify=stage=>progress({stage,downloaded:done,total,networkBytes,reusedBytes,progress:Math.round(done/total*100)});
- async function download(file,logicalBytes){
-   const bytes=new Uint8Array(file.bytes),count=Math.ceil(file.bytes/CHUNK),routes=options.sources?.(file)||adaptiveAssetSources(file),unhealthy=new Set();let next=0;
-   async function part(){while(next<count){const start=next++*CHUNK,end=Math.min(file.bytes,start+CHUNK)-1,length=end-start+1,chunkKey=new URL('__chunks__/'+file.sha256+'/'+start,assetBase).href;let chunk;
-    const expectedChunk=file.chunks?.[start/CHUNK];if(!expectedChunk)throw Error('Missing verified download segment for '+file.name);
-    try{const saved=await cache?.match(chunkKey);if(saved){const b=await saved.arrayBuffer();if(b.byteLength===length&&await sha256(b)===expectedChunk){chunk=b;reusedBytes+=length;}else await cache.delete(chunkKey);}}catch(_){}
-    if(!chunk){let error;
-     const available=routes.filter(r=>!unhealthy.has(r));for(const url of available.length?available:routes){const ctrl=new AbortController(),clock=setTimeout(()=>ctrl.abort(),20000);
-      try{notify('Downloading '+file.name);const response=await fetcher(url+'?part='+start+'-'+end,{headers:{Range:`bytes=${start}-${end}`},signal:ctrl.signal});if(!response.ok||response.status!==206&&length!==file.bytes){await response.body?.cancel();throw Error('Download route cannot resume');}const range=response.headers.get('Content-Range');if(range&&range!==`bytes ${start}-${end}/${file.bytes}`){await response.body?.cancel();throw Error('Wrong download segment');}const b=await response.arrayBuffer();networkBytes+=b.byteLength;if(b.byteLength!==length)throw Error('Incomplete download');if(await sha256(b)!==expectedChunk)throw Error('This route returned a different copy of '+file.name);chunk=b;break;}catch(e){error=e;unhealthy.add(url);}finally{clearTimeout(clock);}
-     }
-     if(!chunk)throw Error('Could not finish '+file.name+'. Verified parts are saved for Retry. '+String(error?.message||''));
-     try{await cache?.put(chunkKey,new Response(chunk.slice(0)));}catch(_){}
-    }
-    bytes.set(new Uint8Array(chunk),start);done+=length*logicalBytes/file.bytes;notify('Downloading '+file.name);
-   }}
-   const completed=await Promise.allSettled(Array.from({length:Math.min(4,count)},()=>part())),failed=completed.find(r=>r.status==='rejected');if(failed)throw failed.reason;
-   if(await sha256(bytes)!==file.sha256)throw Error(file.name+' did not match its verified file list. Reload the updated preview.');return bytes;
+ function download(file, logicalBytes) {
+  const stage = 'Downloading ' + file.name;
+  return downloadVerifiedAsset(file, {
+   cache, fetcher, routes: options.sources?.(file) || adaptiveAssetSources(file),
+   onDownload: () => notify(stage),
+   onNetworkBytes: bytes => { networkBytes += bytes; },
+   onSegment: (bytes, reused) => {
+    if (reused) reusedBytes += bytes;
+    done += bytes * logicalBytes / file.bytes;
+    notify(stage);
+   }
+  });
  }
  async function transfer(file,logicalBytes){
   if(file.packed&&typeof DecompressionStream==='function'){const previousDone=done;try{const compressed=await download(file.packed,logicalBytes),data=new Uint8Array(await new Response(new Response(compressed).body.pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());if(data.byteLength!==file.bytes||await sha256(data)!==file.sha256)throw Error('Unpacked speech file did not verify');return data;}catch(_){done=previousDone;}}

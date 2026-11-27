@@ -55,7 +55,7 @@
       if (!window.Recorder) await script('speech_recorder.js?v=2026-11-02c');
       if (!window.AdaptiveSpeech?.enabled) {
         if (typeof SPEECH_PRACTICE_ENABLED === 'undefined') await script('config.js?v=2026-11-27a');
-        await script('speech_adaptive_app.js?v=banban-speech-1');
+        await script('speech_adaptive_app.js?v=banban-zipa-1');
       }
       if (!window.AdaptiveSpeech?.enabled) throw new Error('Adaptive speech unavailable');
       return { engine: window.AdaptiveSpeech, Recorder: window.Recorder };

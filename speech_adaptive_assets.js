@@ -20,11 +20,22 @@ export async function applyVerifiedBytePatch(base,patch,target,maximumBytes=48*1
  if(offset!==out.length||await sha256(out)!==patch.resultSHA256)throw Error('Encoder update did not verify');return out;
 }
 export async function applyEncoderPatch(base,patch){return applyVerifiedBytePatch(base,patch,{bytes:patch.resultBytes,sha256:patch.resultSHA256},16*1024*1024,64);}
-function sources(file,preferLocal=false){
- if(file.urls)return file.urls;
- const local=new URL(file.url,appBase).href,host=appBase.hostname,repo=appBase.pathname.split('/').filter(Boolean)[0],owner=host.endsWith('.github.io')?host.slice(0,-10):null,raw=owner&&repo?'https://raw.githubusercontent.com/'+owner+'/'+repo+'/'+(file.sourceRevision||'main')+'/'+file.url:null;
- const mirrors=raw?['https://gh-proxy.com/'+raw,raw]:[];
- return [...new Set([local,...mirrors].filter(Boolean))];
+export function adaptiveAssetSources(file, base = appBase) {
+ if (file.urls) return file.urls;
+ const local = new URL(file.url, base).href;
+ const host = base.hostname;
+ const onBanban = host === 'banban.quest';
+ if (!onBanban && !host.endsWith('.github.io')) return [local];
+
+ const owner = onBanban ? 'vpietri-stack' : host.slice(0, -'.github.io'.length);
+ const repo = onBanban ? 'Classroom-survivors' : base.pathname.split('/').filter(Boolean)[0];
+ if (!owner || !repo) return [local];
+
+ const raw = 'https://raw.githubusercontent.com/' + owner + '/' + repo + '/' + (file.sourceRevision || 'main') + '/' + file.url;
+ const mirror = 'https://gh-proxy.com/' + raw;
+ // BanBan's Pages route can return ranges of a compressed representation.
+ // Try the byte-verified mirror first for files that need multiple ranges.
+ return onBanban && file.bytes > CHUNK ? [mirror, local, raw] : [local, mirror, raw];
 }
 export async function prepareAdaptiveAssets(progress=()=>{},options={}){
  const fetcher=options.fetch||globalThis.fetch.bind(globalThis),controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);let manifest;
@@ -34,7 +45,7 @@ export async function prepareAdaptiveAssets(progress=()=>{},options={}){
  const buffers=new Map(),total=manifest.files.reduce((sum,f)=>sum+f.bytes,0);let done=0,networkBytes=0,reusedBytes=0;
  const notify=stage=>progress({stage,downloaded:done,total,networkBytes,reusedBytes,progress:Math.round(done/total*100)});
  async function download(file,logicalBytes){
-   const bytes=new Uint8Array(file.bytes),count=Math.ceil(file.bytes/CHUNK),routes=options.sources?.(file)||sources(file,options.preferLocal),unhealthy=new Set();let next=0;
+   const bytes=new Uint8Array(file.bytes),count=Math.ceil(file.bytes/CHUNK),routes=options.sources?.(file)||adaptiveAssetSources(file),unhealthy=new Set();let next=0;
    async function part(){while(next<count){const start=next++*CHUNK,end=Math.min(file.bytes,start+CHUNK)-1,length=end-start+1,chunkKey=new URL('__chunks__/'+file.sha256+'/'+start,assetBase).href;let chunk;
     const expectedChunk=file.chunks?.[start/CHUNK];if(!expectedChunk)throw Error('Missing verified download segment for '+file.name);
     try{const saved=await cache?.match(chunkKey);if(saved){const b=await saved.arrayBuffer();if(b.byteLength===length&&await sha256(b)===expectedChunk){chunk=b;reusedBytes+=length;}else await cache.delete(chunkKey);}}catch(_){}

@@ -4,6 +4,14 @@ Study entry, the game menu and session restoration start the shared speech model
 
 # Speech Recognition & Pronunciation Scoring
 
+At `banban.quest`, speech-enabled notes mount their shared microphone controls at
+the root URL. The adaptive downloader uses the production GitHub repository for
+mirrors even though the custom-domain URL has no repository path. Large
+canonical assets try the GitHub proxy before GitHub Pages and raw GitHub, and
+every range is still checked against its manifest hash. The browser caches
+verified assets per site, so the move from the old GitHub address requires a
+fresh download on the new origin.
+
 ## Production speech and interrupted-session recovery — 2 November 2026
 
 The teacher approved production release of the reviewed adaptive word/sentence

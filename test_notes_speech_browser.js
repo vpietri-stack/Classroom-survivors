@@ -79,6 +79,36 @@ const server=http.createServer((req,res)=>{
    await hotspot.click();
    ok(await page.locator('#notes-mic').isEnabled(), reader+' loads optional speech and accepts a selected target');
   }
+  const localBase = 'http://127.0.0.1:' + server.address().port;
+  await page.route('https://banban.quest/**', async route => {
+   const url = new URL(route.request().url());
+   const response = await route.fetch({url: localBase + url.pathname + url.search});
+   await route.fulfill({response});
+  });
+  await page.route('https://gh-proxy.com/**', route => route.abort());
+  for (const reader of ['act3_u2_p12_notes.html', 'pu1_u7_p85_notes.html']) {
+   await page.goto('https://banban.quest/' + reader);
+   const mic = page.locator('#notes-mic');
+   await mic.waitFor({state: 'visible'});
+   ok(await mic.isDisabled(), reader + ' shows speech controls at the root custom domain');
+   await page.evaluate(() => {
+    window.dispatchEvent(new CustomEvent('notes-select', {detail: {id: 'banban-fixture', text: 'Hello.'}}));
+   });
+   ok(await mic.isEnabled(), reader + ' enables the microphone after target selection on banban.quest');
+  }
+  await page.route('https://banban.quest/notes-test-host.html', route => route.fulfill({
+   contentType: 'text/html',
+   body: '<script>window.PreviewNotes={isReader: child => child === document.querySelector("iframe")?.contentWindow};</script>'
+    + '<iframe src="/think1_u9_reader.html?page=wild" width="900" height="800"></iframe>'
+  }));
+  await page.goto('https://banban.quest/notes-test-host.html');
+  const scanReader = page.frameLocator('iframe');
+  const scanMic = scanReader.locator('#notes-mic');
+  await scanMic.waitFor({state: 'attached'});
+  ok(await scanMic.isHidden(), 'Think 1 keeps the speaking panel collapsed until a cue is selected');
+  await scanReader.locator('#hotspots .hotspot').first().click();
+  await scanMic.waitFor({state: 'visible'});
+  ok(await scanMic.isEnabled(), 'Think 1 opens an enabled microphone after cue selection on banban.quest');
   ok(errors.length===0,'no browser runtime errors');
   console.log(checks+' notes speech browser checks passed');
  }finally{await browser.close();server.close();}

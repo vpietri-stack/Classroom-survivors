@@ -1,4 +1,4 @@
-import {prepareAdaptiveAssets,sha256} from './speech_adaptive_assets.js?v=5';
+import {prepareAdaptiveAssets,sha256} from './speech_adaptive_assets.js?v=6';
 import {compactLexicon,decide,sentenceFeatures,binaryProbability} from './speech_adaptive_core.js?v=1';
 import {expectedWordSimilarity} from './speech_adaptive_phonetic.js?v=1';
 import {words,disposeTensors,stats} from './speech_target.js?v=2026-10-28b';

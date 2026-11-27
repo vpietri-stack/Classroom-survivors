@@ -1,6 +1,8 @@
 (function () {
   'use strict';
-  if (!(/^\/Classroom-survivors(?:-preview)?(?:\/|$)/i.test(location.pathname) || ['localhost', '127.0.0.1'].includes(location.hostname))) return;
+  const supportedHost = ['banban.quest', 'localhost', '127.0.0.1'].includes(location.hostname);
+  const projectPath = /^\/Classroom-survivors(?:-preview)?(?:\/|$)/i.test(location.pathname);
+  if (!supportedHost && !projectPath) return;
   const player = document.querySelector('.player'), caption = document.getElementById('nowPlaying');
   if (!player || !caption) return;
   const controls = document.createElement('div'); controls.className = 'notes-speech';
@@ -52,8 +54,8 @@
     if (!runtime) runtime = (async () => {
       if (!window.Recorder) await script('speech_recorder.js?v=2026-11-02c');
       if (!window.AdaptiveSpeech?.enabled) {
-        if (typeof SPEECH_PRACTICE_ENABLED === 'undefined') await script('config.js?v=2026-11-02c');
-        await script('speech_adaptive_app.js?v=2026-11-25b');
+        if (typeof SPEECH_PRACTICE_ENABLED === 'undefined') await script('config.js?v=2026-11-27a');
+        await script('speech_adaptive_app.js?v=banban-speech-1');
       }
       if (!window.AdaptiveSpeech?.enabled) throw new Error('Adaptive speech unavailable');
       return { engine: window.AdaptiveSpeech, Recorder: window.Recorder };

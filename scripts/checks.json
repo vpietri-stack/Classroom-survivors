@@ -3,6 +3,7 @@
     "test_deploy_stamp_sync.js",
     "scripts/check-notes-images.cjs",
     "test_production_release_gates.js",
+    "test_api_cors.js",
     "test_study_resume.js",
     "test_game_resume.js",
     "test_student_startup_browser.js",
@@ -181,9 +182,11 @@
     },
     "api": {
       "paths": [
-        "^api/"
+        "^api/",
+        "^staticwebapp\\.config\\.json$"
       ],
       "tests": [
+        "test_api_cors.js",
         "test_study_resume.js",
         "test_game_resume.js",
         "test_handwriting_samples.js",

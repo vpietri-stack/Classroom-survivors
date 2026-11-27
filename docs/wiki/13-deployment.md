@@ -89,8 +89,9 @@ flowchart LR
 ```
 
 The SWA stub links to the legacy Pages address above. `config.js` routes
-production sessions to the SWA API. The API's Functions choose CORS headers
-for each request. There is **no dedicated Pages workflow file**.
+production sessions to the SWA API. Azure Static Web Apps answers hosted
+browser preflights and the Functions check the origin on API requests.
+There is **no dedicated Pages workflow file**.
 GitHub Pages deploy-from-branch is configured in repo Settings (source: `main`, root), evidenced
 by `.nojekyll` at root and the absence of any `pages-build` workflow; the only tracked workflow
 is the Azure SWA one.
@@ -108,11 +109,15 @@ is the Azure SWA one.
    requests to `login` and `saveAnalytics` with `Origin`,
    `Access-Control-Request-Method: POST`, and
    `Access-Control-Request-Headers: content-type,x-app-key,x-auth-token`.
-   Check that the response allows each requesting origin separately
-   (`https://vpietri-stack.github.io` and `https://banban.quest`). Also confirm
-   an unauthenticated API response carries the matching origin. Azure's edge
-   used to answer browser preflights directly with the legacy static header,
-   so an isolated Functions pass alone cannot verify this behavior.
+   Check that preflights from `https://vpietri-stack.github.io` and
+   `https://banban.quest` permit the requested method and headers. Azure
+   answers these requests at its edge and may return `*` on `OPTIONS`.
+   Verify an unauthenticated GET to `login` returns 401 with exactly the
+   requesting origin for each of the two sites. Send one GET with an
+   unrelated origin and expect 403 without `Access-Control-Allow-Origin`.
+   The Nov 27 deployment passed isolated Functions checks and still broke
+   both browser origins at the Azure edge. The restored static rules
+   re-enabled the GitHub Pages origin. Check hosted headers before touching DNS.
 3. Set the *repository* Pages custom domain to `banban.quest`. The branch
    publishing source writes a root `CNAME` commit. Pull its resulting production
    ref before the next release. In Porkbun replace the parking records for the

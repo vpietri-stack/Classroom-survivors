@@ -69,10 +69,16 @@ The key is injected at deploy time by the GitHub Actions workflow from repo secr
 Browser origins are `https://banban.quest`, `https://vpietri-stack.github.io`
 (the legacy production and preview project paths share an origin), and the
 existing HTTP localhost/127.0.0.1 development origins. The Functions allowlist
-returns the matching origin with `Vary: Origin`. `corsOptions.js` handles
-preflights and `corsHooks.js` adds CORS headers to API responses. Keep origin
-headers out of both SWA routing config and Functions host config so a single
-static origin cannot replace the request-specific result.
+returns the matching origin with `Vary: Origin`. Azure Static Web Apps
+answers hosted browser preflights itself, so its first `/api/*` rule matches
+`OPTIONS` and advertises the supported request headers for either site.
+The wildcard applies to that preflight response. The existing GitHub Pages
+header stays as the fallback in the original static rules.
+`corsOptions.js` still handles direct Functions preflights.
+`corsHooks.js` rejects other browser origins before handlers run and applies
+the origin-specific response headers. Requests without an Origin use the
+existing auth path. An opaque `text/plain` analytics unload beacon also
+uses that path, with its existing token checks and no CORS response allowance.
 
 ## `saveAnalytics` deep dive (the most important endpoint)
 

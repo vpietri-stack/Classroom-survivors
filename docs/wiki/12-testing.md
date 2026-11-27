@@ -110,7 +110,7 @@ The production gate and notes tests cover the custom-domain root alongside
 the legacy and preview paths. The isolated client integration checks actual
 preflights for both public frontend origins and localhost, and verifies that a
 similar-looking domain receives no CORS allowance from Functions.
-`test_api_cors.js` checks the API path scope of Azure's preflight configuration and the Functions
+`test_api_cors.js` checks the API path and Functions host settings for preflights, and the Functions
 hook for both public origins, unfamiliar origins and the analytics unload beacon.
 Hosted Azure owns a separate preflight path that local Functions cannot verify.
 For browser verification, disable Playwright routing before making API calls.

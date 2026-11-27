@@ -38,29 +38,35 @@ async function invoke({ origin, method = 'POST', functionName = 'login', content
 async function main() {
     const config = require('./staticwebapp.config.json');
     const [preflight] = config.routes;
+    const hostDefaults = require('./api/host.json').extensions.http.customHeaders;
+    const legacyOrigin = 'https://vpietri-stack.github.io';
     assert.equal(preflight.route, '/api/*');
     assert.equal(preflight.headers['Access-Control-Allow-Origin'], '*');
     assert.match(preflight.headers['Access-Control-Allow-Headers'], /X-Auth-Token/);
     assert.ok(!preflight.headers['Access-Control-Allow-Credentials']);
+    assert.deepEqual(hostDefaults, preflight.headers);
     assert.notEqual(config.globalHeaders['Access-Control-Allow-Origin'], '*');
 
     for (const origin of ['https://banban.quest', 'https://vpietri-stack.github.io', 'http://localhost:7074']) {
         assert.deepEqual(await invoke({ origin }), { called: true, status: 401, allowOrigin: origin });
     }
-    assert.deepEqual(await invoke({}), { called: true, status: 401, allowOrigin: undefined });
+    assert.deepEqual(await invoke({}), { called: true, status: 401, allowOrigin: legacyOrigin });
     for (const origin of ['https://banban.quest.example', 'http://banban.quest', 'null']) {
-        assert.deepEqual(await invoke({ origin }), { called: false, status: 403, allowOrigin: undefined });
+        assert.deepEqual(await invoke({ origin }), { called: false, status: 403, allowOrigin: legacyOrigin });
     }
     assert.deepEqual(await invoke({
         origin: 'null', functionName: 'saveAnalytics', contentType: 'text/plain;charset=UTF-8'
-    }), { called: true, status: 401, allowOrigin: undefined });
+    }), { called: true, status: 401, allowOrigin: legacyOrigin });
     for (const request of [
         { origin: 'null', functionName: 'saveAnalytics' },
         { origin: 'null', contentType: 'text/plain' },
         { origin: 'https://banban.quest.example', functionName: 'saveAnalytics', contentType: 'text/plain' }
     ]) {
-        assert.deepEqual(await invoke(request), { called: false, status: 403, allowOrigin: undefined });
+        assert.deepEqual(await invoke(request), { called: false, status: 403, allowOrigin: legacyOrigin });
     }
+
+    assert.deepEqual(await invoke({ origin: 'https://other.example', method: 'OPTIONS' }),
+        { called: true, status: 401, allowOrigin: undefined });
 
     console.log('Azure API path policy, origin enforcement, and analytics beacon path passed.');
 }

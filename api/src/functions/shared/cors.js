@@ -3,8 +3,9 @@
  * The legacy production and preview project paths share one browser origin.
  */
 
+const LEGACY_ORIGIN = 'https://vpietri-stack.github.io';
 const ALLOWED_ORIGINS = new Set([
-    'https://vpietri-stack.github.io',
+    LEGACY_ORIGIN,
     'https://banban.quest',
 ]);
 
@@ -32,10 +33,16 @@ function getCorsHeaders(request) {
 
 function withCors(request, response) {
     if (!response || typeof response !== 'object') return response;
+    const cors = getCorsHeaders(request);
+    if (request?.method !== 'OPTIONS') {
+        // Use a concrete origin even for denied and origin-less responses so
+        // Azure's wildcard preflight default cannot be applied to API data.
+        cors['Access-Control-Allow-Origin'] ??= LEGACY_ORIGIN;
+    }
     return {
         ...response,
         headers: {
-            ...getCorsHeaders(request),
+            ...cors,
             ...(response.headers || {}),
         },
     };

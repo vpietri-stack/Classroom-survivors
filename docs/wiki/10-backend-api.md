@@ -70,10 +70,12 @@ Browser origins are `https://banban.quest`, `https://vpietri-stack.github.io`
 (the legacy production and preview project paths share an origin), and the
 existing HTTP localhost/127.0.0.1 development origins. The Functions allowlist
 returns the matching origin with `Vary: Origin`. Azure Static Web Apps
-answers hosted browser preflights itself. Its `/api/*` path rule advertises
-the supported request headers for both sites with `*` and no credential
-allowance. The deployed edge ignored an `OPTIONS`-only rule in this app.
-The Functions authorize actual requests and return the matching origin.
+answers hosted browser preflights itself. The `/api/*` routing rule and the
+Functions host defaults both advertise the supported request headers with `*`
+and no credential allowance. Live probes matched the old Functions host headers
+even after the Static Web Apps path rule changed. Actual Functions responses
+specify a concrete origin, including a GitHub Pages fallback for denied and
+origin-less requests, so they never inherit the wildcard from the preflight.
 `corsOptions.js` still handles direct Functions preflights.
 `corsHooks.js` rejects other browser origins before handlers run and applies
 the origin-specific response headers. Requests without an Origin use the
